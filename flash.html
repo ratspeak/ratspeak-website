@@ -1573,7 +1573,7 @@
             accent: 'green',
             firmware: 'ratdeck-firmware.bin',
             firmwareSize: 'Loading from GitHub...',
-            releaseUrl: 'https://api.github.com/repos/defidude/Ratdeck/releases/latest'
+            downloadUrl: '/firmware/ratdeck-latest.bin'
         },
         cardputer: {
             name: 'Cardputer Adv',
@@ -1581,7 +1581,7 @@
             accent: 'blue',
             firmware: 'ratcom-firmware.bin',
             firmwareSize: 'Loading from GitHub...',
-            releaseUrl: 'https://api.github.com/repos/defidude/RatCom/releases/latest'
+            downloadUrl: '/firmware/ratcom-latest.bin'
         },
         custom: {
             name: 'Custom Device',
@@ -1589,7 +1589,7 @@
             accent: 'purple',
             firmware: null,
             firmwareSize: null,
-            releaseUrl: null
+            downloadUrl: null
         }
     };
 
@@ -1663,30 +1663,12 @@
 
     // ── Firmware Download from GitHub Releases ────────
     function fetchFirmwareFromRelease(dev) {
-        fetch(dev.releaseUrl)
-            .then(function(resp) {
-                if (!resp.ok) throw new Error('Release not found');
-                return resp.json();
-            })
-            .then(function(release) {
-                var asset = null;
-                for (var i = 0; i < release.assets.length; i++) {
-                    if (release.assets[i].name === dev.firmware) {
-                        asset = release.assets[i];
-                        break;
-                    }
-                }
-                if (!asset) throw new Error('Firmware binary not found in release');
+        document.getElementById('presetName').textContent = dev.firmware;
+        document.getElementById('presetSize').textContent = 'Downloading...';
 
-                document.getElementById('presetName').textContent = dev.firmware + ' (' + release.tag_name + ')';
-                document.getElementById('presetSize').textContent = 'Downloading ' + formatBytes(asset.size) + '...';
-
-                return fetch(asset.url, {
-                    headers: { 'Accept': 'application/octet-stream' }
-                });
-            })
+        fetch(dev.downloadUrl)
             .then(function(resp) {
-                if (!resp.ok) throw new Error('Download failed');
+                if (!resp.ok) throw new Error('Firmware not available (HTTP ' + resp.status + ')');
                 return resp.arrayBuffer();
             })
             .then(function(buffer) {
