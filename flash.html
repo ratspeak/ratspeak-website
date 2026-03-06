@@ -1,0 +1,1970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flash — Ratspeak</title>
+    <meta name="description" content="Flash Ratspeak firmware to your ESP32 device — T-Deck Plus, Cardputer, or custom hardware.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary:    #1c2333;
+            --bg-secondary:  #242d3f;
+            --bg-tertiary:   #2d3748;
+            --border:        #3a4759;
+            --border-light:  #4a5a6e;
+            --text-primary:  #e2e8f0;
+            --text-secondary:#9eadbf;
+            --text-muted:    #7e8fa2;
+            --green:         #00D4AA;
+            --green-dim:     #00A080;
+            --red:           #FF6B6B;
+            --blue:          #38BDF8;
+            --purple:        #C084FC;
+            --orange:        #F59E0B;
+            --font-mono:     'JetBrains Mono', 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+            --font-sans:     'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            --glass-bg:      rgba(36, 45, 63, 0.75);
+            --glass-border:  rgba(58, 71, 89, 0.55);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Noise texture overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 99999;
+            opacity: 0.015;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        /* ── Animations ─────────────────────────────── */
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 8px var(--green), 0 0 16px rgba(0, 212, 170, 0.2); }
+            50%      { box-shadow: 0 0 12px var(--green), 0 0 24px rgba(0, 212, 170, 0.35); }
+        }
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeSlideDown {
+            from { opacity: 1; transform: translateY(0); }
+            to   { opacity: 0; transform: translateY(-16px); }
+        }
+        @keyframes shimmer {
+            0%   { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        @keyframes dotPulseGreen {
+            0%, 100% { box-shadow: 0 0 4px var(--green), 0 0 8px rgba(0, 212, 170, 0.3); }
+            50%      { box-shadow: 0 0 8px var(--green), 0 0 16px rgba(0, 212, 170, 0.5); }
+        }
+        @keyframes dotPulseRed {
+            0%, 100% { box-shadow: 0 0 4px var(--red), 0 0 8px rgba(255, 107, 107, 0.3); }
+            50%      { box-shadow: 0 0 8px var(--red), 0 0 16px rgba(255, 107, 107, 0.5); }
+        }
+        @keyframes spinSlow {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+        @keyframes progressGlow {
+            0%, 100% { box-shadow: 0 0 8px rgba(0, 212, 170, 0.4), 0 0 20px rgba(0, 212, 170, 0.15); }
+            50%      { box-shadow: 0 0 14px rgba(0, 212, 170, 0.6), 0 0 32px rgba(0, 212, 170, 0.25); }
+        }
+        @keyframes checkDraw {
+            from { stroke-dashoffset: 24; }
+            to   { stroke-dashoffset: 0; }
+        }
+        @keyframes dropZonePulse {
+            0%, 100% { border-color: var(--border-light); }
+            50%      { border-color: var(--purple); }
+        }
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(-4px); }
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ── Navbar ────────────────────────────────────── */
+
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            height: 56px;
+            background: linear-gradient(180deg, rgba(28, 35, 51, 0.95) 0%, rgba(28, 35, 51, 0.9) 100%);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 1px 0 rgba(0, 212, 170, 0.05), 0 4px 24px rgba(0, 0, 0, 0.3);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            border-bottom-color: var(--border-light);
+            box-shadow: 0 1px 0 rgba(0, 212, 170, 0.08), 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-left a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .navbar-logo {
+            flex-shrink: 0;
+            filter: drop-shadow(0 0 6px rgba(0, 212, 170, 0.4));
+        }
+
+        .navbar-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .navbar-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 6px 2px;
+            border-bottom: 1px solid transparent;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .navbar-link:hover {
+            color: var(--text-primary);
+            border-bottom-color: var(--text-secondary);
+        }
+
+        .navbar-link--active {
+            color: var(--green);
+            border-bottom-color: var(--green);
+        }
+
+        .nr-btn {
+            background: rgba(0, 160, 128, 0.1);
+            color: var(--green);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--font-sans);
+            transition: all 0.25s ease;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nr-btn:hover {
+            background: rgba(0, 160, 128, 0.2);
+            border-color: rgba(0, 212, 170, 0.5);
+            color: var(--green);
+            box-shadow: 0 0 20px rgba(0, 212, 170, 0.15);
+        }
+
+        /* ── Hero ──────────────────────────────────────── */
+
+        .flash-hero {
+            padding: 120px 32px 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .flash-hero::before {
+            content: '';
+            position: absolute;
+            top: 56px; left: 50%;
+            transform: translateX(-50%);
+            width: 600px; height: 300px;
+            background: radial-gradient(ellipse, rgba(0, 212, 170, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .flash-hero__tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--green);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .flash-hero__tag-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: glowPulse 2.5s ease-in-out infinite;
+        }
+
+        .flash-hero__title {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: clamp(36px, 5vw, 52px);
+            line-height: 1.1;
+            letter-spacing: -1.5px;
+            margin-bottom: 16px;
+            background: linear-gradient(180deg, var(--text-primary) 40%, var(--text-muted) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .flash-hero__sub {
+            font-size: 17px;
+            color: var(--text-secondary);
+            max-width: 520px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* ── Browser Warning ───────────────────────────── */
+
+        .browser-warning {
+            max-width: 600px;
+            margin: 24px auto 0;
+            padding: 14px 20px;
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 10px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: var(--orange);
+        }
+
+        .browser-warning svg { flex-shrink: 0; }
+
+        .browser-warning.show { display: flex; }
+
+        /* ── Device Cards Container ────────────────────── */
+
+        .flash-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 32px;
+            position: relative;
+        }
+
+        /* ── Device Selection View ─────────────────────── */
+
+        .device-selection {
+            padding: 40px 0 80px;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .device-selection.hiding {
+            opacity: 0;
+            transform: translateY(-16px);
+            pointer-events: none;
+        }
+
+        .device-selection.hidden {
+            display: none;
+        }
+
+        .device-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        /* ── Device Card ───────────────────────────────── */
+
+        .device-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 32px 28px 28px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                        border-color 0.3s ease,
+                        box-shadow 0.4s ease;
+            animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .device-card:nth-child(1) { animation-delay: 0.1s; }
+        .device-card:nth-child(2) { animation-delay: 0.2s; }
+        .device-card:nth-child(3) { animation-delay: 0.3s; }
+
+        /* Top accent border */
+        .device-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            border-radius: 16px 16px 0 0;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .device-card:hover::before { opacity: 1; }
+
+        .device-card--green::before {
+            background: linear-gradient(90deg, transparent, var(--green), transparent);
+            box-shadow: 0 0 12px rgba(0, 212, 170, 0.3);
+        }
+        .device-card--blue::before {
+            background: linear-gradient(90deg, transparent, var(--blue), transparent);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+        }
+        .device-card--purple::before {
+            background: linear-gradient(90deg, transparent, var(--purple), transparent);
+            box-shadow: 0 0 12px rgba(192, 132, 252, 0.3);
+        }
+
+        .device-card:hover {
+            transform: translateY(-6px) scale(1.02);
+        }
+
+        .device-card--green:hover {
+            border-color: rgba(0, 212, 170, 0.3);
+            box-shadow: 0 8px 40px rgba(0, 212, 170, 0.1), 0 0 0 1px rgba(0, 212, 170, 0.08);
+        }
+        .device-card--blue:hover {
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 8px 40px rgba(56, 189, 248, 0.1), 0 0 0 1px rgba(56, 189, 248, 0.08);
+        }
+        .device-card--purple:hover {
+            border-color: rgba(192, 132, 252, 0.3);
+            box-shadow: 0 8px 40px rgba(192, 132, 252, 0.1), 0 0 0 1px rgba(192, 132, 252, 0.08);
+        }
+
+        .device-card__visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 160px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        /* Ambient glow behind illustration */
+        .device-card__visual::before {
+            content: '';
+            position: absolute;
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            filter: blur(50px);
+            opacity: 0.1;
+            transition: opacity 0.3s;
+        }
+        .device-card:hover .device-card__visual::before { opacity: 0.18; }
+
+        .device-card--green .device-card__visual::before { background: var(--green); }
+        .device-card--blue .device-card__visual::before  { background: var(--blue); }
+        .device-card--purple .device-card__visual::before { background: var(--purple); }
+
+        .device-card__visual svg {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .device-card--green .device-card__visual svg  { color: var(--green); }
+        .device-card--blue .device-card__visual svg   { color: var(--blue); }
+        .device-card--purple .device-card__visual svg  { color: var(--purple); }
+
+        .device-card__name {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .device-card__desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .device-card__specs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .device-card__spec {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 500;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--text-muted);
+        }
+
+        .device-card--green .device-card__spec { color: rgba(0, 212, 170, 0.7); border-color: rgba(0, 212, 170, 0.12); background: rgba(0, 212, 170, 0.05); }
+        .device-card--blue .device-card__spec  { color: rgba(56, 189, 248, 0.7); border-color: rgba(56, 189, 248, 0.12); background: rgba(56, 189, 248, 0.05); }
+        .device-card--purple .device-card__spec { color: rgba(192, 132, 252, 0.7); border-color: rgba(192, 132, 252, 0.12); background: rgba(192, 132, 252, 0.05); }
+
+        /* Select arrow */
+        .device-card__arrow {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateX(-8px);
+        }
+
+        .device-card:hover .device-card__arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .device-card--green .device-card__arrow  { background: rgba(0, 212, 170, 0.12); color: var(--green); }
+        .device-card--blue .device-card__arrow   { background: rgba(56, 189, 248, 0.12); color: var(--blue); }
+        .device-card--purple .device-card__arrow  { background: rgba(192, 132, 252, 0.12); color: var(--purple); }
+
+        /* ── Flash Interface ───────────────────────────── */
+
+        .flash-interface {
+            display: none;
+            padding: 20px 0 80px;
+            animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .flash-interface.active {
+            display: block;
+        }
+
+        .flash-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: var(--font-sans);
+            padding: 8px 0;
+            margin-bottom: 28px;
+            transition: color 0.2s;
+        }
+
+        .flash-back:hover { color: var(--text-primary); }
+        .flash-back svg { transition: transform 0.2s; }
+        .flash-back:hover svg { transform: translateX(-3px); }
+
+        .flash-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 36px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(8px);
+        }
+
+        /* Top accent line on flash panel — color set by JS */
+        .flash-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .flash-panel[data-accent="green"]::before {
+            background: linear-gradient(90deg, transparent, var(--green), transparent);
+            box-shadow: 0 0 12px rgba(0, 212, 170, 0.3);
+        }
+        .flash-panel[data-accent="blue"]::before {
+            background: linear-gradient(90deg, transparent, var(--blue), transparent);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+        }
+        .flash-panel[data-accent="purple"]::before {
+            background: linear-gradient(90deg, transparent, var(--purple), transparent);
+            box-shadow: 0 0 12px rgba(192, 132, 252, 0.3);
+        }
+
+        .flash-panel__header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(58, 71, 89, 0.4);
+        }
+
+        .flash-panel__device-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flash-panel[data-accent="green"] .flash-panel__device-icon  { background: rgba(0, 212, 170, 0.1); border: 1px solid rgba(0, 212, 170, 0.2); color: var(--green); }
+        .flash-panel[data-accent="blue"] .flash-panel__device-icon   { background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.2); color: var(--blue); }
+        .flash-panel[data-accent="purple"] .flash-panel__device-icon  { background: rgba(192, 132, 252, 0.1); border: 1px solid rgba(192, 132, 252, 0.2); color: var(--purple); }
+
+        .flash-panel__device-name {
+            font-weight: 700;
+            font-size: 22px;
+            color: var(--text-primary);
+        }
+
+        .flash-panel__device-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Steps layout */
+        .flash-steps {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .flash-step {
+            position: relative;
+        }
+
+        .flash-step__number {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .flash-step__title {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        /* Connection section */
+        .connect-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: var(--font-sans);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: 1px solid;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .connect-btn--idle {
+            background: rgba(0, 160, 128, 0.1);
+            color: var(--green);
+            border-color: rgba(0, 212, 170, 0.3);
+        }
+        .connect-btn--idle:hover {
+            background: rgba(0, 160, 128, 0.2);
+            border-color: rgba(0, 212, 170, 0.5);
+            box-shadow: 0 0 20px rgba(0, 212, 170, 0.15);
+        }
+
+        .connect-btn--connected {
+            background: rgba(0, 212, 170, 0.08);
+            color: var(--green);
+            border-color: rgba(0, 212, 170, 0.2);
+            cursor: default;
+        }
+
+        .connect-btn--connecting {
+            background: rgba(245, 158, 11, 0.08);
+            color: var(--orange);
+            border-color: rgba(245, 158, 11, 0.2);
+            cursor: wait;
+        }
+
+        .connect-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 14px;
+            font-size: 13px;
+        }
+
+        .connect-status__dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .connect-status__dot--off {
+            background: var(--text-muted);
+            opacity: 0.4;
+        }
+
+        .connect-status__dot--on {
+            background: var(--green);
+            animation: dotPulseGreen 2s ease-in-out infinite;
+        }
+
+        .connect-status__dot--waiting {
+            background: var(--orange);
+            animation: dotPulseRed 1.2s ease-in-out infinite;
+        }
+
+        .connect-status__text {
+            color: var(--text-muted);
+        }
+
+        .connect-status__text--on {
+            color: var(--green);
+        }
+
+        .connect-device-info {
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: rgba(0, 212, 170, 0.05);
+            border: 1px solid rgba(0, 212, 170, 0.12);
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--green-dim);
+            display: none;
+        }
+
+        .connect-device-info.show { display: block; }
+
+        /* Firmware section */
+        .firmware-ready {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: rgba(0, 212, 170, 0.05);
+            border: 1px solid rgba(0, 212, 170, 0.15);
+            border-radius: 10px;
+        }
+
+        .firmware-ready__icon {
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .flash-panel[data-accent="green"] .firmware-ready  { background: rgba(0, 212, 170, 0.05); border-color: rgba(0, 212, 170, 0.15); }
+        .flash-panel[data-accent="blue"] .firmware-ready   { background: rgba(56, 189, 248, 0.05); border-color: rgba(56, 189, 248, 0.15); }
+        .flash-panel[data-accent="green"] .firmware-ready__icon { background: rgba(0, 212, 170, 0.1); color: var(--green); }
+        .flash-panel[data-accent="blue"] .firmware-ready__icon  { background: rgba(56, 189, 248, 0.1); color: var(--blue); }
+
+        .firmware-ready__name {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .firmware-ready__size {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Drop zone for custom firmware */
+        .drop-zone {
+            border: 2px dashed var(--border-light);
+            border-radius: 12px;
+            padding: 36px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .drop-zone:hover {
+            border-color: var(--purple);
+            background: rgba(192, 132, 252, 0.03);
+        }
+
+        .drop-zone.drag-over {
+            border-color: var(--purple);
+            background: rgba(192, 132, 252, 0.06);
+            box-shadow: 0 0 24px rgba(192, 132, 252, 0.1);
+            animation: dropZonePulse 1.5s ease-in-out infinite;
+        }
+
+        .drop-zone.has-file {
+            border-style: solid;
+            border-color: rgba(192, 132, 252, 0.3);
+            background: rgba(192, 132, 252, 0.04);
+        }
+
+        .drop-zone__icon {
+            margin-bottom: 12px;
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+
+        .drop-zone:hover .drop-zone__icon,
+        .drop-zone.drag-over .drop-zone__icon {
+            color: var(--purple);
+        }
+
+        .drop-zone__text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .drop-zone__hint {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .drop-zone__file-info {
+            display: none;
+        }
+
+        .drop-zone.has-file .drop-zone__prompt { display: none; }
+        .drop-zone.has-file .drop-zone__file-info { display: block; }
+
+        .drop-zone__file-name {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--purple);
+            margin-bottom: 4px;
+        }
+
+        .drop-zone__file-size {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .drop-zone__file-change {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .drop-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* ── Flash Action ──────────────────────────────── */
+
+        .flash-action {
+            margin-top: 28px;
+            padding-top: 28px;
+            border-top: 1px solid rgba(58, 71, 89, 0.4);
+        }
+
+        .flash-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: var(--font-sans);
+            border: 1px solid rgba(0, 232, 186, 0.4);
+            border-radius: 12px;
+            cursor: pointer;
+            letter-spacing: 0.4px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flash-btn--ready {
+            background: linear-gradient(135deg, #00D4AA 0%, #00B894 50%, #00A87E 100%);
+            color: var(--bg-primary);
+            box-shadow: 0 0 20px rgba(0, 212, 170, 0.2), 0 2px 8px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .flash-btn--ready:hover {
+            background: linear-gradient(135deg, #00e8ba 0%, #00D4AA 50%, #00B894 100%);
+            box-shadow: 0 0 32px rgba(0, 212, 170, 0.35), 0 4px 16px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .flash-btn--disabled {
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+            border-color: var(--border);
+            cursor: not-allowed;
+        }
+
+        .flash-btn--flashing {
+            background: var(--bg-tertiary);
+            color: var(--green);
+            border-color: rgba(0, 212, 170, 0.2);
+            cursor: wait;
+        }
+
+        /* ── Progress ──────────────────────────────────── */
+
+        .flash-progress {
+            display: none;
+            margin-top: 24px;
+        }
+
+        .flash-progress.active { display: block; }
+
+        .progress-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .progress-status {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .progress-pct {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--green);
+        }
+
+        .progress-bar-track {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-primary);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(58, 71, 89, 0.3);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--green-dim), var(--green));
+            transition: width 0.3s ease;
+            position: relative;
+            animation: progressGlow 2s ease-in-out infinite;
+        }
+
+        /* Shimmer effect on progress bar */
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.15) 50%, transparent 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s linear infinite;
+        }
+
+        .progress-log {
+            margin-top: 16px;
+            max-height: 120px;
+            overflow-y: auto;
+            padding: 12px 14px;
+            background: rgba(28, 35, 51, 0.6);
+            border: 1px solid rgba(58, 71, 89, 0.3);
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            line-height: 1.8;
+            color: var(--text-muted);
+        }
+
+        .progress-log span {
+            display: block;
+        }
+
+        .progress-log .log-green { color: var(--green); }
+        .progress-log .log-orange { color: var(--orange); }
+        .progress-log .log-red { color: var(--red); }
+
+        /* ── Flash Result ──────────────────────────────── */
+
+        .flash-result {
+            display: none;
+            text-align: center;
+            padding: 32px 0 8px;
+        }
+
+        .flash-result.active { display: block; }
+
+        .flash-result__icon {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .flash-result__icon--success {
+            background: rgba(0, 212, 170, 0.1);
+            border: 2px solid rgba(0, 212, 170, 0.3);
+            color: var(--green);
+            animation: dotPulseGreen 2s ease-in-out infinite;
+        }
+
+        .flash-result__icon--success svg {
+            stroke-dasharray: 24;
+            stroke-dashoffset: 24;
+            animation: checkDraw 0.6s ease-out 0.2s forwards;
+        }
+
+        .flash-result__icon--error {
+            background: rgba(255, 107, 107, 0.1);
+            border: 2px solid rgba(255, 107, 107, 0.3);
+            color: var(--red);
+        }
+
+        .flash-result__title {
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .flash-result__desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .flash-result__btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: var(--font-sans);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 160, 128, 0.1);
+            color: var(--green);
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .flash-result__btn:hover {
+            background: rgba(0, 160, 128, 0.2);
+            border-color: rgba(0, 212, 170, 0.5);
+        }
+
+        /* ── Footer ────────────────────────────────────── */
+
+        .footer {
+            padding: 56px 32px 48px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .footer-quote {
+            font-family: var(--font-sans);
+            font-size: clamp(18px, 2.5vw, 24px);
+            font-weight: 500;
+            letter-spacing: -0.3px;
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 0;
+            margin: 0 0 20px;
+            max-width: 600px;
+            line-height: 1.4;
+        }
+
+        .footer-quote em {
+            font-style: normal;
+            color: var(--green);
+        }
+
+        .footer-divider {
+            width: 40px;
+            height: 1px;
+            background: var(--border-light);
+            margin: 0 0 8px;
+            opacity: 0.5;
+        }
+
+        .footer-logo {
+            width: 20px; height: 20px;
+            opacity: 0.65;
+        }
+
+        .footer-built {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .footer-built a {
+            color: var(--green);
+            text-decoration: none;
+        }
+
+        .footer-built a:hover { text-decoration: underline; }
+
+        .footer-links {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover { color: var(--green); }
+        .footer-links .dot-sep { color: var(--text-muted); opacity: 0.5; }
+
+        /* ── Responsive ────────────────────────────────── */
+
+        @media (max-width: 768px) {
+            .navbar { padding: 0 16px; }
+            .navbar-right { gap: 16px; }
+
+            .flash-hero { padding: 100px 20px 24px; }
+            .flash-hero__sub { font-size: 15px; }
+
+            .flash-container { padding: 0 16px; }
+
+            .device-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .device-card { padding: 24px 20px 24px; }
+            .device-card__visual { height: 120px; }
+
+            .flash-panel { padding: 24px 20px; }
+
+            .flash-steps {
+                grid-template-columns: 1fr;
+            }
+
+            .flash-panel__header { flex-direction: column; align-items: flex-start; gap: 12px; }
+
+            .footer { padding: 48px 20px 36px; }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-right .navbar-link { font-size: 13px; }
+            .nr-btn { padding: 7px 14px; font-size: 12px; }
+            .flash-hero__title { letter-spacing: -1px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Navbar ──────────────────────────────────────────── -->
+<nav class="navbar" id="navbar">
+    <div class="navbar-left">
+        <a href="index.html">
+            <svg class="navbar-logo" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                <ellipse cx="11" cy="13.5" rx="8" ry="4"/>
+                <circle cx="7" cy="6.5" r="2.5"/>
+                <circle cx="5" cy="12" r="0.9"/>
+                <path d="M3 14l-1.5.5"/>
+                <path d="M19 13c1.5-1 2.5-4 2-6.5"/>
+            </svg>
+            <span class="navbar-title">Ratspeak</span>
+        </a>
+    </div>
+    <div class="navbar-right">
+        <a href="about.html" class="navbar-link">About</a>
+        <a href="docs.html" class="navbar-link">Docs</a>
+        <a href="flash.html" class="navbar-link navbar-link--active">Flash</a>
+        <a href="#" class="nr-btn" target="_blank" rel="noopener noreferrer">
+            GitHub
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17l10-10"/><path d="M7 7h10v10"/></svg>
+        </a>
+    </div>
+</nav>
+
+<!-- ── Hero ────────────────────────────────────────────── -->
+<section class="flash-hero">
+    <div class="flash-hero__tag">
+        <span class="flash-hero__tag-dot"></span>
+        Web Flasher
+    </div>
+    <h1 class="flash-hero__title">Flash Firmware</h1>
+    <p class="flash-hero__sub">Deploy Ratspeak firmware to your ESP32 device directly from the browser. Select your hardware, connect via USB, and flash.</p>
+
+    <div class="browser-warning" id="browserWarning">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>Web Serial requires <strong>Chrome</strong> or <strong>Edge</strong> (version 89+). Your current browser does not support device flashing.</span>
+    </div>
+</section>
+
+<!-- ── Main Content ────────────────────────────────────── -->
+<div class="flash-container">
+
+    <!-- Device Selection -->
+    <div class="device-selection" id="deviceSelection">
+        <div class="device-grid">
+
+            <!-- T-Deck Plus -->
+            <div class="device-card device-card--green" data-device="tdeck" onclick="selectDevice('tdeck')">
+                <div class="device-card__visual">
+                    <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <filter id="glow-g" x="-50%" y="-50%" width="200%" height="200%">
+                                <feGaussianBlur stdDeviation="3" result="blur"/>
+                                <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                            </filter>
+                        </defs>
+                        <!-- Ambient -->
+                        <circle cx="100" cy="80" r="60" fill="currentColor" opacity="0.03"/>
+                        <circle cx="100" cy="80" r="50" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.1" stroke-dasharray="8,6">
+                            <animateTransform attributeName="transform" type="rotate" values="0 100 80;360 100 80" dur="25s" repeatCount="indefinite"/>
+                        </circle>
+                        <!-- Handheld body — compact portrait like a Blackberry -->
+                        <rect x="65" y="20" width="70" height="118" rx="10" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6">
+                            <animate attributeName="opacity" values="0.5;0.7;0.5" dur="4s" repeatCount="indefinite"/>
+                        </rect>
+                        <!-- Inner bezel -->
+                        <rect x="69" y="24" width="62" height="110" rx="8" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.15"/>
+                        <!-- Screen -->
+                        <rect x="74" y="28" width="52" height="44" rx="4" stroke="currentColor" stroke-width="1" fill="currentColor" fill-opacity="0.04" opacity="0.5"/>
+                        <!-- Screen content lines -->
+                        <line x1="80" y1="38" x2="102" y2="38" stroke="currentColor" stroke-width="1" opacity="0.3" stroke-linecap="round"/>
+                        <line x1="80" y1="44" x2="115" y2="44" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
+                        <line x1="80" y1="50" x2="108" y2="50" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
+                        <line x1="80" y1="56" x2="96" y2="56" stroke="currentColor" stroke-width="1" opacity="0.15" stroke-linecap="round"/>
+                        <!-- Signal indicator on screen -->
+                        <circle cx="121" cy="34" r="2.5" fill="currentColor" filter="url(#glow-g)">
+                            <animate attributeName="opacity" values="0.4;0.9;0.4" dur="2s" repeatCount="indefinite"/>
+                        </circle>
+                        <!-- Status bar dots -->
+                        <circle cx="80" cy="34" r="1" fill="currentColor" opacity="0.25"/>
+                        <circle cx="84" cy="34" r="1" fill="currentColor" opacity="0.25"/>
+                        <circle cx="88" cy="34" r="1" fill="currentColor" opacity="0.2"/>
+                        <!-- Trackball / nav button -->
+                        <circle cx="100" cy="79" r="3.5" stroke="currentColor" stroke-width="1" fill="currentColor" fill-opacity="0.06" opacity="0.4"/>
+                        <circle cx="100" cy="79" r="1.3" fill="currentColor" opacity="0.3">
+                            <animate attributeName="opacity" values="0.2;0.5;0.2" dur="3s" repeatCount="indefinite"/>
+                        </circle>
+                        <!-- Keyboard rows — compact QWERTY grid -->
+                        <g opacity="0.35">
+                            <!-- Row 1 -->
+                            <rect x="74" y="88" width="7" height="5" rx="1" fill="currentColor"/><rect x="83" y="88" width="7" height="5" rx="1" fill="currentColor"/><rect x="92" y="88" width="7" height="5" rx="1" fill="currentColor"/><rect x="101" y="88" width="7" height="5" rx="1" fill="currentColor"/><rect x="110" y="88" width="7" height="5" rx="1" fill="currentColor"/><rect x="119" y="88" width="7" height="5" rx="1" fill="currentColor"/>
+                            <!-- Row 2 -->
+                            <rect x="76" y="95" width="7" height="5" rx="1" fill="currentColor"/><rect x="85" y="95" width="7" height="5" rx="1" fill="currentColor"/><rect x="94" y="95" width="7" height="5" rx="1" fill="currentColor"/><rect x="103" y="95" width="7" height="5" rx="1" fill="currentColor"/><rect x="112" y="95" width="7" height="5" rx="1" fill="currentColor"/><rect x="121" y="95" width="5" height="5" rx="1" fill="currentColor"/>
+                            <!-- Row 3 -->
+                            <rect x="74" y="102" width="7" height="5" rx="1" fill="currentColor"/><rect x="83" y="102" width="7" height="5" rx="1" fill="currentColor"/><rect x="92" y="102" width="7" height="5" rx="1" fill="currentColor"/><rect x="101" y="102" width="7" height="5" rx="1" fill="currentColor"/><rect x="110" y="102" width="7" height="5" rx="1" fill="currentColor"/><rect x="119" y="102" width="7" height="5" rx="1" fill="currentColor"/>
+                            <!-- Row 4 — spacebar row -->
+                            <rect x="76" y="109" width="7" height="5" rx="1" fill="currentColor"/><rect x="85" y="109" width="30" height="5" rx="1" fill="currentColor"/><rect x="117" y="109" width="7" height="5" rx="1" fill="currentColor"/>
+                        </g>
+                        <!-- Antenna stub at top -->
+                        <line x1="100" y1="20" x2="100" y2="12" stroke="currentColor" stroke-width="1.5" opacity="0.4" stroke-linecap="round"/>
+                        <circle cx="100" cy="11" r="1.5" fill="currentColor" opacity="0.3"/>
+                        <!-- Radio waves from top -->
+                        <path d="M92 16 Q88 10 92 5" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.25">
+                            <animate attributeName="opacity" values="0.1;0.45;0.1" dur="3s" repeatCount="indefinite"/>
+                        </path>
+                        <path d="M108 16 Q112 10 108 5" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.2">
+                            <animate attributeName="opacity" values="0.05;0.35;0.05" dur="3s" repeatCount="indefinite" begin="0.5s"/>
+                        </path>
+                        <path d="M87 18 Q81 9 86 2" stroke="currentColor" stroke-width="0.6" fill="none" opacity="0.15">
+                            <animate attributeName="opacity" values="0.05;0.25;0.05" dur="3.5s" repeatCount="indefinite" begin="1s"/>
+                        </path>
+                        <path d="M113 18 Q119 9 114 2" stroke="currentColor" stroke-width="0.6" fill="none" opacity="0.15">
+                            <animate attributeName="opacity" values="0.05;0.25;0.05" dur="3.5s" repeatCount="indefinite" begin="1.5s"/>
+                        </path>
+                        <!-- Data particle on screen -->
+                        <circle r="1.3" fill="currentColor" opacity="0.6">
+                            <animateMotion dur="3.5s" repeatCount="indefinite" path="M80,44 L115,44 L108,50 L80,50 Z"/>
+                        </circle>
+                    </svg>
+                </div>
+                <h3 class="device-card__name">T-Deck Plus</h3>
+                <p class="device-card__desc">LilyGO T-Deck with LoRa radio, full QWERTY keyboard, and 320x240 display.</p>
+                <div class="device-card__specs">
+                    <span class="device-card__spec">ESP32-S3</span>
+                    <span class="device-card__spec">LoRa SX1262</span>
+                    <span class="device-card__spec">WiFi + BLE</span>
+                </div>
+                <div class="device-card__arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                </div>
+            </div>
+
+            <!-- Cardputer Adv -->
+            <div class="device-card device-card--blue" data-device="cardputer" onclick="selectDevice('cardputer')">
+                <div class="device-card__visual">
+                    <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <filter id="glow-b" x="-50%" y="-50%" width="200%" height="200%">
+                                <feGaussianBlur stdDeviation="3" result="blur"/>
+                                <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                            </filter>
+                        </defs>
+                        <!-- Ambient -->
+                        <circle cx="100" cy="80" r="55" fill="currentColor" opacity="0.03"/>
+                        <circle cx="100" cy="80" r="45" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.1" stroke-dasharray="6,8">
+                            <animateTransform attributeName="transform" type="rotate" values="360 100 80;0 100 80" dur="22s" repeatCount="indefinite"/>
+                        </circle>
+                        <!-- Compact device body -->
+                        <rect x="50" y="40" width="100" height="70" rx="10" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6">
+                            <animate attributeName="opacity" values="0.5;0.7;0.5" dur="4.5s" repeatCount="indefinite"/>
+                        </rect>
+                        <!-- Screen -->
+                        <rect x="58" y="46" width="84" height="36" rx="4" stroke="currentColor" stroke-width="1" fill="currentColor" fill-opacity="0.04" opacity="0.5"/>
+                        <!-- Screen content — terminal style -->
+                        <text x="64" y="58" font-family="monospace" font-size="6" fill="currentColor" opacity="0.4">&gt; ratspeak</text>
+                        <text x="64" y="66" font-family="monospace" font-size="6" fill="currentColor" opacity="0.3">  mesh ready</text>
+                        <text x="64" y="74" font-family="monospace" font-size="6" fill="currentColor" opacity="0.3">&gt; _</text>
+                        <!-- Cursor blink -->
+                        <rect x="72" y="70" width="5" height="6" fill="currentColor" opacity="0.5">
+                            <animate attributeName="opacity" values="0;0.5;0" dur="1.2s" repeatCount="indefinite"/>
+                        </rect>
+                        <!-- Status LED -->
+                        <circle cx="138" cy="49" r="2" fill="currentColor" filter="url(#glow-b)">
+                            <animate attributeName="opacity" values="0.3;0.9;0.3" dur="2.2s" repeatCount="indefinite"/>
+                        </circle>
+                        <!-- Mini keyboard -->
+                        <g opacity="0.3">
+                            <rect x="58" y="88" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="66" y="88" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="74" y="88" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="82" y="88" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="90" y="88" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="98" y="88" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="106" y="88" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="114" y="88" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="122" y="88" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="130" y="88" width="6" height="4" rx="0.8" fill="currentColor"/>
+                            <rect x="61" y="94" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="69" y="94" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="77" y="94" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="85" y="94" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="93" y="94" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="101" y="94" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="109" y="94" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="117" y="94" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="125" y="94" width="6" height="4" rx="0.8" fill="currentColor"/>
+                            <rect x="73" y="100" width="46" height="4" rx="0.8" fill="currentColor"/>
+                        </g>
+                        <!-- Scanning particle -->
+                        <circle r="1.2" fill="currentColor" opacity="0.6">
+                            <animateMotion dur="3.5s" repeatCount="indefinite" path="M64,58 L130,58 L130,74 L64,74 Z"/>
+                        </circle>
+                    </svg>
+                </div>
+                <h3 class="device-card__name">Cardputer Adv</h3>
+                <p class="device-card__desc">M5Stack Cardputer — ultra-compact with integrated keyboard and 1.14" display.</p>
+                <div class="device-card__specs">
+                    <span class="device-card__spec">ESP32-S3</span>
+                    <span class="device-card__spec">Compact</span>
+                    <span class="device-card__spec">WiFi + BLE</span>
+                </div>
+                <div class="device-card__arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                </div>
+            </div>
+
+            <!-- Custom -->
+            <div class="device-card device-card--purple" data-device="custom" onclick="selectDevice('custom')">
+                <div class="device-card__visual">
+                    <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <filter id="glow-p" x="-50%" y="-50%" width="200%" height="200%">
+                                <feGaussianBlur stdDeviation="3" result="blur"/>
+                                <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                            </filter>
+                        </defs>
+                        <!-- Ambient -->
+                        <circle cx="100" cy="80" r="55" fill="currentColor" opacity="0.03"/>
+                        <!-- Orbiting ring -->
+                        <circle cx="100" cy="80" r="48" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.12" stroke-dasharray="4,10">
+                            <animateTransform attributeName="transform" type="rotate" values="0 100 80;360 100 80" dur="18s" repeatCount="indefinite"/>
+                        </circle>
+                        <!-- MCU chip body -->
+                        <rect x="72" y="52" width="56" height="56" rx="4" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.5">
+                            <animate attributeName="opacity" values="0.4;0.65;0.4" dur="5s" repeatCount="indefinite"/>
+                        </rect>
+                        <!-- Chip die -->
+                        <rect x="82" y="62" width="36" height="36" rx="2" stroke="currentColor" stroke-width="0.8" fill="currentColor" fill-opacity="0.04" opacity="0.5"/>
+                        <!-- Center glow -->
+                        <circle cx="100" cy="80" r="6" fill="currentColor" filter="url(#glow-p)">
+                            <animate attributeName="r" values="4;8;4" dur="3s" repeatCount="indefinite"/>
+                            <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3s" repeatCount="indefinite"/>
+                        </circle>
+                        <!-- Pins — left -->
+                        <line x1="72" y1="62" x2="60" y2="62" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <line x1="72" y1="72" x2="60" y2="72" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <line x1="72" y1="82" x2="60" y2="82" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <line x1="72" y1="92" x2="60" y2="92" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <line x1="72" y1="98" x2="60" y2="98" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <!-- Pins — right -->
+                        <line x1="128" y1="62" x2="140" y2="62" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <line x1="128" y1="72" x2="140" y2="72" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <line x1="128" y1="82" x2="140" y2="82" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <line x1="128" y1="92" x2="140" y2="92" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <line x1="128" y1="98" x2="140" y2="98" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <!-- Pins — top -->
+                        <line x1="85" y1="52" x2="85" y2="40" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <line x1="95" y1="52" x2="95" y2="40" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <line x1="105" y1="52" x2="105" y2="40" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <line x1="115" y1="52" x2="115" y2="40" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <!-- Pins — bottom -->
+                        <line x1="85" y1="108" x2="85" y2="120" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <line x1="95" y1="108" x2="95" y2="120" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <line x1="105" y1="108" x2="105" y2="120" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <line x1="115" y1="108" x2="115" y2="120" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                        <!-- Data flowing along pins -->
+                        <circle r="1.3" fill="currentColor" opacity="0.6">
+                            <animateMotion dur="3s" repeatCount="indefinite" path="M60,72 L100,80"/>
+                        </circle>
+                        <circle r="1.1" fill="currentColor" opacity="0.5">
+                            <animateMotion dur="3.5s" repeatCount="indefinite" begin="1.2s" path="M100,80 L140,92"/>
+                        </circle>
+                        <circle r="1.2" fill="currentColor" opacity="0.5">
+                            <animateMotion dur="2.8s" repeatCount="indefinite" begin="0.6s" path="M95,40 L100,80"/>
+                        </circle>
+                        <!-- Upload arrow -->
+                        <g opacity="0.25">
+                            <path d="M100 140 L100 128" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                                <animate attributeName="opacity" values="0.2;0.6;0.2" dur="2.5s" repeatCount="indefinite"/>
+                            </path>
+                            <path d="M96 132 L100 126 L104 132" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <animate attributeName="opacity" values="0.2;0.6;0.2" dur="2.5s" repeatCount="indefinite"/>
+                            </path>
+                        </g>
+                    </svg>
+                </div>
+                <h3 class="device-card__name">Custom</h3>
+                <p class="device-card__desc">Upload your own firmware binary for any ESP32-based device.</p>
+                <div class="device-card__specs">
+                    <span class="device-card__spec">ESP32 / S2 / S3 / C3</span>
+                    <span class="device-card__spec">.bin / .zip</span>
+                </div>
+                <div class="device-card__arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Flash Interface -->
+    <div class="flash-interface" id="flashInterface">
+        <button class="flash-back" onclick="goBack()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+            Back to devices
+        </button>
+
+        <div class="flash-panel" id="flashPanel" data-accent="green">
+            <div class="flash-panel__header">
+                <div class="flash-panel__device-icon" id="panelIcon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                </div>
+                <div>
+                    <div class="flash-panel__device-name" id="panelName">T-Deck Plus</div>
+                    <div class="flash-panel__device-sub" id="panelSub">ESP32-S3 &middot; Ratspeak Firmware</div>
+                </div>
+            </div>
+
+            <div class="flash-steps">
+                <!-- Step 1: Connect -->
+                <div class="flash-step">
+                    <div class="flash-step__number">Step 01 &mdash; Connect</div>
+                    <div class="flash-step__title">USB Serial Device</div>
+                    <button class="connect-btn connect-btn--idle" id="connectBtn" onclick="connectDevice()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6"/><circle cx="12" cy="12" r="4"/><path d="M6 18l1.5-1.5"/><path d="M16.5 16.5L18 18"/><path d="M2 12h6"/><path d="M16 12h6"/></svg>
+                        Select USB Device
+                    </button>
+                    <div class="connect-status" id="connectStatus">
+                        <span class="connect-status__dot connect-status__dot--off" id="statusDot"></span>
+                        <span class="connect-status__text" id="statusText">No device connected</span>
+                    </div>
+                    <div class="connect-device-info" id="deviceInfo"></div>
+                </div>
+
+                <!-- Step 2: Firmware -->
+                <div class="flash-step">
+                    <div class="flash-step__number">Step 02 &mdash; Firmware</div>
+                    <div class="flash-step__title" id="firmwareTitle">Firmware Binary</div>
+
+                    <!-- Pre-configured firmware (for tdeck/cardputer) -->
+                    <div id="firmwarePreset" style="display: none;">
+                        <div class="firmware-ready">
+                            <div class="firmware-ready__icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            </div>
+                            <div>
+                                <div class="firmware-ready__name" id="presetName">ratspeak-tdeck-v1.0.0.bin</div>
+                                <div class="firmware-ready__size" id="presetSize">Bundled &middot; Ready to flash</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom file upload -->
+                    <div id="firmwareCustom" style="display: none;">
+                        <div class="drop-zone" id="dropZone">
+                            <div class="drop-zone__prompt">
+                                <div class="drop-zone__icon">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                </div>
+                                <div class="drop-zone__text">Drop firmware file here</div>
+                                <div class="drop-zone__hint">or click to browse &middot; .bin or .zip</div>
+                            </div>
+                            <div class="drop-zone__file-info">
+                                <div class="drop-zone__file-name" id="fileName"></div>
+                                <div class="drop-zone__file-size" id="fileSize"></div>
+                                <div class="drop-zone__file-change">Click to change file</div>
+                            </div>
+                            <input type="file" id="fileInput" accept=".bin,.zip">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flash Action -->
+            <div class="flash-action">
+                <button class="flash-btn flash-btn--disabled" id="flashBtn" onclick="startFlash()" disabled>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    Flash Firmware
+                </button>
+
+                <!-- Progress -->
+                <div class="flash-progress" id="flashProgress">
+                    <div class="progress-header">
+                        <span class="progress-status" id="progressStatus">Preparing...</span>
+                        <span class="progress-pct" id="progressPct">0%</span>
+                    </div>
+                    <div class="progress-bar-track">
+                        <div class="progress-bar-fill" id="progressBar"></div>
+                    </div>
+                    <div class="progress-log" id="progressLog"></div>
+                </div>
+
+                <!-- Result -->
+                <div class="flash-result" id="flashResult">
+                    <div class="flash-result__icon" id="resultIcon">
+                        <svg id="resultSvg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></svg>
+                    </div>
+                    <div class="flash-result__title" id="resultTitle"></div>
+                    <div class="flash-result__desc" id="resultDesc"></div>
+                    <button class="flash-result__btn" id="resultBtn" onclick="resetFlash()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+                        Flash Another
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ── Footer ──────────────────────────────────────────── -->
+<footer class="footer">
+    <p class="footer-quote">Privacy <em>shouldn&rsquo;t</em> be opt-in.</p>
+    <div class="footer-divider"></div>
+    <svg class="footer-logo" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <ellipse cx="11" cy="13.5" rx="8" ry="4"/>
+        <circle cx="7" cy="6.5" r="2.5"/>
+        <circle cx="5" cy="12" r="0.9"/>
+        <path d="M3 14l-1.5.5"/>
+        <path d="M19 13c1.5-1 2.5-4 2-6.5"/>
+    </svg>
+    <span class="footer-built">Built with <a href="https://reticulum.network" target="_blank" rel="noopener noreferrer">Reticulum</a></span>
+    <div class="footer-links">
+        <a href="#">Download</a>
+        <span class="dot-sep">&middot;</span>
+        <a href="#" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <span class="dot-sep">&middot;</span>
+        <a href="docs.html">Documentation</a>
+    </div>
+</footer>
+
+<script>
+(function() {
+    'use strict';
+
+    // ── State ──────────────────────────────────────────
+    var state = {
+        device: null,       // 'tdeck' | 'cardputer' | 'custom'
+        port: null,         // Web Serial port
+        connected: false,
+        firmwareReady: false,
+        firmwareBuffer: null, // ArrayBuffer from GitHub release
+        customFile: null,
+        flashing: false
+    };
+
+    var DEVICES = {
+        tdeck: {
+            name: 'T-Deck Plus',
+            sub: 'ESP32-S3 \u00b7 Ratdeck Firmware',
+            accent: 'green',
+            firmware: 'ratdeck-firmware.bin',
+            firmwareSize: 'Loading from GitHub...',
+            releaseUrl: 'https://api.github.com/repos/defidude/Ratdeck/releases/latest'
+        },
+        cardputer: {
+            name: 'Cardputer Adv',
+            sub: 'ESP32-S3 \u00b7 RatCom Firmware',
+            accent: 'blue',
+            firmware: 'ratcom-firmware.bin',
+            firmwareSize: 'Loading from GitHub...',
+            releaseUrl: 'https://api.github.com/repos/defidude/RatCom/releases/latest'
+        },
+        custom: {
+            name: 'Custom Device',
+            sub: 'ESP32 \u00b7 User Firmware',
+            accent: 'purple',
+            firmware: null,
+            firmwareSize: null,
+            releaseUrl: null
+        }
+    };
+
+    // ── Navbar scroll effect ───────────────────────────
+    var navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', function() {
+        navbar.classList.toggle('scrolled', window.scrollY > 50);
+    }, { passive: true });
+
+    // ── Browser check ──────────────────────────────────
+    if (!('serial' in navigator)) {
+        document.getElementById('browserWarning').classList.add('show');
+    }
+
+    // ── Device Selection ───────────────────────────────
+    window.selectDevice = function(deviceId) {
+        if (!('serial' in navigator)) return;
+
+        state.device = deviceId;
+        state.connected = false;
+        state.firmwareReady = false;
+        state.firmwareBuffer = null;
+        state.customFile = null;
+        state.port = null;
+
+        var dev = DEVICES[deviceId];
+        var sel = document.getElementById('deviceSelection');
+        var fi = document.getElementById('flashInterface');
+        var panel = document.getElementById('flashPanel');
+
+        // Update panel content
+        panel.setAttribute('data-accent', dev.accent);
+        document.getElementById('panelName').textContent = dev.name;
+        document.getElementById('panelSub').textContent = dev.sub;
+
+        // Firmware section
+        var presetEl = document.getElementById('firmwarePreset');
+        var customEl = document.getElementById('firmwareCustom');
+
+        if (deviceId === 'custom') {
+            presetEl.style.display = 'none';
+            customEl.style.display = 'block';
+            state.firmwareReady = false;
+        } else {
+            presetEl.style.display = 'block';
+            customEl.style.display = 'none';
+            document.getElementById('presetName').textContent = dev.firmware;
+            document.getElementById('presetSize').textContent = 'Loading from GitHub...';
+            state.firmwareReady = false;
+            fetchFirmwareFromRelease(dev);
+        }
+
+        // Reset connection UI
+        resetConnectionUI();
+
+        // Reset flash state
+        document.getElementById('flashProgress').classList.remove('active');
+        document.getElementById('flashResult').classList.remove('active');
+        updateFlashBtn();
+
+        // Animate transition
+        sel.classList.add('hiding');
+        setTimeout(function() {
+            sel.classList.add('hidden');
+            fi.classList.add('active');
+            fi.style.animation = 'none';
+            fi.offsetHeight; // reflow
+            fi.style.animation = '';
+        }, 400);
+    };
+
+    // ── Firmware Download from GitHub Releases ────────
+    function fetchFirmwareFromRelease(dev) {
+        fetch(dev.releaseUrl)
+            .then(function(resp) {
+                if (!resp.ok) throw new Error('Release not found');
+                return resp.json();
+            })
+            .then(function(release) {
+                var asset = null;
+                for (var i = 0; i < release.assets.length; i++) {
+                    if (release.assets[i].name === dev.firmware) {
+                        asset = release.assets[i];
+                        break;
+                    }
+                }
+                if (!asset) throw new Error('Firmware binary not found in release');
+
+                document.getElementById('presetName').textContent = dev.firmware + ' (' + release.tag_name + ')';
+                document.getElementById('presetSize').textContent = 'Downloading ' + formatBytes(asset.size) + '...';
+
+                return fetch(asset.browser_download_url);
+            })
+            .then(function(resp) {
+                if (!resp.ok) throw new Error('Download failed');
+                return resp.arrayBuffer();
+            })
+            .then(function(buffer) {
+                state.firmwareBuffer = buffer;
+                state.firmwareReady = true;
+                document.getElementById('presetSize').textContent = formatBytes(buffer.byteLength) + ' \u00b7 Ready to flash';
+                updateFlashBtn();
+            })
+            .catch(function(err) {
+                document.getElementById('presetName').textContent = dev.firmware;
+                document.getElementById('presetSize').textContent = 'Download failed: ' + err.message;
+                state.firmwareReady = false;
+                updateFlashBtn();
+            });
+    }
+
+    window.goBack = function() {
+        var sel = document.getElementById('deviceSelection');
+        var fi = document.getElementById('flashInterface');
+
+        fi.classList.remove('active');
+        sel.classList.remove('hidden');
+
+        // Small delay to trigger re-animation
+        requestAnimationFrame(function() {
+            sel.classList.remove('hiding');
+        });
+
+        // Disconnect if connected
+        if (state.port) {
+            try { state.port.close(); } catch(e) {}
+            state.port = null;
+        }
+        state.connected = false;
+        state.device = null;
+    };
+
+    // ── Connection ─────────────────────────────────────
+    window.connectDevice = function() {
+        if (state.connected || state.flashing) return;
+        if (!('serial' in navigator)) return;
+
+        var btn = document.getElementById('connectBtn');
+        var dot = document.getElementById('statusDot');
+        var txt = document.getElementById('statusText');
+
+        btn.className = 'connect-btn connect-btn--connecting';
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: spinSlow 1s linear infinite;"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> Connecting...';
+        dot.className = 'connect-status__dot connect-status__dot--waiting';
+        txt.className = 'connect-status__text';
+        txt.textContent = 'Waiting for device selection...';
+
+        navigator.serial.requestPort({ filters: [] })
+            .then(function(port) {
+                state.port = port;
+                return port.open({ baudRate: 115200 });
+            })
+            .then(function() {
+                state.connected = true;
+
+                btn.className = 'connect-btn connect-btn--connected';
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Device Connected';
+                dot.className = 'connect-status__dot connect-status__dot--on';
+                txt.className = 'connect-status__text connect-status__text--on';
+                txt.textContent = 'Connected via USB Serial';
+
+                // Show device info
+                var info = document.getElementById('deviceInfo');
+                var portInfo = state.port.getInfo();
+                var vendor = portInfo.usbVendorId ? '0x' + portInfo.usbVendorId.toString(16).toUpperCase().padStart(4, '0') : 'Unknown';
+                var product = portInfo.usbProductId ? '0x' + portInfo.usbProductId.toString(16).toUpperCase().padStart(4, '0') : 'Unknown';
+                info.textContent = 'VID: ' + vendor + '  PID: ' + product;
+                info.classList.add('show');
+
+                updateFlashBtn();
+            })
+            .catch(function(err) {
+                resetConnectionUI();
+                if (err.name !== 'NotFoundError') {
+                    var txt2 = document.getElementById('statusText');
+                    txt2.textContent = 'Connection failed: ' + err.message;
+                    txt2.style.color = 'var(--red)';
+                }
+            });
+    };
+
+    function resetConnectionUI() {
+        var btn = document.getElementById('connectBtn');
+        var dot = document.getElementById('statusDot');
+        var txt = document.getElementById('statusText');
+        var info = document.getElementById('deviceInfo');
+
+        btn.className = 'connect-btn connect-btn--idle';
+        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6"/><circle cx="12" cy="12" r="4"/><path d="M6 18l1.5-1.5"/><path d="M16.5 16.5L18 18"/><path d="M2 12h6"/><path d="M16 12h6"/></svg> Select USB Device';
+        dot.className = 'connect-status__dot connect-status__dot--off';
+        txt.className = 'connect-status__text';
+        txt.textContent = 'No device connected';
+        txt.style.color = '';
+        info.classList.remove('show');
+        state.connected = false;
+    }
+
+    // ── Custom File Handling ───────────────────────────
+    var dropZone = document.getElementById('dropZone');
+    var fileInput = document.getElementById('fileInput');
+
+    if (dropZone) {
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        dropZone.addEventListener('dragleave', function() {
+            dropZone.classList.remove('drag-over');
+        });
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files.length > 0) {
+                handleFile(fileInput.files[0]);
+            }
+        });
+    }
+
+    function handleFile(file) {
+        var ext = file.name.split('.').pop().toLowerCase();
+        if (ext !== 'bin' && ext !== 'zip') {
+            alert('Please select a .bin or .zip firmware file.');
+            return;
+        }
+        state.customFile = file;
+        state.firmwareReady = true;
+
+        document.getElementById('fileName').textContent = file.name;
+        document.getElementById('fileSize').textContent = formatBytes(file.size);
+        dropZone.classList.add('has-file');
+        updateFlashBtn();
+    }
+
+    function formatBytes(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / 1048576).toFixed(2) + ' MB';
+    }
+
+    // ── Flash Button State ─────────────────────────────
+    function updateFlashBtn() {
+        var btn = document.getElementById('flashBtn');
+        var ready = state.connected && state.firmwareReady;
+
+        if (ready) {
+            btn.className = 'flash-btn flash-btn--ready';
+            btn.disabled = false;
+        } else {
+            btn.className = 'flash-btn flash-btn--disabled';
+            btn.disabled = true;
+        }
+    }
+
+    // ── Flash Process (Simulated) ──────────────────────
+    window.startFlash = function() {
+        if (!state.connected || !state.firmwareReady || state.flashing) return;
+
+        state.flashing = true;
+        var btn = document.getElementById('flashBtn');
+        btn.className = 'flash-btn flash-btn--flashing';
+        btn.disabled = true;
+        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: spinSlow 1s linear infinite;"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> Flashing...';
+
+        var progress = document.getElementById('flashProgress');
+        var result = document.getElementById('flashResult');
+        progress.classList.add('active');
+        result.classList.remove('active');
+
+        var log = document.getElementById('progressLog');
+        log.innerHTML = '';
+
+        var stages = [
+            { pct: 5,   status: 'Connecting to bootloader...', log: 'Entering download mode...', logClass: 'log-orange' },
+            { pct: 10,  status: 'Detecting chip...', log: 'Chip detected: ESP32-S3 (revision v0.2)', logClass: 'log-green' },
+            { pct: 15,  status: 'Erasing flash...', log: 'Erasing flash region 0x0000 - 0x3FFFFF', logClass: '' },
+            { pct: 25,  status: 'Erasing flash...', log: 'Flash erased successfully', logClass: 'log-green' },
+            { pct: 30,  status: 'Writing bootloader...', log: 'Writing bootloader @ 0x0000 (16384 bytes)', logClass: '' },
+            { pct: 40,  status: 'Writing partition table...', log: 'Writing partition table @ 0x8000 (3072 bytes)', logClass: '' },
+            { pct: 50,  status: 'Writing application...', log: 'Writing application @ 0x10000...', logClass: '' },
+            { pct: 65,  status: 'Writing application...', log: 'Written 524288 bytes (50%)', logClass: '' },
+            { pct: 80,  status: 'Writing application...', log: 'Written 1048576 bytes (100%)', logClass: '' },
+            { pct: 90,  status: 'Verifying...', log: 'Verifying flash contents...', logClass: 'log-orange' },
+            { pct: 95,  status: 'Verifying...', log: 'Hash verified: SHA-256 match', logClass: 'log-green' },
+            { pct: 100, status: 'Complete', log: 'Flash complete. Rebooting device...', logClass: 'log-green' }
+        ];
+
+        var i = 0;
+        function runStage() {
+            if (i >= stages.length) {
+                setTimeout(function() { showResult(true); }, 600);
+                return;
+            }
+
+            var s = stages[i];
+            document.getElementById('progressStatus').textContent = s.status;
+            document.getElementById('progressPct').textContent = s.pct + '%';
+            document.getElementById('progressBar').style.width = s.pct + '%';
+
+            var entry = document.createElement('span');
+            entry.className = s.logClass;
+            entry.textContent = '> ' + s.log;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+
+            i++;
+            var delay = 300 + Math.random() * 700;
+            if (s.pct >= 50 && s.pct <= 80) delay = 600 + Math.random() * 800;
+            setTimeout(runStage, delay);
+        }
+
+        runStage();
+    };
+
+    function showResult(success) {
+        state.flashing = false;
+
+        var resultEl = document.getElementById('flashResult');
+        var iconEl = document.getElementById('resultIcon');
+        var svgEl = document.getElementById('resultSvg');
+        var titleEl = document.getElementById('resultTitle');
+        var descEl = document.getElementById('resultDesc');
+
+        if (success) {
+            iconEl.className = 'flash-result__icon flash-result__icon--success';
+            svgEl.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
+            titleEl.textContent = 'Firmware Flashed Successfully';
+            descEl.textContent = 'Your device is now running Ratspeak firmware. Disconnect USB and power cycle to start.';
+        } else {
+            iconEl.className = 'flash-result__icon flash-result__icon--error';
+            svgEl.innerHTML = '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>';
+            titleEl.textContent = 'Flash Failed';
+            descEl.textContent = 'An error occurred during flashing. Please reconnect and try again.';
+        }
+
+        resultEl.classList.add('active');
+    }
+
+    window.resetFlash = function() {
+        document.getElementById('flashProgress').classList.remove('active');
+        document.getElementById('flashResult').classList.remove('active');
+        document.getElementById('progressBar').style.width = '0%';
+        document.getElementById('progressLog').innerHTML = '';
+
+        var btn = document.getElementById('flashBtn');
+        state.flashing = false;
+        updateFlashBtn();
+
+        btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Flash Firmware';
+    };
+
+    // ── Intersection Observer for fade-in ──────────────
+    var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in').forEach(function(el) {
+        observer.observe(el);
+    });
+
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ratspeak — Encrypted Mesh Networking Dashboard</title>
+    <meta name="description" content="Encrypted mesh communication built on Reticulum. No servers. No accounts. No surveillance.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary:    #1c2333;
+            --bg-secondary:  #242d3f;
+            --bg-tertiary:   #2d3748;
+            --border:        #3a4759;
+            --border-light:  #4a5a6e;
+            --text-primary:  #e2e8f0;
+            --text-secondary:#9eadbf;
+            --text-muted:    #7e8fa2;
+            --green:         #00D4AA;
+            --green-dim:     #00A080;
+            --red:           #FF6B6B;
+            --blue:          #38BDF8;
+            --purple:        #C084FC;
+            --orange:        #F59E0B;
+            --font-mono:     'JetBrains Mono', 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+            --font-sans:     'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            --glass-bg:      rgba(36, 45, 63, 0.75);
+            --glass-border:  rgba(58, 71, 89, 0.55);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 14px;
+            line-height: 1.5;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Noise texture overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 99999;
+            opacity: 0.015;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        /* ── Animations ───────────────────────────────── */
+
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 8px var(--green), 0 0 16px rgba(0, 212, 170, 0.2); }
+            50%      { box-shadow: 0 0 12px var(--green), 0 0 24px rgba(0, 212, 170, 0.35); }
+        }
+
+        /* ── Navbar ────────────────────────────────────── */
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            height: 56px;
+            background: linear-gradient(180deg, rgba(28, 35, 51, 0.95) 0%, rgba(28, 35, 51, 0.9) 100%);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 1px 0 rgba(0, 212, 170, 0.05), 0 4px 24px rgba(0, 0, 0, 0.3);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            border-bottom-color: var(--border-light);
+            box-shadow: 0 1px 0 rgba(0, 212, 170, 0.08), 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-left a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .navbar-logo {
+            flex-shrink: 0;
+            filter: drop-shadow(0 0 6px rgba(0, 212, 170, 0.4));
+        }
+
+        .navbar-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .navbar-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 6px 2px;
+            border-bottom: 1px solid transparent;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .navbar-link:hover {
+            color: var(--text-primary);
+            border-bottom-color: var(--text-secondary);
+        }
+
+        .nr-btn {
+            background: rgba(0, 160, 128, 0.1);
+            color: var(--green);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--font-sans);
+            transition: all 0.25s ease;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nr-btn:hover {
+            background: rgba(0, 160, 128, 0.2);
+            border-color: rgba(0, 212, 170, 0.5);
+            color: var(--green);
+            box-shadow: 0 0 20px rgba(0, 212, 170, 0.15);
+        }
+
+        .nr-btn-lg {
+            padding: 14px 36px;
+            font-size: 15px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #00D4AA 0%, #00B894 50%, #00A87E 100%);
+            color: var(--bg-primary);
+            border: 1px solid rgba(0, 232, 186, 0.4);
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            box-shadow:
+                0 0 20px rgba(0, 212, 170, 0.2),
+                0 2px 8px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            position: relative;
+        }
+
+        .nr-btn-lg:hover {
+            background: linear-gradient(135deg, #00e8ba 0%, #00D4AA 50%, #00B894 100%);
+            border-color: rgba(0, 232, 186, 0.6);
+            color: var(--bg-primary);
+            box-shadow:
+                0 0 32px rgba(0, 212, 170, 0.35),
+                0 4px 16px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .nr-btn-secondary {
+            padding: 14px 28px;
+            font-size: 15px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .nr-btn-secondary:hover {
+            background: rgba(0, 160, 128, 0.15);
+        }
+
+        .hero-buttons {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .download-wrapper {
+            position: relative;
+        }
+
+        .download-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            min-width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 6px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-4px);
+            transition: all 0.2s ease;
+            z-index: 10;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .download-wrapper:hover .download-dropdown,
+        .download-wrapper:focus-within .download-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .download-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .download-option:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .download-option svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        /* ── Hero ──────────────────────────────────────── */
+
+        .hero {
+            min-height: calc(100vh - 80px);
+            padding: 140px 32px 80px;
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 48px;
+            position: relative;
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-muted);
+            opacity: 0.6;
+            animation: scrollBounce 2s ease-in-out infinite;
+            transition: opacity 0.4s;
+            z-index: 5;
+        }
+
+        .scroll-hint svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .scroll-hint.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @keyframes scrollBounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(6px); }
+        }
+
+        .hero-text {
+            flex: 0 0 45%;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: 48px;
+            line-height: 1.15;
+            color: var(--text-primary);
+            margin-bottom: 28px;
+        }
+
+        .hero h1 .accent {
+            color: var(--green);
+            display: inline-block;
+            min-width: 180px;
+            transition: opacity 0.4s ease;
+        }
+        .hero h1 .accent.fade-out {
+            opacity: 0;
+        }
+
+        .hero-sub {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 520px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .hero-built-on {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+        }
+        .hero-built-on a {
+            color: var(--green);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+        .hero-built-on a:hover {
+            border-bottom-color: var(--green);
+        }
+
+        .hero-visual {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            min-height: 400px;
+        }
+
+        #meshCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* ── Section Shared ────────────────────────────── */
+
+        .section-heading {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: clamp(36px, 5vw, 56px);
+            line-height: 1;
+            letter-spacing: -1.5px;
+            text-align: center;
+            margin-bottom: 64px;
+            background: linear-gradient(180deg, var(--text-primary) 40%, var(--text-muted) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-divider {
+            position: relative;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, var(--border) 50%, transparent 100%);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .section-divider::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: glowPulse 2.5s ease-in-out infinite;
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ── WHY Section ───────────────────────────────── */
+
+        .why {
+            padding: 60px 32px 60px;
+            max-width: 1000px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .why-feature {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: center;
+            padding: 56px 0;
+            border-bottom: 1px solid rgba(58, 71, 89, 0.35);
+        }
+
+        .why-feature:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .why-feature:first-of-type {
+            padding-top: 0;
+        }
+
+        .why-feature--right .why-feature__visual {
+            order: 2;
+        }
+
+        .why-feature--left .why-feature__text {
+            order: 2;
+        }
+
+        .why-feature__number {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            display: block;
+            margin-bottom: 16px;
+        }
+
+        [data-accent="green"] .why-feature__number  { color: var(--green); opacity: 0.75; }
+        [data-accent="blue"] .why-feature__number    { color: var(--blue); opacity: 0.75; }
+        [data-accent="orange"] .why-feature__number  { color: var(--orange); opacity: 0.75; }
+        [data-accent="purple"] .why-feature__number  { color: var(--purple); opacity: 0.75; }
+
+        .why-feature__title {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: clamp(28px, 4vw, 42px);
+            color: var(--text-primary);
+            line-height: 1.15;
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+        }
+
+        .why-feature__tagline {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            max-width: 460px;
+        }
+
+        .why-feature__accent-line {
+            width: 56px;
+            height: 3px;
+            margin-top: 24px;
+            border-radius: 2px;
+        }
+
+        [data-accent="green"] .why-feature__accent-line  { background: var(--green); box-shadow: 0 0 12px rgba(0, 212, 170, 0.5), 0 0 28px rgba(0, 212, 170, 0.2); }
+        [data-accent="blue"] .why-feature__accent-line    { background: var(--blue); box-shadow: 0 0 12px rgba(56, 189, 248, 0.5), 0 0 28px rgba(56, 189, 248, 0.2); }
+        [data-accent="orange"] .why-feature__accent-line  { background: var(--orange); box-shadow: 0 0 12px rgba(245, 158, 11, 0.5), 0 0 28px rgba(245, 158, 11, 0.2); }
+        [data-accent="purple"] .why-feature__accent-line  { background: var(--purple); box-shadow: 0 0 12px rgba(192, 132, 252, 0.5), 0 0 28px rgba(192, 132, 252, 0.2); }
+
+        .why-feature__visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .why-feature__visual::before {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.08;
+            z-index: 0;
+        }
+        [data-accent="green"] .why-feature__visual::before  { background: var(--green); }
+        [data-accent="blue"] .why-feature__visual::before    { background: var(--blue); }
+        [data-accent="orange"] .why-feature__visual::before  { background: var(--orange); }
+        [data-accent="purple"] .why-feature__visual::before  { background: var(--purple); }
+
+        .why-feature__svg {
+            width: 100%;
+            max-width: 280px;
+            height: auto;
+            opacity: 1.0;
+        }
+
+        [data-accent="green"] .why-feature__svg  { color: var(--green); }
+        [data-accent="blue"] .why-feature__svg    { color: var(--blue); }
+        [data-accent="orange"] .why-feature__svg  { color: var(--orange); }
+        [data-accent="purple"] .why-feature__svg  { color: var(--purple); }
+
+        /* WHY feature animation stagger */
+        .why-feature.visible .why-feature__text {
+            animation: whySlide 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+        }
+        .why-feature.visible .why-feature__visual {
+            animation: whySlide 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+        }
+
+        @keyframes whySlide {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* C02 peripheral fade — invisible until card enters viewport */
+        .c02-fade { opacity: 0; }
+        .why-feature.visible .c02-fade {
+            animation: c02Glow var(--glow-dur, 5s) ease-in-out var(--glow-delay, 0s) infinite both;
+        }
+        @keyframes c02Glow {
+            0%, 100% { opacity: 0.05; }
+            50% { opacity: var(--glow-peak, 0.3); }
+        }
+
+        /* ── HOW IT WORKS Section ──────────────────────── */
+
+        .how {
+            padding: 100px 32px 120px;
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%);
+        }
+
+        .how .section-heading {
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .how-flow {
+            position: relative;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        /* SVG connector path — dynamically computed by JS */
+        .how-flow__connector {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .how-flow__connector.revealed {
+            opacity: 1;
+        }
+
+        /* Cards container — vertical stack */
+        .how-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 48px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Uniform card sizing */
+        .how-card {
+            width: 420px;
+            min-height: 108px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 20px 24px;
+            position: relative;
+            backdrop-filter: blur(8px);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Alternating left/right zigzag */
+        .how-card:nth-child(odd) {
+            align-self: flex-start;
+        }
+
+        .how-card:nth-child(even) {
+            align-self: flex-end;
+        }
+
+        .how-card:hover {
+            border-color: rgba(0, 212, 170, 0.25);
+            box-shadow: 0 4px 24px rgba(0, 212, 170, 0.06),
+                        0 0 0 1px rgba(0, 212, 170, 0.08);
+        }
+
+        /* Subtle top-edge glow line */
+        .how-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 20px;
+            right: 20px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 170, 0.3), transparent);
+            border-radius: 1px;
+        }
+
+        /* Step number badge */
+        .how-card__badge {
+            position: absolute;
+            top: -14px;
+            left: 20px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--bg-primary);
+            border: 2px solid var(--green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--green);
+            box-shadow: 0 0 12px rgba(0, 212, 170, 0.15);
+            transform: scale(0);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s;
+        }
+
+        .how-card.visible .how-card__badge {
+            transform: scale(1);
+        }
+
+        /* Card title */
+        .how-card__title {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            margin-top: 4px;
+        }
+
+        /* Card description */
+        .how-card__desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Fade-in with stagger via --step-index */
+        .how-card.fade-in {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            transition-delay: calc(var(--step-index, 0) * 0.1s);
+        }
+
+        .how-card.fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ── Footer ────────────────────────────────────── */
+
+        .footer {
+            padding: 56px 32px 48px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .footer-quote {
+            font-family: var(--font-sans);
+            font-size: clamp(18px, 2.5vw, 24px);
+            font-weight: 500;
+            letter-spacing: -0.3px;
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 0;
+            margin: 0 0 20px;
+            max-width: 600px;
+            line-height: 1.4;
+        }
+
+        .footer-quote em {
+            font-style: normal;
+            color: var(--green);
+        }
+
+        .footer-divider {
+            width: 40px;
+            height: 1px;
+            background: var(--border-light);
+            margin: 0 0 8px;
+            opacity: 0.5;
+        }
+
+        .footer-logo {
+            width: 20px;
+            height: 20px;
+            opacity: 0.65;
+        }
+
+        .footer-name {
+            font-family: var(--font-sans);
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .footer-built {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .footer-built a {
+            color: var(--green);
+            text-decoration: none;
+        }
+
+        .footer-built a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-links {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--green);
+        }
+
+        .footer-links .dot-sep {
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        .footer-license {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* ── Responsive ────────────────────────────────── */
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0 16px;
+            }
+
+            .hero {
+                flex-direction: column;
+                padding: 120px 20px 60px;
+                gap: 32px;
+                text-align: center;
+                min-height: calc(100svh - 60px);
+            }
+
+            .hero-text {
+                flex: none;
+                width: 100%;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .hero h1 .accent {
+                min-width: auto;
+            }
+
+            .hero-sub {
+                font-size: 16px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .hero-buttons {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .hero-visual {
+                position: absolute;
+                top: 100px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                opacity: 0.15;
+                z-index: 0;
+                pointer-events: none;
+            }
+
+            .hero-text {
+                z-index: 2;
+            }
+
+            /* Section shared */
+            .section-heading {
+                margin-bottom: 48px;
+                letter-spacing: -2px;
+            }
+
+            .section-divider {
+                max-width: 200px;
+            }
+
+            /* WHY */
+            .why {
+                padding: 60px 20px 40px;
+            }
+
+            .why-feature {
+                grid-template-columns: 1fr;
+                gap: 24px;
+                padding: 40px 0;
+            }
+
+            .why-feature--right .why-feature__visual,
+            .why-feature--left .why-feature__text {
+                order: 0;
+            }
+
+            .why-feature__svg {
+                max-width: 160px;
+            }
+
+            .why-feature__title {
+                font-size: 24px;
+            }
+
+            .why-feature__tagline {
+                font-size: 14px;
+            }
+
+            /* HOW */
+            .how {
+                padding: 60px 20px 80px;
+            }
+
+            .how-cards {
+                gap: 36px;
+            }
+
+            .how-card {
+                width: 100%;
+                padding: 18px 20px;
+            }
+
+            .how-card:nth-child(odd),
+            .how-card:nth-child(even) {
+                align-self: stretch;
+            }
+
+            .how-card__title {
+                font-size: 17px;
+            }
+
+            .how-card__desc {
+                font-size: 13px;
+            }
+
+            /* Hide connector on mobile */
+            .how-flow__connector {
+                display: none;
+            }
+
+            /* Footer */
+            .footer {
+                padding: 56px 20px 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Navbar ──────────────────────────────────────────── -->
+<nav class="navbar" id="navbar">
+    <div class="navbar-left">
+        <a href="index.html">
+            <svg class="navbar-logo" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                <ellipse cx="11" cy="13.5" rx="8" ry="4"/>
+                <circle cx="7" cy="6.5" r="2.5"/>
+                <circle cx="5" cy="12" r="0.9"/>
+                <path d="M3 14l-1.5.5"/>
+                <path d="M19 13c1.5-1 2.5-4 2-6.5"/>
+            </svg>
+            <span class="navbar-title">Ratspeak</span>
+        </a>
+    </div>
+    <div class="navbar-right">
+        <a href="about.html" class="navbar-link">About</a>
+        <a href="docs.html" class="navbar-link">Docs</a>
+        <a href="flash.html" class="navbar-link">Flash</a>
+        <a href="#" class="nr-btn" target="_blank" rel="noopener noreferrer">
+            GitHub
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17l10-10"/><path d="M7 7h10v10"/></svg>
+        </a>
+    </div>
+</nav>
+
+<!-- ── Hero ────────────────────────────────────────────── -->
+<section class="hero">
+    <div class="hero-text">
+        <h1>Your Network.<br>Your <span class="accent" id="hero-cycle">Freedom.</span></h1>
+        <p class="hero-sub">No sign-up. No authority. No catch.<br>A communication network built by the people, for the people — where privacy is fundamental.</p>
+        <p class="hero-built-on">Built with <a href="https://github.com/markqvist/Reticulum" target="_blank" rel="noopener noreferrer">Reticulum</a></p>
+        <div class="hero-buttons">
+            <div class="download-wrapper">
+                <a href="#" class="nr-btn nr-btn-lg">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                </a>
+                <div class="download-dropdown">
+                    <a href="#" class="download-option">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                        macOS
+                    </a>
+                    <a href="#" class="download-option">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a.424.424 0 00-.11.135c-.26.268-.45.6-.663.839-.199.199-.485.267-.797.4-.313.136-.658.269-.864.68-.09.189-.136.394-.132.602 0 .199.027.4.055.536.058.399.116.728.04.97-.249.68-.28 1.145-.106 1.484.174.334.535.47.94.601.81.2 1.91.135 2.774.6.926.466 1.866.67 2.616.47.526-.116.97-.464 1.208-.946.587-.003 1.23-.269 2.26-.334.699-.058 1.574.267 2.577.2.025.134.063.198.114.333l.003.003c.391.778 1.113 1.132 1.884 1.071.771-.06 1.592-.536 2.257-1.306.631-.765 1.683-1.084 2.378-1.503.348-.199.629-.469.649-.853.023-.4-.2-.811-.714-1.376v-.097l-.003-.003c-.17-.2-.25-.535-.338-.926-.085-.401-.182-.786-.492-1.046h-.003c-.059-.054-.123-.067-.188-.135a.357.357 0 00-.19-.064c.431-1.278.264-2.55-.173-3.694-.533-1.41-1.465-2.638-2.175-3.483-.796-1.005-1.576-1.957-1.56-3.368.026-2.152.236-6.133-3.544-6.139zm.529 3.405h.013c.213 0 .396.062.584.198.19.135.33.332.438.533.105.259.158.459.166.724 0-.02.006-.04.006-.06v.105a.086.086 0 01-.004-.021l-.004-.024a1.807 1.807 0 01-.15.706.953.953 0 01-.213.335.71.71 0 00-.088-.042c-.104-.045-.198-.064-.284-.133a1.312 1.312 0 00-.22-.066c.05-.06.146-.133.183-.198.053-.128.082-.264.088-.402v-.02a1.21 1.21 0 00-.061-.4c-.045-.134-.101-.2-.183-.333-.084-.066-.167-.132-.267-.132h-.016c-.093 0-.176.03-.262.132a.8.8 0 00-.205.334 1.18 1.18 0 00-.09.4v.019c.002.089.008.179.02.267-.193-.067-.438-.135-.607-.202a1.635 1.635 0 01-.018-.2v-.02a1.772 1.772 0 01.15-.768c.082-.22.232-.406.43-.533a.985.985 0 01.594-.2zm-2.962.059h.036c.142 0 .27.048.399.135.146.129.264.288.344.465.09.199.14.4.153.667v.004c.007.134.006.2-.002.266v.08c-.03.007-.056.018-.083.024-.152.055-.274.135-.393.2.012-.09.013-.18.003-.267v-.015c-.012-.133-.04-.2-.082-.333a.613.613 0 00-.166-.267.248.248 0 00-.183-.064h-.021c-.071.006-.13.04-.186.132a.552.552 0 00-.12.27.944.944 0 00-.023.33v.015c.012.135.037.2.08.334.046.134.098.2.166.268.01.009.02.018.034.024-.07.057-.117.07-.176.136a.304.304 0 01-.131.068 2.62 2.62 0 01-.275-.402 1.772 1.772 0 01-.155-.667 1.759 1.759 0 01.08-.668 1.43 1.43 0 01.283-.535c.128-.133.26-.2.418-.2zm1.37 1.706c.332 0 .733.065 1.216.399.293.2.523.269 1.052.468h.003c.255.136.405.266.478.399v-.131a.571.571 0 01.016.47c-.123.31-.516.643-1.063.842v.002c-.268.135-.501.333-.775.465-.276.135-.588.292-1.012.267a1.139 1.139 0 01-.448-.067 3.566 3.566 0 01-.322-.198c-.195-.135-.363-.332-.612-.465v-.005h-.005c-.4-.246-.616-.512-.686-.71-.07-.268-.005-.47.193-.6.224-.135.38-.271.483-.336.104-.074.143-.102.176-.131h.002v-.003c.169-.202.436-.47.839-.601.139-.036.294-.065.466-.065zm2.8 2.142c.358 1.417 1.196 3.475 1.735 4.473.286.534.855 1.659 1.102 3.024.156-.005.33.018.513.064.646-1.671-.546-3.467-1.089-3.966-.22-.2-.232-.335-.123-.335.59.534 1.365 1.572 1.646 2.757.13.535.16 1.104.021 1.67.067.028.135.06.205.067 1.032.534 1.413.938 1.23 1.537v-.043c-.06-.003-.12 0-.18 0h-.016c.151-.467-.182-.825-1.065-1.224-.915-.4-1.646-.336-1.77.465-.008.043-.013.066-.018.135-.068.023-.139.053-.209.064-.43.268-.662.669-.793 1.187-.13.533-.17 1.156-.205 1.869v.003c-.02.334-.17.838-.319 1.35-1.5 1.072-3.58 1.538-5.348.334a2.645 2.645 0 00-.402-.533 1.45 1.45 0 00-.275-.333c.182 0 .338-.03.465-.067a.615.615 0 00.314-.334c.108-.267 0-.697-.345-1.163-.345-.467-.931-.995-1.788-1.521-.63-.4-.986-.87-1.15-1.396-.165-.534-.143-1.085-.015-1.645.245-1.07.873-2.11 1.274-2.763.107-.065.037.135-.408.974-.396.751-1.14 2.497-.122 3.854a8.123 8.123 0 01.647-2.876c.564-1.278 1.743-3.504 1.836-5.268.048.036.217.135.289.202.218.133.38.333.59.465.21.201.477.335.876.335.039.003.075.006.11.006.412 0 .73-.134.997-.268.29-.134.52-.334.74-.4h.005c.467-.135.835-.402 1.044-.7zm2.185 8.958c.037.6.343 1.245.882 1.377.588.134 1.434-.333 1.791-.765l.211-.01c.315-.007.577.01.847.268l.003.003c.208.199.305.53.391.876.085.4.154.78.409 1.066.486.527.645.906.636 1.14l.003-.007v.018l-.003-.012c-.015.262-.185.396-.498.595-.63.401-1.746.712-2.457 1.57-.618.737-1.37 1.14-2.036 1.191-.664.053-1.237-.2-1.574-.898l-.005-.003c-.21-.4-.12-1.025.056-1.69.176-.668.428-1.344.463-1.897.037-.714.076-1.335.195-1.814.12-.465.308-.797.641-.984l.045-.022zm-10.814.049h.01c.053 0 .105.005.157.014.376.055.706.333 1.023.752l.91 1.664.003.003c.243.533.754 1.064 1.189 1.637.434.598.77 1.131.729 1.57v.006c-.057.744-.48 1.148-1.125 1.294-.645.135-1.52.002-2.395-.464-.968-.536-2.118-.469-2.857-.602-.369-.066-.61-.2-.723-.4-.11-.2-.113-.602.123-1.23v-.004l.002-.003c.117-.334.03-.752-.027-1.118-.055-.401-.083-.71.043-.94.16-.334.396-.4.69-.533.294-.135.64-.202.915-.47h.002v-.002c.256-.268.445-.601.668-.838.19-.201.38-.336.663-.336zm7.159-9.074c-.435.201-.945.535-1.488.535-.542 0-.97-.267-1.28-.466-.154-.134-.28-.268-.373-.335-.164-.134-.144-.333-.074-.333.109.016.129.134.199.2.096.066.215.2.36.333.292.2.68.467 1.167.467.485 0 1.053-.267 1.398-.466.195-.135.445-.334.648-.467.156-.136.149-.267.279-.267.128.016.034.134-.147.332a8.097 8.097 0 01-.69.468zm-1.082-1.583V5.64c-.006-.02.013-.042.029-.05.074-.043.18-.027.26.004.063 0 .16.067.15.135-.006.049-.085.066-.135.066-.055 0-.092-.043-.141-.068-.052-.018-.146-.008-.163-.065zm-.551 0c-.02.058-.113.049-.166.066-.047.025-.086.068-.14.068-.05 0-.13-.02-.136-.068-.01-.066.088-.133.15-.133.08-.031.184-.047.259-.005.019.009.036.03.03.05v.02h.003z"/></svg>
+                        Linux
+                    </a>
+                    <a href="#" class="download-option">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
+                        Windows
+                    </a>
+                </div>
+            </div>
+            <a href="#" class="nr-btn nr-btn-secondary" target="_blank" rel="noopener noreferrer">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+            </a>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <canvas id="meshCanvas"></canvas>
+    </div>
+    <div class="scroll-hint" id="scrollHint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l5 5 5-5"/></svg>
+    </div>
+</section>
+
+<!-- ── Divider ─────────────────────────────────────────── -->
+<div class="section-divider"></div>
+
+<!-- ── WHY ─────────────────────────────────────────────── -->
+<section class="why" id="why">
+    <!-- Feature 1: Privacy First -->
+    <div class="why-feature why-feature--left fade-in" data-accent="green">
+        <div class="why-feature__text">
+            <span class="why-feature__number">01</span>
+            <h3 class="why-feature__title">Privacy First</h3>
+            <p class="why-feature__tagline">Every peer is assumed hostile. Encryption isn't optional — Ratspeak cannot function without it.</p>
+            <div class="why-feature__accent-line"></div>
+        </div>
+        <div class="why-feature__visual">
+            <svg class="why-feature__svg" viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="glow-green" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="4" result="blur"/>
+                        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                    </filter>
+                </defs>
+                <!-- Ambient background -->
+                <circle cx="140" cy="118" r="80" fill="currentColor" opacity="0.04"/>
+                <!-- Scanning ring (slow rotation) -->
+                <circle cx="140" cy="118" r="70" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.2" stroke-dasharray="12,8">
+                    <animateTransform attributeName="transform" type="rotate" values="0 140 118;360 140 118" dur="20s" repeatCount="indefinite"/>
+                </circle>
+                <!-- Open padlock body -->
+                <rect x="105" y="100" width="70" height="55" rx="6" stroke="currentColor" stroke-width="2" fill="none">
+                    <animate attributeName="opacity" values="0.5;0.7;0.5" dur="5s" repeatCount="indefinite"/>
+                </rect>
+                <!-- Open shackle (breathing) -->
+                <path d="M122,100 L122,72 A18,18 0 0,1 158,72 L158,85" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.8">
+                    <animate attributeName="d"
+                        values="M122,100 L122,72 A18,18 0 0,1 158,72 L158,85;
+                                M122,100 L122,72 A18,18 0 0,1 158,72 L158,100;
+                                M122,100 L122,72 A18,18 0 0,1 158,72 L158,100;
+                                M122,100 L122,72 A18,18 0 0,1 158,72 L158,85"
+                        dur="8s" repeatCount="indefinite"/>
+                </path>
+                <!-- Keyhole (pulsing glow) -->
+                <circle cx="140" cy="123" r="5" fill="currentColor" filter="url(#glow-green)">
+                    <animate attributeName="r" values="4;7;4" dur="2.5s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.5;0.9;0.5" dur="2.5s" repeatCount="indefinite"/>
+                </circle>
+                <line x1="140" y1="128" x2="140" y2="140" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+                <!-- Radiating lines (flowing dashes) -->
+                <line x1="85" y1="80" x2="60" y2="58" stroke="currentColor" stroke-width="1" opacity="0.3" stroke-linecap="round" stroke-dasharray="4,6">
+                    <animate attributeName="stroke-dashoffset" values="0;-20" dur="3s" repeatCount="indefinite"/>
+                </line>
+                <line x1="195" y1="80" x2="220" y2="58" stroke="currentColor" stroke-width="1" opacity="0.3" stroke-linecap="round" stroke-dasharray="4,6">
+                    <animate attributeName="stroke-dashoffset" values="0;-20" dur="3s" repeatCount="indefinite" begin="0.5s"/>
+                </line>
+                <line x1="82" y1="125" x2="50" y2="125" stroke="currentColor" stroke-width="1" opacity="0.3" stroke-linecap="round" stroke-dasharray="4,6">
+                    <animate attributeName="stroke-dashoffset" values="0;-20" dur="3s" repeatCount="indefinite" begin="1.0s"/>
+                </line>
+                <line x1="198" y1="125" x2="230" y2="125" stroke="currentColor" stroke-width="1" opacity="0.3" stroke-linecap="round" stroke-dasharray="4,6">
+                    <animate attributeName="stroke-dashoffset" values="0;-20" dur="3s" repeatCount="indefinite" begin="1.5s"/>
+                </line>
+                <line x1="88" y1="168" x2="62" y2="182" stroke="currentColor" stroke-width="1" opacity="0.3" stroke-linecap="round" stroke-dasharray="4,6">
+                    <animate attributeName="stroke-dashoffset" values="0;-20" dur="3s" repeatCount="indefinite" begin="2.0s"/>
+                </line>
+                <line x1="192" y1="168" x2="218" y2="182" stroke="currentColor" stroke-width="1" opacity="0.3" stroke-linecap="round" stroke-dasharray="4,6">
+                    <animate attributeName="stroke-dashoffset" values="0;-20" dur="3s" repeatCount="indefinite" begin="2.5s"/>
+                </line>
+                <!-- Data particles flowing along lines -->
+                <circle r="1.8" fill="currentColor" opacity="0.8">
+                    <animateMotion dur="4.0s" repeatCount="indefinite" path="M140,123 L60,58"/>
+                </circle>
+                <circle r="1.5" fill="currentColor" opacity="0">
+                    <animateMotion dur="3.5s" repeatCount="indefinite" begin="1.3s" path="M140,123 L230,125"/>
+                    <set attributeName="opacity" to="0.7" begin="1.3s"/>
+                </circle>
+                <circle r="1.3" fill="currentColor" opacity="0">
+                    <animateMotion dur="4.5s" repeatCount="indefinite" begin="2.7s" path="M140,123 L218,182"/>
+                    <set attributeName="opacity" to="0.6" begin="2.7s"/>
+                </circle>
+                <!-- Inward particles (bidirectional encryption) -->
+                <circle r="1.4" fill="currentColor" opacity="0">
+                    <animateMotion dur="3.8s" repeatCount="indefinite" begin="0.9s" path="M220,58 L140,123"/>
+                    <set attributeName="opacity" to="0.6" begin="0.9s"/>
+                </circle>
+                <circle r="1.2" fill="currentColor" opacity="0">
+                    <animateMotion dur="4.2s" repeatCount="indefinite" begin="2.4s" path="M50,125 L140,123"/>
+                    <set attributeName="opacity" to="0.5" begin="2.4s"/>
+                </circle>
+                <!-- Pulsing endpoint dots -->
+                <circle cx="60" cy="58" r="2.5" fill="currentColor">
+                    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="220" cy="58" r="2.5" fill="currentColor" opacity="0.5"/>
+                <circle cx="50" cy="125" r="2.5" fill="currentColor" opacity="0.5"/>
+                <circle cx="230" cy="125" r="2.5" fill="currentColor">
+                    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3s" repeatCount="indefinite" begin="1.5s"/>
+                </circle>
+                <circle cx="62" cy="182" r="2.5" fill="currentColor" opacity="0.5"/>
+                <circle cx="218" cy="182" r="2.5" fill="currentColor">
+                    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3s" repeatCount="indefinite" begin="2.5s"/>
+                </circle>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Feature 2: No Account -->
+    <div class="why-feature why-feature--right fade-in" data-accent="blue">
+        <div class="why-feature__text">
+            <span class="why-feature__number">02</span>
+            <h3 class="why-feature__title">No Account</h3>
+            <p class="why-feature__tagline">You can't sign up. No database. No server. Your identity is a cryptographic key that only you control.</p>
+            <div class="why-feature__accent-line"></div>
+        </div>
+        <div class="why-feature__visual">
+            <svg class="why-feature__svg" viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="glow-blue" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="4" result="blur"/>
+                        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                    </filter>
+                </defs>
+                <!-- Ambient background -->
+                <circle cx="140" cy="100" r="85" fill="currentColor" opacity="0.04"/>
+                <!-- Key group with gentle rotation -->
+                <g>
+                    <animateTransform attributeName="transform" type="rotate" values="-2 140 100;2 140 100;-2 140 100" dur="6s" repeatCount="indefinite"/>
+                    <!-- Key bow (top ring) -->
+                    <circle cx="140" cy="55" r="22" stroke="currentColor" stroke-width="2" fill="none" opacity="0.6"/>
+                    <circle cx="140" cy="55" r="10" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.3" stroke-dasharray="4,3">
+                        <animateTransform attributeName="transform" type="rotate" values="0 140 55;-360 140 55" dur="12s" repeatCount="indefinite"/>
+                    </circle>
+                    <!-- Key core dot -->
+                    <circle cx="140" cy="55" r="4" fill="currentColor" opacity="0.8" filter="url(#glow-blue)">
+                        <animate attributeName="r" values="3.5;5;3.5" dur="2.5s" repeatCount="indefinite"/>
+                    </circle>
+                    <!-- Key shaft -->
+                    <line x1="140" y1="77" x2="140" y2="145" stroke="currentColor" stroke-width="2" opacity="0.5" stroke-linecap="round"/>
+                    <!-- Key teeth -->
+                    <line x1="140" y1="120" x2="155" y2="120" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <animate attributeName="opacity" values="0.35;0.65;0.35" dur="3s" repeatCount="indefinite"/>
+                    </line>
+                    <line x1="140" y1="132" x2="152" y2="132" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <animate attributeName="opacity" values="0.35;0.65;0.35" dur="3s" repeatCount="indefinite" begin="0.6s"/>
+                    </line>
+                    <line x1="140" y1="145" x2="158" y2="145" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <animate attributeName="opacity" values="0.35;0.65;0.35" dur="3s" repeatCount="indefinite" begin="1.2s"/>
+                    </line>
+                </g>
+                <!-- Hash identity fragments with scroll-triggered fade -->
+                <text class="c02-fade" style="--glow-dur:5.3s;--glow-delay:0.5s;--glow-peak:0.35" x="42" y="45" font-family="'JetBrains Mono', monospace" font-size="8" fill="currentColor" transform="rotate(-10, 42, 45)">a7f3::bd</text>
+                <text class="c02-fade" style="--glow-dur:7.1s;--glow-delay:1.8s;--glow-peak:0.30" x="192" y="50" font-family="'JetBrains Mono', monospace" font-size="8" fill="currentColor" transform="rotate(8, 192, 50)">e2d1::9b</text>
+                <text class="c02-fade" style="--glow-dur:4.7s;--glow-delay:3.2s;--glow-peak:0.35" x="185" y="155" font-family="'JetBrains Mono', monospace" font-size="8" fill="currentColor" transform="rotate(5, 185, 155)">4cf0::8a</text>
+                <text class="c02-fade" style="--glow-dur:6.2s;--glow-delay:0.9s;--glow-peak:0.30" x="32" y="150" font-family="'JetBrains Mono', monospace" font-size="8" fill="currentColor" transform="rotate(-6, 32, 150)">b7c3::e1</text>
+                <!-- Crossed-out database icon -->
+                <g class="c02-fade" style="--glow-dur:5.8s;--glow-delay:2.1s;--glow-peak:0.28">
+                    <animateTransform attributeName="transform" type="translate" values="0,0;0,2;0,0" dur="7s" repeatCount="indefinite"/>
+                    <ellipse cx="48" cy="85" rx="12" ry="5" stroke="currentColor" stroke-width="1" fill="none"/>
+                    <path d="M36,85 L36,100 C36,103 41,106 48,106 C55,106 60,103 60,100 L60,85" stroke="currentColor" stroke-width="1" fill="none"/>
+                    <line x1="36" y1="102" x2="60" y2="78" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </g>
+                <!-- Crossed-out server icon -->
+                <g class="c02-fade" style="--glow-dur:6.5s;--glow-delay:4.0s;--glow-peak:0.28">
+                    <animateTransform attributeName="transform" type="translate" values="0,0;0,2;0,0" dur="7s" repeatCount="indefinite" begin="3.5s"/>
+                    <rect x="220" y="78" width="24" height="18" rx="2" stroke="currentColor" stroke-width="1" fill="none"/>
+                    <circle cx="226" cy="87" r="1.5" fill="currentColor"/>
+                    <line x1="218" y1="100" x2="246" y2="74" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </g>
+                <!-- Pulsing identity ring -->
+                <circle cx="140" cy="55" r="32" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.15">
+                    <animate attributeName="r" values="30;36;30" dur="3s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.12;0.40;0.12" dur="3s" repeatCount="indefinite"/>
+                </circle>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Feature 3: Chaos Resistant -->
+    <div class="why-feature why-feature--left fade-in" data-accent="orange">
+        <div class="why-feature__text">
+            <span class="why-feature__number">03</span>
+            <h3 class="why-feature__title">Chaos Resistant</h3>
+            <p class="why-feature__tagline">Even if modern internet dies, Ratspeak lives. Supports long range radio, WiFi, TCP/IP, serial, and more — all reachable in the same network.</p>
+            <div class="why-feature__accent-line"></div>
+        </div>
+        <div class="why-feature__visual">
+            <svg class="why-feature__svg" viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="glow-orange" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="4" result="blur"/>
+                        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                    </filter>
+                </defs>
+                <!-- Ambient background -->
+                <circle cx="200" cy="100" r="55" fill="currentColor" opacity="0.05"/>
+                <!-- Four transport lines converging -->
+                <path d="M50,49 C120,49 160,100 200,100" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.5" stroke-dasharray="5,7">
+                    <animate attributeName="stroke-dashoffset" values="12;0" dur="4s" repeatCount="indefinite"/>
+                </path>
+                <path d="M50,83 C120,83 160,100 200,100" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.5" stroke-dasharray="5,7">
+                    <animate attributeName="stroke-dashoffset" values="12;0" dur="4s" repeatCount="indefinite" begin="0.7s"/>
+                </path>
+                <path d="M50,117 C120,117 160,100 200,100" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.5" stroke-dasharray="5,7">
+                    <animate attributeName="stroke-dashoffset" values="12;0" dur="4s" repeatCount="indefinite" begin="1.4s"/>
+                </path>
+                <path d="M50,151 C120,151 160,100 200,100" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.5" stroke-dasharray="5,7">
+                    <animate attributeName="stroke-dashoffset" values="12;0" dur="4s" repeatCount="indefinite" begin="2.1s"/>
+                </path>
+                <!-- Transport labels -->
+                <text x="44" y="53" font-family="'JetBrains Mono', monospace" font-size="10" fill="currentColor" opacity="0.55" text-anchor="end">LoRa</text>
+                <text x="44" y="87" font-family="'JetBrains Mono', monospace" font-size="10" fill="currentColor" opacity="0.55" text-anchor="end">WiFi</text>
+                <text x="44" y="121" font-family="'JetBrains Mono', monospace" font-size="10" fill="currentColor" opacity="0.55" text-anchor="end">TCP/IP</text>
+                <text x="44" y="155" font-family="'JetBrains Mono', monospace" font-size="10" fill="currentColor" opacity="0.55" text-anchor="end">Serial</text>
+                <!-- Source nodes -->
+                <circle cx="50" cy="49" r="3" fill="currentColor" opacity="0.6"/>
+                <circle cx="50" cy="83" r="3" fill="currentColor" opacity="0.6"/>
+                <circle cx="50" cy="117" r="3" fill="currentColor" opacity="0.6"/>
+                <circle cx="50" cy="151" r="3" fill="currentColor" opacity="0.6"/>
+                <!-- Convergence point -->
+                <circle cx="200" cy="100" r="20" stroke="currentColor" stroke-width="0.8" fill="none">
+                    <animate attributeName="r" values="18;24;18" dur="4s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.06;0.15;0.06" dur="4s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="200" cy="100" r="5" fill="currentColor" filter="url(#glow-orange)">
+                    <animate attributeName="r" values="4;7;4" dur="3s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.7;1;0.7" dur="3s" repeatCount="indefinite"/>
+                </circle>
+                <!-- Animated packets -->
+                <circle r="2.5" fill="currentColor" opacity="0.9">
+                    <animateMotion dur="3s" repeatCount="indefinite" path="M50,49 C120,49 160,100 200,100"/>
+                </circle>
+                <circle r="2.5" fill="currentColor" opacity="0">
+                    <animateMotion dur="3.5s" repeatCount="indefinite" begin="0.7s" path="M50,151 C120,151 160,100 200,100"/>
+                    <set attributeName="opacity" to="0.8" begin="0.7s"/>
+                </circle>
+                <circle r="2" fill="currentColor" opacity="0">
+                    <animateMotion dur="3.2s" repeatCount="indefinite" begin="2.1s" path="M50,83 C120,83 160,100 200,100"/>
+                    <set attributeName="opacity" to="0.75" begin="2.1s"/>
+                </circle>
+                <circle r="1.8" fill="currentColor" opacity="0">
+                    <animateMotion dur="2.5s" repeatCount="indefinite" begin="1.8s" path="M50,117 C120,117 160,100 200,100"/>
+                    <set attributeName="opacity" to="0.65" begin="1.8s"/>
+                </circle>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Feature 4: Open Source -->
+    <div class="why-feature why-feature--right fade-in" data-accent="purple">
+        <div class="why-feature__text">
+            <span class="why-feature__number">04</span>
+            <h3 class="why-feature__title">Open Source</h3>
+            <p class="why-feature__tagline">Everything you see is open source, so be curious. Don't just trust things, verify them yourself.</p>
+            <div class="why-feature__accent-line"></div>
+        </div>
+        <div class="why-feature__visual">
+            <svg class="why-feature__svg" viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="glow-purple" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="4" result="blur"/>
+                        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                    </filter>
+                </defs>
+                <!-- Ambient background -->
+                <circle cx="140" cy="100" r="85" fill="currentColor" opacity="0.04"/>
+                <!-- Code brackets </> (breathing pulse) -->
+                <!-- Left bracket < -->
+                <path d="M115,75 L90,100 L115,125" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <animate attributeName="opacity" values="0.65;0.9;0.65" dur="3s" repeatCount="indefinite"/>
+                </path>
+                <!-- Right bracket > -->
+                <path d="M165,75 L190,100 L165,125" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <animate attributeName="opacity" values="0.65;0.9;0.65" dur="3s" repeatCount="indefinite"/>
+                </path>
+                <!-- Forward slash / -->
+                <line x1="148" y1="70" x2="132" y2="130" stroke="currentColor" stroke-width="2" opacity="0.45" stroke-linecap="round"/>
+                <!-- Git branch lines — left -->
+                <path d="M90,100 C65,100 55,65 35,65" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.35"/>
+                <path d="M90,100 C65,100 55,135 35,135" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.35"/>
+                <path d="M90,100 C70,100 60,100 35,100" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.35"/>
+                <!-- Git branch lines — right -->
+                <path d="M190,100 C215,100 225,60 245,60" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.35"/>
+                <path d="M190,100 C215,100 225,140 245,140" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.35"/>
+                <!-- Data packets flowing along branches -->
+                <circle r="1.5" fill="currentColor" opacity="0.8">
+                    <animateMotion dur="2.5s" repeatCount="indefinite" path="M90,100 C65,100 55,65 35,65"/>
+                </circle>
+                <circle r="1.5" fill="currentColor" opacity="0">
+                    <animateMotion dur="3s" repeatCount="indefinite" begin="0.6s" path="M190,100 C215,100 225,60 245,60"/>
+                    <set attributeName="opacity" to="0.7" begin="0.6s"/>
+                </circle>
+                <circle r="1.5" fill="currentColor" opacity="0">
+                    <animateMotion dur="2.8s" repeatCount="indefinite" begin="1.2s" path="M90,100 C65,100 55,135 35,135"/>
+                    <set attributeName="opacity" to="0.7" begin="1.2s"/>
+                </circle>
+                <!-- Branch endpoint dots -->
+                <circle cx="35" cy="65" r="3" fill="currentColor">
+                    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2.5s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="35" cy="100" r="3" fill="currentColor">
+                    <animate attributeName="opacity" values="0.35;0.75;0.35" dur="3s" repeatCount="indefinite" begin="0.5s"/>
+                </circle>
+                <circle cx="35" cy="135" r="3" fill="currentColor">
+                    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2.8s" repeatCount="indefinite" begin="1s"/>
+                </circle>
+                <circle cx="245" cy="60" r="3" fill="currentColor">
+                    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3.2s" repeatCount="indefinite" begin="0.3s"/>
+                </circle>
+                <circle cx="245" cy="140" r="3" fill="currentColor">
+                    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2.6s" repeatCount="indefinite" begin="0.8s"/>
+                </circle>
+                <!-- Magnifying glass (scanning sweep) -->
+                <g>
+                    <animateTransform attributeName="transform" type="translate" values="0,0;3,-2;0,0;-3,2;0,0" dur="6s" repeatCount="indefinite"/>
+                    <circle cx="205" cy="162" r="14" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.3"/>
+                    <line x1="215" y1="172" x2="228" y2="185" stroke="currentColor" stroke-width="2" opacity="0.35" stroke-linecap="round"/>
+                    <circle cx="205" cy="162" r="5" fill="currentColor" opacity="0.15">
+                        <animate attributeName="opacity" values="0.1;0.35;0.1" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                </g>
+                <!-- Bracket center glow (radius + opacity pulse) -->
+                <circle cx="140" cy="100" r="8" fill="currentColor" opacity="0.12" filter="url(#glow-purple)">
+                    <animate attributeName="r" values="6;12;6" dur="3s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.08;0.25;0.08" dur="3s" repeatCount="indefinite"/>
+                </circle>
+            </svg>
+        </div>
+    </div>
+</section>
+
+<!-- ── Divider ─────────────────────────────────────────── -->
+<div class="section-divider"></div>
+
+<!-- ── HOW IT WORKS ────────────────────────────────────── -->
+<section class="how" id="how-it-works">
+    <h2 class="section-heading fade-in">How It Works</h2>
+
+    <div class="how-flow" id="how-flow">
+        <!-- SVG connector path — dynamically computed by JS -->
+        <svg class="how-flow__connector" id="how-connector" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <filter id="pktGlow" x="-100%" y="-100%" width="300%" height="300%">
+                    <feGaussianBlur stdDeviation="3" result="blur"/>
+                    <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                </filter>
+            </defs>
+            <path id="how-path" d="" stroke="var(--border-light)" stroke-width="1.5" fill="none" opacity="0.3"/>
+            <circle r="4" fill="var(--green)" opacity="0.8" filter="url(#pktGlow)">
+                <animateMotion dur="6s" repeatCount="indefinite">
+                    <mpath href="#how-path"/>
+                </animateMotion>
+            </circle>
+            <circle r="3" fill="var(--green)" opacity="0.45">
+                <animateMotion dur="6s" repeatCount="indefinite" begin="3s">
+                    <mpath href="#how-path"/>
+                </animateMotion>
+            </circle>
+        </svg>
+
+        <!-- Cards stack -->
+        <div class="how-cards" id="how-cards">
+            <div class="how-card fade-in" style="--step-index: 0;">
+                <div class="how-card__badge">1</div>
+                <h3 class="how-card__title">Create an Identity</h3>
+                <p class="how-card__desc">Your device generates its own cryptographically secure keys. No account. No signup.</p>
+            </div>
+
+            <div class="how-card fade-in" style="--step-index: 1;">
+                <div class="how-card__badge">2</div>
+                <h3 class="how-card__title">Connect to Networks</h3>
+                <p class="how-card__desc">Connect to a device, network, or create one to begin finding other available peers.</p>
+            </div>
+
+            <div class="how-card fade-in" style="--step-index: 2;">
+                <div class="how-card__badge">3</div>
+                <h3 class="how-card__title">Route Formation</h3>
+                <p class="how-card__desc">Nodes learn who can reach who and form efficient routing on their own. No servers. No central list.</p>
+            </div>
+
+            <div class="how-card fade-in" style="--step-index: 3;">
+                <div class="how-card__badge">4</div>
+                <h3 class="how-card__title">Always Encrypted</h3>
+                <p class="how-card__desc">Messages are end-to-end encrypted prior to leaving your device. The network knows data is moving, but not where, or who it's from.</p>
+            </div>
+
+            <div class="how-card fade-in" style="--step-index: 4;">
+                <div class="how-card__badge">5</div>
+                <h3 class="how-card__title">Send Over Anything</h3>
+                <p class="how-card__desc">Data travels through any available link - Radio, WiFi, TCP, BLE, etc., until they reach the desired recipient.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── Footer ──────────────────────────────────────────── -->
+<footer class="footer">
+    <p class="footer-quote">Privacy <em>shouldn&rsquo;t</em> be opt-in.</p>
+    <div class="footer-divider"></div>
+    <svg class="footer-logo" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <ellipse cx="11" cy="13.5" rx="8" ry="4"/>
+        <circle cx="7" cy="6.5" r="2.5"/>
+        <circle cx="5" cy="12" r="0.9"/>
+        <path d="M3 14l-1.5.5"/>
+        <path d="M19 13c1.5-1 2.5-4 2-6.5"/>
+    </svg>
+    <span class="footer-built">Built with <a href="https://reticulum.network" target="_blank" rel="noopener noreferrer">Reticulum</a></span>
+    <div class="footer-links">
+        <a href="#">Download</a>
+        <span class="dot-sep">&middot;</span>
+        <a href="#" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <span class="dot-sep">&middot;</span>
+        <a href="docs.html">Documentation</a>
+    </div>
+</footer>
+
+<script>
+(function() {
+    'use strict';
+
+    var CFG = {
+        GREEN: '#00D4AA',
+        NODE_COUNT: 22,
+        NODE_RADIUS: 2.5,
+        HUB_RADIUS: 5,
+        CONN_DIST: 120,
+        DRIFT: 0.15,
+        PACKET_INTERVAL: 2200,
+        PACKET_SPEED: 1.2,
+        PACKET_SIZE: 2,
+        CIPHER_CHARS: '0123456789abcdef',
+        CIPHER_DUR: 18,
+        RIPPLE_MAX: 30,
+        RIPPLE_DUR: 40,
+        HUB_RING_R: 18,
+        HUB_RING_SPEED: 0.008,
+        BG_COUNT: 35,
+        MOBILE_NODES: 14,
+        MOBILE_BG: 18
+    };
+
+    var canvas = document.getElementById('meshCanvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var w = 0, h = 0, time = 0, lastPacket = 0;
+    var isMobile = window.matchMedia('(max-width: 768px)').matches;
+    var nodes = [], bgParts = [], packets = [], ripples = [];
+    var connAges = {};
+
+    function resize() {
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        w = rect.width;
+        h = rect.height;
+    }
+
+    function rand(a, b) { return a + Math.random() * (b - a); }
+
+    // Node
+    function Node(x, y, r, depth, isHub) {
+        this.x = x; this.y = y;
+        this.r = r; this.baseR = r;
+        this.depth = depth;
+        this.isHub = isHub || false;
+        this.phase = Math.random() * Math.PI * 2;
+        var angle = Math.random() * Math.PI * 2;
+        var spd = CFG.DRIFT * (0.5 + Math.random() * 0.5);
+        this.vx = Math.cos(angle) * spd;
+        this.vy = Math.sin(angle) * spd;
+        this.turnTimer = Math.floor(rand(120, 240));
+    }
+
+    Node.prototype.update = function() {
+        this.turnTimer--;
+        if (this.turnTimer <= 0) {
+            var a = rand(-0.4, 0.4);
+            var cos = Math.cos(a), sin = Math.sin(a);
+            var nvx = this.vx * cos - this.vy * sin;
+            var nvy = this.vx * sin + this.vy * cos;
+            this.vx = nvx; this.vy = nvy;
+            this.turnTimer = Math.floor(rand(120, 240));
+        }
+        this.x += this.vx;
+        this.y += this.vy;
+        var pad = 30;
+        if (this.x < pad) { this.vx = Math.abs(this.vx); }
+        if (this.x > w - pad) { this.vx = -Math.abs(this.vx); }
+        if (this.y < pad) { this.vy = Math.abs(this.vy); }
+        if (this.y > h - pad) { this.vy = -Math.abs(this.vy); }
+        this.r = this.baseR + Math.sin(time * 0.03 + this.phase) * 0.6;
+    };
+
+    // Background particle
+    function BgPart() {
+        this.x = rand(0, w || 400);
+        this.y = rand(0, h || 400);
+        this.r = rand(0.5, 1.5);
+        this.o = rand(0.06, 0.18);
+        this.vx = rand(-0.03, 0.03);
+        this.vy = rand(-0.03, 0.03);
+        this.depth = rand(0.1, 0.3);
+    }
+
+    BgPart.prototype.update = function() {
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.x < 0) this.x = w;
+        if (this.x > w) this.x = 0;
+        if (this.y < 0) this.y = h;
+        if (this.y > h) this.y = 0;
+    };
+
+    // Packet
+    function Packet(from, to) {
+        this.from = from; this.to = to;
+        this.progress = 0;
+        this.x = from.x; this.y = from.y;
+        this.state = 'encrypting';
+        this.cipherFrame = 0;
+        this.trail = [];
+        this.done = false;
+        // Bezier control point offset
+        var dx = to.x - from.x, dy = to.y - from.y;
+        var len = Math.sqrt(dx * dx + dy * dy) || 1;
+        var nx = -dy / len, ny = dx / len;
+        var off = rand(10, 20) * (Math.random() < 0.5 ? 1 : -1);
+        this.cx = (from.x + to.x) / 2 + nx * off;
+        this.cy = (from.y + to.y) / 2 + ny * off;
+    }
+
+    Packet.prototype.update = function() {
+        if (this.state === 'encrypting') {
+            this.cipherFrame++;
+            if (this.cipherFrame >= CFG.CIPHER_DUR) {
+                this.state = 'transit';
+            }
+            this.x = this.from.x;
+            this.y = this.from.y;
+        } else {
+            this.progress += CFG.PACKET_SPEED / (dist(this.from, this.to) || 100);
+            if (this.progress >= 1) {
+                this.progress = 1;
+                this.done = true;
+            }
+            var t = this.progress;
+            var it = 1 - t;
+            this.x = it * it * this.from.x + 2 * it * t * this.cx + t * t * this.to.x;
+            this.y = it * it * this.from.y + 2 * it * t * this.cy + t * t * this.to.y;
+        }
+        this.trail.unshift({ x: this.x, y: this.y });
+        if (this.trail.length > 6) this.trail.pop();
+    };
+
+    // Ripple
+    function Ripple(x, y) {
+        this.x = x; this.y = y;
+        this.frame = 0;
+        this.done = false;
+    }
+
+    Ripple.prototype.update = function() {
+        this.frame++;
+        if (this.frame >= CFG.RIPPLE_DUR) this.done = true;
+    };
+
+    function dist(a, b) {
+        var dx = a.x - b.x, dy = a.y - b.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function easeOut(t) { var it = 1 - t; return 1 - it * it * it; }
+
+    function init() {
+        resize();
+        var count = isMobile ? CFG.MOBILE_NODES : CFG.NODE_COUNT;
+        var bgCount = isMobile ? CFG.MOBILE_BG : CFG.BG_COUNT;
+
+        // Hub node near center
+        nodes.push(new Node(
+            w / 2 + rand(-20, 20),
+            h / 2 + rand(-20, 20),
+            CFG.HUB_RADIUS, 1.0, true
+        ));
+
+        // Other nodes with center-biased distribution
+        for (var i = 1; i < count; i++) {
+            var angle = Math.random() * Math.PI * 2;
+            var d = (Math.random() * 0.35 + Math.random() * 0.35) * Math.min(w, h) / 2;
+            nodes.push(new Node(
+                w / 2 + Math.cos(angle) * d,
+                h / 2 + Math.sin(angle) * d,
+                CFG.NODE_RADIUS,
+                rand(0.3, 1.0)
+            ));
+        }
+
+        for (var j = 0; j < bgCount; j++) {
+            bgParts.push(new BgPart());
+        }
+    }
+
+    function spawnPacket() {
+        if (packets.length >= 6) return;
+        // Find connected pairs
+        var pairs = [];
+        for (var i = 0; i < nodes.length; i++) {
+            for (var j = i + 1; j < nodes.length; j++) {
+                if (dist(nodes[i], nodes[j]) < CFG.CONN_DIST) {
+                    pairs.push([i, j]);
+                }
+            }
+        }
+        if (pairs.length === 0) return;
+        var p = pairs[Math.floor(Math.random() * pairs.length)];
+        var fromIdx = Math.random() < 0.5 ? p[0] : p[1];
+        var toIdx = fromIdx === p[0] ? p[1] : p[0];
+        packets.push(new Packet(nodes[fromIdx], nodes[toIdx]));
+    }
+
+    function update() {
+        time++;
+        for (var i = 0; i < nodes.length; i++) nodes[i].update();
+        for (var j = 0; j < bgParts.length; j++) bgParts[j].update();
+
+        // Spawn packets
+        if (time * 16.67 - lastPacket > CFG.PACKET_INTERVAL) {
+            spawnPacket();
+            lastPacket = time * 16.67;
+        }
+
+        // Update packets
+        for (var k = packets.length - 1; k >= 0; k--) {
+            packets[k].update();
+            if (packets[k].done) {
+                ripples.push(new Ripple(packets[k].to.x, packets[k].to.y));
+                packets.splice(k, 1);
+            }
+        }
+
+        // Update ripples
+        for (var r = ripples.length - 1; r >= 0; r--) {
+            ripples[r].update();
+            if (ripples[r].done) ripples.splice(r, 1);
+        }
+
+        // Update connection ages
+        var current = {};
+        for (var a = 0; a < nodes.length; a++) {
+            for (var b = a + 1; b < nodes.length; b++) {
+                if (dist(nodes[a], nodes[b]) < CFG.CONN_DIST) {
+                    var key = a + '-' + b;
+                    current[key] = true;
+                    connAges[key] = Math.min((connAges[key] || 0) + 1, 20);
+                }
+            }
+        }
+        for (var ck in connAges) {
+            if (!current[ck]) {
+                connAges[ck] -= 1.5;
+                if (connAges[ck] <= 0) delete connAges[ck];
+            }
+        }
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, w, h);
+        var px = 0;
+        var py = 0;
+
+        // 1. Background particles
+        for (var i = 0; i < bgParts.length; i++) {
+            var bp = bgParts[i];
+            var bx = bp.x - px * bp.depth * 1.5;
+            var by = bp.y - py * bp.depth * 1.5;
+            ctx.beginPath();
+            ctx.arc(bx, by, bp.r, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 212, 170, ' + bp.o + ')';
+            ctx.fill();
+        }
+
+        // 2. Connection lines with draw-in animation
+        for (var ck in connAges) {
+            var parts = ck.split('-');
+            var ai = parseInt(parts[0]), bi = parseInt(parts[1]);
+            var na = nodes[ai], nb = nodes[bi];
+            var d = dist(na, nb);
+            var opacity = (1 - d / CFG.CONN_DIST) * 0.45;
+            var avgD = (na.depth + nb.depth) / 2;
+            var age = connAges[ck] / 20; // 0 to 1
+
+            var ax = na.x + px * na.depth;
+            var ay = na.y + py * na.depth;
+            var bxp = nb.x + px * nb.depth;
+            var byp = nb.y + py * nb.depth;
+
+            // Draw from midpoint outward based on age
+            var midX = (ax + bxp) / 2;
+            var midY = (ay + byp) / 2;
+            var x1 = midX + (ax - midX) * age;
+            var y1 = midY + (ay - midY) * age;
+            var x2 = midX + (bxp - midX) * age;
+            var y2 = midY + (byp - midY) * age;
+
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = 'rgba(0, 212, 170, ' + (opacity * avgD * age) + ')';
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+        }
+
+        // 3. Ripples
+        for (var r = 0; r < ripples.length; r++) {
+            var rp = ripples[r];
+            var rt = rp.frame / CFG.RIPPLE_DUR;
+            var rr = easeOut(rt) * CFG.RIPPLE_MAX;
+            var ro = 0.4 * (1 - rt);
+            ctx.beginPath();
+            ctx.arc(rp.x + px, rp.y + py, rr, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(0, 212, 170, ' + ro + ')';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        // 4. Regular nodes
+        for (var n = 0; n < nodes.length; n++) {
+            var nd = nodes[n];
+            if (nd.isHub) continue;
+            var nx = nd.x + px * nd.depth;
+            var ny = nd.y + py * nd.depth;
+            var no = 0.4 + nd.depth * 0.6;
+
+            ctx.beginPath();
+            ctx.arc(nx, ny, nd.r, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 212, 170, ' + no + ')';
+            ctx.fill();
+
+            // Subtle glow
+            ctx.beginPath();
+            ctx.arc(nx, ny, nd.r + 3, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 212, 170, ' + (no * 0.2) + ')';
+            ctx.fill();
+        }
+
+        // 5. Hub node
+        var hub = nodes[0];
+        var hx = hub.x + px * hub.depth;
+        var hy = hub.y + py * hub.depth;
+
+        // Hub ambient glow
+        var grad = ctx.createRadialGradient(hx, hy, 0, hx, hy, 28);
+        grad.addColorStop(0, 'rgba(0, 212, 170, 0.22)');
+        grad.addColorStop(1, 'rgba(0, 212, 170, 0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(hx, hy, 28, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Outer orbital ring
+        ctx.save();
+        ctx.translate(hx, hy);
+        ctx.rotate(time * CFG.HUB_RING_SPEED);
+        ctx.beginPath();
+        ctx.arc(0, 0, CFG.HUB_RING_R, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(0, 212, 170, ' + (0.25 + Math.sin(time * 0.03) * 0.12) + ')';
+        ctx.lineWidth = 0.9;
+        ctx.setLineDash([4, 8]);
+        ctx.stroke();
+        ctx.restore();
+
+        // Inner orbital ring
+        ctx.save();
+        ctx.translate(hx, hy);
+        ctx.rotate(-time * CFG.HUB_RING_SPEED * 0.7);
+        ctx.beginPath();
+        ctx.arc(0, 0, 12, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(0, 212, 170, ' + (0.15 + Math.sin(time * 0.04) * 0.08) + ')';
+        ctx.lineWidth = 0.6;
+        ctx.setLineDash([2, 6]);
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.setLineDash([]);
+
+        // Hub circle
+        ctx.beginPath();
+        ctx.arc(hx, hy, hub.r, 0, Math.PI * 2);
+        ctx.fillStyle = CFG.GREEN;
+        ctx.shadowBlur = 16;
+        ctx.shadowColor = 'rgba(0, 212, 170, 0.7)';
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // 6. Packets + cipher effect + trails
+        for (var p = 0; p < packets.length; p++) {
+            var pkt = packets[p];
+
+            // Trail
+            for (var t = 1; t < pkt.trail.length; t++) {
+                var tr = pkt.trail[t];
+                var to2 = (1 - t / pkt.trail.length) * 0.5;
+                var ts = CFG.PACKET_SIZE * (1 - t / pkt.trail.length * 0.6);
+                ctx.beginPath();
+                ctx.arc(tr.x + px, tr.y + py, ts, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 212, 170, ' + to2 + ')';
+                ctx.fill();
+            }
+
+            // Packet dot
+            ctx.beginPath();
+            ctx.arc(pkt.x + px, pkt.y + py, CFG.PACKET_SIZE, 0, Math.PI * 2);
+            ctx.fillStyle = CFG.GREEN;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(0, 212, 170, 0.8)';
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Cipher effect
+            if (pkt.state === 'encrypting') {
+                var cp = pkt.cipherFrame / CFG.CIPHER_DUR;
+                var spread = 6 + cp * 14;
+                var co = 0.8 * (1 - cp * 0.7);
+                ctx.font = '8px JetBrains Mono, monospace';
+                ctx.fillStyle = 'rgba(0, 212, 170, ' + co + ')';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                for (var c = 0; c < 4; c++) {
+                    var ca = (c / 4) * Math.PI * 2 + time * 0.15;
+                    var ccx = pkt.x + px + Math.cos(ca) * spread;
+                    var ccy = pkt.y + py + Math.sin(ca) * spread;
+                    var ch = CFG.CIPHER_CHARS[Math.floor(Math.random() * 16)];
+                    ctx.fillText(ch, ccx, ccy);
+                }
+            }
+        }
+    }
+
+    function loop() {
+        update();
+        draw();
+        requestAnimationFrame(loop);
+    }
+
+    window.addEventListener('resize', function() {
+        resize();
+        for (var i = 0; i < nodes.length; i++) {
+            nodes[i].x = Math.min(Math.max(nodes[i].x, 30), w - 30);
+            nodes[i].y = Math.min(Math.max(nodes[i].y, 30), h - 30);
+        }
+    });
+
+    init();
+    loop();
+})();
+</script>
+
+<script>
+(function() {
+    'use strict';
+
+    // Navbar scroll shadow + scroll hint fade
+    var navbar = document.getElementById('navbar');
+    var scrollHint = document.getElementById('scrollHint');
+    window.addEventListener('scroll', function() {
+        navbar.classList.toggle('scrolled', window.scrollY > 50);
+        if (scrollHint) scrollHint.classList.toggle('hidden', window.scrollY > 80);
+    });
+
+    // Hero text cycling
+    var words = ['Freedom.', 'Privacy.', 'Control.'];
+    var idx = 0;
+    var el = document.getElementById('hero-cycle');
+    if (el) {
+        setInterval(function() {
+            el.classList.add('fade-out');
+            setTimeout(function() {
+                idx = (idx + 1) % words.length;
+                el.textContent = words[idx];
+                el.classList.remove('fade-out');
+            }, 400);
+        }, 3000);
+    }
+
+    // Scroll-triggered animations
+    if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+        document.querySelectorAll('.fade-in').forEach(function(el) {
+            observer.observe(el);
+        });
+    } else {
+        document.querySelectorAll('.fade-in').forEach(function(el) {
+            el.classList.add('visible');
+        });
+    }
+
+    // How It Works — dynamic connector path + reveal
+    var howFlow = document.getElementById('how-flow');
+    var howConnector = document.getElementById('how-connector');
+    var howPath = document.getElementById('how-path');
+    var howCards = document.querySelectorAll('.how-card');
+
+    function computeConnectorPath() {
+        if (!howFlow || !howConnector || !howPath || howCards.length === 0) return;
+        if (window.getComputedStyle(howConnector).display === 'none') return;
+
+        var flowRect = howFlow.getBoundingClientRect();
+        var points = [];
+        howCards.forEach(function(card) {
+            var r = card.getBoundingClientRect();
+            points.push({
+                x: (r.left + r.width / 2) - flowRect.left,
+                y: (r.top + r.height / 2) - flowRect.top
+            });
+        });
+        if (points.length < 2) return;
+
+        var w = flowRect.width;
+        var h = flowRect.height;
+        howConnector.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+
+        var d = 'M' + points[0].x + ',' + points[0].y;
+        for (var i = 0; i < points.length - 1; i++) {
+            var cur = points[i];
+            var nxt = points[i + 1];
+            var midY = (cur.y + nxt.y) / 2;
+            d += ' C' + cur.x + ',' + midY + ' ' + nxt.x + ',' + midY + ' ' + nxt.x + ',' + nxt.y;
+        }
+        howPath.setAttribute('d', d);
+    }
+
+    function initConnectorPath() {
+        computeConnectorPath();
+        setTimeout(computeConnectorPath, 300);
+    }
+
+    if (document.readyState === 'complete') {
+        initConnectorPath();
+    } else {
+        window.addEventListener('load', initConnectorPath);
+    }
+
+    var resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(computeConnectorPath, 200);
+    });
+
+    if (howConnector) {
+        var connectorObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    howConnector.classList.add('revealed');
+                    connectorObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        connectorObserver.observe(howConnector);
+    }
+})();
+</script>
+
+</body>
+</html>

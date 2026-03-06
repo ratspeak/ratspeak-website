@@ -1,0 +1,240 @@
+[
+  {
+    "title": "What Is Reticulum?",
+    "section": "Introduction",
+    "path": "introduction/what-is-reticulum",
+    "headings": "The Core Idea, Key Properties, How Addressing Works, Heterogeneous Mesh, Status, What Reticulum Is Not, Next Steps",
+    "content": "What Is Reticulum? A cryptography-based networking stack that lets you build resilient, private communication networks over any medium. The Core Idea Reticulum is not a network — it's a tool to build networks. It provides a complete networking stack that works over virtually any communication medium"
+  },
+  {
+    "title": "What Is Ratspeak?",
+    "section": "Introduction",
+    "path": "introduction/what-is-ratspeak",
+    "headings": "Overview, Features, Encrypted Messaging, Network Graph, Games & Apps, Network Topology, Identity Management, Interface Control, Propagation Node, Contacts & Reachability, Desktop App, Tech Stack, The Ecosystem, Next Steps",
+    "content": "What Is Ratspeak? A real-time dashboard and desktop app for Reticulum mesh networks — messaging, network visualization, games, identity management, and monitoring in your browser or as a native application. Overview Ratspeak gives you a graphical interface to the Reticulum network stack. Instead of "
+  },
+  {
+    "title": "How They Work Together",
+    "section": "Introduction",
+    "path": "introduction/how-they-work-together",
+    "headings": "The Stack, Three-Process Architecture, 1. rnsd — Reticulum Daemon, 2. node_agent.py — Node Agent, 3. app.py — Dashboard Server, The Hub Node, Data Flow Example, Interface Changes, Next Steps",
+    "content": "How They Work Together Ratspeak isn't a single program — it's three processes working in concert. Understanding how they connect helps you troubleshoot issues and build more complex setups. The Stack Ratspeak sits at the top of a three-layer stack: Layer What It Does ------- ------------- Reticulum "
+  },
+  {
+    "title": "Key Concepts",
+    "section": "Introduction",
+    "path": "introduction/key-concepts",
+    "headings": "Networking, Destination, Announce, Transport Node, Interface, Path, Cryptography, Identity, Link, Forward Secrecy, Ratchet, Messaging, LXMF, Propagation Node, Delivery Modes, Ratspeak-Specific, Hub Node, Safe Restart, Contact Reachability, Graph View, App Layer, RLAP, Session, RLAP Envelope, Fallback Text, Next Steps",
+    "content": "Key Concepts Essential terminology for understanding Reticulum and Ratspeak, grouped by theme. Networking Destination The fundamental addressing unit in Reticulum. A 16-byte truncated SHA-256 hash derived from a cryptographic identity's public key and an application-specific name. Replaces IP addres"
+  },
+  {
+    "title": "Zen of Reticulum",
+    "section": "Introduction",
+    "path": "introduction/zen-of-reticulum",
+    "headings": "1. The Illusion of the Center, 2. Physics of Trust, 3. Merits of Scarcity, 4. Sovereignty Through Infrastructure, 5. Identity and Nomadism, 6. Ethics of the Tool, 7. Design Patterns for Post-IP Systems, 8. Fabric of the Independent, Next Steps",
+    "content": "Zen of Reticulum The philosophical principles that guide Reticulum's design. These aren't just ideals — they're architectural constraints that shape every protocol decision. > Tip: This page is optional background reading. If you'd rather get hands-on first, skip ahead to Installing Ratspeak. 1. The"
+  },
+  {
+    "title": "Installing Ratspeak",
+    "section": "Getting Started",
+    "path": "getting-started/installing-ratspeak",
+    "headings": "Prerequisites, Quick Start, What `start.sh` Does, Dashboard-Only Mode, Stopping, Configuration, Verifying the Install, Next Steps",
+    "content": "Installing Ratspeak Get Ratspeak running on your system in a few minutes. Prerequisites - Python 3.11+ (required) - pip (Python package manager) - git (to clone the repository) - bleak and bless (for BLE mesh — installed via requirements.txt) Ratspeak runs on Linux, macOS, and Windows (via WSL or Gi"
+  },
+  {
+    "title": "First Run",
+    "section": "Getting Started",
+    "path": "getting-started/first-run",
+    "headings": "The Setup Wizard, Identity Creation, Choosing a Display Name, Generated Files, What You'll See, Next Steps",
+    "content": "First Run The first time you launch Ratspeak, it generates a unique cryptographic identity for you and sets up everything needed to join the mesh. Here's what happens and what to look for. The Setup Wizard On first launch, Ratspeak runs through initial setup: 1. Creates your data directory at .ratsp"
+  },
+  {
+    "title": "Your First Connection",
+    "section": "Getting Started",
+    "path": "getting-started/your-first-connection",
+    "headings": "AutoInterface (WiFi / LAN), TCP Connection, Connection History, Verifying Your Connection, What If Nothing Happens?, Next Steps",
+    "content": "Your First Connection Connect to the Reticulum network — whether that's your local WiFi, a remote TCP node, or a LoRa radio. AutoInterface (WiFi / LAN) The simplest way to connect is via AutoInterface — zero-configuration local network discovery (automatically finds other Reticulum nodes on your WiF"
+  },
+  {
+    "title": "Sending Your First Message",
+    "section": "Getting Started",
+    "path": "getting-started/sending-your-first-message",
+    "headings": "Adding a Contact, Composing a Message, What Happens Behind the Scenes, Delivery Status, File Attachments, Next Steps",
+    "content": "Sending Your First Message Send an encrypted LXMF message through the Reticulum mesh network. Adding a Contact Before you can message someone, you need their LXMF destination hash — a 32-character hex string like 13425ec15b621c1d928589718000d814. 1. Navigate to the Messages section 2. Click New Conv"
+  },
+  {
+    "title": "Platform Notes",
+    "section": "Getting Started",
+    "path": "getting-started/platform-notes",
+    "headings": "Linux, Debian / Ubuntu (Bookworm+ / Lunar+), Arch Linux, Fedora / RHEL, macOS, Windows, Raspberry Pi, Android (Termux), Embedded / Constrained Environments, rnspure, OpenWRT, First Run on Any Platform, Next Steps",
+    "content": "Platform Notes Reticulum and Ratspeak run on almost anything with Python. Here are the platform-specific details you may need. Linux Debian / Ubuntu (Bookworm+ / Lunar+) Modern Debian-based systems use externally managed Python environments. Choose one approach: For Ratspeak, always use a virtual en"
+  },
+  {
+    "title": "Dashboard Overview",
+    "section": "Using Ratspeak",
+    "path": "using-ratspeak/dashboard-overview",
+    "headings": "Layout, Main Views, Dashboard, Messages, Identity, Network, Graph, Games, Settings, Real-Time Updates, Alerts, Next Steps",
+    "content": "Dashboard Overview A tour of the Ratspeak interface — what's where and how to navigate. Layout The dashboard is a single-page application with a consistent layout: - Sidebar (left) — main navigation between views - Header — node status, alerts, identity info - Main content (center) — the active view"
+  },
+  {
+    "title": "Messaging",
+    "section": "Using Ratspeak",
+    "path": "using-ratspeak/messaging",
+    "headings": "How Messages Work, Three Delivery Modes, Delivery Status, Auto-Resend, File Attachments, Full-Text Search, Next Steps",
+    "content": "Messaging Sending and receiving encrypted LXMF messages — delivery modes, attachments, search, and status tracking. How Messages Work All messaging in Ratspeak uses LXMF (Lightweight Extensible Message Format) over Reticulum. Every message is end-to-end encrypted with forward secrecy. Messages sent "
+  },
+  {
+    "title": "Contacts",
+    "section": "Using Ratspeak",
+    "path": "using-ratspeak/contacts",
+    "headings": "Contact List, Reachability Status, How Announces Work, Auto-Path Requests, Path Age and Hop Count, Next Steps",
+    "content": "Contacts Managing your contact list, understanding reachability status, and how announces populate your address book. Contact List Your contacts are the people you communicate with on the Reticulum network. Each contact is identified by their LXMF destination hash — a 32-character hex string derived"
+  },
+  {
+    "title": "Identity Management",
+    "section": "Using Ratspeak",
+    "path": "using-ratspeak/identity-management",
+    "headings": "What Is an Identity?, Creating a New Identity, Importing an Identity, From File, From Base64, Exporting an Identity, Switching Identities, Per-Identity Storage, Removing an Identity, Display Names, Next Steps",
+    "content": "Identity Management Create, import, export, and switch between Reticulum identities — all without restarting. What Is an Identity? A Reticulum identity is a 512-bit Curve25519 keyset: - Ed25519 (256 bits) — signing and verification - X25519 (256 bits) — encryption and key exchange Your identity dete"
+  },
+  {
+    "title": "Network Monitoring",
+    "section": "Using Ratspeak",
+    "path": "using-ratspeak/network-monitoring",
+    "headings": "Connections Table, Interface Stats, Throughput Sparklines, Alert System, RNode Auto-Removal, Status Summaries, Graph View, Next Steps",
+    "content": "Network Monitoring Real-time visibility into your mesh network — connections, interfaces, throughput, and alerts. Connections Table The connections table is the primary view for network health. It shows all discovered destinations with: - Name — the announced display name (if available) - Destinatio"
+  },
+  {
+    "title": "Graph Visualization",
+    "section": "Using Ratspeak",
+    "path": "using-ratspeak/graph-visualization",
+    "headings": "Overview, Node Types, Edge Types, Interactions, Zoom and Pan, Node Dragging, Pinning Nodes, Node Detail Panel, Search and Filter, Technical Details, Canvas Rendering, Simulation Lifecycle, Data Source, Next Steps",
+    "content": "Graph Visualization A real-time, interactive force-directed graph of your Reticulum mesh network — see your hub, contacts, transport nodes, and discovered peers at a glance. Overview The Graph view renders a live network topology using D3.js force simulation on an HTML Canvas. Nodes represent Reticu"
+  },
+  {
+    "title": "Games & Apps",
+    "section": "Using Ratspeak",
+    "path": "using-ratspeak/games-and-apps",
+    "headings": "Overview, Available Apps, Games Tab Layout, Session Lifecycle, Playing Chess, Starting a Game, Making Moves, Game End, Fallback Text, Session Details, Status and TTLs, Unread Badges, Size Budget, Next Steps",
+    "content": "Games & Apps Interactive applications built on RLAP — play chess, challenge contacts, and track sessions alongside your messages. Overview The Games tab hosts interactive applications that run over the Reticulum mesh using LXMF messages. Each app session (a chess game, for example) is a series of st"
+  },
+  {
+    "title": "Propagation Node",
+    "section": "Using Ratspeak",
+    "path": "using-ratspeak/propagation-node",
+    "headings": "What Is a Propagation Node?, Running a Local Propagation Node, Setting an Outbound Propagation Node, Syncing Messages, Propagation Status, Next Steps",
+    "content": "Propagation Node Store-and-forward messaging for offline contacts — how propagation nodes work and how to use them in Ratspeak. What Is a Propagation Node? A propagation node stores encrypted messages for recipients who are currently offline. When the recipient comes back online and syncs with the p"
+  },
+  {
+    "title": "Configuration",
+    "section": "Using Ratspeak",
+    "path": "using-ratspeak/configuration",
+    "headings": "Config File, Environment Variable Overrides, Settings Reference, `[server]`, `[nodes]`, `[dashboard]`, `[electron]`, Data Directories, Key Constants, Next Steps",
+    "content": "Configuration Complete reference for Ratspeak settings — config file, environment variables, and all available options. Config File Ratspeak reads configuration from dashboard/ratspeak.conf in INI format: Environment Variable Overrides Every setting can be overridden with an environment variable usi"
+  },
+  {
+    "title": "Interface Types Overview",
+    "section": "Connecting Your Network",
+    "path": "connecting/interface-types-overview",
+    "headings": "Comparison Table, Choosing an Interface, UI-Managed vs Config-Only, Next Steps",
+    "content": "Interface Types Overview A comparison of all interface types available in Reticulum and which can be managed through the Ratspeak UI. Comparison Table Interface Medium Speed Range Managed via UI Restart Required ----------- -------- ------- ------- :--------------: :----------------: AutoInterface W"
+  },
+  {
+    "title": "TCP Connections",
+    "section": "Connecting Your Network",
+    "path": "connecting/tcp-connections",
+    "headings": "TCP Client, Adding via Ratspeak UI, Config File Format, Parameters, TCP Server, Config File Format, Parameters, Firewall Configuration, Connection History, Backbone Interface (Linux and Android), Next Steps",
+    "content": "TCP Connections Connecting to remote Reticulum nodes over TCP/IP — both as a client and a server. TCP Client A TCPClientInterface connects your node to a remote Reticulum node running a TCP server. This is the most common way to connect to nodes over the internet. Adding via Ratspeak UI 1. Navigate "
+  },
+  {
+    "title": "LoRa / RNode",
+    "section": "Connecting Your Network",
+    "path": "connecting/lora-rnode",
+    "headings": "What Is RNode?, Supported Devices, LoRa Presets, Frequency Regions, LoRa Parameters, Available Bandwidths, Connection Methods, Config File Format, Airtime Limits, Multi-Transceiver Support, Next Steps",
+    "content": "LoRa / RNode Long-range radio communication via RNode devices — frequencies, presets, and configuration. What Is RNode? RNode is an open-source LoRa radio interface for Reticulum. It uses LoRa radio chips with a custom MAC layer (not LoRaWAN) for efficient, long-range mesh communication. RNode devic"
+  },
+  {
+    "title": "WiFi & LAN",
+    "section": "Connecting Your Network",
+    "path": "connecting/wifi-lan",
+    "headings": "How AutoInterface Works, Enabling in Ratspeak, Required Ports, Configuration Options, Isolated Networks with `group_id`, Discovery Scope, Limitations, Next Steps",
+    "content": "WiFi & LAN Zero-configuration local network discovery with AutoInterface — connecting nodes on the same network segment. How AutoInterface Works AutoInterface uses IPv6 multicast peer discovery and UDP transport to automatically find other Reticulum nodes on the same local network. No IP configurati"
+  },
+  {
+    "title": "BLE Mesh",
+    "section": "Connecting Your Network",
+    "path": "connecting/ble-mesh",
+    "headings": "Overview, Requirements, How It Works, Discovery and Role Assignment, GATT Service Architecture, Fragmentation, Background Threads, Enabling BLE Mesh, Deduplication, Limitations, Technical Details, Next Steps",
+    "content": "BLE Mesh Bluetooth Low Energy peer-to-peer mesh networking — the only interface that works without restarting rnsd. Overview BLE Mesh creates peer-to-peer connections between nearby Ratspeak nodes using Bluetooth Low Energy. Unlike all other interface types, BLE Mesh registers directly with the RNS "
+  },
+  {
+    "title": "Interface Modes",
+    "section": "Connecting Your Network",
+    "path": "connecting/interface-modes",
+    "headings": "Interface Modes, Gateway Mode, Boundary Mode, IFAC — Interface Access Codes, Announce Rate Control, Ingress Control, Mode Abbreviations, Next Steps",
+    "content": "Interface Modes Controlling how interfaces participate in the network — modes, access codes, and announce rate control. Interface Modes Each interface can operate in one of five modes, controlling how it handles packet forwarding, announce propagation, and path discovery: Mode Description Use Case -"
+  },
+  {
+    "title": "Building Networks",
+    "section": "Connecting Your Network",
+    "path": "connecting/building-networks",
+    "headings": "Transport Nodes vs Instances, Topology Patterns, Star, Mesh, Hierarchical, Backbone + Access, Mixing Hardware Types, Starting Small, Trustless Open Access, Next Steps",
+    "content": "Building Networks Network topology patterns, mixing hardware types, and growing a Reticulum mesh from scratch. Transport Nodes vs Instances The most important architectural decision is which nodes should be Transport Nodes: Type Config Role Requirements ------ -------- ------ ------------- Instance "
+  },
+  {
+    "title": "Protocol Architecture",
+    "section": "Understanding Reticulum",
+    "path": "understanding/protocol-architecture",
+    "headings": "Destination-Based Addressing, Four Destination Types, The Announce Mechanism, Propagation Rules, Routing, Packet Receipt Verification, Packet Prioritization, Next Steps",
+    "content": "Protocol Architecture How Reticulum addresses, routes, announces, and transports data — the foundations of hash-based networking. Destination-Based Addressing Reticulum replaces IP addresses with destination hashes — 16-byte (128-bit) truncated SHA-256 hashes derived from a cryptographic identity an"
+  },
+  {
+    "title": "Links & Communication",
+    "section": "Understanding Reticulum",
+    "path": "understanding/links-and-communication",
+    "headings": "Link Establishment, Key Properties, Link Timers, Resources, Channels, Buffers, Request / Response, Next Steps",
+    "content": "Links & Communication Encrypted bidirectional channels — the 297-byte handshake, forward secrecy, resources, channels, and request/response. Link Establishment Links provide encrypted, bidirectional communication with forward secrecy and initiator anonymity. The entire handshake takes just 3 packets"
+  },
+  {
+    "title": "Wire Format",
+    "section": "Understanding Reticulum",
+    "path": "understanding/wire-format",
+    "headings": "Packet Structure, Header Byte 1 (Flags), Header Byte 2 (Hop Count), Address Field, Maximum Data Units, Why 500 Bytes?, IFAC Packets, Next Steps",
+    "content": "Wire Format The binary structure of Reticulum packets — header fields, addressing, and the 500-byte MTU. Packet Structure Every Reticulum packet follows this format: Total maximum size: 500 bytes (network-wide MTU, fixed). HEADER 2 bytes flags + hop count ADDRESSES 16 or 32 bytes dest hash [+ transp"
+  },
+  {
+    "title": "Cryptographic Primitives",
+    "section": "Understanding Reticulum",
+    "path": "understanding/cryptographic-primitives",
+    "headings": "Algorithm Suite, How They Fit Together, Identity (at rest), Destination Hash (derived), Per-Packet Encryption (Single destinations), Link Encryption, Announce Signing, Encrypted Token Format, AES-256 Migration, Implementation, Pure-Python Fallback, Next Steps",
+    "content": "Cryptographic Primitives The specific algorithms and constructions that power Reticulum's security. Algorithm Suite Primitive Algorithm Key/Output Size Purpose ----------- ----------- :-----------: --------- Digital Signatures Ed25519 256-bit Signing announces, proofs, link verification Key Exchange"
+  },
+  {
+    "title": "Security Model",
+    "section": "Understanding Reticulum",
+    "path": "understanding/security-model",
+    "headings": "Zero-Trust Architecture, Forward Secrecy, 1. Ephemeral Keys on Links, 2. Ratchet System (Single Destinations), Ratchet Parameters, Sender Anonymity, Traffic Analysis Resistance, Blackhole Management, What Reticulum Does NOT Protect Against, Next Steps",
+    "content": "Security Model Forward secrecy, zero-trust design, ratchets, and how Reticulum's architecture makes surveillance structurally difficult. Zero-Trust Architecture Reticulum assumes every environment is hostile. There is no trusted core, no certificate authority, no privileged infrastructure. Security "
+  },
+  {
+    "title": "LXMF Protocol",
+    "section": "Understanding Reticulum",
+    "path": "understanding/lxmf-protocol",
+    "headings": "Overview, Delivery Modes, Direct, Opportunistic, Propagated, LXMF Fields, Propagation Nodes, Ecosystem Compatibility, LXST — Streaming Companion, Message Size Considerations, Next Steps",
+    "content": "LXMF Protocol Lightweight Extensible Message Format — zero-configuration encrypted messaging over Reticulum. Overview LXMF is a messaging protocol built on top of Reticulum that provides: - Zero-configuration message routing — no servers to configure - End-to-end encryption — every message is encryp"
+  },
+  {
+    "title": "RLAP Protocol",
+    "section": "Understanding Reticulum",
+    "path": "understanding/rlap-protocol",
+    "headings": "Overview, LXMF Field Allocation, Envelope Schema, Size Constraints, Session Lifecycle, Validation Models, Session Types, Session Expiry, Delivery Method Guidelines, Fallback Text Convention, Plugin Architecture, Capability Negotiation, Cross-Client Adoption, Backward Compatibility, Next Steps",
+    "content": "RLAP Protocol Reticulum LXMF App Protocol — a lightweight standard for interactive applications over LXMF messaging. Overview RLAP defines how interactive app sessions (games, file sharing, collaborative tools) are encoded as LXMF messages. It uses LXMF's custom extension fields to carry structured "
+  },
+  {
+    "title": "Glossary",
+    "section": "Reference",
+    "path": "reference/glossary",
+    "headings": "A, Access Point Mode <span class=\"glossary-category glossary-category--interface\">Interface</span>, AES-256-CBC <span class=\"glossary-category glossary-category--crypto\">Crypto</span>, Airtime Limit <span class=\"glossary-category glossary-category--interface\">Interface</span>, Announce <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Announce Cap <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Announce Rate Control <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, App Data <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, App Manifest <span class=\"glossary-category glossary-category--tool\">Tool</span>, App Router <span class=\"glossary-category glossary-category--tool\">Tool</span>, Aspect <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Aspect Filter <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, AutoInterface <span class=\"glossary-category glossary-category--interface\">Interface</span>, AX.25 <span class=\"glossary-category glossary-category--interface\">Interface</span>, B, BackboneInterface <span class=\"glossary-category glossary-category--interface\">Interface</span>, Bandwidth <span class=\"glossary-category glossary-category--interface\">Interface</span>, Beacon <span class=\"glossary-category glossary-category--interface\">Interface</span>, Blackhole <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, BLE Mesh <span class=\"glossary-category glossary-category--interface\">Interface</span>, Bootstrap Only <span class=\"glossary-category glossary-category--interface\">Interface</span>, Boundary Mode <span class=\"glossary-category glossary-category--interface\">Interface</span>, Buffer <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, C, Capability Negotiation <span class=\"glossary-category glossary-category--tool\">Tool</span>, Challenge / Accept / Decline <span class=\"glossary-category glossary-category--tool\">Tool</span>, Channel <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Codec2 <span class=\"glossary-category glossary-category--messaging\">Messaging</span>, Coding Rate <span class=\"glossary-category glossary-category--interface\">Interface</span>, Contact Reachability <span class=\"glossary-category glossary-category--tool\">Tool</span>, Context Field <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Curve25519 <span class=\"glossary-category glossary-category--crypto\">Crypto</span>, D, Destination <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Destination Hash <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Direct Delivery <span class=\"glossary-category glossary-category--messaging\">Messaging</span>, Discoverable Interface <span class=\"glossary-category glossary-category--interface\">Interface</span>, E, ECDH <span class=\"glossary-category glossary-category--crypto\">Crypto</span>, Ed25519 <span class=\"glossary-category glossary-category--crypto\">Crypto</span>, Encrypted MDU <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Ephemeral Key <span class=\"glossary-category glossary-category--crypto\">Crypto</span>, F, Fallback Text <span class=\"glossary-category glossary-category--tool\">Tool</span>, Fernet <span class=\"glossary-category glossary-category--crypto\">Crypto</span>, Forward Secrecy <span class=\"glossary-category glossary-category--crypto\">Crypto</span>, Frequency <span class=\"glossary-category glossary-category--interface\">Interface</span>, Full Hash <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, G, Graph View <span class=\"glossary-category glossary-category--tool\">Tool</span>, Gateway Mode <span class=\"glossary-category glossary-category--interface\">Interface</span>, Group Destination <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, H, Half-Duplex <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Header Type <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, HKDF <span class=\"glossary-category glossary-category--crypto\">Crypto</span>, HMAC-SHA256 <span class=\"glossary-category glossary-category--crypto\">Crypto</span>, Hop Count <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Hub Node <span class=\"glossary-category glossary-category--tool\">Tool</span>, I, I2PInterface <span class=\"glossary-category glossary-category--interface\">Interface</span>, Identity <span class=\"glossary-category glossary-category--crypto\">Crypto</span>, IFAC <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, IFAC Flag <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Ingress Control <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Instance <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Interface <span class=\"glossary-category glossary-category--interface\">Interface</span>, Interface Mode <span class=\"glossary-category glossary-category--interface\">Interface</span>, K, Keepalive <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, KISS <span class=\"glossary-category glossary-category--interface\">Interface</span>, L, Link <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Link MTU Discovery <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, LocalClientInterface <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, LXMF <span class=\"glossary-category glossary-category--messaging\">Messaging</span>, LXMF Custom Fields <span class=\"glossary-category glossary-category--messaging\">Messaging</span>, LXMF Fields <span class=\"glossary-category glossary-category--messaging\">Messaging</span>, LXMessage <span class=\"glossary-category glossary-category--messaging\">Messaging</span>, LXMRouter <span class=\"glossary-category glossary-category--messaging\">Messaging</span>, lxm:// URI <span class=\"glossary-category glossary-category--messaging\">Messaging</span>, LXST <span class=\"glossary-category glossary-category--messaging\">Messaging</span>, M, MDU <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, MeshChat <span class=\"glossary-category glossary-category--tool\">Tool</span>, MessageBase <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, MessagePack (msgpack) <span class=\"glossary-category glossary-category--messaging\">Messaging</span>, Micron <span class=\"glossary-category glossary-category--tool\">Tool</span>, Minimum Bitrate <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, MTU <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, N, Network Identity <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, NomadNet <span class=\"glossary-category glossary-category--tool\">Tool</span>, O, OpenModem <span class=\"glossary-category glossary-category--interface\">Interface</span>, Opportunistic Delivery <span class=\"glossary-category glossary-category--messaging\">Messaging</span>, Opus <span class=\"glossary-category glossary-category--messaging\">Messaging</span>, P, Packet <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Packet Types <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, PacketReceipt <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Paper Message <span class=\"glossary-category glossary-category--messaging\">Messaging</span>, Path <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Path Table <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, PATHFINDER_M <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Peering <span class=\"glossary-category glossary-category--messaging\">Messaging</span>, PipeInterface <span class=\"glossary-category glossary-category--interface\">Interface</span>, PKCS7 <span class=\"glossary-category glossary-category--crypto\">Crypto</span>, Plain MDU <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Propagated Delivery <span class=\"glossary-category glossary-category--messaging\">Messaging</span>, Propagation Node <span class=\"glossary-category glossary-category--messaging\">Messaging</span>, Propagation Type <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Proof Strategy <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, PyCA/cryptography <span class=\"glossary-category glossary-category--crypto\">Crypto</span>, R, Ratchet <span class=\"glossary-category glossary-category--crypto\">Crypto</span>, Remote Management <span class=\"glossary-category glossary-category--tool\">Tool</span>, Request/Response <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Resource <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, RLAP <span class=\"glossary-category glossary-category--tool\">Tool</span>, RLAP Envelope <span class=\"glossary-category glossary-category--tool\">Tool</span>, RNode <span class=\"glossary-category glossary-category--interface\">Interface</span>, RNodeMultiInterface <span class=\"glossary-category glossary-category--interface\">Interface</span>, rncp <span class=\"glossary-category glossary-category--tool\">Tool</span>, rnid <span class=\"glossary-category glossary-category--tool\">Tool</span>, rnodeconf <span class=\"glossary-category glossary-category--tool\">Tool</span>, rnpath <span class=\"glossary-category glossary-category--tool\">Tool</span>, rnprobe <span class=\"glossary-category glossary-category--tool\">Tool</span>, rnsd <span class=\"glossary-category glossary-category--tool\">Tool</span>, rnsh <span class=\"glossary-category glossary-category--tool\">Tool</span>, rnspure <span class=\"glossary-category glossary-category--tool\">Tool</span>, rnstatus <span class=\"glossary-category glossary-category--tool\">Tool</span>, rnx <span class=\"glossary-category glossary-category--tool\">Tool</span>, Roaming Mode <span class=\"glossary-category glossary-category--interface\">Interface</span>, RSSI <span class=\"glossary-category glossary-category--interface\">Interface</span>, S, Safe Restart <span class=\"glossary-category glossary-category--tool\">Tool</span>, SerialInterface <span class=\"glossary-category glossary-category--interface\">Interface</span>, SHA-256 / SHA-512 <span class=\"glossary-category glossary-category--crypto\">Crypto</span>, Shared Instance <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Sideband <span class=\"glossary-category glossary-category--tool\">Tool</span>, SNR <span class=\"glossary-category glossary-category--interface\">Interface</span>, Session <span class=\"glossary-category glossary-category--tool\">Tool</span>, Session Type <span class=\"glossary-category glossary-category--tool\">Tool</span>, Spreading Factor <span class=\"glossary-category glossary-category--interface\">Interface</span>, Stamp <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Stale Time <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, T, Tauri <span class=\"glossary-category glossary-category--tool\">Tool</span>, Telemetry <span class=\"glossary-category glossary-category--messaging\">Messaging</span>, TNC <span class=\"glossary-category glossary-category--interface\">Interface</span>, Transient ID <span class=\"glossary-category glossary-category--messaging\">Messaging</span>, Transport Node <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Transport Instance <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, Truncated Hash <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, TX Power <span class=\"glossary-category glossary-category--interface\">Interface</span>, U, UDPInterface <span class=\"glossary-category glossary-category--interface\">Interface</span>, V, Validation Model <span class=\"glossary-category glossary-category--tool\">Tool</span>, VPort <span class=\"glossary-category glossary-category--interface\">Interface</span>, W, Wire Format <span class=\"glossary-category glossary-category--protocol\">Protocol</span>, X, X25519 <span class=\"glossary-category glossary-category--crypto\">Crypto</span>, Y, Yggdrasil <span class=\"glossary-category glossary-category--interface\">Interface</span>",
+    "content": "Glossary Complete reference of Reticulum, LXMF, and Ratspeak terminology. A Access Point Mode Interface Interface mode (mode = access_point or mode = ap) where the interface operates quietly, suppressing announce rebroadcasts and using shorter path expiry times. Designed for interfaces serving clien"
+  }
+]

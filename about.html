@@ -1,0 +1,2840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Network Is the Vulnerability — Ratspeak + Reticulum Explainer</title>
+    <meta name="description" content="A visual guide to Ratspeak &amp; the Reticulum stack -- a cryptographic network that doesn't just patch the internet, it replaces it.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary:    #1c2333;
+            --bg-secondary:  #242d3f;
+            --bg-tertiary:   #2d3748;
+            --border:        #3a4759;
+            --border-light:  #4a5a6e;
+            --text-primary:  #e2e8f0;
+            --text-secondary:#9eadbf;
+            --text-muted:    #7e8fa2;
+            --green:         #00D4AA;
+            --green-dim:     #00A080;
+            --red:           #FF6B6B;
+            --blue:          #38BDF8;
+            --purple:        #C084FC;
+            --orange:        #F59E0B;
+            --cyan:          #22D3EE;
+            --font-mono:     'JetBrains Mono', 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+            --font-sans:     'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            --glass-bg:      rgba(36, 45, 63, 0.75);
+            --glass-border:  rgba(58, 71, 89, 0.55);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* Noise texture */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 99999;
+            opacity: 0.015;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        /* ── Animations ─────────────────────────────── */
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 8px var(--green), 0 0 16px rgba(0, 212, 170, 0.2); }
+            50%      { box-shadow: 0 0 12px var(--green), 0 0 24px rgba(0, 212, 170, 0.35); }
+        }
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes breathe {
+            0%, 100% { opacity: 0.5; }
+            50%      { opacity: 0.9; }
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ── Layout ─────────────────────────────────── */
+        .container {
+            max-width: 940px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        .section-divider {
+            position: relative;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, var(--border) 50%, transparent 100%);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .section-divider::after {
+            content: '';
+            position: absolute;
+            top: -4px; left: 50%;
+            transform: translateX(-50%);
+            width: 9px; height: 9px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: glowPulse 2.5s ease-in-out infinite;
+        }
+
+        /* ── Section Numbers ────────────────────────── */
+        .section-num {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            display: block;
+            margin-bottom: 16px;
+            opacity: 0.75;
+        }
+        .section-num--green  { color: var(--green); }
+        .section-num--orange { color: var(--orange); }
+        .section-num--blue   { color: var(--blue); }
+        .section-num--purple { color: var(--purple); }
+        .section-num--cyan   { color: var(--cyan); }
+        .section-num--red    { color: var(--red); }
+
+        .section-title {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: clamp(28px, 4vw, 42px);
+            color: var(--text-primary);
+            line-height: 1.15;
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+        }
+
+        .section-body {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            max-width: 540px;
+        }
+
+        .accent-line {
+            width: 56px;
+            height: 3px;
+            margin-top: 24px;
+            border-radius: 2px;
+        }
+        .accent-line--green  { background: var(--green); box-shadow: 0 0 12px rgba(0, 212, 170, 0.5), 0 0 28px rgba(0, 212, 170, 0.2); }
+        .accent-line--orange { background: var(--orange); box-shadow: 0 0 12px rgba(245, 158, 11, 0.5), 0 0 28px rgba(245, 158, 11, 0.2); }
+        .accent-line--blue   { background: var(--blue); box-shadow: 0 0 12px rgba(56, 189, 248, 0.5), 0 0 28px rgba(56, 189, 248, 0.2); }
+        .accent-line--purple { background: var(--purple); box-shadow: 0 0 12px rgba(192, 132, 252, 0.5), 0 0 28px rgba(192, 132, 252, 0.2); }
+        .accent-line--cyan   { background: var(--cyan); box-shadow: 0 0 12px rgba(34, 211, 238, 0.5), 0 0 28px rgba(34, 211, 238, 0.2); }
+
+        /* ── Navbar ────────────────────────────────────── */
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            height: 56px;
+            background: linear-gradient(180deg, rgba(28, 35, 51, 0.95) 0%, rgba(28, 35, 51, 0.9) 100%);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 1px 0 rgba(0, 212, 170, 0.05), 0 4px 24px rgba(0, 0, 0, 0.3);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            border-bottom-color: var(--border-light);
+            box-shadow: 0 1px 0 rgba(0, 212, 170, 0.08), 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-left a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .navbar-logo {
+            flex-shrink: 0;
+            filter: drop-shadow(0 0 6px rgba(0, 212, 170, 0.4));
+        }
+
+        .navbar-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .navbar-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .navbar-link:hover {
+            color: var(--text-primary);
+        }
+
+        .navbar-link--active {
+            color: var(--green);
+        }
+
+        .nr-btn {
+            background: rgba(0, 160, 128, 0.1);
+            color: var(--green);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-radius: 8px;
+            padding: 7px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--font-sans);
+            transition: all 0.25s ease;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nr-btn:hover {
+            background: rgba(0, 160, 128, 0.2);
+            border-color: rgba(0, 212, 170, 0.5);
+            color: var(--green);
+            box-shadow: 0 0 20px rgba(0, 212, 170, 0.15);
+        }
+
+        /* ── Hero / Title Banner ────────────────────── */
+        .hero-banner {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 120px 32px 80px;
+            overflow: hidden;
+        }
+        .hero-banner canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            opacity: 0.6;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 720px;
+            background: radial-gradient(ellipse at center, rgba(28, 35, 51, 0.6) 0%, transparent 70%);
+            padding: 48px;
+        }
+        .hero-title {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: clamp(36px, 6vw, 56px);
+            line-height: 1.1;
+            letter-spacing: -1.5px;
+            margin-bottom: 24px;
+            background: linear-gradient(180deg, var(--text-primary) 40%, var(--text-muted) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-subtitle {
+            font-size: clamp(16px, 2.2vw, 20px);
+            color: var(--text-secondary);
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .scroll-hint {
+            position: absolute;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--text-muted);
+            opacity: 0.5;
+            animation: scrollBounce 2s ease-in-out infinite;
+        }
+        .scroll-hint svg { width: 24px; height: 24px; }
+        @keyframes scrollBounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(6px); }
+        }
+
+        /* ── Two-Column Feature ─────────────────────── */
+        .feature-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: center;
+            padding: 72px 0;
+        }
+        .feature-row--reverse .feature-visual { order: -1; }
+
+        .feature-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .feature-visual svg {
+            width: 100%;
+            max-width: 320px;
+            height: auto;
+        }
+
+        /* ── Stat Callouts ──────────────────────────── */
+        .stat-row {
+            display: flex;
+            gap: 24px;
+            margin-top: 28px;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            backdrop-filter: blur(8px);
+            flex: 1;
+            min-width: 140px;
+        }
+        .stat-card__num {
+            font-family: var(--font-mono);
+            font-weight: 600;
+            font-size: 32px;
+            color: var(--green);
+            line-height: 1.1;
+        }
+        .stat-card__label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+
+        /* ── Centerpiece Diamond ────────────────────── */
+        .centerpiece {
+            padding: 80px 0;
+        }
+        .centerpiece-inner {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 48px;
+            backdrop-filter: blur(8px);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .centerpiece-inner::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--green), transparent);
+            opacity: 0.6;
+        }
+        .centerpiece-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .centerpiece-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: nowrap;
+            margin: 32px 0;
+        }
+        .centerpiece-stats {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            margin-top: 36px;
+            flex-wrap: wrap;
+        }
+        .cp-stat {
+            text-align: center;
+        }
+        .cp-stat__num {
+            font-family: var(--font-mono);
+            font-weight: 600;
+            font-size: 36px;
+            color: var(--green);
+        }
+        .cp-stat__label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            max-width: 160px;
+            margin: 4px auto 0;
+        }
+
+        /* ── Pull Quote ─────────────────────────────── */
+        .pull-quote {
+            text-align: center;
+            padding: 32px 32px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .pull-quote__text {
+            font-family: var(--font-sans);
+            font-weight: 500;
+            font-size: clamp(20px, 3vw, 28px);
+            color: var(--text-secondary);
+            line-height: 1.5;
+            font-style: italic;
+        }
+        .pull-quote__text em {
+            color: var(--green);
+            font-style: italic;
+        }
+        .pull-quote__source {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 16px;
+        }
+
+        /* ── Comparison Table ───────────────────────── */
+        .comparison-section {
+            padding: 72px 0;
+        }
+        .comparison-table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 32px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 4px;
+            backdrop-filter: blur(8px);
+            overflow: hidden;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 13px;
+            min-width: 600px;
+        }
+        .comparison-table thead th {
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+            vertical-align: bottom;
+        }
+        .comparison-table thead th:first-child {
+            width: 130px;
+        }
+        .comparison-table thead th .col-icon {
+            display: block;
+            margin-bottom: 6px;
+            opacity: 0.7;
+        }
+        .comparison-table thead th.highlight-col {
+            background: rgba(0, 212, 170, 0.05);
+            border-bottom-color: var(--green);
+            color: var(--green);
+        }
+        .comparison-table tbody td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(58, 71, 89, 0.3);
+            color: var(--text-secondary);
+            vertical-align: top;
+        }
+        .comparison-table tbody td:first-child {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 12px;
+        }
+        .comparison-table tbody td.highlight-col {
+            background: rgba(0, 212, 170, 0.04);
+            color: var(--green);
+            font-weight: 500;
+        }
+        .comparison-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .comparison-table tbody tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .cmp-yes { color: var(--green); }
+        .cmp-no  { color: var(--red); opacity: 0.7; }
+        .cmp-partial { color: var(--orange); }
+
+        /* ── Feature Grid ───────────────────────────── */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 32px;
+        }
+        .fcard {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 24px;
+            backdrop-filter: blur(8px);
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .fcard:hover {
+            border-color: var(--border-light);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+        }
+        .fcard::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: 20%; right: 20%;
+            height: 2px;
+            border-radius: 0 0 2px 2px;
+            opacity: 0.7;
+        }
+        .fcard--green::before  { background: var(--green); box-shadow: 0 0 8px rgba(0, 212, 170, 0.3); }
+        .fcard--blue::before   { background: var(--blue); box-shadow: 0 0 8px rgba(56, 189, 248, 0.3); }
+        .fcard--purple::before { background: var(--purple); box-shadow: 0 0 8px rgba(192, 132, 252, 0.3); }
+        .fcard--orange::before { background: var(--orange); box-shadow: 0 0 8px rgba(245, 158, 11, 0.3); }
+        .fcard--cyan::before   { background: var(--cyan); box-shadow: 0 0 8px rgba(34, 211, 238, 0.3); }
+        .fcard--red::before    { background: var(--red); box-shadow: 0 0 8px rgba(255, 107, 107, 0.3); }
+
+        .fcard__icon {
+            width: 36px;
+            height: 36px;
+            margin-bottom: 14px;
+            opacity: 0.85;
+        }
+        .fcard--green  .fcard__icon { color: var(--green); }
+        .fcard--blue   .fcard__icon { color: var(--blue); }
+        .fcard--purple .fcard__icon { color: var(--purple); }
+        .fcard--orange .fcard__icon { color: var(--orange); }
+        .fcard--cyan   .fcard__icon { color: var(--cyan); }
+        .fcard--red    .fcard__icon { color: var(--red); }
+
+        .fcard__title {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+        .fcard__desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* ── Zen Pillars ────────────────────────────── */
+        .zen-section {
+            padding: 72px 0;
+        }
+        .zen-pillar {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 28px 0;
+            border-bottom: 1px solid rgba(58, 71, 89, 0.3);
+        }
+        .zen-pillar:last-child { border-bottom: none; }
+        .zen-pillar__icon {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: rgba(0, 212, 170, 0.08);
+            border: 1px solid rgba(0, 212, 170, 0.15);
+            color: var(--green);
+        }
+        .zen-pillar__icon svg { width: 20px; height: 20px; }
+        /* Zen pillar color differentiation */
+        .zen-pillar--green .zen-pillar__icon { background: rgba(0, 212, 170, 0.08); border-color: rgba(0, 212, 170, 0.15); color: var(--green); }
+        .zen-pillar--green .zen-pillar__title { color: var(--green); }
+        .zen-pillar--blue .zen-pillar__icon { background: rgba(56, 189, 248, 0.08); border-color: rgba(56, 189, 248, 0.15); color: var(--blue); }
+        .zen-pillar--blue .zen-pillar__title { color: var(--blue); }
+        .zen-pillar--orange .zen-pillar__icon { background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.15); color: var(--orange); }
+        .zen-pillar--orange .zen-pillar__title { color: var(--orange); }
+        .zen-pillar--purple .zen-pillar__icon { background: rgba(192, 132, 252, 0.08); border-color: rgba(192, 132, 252, 0.15); color: var(--purple); }
+        .zen-pillar--purple .zen-pillar__title { color: var(--purple); }
+        .zen-pillar__title {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--green);
+            margin-bottom: 4px;
+        }
+        .zen-pillar__desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ── CTA Footer ─────────────────────────────── */
+        .cta-footer {
+            text-align: center;
+            padding: 80px 32px 60px;
+        }
+        .cta-dot {
+            width: 9px; height: 9px;
+            border-radius: 50%;
+            background: var(--green);
+            margin: 0 auto 28px;
+            animation: glowPulse 2.5s ease-in-out infinite;
+        }
+        .cta-title {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: clamp(32px, 5vw, 48px);
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+            background: linear-gradient(180deg, var(--text-primary) 40%, var(--text-muted) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+        .cta-footer::before {
+            content: '';
+            position: absolute;
+            top: 60px; left: 50%;
+            transform: translateX(-50%);
+            width: 300px; height: 200px;
+            background: radial-gradient(ellipse, rgba(0, 212, 170, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .cta-footer { position: relative; }
+        .cta-subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 36px;
+        }
+        .cta-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 48px;
+        }
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 36px;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: var(--font-sans);
+            border-radius: 10px;
+            background: linear-gradient(135deg, #00D4AA 0%, #00B894 50%, #00A87E 100%);
+            color: var(--bg-primary);
+            border: 1px solid rgba(0, 232, 186, 0.4);
+            cursor: pointer;
+            text-decoration: none;
+            letter-spacing: 0.4px;
+            box-shadow: 0 0 20px rgba(0, 212, 170, 0.2), 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.25s ease;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #00e8ba 0%, #00D4AA 50%, #00B894 100%);
+            box-shadow: 0 0 32px rgba(0, 212, 170, 0.35), 0 4px 16px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 160, 128, 0.1);
+            color: var(--green);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-radius: 10px;
+            padding: 14px 28px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: var(--font-sans);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.25s ease;
+        }
+        .btn-secondary:hover {
+            background: rgba(0, 160, 128, 0.2);
+            border-color: rgba(0, 212, 170, 0.5);
+            box-shadow: 0 0 20px rgba(0, 212, 170, 0.15);
+        }
+
+        .repo-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .repo-dropdown .btn-secondary {
+            font-family: var(--font-sans);
+        }
+        .repo-dropdown__menu {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            min-width: 180px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 6px;
+            backdrop-filter: blur(16px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+        }
+        .repo-dropdown.open .repo-dropdown__menu {
+            opacity: 1;
+            visibility: visible;
+        }
+        .repo-dropdown.open .btn-secondary svg:last-child {
+            transform: rotate(180deg);
+        }
+        .repo-dropdown__item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--green);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.15s ease;
+        }
+        .repo-dropdown__item:hover {
+            background: rgba(0, 212, 170, 0.1);
+        }
+        .footer-divider {
+            width: 40px;
+            height: 1px;
+            background: var(--border);
+            margin: 40px auto 20px;
+        }
+        .footer-logo {
+            display: block;
+            width: 28px;
+            height: 28px;
+            margin: 0 auto 8px;
+            opacity: 0.4;
+        }
+        .footer-built {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .footer-built a {
+            color: var(--green);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+        .footer-built a:hover { border-bottom-color: var(--green); }
+        .footer-links {
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 13px;
+        }
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .footer-links a:hover { color: var(--text-primary); }
+        .dot-sep { color: var(--border); }
+
+        /* ── Gradient Background Bands ─────────────── */
+        .gradient-band {
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%);
+        }
+
+        /* ── Staggered Fade-in ─────────────────────── */
+        .fade-in-stagger .fcard,
+        .fade-in-stagger .zen-pillar {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+            transition-delay: calc(var(--step-index, 0) * 0.08s);
+        }
+        .fade-in-stagger.visible .fcard,
+        .fade-in-stagger.visible .zen-pillar {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ── Showcase Segments ──────────────────────── */
+        .showcase-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: center;
+            padding: 56px 0;
+        }
+        .showcase-row--reverse .showcase-frame { order: -1; }
+
+        .showcase-frame {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+        }
+        .showcase-frame--green  { border-color: rgba(0, 212, 170, 0.3); }
+        .showcase-frame--purple { border-color: rgba(192, 132, 252, 0.3); }
+        .showcase-frame--blue   { border-color: rgba(56, 189, 248, 0.3); }
+        .showcase-frame--cyan   { border-color: rgba(34, 211, 238, 0.3); }
+        .showcase-frame--orange { border-color: rgba(245, 158, 11, 0.3); }
+
+        .showcase-titlebar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.15);
+        }
+        .showcase-titlebar__dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+        }
+        .showcase-titlebar__title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+        .showcase-body {
+            padding: 20px;
+        }
+
+        /* Mock chat messages */
+        .mock-msg {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            align-items: flex-end;
+        }
+        .mock-msg--out { justify-content: flex-end; }
+        .mock-msg__bubble {
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            line-height: 1.45;
+            max-width: 75%;
+        }
+        .mock-msg--in .mock-msg__bubble {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border-bottom-left-radius: 4px;
+        }
+        .mock-msg--out .mock-msg__bubble {
+            background: rgba(0, 212, 170, 0.15);
+            color: var(--text-primary);
+            border-bottom-right-radius: 4px;
+        }
+        .mock-msg__meta {
+            font-size: 9px;
+            color: var(--text-muted);
+            margin-top: 3px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .mock-input-bar {
+            display: flex;
+            gap: 8px;
+            padding: 10px;
+            border-top: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.1);
+        }
+        .mock-input-field {
+            flex: 1;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .mock-send-btn {
+            width: 28px; height: 28px;
+            border-radius: 8px;
+            background: rgba(0, 212, 170, 0.2);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Mock connection rows */
+        .mock-filter-bar {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .mock-filter-pill {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-family: var(--font-mono);
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+        .mock-filter-pill--active {
+            background: rgba(0, 212, 170, 0.12);
+            color: var(--green);
+            border-color: rgba(0, 212, 170, 0.3);
+        }
+        .mock-conn-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 0;
+            border-bottom: 1px solid rgba(58, 71, 89, 0.2);
+            font-size: 11px;
+        }
+        .mock-conn-row:last-child { border-bottom: none; }
+        .mock-conn-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .mock-conn-dot--online  { background: var(--green); box-shadow: 0 0 4px rgba(0,212,170,0.4); }
+        .mock-conn-dot--stale   { background: var(--orange); }
+        .mock-conn-dot--offline { background: var(--text-muted); opacity: 0.4; }
+        .mock-conn-name {
+            flex: 1;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 11px;
+        }
+        .mock-conn-hops {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+        .mock-conn-time {
+            font-size: 9px;
+            color: var(--text-muted);
+            min-width: 36px;
+            text-align: right;
+        }
+
+        /* Mock identity cards */
+        .mock-identity-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(34, 211, 238, 0.2);
+        }
+        .mock-identity-avatar {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .mock-identity-name {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+        .mock-identity-hash {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .mock-identity-list-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(58, 71, 89, 0.2);
+            font-size: 12px;
+        }
+        .mock-identity-list-item:last-child { border-bottom: none; }
+        .mock-identity-list-avatar {
+            width: 28px; height: 28px;
+            border-radius: 7px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        /* Mock interface cards */
+        .mock-iface-card {
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--border);
+        }
+        .mock-iface-card:last-child { margin-bottom: 0; }
+        .mock-iface-card--lora  { border-left-color: var(--orange); }
+        .mock-iface-card--tcp   { border-left-color: var(--green); }
+        .mock-iface-card--auto  { border-left-color: var(--blue); }
+        .mock-iface-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .mock-iface-name {
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--text-primary);
+        }
+        .mock-iface-status {
+            font-size: 9px;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-family: var(--font-mono);
+            letter-spacing: 0.5px;
+        }
+        .mock-iface-status--up {
+            background: rgba(0, 212, 170, 0.12);
+            color: var(--green);
+        }
+        .mock-iface-status--down {
+            background: rgba(255, 107, 107, 0.12);
+            color: var(--red);
+        }
+        .mock-iface-stats {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        /* ── Sparklines (Network Health) ───────────── */
+        .mock-sparkline {
+            width: 48px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        /* ── App Cards (Future Apps) ──────────────── */
+        .mock-app-card { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg-tertiary); border-radius: 10px; margin-bottom: 10px; }
+        .mock-app-card__icon { width: 36px; height: 36px; border-radius: 9px; border: 1px solid; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .mock-app-card__info { flex: 1; }
+        .mock-app-card__name { font-weight: 600; font-size: 12px; color: var(--text-primary); margin-bottom: 2px; }
+        .mock-app-card__desc { font-size: 10px; color: var(--text-muted); line-height: 1.4; }
+        .mock-app-card__badge { font-family: var(--font-mono); font-size: 8px; font-weight: 700; letter-spacing: 0.5px; color: var(--green); background: rgba(0, 212, 170, 0.1); border: 1px solid rgba(0, 212, 170, 0.2); border-radius: 4px; padding: 2px 6px; flex-shrink: 0; }
+
+        /* ── Announce Visual ───────────────────────── */
+        .announce-visual svg {
+            max-width: 320px;
+        }
+
+        /* ── Responsive ─────────────────────────────── */
+        @media (max-width: 768px) {
+            .container { padding: 0 20px; }
+            .feature-row {
+                grid-template-columns: 1fr;
+                gap: 32px;
+                padding: 48px 0;
+            }
+            .feature-row--reverse .feature-visual { order: 0; }
+            .feature-visual { order: -1 !important; }
+            .feature-visual svg { max-width: 240px; }
+            .centerpiece-inner { padding: 28px 20px; }
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            .stat-row { flex-direction: column; }
+            .stat-card { min-width: unset; }
+            .comparison-table { font-size: 12px; }
+            .showcase-row {
+                grid-template-columns: 1fr;
+                gap: 28px;
+                padding: 40px 0;
+            }
+            .showcase-row--reverse .showcase-frame { order: 0; }
+            .showcase-frame { order: -1 !important; }
+
+            .hero-title { letter-spacing: -0.5px; }
+        }
+        @media (min-width: 481px) and (max-width: 768px) {
+            .feature-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 480px) {
+            .hero-banner { padding: 100px 20px 60px; }
+            .centerpiece-stats { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 0: TITLE BANNER
+     ══════════════════════════════════════════════════════ -->
+<nav class="navbar" id="navbar">
+    <div class="navbar-left">
+        <a href="index.html">
+            <svg class="navbar-logo" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                <ellipse cx="11" cy="13.5" rx="8" ry="4"/>
+                <circle cx="7" cy="6.5" r="2.5"/>
+                <circle cx="5" cy="12" r="0.9"/>
+                <path d="M3 14l-1.5.5"/>
+                <path d="M19 13c1.5-1 2.5-4 2-6.5"/>
+            </svg>
+            <span class="navbar-title">Ratspeak</span>
+        </a>
+    </div>
+    <div class="navbar-right">
+        <a href="about.html" class="navbar-link navbar-link--active">About</a>
+        <a href="docs.html" class="navbar-link">Docs</a>
+        <a href="flash.html" class="navbar-link">Flash</a>
+        <a href="#" class="nr-btn" target="_blank" rel="noopener noreferrer">
+            GitHub
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17l10-10"/><path d="M7 7h10v10"/></svg>
+        </a>
+    </div>
+</nav>
+
+<section class="hero-banner" id="top">
+    <canvas id="meshCanvas"></canvas>
+    <div class="hero-content">
+        <h1 class="hero-title">The Network Is<br>the Vulnerability</h1>
+        <p class="hero-subtitle">A visual guide to Ratspeak &amp; the Reticulum stack &mdash; a cryptographic network that doesn&rsquo;t just patch the internet, it replaces it.</p>
+    </div>
+    <div class="scroll-hint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l5 5 5-5"/></svg>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 1: THE INTERNET WAS NEVER DESIGNED FOR YOU
+     ══════════════════════════════════════════════════════ -->
+<section class="container" style="padding-top: 48px; padding-bottom: 48px;">
+    <div class="feature-row fade-in">
+        <div>
+            <span class="section-num section-num--orange">01</span>
+            <h2 class="section-title">The Internet Wasn't<br>Designed for Us</h2>
+            <p class="section-body">The Internet's architecture requires surveillance. Every protocol leaks location &mdash; IP addresses are like street addresses, and TLS is a locked envelope with that address in permanent marker. Even VPNs just shift the trust problem. <strong>Someone always knows.</strong></p>
+            <div class="accent-line accent-line--orange"></div>
+        </div>
+        <div class="feature-visual">
+            <!-- Hub-and-spoke surveillance diagram -->
+            <svg viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="glow-s1" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="3" result="blur"/>
+                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <filter id="glow-s1-bright" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="5" result="blur"/>
+                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <!-- Particle paths: curved Béziers from each user toward hub -->
+                    <path id="spoke-tl" d="M55,38 C80,65 120,90 160,115"/>
+                    <path id="spoke-tr" d="M265,38 C240,65 200,90 160,115"/>
+                    <path id="spoke-bl" d="M48,195 C78,170 118,140 160,115"/>
+                    <path id="spoke-bc" d="M160,218 C160,180 160,150 160,115"/>
+                    <path id="spoke-br" d="M272,195 C242,170 202,140 160,115"/>
+                </defs>
+
+                <!-- Dashed spoke lines -->
+                <line x1="55" y1="38" x2="160" y2="115" stroke="var(--orange)" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.25"/>
+                <line x1="265" y1="38" x2="160" y2="115" stroke="var(--orange)" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.25"/>
+                <line x1="48" y1="195" x2="160" y2="115" stroke="var(--orange)" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.25"/>
+                <line x1="160" y1="218" x2="160" y2="115" stroke="var(--orange)" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.25"/>
+                <line x1="272" y1="195" x2="160" y2="115" stroke="var(--orange)" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.25"/>
+
+                <!-- Rotating surveillance rings -->
+                <circle cx="160" cy="115" r="22" fill="none" stroke="var(--orange)" stroke-width="0.8" stroke-dasharray="8,5,3,5" opacity="0.3">
+                    <animateTransform attributeName="transform" type="rotate" from="0 160 115" to="360 160 115" dur="15s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="160" cy="115" r="28" fill="none" stroke="var(--orange)" stroke-width="0.6" stroke-dasharray="5,8,3,8" opacity="0.2">
+                    <animateTransform attributeName="transform" type="rotate" from="360 160 115" to="0 160 115" dur="22s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- Hub eye — almond outline + pulsing pupil -->
+                <path d="M145,115 Q152,104 160,104 Q168,104 175,115 Q168,126 160,126 Q152,126 145,115" stroke="var(--red)" stroke-width="1.2" fill="none" opacity="0.6"/>
+                <circle cx="160" cy="115" r="4" fill="var(--red)" filter="url(#glow-s1)" opacity="0.5">
+                    <animate attributeName="opacity" values="0.5;1;0.5" dur="1.8s" repeatCount="indefinite"/>
+                    <animate attributeName="r" values="4;5.5;4" dur="1.8s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- Hub reception flash -->
+                <circle cx="160" cy="115" r="4" fill="none" stroke="var(--red)" stroke-width="1" opacity="0">
+                    <animate attributeName="r" values="4;18;18" keyTimes="0;0.25;1" dur="2.2s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.35;0;0" keyTimes="0;0.25;1" dur="2.2s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- Flowing data particles (user → hub, independent random timing) -->
+                <!-- TL particle: fires every 4.7s -->
+                <circle r="2.5" fill="var(--red)" filter="url(#glow-s1-bright)" opacity="0">
+                    <animateMotion dur="4.7s" repeatCount="indefinite" calcMode="linear"
+                        keyPoints="0;1;1" keyTimes="0;0.32;1">
+                        <mpath href="#spoke-tl"/>
+                    </animateMotion>
+                    <animate attributeName="opacity" dur="4.7s" repeatCount="indefinite"
+                        values="0;0.9;0.9;0;0" keyTimes="0;0.02;0.29;0.34;1"/>
+                </circle>
+                <!-- TR particle: fires every 6.3s -->
+                <circle r="2.5" fill="var(--red)" filter="url(#glow-s1-bright)" opacity="0">
+                    <animateMotion dur="6.3s" begin="1.3s" repeatCount="indefinite" calcMode="linear"
+                        keyPoints="0;1;1" keyTimes="0;0.29;1">
+                        <mpath href="#spoke-tr"/>
+                    </animateMotion>
+                    <animate attributeName="opacity" dur="6.3s" begin="1.3s" repeatCount="indefinite"
+                        values="0;0.9;0.9;0;0" keyTimes="0;0.02;0.26;0.31;1"/>
+                </circle>
+                <!-- BL particle: fires every 3.8s -->
+                <circle r="2.5" fill="var(--red)" filter="url(#glow-s1-bright)" opacity="0">
+                    <animateMotion dur="3.8s" begin="0.7s" repeatCount="indefinite" calcMode="linear"
+                        keyPoints="0;1;1" keyTimes="0;0.37;1">
+                        <mpath href="#spoke-bl"/>
+                    </animateMotion>
+                    <animate attributeName="opacity" dur="3.8s" begin="0.7s" repeatCount="indefinite"
+                        values="0;0.9;0.9;0;0" keyTimes="0;0.02;0.34;0.39;1"/>
+                </circle>
+                <!-- BC particle: fires every 7.1s -->
+                <circle r="2.5" fill="var(--red)" filter="url(#glow-s1-bright)" opacity="0">
+                    <animateMotion dur="7.1s" begin="2.0s" repeatCount="indefinite" calcMode="linear"
+                        keyPoints="0;1;1" keyTimes="0;0.24;1">
+                        <mpath href="#spoke-bc"/>
+                    </animateMotion>
+                    <animate attributeName="opacity" dur="7.1s" begin="2.0s" repeatCount="indefinite"
+                        values="0;0.9;0.9;0;0" keyTimes="0;0.02;0.21;0.26;1"/>
+                </circle>
+                <!-- BR particle: fires every 5.2s -->
+                <circle r="2.5" fill="var(--red)" filter="url(#glow-s1-bright)" opacity="0">
+                    <animateMotion dur="5.2s" begin="1.8s" repeatCount="indefinite" calcMode="linear"
+                        keyPoints="0;1;1" keyTimes="0;0.31;1">
+                        <mpath href="#spoke-br"/>
+                    </animateMotion>
+                    <animate attributeName="opacity" dur="5.2s" begin="1.8s" repeatCount="indefinite"
+                        values="0;0.9;0.9;0;0" keyTimes="0;0.02;0.28;0.33;1"/>
+                </circle>
+
+                <!-- User nodes — passive victims with gentle idle pulse -->
+                <circle cx="55" cy="38" r="3.5" fill="var(--orange)" opacity="0.5">
+                    <animate attributeName="opacity" values="0.4;0.6;0.4" dur="3s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="265" cy="38" r="3.5" fill="var(--orange)" opacity="0.5">
+                    <animate attributeName="opacity" values="0.4;0.6;0.4" dur="3.4s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="48" cy="195" r="3.5" fill="var(--orange)" opacity="0.5">
+                    <animate attributeName="opacity" values="0.4;0.6;0.4" dur="3.7s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="160" cy="218" r="3.5" fill="var(--orange)" opacity="0.5">
+                    <animate attributeName="opacity" values="0.4;0.6;0.4" dur="3.2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="272" cy="195" r="3.5" fill="var(--orange)" opacity="0.5">
+                    <animate attributeName="opacity" values="0.4;0.6;0.4" dur="3.5s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- IP address labels -->
+                <text x="55" y="28" font-family="var(--font-mono)" font-size="8" fill="var(--orange)" text-anchor="middle" opacity="0.45">203.0.113.7</text>
+                <text x="265" y="28" font-family="var(--font-mono)" font-size="8" fill="var(--orange)" text-anchor="middle" opacity="0.45">198.51.100.1</text>
+                <text x="48" y="210" font-family="var(--font-mono)" font-size="8" fill="var(--orange)" text-anchor="middle" opacity="0.45">192.168.1.5</text>
+                <text x="160" y="234" font-family="var(--font-mono)" font-size="8" fill="var(--orange)" text-anchor="middle" opacity="0.45">10.0.0.42</text>
+                <text x="272" y="210" font-family="var(--font-mono)" font-size="8" fill="var(--orange)" text-anchor="middle" opacity="0.45">172.16.3.8</text>
+
+                <!-- ISP / SERVER label -->
+                <text x="160" y="86" font-family="var(--font-mono)" font-size="8.5" fill="var(--orange)" text-anchor="middle" opacity="0.6">ISP / SERVER</text>
+            </svg>
+        </div>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 2: WHAT IF THE NETWORK WAS DIFFERENT?
+     ══════════════════════════════════════════════════════ -->
+<section class="container centerpiece gradient-band">
+    <div class="centerpiece-inner fade-in">
+        <div class="centerpiece-header">
+            <span class="section-num section-num--green">02</span>
+            <h2 class="section-title" style="text-align: center;">What If We Imagine<br>a New Network?</h2>
+            <p class="section-body" style="text-align: center; max-width: 600px; margin: 0 auto;">Reticulum doesn't just fix the internet. It changes it completely. Your entire footprint is a cryptographic key, not an IP address, no ISP involvement, just math. Meanwhile, packets in the network carry zero source address information.</p>
+        </div>
+
+        <!-- Identity Forge: horizontal diamond-flow SVG animation
+             8s cycle: seed(0s) → keys(2s) → hash(4.5s) → address(6s) → rest(8s)
+             Particles fade in/out at nodes; nodes flash only on arrival -->
+        <div class="centerpiece-flow">
+        <svg viewBox="0 0 580 210" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:620px;height:auto;display:block;margin:0 auto;">
+            <defs>
+                <filter id="glow-id" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="4" result="blur"/>
+                    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <filter id="glow-id-bright" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="6" result="blur"/>
+                    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <path id="path-e-x"  d="M80,105 C130,105 175,48 210,48"/>
+                <path id="path-e-ed" d="M80,105 C130,105 175,162 210,162"/>
+                <path id="path-x-s"  d="M230,48 C275,48 330,105 360,105"/>
+                <path id="path-ed-s" d="M230,162 C275,162 330,105 360,105"/>
+                <path id="path-s-a"  d="M380,105 L495,105"/>
+            </defs>
+
+            <!-- ═══ Dashed connection paths ═══ -->
+            <path d="M80,105 C130,105 175,48 210,48" fill="none" stroke="#00D4AA" stroke-width="1" stroke-dasharray="5 4" opacity="0.25"/>
+            <path d="M80,105 C130,105 175,162 210,162" fill="none" stroke="#00D4AA" stroke-width="1" stroke-dasharray="5 4" opacity="0.25"/>
+            <path d="M230,48 C275,48 330,105 360,105" fill="none" stroke="#00D4AA" stroke-width="1" stroke-dasharray="5 4" opacity="0.25"/>
+            <path d="M230,162 C275,162 330,105 360,105" fill="none" stroke="#00D4AA" stroke-width="1" stroke-dasharray="5 4" opacity="0.25"/>
+            <line x1="380" y1="105" x2="495" y2="105" stroke="#00D4AA" stroke-width="1" stroke-dasharray="5 4" opacity="0.25"/>
+
+            <!-- ═══ Rotating rings (independent decorative timing) ═══ -->
+            <circle cx="70" cy="105" r="16" fill="none" stroke="#00D4AA" stroke-width="0.8" stroke-dasharray="8 6 3 6" opacity="0.35">
+                <animateTransform attributeName="transform" type="rotate" from="0 70 105" to="360 70 105" dur="20s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="220" cy="48" r="13" fill="none" stroke="#00D4AA" stroke-width="0.8" stroke-dasharray="6 5 2 5" opacity="0.3">
+                <animateTransform attributeName="transform" type="rotate" from="360 220 48" to="0 220 48" dur="18s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="220" cy="162" r="13" fill="none" stroke="#00D4AA" stroke-width="0.8" stroke-dasharray="7 4 3 4" opacity="0.3">
+                <animateTransform attributeName="transform" type="rotate" from="0 220 162" to="360 220 162" dur="22s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="370" cy="105" r="15" fill="none" stroke="#00D4AA" stroke-width="0.8" stroke-dasharray="9 5 4 5" opacity="0.3">
+                <animateTransform attributeName="transform" type="rotate" from="0 370 105" to="360 370 105" dur="25s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="370" cy="105" r="9" fill="none" stroke="#00D4AA" stroke-width="0.6" stroke-dasharray="4 3 2 3" opacity="0.25">
+                <animateTransform attributeName="transform" type="rotate" from="360 370 105" to="0 370 105" dur="12s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="505" cy="105" r="17" fill="none" stroke="#00D4AA" stroke-width="1" stroke-dasharray="10 5 3 5" opacity="0.45">
+                <animateTransform attributeName="transform" type="rotate" from="0 505 105" to="360 505 105" dur="15s" repeatCount="indefinite"/>
+            </circle>
+
+            <!-- ═══ Cascading particles (8s cycle, keyPoints control)
+                 Seed emits at 0s → Keys at 2s → SHA at 4.5s → Address at 6s → rest → repeat
+                 Particles fade out at destination, fade in at source — no teleport ═══ -->
+
+            <!-- Seed → X25519: transit 0–2s -->
+            <circle r="2" fill="#00D4AA" filter="url(#glow-id)">
+                <animateMotion dur="8s" repeatCount="indefinite" calcMode="linear"
+                    keyPoints="0;1;1" keyTimes="0;0.25;1">
+                    <mpath href="#path-e-x"/>
+                </animateMotion>
+                <animate attributeName="opacity" dur="8s" repeatCount="indefinite"
+                    values="0.7;0.7;0;0" keyTimes="0;0.23;0.27;1"/>
+            </circle>
+
+            <!-- Seed → Ed25519: transit 0–2s (parallel with above) -->
+            <circle r="2" fill="#00D4AA" filter="url(#glow-id)">
+                <animateMotion dur="8s" repeatCount="indefinite" calcMode="linear"
+                    keyPoints="0;1;1" keyTimes="0;0.25;1">
+                    <mpath href="#path-e-ed"/>
+                </animateMotion>
+                <animate attributeName="opacity" dur="8s" repeatCount="indefinite"
+                    values="0.7;0.7;0;0" keyTimes="0;0.23;0.27;1"/>
+            </circle>
+
+            <!-- X25519 → SHA: transit 2–4.5s (slightly slower) -->
+            <circle r="2" fill="#00D4AA" filter="url(#glow-id)">
+                <animateMotion dur="8s" repeatCount="indefinite" calcMode="linear"
+                    keyPoints="0;0;1;1" keyTimes="0;0.25;0.5625;1">
+                    <mpath href="#path-x-s"/>
+                </animateMotion>
+                <animate attributeName="opacity" dur="8s" repeatCount="indefinite"
+                    values="0;0;0.65;0.65;0;0" keyTimes="0;0.23;0.26;0.54;0.58;1"/>
+            </circle>
+
+            <!-- Ed25519 → SHA: transit 2–4.5s (parallel, converging) -->
+            <circle r="2" fill="#00D4AA" filter="url(#glow-id)">
+                <animateMotion dur="8s" repeatCount="indefinite" calcMode="linear"
+                    keyPoints="0;0;1;1" keyTimes="0;0.25;0.5625;1">
+                    <mpath href="#path-ed-s"/>
+                </animateMotion>
+                <animate attributeName="opacity" dur="8s" repeatCount="indefinite"
+                    values="0;0;0.65;0.65;0;0" keyTimes="0;0.23;0.26;0.54;0.58;1"/>
+            </circle>
+
+            <!-- SHA → Address: transit 4.5–6s (fastest, straight line) -->
+            <circle r="2" fill="#00D4AA" filter="url(#glow-id)">
+                <animateMotion dur="8s" repeatCount="indefinite" calcMode="linear"
+                    keyPoints="0;0;1;1" keyTimes="0;0.5625;0.75;1">
+                    <mpath href="#path-s-a"/>
+                </animateMotion>
+                <animate attributeName="opacity" dur="8s" repeatCount="indefinite"
+                    values="0;0;0.8;0.8;0;0" keyTimes="0;0.54;0.57;0.73;0.77;1"/>
+            </circle>
+
+            <!-- ═══ Reception rings (staggered — each fires only when its particle arrives) ═══ -->
+
+            <!-- Seed: fires at t=0 (departure) -->
+            <circle cx="70" cy="105" r="6" fill="none" stroke="#00D4AA" stroke-width="1.5" opacity="0">
+                <animate attributeName="r" values="6;22;22" keyTimes="0;0.1;1" dur="8s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0.4;0;0" keyTimes="0;0.1;1" dur="8s" repeatCount="indefinite"/>
+            </circle>
+
+            <!-- X25519: fires at t=2s -->
+            <circle cx="220" cy="48" r="5" fill="none" stroke="#00D4AA" stroke-width="1.2" opacity="0">
+                <animate attributeName="r" values="5;5;5;18;18" keyTimes="0;0.24;0.25;0.35;1" dur="8s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0;0;0.35;0;0" keyTimes="0;0.24;0.25;0.35;1" dur="8s" repeatCount="indefinite"/>
+            </circle>
+
+            <!-- Ed25519: fires at t=2s -->
+            <circle cx="220" cy="162" r="5" fill="none" stroke="#00D4AA" stroke-width="1.2" opacity="0">
+                <animate attributeName="r" values="5;5;5;18;18" keyTimes="0;0.24;0.25;0.35;1" dur="8s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0;0;0.35;0;0" keyTimes="0;0.24;0.25;0.35;1" dur="8s" repeatCount="indefinite"/>
+            </circle>
+
+            <!-- SHA-256: fires at t=4.5s -->
+            <circle cx="370" cy="105" r="6" fill="none" stroke="#00D4AA" stroke-width="1.2" opacity="0">
+                <animate attributeName="r" values="6;6;6;22;22" keyTimes="0;0.55;0.5625;0.66;1" dur="8s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0;0;0.4;0;0" keyTimes="0;0.55;0.5625;0.66;1" dur="8s" repeatCount="indefinite"/>
+            </circle>
+
+            <!-- Address: fires at t=6s -->
+            <circle cx="505" cy="105" r="7" fill="none" stroke="#00D4AA" stroke-width="1.5" opacity="0">
+                <animate attributeName="r" values="7;7;7;24;24" keyTimes="0;0.74;0.75;0.85;1" dur="8s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0;0;0.5;0;0" keyTimes="0;0.74;0.75;0.85;1" dur="8s" repeatCount="indefinite"/>
+            </circle>
+
+            <!-- ═══ Core nodes (each flashes only at its moment in the cascade) ═══ -->
+
+            <!-- Seed: flashes at t=0 -->
+            <circle cx="70" cy="105" r="5" fill="#00D4AA" filter="url(#glow-id)">
+                <animate attributeName="r" values="5;9;5;5" keyTimes="0;0.03;0.1;1" dur="8s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0.7;1;0.7;0.7" keyTimes="0;0.03;0.1;1" dur="8s" repeatCount="indefinite"/>
+            </circle>
+
+            <!-- X25519: flashes at t=2s -->
+            <circle cx="220" cy="48" r="4.5" fill="#00D4AA" filter="url(#glow-id)">
+                <animate attributeName="r" values="4.5;4.5;8;4.5;4.5" keyTimes="0;0.24;0.28;0.34;1" dur="8s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0.65;0.65;1;0.65;0.65" keyTimes="0;0.24;0.28;0.34;1" dur="8s" repeatCount="indefinite"/>
+            </circle>
+
+            <!-- Ed25519: flashes at t=2s -->
+            <circle cx="220" cy="162" r="4.5" fill="#00D4AA" filter="url(#glow-id)">
+                <animate attributeName="r" values="4.5;4.5;8;4.5;4.5" keyTimes="0;0.24;0.28;0.34;1" dur="8s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0.65;0.65;1;0.65;0.65" keyTimes="0;0.24;0.28;0.34;1" dur="8s" repeatCount="indefinite"/>
+            </circle>
+
+            <!-- SHA-256: flashes at t=4.5s -->
+            <circle cx="370" cy="105" r="5" fill="#00D4AA" filter="url(#glow-id)">
+                <animate attributeName="r" values="5;5;9;5;5" keyTimes="0;0.55;0.59;0.65;1" dur="8s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0.7;0.7;1;0.7;0.7" keyTimes="0;0.55;0.59;0.65;1" dur="8s" repeatCount="indefinite"/>
+            </circle>
+
+            <!-- Address: flashes at t=6s -->
+            <circle cx="505" cy="105" r="6" fill="#00D4AA" filter="url(#glow-id-bright)">
+                <animate attributeName="r" values="6;6;10;6;6" keyTimes="0;0.74;0.78;0.84;1" dur="8s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0.85;0.85;1;0.85;0.85" keyTimes="0;0.74;0.78;0.84;1" dur="8s" repeatCount="indefinite"/>
+            </circle>
+
+            <!-- ═══ Text labels ═══ -->
+            <text x="70" y="82" text-anchor="middle" fill="#00D4AA" font-family="'IBM Plex Mono',monospace" font-size="9.5" font-weight="600" letter-spacing="1" opacity="0.9">RANDOM SEED</text>
+            <text x="70" y="130" text-anchor="middle" fill="#7a8a8a" font-family="'IBM Plex Mono',monospace" font-size="7.5" opacity="0.65">Device Entropy</text>
+
+            <text x="220" y="28" text-anchor="middle" fill="#00D4AA" font-family="'IBM Plex Mono',monospace" font-size="9" font-weight="600" letter-spacing="1" opacity="0.85">ENCRYPTION KEY</text>
+            <text x="220" y="70" text-anchor="middle" fill="#7a8a8a" font-family="'IBM Plex Mono',monospace" font-size="7.5" opacity="0.6">X25519 Keypair</text>
+
+            <text x="220" y="142" text-anchor="middle" fill="#00D4AA" font-family="'IBM Plex Mono',monospace" font-size="9" font-weight="600" letter-spacing="1" opacity="0.85">SIGNING KEY</text>
+            <text x="220" y="184" text-anchor="middle" fill="#7a8a8a" font-family="'IBM Plex Mono',monospace" font-size="7.5" opacity="0.6">Ed25519 Keypair</text>
+
+            <text x="370" y="82" text-anchor="middle" fill="#00D4AA" font-family="'IBM Plex Mono',monospace" font-size="9" font-weight="600" letter-spacing="1" opacity="0.85">FINGERPRINT</text>
+            <text x="370" y="130" text-anchor="middle" fill="#7a8a8a" font-family="'IBM Plex Mono',monospace" font-size="7.5" opacity="0.6">SHA-256 Hash</text>
+
+            <text x="505" y="82" text-anchor="middle" fill="#00D4AA" font-family="'IBM Plex Mono',monospace" font-size="10" font-weight="600" letter-spacing="1.5" opacity="1">YOUR ADDRESS</text>
+            <text x="505" y="130" text-anchor="middle" fill="#7a8a8a" font-family="'IBM Plex Mono',monospace" font-size="7.5" opacity="0.6">128-bit Identity</text>
+        </svg>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 3: ENCRYPTION IS GRAVITY
+     ══════════════════════════════════════════════════════ -->
+<section class="container" style="padding-top: 48px; padding-bottom: 48px;">
+    <div class="feature-row feature-row--reverse fade-in">
+        <div>
+            <span class="section-num section-num--green">03</span>
+            <h2 class="section-title">Encryption Is Gravity,<br>Not a Feature</h2>
+            <p class="section-body">Reticulum makes unencrypted communication <strong>impossible</strong>. Stripping encryption breaks the routing itself &mdash; as the entropy of the encrypted packets <em>is</em> the routing logic. You can't opt-out.</p>
+            <div class="stat-row">
+                <div class="stat-card">
+                    <div class="stat-card__num">3</div>
+                    <div class="stat-card__label">Packets to establish a fully encrypted link</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card__num">297</div>
+                    <div class="stat-card__label">Total bytes for link establishment</div>
+                </div>
+            </div>
+            <div class="accent-line accent-line--green"></div>
+        </div>
+        <div class="feature-visual">
+            <!-- Concentric encryption rings -->
+            <svg viewBox="0 0 320 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="glow-g" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="4" result="blur"/>
+                        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                    </filter>
+                </defs>
+                <circle cx="160" cy="140" r="110" fill="var(--green)" opacity="0.03"/>
+                <!-- Outer ring: HMAC -->
+                <circle cx="160" cy="140" r="105" stroke="var(--green)" stroke-width="0.8" fill="none" opacity="0.25" stroke-dasharray="8,5">
+                    <animateTransform attributeName="transform" type="rotate" values="0 160 140;360 160 140" dur="30s" repeatCount="indefinite"/>
+                </circle>
+                <text x="160" y="42" font-family="var(--font-mono)" font-size="10" fill="var(--green)" text-anchor="middle" opacity="0.55">HMAC-SHA256</text>
+                <!-- Middle ring: AES -->
+                <circle cx="160" cy="140" r="75" stroke="var(--green)" stroke-width="1" fill="none" opacity="0.35" stroke-dasharray="12,6">
+                    <animateTransform attributeName="transform" type="rotate" values="360 160 140;0 160 140" dur="22s" repeatCount="indefinite"/>
+                </circle>
+                <text x="160" y="72" font-family="var(--font-mono)" font-size="10" fill="var(--green)" text-anchor="middle" opacity="0.65">AES-256-CBC</text>
+                <!-- Inner ring: ECDH -->
+                <circle cx="160" cy="140" r="45" stroke="var(--green)" stroke-width="1.2" fill="none" opacity="0.45" stroke-dasharray="6,4">
+                    <animateTransform attributeName="transform" type="rotate" values="0 160 140;360 160 140" dur="15s" repeatCount="indefinite"/>
+                </circle>
+                <text x="160" y="100" font-family="var(--font-mono)" font-size="10" fill="var(--green)" text-anchor="middle" opacity="0.75">X25519 ECDH</text>
+                <!-- Gravity-well ring -->
+                <circle cx="160" cy="140" r="30" stroke="var(--green)" stroke-width="0.6" fill="none">
+                    <animate attributeName="r" values="33;27;33" dur="4s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.08;0.20;0.08" dur="4s" repeatCount="indefinite"/>
+                </circle>
+                <!-- Center glow pulse -->
+                <circle cx="160" cy="140" r="12" fill="var(--green)" filter="url(#glow-g)">
+                    <animate attributeName="r" values="10;16;10" dur="3s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.4;0.8;0.4" dur="3s" repeatCount="indefinite"/>
+                </circle>
+                <!-- Ed25519 signature label -->
+                <text x="160" y="230" font-family="var(--font-mono)" font-size="10" fill="var(--green)" text-anchor="middle" opacity="0.55">Ed25519 SIGNATURES</text>
+                <!-- Inward particles (curved paths — gravitational pull) -->
+                <circle r="2" fill="var(--green)" opacity="0.8">
+                    <animateMotion dur="3.2s" repeatCount="indefinite" path="M265,140 C230,100 190,165 160,140"/>
+                    <animate attributeName="opacity" values="0.8;0.3;0" dur="3.2s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="1.8" fill="var(--green)" opacity="0">
+                    <animateMotion dur="3.8s" repeatCount="indefinite" begin="1.2s" path="M55,140 C90,180 130,115 160,140"/>
+                    <animate attributeName="opacity" values="0;0.8;0.3" dur="3.8s" repeatCount="indefinite" begin="1.2s"/>
+                </circle>
+                <circle r="1.5" fill="var(--green)" opacity="0">
+                    <animateMotion dur="3.0s" repeatCount="indefinite" begin="2.5s" path="M160,245 C130,210 190,165 160,140"/>
+                    <animate attributeName="opacity" values="0;0.7;0.2" dur="3.0s" repeatCount="indefinite" begin="2.5s"/>
+                </circle>
+                <circle r="1.6" fill="var(--green)" opacity="0">
+                    <animateMotion dur="4.0s" repeatCount="indefinite" begin="0.7s" path="M70,45 C105,85 140,125 160,140"/>
+                    <animate attributeName="opacity" values="0;0.7;0.2" dur="4.0s" repeatCount="indefinite" begin="0.7s"/>
+                </circle>
+            </svg>
+        </div>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 4: IDENTITY WITHOUT AUTHORITY
+     ══════════════════════════════════════════════════════ -->
+<section class="container" style="padding-top: 48px; padding-bottom: 48px;">
+    <div class="feature-row fade-in">
+        <div>
+            <span class="section-num section-num--blue">04</span>
+            <h2 class="section-title">Identity Without Authority</h2>
+            <p class="section-body">Your identity is a 512-bit keypair you generate yourself. No registration, no servers, no authority. Portable across any medium, your identity follows you &mdash; only when you want it to.</p>
+            <p class="section-body" style="margin-top: 12px;">Generate as many as you want. Each is cryptographically independent and compromising one reveals nothing about the others.</p>
+            <div class="stat-row">
+                <div class="stat-card">
+                    <div class="stat-card__num">0</div>
+                    <div class="stat-card__label">Servers, tokens, or accounts required</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card__num">&infin;</div>
+                    <div class="stat-card__label">Identities &mdash; like wallets, use different ones for different purposes</div>
+                </div>
+            </div>
+            <div class="accent-line accent-line--blue"></div>
+        </div>
+        <div class="feature-visual">
+            <!-- Key + portability diagram -->
+            <svg viewBox="0 0 320 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="glow-b" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="4" result="blur"/>
+                        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                    </filter>
+                </defs>
+                <circle cx="160" cy="80" r="70" fill="var(--blue)" opacity="0.03"/>
+                <!-- Key bow -->
+                <circle cx="160" cy="55" r="22" stroke="var(--blue)" stroke-width="2" fill="none" opacity="0.6"/>
+                <circle cx="160" cy="55" r="10" stroke="var(--blue)" stroke-width="1.2" fill="none" opacity="0.3" stroke-dasharray="4,3"/>
+                <circle cx="160" cy="55" r="4" fill="var(--blue)" opacity="0.8" filter="url(#glow-b)">
+                    <animate attributeName="r" values="3.5;5.5;3.5" dur="2.5s" repeatCount="indefinite"/>
+                </circle>
+                <!-- Key shaft -->
+                <line x1="160" y1="77" x2="160" y2="140" stroke="var(--blue)" stroke-width="2" opacity="0.5" stroke-linecap="round"/>
+                <line x1="160" y1="118" x2="175" y2="118" stroke="var(--blue)" stroke-width="2" opacity="0.5" stroke-linecap="round"/>
+                <line x1="160" y1="130" x2="172" y2="130" stroke="var(--blue)" stroke-width="2" opacity="0.5" stroke-linecap="round"/>
+                <line x1="160" y1="140" x2="178" y2="140" stroke="var(--blue)" stroke-width="2" opacity="0.5" stroke-linecap="round"/>
+                <!-- Hash fragments -->
+                <text x="62" y="48" font-family="var(--font-mono)" font-size="8" fill="var(--blue)" opacity="0.25" transform="rotate(-10, 62, 48)">a7f3::bd</text>
+                <text x="212" y="52" font-family="var(--font-mono)" font-size="8" fill="var(--blue)" opacity="0.25" transform="rotate(8, 212, 52)">e2d1::9b</text>
+                <!-- Pulsing identity ring -->
+                <circle cx="160" cy="55" r="32" stroke="var(--blue)" stroke-width="0.8" fill="none" opacity="0.15">
+                    <animate attributeName="r" values="30;36;30" dur="3s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.15;0.35;0.15" dur="3s" repeatCount="indefinite"/>
+                </circle>
+                <!-- Scanning ring -->
+                <circle cx="160" cy="80" r="90" stroke="var(--blue)" stroke-width="0.6" fill="none" opacity="0.12" stroke-dasharray="8,6">
+                    <animateTransform attributeName="transform" type="rotate" values="0 160 80;360 160 80" dur="25s" repeatCount="indefinite"/>
+                </circle>
+                <!-- Transport portability: same hash connects to all -->
+                <text x="160" y="168" font-family="var(--font-mono)" font-size="10" fill="var(--blue)" text-anchor="middle" opacity="0.55">SAME IDENTITY, ANY MEDIUM</text>
+                <!-- Transport icons row -->
+                <line x1="160" y1="175" x2="60" y2="220" stroke="var(--blue)" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.3"/>
+                <line x1="160" y1="175" x2="120" y2="230" stroke="var(--blue)" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.3"/>
+                <line x1="160" y1="175" x2="200" y2="230" stroke="var(--blue)" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.3"/>
+                <line x1="160" y1="175" x2="260" y2="220" stroke="var(--blue)" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.3"/>
+                <text x="60" y="236" font-family="var(--font-mono)" font-size="10" fill="var(--blue)" text-anchor="middle" opacity="0.55">LoRa</text>
+                <text x="120" y="248" font-family="var(--font-mono)" font-size="10" fill="var(--blue)" text-anchor="middle" opacity="0.55">WiFi</text>
+                <text x="200" y="248" font-family="var(--font-mono)" font-size="10" fill="var(--blue)" text-anchor="middle" opacity="0.55">TCP</text>
+                <text x="260" y="236" font-family="var(--font-mono)" font-size="10" fill="var(--blue)" text-anchor="middle" opacity="0.55">Serial</text>
+                <circle cx="60" cy="220" r="4" fill="var(--blue)" opacity="0.5">
+                    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2.5s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="120" cy="230" r="4" fill="var(--blue)" opacity="0.5">
+                    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3s" repeatCount="indefinite" begin="0.5s"/>
+                </circle>
+                <circle cx="200" cy="230" r="4" fill="var(--blue)" opacity="0.5">
+                    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2.8s" repeatCount="indefinite" begin="1s"/>
+                </circle>
+                <circle cx="260" cy="220" r="4" fill="var(--blue)" opacity="0.5">
+                    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3.2s" repeatCount="indefinite" begin="0.3s"/>
+                </circle>
+            </svg>
+        </div>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 5: RUNS ON ANYTHING
+     ══════════════════════════════════════════════════════ -->
+<section class="container" style="padding-top: 48px; padding-bottom: 48px;">
+    <div class="feature-row feature-row--reverse fade-in">
+        <div>
+            <span class="section-num section-num--orange">05</span>
+            <h2 class="section-title">Runs on Anything.<br>Literally.</h2>
+            <p class="section-body">Reticulum is transport-agnostic. The same protocol, the same code, the same identity &mdash; over fiber, satellite, packet radio, WiFi, and more. A solar-powered field radio joins the same mesh as a fiber server.</p>
+            <div class="stat-row">
+                <div class="stat-card">
+                    <div class="stat-card__num">5 bps</div>
+                    <div class="stat-card__label">Minimum bandwidth &mdash; a solar radio is enough</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card__num">1 Gbps</div>
+                    <div class="stat-card__label">Same protocol, same code, no changes</div>
+                </div>
+            </div>
+            <div class="accent-line accent-line--orange"></div>
+        </div>
+        <div class="feature-visual">
+            <!-- Heterogeneous mesh topology diagram -->
+            <svg viewBox="0 0 360 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="glow-mesh" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="3" result="blur"/>
+                        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                    </filter>
+                </defs>
+
+                <!-- Connection lines with transport labels -->
+                <!-- Solar Radio --[LoRa]--> LoRa Node -->
+                <line x1="60" y1="70" x2="150" y2="110" stroke="var(--orange)" stroke-width="1.2" opacity="0.4" stroke-dasharray="6,4"/>
+                <text x="95" y="82" font-family="var(--font-mono)" font-size="8" fill="var(--orange)" opacity="0.6" transform="rotate(12, 95, 82)">LoRa</text>
+
+                <!-- LoRa Node --[LoRa]--> Laptop -->
+                <line x1="150" y1="110" x2="200" y2="170" stroke="var(--orange)" stroke-width="1.2" opacity="0.4" stroke-dasharray="6,4"/>
+                <text x="164" y="134" font-family="var(--font-mono)" font-size="8" fill="var(--orange)" opacity="0.6" transform="rotate(48, 164, 134)">LoRa</text>
+
+                <!-- Laptop --[WiFi]--> Phone -->
+                <line x1="200" y1="170" x2="120" y2="210" stroke="var(--blue)" stroke-width="1.2" opacity="0.4"/>
+                <text x="152" y="184" font-family="var(--font-mono)" font-size="8" fill="var(--blue)" opacity="0.6">WiFi</text>
+
+                <!-- Laptop --[TCP]--> Server -->
+                <line x1="200" y1="170" x2="310" y2="130" stroke="var(--green)" stroke-width="1.2" opacity="0.4"/>
+                <text x="258" y="143" font-family="var(--font-mono)" font-size="8" fill="var(--green)" opacity="0.6">TCP</text>
+
+                <!-- Phone --[BLE]--> Raspberry Pi -->
+                <line x1="120" y1="210" x2="80" y2="260" stroke="var(--cyan)" stroke-width="1.2" opacity="0.4" stroke-dasharray="4,3"/>
+                <text x="88" y="230" font-family="var(--font-mono)" font-size="8" fill="var(--cyan)" opacity="0.6">BLE</text>
+
+                <!-- Server --[TCP]--> Phone 2 -->
+                <line x1="310" y1="130" x2="300" y2="220" stroke="var(--green)" stroke-width="1.2" opacity="0.4"/>
+                <text x="312" y="178" font-family="var(--font-mono)" font-size="8" fill="var(--green)" opacity="0.6">TCP</text>
+
+                <!-- LoRa Node --[LoRa]--> Server (redundant long-range link) -->
+                <line x1="150" y1="110" x2="310" y2="130" stroke="var(--orange)" stroke-width="1" opacity="0.25" stroke-dasharray="8,6"/>
+                <text x="230" y="108" font-family="var(--font-mono)" font-size="7" fill="var(--orange)" opacity="0.4">LoRa</text>
+
+                <!-- Phone --[WiFi]--> Phone 2 (path diversity) -->
+                <line x1="120" y1="210" x2="300" y2="220" stroke="var(--blue)" stroke-width="0.8" opacity="0.2"/>
+                <text x="210" y="222" font-family="var(--font-mono)" font-size="7" fill="var(--blue)" opacity="0.35">WiFi</text>
+
+                <!-- Faint packets on redundant LoRa link -->
+                <circle r="1.5" fill="var(--orange)" opacity="0">
+                    <animateMotion dur="4s" repeatCount="indefinite" begin="0.5s" path="M150,110 L310,130"/>
+                    <animate attributeName="opacity" values="0;0.25;0" dur="4s" repeatCount="indefinite" begin="0.5s"/>
+                </circle>
+                <circle r="1.5" fill="var(--orange)" opacity="0">
+                    <animateMotion dur="4.5s" repeatCount="indefinite" begin="3s" path="M310,130 L150,110"/>
+                    <animate attributeName="opacity" values="0;0.25;0" dur="4.5s" repeatCount="indefinite" begin="3s"/>
+                </circle>
+                <!-- Faint packets on redundant WiFi link -->
+                <circle r="1.5" fill="var(--blue)" opacity="0">
+                    <animateMotion dur="4.2s" repeatCount="indefinite" begin="1.2s" path="M120,210 L300,220"/>
+                    <animate attributeName="opacity" values="0;0.2;0" dur="4.2s" repeatCount="indefinite" begin="1.2s"/>
+                </circle>
+                <circle r="1.5" fill="var(--blue)" opacity="0">
+                    <animateMotion dur="4.8s" repeatCount="indefinite" begin="3.5s" path="M300,220 L120,210"/>
+                    <animate attributeName="opacity" values="0;0.2;0" dur="4.8s" repeatCount="indefinite" begin="3.5s"/>
+                </circle>
+
+                <!-- Device nodes -->
+                <!-- Solar Radio -->
+                <circle cx="60" cy="70" r="16" fill="var(--orange)" opacity="0.06"/>
+                <circle cx="60" cy="70" r="5" fill="var(--orange)" opacity="0.7" filter="url(#glow-mesh)">
+                    <animate attributeName="opacity" values="0.5;0.9;0.5" dur="3s" repeatCount="indefinite"/>
+                </circle>
+                <text x="60" y="50" font-family="var(--font-mono)" font-size="9" fill="var(--orange)" text-anchor="middle" opacity="0.7">Solar Radio</text>
+
+                <!-- LoRa Node -->
+                <circle cx="150" cy="110" r="16" fill="var(--orange)" opacity="0.06"/>
+                <circle cx="150" cy="110" r="5" fill="var(--orange)" opacity="0.7" filter="url(#glow-mesh)">
+                    <animate attributeName="opacity" values="0.5;0.9;0.5" dur="2.8s" repeatCount="indefinite" begin="0.5s"/>
+                </circle>
+                <text x="150" y="94" font-family="var(--font-mono)" font-size="9" fill="var(--orange)" text-anchor="middle" opacity="0.7">LoRa Node</text>
+
+                <!-- Laptop -->
+                <circle cx="200" cy="170" r="18" fill="var(--blue)" opacity="0.06"/>
+                <circle cx="200" cy="170" r="6" fill="var(--blue)" opacity="0.7" filter="url(#glow-mesh)">
+                    <animate attributeName="opacity" values="0.5;0.9;0.5" dur="3.2s" repeatCount="indefinite" begin="1s"/>
+                </circle>
+                <text x="222" y="167" font-family="var(--font-mono)" font-size="9" fill="var(--blue)" opacity="0.7">Laptop</text>
+
+                <!-- Phone -->
+                <circle cx="120" cy="210" r="15" fill="var(--blue)" opacity="0.06"/>
+                <circle cx="120" cy="210" r="4.5" fill="var(--blue)" opacity="0.7" filter="url(#glow-mesh)"/>
+                <text x="120" y="200" font-family="var(--font-mono)" font-size="9" fill="var(--blue)" text-anchor="middle" opacity="0.7">Phone</text>
+
+                <!-- Raspberry Pi -->
+                <circle cx="80" cy="260" r="14" fill="var(--cyan)" opacity="0.06"/>
+                <circle cx="80" cy="260" r="4" fill="var(--cyan)" opacity="0.7" filter="url(#glow-mesh)"/>
+                <text x="80" y="250" font-family="var(--font-mono)" font-size="8" fill="var(--cyan)" text-anchor="middle" opacity="0.7">RPi</text>
+
+                <!-- Server -->
+                <circle cx="310" cy="130" r="18" fill="var(--green)" opacity="0.06"/>
+                <circle cx="310" cy="130" r="6" fill="var(--green)" opacity="0.7" filter="url(#glow-mesh)">
+                    <animate attributeName="opacity" values="0.6;1;0.6" dur="2.5s" repeatCount="indefinite" begin="0.3s"/>
+                </circle>
+                <text x="310" y="114" font-family="var(--font-mono)" font-size="9" fill="var(--green)" text-anchor="middle" opacity="0.7">Server</text>
+
+                <!-- Phone 2 -->
+                <circle cx="300" cy="220" r="14" fill="var(--green)" opacity="0.06"/>
+                <circle cx="300" cy="220" r="4" fill="var(--green)" opacity="0.7" filter="url(#glow-mesh)"/>
+                <text x="300" y="240" font-family="var(--font-mono)" font-size="9" fill="var(--green)" text-anchor="middle" opacity="0.7">Phone 2</text>
+
+                <!-- Animated packets — bidirectional across all peers -->
+                <!-- Solar Radio → LoRa Node -->
+                <circle r="2.5" fill="var(--orange)" opacity="0">
+                    <animateMotion dur="2.5s" repeatCount="indefinite" path="M60,70 L150,110"/>
+                    <animate attributeName="opacity" values="0;0.8;0" dur="2.5s" repeatCount="indefinite"/>
+                </circle>
+                <!-- LoRa Node → Solar Radio -->
+                <circle r="2" fill="var(--orange)" opacity="0">
+                    <animateMotion dur="2.8s" repeatCount="indefinite" begin="1.8s" path="M150,110 L60,70"/>
+                    <animate attributeName="opacity" values="0;0.7;0" dur="2.8s" repeatCount="indefinite" begin="1.8s"/>
+                </circle>
+                <!-- LoRa Node → Laptop -->
+                <circle r="2" fill="var(--orange)" opacity="0">
+                    <animateMotion dur="2s" repeatCount="indefinite" begin="0.6s" path="M150,110 L200,170"/>
+                    <animate attributeName="opacity" values="0;0.8;0" dur="2s" repeatCount="indefinite" begin="0.6s"/>
+                </circle>
+                <!-- Laptop → Server -->
+                <circle r="2" fill="var(--green)" opacity="0">
+                    <animateMotion dur="2.2s" repeatCount="indefinite" begin="1.4s" path="M200,170 L310,130"/>
+                    <animate attributeName="opacity" values="0;0.8;0" dur="2.2s" repeatCount="indefinite" begin="1.4s"/>
+                </circle>
+                <!-- Server → Laptop -->
+                <circle r="2" fill="var(--green)" opacity="0">
+                    <animateMotion dur="2.4s" repeatCount="indefinite" begin="3.2s" path="M310,130 L200,170"/>
+                    <animate attributeName="opacity" values="0;0.8;0" dur="2.4s" repeatCount="indefinite" begin="3.2s"/>
+                </circle>
+                <!-- Phone → Laptop -->
+                <circle r="2" fill="var(--blue)" opacity="0">
+                    <animateMotion dur="2s" repeatCount="indefinite" begin="0.8s" path="M120,210 L200,170"/>
+                    <animate attributeName="opacity" values="0;0.7;0" dur="2s" repeatCount="indefinite" begin="0.8s"/>
+                </circle>
+                <!-- Laptop → Phone -->
+                <circle r="2" fill="var(--blue)" opacity="0">
+                    <animateMotion dur="2.3s" repeatCount="indefinite" begin="2.6s" path="M200,170 L120,210"/>
+                    <animate attributeName="opacity" values="0;0.7;0" dur="2.3s" repeatCount="indefinite" begin="2.6s"/>
+                </circle>
+                <!-- Phone → RPi -->
+                <circle r="1.5" fill="var(--cyan)" opacity="0">
+                    <animateMotion dur="1.8s" repeatCount="indefinite" begin="1.5s" path="M120,210 L80,260"/>
+                    <animate attributeName="opacity" values="0;0.6;0" dur="1.8s" repeatCount="indefinite" begin="1.5s"/>
+                </circle>
+                <!-- Phone 2 → Server -->
+                <circle r="2" fill="var(--green)" opacity="0">
+                    <animateMotion dur="2.5s" repeatCount="indefinite" begin="0.4s" path="M300,220 L310,130"/>
+                    <animate attributeName="opacity" values="0;0.7;0" dur="2.5s" repeatCount="indefinite" begin="0.4s"/>
+                </circle>
+                <!-- Server → Phone 2 -->
+                <circle r="2" fill="var(--green)" opacity="0">
+                    <animateMotion dur="2.3s" repeatCount="indefinite" begin="2.0s" path="M310,130 L300,220"/>
+                    <animate attributeName="opacity" values="0;0.7;0" dur="2.3s" repeatCount="indefinite" begin="2.0s"/>
+                </circle>
+            </svg>
+        </div>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 6: HOW NODES FIND EACH OTHER
+     ══════════════════════════════════════════════════════ -->
+<section class="container" style="padding-top: 48px; padding-bottom: 48px;">
+    <div class="feature-row fade-in">
+        <div>
+            <span class="section-num section-num--cyan">06</span>
+            <h2 class="section-title">How Peer Discovery Works</h2>
+            <p class="section-body">No directory, no DNS, no server to lookup. Instead, peers <em>announce</em> themselves &mdash; broadcasting a cryptographic proof of life. The announce ripples outward through the mesh. Peers record the path back, organically mapping and optimizing the best routes. No coordination, no control.</p>
+            <div class="stat-row">
+                <div class="stat-card">
+                    <div class="stat-card__num" style="color: var(--cyan);">128</div>
+                    <div class="stat-card__label">Maximum announce hops*</div>
+                    <div style="font-size: 8px; opacity: 0.35; margin-top: 4px; font-family: var(--font-mono);">*Compared to Meshtastic's 7</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card__num" style="color: var(--cyan);">2%</div>
+                    <div class="stat-card__label">Maximum bandwidth used for announces</div>
+                </div>
+            </div>
+            <div class="accent-line accent-line--cyan"></div>
+        </div>
+        <div class="feature-visual announce-visual">
+            <!-- Announce Ripple Animation -->
+            <svg viewBox="0 0 320 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="glow-ann" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="4" result="blur"/>
+                        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                    </filter>
+                </defs>
+
+                <!-- Central announcing node -->
+                <circle cx="160" cy="130" r="7" fill="var(--cyan)" opacity="0.9" filter="url(#glow-ann)">
+                    <animate attributeName="opacity" values="0.7;1;0.7" dur="4s" repeatCount="indefinite"/>
+                </circle>
+                <text x="160" y="118" font-family="var(--font-mono)" font-size="9" fill="var(--cyan)" text-anchor="middle" opacity="0.7">ANNOUNCE</text>
+
+                <!-- Expanding ripple ring 1 -->
+                <circle cx="160" cy="130" r="0" stroke="var(--cyan)" stroke-width="1" fill="none" stroke-dasharray="6,4">
+                    <animate attributeName="r" values="0;180" dur="4s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.5;0" dur="4s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- Expanding ripple ring 2 (staggered) -->
+                <circle cx="160" cy="130" r="0" stroke="var(--cyan)" stroke-width="0.8" fill="none" stroke-dasharray="6,4">
+                    <animate attributeName="r" values="0;180" dur="4s" repeatCount="indefinite" begin="1s"/>
+                    <animate attributeName="opacity" values="0.4;0" dur="4s" repeatCount="indefinite" begin="1s"/>
+                </circle>
+
+                <!-- Transport node 1 (top-left) -->
+                <circle cx="80" cy="70" r="5" fill="var(--cyan)" opacity="0.3">
+                    <animate attributeName="opacity" values="0.3;0.9;0.6" dur="1.5s" begin="2.2s" repeatCount="indefinite"/>
+                </circle>
+                <text x="80" y="56" font-family="var(--font-mono)" font-size="7" fill="var(--cyan)" text-anchor="middle" opacity="0">
+                    PATH STORED
+                    <animate attributeName="opacity" values="0;0.6;0.5" dur="1.5s" begin="2.5s" repeatCount="indefinite"/>
+                </text>
+
+                <!-- Transport node 2 (top-right) -->
+                <circle cx="260" cy="80" r="5" fill="var(--cyan)" opacity="0.3">
+                    <animate attributeName="opacity" values="0.3;0.9;0.6" dur="1.5s" begin="2.5s" repeatCount="indefinite"/>
+                </circle>
+                <text x="260" y="66" font-family="var(--font-mono)" font-size="7" fill="var(--cyan)" text-anchor="middle" opacity="0">
+                    PATH STORED
+                    <animate attributeName="opacity" values="0;0.6;0.5" dur="1.5s" begin="2.8s" repeatCount="indefinite"/>
+                </text>
+                <!-- Secondary ripple from node 2 -->
+                <circle cx="260" cy="80" r="0" stroke="var(--cyan)" stroke-width="0.6" fill="none" opacity="0">
+                    <animate attributeName="r" values="0;50" dur="2s" begin="2.8s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.3;0" dur="2s" begin="2.8s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- Transport node 3 (bottom-left) -->
+                <circle cx="50" cy="180" r="5" fill="var(--cyan)" opacity="0.3">
+                    <animate attributeName="opacity" values="0.3;0.9;0.6" dur="1.5s" begin="2.7s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- Transport node 4 (bottom-right) -->
+                <circle cx="280" cy="190" r="5" fill="var(--cyan)" opacity="0.3">
+                    <animate attributeName="opacity" values="0.3;0.9;0.6" dur="1.5s" begin="3.0s" repeatCount="indefinite"/>
+                </circle>
+                <!-- Secondary ripple from node 4 -->
+                <circle cx="280" cy="190" r="0" stroke="var(--cyan)" stroke-width="0.6" fill="none" opacity="0">
+                    <animate attributeName="r" values="0;50" dur="2s" begin="3.3s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.3;0" dur="2s" begin="3.3s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- Transport node 5 (bottom-center) -->
+                <circle cx="160" cy="240" r="5" fill="var(--cyan)" opacity="0.3">
+                    <animate attributeName="opacity" values="0.3;0.9;0.6" dur="1.5s" begin="2.4s" repeatCount="indefinite"/>
+                </circle>
+                <text x="160" y="226" font-family="var(--font-mono)" font-size="7" fill="var(--cyan)" text-anchor="middle" opacity="0">
+                    PATH STORED
+                    <animate attributeName="opacity" values="0;0.6;0.5" dur="1.5s" begin="2.7s" repeatCount="indefinite"/>
+                </text>
+            </svg>
+        </div>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 7: FROM NETWORK TO APPLICATION (LXMF BRIDGE)
+     ══════════════════════════════════════════════════════ -->
+<section class="container" style="padding-top: 48px; padding-bottom: 48px;">
+    <div class="feature-row feature-row--reverse fade-in">
+        <div>
+            <span class="section-num section-num--purple">07</span>
+            <h2 class="section-title">Application<br>Layer</h2>
+            <p class="section-body">Reticulum provides the network layer &mdash; cryptographic identity, encrypted transport, source anonymity. But a network layer alone doesn't send messages, share files, or deliver to offline nodes.</p>
+            <p class="section-body" style="margin-top: 12px;">That's where LXMF comes in. The Lightweight Extensible Message Format is an application-layer protocol built entirely on Reticulum primitives. Think of it like email built on TCP &mdash; except every message is encrypted, authenticated, and carries no sender address by default.</p>
+            <div class="stat-row">
+                <div class="stat-card">
+                    <div class="stat-card__num">111</div>
+                    <div class="stat-card__label">Bytes total overhead per encrypted message</div>
+                </div>
+            </div>
+            <div class="accent-line accent-line--purple"></div>
+        </div>
+        <div class="feature-visual">
+            <!-- Four-corner convergence: message assembly animation -->
+            <svg viewBox="0 0 320 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="glow-lxmf" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="4" result="blur"/>
+                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <filter id="glow-lxmf-bright" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="6" result="blur"/>
+                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <!-- Corner-to-center Bezier paths -->
+                    <path id="lxmf-tl" d="M40,60 C100,55 120,95 160,120"/>
+                    <path id="lxmf-tr" d="M280,60 C220,55 200,95 160,120"/>
+                    <path id="lxmf-bl" d="M40,180 C100,185 120,145 160,120"/>
+                    <path id="lxmf-br" d="M280,180 C220,185 200,145 160,120"/>
+                    <!-- Launch path (center → bottom) -->
+                    <path id="lxmf-launch" d="M160,120 L160,260"/>
+                </defs>
+
+                <!-- Top label -->
+                <text x="160" y="18" text-anchor="middle" font-family="var(--font-mono)" font-size="9" fill="#C084FC" opacity="0.4" letter-spacing="2">LXMF MESSAGE</text>
+
+                <!-- Dashed structural lines (corners → center) -->
+                <path d="M40,60 C100,55 120,95 160,120" stroke="#C084FC" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.2"/>
+                <path d="M280,60 C220,55 200,95 160,120" stroke="#C084FC" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.2"/>
+                <path d="M40,180 C100,185 120,145 160,120" stroke="#C084FC" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.2"/>
+                <path d="M280,180 C220,185 200,145 160,120" stroke="#C084FC" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.2"/>
+                <!-- Dashed vertical line (center → bottom) -->
+                <line x1="160" y1="120" x2="160" y2="260" stroke="#C084FC" stroke-width="0.8" stroke-dasharray="5,4" opacity="0.15"/>
+
+                <!-- Corner stations -->
+                <!-- Timestamp (top-left) -->
+                <circle cx="40" cy="60" r="4" fill="#C084FC" filter="url(#glow-lxmf)" opacity="0.6"/>
+                <text x="40" y="42" text-anchor="middle" font-family="var(--font-mono)" font-size="8" fill="#C084FC" opacity="0.7">TIMESTAMP</text>
+                <text x="40" y="78" text-anchor="middle" font-family="var(--font-mono)" font-size="9" font-weight="bold" fill="#C084FC" opacity="0.9">8B</text>
+                <!-- Signature (top-right) -->
+                <circle cx="280" cy="60" r="4" fill="#C084FC" filter="url(#glow-lxmf)" opacity="0.6"/>
+                <text x="280" y="42" text-anchor="middle" font-family="var(--font-mono)" font-size="8" fill="#C084FC" opacity="0.7">SIGNATURE</text>
+                <text x="280" y="78" text-anchor="middle" font-family="var(--font-mono)" font-size="9" font-weight="bold" fill="#C084FC" opacity="0.9">64B</text>
+                <!-- Encryption (bottom-left) -->
+                <circle cx="40" cy="180" r="4" fill="#C084FC" filter="url(#glow-lxmf)" opacity="0.6"/>
+                <text x="40" y="198" text-anchor="middle" font-family="var(--font-mono)" font-size="8" fill="#C084FC" opacity="0.7">ENCRYPTION</text>
+                <text x="40" y="210" text-anchor="middle" font-family="var(--font-mono)" font-size="9" font-weight="bold" fill="#C084FC" opacity="0.9">32B</text>
+                <!-- E2E Header (bottom-right) -->
+                <circle cx="280" cy="180" r="4" fill="#C084FC" filter="url(#glow-lxmf)" opacity="0.6"/>
+                <text x="280" y="198" text-anchor="middle" font-family="var(--font-mono)" font-size="8" fill="#C084FC" opacity="0.7">E2E HEADER</text>
+                <text x="280" y="210" text-anchor="middle" font-family="var(--font-mono)" font-size="9" font-weight="bold" fill="#C084FC" opacity="0.9">7B</text>
+
+                <!-- Central payload core (idle pulse) -->
+                <text x="160" y="102" text-anchor="middle" font-family="var(--font-mono)" font-size="8" fill="#C084FC" opacity="0.5">PAYLOAD</text>
+                <circle cx="160" cy="120" r="6" fill="#C084FC" filter="url(#glow-lxmf)" opacity="0.5">
+                    <animate attributeName="r" values="6;10;6" dur="3s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.5;0.8;0.5" dur="3s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- Station flash rings (expand on particle departure) -->
+                <!-- Timestamp flash (t=0s) -->
+                <circle cx="40" cy="60" r="4" fill="none" stroke="#C084FC" stroke-width="1" opacity="0">
+                    <animate attributeName="r" dur="10s" repeatCount="indefinite" values="4;18;18;18" keyTimes="0;0.04;0.06;1"/>
+                    <animate attributeName="opacity" dur="10s" repeatCount="indefinite" values="0.4;0;0;0" keyTimes="0;0.05;0.06;1"/>
+                </circle>
+                <!-- Signature flash (t=1.5s) -->
+                <circle cx="280" cy="60" r="4" fill="none" stroke="#C084FC" stroke-width="1" opacity="0">
+                    <animate attributeName="r" dur="10s" repeatCount="indefinite" values="4;4;18;18;18" keyTimes="0;0.15;0.19;0.21;1"/>
+                    <animate attributeName="opacity" dur="10s" repeatCount="indefinite" values="0;0.4;0;0;0" keyTimes="0;0.15;0.20;0.21;1"/>
+                </circle>
+                <!-- Encryption flash (t=3.0s) -->
+                <circle cx="40" cy="180" r="4" fill="none" stroke="#C084FC" stroke-width="1" opacity="0">
+                    <animate attributeName="r" dur="10s" repeatCount="indefinite" values="4;4;18;18;18" keyTimes="0;0.30;0.34;0.36;1"/>
+                    <animate attributeName="opacity" dur="10s" repeatCount="indefinite" values="0;0.4;0;0;0" keyTimes="0;0.30;0.35;0.36;1"/>
+                </circle>
+                <!-- E2E flash (t=4.5s) -->
+                <circle cx="280" cy="180" r="4" fill="none" stroke="#C084FC" stroke-width="1" opacity="0">
+                    <animate attributeName="r" dur="10s" repeatCount="indefinite" values="4;4;18;18;18" keyTimes="0;0.45;0.49;0.51;1"/>
+                    <animate attributeName="opacity" dur="10s" repeatCount="indefinite" values="0;0.4;0;0;0" keyTimes="0;0.45;0.50;0.51;1"/>
+                </circle>
+
+                <!-- Traveling particles (corners → center) -->
+                <!-- Timestamp particle (0s → 1s) -->
+                <circle r="3" fill="#C084FC" filter="url(#glow-lxmf-bright)" opacity="0">
+                    <animateMotion dur="10s" repeatCount="indefinite" calcMode="linear" keyPoints="0;1;1" keyTimes="0;0.10;1">
+                        <mpath href="#lxmf-tl"/>
+                    </animateMotion>
+                    <animate attributeName="opacity" dur="10s" repeatCount="indefinite" values="0;0.9;0.9;0;0" keyTimes="0;0.01;0.09;0.11;1"/>
+                </circle>
+                <!-- Signature particle (1.5s → 2.5s) -->
+                <circle r="3" fill="#C084FC" filter="url(#glow-lxmf-bright)" opacity="0">
+                    <animateMotion dur="10s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.15;0.25;1">
+                        <mpath href="#lxmf-tr"/>
+                    </animateMotion>
+                    <animate attributeName="opacity" dur="10s" repeatCount="indefinite" values="0;0;0.9;0.9;0;0" keyTimes="0;0.14;0.16;0.24;0.26;1"/>
+                </circle>
+                <!-- Encryption particle (3s → 4s) -->
+                <circle r="3" fill="#C084FC" filter="url(#glow-lxmf-bright)" opacity="0">
+                    <animateMotion dur="10s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.30;0.40;1">
+                        <mpath href="#lxmf-bl"/>
+                    </animateMotion>
+                    <animate attributeName="opacity" dur="10s" repeatCount="indefinite" values="0;0;0.9;0.9;0;0" keyTimes="0;0.29;0.31;0.39;0.41;1"/>
+                </circle>
+                <!-- E2E particle (4.5s → 5.5s) -->
+                <circle r="3" fill="#C084FC" filter="url(#glow-lxmf-bright)" opacity="0">
+                    <animateMotion dur="10s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.45;0.55;1">
+                        <mpath href="#lxmf-br"/>
+                    </animateMotion>
+                    <animate attributeName="opacity" dur="10s" repeatCount="indefinite" values="0;0;0.9;0.9;0;0" keyTimes="0;0.44;0.46;0.54;0.56;1"/>
+                </circle>
+
+                <!-- Concentric assembly rings (materialize on particle arrival) -->
+                <!-- Timestamp ring r=24 (arrives t=1s) -->
+                <circle cx="160" cy="120" r="24" fill="none" stroke="#C084FC" stroke-width="0.8" stroke-dasharray="6,4" opacity="0">
+                    <animate attributeName="opacity" dur="10s" repeatCount="indefinite" values="0;0;0.4;0.4;0;0" keyTimes="0;0.09;0.12;0.83;0.86;1"/>
+                    <animateTransform attributeName="transform" type="rotate" from="0 160 120" to="-360 160 120" dur="12s" repeatCount="indefinite"/>
+                </circle>
+                <!-- Signature ring r=50 (arrives t=2.5s) -->
+                <circle cx="160" cy="120" r="50" fill="none" stroke="#C084FC" stroke-width="0.8" stroke-dasharray="10,6" opacity="0">
+                    <animate attributeName="opacity" dur="10s" repeatCount="indefinite" values="0;0;0.35;0.35;0;0" keyTimes="0;0.24;0.27;0.83;0.86;1"/>
+                    <animateTransform attributeName="transform" type="rotate" from="0 160 120" to="360 160 120" dur="18s" repeatCount="indefinite"/>
+                </circle>
+                <!-- Encryption ring r=36 (arrives t=4s) -->
+                <circle cx="160" cy="120" r="36" fill="none" stroke="#C084FC" stroke-width="0.8" stroke-dasharray="8,5" opacity="0">
+                    <animate attributeName="opacity" dur="10s" repeatCount="indefinite" values="0;0;0.4;0.4;0;0" keyTimes="0;0.39;0.42;0.83;0.86;1"/>
+                    <animateTransform attributeName="transform" type="rotate" from="0 160 120" to="-360 160 120" dur="15s" repeatCount="indefinite"/>
+                </circle>
+                <!-- E2E ring r=16 (arrives t=5.5s) -->
+                <circle cx="160" cy="120" r="16" fill="none" stroke="#C084FC" stroke-width="0.8" stroke-dasharray="4,4" opacity="0">
+                    <animate attributeName="opacity" dur="10s" repeatCount="indefinite" values="0;0;0.45;0.45;0;0" keyTimes="0;0.54;0.57;0.83;0.86;1"/>
+                    <animateTransform attributeName="transform" type="rotate" from="0 160 120" to="360 160 120" dur="9s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- Assembly completion (t=6s) -->
+                <!-- Center flash ring -->
+                <circle cx="160" cy="120" r="6" fill="none" stroke="#C084FC" stroke-width="1.5" opacity="0">
+                    <animate attributeName="r" dur="10s" repeatCount="indefinite" values="6;6;30;30;30" keyTimes="0;0.59;0.63;0.65;1"/>
+                    <animate attributeName="opacity" dur="10s" repeatCount="indefinite" values="0;0;0.5;0;0" keyTimes="0;0.59;0.60;0.64;1"/>
+                </circle>
+                <!-- Core brightens -->
+                <circle cx="160" cy="120" r="6" fill="#C084FC" filter="url(#glow-lxmf-bright)" opacity="0">
+                    <animate attributeName="opacity" dur="10s" repeatCount="indefinite" values="0;0;0.7;0.7;0;0" keyTimes="0;0.59;0.62;0.83;0.86;1"/>
+                </circle>
+                <!-- "111 BYTES" hero label -->
+                <text x="160" y="142" text-anchor="middle" font-family="var(--font-mono)" font-size="11" font-weight="bold" fill="#C084FC" opacity="0">
+                    <animate attributeName="opacity" dur="10s" repeatCount="indefinite" values="0;0;1;1;0;0" keyTimes="0;0.59;0.62;0.83;0.86;1"/>
+                    111 BYTES
+                </text>
+
+                <!-- Protocol layer ellipses -->
+                <!-- Reticulum (green) -->
+                <ellipse cx="160" cy="210" rx="30" ry="8" fill="none" stroke="#00D4AA" stroke-width="0.8" stroke-dasharray="6,4" opacity="0.3">
+                    <animateTransform attributeName="transform" type="rotate" from="0 160 210" to="360 160 210" dur="20s" repeatCount="indefinite"/>
+                </ellipse>
+                <text x="160" y="214" text-anchor="middle" font-family="var(--font-mono)" font-size="7" fill="#00D4AA" opacity="0.5">RETICULUM</text>
+                <!-- Reticulum flash (t=7.5s) -->
+                <ellipse cx="160" cy="210" rx="30" ry="8" fill="none" stroke="#00D4AA" stroke-width="2" opacity="0">
+                    <animate attributeName="opacity" dur="10s" repeatCount="indefinite" values="0;0;0.7;0;0" keyTimes="0;0.74;0.76;0.79;1"/>
+                    <animate attributeName="rx" dur="10s" repeatCount="indefinite" values="30;30;40;40;30" keyTimes="0;0.74;0.78;0.79;1"/>
+                    <animate attributeName="ry" dur="10s" repeatCount="indefinite" values="8;8;12;12;8" keyTimes="0;0.74;0.78;0.79;1"/>
+                </ellipse>
+                <!-- Transport (orange) -->
+                <ellipse cx="160" cy="245" rx="35" ry="9" fill="none" stroke="#F59E0B" stroke-width="0.8" stroke-dasharray="8,5" opacity="0.3">
+                    <animateTransform attributeName="transform" type="rotate" from="360 160 245" to="0 160 245" dur="25s" repeatCount="indefinite"/>
+                </ellipse>
+                <text x="160" y="249" text-anchor="middle" font-family="var(--font-mono)" font-size="7" fill="#F59E0B" opacity="0.5">TRANSPORT</text>
+                <!-- Transport flash (t=8.0s) -->
+                <ellipse cx="160" cy="245" rx="35" ry="9" fill="none" stroke="#F59E0B" stroke-width="2" opacity="0">
+                    <animate attributeName="opacity" dur="10s" repeatCount="indefinite" values="0;0;0.7;0;0" keyTimes="0;0.79;0.81;0.84;1"/>
+                    <animate attributeName="rx" dur="10s" repeatCount="indefinite" values="35;35;45;45;35" keyTimes="0;0.79;0.83;0.84;1"/>
+                    <animate attributeName="ry" dur="10s" repeatCount="indefinite" values="9;9;13;13;9" keyTimes="0;0.79;0.83;0.84;1"/>
+                </ellipse>
+
+                <!-- Launch particle (t=7s → 8s, travels center → bottom through both rings) -->
+                <circle r="3" fill="#C084FC" filter="url(#glow-lxmf-bright)" opacity="0">
+                    <animateMotion dur="10s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.70;0.80;1">
+                        <mpath href="#lxmf-launch"/>
+                    </animateMotion>
+                    <animate attributeName="opacity" dur="10s" repeatCount="indefinite" values="0;0;0.9;0.9;0;0" keyTimes="0;0.69;0.71;0.79;0.81;1"/>
+                </circle>
+            </svg>
+        </div>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 8: MESSAGES THAT WAIT
+     ══════════════════════════════════════════════════════ -->
+<section class="container" style="padding-top: 48px; padding-bottom: 48px;">
+    <div class="feature-row fade-in">
+        <div>
+            <span class="section-num section-num--purple">08</span>
+            <h2 class="section-title">Messages That Wait</h2>
+            <p class="section-body">Messages propagate when they can. Arrive when they arrive. Propagation nodes hold encrypted messages until the recipient comes online &mdash; hours, days, whenever. This isn't a fallback mode. On Reticulum, store-and-forward is the <em>primary</em> mode of existence.</p>
+            <p class="section-body" style="margin-top: 12px;">Messages held by propagation nodes have no sender information, are unreadable and contain encrypted blobs only.</p>
+            <div class="accent-line accent-line--purple"></div>
+        </div>
+        <div class="feature-visual">
+            <!-- Store-and-Forward Timeline Animation -->
+            <svg viewBox="0 0 360 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="glow-saf" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="3" result="blur"/>
+                        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                    </filter>
+                </defs>
+
+                <!-- Connection lines -->
+                <line x1="60" y1="100" x2="180" y2="80" stroke="var(--purple)" stroke-width="0.8" opacity="0.3" stroke-dasharray="4,3"/>
+                <line x1="180" y1="80" x2="300" y2="100" stroke="var(--purple)" stroke-width="0.8" opacity="0.3" stroke-dasharray="4,3"/>
+
+                <!-- Sender node -->
+                <circle cx="60" cy="100" r="6" fill="var(--purple)" opacity="0.8" filter="url(#glow-saf)"/>
+                <text x="60" y="126" font-family="var(--font-mono)" font-size="9" fill="var(--purple)" text-anchor="middle" opacity="0.7">SENDER</text>
+
+                <!-- Propagation node (larger) -->
+                <circle cx="180" cy="80" r="8" fill="var(--green)" opacity="0.7" filter="url(#glow-saf)"/>
+                <text x="180" y="60" font-family="var(--font-mono)" font-size="9" fill="var(--green)" text-anchor="middle" opacity="0.7">PROPAGATION</text>
+
+                <!-- Encrypted blob indicator (appears during hold phase) -->
+                <rect x="194" y="90" width="22" height="14" rx="2" stroke="var(--green)" stroke-width="0.8" fill="none" stroke-dasharray="3,2" opacity="0">
+                    <animate attributeName="opacity" values="0;0;0.5;0.5;0.5;0;0" dur="9s" repeatCount="indefinite" keyTimes="0;0.18;0.22;0.44;0.55;0.6;1"/>
+                </rect>
+                <line x1="197" y1="94" x2="204" y2="94" stroke="var(--green)" stroke-width="0.6" opacity="0">
+                    <animate attributeName="opacity" values="0;0;0.35;0.35;0.35;0;0" dur="9s" repeatCount="indefinite" keyTimes="0;0.18;0.22;0.44;0.55;0.6;1"/>
+                </line>
+                <line x1="206" y1="94" x2="213" y2="94" stroke="var(--green)" stroke-width="0.6" opacity="0">
+                    <animate attributeName="opacity" values="0;0;0.35;0.35;0.35;0;0" dur="9s" repeatCount="indefinite" keyTimes="0;0.18;0.22;0.44;0.55;0.6;1"/>
+                </line>
+                <line x1="197" y1="98" x2="209" y2="98" stroke="var(--green)" stroke-width="0.6" opacity="0">
+                    <animate attributeName="opacity" values="0;0;0.35;0.35;0.35;0;0" dur="9s" repeatCount="indefinite" keyTimes="0;0.18;0.22;0.44;0.55;0.6;1"/>
+                </line>
+                <line x1="211" y1="98" x2="213" y2="98" stroke="var(--green)" stroke-width="0.6" opacity="0">
+                    <animate attributeName="opacity" values="0;0;0.35;0.35;0.35;0;0" dur="9s" repeatCount="indefinite" keyTimes="0;0.18;0.22;0.44;0.55;0.6;1"/>
+                </line>
+
+                <!-- Recipient node (dims and lights up) -->
+                <circle cx="300" cy="100" r="6" fill="var(--purple)" filter="url(#glow-saf)">
+                    <animate attributeName="opacity" values="0.3;0.3;0.3;1.0;1.0;0.3" dur="9s" repeatCount="indefinite" keyTimes="0;0.22;0.55;0.56;0.78;1"/>
+                </circle>
+                <text x="300" y="126" font-family="var(--font-mono)" font-size="9" fill="var(--purple)" text-anchor="middle" opacity="0.7">RECIPIENT</text>
+
+                <!-- "ENCRYPTED" label -->
+                <text x="180" y="112" font-family="var(--font-mono)" font-size="8" fill="var(--green)" text-anchor="middle">
+                    ENCRYPTED
+                    <animate attributeName="opacity" values="0;0;0.7;0.7;0.7;0;0" dur="9s" repeatCount="indefinite" keyTimes="0;0.18;0.22;0.44;0.55;0.6;1"/>
+                </text>
+
+                <!-- Waiting indicator: rotating dashes -->
+                <circle cx="180" cy="80" r="16" stroke="var(--green)" stroke-width="0.8" fill="none" stroke-dasharray="4,6">
+                    <animate attributeName="opacity" values="0;0;0.4;0.4;0;0" dur="9s" repeatCount="indefinite" keyTimes="0;0.22;0.25;0.52;0.55;1"/>
+                    <animateTransform attributeName="transform" type="rotate" values="0 180 80;360 180 80" dur="3s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- "OFFLINE" label near recipient -->
+                <text x="300" y="86" font-family="var(--font-mono)" font-size="8" fill="var(--red)" text-anchor="middle">
+                    OFFLINE
+                    <animate attributeName="opacity" values="0;0;0.6;0.6;0;0;0" dur="9s" repeatCount="indefinite" keyTimes="0;0.1;0.15;0.52;0.55;0.56;1"/>
+                </text>
+
+                <!-- "ONLINE" label -->
+                <text x="300" y="86" font-family="var(--font-mono)" font-size="8" fill="var(--green)" text-anchor="middle">
+                    ONLINE
+                    <animate attributeName="opacity" values="0;0;0.7;0.7;0" dur="9s" repeatCount="indefinite" keyTimes="0;0.55;0.56;0.72;0.78"/>
+                </text>
+
+                <!-- Packet: Sender → Propagation (Phase 1) -->
+                <circle r="3" fill="var(--purple)" opacity="0">
+                    <animateMotion dur="9s" repeatCount="indefinite" keyPoints="0;0;1;1;1;1" keyTimes="0;0.01;0.2;0.22;0.5;1" path="M60,100 L180,80"/>
+                    <animate attributeName="opacity" values="0;0.9;0.9;0;0;0" dur="9s" repeatCount="indefinite" keyTimes="0;0.01;0.18;0.22;0.5;1"/>
+                </circle>
+
+                <!-- Packet: Propagation → Recipient (Phase 3) -->
+                <circle r="3" fill="var(--green)" opacity="0">
+                    <animateMotion dur="9s" repeatCount="indefinite" keyPoints="0;0;0;1;1;1" keyTimes="0;0.55;0.56;0.72;0.78;1" path="M180,80 L300,100"/>
+                    <animate attributeName="opacity" values="0;0;0.9;0.9;0;0" dur="9s" repeatCount="indefinite" keyTimes="0;0.55;0.56;0.70;0.72;1"/>
+                </circle>
+
+                <!-- Recipient arrival flash ring -->
+                <circle cx="300" cy="100" r="6" fill="none" stroke="var(--green)" stroke-width="1" opacity="0">
+                    <animate attributeName="r" dur="9s" repeatCount="indefinite" values="6;6;6;20;20;20" keyTimes="0;0.55;0.70;0.76;0.78;1"/>
+                    <animate attributeName="opacity" dur="9s" repeatCount="indefinite" values="0;0;0;0.5;0;0" keyTimes="0;0.55;0.70;0.72;0.77;1"/>
+                </circle>
+            </svg>
+        </div>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 9: RATSPEAK UI SHOWCASE
+     ══════════════════════════════════════════════════════ -->
+<section class="container gradient-band" style="padding-top: 72px; padding-bottom: 72px;">
+    <div class="fade-in">
+        <span class="section-num section-num--green">09</span>
+        <h2 class="section-title">Ratspeak &mdash; Your Access Point</h2>
+        <p class="section-body" style="margin-bottom: 8px;">Ratspeak makes Reticulum feel like the apps you already know &mdash; without compromising any principles.</p>
+    </div>
+
+    <!-- ── Showcase 1: Encrypted Messaging ── -->
+    <div class="showcase-row showcase-row--reverse fade-in">
+        <div>
+            <h3 class="section-title" style="font-size: clamp(22px, 3vw, 32px);">Encrypted Messaging</h3>
+            <p class="section-body">Full LXMF encrypted chat with delivery confirmation, file attachments, and forward secrecy. Compatible with Sideband, NomadNet, and MeshChat.</p>
+            <div class="accent-line accent-line--green" style="margin-top: 20px;"></div>
+        </div>
+        <div class="showcase-frame showcase-frame--green">
+            <div class="showcase-titlebar">
+                <div class="showcase-titlebar__dot" style="background: var(--green);"></div>
+                <span class="showcase-titlebar__title">messages &mdash; Vitalik</span>
+            </div>
+            <div class="showcase-body">
+                <!-- Chat mockup -->
+                <div class="mock-msg mock-msg--in">
+                    <div>
+                        <div class="mock-msg__bubble" style="padding: 8px 16px;">Hey, how are you?</div>
+                        <div class="mock-msg__meta">14:32 &middot; 1 hop</div>
+                    </div>
+                </div>
+                <div class="mock-msg mock-msg--out" style="display: flex; justify-content: flex-end;">
+                    <div style="max-width: 75%;">
+                        <div class="mock-msg__bubble" style="max-width: 100%; display: inline-flex; align-items: flex-end; gap: 6px;">
+                            <span>Great! Reading this PDF, interesting stuff.</span>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" style="flex-shrink: 0; position: relative; top: -1px;"><path d="M20 6L9 17l-5-5"/></svg>
+                        </div>
+                        <div class="mock-msg__meta" style="justify-content: flex-end;">14:33</div>
+                    </div>
+                </div>
+                <div class="mock-msg mock-msg--out">
+                    <div>
+                        <div class="mock-msg__bubble" style="max-width: 100%; display: inline-block;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 32px; height: 32px; border-radius: 6px; background: rgba(0, 212, 170, 0.1); border: 1px solid rgba(0, 212, 170, 0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                </div>
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="font-size: 11px; font-weight: 500; color: var(--text-primary);">Reticulum.pdf</div>
+                                    <div style="font-size: 9px; color: var(--text-muted);">1.2 MB</div>
+                                </div>
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" style="flex-shrink: 0;"><path d="M20 6L9 17l-5-5"/></svg>
+                            </div>
+                        </div>
+                        <div class="mock-msg__meta" style="justify-content: flex-end;">14:34</div>
+                    </div>
+                </div>
+            </div>
+            <div class="mock-input-bar">
+                <div class="mock-input-field">Type a message...</div>
+                <div class="mock-send-btn">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Showcase 2: Your Contacts ── -->
+    <div class="showcase-row fade-in">
+        <div>
+            <h3 class="section-title" style="font-size: clamp(22px, 3vw, 32px);">Your Contacts</h3>
+            <p class="section-body">Everyone on your mesh, organized by availability. See who's reachable, how far away they are, and start an encrypted conversation in one tap.</p>
+            <div class="accent-line accent-line--green" style="margin-top: 20px;"></div>
+        </div>
+        <div class="showcase-frame showcase-frame--green">
+            <div class="showcase-titlebar">
+                <div class="showcase-titlebar__dot" style="background: var(--green);"></div>
+                <span class="showcase-titlebar__title">contacts</span>
+            </div>
+            <div class="showcase-body">
+                <div class="mock-filter-bar">
+                    <span class="mock-filter-pill mock-filter-pill--active">All (5)</span>
+                    <span class="mock-filter-pill">Online</span>
+                    <span class="mock-filter-pill">Stale</span>
+                    <span class="mock-filter-pill">Offline</span>
+                </div>
+                <div class="mock-conn-row">
+                    <div class="mock-conn-dot mock-conn-dot--online"></div>
+                    <span class="mock-conn-name" style="font-family: var(--font-sans); font-weight: 500; color: var(--text-primary);">Atlas</span>
+                    <span class="mock-conn-hops">1 hop</span>
+                    <span class="mock-conn-time">2m ago</span>
+                </div>
+                <div class="mock-conn-row">
+                    <div class="mock-conn-dot mock-conn-dot--online"></div>
+                    <span class="mock-conn-name" style="font-family: var(--font-sans); font-weight: 500; color: var(--text-primary);">Meridian</span>
+                    <span class="mock-conn-hops">1 hop</span>
+                    <span class="mock-conn-time">5m ago</span>
+                </div>
+                <div class="mock-conn-row">
+                    <div class="mock-conn-dot mock-conn-dot--online"></div>
+                    <span class="mock-conn-name" style="font-family: var(--font-sans); font-weight: 500; color: var(--text-primary);">Juno</span>
+                    <span class="mock-conn-hops">2 hops</span>
+                    <span class="mock-conn-time">8m ago</span>
+                </div>
+                <div class="mock-conn-row">
+                    <div class="mock-conn-dot mock-conn-dot--stale"></div>
+                    <span class="mock-conn-name" style="font-family: var(--font-sans); font-weight: 500; color: var(--text-primary);">Solstice</span>
+                    <span class="mock-conn-hops">3 hops</span>
+                    <span class="mock-conn-time">47m ago</span>
+                </div>
+                <div class="mock-conn-row">
+                    <div class="mock-conn-dot mock-conn-dot--offline"></div>
+                    <span class="mock-conn-name" style="font-family: var(--font-sans); font-weight: 500; color: var(--text-primary);">Nexus</span>
+                    <span class="mock-conn-hops">---</span>
+                    <span class="mock-conn-time">6h ago</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Showcase 3: Multi-Identity ── -->
+    <div class="showcase-row showcase-row--reverse fade-in">
+        <div>
+            <h3 class="section-title" style="font-size: clamp(22px, 3vw, 32px);">Multi-Identity</h3>
+            <p class="section-body">Create, switch, and export identities instantly. Each is a unique Ed25519 keypair with its own address and message store. Hot-swap without restarting.</p>
+            <div class="accent-line accent-line--cyan" style="margin-top: 20px;"></div>
+        </div>
+        <div class="showcase-frame showcase-frame--cyan">
+            <div class="showcase-titlebar">
+                <div class="showcase-titlebar__dot" style="background: var(--cyan);"></div>
+                <span class="showcase-titlebar__title">identities</span>
+            </div>
+            <div class="showcase-body">
+                <!-- Active identity card -->
+                <div class="mock-identity-card">
+                    <div class="mock-identity-avatar">
+                        <svg viewBox="0 0 40 40" width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="40" height="40" fill="var(--bg-tertiary)"/>
+                            <rect x="4" y="4" width="14" height="14" rx="2" fill="var(--cyan)" opacity="0.6"/>
+                            <rect x="22" y="4" width="14" height="14" rx="2" fill="var(--cyan)" opacity="0.3"/>
+                            <rect x="4" y="22" width="14" height="14" rx="2" fill="var(--cyan)" opacity="0.4"/>
+                            <rect x="22" y="22" width="14" height="14" rx="2" fill="var(--cyan)" opacity="0.7"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="mock-identity-name">RatRunner</div>
+                        <div class="mock-identity-hash">a7f3e2d1::9b4c</div>
+                        <div style="font-size: 9px; color: var(--cyan); margin-top: 2px;">ACTIVE</div>
+                    </div>
+                </div>
+                <!-- Identity list -->
+                <div class="mock-identity-list-item">
+                    <div class="mock-identity-list-avatar">
+                        <svg viewBox="0 0 28 28" width="28" height="28" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="28" height="28" fill="var(--bg-tertiary)"/>
+                            <circle cx="14" cy="10" r="6" fill="var(--orange)" opacity="0.5"/>
+                            <rect x="4" y="18" width="20" height="8" rx="2" fill="var(--orange)" opacity="0.3"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <span style="font-size: 12px; color: var(--text-primary); font-weight: 500;">FieldOps</span>
+                        <span style="font-size: 9px; color: var(--text-muted); margin-left: 6px;">c4b8::3e71</span>
+                    </div>
+                </div>
+                <div class="mock-identity-list-item">
+                    <div class="mock-identity-list-avatar">
+                        <svg viewBox="0 0 28 28" width="28" height="28" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="28" height="28" fill="var(--bg-tertiary)"/>
+                            <polygon points="14,3 25,25 3,25" fill="var(--purple)" opacity="0.4"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <span style="font-size: 12px; color: var(--text-primary); font-weight: 500;">Anonymous</span>
+                        <span style="font-size: 9px; color: var(--text-muted); margin-left: 6px;">8f12::aa05</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Showcase 4: Interface Management ── -->
+    <div class="showcase-row fade-in">
+        <div>
+            <h3 class="section-title" style="font-size: clamp(22px, 3vw, 32px);">Interface Management</h3>
+            <p class="section-body">Add LoRa radios, TCP connections, WiFi auto-discovery, and BLE mesh from the dashboard. Interface health and traffic stats at a glance.</p>
+            <div class="accent-line accent-line--orange" style="margin-top: 20px;"></div>
+        </div>
+        <div class="showcase-frame showcase-frame--orange">
+            <div class="showcase-titlebar">
+                <div class="showcase-titlebar__dot" style="background: var(--orange);"></div>
+                <span class="showcase-titlebar__title">interfaces</span>
+            </div>
+            <div class="showcase-body">
+                <div class="mock-iface-card mock-iface-card--lora">
+                    <div class="mock-iface-header">
+                        <span class="mock-iface-name">RNode LoRa</span>
+                        <span class="mock-iface-status mock-iface-status--up">UP</span>
+                    </div>
+                    <div class="mock-iface-stats">
+                        TX 14.2 KB &middot; RX 8.7 KB &middot; 868 MHz &middot; BW 125 &middot; SF 7
+                    </div>
+                </div>
+                <div class="mock-iface-card mock-iface-card--tcp">
+                    <div class="mock-iface-header">
+                        <span class="mock-iface-name">TCP to relay.mesh</span>
+                        <span class="mock-iface-status mock-iface-status--up">UP</span>
+                    </div>
+                    <div class="mock-iface-stats">
+                        TX 1.1 MB &middot; RX 2.3 MB &middot; 192.168.4.1:4242
+                    </div>
+                </div>
+                <div class="mock-iface-card mock-iface-card--auto">
+                    <div class="mock-iface-header">
+                        <span class="mock-iface-name">Local Network</span>
+                        <span class="mock-iface-status mock-iface-status--down">DOWN</span>
+                    </div>
+                    <div class="mock-iface-stats">
+                        AutoInterface &middot; group ratspeak &middot; no peers
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Showcase 5: Future Apps ── -->
+    <div class="showcase-row showcase-row--reverse fade-in">
+        <div>
+            <h3 class="section-title" style="font-size: clamp(22px, 3vw, 32px);">Future Apps</h3>
+            <p class="section-body">Forums, wallet support, file sharing &mdash; we aren't just stopping at messaging.</p>
+            <div class="accent-line accent-line--green" style="margin-top: 20px;"></div>
+        </div>
+        <div class="showcase-frame showcase-frame--green">
+            <div class="showcase-titlebar">
+                <div class="showcase-titlebar__dot" style="background: var(--green);"></div>
+                <span class="showcase-titlebar__title">apps</span>
+            </div>
+            <div class="showcase-body">
+                <div class="mock-app-card">
+                    <div class="mock-app-card__icon" style="background: rgba(0, 212, 170, 0.1); border-color: rgba(0, 212, 170, 0.2);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <div class="mock-app-card__info">
+                        <div class="mock-app-card__name">Rat Chat</div>
+                        <div class="mock-app-card__desc">Threaded discussions</div>
+                    </div>
+                    <span class="mock-app-card__badge">SOON</span>
+                </div>
+                <div class="mock-app-card">
+                    <div class="mock-app-card__icon" style="background: rgba(0, 212, 170, 0.1); border-color: rgba(0, 212, 170, 0.2);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+                    </div>
+                    <div class="mock-app-card__info">
+                        <div class="mock-app-card__name">Rat Wallet</div>
+                        <div class="mock-app-card__desc">Manage virtual currencies</div>
+                    </div>
+                    <span class="mock-app-card__badge">SOON</span>
+                </div>
+                <div class="mock-app-card" style="margin-bottom: 0;">
+                    <div class="mock-app-card__icon" style="background: rgba(0, 212, 170, 0.1); border-color: rgba(0, 212, 170, 0.2);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    </div>
+                    <div class="mock-app-card__info">
+                        <div class="mock-app-card__name">File Drop</div>
+                        <div class="mock-app-card__desc">Encrypted file transfer over any distance, zero cloud</div>
+                    </div>
+                    <span class="mock-app-card__badge">SOON</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 10: ZEN OF RETICULUM
+     ══════════════════════════════════════════════════════ -->
+<section class="container zen-section">
+    <div class="fade-in">
+        <span class="section-num section-num--purple">10</span>
+        <h2 class="section-title">The Zen of Reticulum</h2>
+        <p class="section-body" style="margin-bottom: 16px;">Reticulum isn't just technology. It's a philosophy of sovereignty, independence, and ethical toolmaking.</p>
+        <div class="accent-line accent-line--purple" style="margin-bottom: 8px;"></div>
+    </div>
+
+    <div class="fade-in fade-in-stagger">
+        <div class="zen-pillar zen-pillar--green" style="--step-index: 0;">
+            <div class="zen-pillar__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/>
+                </svg>
+            </div>
+            <div>
+                <div class="zen-pillar__title">The Illusion of the Center</div>
+                <div class="zen-pillar__desc">There is no cloud. There is only other people. Reticulum is a fabric you inhabit, not a service you connect to. Uncentralized &mdash; not just decentralized.</div>
+            </div>
+        </div>
+
+        <div class="zen-pillar zen-pillar--blue" style="--step-index: 1;">
+            <div class="zen-pillar__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="4"/>
+                    <line x1="12" y1="2" x2="12" y2="8"/>
+                    <line x1="12" y1="16" x2="12" y2="22"/>
+                    <line x1="2" y1="12" x2="8" y2="12"/>
+                    <line x1="16" y1="12" x2="22" y2="12"/>
+                </svg>
+            </div>
+            <div>
+                <div class="zen-pillar__title">Physics of Trust</div>
+                <div class="zen-pillar__desc">Trust is binary, mathematical, and absolute. Either the signature matches, or it doesn't. There is no "maybe."</div>
+            </div>
+        </div>
+
+        <div class="zen-pillar zen-pillar--orange" style="--step-index: 2;">
+            <div class="zen-pillar__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+            </div>
+            <div>
+                <div class="zen-pillar__title">Self-Sovereignty</div>
+                <div class="zen-pillar__desc">Be your own network operator. Hardware is abundant, and open source is free forever.</div>
+            </div>
+        </div>
+
+        <div class="zen-pillar zen-pillar--purple" style="--step-index: 3;">
+            <div class="zen-pillar__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14"/>
+                    <path d="M12 5l7 7-7 7"/>
+                </svg>
+            </div>
+            <div>
+                <div class="zen-pillar__title">Fabric of the Independent</div>
+                <div class="zen-pillar__desc">The right to communicate privately and freely is fundamental. The initial barrier is convenience, not complexity. Only we can change that.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 12: CTA FOOTER
+     ══════════════════════════════════════════════════════ -->
+<section class="cta-footer">
+    <h2 class="cta-title">Join the Network.</h2>
+    <p class="cta-subtitle">No account. No signup. No permission.</p>
+
+    <div class="cta-buttons">
+        <a href="#" class="btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download Ratspeak
+        </a>
+        <div class="repo-dropdown">
+            <button class="btn-secondary" onclick="this.parentElement.classList.toggle('open')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                Explore the Code
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="repo-dropdown__menu">
+                <a href="#" class="repo-dropdown__item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    Reticulum
+                </a>
+                <a href="#" class="repo-dropdown__item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    Ratspeak
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-divider"></div>
+    <svg class="footer-logo" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <ellipse cx="11" cy="13.5" rx="8" ry="4"/>
+        <circle cx="7" cy="6.5" r="2.5"/>
+        <circle cx="5" cy="12" r="0.9"/>
+        <path d="M3 14l-1.5.5"/>
+        <path d="M19 13c1.5-1 2.5-4 2-6.5"/>
+    </svg>
+    <span class="footer-built">Built with <a href="https://reticulum.network" target="_blank" rel="noopener noreferrer">Reticulum</a></span>
+    <div class="footer-links">
+        <a href="#">Download</a>
+        <span class="dot-sep">&middot;</span>
+        <a href="#" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <span class="dot-sep">&middot;</span>
+        <a href="docs.html">Documentation</a>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SCRIPTS
+     ══════════════════════════════════════════════════════ -->
+<script>
+(function() {
+    'use strict';
+
+    // ── Navbar scroll effect ──
+    var navbar = document.getElementById('navbar');
+    if (navbar) {
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 50) navbar.classList.add('scrolled');
+            else navbar.classList.remove('scrolled');
+        }, { passive: true });
+    }
+
+    // ── Intersection Observer for fade-in ──
+    var fadeEls = document.querySelectorAll('.fade-in');
+    if ('IntersectionObserver' in window) {
+        var obs = new IntersectionObserver(function(entries) {
+            entries.forEach(function(e) {
+                if (e.isIntersecting) {
+                    e.target.classList.add('visible');
+                    obs.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+        fadeEls.forEach(function(el) { obs.observe(el); });
+    } else {
+        fadeEls.forEach(function(el) { el.classList.add('visible'); });
+    }
+
+    // ── Scroll hint fade ──
+    var hint = document.querySelector('.scroll-hint');
+    if (hint) {
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 100) hint.style.opacity = '0';
+            else hint.style.opacity = '0.5';
+        }, { passive: true });
+    }
+
+    // ── Repo dropdown close on outside click ──
+    document.addEventListener('click', function(e) {
+        var dropdown = document.querySelector('.repo-dropdown');
+        if (dropdown && !dropdown.contains(e.target)) {
+            dropdown.classList.remove('open');
+        }
+    });
+
+    // ── Mesh Canvas ──
+    var canvas = document.getElementById('meshCanvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var w = 0, h = 0, time = 0;
+    var isMobile = window.matchMedia('(max-width: 768px)').matches;
+    var nodeCount = isMobile ? 14 : 24;
+    var nodes = [], packets = [];
+    var GREEN = '#00D4AA';
+
+    function resize() {
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        w = rect.width;
+        h = rect.height;
+    }
+
+    function rand(a, b) { return a + Math.random() * (b - a); }
+
+    function initNodes() {
+        nodes = [];
+        for (var i = 0; i < nodeCount; i++) {
+            nodes.push({
+                x: rand(40, w - 40),
+                y: rand(40, h - 40),
+                vx: rand(-0.15, 0.15),
+                vy: rand(-0.15, 0.15),
+                r: i === 0 ? 4 : rand(1.5, 3)
+            });
+        }
+    }
+
+    function spawnPacket() {
+        if (nodes.length < 2) return;
+        var connDist = isMobile ? 100 : 130;
+        var a = Math.floor(rand(0, nodes.length));
+        // Collect neighbors within connection range
+        var neighbors = [];
+        for (var i = 0; i < nodes.length; i++) {
+            if (i === a) continue;
+            var dx = nodes[a].x - nodes[i].x;
+            var dy = nodes[a].y - nodes[i].y;
+            if (Math.sqrt(dx * dx + dy * dy) < connDist) neighbors.push(i);
+        }
+        if (neighbors.length === 0) return;
+        var b = neighbors[Math.floor(rand(0, neighbors.length))];
+        var dx = nodes[a].x - nodes[b].x;
+        var dy = nodes[a].y - nodes[b].y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        // Constant visual speed: ~60px/sec → increment = 60 / (dist * 60fps)
+        var speed = 1 / (dist * 1);
+        packets.push({ from: a, to: b, t: 0, speed: speed });
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, w, h);
+        time++;
+
+        // Move nodes
+        for (var i = 0; i < nodes.length; i++) {
+            var n = nodes[i];
+            n.x += n.vx;
+            n.y += n.vy;
+            if (n.x < 20 || n.x > w - 20) n.vx *= -1;
+            if (n.y < 20 || n.y > h - 20) n.vy *= -1;
+        }
+
+        // Draw connections
+        var connDist = isMobile ? 100 : 130;
+        ctx.strokeStyle = GREEN;
+        for (var i = 0; i < nodes.length; i++) {
+            for (var j = i + 1; j < nodes.length; j++) {
+                var dx = nodes[i].x - nodes[j].x;
+                var dy = nodes[i].y - nodes[j].y;
+                var d = Math.sqrt(dx * dx + dy * dy);
+                if (d < connDist) {
+                    var alpha = (1 - d / connDist) * 0.23;
+                    ctx.globalAlpha = alpha;
+                    ctx.lineWidth = 0.8;
+                    ctx.beginPath();
+                    ctx.moveTo(nodes[i].x, nodes[i].y);
+                    ctx.lineTo(nodes[j].x, nodes[j].y);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Draw nodes
+        for (var i = 0; i < nodes.length; i++) {
+            var n = nodes[i];
+            ctx.globalAlpha = i === 0 ? 0.95 : 0.55;
+            ctx.fillStyle = GREEN;
+            ctx.beginPath();
+            ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Packets
+        if (time % 60 === 0) spawnPacket();
+        ctx.fillStyle = GREEN;
+        for (var p = packets.length - 1; p >= 0; p--) {
+            var pkt = packets[p];
+            pkt.t += pkt.speed;
+            if (pkt.t > 1) { packets.splice(p, 1); continue; }
+            var from = nodes[pkt.from], to = nodes[pkt.to];
+            var px = from.x + (to.x - from.x) * pkt.t;
+            var py = from.y + (to.y - from.y) * pkt.t;
+            ctx.globalAlpha = 0.85 * (1 - Math.abs(pkt.t - 0.5) * 2);
+            ctx.beginPath();
+            ctx.arc(px, py, 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(draw);
+    }
+
+    resize();
+    initNodes();
+    draw();
+    window.addEventListener('resize', function() { resize(); initNodes(); });
+})();
+</script>
+
+</body>
+</html>

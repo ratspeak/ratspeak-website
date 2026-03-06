@@ -1,0 +1,74 @@
+{
+  "sections": [
+    {
+      "title": "Introduction",
+      "slug": "introduction",
+      "pages": [
+        { "title": "What Is Reticulum?", "slug": "what-is-reticulum" },
+        { "title": "What Is Ratspeak?", "slug": "what-is-ratspeak" },
+        { "title": "How They Work Together", "slug": "how-they-work-together" },
+        { "title": "Key Concepts", "slug": "key-concepts" },
+        { "title": "Zen of Reticulum", "slug": "zen-of-reticulum" }
+      ]
+    },
+    {
+      "title": "Getting Started",
+      "slug": "getting-started",
+      "pages": [
+        { "title": "Installing Ratspeak", "slug": "installing-ratspeak" },
+        { "title": "First Run", "slug": "first-run" },
+        { "title": "Your First Connection", "slug": "your-first-connection" },
+        { "title": "Sending Your First Message", "slug": "sending-your-first-message" },
+        { "title": "Platform Notes", "slug": "platform-notes" }
+      ]
+    },
+    {
+      "title": "Using Ratspeak",
+      "slug": "using-ratspeak",
+      "pages": [
+        { "title": "Dashboard Overview", "slug": "dashboard-overview" },
+        { "title": "Messaging", "slug": "messaging" },
+        { "title": "Contacts", "slug": "contacts" },
+        { "title": "Identity Management", "slug": "identity-management" },
+        { "title": "Network Monitoring", "slug": "network-monitoring" },
+        { "title": "Graph Visualization", "slug": "graph-visualization" },
+        { "title": "Games & Apps", "slug": "games-and-apps" },
+        { "title": "Propagation Node", "slug": "propagation-node" },
+        { "title": "Configuration", "slug": "configuration" }
+      ]
+    },
+    {
+      "title": "Connecting Your Network",
+      "slug": "connecting",
+      "pages": [
+        { "title": "Interface Types Overview", "slug": "interface-types-overview" },
+        { "title": "TCP Connections", "slug": "tcp-connections" },
+        { "title": "LoRa / RNode", "slug": "lora-rnode" },
+        { "title": "WiFi & LAN", "slug": "wifi-lan" },
+        { "title": "BLE Mesh", "slug": "ble-mesh" },
+        { "title": "Interface Modes", "slug": "interface-modes" },
+        { "title": "Building Networks", "slug": "building-networks" }
+      ]
+    },
+    {
+      "title": "Understanding Reticulum",
+      "slug": "understanding",
+      "pages": [
+        { "title": "Protocol Architecture", "slug": "protocol-architecture" },
+        { "title": "Links & Communication", "slug": "links-and-communication" },
+        { "title": "Wire Format", "slug": "wire-format" },
+        { "title": "Cryptographic Primitives", "slug": "cryptographic-primitives" },
+        { "title": "Security Model", "slug": "security-model" },
+        { "title": "LXMF Protocol", "slug": "lxmf-protocol" },
+        { "title": "RLAP Protocol", "slug": "rlap-protocol" }
+      ]
+    },
+    {
+      "title": "Reference",
+      "slug": "reference",
+      "pages": [
+        { "title": "Glossary", "slug": "glossary" }
+      ]
+    }
+  ]
+}
