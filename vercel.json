@@ -1,12 +1,7 @@
 {
-  "rewrites": [
-    {
-      "source": "/firmware/ratdeck-latest.bin",
-      "destination": "https://github.com/defidude/Ratdeck/releases/latest/download/ratdeck-firmware.bin"
-    },
-    {
-      "source": "/firmware/ratcom-latest.bin",
-      "destination": "https://github.com/defidude/RatCom/releases/latest/download/ratcom-firmware.bin"
+  "functions": {
+    "api/firmware.js": {
+      "maxDuration": 30
     }
-  ]
+  }
 }

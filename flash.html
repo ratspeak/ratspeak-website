@@ -1573,7 +1573,7 @@
             accent: 'green',
             firmware: 'ratdeck-firmware.bin',
             firmwareSize: 'Loading from GitHub...',
-            downloadUrl: '/firmware/ratdeck-latest.bin'
+            apiDevice: 'ratdeck'
         },
         cardputer: {
             name: 'Cardputer Adv',
@@ -1581,7 +1581,7 @@
             accent: 'blue',
             firmware: 'ratcom-firmware.bin',
             firmwareSize: 'Loading from GitHub...',
-            downloadUrl: '/firmware/ratcom-latest.bin'
+            apiDevice: 'ratcom'
         },
         custom: {
             name: 'Custom Device',
@@ -1589,7 +1589,7 @@
             accent: 'purple',
             firmware: null,
             firmwareSize: null,
-            downloadUrl: null
+            apiDevice: null
         }
     };
 
@@ -1664,11 +1664,21 @@
     // ── Firmware Download from GitHub Releases ────────
     function fetchFirmwareFromRelease(dev) {
         document.getElementById('presetName').textContent = dev.firmware;
-        document.getElementById('presetSize').textContent = 'Downloading...';
+        document.getElementById('presetSize').textContent = 'Fetching release info...';
 
-        fetch(dev.downloadUrl)
+        // First get version info, then download the binary
+        fetch('/api/firmware?device=' + dev.apiDevice + '&info=true')
             .then(function(resp) {
-                if (!resp.ok) throw new Error('Firmware not available (HTTP ' + resp.status + ')');
+                if (!resp.ok) throw new Error('Release not found');
+                return resp.json();
+            })
+            .then(function(info) {
+                document.getElementById('presetName').textContent = dev.firmware + ' (' + info.version + ')';
+                document.getElementById('presetSize').textContent = 'Downloading ' + formatBytes(info.size) + '...';
+                return fetch('/api/firmware?device=' + dev.apiDevice);
+            })
+            .then(function(resp) {
+                if (!resp.ok) throw new Error('Firmware download failed (HTTP ' + resp.status + ')');
                 return resp.arrayBuffer();
             })
             .then(function(buffer) {
