@@ -1683,7 +1683,9 @@
                 document.getElementById('presetName').textContent = dev.firmware + ' (' + release.tag_name + ')';
                 document.getElementById('presetSize').textContent = 'Downloading ' + formatBytes(asset.size) + '...';
 
-                return fetch(asset.browser_download_url);
+                return fetch(asset.url, {
+                    headers: { 'Accept': 'application/octet-stream' }
+                });
             })
             .then(function(resp) {
                 if (!resp.ok) throw new Error('Download failed');
