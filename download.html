@@ -217,7 +217,7 @@
         /* ── Hero ──────────────────────────────────────── */
 
         .flash-hero {
-            padding: 120px 32px 40px;
+            padding: 120px 32px 28px;
             text-align: center;
             position: relative;
         }
@@ -235,10 +235,10 @@
         .flash-hero__title {
             font-family: var(--font-sans);
             font-weight: 700;
-            font-size: clamp(36px, 5vw, 52px);
+            font-size: clamp(30px, 4.5vw, 44px);
             line-height: 1.1;
             letter-spacing: -1.5px;
-            margin-bottom: 16px;
+            margin-bottom: 8px;
             background: linear-gradient(180deg, var(--text-primary) 40%, var(--text-muted) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -671,7 +671,10 @@
         }
 
         .connect-device-info {
-            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 14px;
             padding: 8px 12px;
             background: rgba(0, 212, 170, 0.05);
             border: 1px solid rgba(0, 212, 170, 0.12);
@@ -679,10 +682,7 @@
             font-family: var(--font-mono);
             font-size: 12px;
             color: var(--green-dim);
-            display: none;
         }
-
-        .connect-device-info.show { display: block; }
 
         /* Firmware section */
         .firmware-ready {
@@ -713,6 +713,11 @@
             font-weight: 600;
             font-size: 14px;
             color: var(--text-primary);
+            text-decoration: none;
+            display: inline-block;
+        }
+        a.firmware-ready__name:hover {
+            color: var(--green);
         }
 
         .firmware-ready__size {
@@ -1421,11 +1426,10 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6"/><circle cx="12" cy="12" r="4"/><path d="M6 18l1.5-1.5"/><path d="M16.5 16.5L18 18"/><path d="M2 12h6"/><path d="M16 12h6"/></svg>
                         Select USB Device
                     </button>
-                    <div class="connect-status" id="connectStatus">
+                    <div class="connect-device-info" id="deviceInfo">
                         <span class="connect-status__dot connect-status__dot--off" id="statusDot"></span>
                         <span class="connect-status__text" id="statusText">No device connected</span>
                     </div>
-                    <div class="connect-device-info" id="deviceInfo"></div>
                 </div>
 
                 <!-- Step 2: Firmware -->
@@ -1440,7 +1444,7 @@
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                             </div>
                             <div>
-                                <div class="firmware-ready__name" id="presetName">ratspeak-tdeck-v1.0.0.bin</div>
+                                <a class="firmware-ready__name" id="presetName" href="#" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: inherit;">Loading...</a>
                                 <div class="firmware-ready__size" id="presetSize">Bundled &middot; Ready to flash</div>
                             </div>
                         </div>
@@ -1493,10 +1497,6 @@
                     </div>
                     <div class="flash-result__title" id="resultTitle"></div>
                     <div class="flash-result__desc" id="resultDesc"></div>
-                    <button class="flash-result__btn" id="resultBtn" onclick="resetFlash()">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
-                        Flash Another
-                    </button>
                 </div>
             </div>
         </div>
@@ -1659,7 +1659,9 @@
         } else {
             presetEl.style.display = 'block';
             customEl.style.display = 'none';
-            document.getElementById('presetName').textContent = dev.firmware;
+            var nameLink = document.getElementById('presetName');
+            nameLink.textContent = 'Loading...';
+            nameLink.href = '#';
             document.getElementById('presetSize').textContent = 'Loading from GitHub...';
             state.firmwareReady = false;
             fetchFirmwareFromRelease(dev);
@@ -1686,8 +1688,13 @@
 
     // ── Firmware Download from GitHub Releases ────────
     function fetchFirmwareFromRelease(dev) {
-        document.getElementById('presetName').textContent = dev.firmware;
+        var nameEl = document.getElementById('presetName');
+        nameEl.textContent = 'Loading...';
+        nameEl.href = '#';
         document.getElementById('presetSize').textContent = 'Fetching release info...';
+
+        var repoMap = { ratdeck: 'defidude/Ratdeck', ratcom: 'defidude/RatCom' };
+        var repoPath = repoMap[dev.apiDevice] || '';
 
         // First get version info, then download the binary
         fetch('/api/firmware?device=' + dev.apiDevice + '&info=true')
@@ -1696,7 +1703,10 @@
                 return resp.json();
             })
             .then(function(info) {
-                document.getElementById('presetName').textContent = dev.firmware + ' (' + info.version + ')';
+                nameEl.textContent = 'Ratspeak ' + info.version;
+                if (repoPath) {
+                    nameEl.href = 'https://github.com/' + repoPath + '/releases/tag/' + info.version;
+                }
                 document.getElementById('presetSize').textContent = 'Downloading ' + formatBytes(info.size) + '...';
                 return fetch('/api/firmware?device=' + dev.apiDevice);
             })
@@ -1711,7 +1721,8 @@
                 updateFlashBtn();
             })
             .catch(function(err) {
-                document.getElementById('presetName').textContent = dev.firmware;
+                nameEl.textContent = dev.firmware;
+                nameEl.href = '#';
                 document.getElementById('presetSize').textContent = 'Download failed: ' + err.message;
                 state.firmwareReady = false;
                 updateFlashBtn();
@@ -1769,17 +1780,16 @@
 
                 btn.className = 'connect-btn connect-btn--connected';
                 btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Device Selected';
+
+                // Show serial device name in the info box with status indicator
+                var portInfo = port.getInfo();
+                var vendor = portInfo.usbVendorId ? '0x' + portInfo.usbVendorId.toString(16).toUpperCase().padStart(4, '0') : '';
+                var product = portInfo.usbProductId ? '0x' + portInfo.usbProductId.toString(16).toUpperCase().padStart(4, '0') : '';
+                var deviceLabel = 'USB Serial Device';
+                if (vendor && product) deviceLabel += ' (' + vendor + ':' + product + ')';
                 dot.className = 'connect-status__dot connect-status__dot--on';
                 txt.className = 'connect-status__text connect-status__text--on';
-                txt.textContent = 'Device selected';
-
-                // Show device info
-                var info = document.getElementById('deviceInfo');
-                var portInfo = port.getInfo();
-                var vendor = portInfo.usbVendorId ? '0x' + portInfo.usbVendorId.toString(16).toUpperCase().padStart(4, '0') : 'Unknown';
-                var product = portInfo.usbProductId ? '0x' + portInfo.usbProductId.toString(16).toUpperCase().padStart(4, '0') : 'Unknown';
-                info.textContent = 'VID: ' + vendor + '  PID: ' + product;
-                info.classList.add('show');
+                txt.textContent = deviceLabel;
 
                 updateFlashBtn();
             })
@@ -1797,7 +1807,6 @@
         var btn = document.getElementById('connectBtn');
         var dot = document.getElementById('statusDot');
         var txt = document.getElementById('statusText');
-        var info = document.getElementById('deviceInfo');
 
         btn.className = 'connect-btn connect-btn--idle';
         btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6"/><circle cx="12" cy="12" r="4"/><path d="M6 18l1.5-1.5"/><path d="M16.5 16.5L18 18"/><path d="M2 12h6"/><path d="M16 12h6"/></svg> Select USB Device';
@@ -1805,7 +1814,6 @@
         txt.className = 'connect-status__text';
         txt.textContent = 'No device connected';
         txt.style.color = '';
-        info.classList.remove('show');
         state.connected = false;
     }
 
@@ -2032,13 +2040,9 @@
                 }
             });
 
-            logMessage('Flash write complete', 'log-green');
-
             // 8. Hard reset to reboot into firmware
             setProgress(95, 'Resetting device...');
-            logMessage('Resetting device...', 'log-orange');
             await esploader.after('hard_reset');
-            logMessage('Device reset complete', 'log-green');
 
             // 9. Disconnect transport
             setProgress(100, 'Complete');
@@ -2046,10 +2050,11 @@
             state.transport = null;
             state.esploader = null;
 
-            logMessage('Flash complete! Device is rebooting into new firmware.', 'log-green');
+            logMessage('Ratspeak is a success. See you in the sewers. Reboot your device now.', 'log-green');
 
-            // 10. Show success
-            setTimeout(function() { showResult(true); }, 600);
+            // 10. Hide flash button, show completion
+            state.flashing = false;
+            btn.style.display = 'none';
 
         } catch (err) {
             // Clean up transport/esploader on error
@@ -2075,6 +2080,10 @@
             }
 
             showResult(false, errorMsg);
+            // Restore flash button for retry
+            btn.style.display = '';
+            btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Flash Ratspeak';
+            updateFlashBtn();
         }
     };
 
@@ -2088,17 +2097,14 @@
         var descEl = document.getElementById('resultDesc');
 
         if (success) {
-            iconEl.className = 'flash-result__icon flash-result__icon--success';
-            svgEl.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
-            titleEl.textContent = 'Firmware Flashed Successfully';
-            descEl.textContent = 'Your device is now running Ratspeak firmware. Disconnect USB and power cycle to start.';
-        } else {
-            iconEl.className = 'flash-result__icon flash-result__icon--error';
-            svgEl.innerHTML = '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>';
-            titleEl.textContent = 'Flash Failed';
-            descEl.textContent = errorMessage || 'An error occurred during flashing. Please reconnect and try again.';
+            // Success is handled inline (no result card needed)
+            return;
         }
 
+        iconEl.className = 'flash-result__icon flash-result__icon--error';
+        svgEl.innerHTML = '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>';
+        titleEl.textContent = 'Flash Failed';
+        descEl.textContent = errorMessage || 'An error occurred during flashing. Please reconnect and try again.';
         resultEl.classList.add('active');
     }
 
@@ -2112,10 +2118,10 @@
         state.transport = null;
         state.esploader = null;
         // Keep state.port valid for re-flash
-        updateFlashBtn();
-
         var btn = document.getElementById('flashBtn');
+        btn.style.display = '';
         btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Flash Ratspeak';
+        updateFlashBtn();
     };
 
     // ── Intersection Observer for fade-in ──────────────
