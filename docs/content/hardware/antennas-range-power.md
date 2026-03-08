@@ -106,13 +106,13 @@ Reticulum enforces these limits automatically when configured.
 
 ### For Maximum Range
 - Use a **collinear or Yagi antenna** mounted as high as possible
-- Set **SF12, 125 kHz bandwidth, coding rate 4/8**
+- Set **SF12, 62.5 kHz bandwidth, coding rate 4/8** (Long Range preset)
 - Set **TX power to maximum legal limit**
 - Ensure clear line-of-sight to target
 
 ### For Best Throughput
-- Use **SF7, 500 kHz bandwidth, coding rate 4/5**
-- Accept shorter range in exchange for ~21 Kbps
+- Use **SF7, 250 kHz bandwidth, coding rate 4/5** (Fast preset)
+- Accept shorter range in exchange for ~11 Kbps
 - Good for local networks where range isn't critical
 
 ### For Battery Life

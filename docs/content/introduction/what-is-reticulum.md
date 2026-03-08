@@ -33,7 +33,7 @@ One of Reticulum's most powerful properties: a single message can traverse compl
   <!-- LoRa Node -->
   <rect x="20" y="70" width="100" height="60" rx="8" stroke="#00D4AA" stroke-width="1.5" fill="rgba(0,212,170,0.08)"/>
   <text x="70" y="95" text-anchor="middle" fill="#00D4AA" font-family="JetBrains Mono" font-size="11" font-weight="600">LoRa</text>
-  <text x="70" y="115" text-anchor="middle" fill="#9eadbf" font-family="Outfit" font-size="10">~300 bps</text>
+  <text x="70" y="115" text-anchor="middle" fill="#9eadbf" font-family="Outfit" font-size="10">~37 bps</text>
   <!-- Radio waves -->
   <path d="M120 100 Q140 80 160 100" stroke="#00D4AA" stroke-width="1" stroke-dasharray="4 3" opacity="0.6"/>
   <path d="M125 100 Q140 85 155 100" stroke="#00D4AA" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>

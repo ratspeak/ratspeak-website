@@ -37,9 +37,9 @@ Three built-in presets with full manual configuration:
 
 | Preset | Speed | Range | Settings |
 |--------|-------|-------|----------|
-| **Long Range** | ~300 bps | Maximum | SF12, 125 kHz, CR 4/8, 17 dBm |
-| **Balanced** | ~2.4 Kbps | Good | SF9, 250 kHz, CR 4/5, 14 dBm |
-| **Fast** | ~21 Kbps | Short | SF7, 500 kHz, CR 4/5, 10 dBm |
+| **Long Range** | ~37 bps | Maximum | SF12, 62.5 kHz, CR 4/8, 22 dBm |
+| **Balanced** | ~1.8 Kbps | Good | SF9, 125 kHz, CR 4/5, 17 dBm |
+| **Fast** | ~11 Kbps | Short | SF7, 250 kHz, CR 4/5, 14 dBm |
 
 Radio changes apply immediately — no reboot needed.
 

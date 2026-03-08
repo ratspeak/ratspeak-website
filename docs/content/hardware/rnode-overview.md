@@ -53,7 +53,7 @@ An RNode connects to your computer (or runs standalone) and provides a radio int
 | Property | Value |
 |----------|-------|
 | **Range** | 1–50+ km (terrain/antenna dependent) |
-| **Speed** | ~300 bps to ~21 Kbps (depends on settings) |
+| **Speed** | ~37 bps to ~11 Kbps (depends on preset) |
 | **Protocol** | Custom MAC layer (not LoRaWAN) |
 | **Encryption** | Handled by Reticulum (end-to-end) |
 | **Connection** | USB serial, Bluetooth LE, or WiFi TCP |
