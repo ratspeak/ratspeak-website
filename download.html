@@ -1194,6 +1194,38 @@
             .nr-btn { padding: 7px 14px; font-size: 12px; }
             .flash-hero__title { letter-spacing: -1px; }
         }
+        /* ── Coming Soon Toast ─────────────────────────── */
+
+        .coming-soon-toast {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-left: 3px solid var(--green);
+            border-radius: 10px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+            z-index: 10000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            pointer-events: none;
+        }
+
+        .coming-soon-toast.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
     </style>
 </head>
 <body>
@@ -1242,7 +1274,7 @@
             <div class="device-grid" id="desktopGrid">
 
                 <!-- Windows -->
-                <a href="#" onclick="return false;" class="device-card device-card--blue">
+                <a href="#" onclick="showComingSoon(event)" class="device-card device-card--blue">
                     <span class="device-card__badge">Coming Soon</span>
                     <div class="device-card__visual">
                         <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1298,7 +1330,7 @@
                 </a>
 
                 <!-- macOS -->
-                <a href="#" onclick="return false;" class="device-card device-card--purple">
+                <a href="#" onclick="showComingSoon(event)" class="device-card device-card--purple">
                     <span class="device-card__badge">Coming Soon</span>
                     <div class="device-card__visual">
                         <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1355,7 +1387,7 @@
                 </a>
 
                 <!-- Linux -->
-                <a href="#" onclick="return false;" class="device-card device-card--orange">
+                <a href="#" onclick="showComingSoon(event)" class="device-card device-card--orange">
                     <span class="device-card__badge">Coming Soon</span>
                     <div class="device-card__visual">
                         <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2407,6 +2439,30 @@
         observer.observe(el);
     });
 
+})();
+</script>
+
+<!-- Coming Soon Toast -->
+<div class="coming-soon-toast" id="comingSoonToast">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Coming Soon
+</div>
+
+<script>
+(function() {
+    var toastTimer = null;
+    window.showComingSoon = function(e) {
+        e.preventDefault();
+        var toast = document.getElementById('comingSoonToast');
+        if (toastTimer) clearTimeout(toastTimer);
+        toast.classList.remove('show');
+        void toast.offsetWidth;
+        toast.classList.add('show');
+        toastTimer = setTimeout(function() {
+            toast.classList.remove('show');
+            toastTimer = null;
+        }, 2500);
+    };
 })();
 </script>
 
