@@ -1355,205 +1355,9 @@
     <!-- Device Selection -->
     <div class="device-selection" id="deviceSelection">
 
-        <!-- Section 1: Desktop -->
+        <!-- Section 1: ESP / LoRa -->
         <div class="download-section">
-            <span class="download-section__label --blue">01</span>
-            <h2 class="download-section__title">Desktop</h2>
-            <div class="download-section__accent --blue"></div>
-            <div class="device-grid" id="desktopGrid">
-
-                <!-- Windows -->
-                <a href="#" onclick="showComingSoon(event)" class="device-card device-card--blue">
-                    <span class="device-card__badge">Coming Soon</span>
-                    <div class="device-card__visual">
-                        <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <filter id="glow-win" x="-50%" y="-50%" width="200%" height="200%">
-                                    <feGaussianBlur stdDeviation="3" result="blur"/>
-                                    <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-                                </filter>
-                            </defs>
-                            <!-- Ambient -->
-                            <circle cx="100" cy="80" r="60" fill="currentColor" opacity="0.03"/>
-                            <circle cx="100" cy="80" r="50" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.1" stroke-dasharray="8,6">
-                                <animateTransform attributeName="transform" type="rotate" values="0 100 80;360 100 80" dur="28s" repeatCount="indefinite"/>
-                            </circle>
-                            <!-- Monitor body -->
-                            <rect x="52" y="28" width="96" height="72" rx="6" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6">
-                                <animate attributeName="opacity" values="0.5;0.7;0.5" dur="4s" repeatCount="indefinite"/>
-                            </rect>
-                            <!-- Screen bezel -->
-                            <rect x="58" y="34" width="84" height="56" rx="3" stroke="currentColor" stroke-width="0.5" fill="currentColor" fill-opacity="0.03" opacity="0.4"/>
-                            <!-- Title bar -->
-                            <rect x="62" y="38" width="76" height="8" rx="1.5" fill="currentColor" fill-opacity="0.06" opacity="0.5"/>
-                            <circle cx="67" cy="42" r="1.5" fill="currentColor" opacity="0.3"/>
-                            <circle cx="73" cy="42" r="1.5" fill="currentColor" opacity="0.25"/>
-                            <circle cx="79" cy="42" r="1.5" fill="currentColor" opacity="0.2"/>
-                            <!-- Content lines -->
-                            <line x1="66" y1="54" x2="110" y2="54" stroke="currentColor" stroke-width="1" opacity="0.25" stroke-linecap="round"/>
-                            <line x1="66" y1="60" x2="125" y2="60" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
-                            <line x1="66" y1="66" x2="118" y2="66" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
-                            <line x1="66" y1="72" x2="98" y2="72" stroke="currentColor" stroke-width="1" opacity="0.15" stroke-linecap="round"/>
-                            <line x1="66" y1="78" x2="108" y2="78" stroke="currentColor" stroke-width="1" opacity="0.15" stroke-linecap="round"/>
-                            <!-- Mesh icon pulsing -->
-                            <circle cx="130" cy="80" r="3" fill="currentColor" filter="url(#glow-win)">
-                                <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2.5s" repeatCount="indefinite"/>
-                            </circle>
-                            <!-- Stand -->
-                            <line x1="100" y1="100" x2="100" y2="114" stroke="currentColor" stroke-width="1.5" opacity="0.35"/>
-                            <line x1="80" y1="114" x2="120" y2="114" stroke="currentColor" stroke-width="1.5" opacity="0.35" stroke-linecap="round"/>
-                            <!-- Data particle -->
-                            <circle r="1.2" fill="currentColor" opacity="0.6">
-                                <animateMotion dur="3s" repeatCount="indefinite" path="M66,54 L125,60 L118,66 L66,72 Z"/>
-                            </circle>
-                        </svg>
-                    </div>
-                    <h3 class="device-card__name">Windows</h3>
-                    <div class="device-card__specs">
-                        <span class="device-card__spec">x86_64</span>
-                        <span class="device-card__spec">Windows 10+</span>
-                    </div>
-                    <div class="device-card__arrow">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
-                    </div>
-                </a>
-
-                <!-- macOS -->
-                <a href="#" onclick="showComingSoon(event)" class="device-card device-card--purple">
-                    <span class="device-card__badge">Coming Soon</span>
-                    <div class="device-card__visual">
-                        <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <filter id="glow-mac" x="-50%" y="-50%" width="200%" height="200%">
-                                    <feGaussianBlur stdDeviation="3" result="blur"/>
-                                    <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-                                </filter>
-                            </defs>
-                            <!-- Ambient -->
-                            <circle cx="100" cy="80" r="58" fill="currentColor" opacity="0.03"/>
-                            <circle cx="100" cy="80" r="48" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.1" stroke-dasharray="6,8">
-                                <animateTransform attributeName="transform" type="rotate" values="360 100 80;0 100 80" dur="24s" repeatCount="indefinite"/>
-                            </circle>
-                            <!-- Laptop screen -->
-                            <rect x="52" y="26" width="96" height="68" rx="6" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6">
-                                <animate attributeName="opacity" values="0.5;0.7;0.5" dur="4.5s" repeatCount="indefinite"/>
-                            </rect>
-                            <!-- Screen inner -->
-                            <rect x="58" y="32" width="84" height="54" rx="3" stroke="currentColor" stroke-width="0.5" fill="currentColor" fill-opacity="0.03" opacity="0.4"/>
-                            <!-- UI content lines -->
-                            <line x1="66" y1="44" x2="105" y2="44" stroke="currentColor" stroke-width="1" opacity="0.25" stroke-linecap="round"/>
-                            <line x1="66" y1="50" x2="120" y2="50" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
-                            <line x1="66" y1="56" x2="112" y2="56" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
-                            <!-- Chat bubbles -->
-                            <rect x="66" y="62" width="40" height="10" rx="5" fill="currentColor" fill-opacity="0.06" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
-                            <rect x="90" y="74" width="36" height="10" rx="5" fill="currentColor" fill-opacity="0.08" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
-                            <!-- Command key symbol -->
-                            <rect x="128" y="38" width="8" height="8" rx="2" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.3">
-                                <animate attributeName="opacity" values="0.2;0.5;0.2" dur="3s" repeatCount="indefinite"/>
-                            </rect>
-                            <!-- Laptop base -->
-                            <path d="M42 94 L52 94 L52 98 L148 98 L148 94 L158 94 L158 100 C158 103 155 106 152 106 L48 106 C45 106 42 103 42 100 Z" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.35"/>
-                            <!-- Trackpad line -->
-                            <line x1="88" y1="100" x2="112" y2="100" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
-                            <!-- Status LED -->
-                            <circle cx="100" cy="29" r="1.5" fill="currentColor" filter="url(#glow-mac)">
-                                <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2.2s" repeatCount="indefinite"/>
-                            </circle>
-                            <!-- Data particle -->
-                            <circle r="1.2" fill="currentColor" opacity="0.6">
-                                <animateMotion dur="3.5s" repeatCount="indefinite" path="M66,44 L120,50 L112,56 L66,62 Z"/>
-                            </circle>
-                        </svg>
-                    </div>
-                    <h3 class="device-card__name">macOS</h3>
-                    <div class="device-card__specs">
-                        <span class="device-card__spec">Apple Silicon / Intel</span>
-                        <span class="device-card__spec">macOS 12+</span>
-                    </div>
-                    <div class="device-card__arrow">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
-                    </div>
-                </a>
-
-                <!-- Linux -->
-                <a href="#" onclick="showComingSoon(event)" class="device-card device-card--orange">
-                    <span class="device-card__badge">Coming Soon</span>
-                    <div class="device-card__visual">
-                        <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <filter id="glow-lin" x="-50%" y="-50%" width="200%" height="200%">
-                                    <feGaussianBlur stdDeviation="3" result="blur"/>
-                                    <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-                                </filter>
-                            </defs>
-                            <!-- Ambient -->
-                            <circle cx="100" cy="80" r="58" fill="currentColor" opacity="0.03"/>
-                            <circle cx="100" cy="80" r="48" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.1" stroke-dasharray="5,9">
-                                <animateTransform attributeName="transform" type="rotate" values="0 100 80;360 100 80" dur="20s" repeatCount="indefinite"/>
-                            </circle>
-                            <!-- Terminal window -->
-                            <rect x="52" y="28" width="96" height="100" rx="6" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6">
-                                <animate attributeName="opacity" values="0.5;0.7;0.5" dur="4s" repeatCount="indefinite"/>
-                            </rect>
-                            <!-- Title bar -->
-                            <rect x="52" y="28" width="96" height="14" rx="6" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-width="0.5" opacity="0.25"/>
-                            <rect x="52" y="36" width="96" height="6" fill="currentColor" fill-opacity="0.04" stroke="none" opacity="0.15"/>
-                            <circle cx="63" cy="35" r="2" fill="currentColor" opacity="0.4">
-                                <animate attributeName="opacity" values="0.3;0.6;0.3" dur="3s" repeatCount="indefinite"/>
-                            </circle>
-                            <circle cx="71" cy="35" r="2" fill="currentColor" opacity="0.2"/>
-                            <circle cx="79" cy="35" r="2" fill="currentColor" opacity="0.2"/>
-                            <!-- Terminal text -->
-                            <text x="62" y="56" font-family="monospace" font-size="7" fill="currentColor" opacity="0.45">&gt; ratspeak</text>
-                            <text x="62" y="68" font-family="monospace" font-size="7" fill="currentColor" opacity="0.3">  mesh: active</text>
-                            <text x="62" y="80" font-family="monospace" font-size="7" fill="currentColor" opacity="0.3">  peers: 3</text>
-                            <text x="62" y="92" font-family="monospace" font-size="7" fill="currentColor" opacity="0.35">&gt; _</text>
-                            <!-- Blinking cursor -->
-                            <rect x="72" y="86" width="5" height="7" fill="currentColor" opacity="0.5">
-                                <animate attributeName="opacity" values="0;0.5;0" dur="1.2s" repeatCount="indefinite"/>
-                            </rect>
-                            <!-- Connection lines radiating from corners -->
-                            <line x1="52" y1="28" x2="38" y2="16" stroke="currentColor" stroke-width="0.8" opacity="0.15">
-                                <animate attributeName="opacity" values="0.1;0.3;0.1" dur="3s" repeatCount="indefinite"/>
-                            </line>
-                            <line x1="148" y1="28" x2="162" y2="16" stroke="currentColor" stroke-width="0.8" opacity="0.15">
-                                <animate attributeName="opacity" values="0.1;0.3;0.1" dur="3s" repeatCount="indefinite" begin="0.5s"/>
-                            </line>
-                            <line x1="52" y1="128" x2="38" y2="140" stroke="currentColor" stroke-width="0.8" opacity="0.15">
-                                <animate attributeName="opacity" values="0.1;0.3;0.1" dur="3s" repeatCount="indefinite" begin="1s"/>
-                            </line>
-                            <line x1="148" y1="128" x2="162" y2="140" stroke="currentColor" stroke-width="0.8" opacity="0.15">
-                                <animate attributeName="opacity" values="0.1;0.3;0.1" dur="3s" repeatCount="indefinite" begin="1.5s"/>
-                            </line>
-                            <!-- Node dots at line ends -->
-                            <circle cx="38" cy="16" r="2" fill="currentColor" filter="url(#glow-lin)" opacity="0.3">
-                                <animate attributeName="opacity" values="0.2;0.5;0.2" dur="3s" repeatCount="indefinite"/>
-                            </circle>
-                            <circle cx="162" cy="16" r="2" fill="currentColor" opacity="0.2">
-                                <animate attributeName="opacity" values="0.15;0.4;0.15" dur="3s" repeatCount="indefinite" begin="0.5s"/>
-                            </circle>
-                            <!-- Data particle along text -->
-                            <circle r="1.2" fill="currentColor" opacity="0.6">
-                                <animateMotion dur="3s" repeatCount="indefinite" path="M62,56 L130,56 L130,80 L62,80 Z"/>
-                            </circle>
-                        </svg>
-                    </div>
-                    <h3 class="device-card__name">Linux</h3>
-                    <div class="device-card__specs">
-                        <span class="device-card__spec">x86_64 / ARM64</span>
-                        <span class="device-card__spec">AppImage / .deb</span>
-                    </div>
-                    <div class="device-card__arrow">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
-                    </div>
-                </a>
-
-            </div>
-        </div>
-
-        <!-- Section 2: ESP / LoRa -->
-        <div class="download-section">
-            <span class="download-section__label --green">02</span>
+            <span class="download-section__label --green">01</span>
             <h2 class="download-section__title">ESP / LoRa</h2>
             <div class="download-section__accent --green"></div>
 
@@ -1782,6 +1586,202 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
                 </div>
             </div>
+
+            </div>
+        </div>
+
+        <!-- Section 2: Desktop -->
+        <div class="download-section">
+            <span class="download-section__label --blue">02</span>
+            <h2 class="download-section__title">Desktop (Coming Soon)</h2>
+            <div class="download-section__accent --blue"></div>
+            <div class="device-grid" id="desktopGrid">
+
+                <!-- Windows -->
+                <a href="#" onclick="showComingSoon(event)" class="device-card device-card--blue">
+                    <span class="device-card__badge">Coming Soon</span>
+                    <div class="device-card__visual">
+                        <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <filter id="glow-win" x="-50%" y="-50%" width="200%" height="200%">
+                                    <feGaussianBlur stdDeviation="3" result="blur"/>
+                                    <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                                </filter>
+                            </defs>
+                            <!-- Ambient -->
+                            <circle cx="100" cy="80" r="60" fill="currentColor" opacity="0.03"/>
+                            <circle cx="100" cy="80" r="50" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.1" stroke-dasharray="8,6">
+                                <animateTransform attributeName="transform" type="rotate" values="0 100 80;360 100 80" dur="28s" repeatCount="indefinite"/>
+                            </circle>
+                            <!-- Monitor body -->
+                            <rect x="52" y="28" width="96" height="72" rx="6" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6">
+                                <animate attributeName="opacity" values="0.5;0.7;0.5" dur="4s" repeatCount="indefinite"/>
+                            </rect>
+                            <!-- Screen bezel -->
+                            <rect x="58" y="34" width="84" height="56" rx="3" stroke="currentColor" stroke-width="0.5" fill="currentColor" fill-opacity="0.03" opacity="0.4"/>
+                            <!-- Title bar -->
+                            <rect x="62" y="38" width="76" height="8" rx="1.5" fill="currentColor" fill-opacity="0.06" opacity="0.5"/>
+                            <circle cx="67" cy="42" r="1.5" fill="currentColor" opacity="0.3"/>
+                            <circle cx="73" cy="42" r="1.5" fill="currentColor" opacity="0.25"/>
+                            <circle cx="79" cy="42" r="1.5" fill="currentColor" opacity="0.2"/>
+                            <!-- Content lines -->
+                            <line x1="66" y1="54" x2="110" y2="54" stroke="currentColor" stroke-width="1" opacity="0.25" stroke-linecap="round"/>
+                            <line x1="66" y1="60" x2="125" y2="60" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
+                            <line x1="66" y1="66" x2="118" y2="66" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
+                            <line x1="66" y1="72" x2="98" y2="72" stroke="currentColor" stroke-width="1" opacity="0.15" stroke-linecap="round"/>
+                            <line x1="66" y1="78" x2="108" y2="78" stroke="currentColor" stroke-width="1" opacity="0.15" stroke-linecap="round"/>
+                            <!-- Mesh icon pulsing -->
+                            <circle cx="130" cy="80" r="3" fill="currentColor" filter="url(#glow-win)">
+                                <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2.5s" repeatCount="indefinite"/>
+                            </circle>
+                            <!-- Stand -->
+                            <line x1="100" y1="100" x2="100" y2="114" stroke="currentColor" stroke-width="1.5" opacity="0.35"/>
+                            <line x1="80" y1="114" x2="120" y2="114" stroke="currentColor" stroke-width="1.5" opacity="0.35" stroke-linecap="round"/>
+                            <!-- Data particle -->
+                            <circle r="1.2" fill="currentColor" opacity="0.6">
+                                <animateMotion dur="3s" repeatCount="indefinite" path="M66,54 L125,60 L118,66 L66,72 Z"/>
+                            </circle>
+                        </svg>
+                    </div>
+                    <h3 class="device-card__name">Windows</h3>
+                    <div class="device-card__specs">
+                        <span class="device-card__spec">x86_64</span>
+                        <span class="device-card__spec">Windows 10+</span>
+                    </div>
+                    <div class="device-card__arrow">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
+                    </div>
+                </a>
+
+                <!-- macOS -->
+                <a href="#" onclick="showComingSoon(event)" class="device-card device-card--purple">
+                    <span class="device-card__badge">Coming Soon</span>
+                    <div class="device-card__visual">
+                        <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <filter id="glow-mac" x="-50%" y="-50%" width="200%" height="200%">
+                                    <feGaussianBlur stdDeviation="3" result="blur"/>
+                                    <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                                </filter>
+                            </defs>
+                            <!-- Ambient -->
+                            <circle cx="100" cy="80" r="58" fill="currentColor" opacity="0.03"/>
+                            <circle cx="100" cy="80" r="48" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.1" stroke-dasharray="6,8">
+                                <animateTransform attributeName="transform" type="rotate" values="360 100 80;0 100 80" dur="24s" repeatCount="indefinite"/>
+                            </circle>
+                            <!-- Laptop screen -->
+                            <rect x="52" y="26" width="96" height="68" rx="6" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6">
+                                <animate attributeName="opacity" values="0.5;0.7;0.5" dur="4.5s" repeatCount="indefinite"/>
+                            </rect>
+                            <!-- Screen inner -->
+                            <rect x="58" y="32" width="84" height="54" rx="3" stroke="currentColor" stroke-width="0.5" fill="currentColor" fill-opacity="0.03" opacity="0.4"/>
+                            <!-- UI content lines -->
+                            <line x1="66" y1="44" x2="105" y2="44" stroke="currentColor" stroke-width="1" opacity="0.25" stroke-linecap="round"/>
+                            <line x1="66" y1="50" x2="120" y2="50" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
+                            <line x1="66" y1="56" x2="112" y2="56" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
+                            <!-- Chat bubbles -->
+                            <rect x="66" y="62" width="40" height="10" rx="5" fill="currentColor" fill-opacity="0.06" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
+                            <rect x="90" y="74" width="36" height="10" rx="5" fill="currentColor" fill-opacity="0.08" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
+                            <!-- Command key symbol -->
+                            <rect x="128" y="38" width="8" height="8" rx="2" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.3">
+                                <animate attributeName="opacity" values="0.2;0.5;0.2" dur="3s" repeatCount="indefinite"/>
+                            </rect>
+                            <!-- Laptop base -->
+                            <path d="M42 94 L52 94 L52 98 L148 98 L148 94 L158 94 L158 100 C158 103 155 106 152 106 L48 106 C45 106 42 103 42 100 Z" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.35"/>
+                            <!-- Trackpad line -->
+                            <line x1="88" y1="100" x2="112" y2="100" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+                            <!-- Status LED -->
+                            <circle cx="100" cy="29" r="1.5" fill="currentColor" filter="url(#glow-mac)">
+                                <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2.2s" repeatCount="indefinite"/>
+                            </circle>
+                            <!-- Data particle -->
+                            <circle r="1.2" fill="currentColor" opacity="0.6">
+                                <animateMotion dur="3.5s" repeatCount="indefinite" path="M66,44 L120,50 L112,56 L66,62 Z"/>
+                            </circle>
+                        </svg>
+                    </div>
+                    <h3 class="device-card__name">macOS</h3>
+                    <div class="device-card__specs">
+                        <span class="device-card__spec">Apple Silicon / Intel</span>
+                        <span class="device-card__spec">macOS 12+</span>
+                    </div>
+                    <div class="device-card__arrow">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
+                    </div>
+                </a>
+
+                <!-- Linux -->
+                <a href="#" onclick="showComingSoon(event)" class="device-card device-card--orange">
+                    <span class="device-card__badge">Coming Soon</span>
+                    <div class="device-card__visual">
+                        <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <filter id="glow-lin" x="-50%" y="-50%" width="200%" height="200%">
+                                    <feGaussianBlur stdDeviation="3" result="blur"/>
+                                    <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                                </filter>
+                            </defs>
+                            <!-- Ambient -->
+                            <circle cx="100" cy="80" r="58" fill="currentColor" opacity="0.03"/>
+                            <circle cx="100" cy="80" r="48" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.1" stroke-dasharray="5,9">
+                                <animateTransform attributeName="transform" type="rotate" values="0 100 80;360 100 80" dur="20s" repeatCount="indefinite"/>
+                            </circle>
+                            <!-- Terminal window -->
+                            <rect x="52" y="28" width="96" height="100" rx="6" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6">
+                                <animate attributeName="opacity" values="0.5;0.7;0.5" dur="4s" repeatCount="indefinite"/>
+                            </rect>
+                            <!-- Title bar -->
+                            <rect x="52" y="28" width="96" height="14" rx="6" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-width="0.5" opacity="0.25"/>
+                            <rect x="52" y="36" width="96" height="6" fill="currentColor" fill-opacity="0.04" stroke="none" opacity="0.15"/>
+                            <circle cx="63" cy="35" r="2" fill="currentColor" opacity="0.4">
+                                <animate attributeName="opacity" values="0.3;0.6;0.3" dur="3s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle cx="71" cy="35" r="2" fill="currentColor" opacity="0.2"/>
+                            <circle cx="79" cy="35" r="2" fill="currentColor" opacity="0.2"/>
+                            <!-- Terminal text -->
+                            <text x="62" y="56" font-family="monospace" font-size="7" fill="currentColor" opacity="0.45">&gt; ratspeak</text>
+                            <text x="62" y="68" font-family="monospace" font-size="7" fill="currentColor" opacity="0.3">  mesh: active</text>
+                            <text x="62" y="80" font-family="monospace" font-size="7" fill="currentColor" opacity="0.3">  peers: 3</text>
+                            <text x="62" y="92" font-family="monospace" font-size="7" fill="currentColor" opacity="0.35">&gt; _</text>
+                            <!-- Blinking cursor -->
+                            <rect x="72" y="86" width="5" height="7" fill="currentColor" opacity="0.5">
+                                <animate attributeName="opacity" values="0;0.5;0" dur="1.2s" repeatCount="indefinite"/>
+                            </rect>
+                            <!-- Connection lines radiating from corners -->
+                            <line x1="52" y1="28" x2="38" y2="16" stroke="currentColor" stroke-width="0.8" opacity="0.15">
+                                <animate attributeName="opacity" values="0.1;0.3;0.1" dur="3s" repeatCount="indefinite"/>
+                            </line>
+                            <line x1="148" y1="28" x2="162" y2="16" stroke="currentColor" stroke-width="0.8" opacity="0.15">
+                                <animate attributeName="opacity" values="0.1;0.3;0.1" dur="3s" repeatCount="indefinite" begin="0.5s"/>
+                            </line>
+                            <line x1="52" y1="128" x2="38" y2="140" stroke="currentColor" stroke-width="0.8" opacity="0.15">
+                                <animate attributeName="opacity" values="0.1;0.3;0.1" dur="3s" repeatCount="indefinite" begin="1s"/>
+                            </line>
+                            <line x1="148" y1="128" x2="162" y2="140" stroke="currentColor" stroke-width="0.8" opacity="0.15">
+                                <animate attributeName="opacity" values="0.1;0.3;0.1" dur="3s" repeatCount="indefinite" begin="1.5s"/>
+                            </line>
+                            <!-- Node dots at line ends -->
+                            <circle cx="38" cy="16" r="2" fill="currentColor" filter="url(#glow-lin)" opacity="0.3">
+                                <animate attributeName="opacity" values="0.2;0.5;0.2" dur="3s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle cx="162" cy="16" r="2" fill="currentColor" opacity="0.2">
+                                <animate attributeName="opacity" values="0.15;0.4;0.15" dur="3s" repeatCount="indefinite" begin="0.5s"/>
+                            </circle>
+                            <!-- Data particle along text -->
+                            <circle r="1.2" fill="currentColor" opacity="0.6">
+                                <animateMotion dur="3s" repeatCount="indefinite" path="M62,56 L130,56 L130,80 L62,80 Z"/>
+                            </circle>
+                        </svg>
+                    </div>
+                    <h3 class="device-card__name">Linux</h3>
+                    <div class="device-card__specs">
+                        <span class="device-card__spec">x86_64 / ARM64</span>
+                        <span class="device-card__spec">AppImage / .deb</span>
+                    </div>
+                    <div class="device-card__arrow">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
+                    </div>
+                </a>
 
             </div>
         </div>
