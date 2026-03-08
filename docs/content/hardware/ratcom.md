@@ -90,7 +90,7 @@ See [Flashing Firmware](../hardware/flashing-firmware) for detailed instructions
 
 ## What's Next
 
+- [Using Your RatCom](../hardware/using-ratcom) — day-to-day usage guide
 - [RatDeck](../hardware/ratdeck) — the larger alternative
 - [Flashing Firmware](../hardware/flashing-firmware) — build and flash instructions
 - [Antennas, Range & Power](../hardware/antennas-range-power) — maximize your range
-- [Building Networks](../connecting/building-networks) — network topology strategies

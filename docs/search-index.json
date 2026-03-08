@@ -231,11 +231,25 @@
     "content": "RatDeck A standalone LoRa mesh communicator built on the LilyGo T-Deck Plus — encrypted messaging, network discovery, and a full keyboard in your pocket. Overview RatDeck is a complete Reticulum mesh node that doesn't need a computer. It runs custom firmware on the LilyGo T-Deck Plus, providing encr"
   },
   {
+    "title": "Using Your RatDeck",
+    "section": "Hardware",
+    "path": "hardware/using-ratdeck",
+    "headings": "First Power-On, Navigating the Interface, Home, Messages, Friends, Peers, Setup, Radio Configuration, Quick Presets, Manual Tuning, WiFi Bridging, AP Mode (Default), STA Mode, WiFi Off, Transport Mode, Power Management, Screen States, Battery Tips, Keyboard Reference, Troubleshooting, No peers visible, Messages not delivering, WiFi bridge not connecting, Device won't boot, What's Next",
+    "content": "Using Your RatDeck A practical guide to operating the RatDeck — from first power-on through daily messaging, radio tuning, and field use. First Power-On 1. Attach a 915 MHz antenna (or your region's frequency) before powering on — transmitting without an antenna can damage the radio 2. Connect power"
+  },
+  {
     "title": "RatCom",
     "section": "Hardware",
     "path": "hardware/ratcom",
     "headings": "Overview, Hardware, RatDeck vs RatCom, Features, Core Capabilities, WiFi Modes, UI Tabs, Keyboard Navigation, Boot Recovery, Getting a RatCom, What's Next",
     "content": "RatCom A pocket-sized Reticulum mesh node built on the M5Stack Cardputer — encrypted messaging and LoRa radio in a device that fits in your hand. Overview RatCom is a compact, standalone mesh communicator running on the M5Stack Cardputer. It provides the same core functionality as RatDeck — encrypte"
+  },
+  {
+    "title": "Using Your RatCom",
+    "section": "Hardware",
+    "path": "hardware/using-ratcom",
+    "headings": "First Power-On, Navigating the Interface, Home, Messages, Nodes, Setup, Radio Configuration, Presets, Manual Parameters, WiFi Bridging, AP Mode (Default), STA Mode, WiFi Off, Transport Mode, Battery Management, Keyboard Reference, Storage Notes, Troubleshooting, No peers visible, Messages not delivering, WiFi bridge not connecting, Boot issues, RatDeck vs RatCom — Which to Carry?, What's Next",
+    "content": "Using Your RatCom A practical guide to operating the RatCom — pocket-sized encrypted messaging on the Reticulum mesh. First Power-On 1. Attach a 915 MHz antenna (or your region's frequency) to the LoRa module before powering on 2. Power on via the side button or USB-C 3. RatCom generates a fresh Ret"
   },
   {
     "title": "Flashing Firmware",

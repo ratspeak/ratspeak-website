@@ -175,14 +175,31 @@ def main():
         f.write(search_json)
     print(f"Generated {OUTPUT_SEARCH} ({len(search_index)} entries)")
 
-    # Print inline versions for docs.html
+    # Auto-patch docs.html inline NAV_DATA and SEARCH_INDEX
+    docs_html_path = os.path.join(os.path.dirname(__file__), "docs.html")
     nav_inline = json.dumps(nav_data, separators=(",", ":"), ensure_ascii=False)
     search_inline = json.dumps(search_index, ensure_ascii=False)
 
-    print("\n--- NAV_DATA for docs.html line 119 ---")
-    print(f"    var NAV_DATA = {nav_inline};")
-    print("\n--- SEARCH_INDEX for docs.html line 122 ---")
-    print(f"    var SEARCH_INDEX = {search_inline};")
+    if os.path.exists(docs_html_path):
+        with open(docs_html_path, "r", encoding="utf-8") as f:
+            html = f.read()
+
+        # Replace inline NAV_DATA
+        html = re.sub(
+            r"var NAV_DATA = .+?;",
+            f"var NAV_DATA = {nav_inline};",
+            html,
+        )
+        # Replace inline SEARCH_INDEX
+        html = re.sub(
+            r"var SEARCH_INDEX = .+?;",
+            f"var SEARCH_INDEX = {search_inline};",
+            html,
+        )
+
+        with open(docs_html_path, "w", encoding="utf-8") as f:
+            f.write(html)
+        print(f"Patched {docs_html_path} (inline NAV_DATA + SEARCH_INDEX)")
 
 
 if __name__ == "__main__":

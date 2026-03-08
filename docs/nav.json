@@ -61,7 +61,9 @@
         { "title": "RNode Overview", "slug": "rnode-overview" },
         { "title": "Supported Boards & Buying Guide", "slug": "supported-boards" },
         { "title": "RatDeck", "slug": "ratdeck" },
+        { "title": "Using Your RatDeck", "slug": "using-ratdeck" },
         { "title": "RatCom", "slug": "ratcom" },
+        { "title": "Using Your RatCom", "slug": "using-ratcom" },
         { "title": "Flashing Firmware", "slug": "flashing-firmware" },
         { "title": "Antennas, Range & Power", "slug": "antennas-range-power" }
       ]

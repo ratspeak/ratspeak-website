@@ -108,7 +108,7 @@ See [Flashing Firmware](../hardware/flashing-firmware) for detailed build and fl
 
 ## What's Next
 
+- [Using Your RatDeck](../hardware/using-ratdeck) — day-to-day usage guide
 - [RatCom](../hardware/ratcom) — the pocket-sized alternative
 - [Flashing Firmware](../hardware/flashing-firmware) — build and flash instructions
 - [Antennas, Range & Power](../hardware/antennas-range-power) — maximize your range
-- [LoRa with RNode](../connecting/lora-rnode) — LoRa parameter tuning
