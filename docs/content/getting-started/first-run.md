@@ -1,29 +1,33 @@
 # First Run
 
-The first time you launch Ratspeak, it generates a unique cryptographic identity for you and sets up everything needed to join the mesh. Here's what happens and what to look for.
+The first time you launch Ratspeak, it creates your cryptographic identity and sets up your local environment. Here's what to expect.
 
 ## The Setup Wizard
 
 On first launch, Ratspeak runs through initial setup:
 
 1. Creates your data directory at `.ratspeak/`
-2. Generates a new Reticulum identity
-3. Sets up the SQLite database with FTS5 search
-4. Creates the LXMF message router
+2. Generates a new Reticulum identity -- your cryptographic key pair
+3. Sets up the local database for messages, contacts, and settings
+4. Starts the LXMF message router
 
-<div class="screenshot-placeholder">
+This takes a few seconds. You do not need to provide any input during this step -- Ratspeak handles everything automatically.
+
+<div class="screenshot-placeholder" data-caption="Ratspeak setup wizard showing identity creation progress with animated key generation">
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#7e8fa2" stroke-width="1.5" stroke-linecap="round"><path d="M12 2a10 10 0 110 20 10 10 0 010-20z"/><path d="M12 6v6l4 2"/></svg>
-    <div>Setup wizard — screenshot placeholder</div>
+    <div>Setup wizard -- screenshot coming soon</div>
 </div>
 
-## Identity Creation
+## Your Identity
 
-Your Reticulum identity is a **512-bit Curve25519 keyset**:
+Your Reticulum identity is a pair of cryptographic keys:
 
-- **Ed25519 signing key** (256 bits) — proves you are who you say
-- **X25519 encryption key** (256 bits) — enables encrypted communication
+- **Signing key** (Ed25519) -- proves you are who you say you are
+- **Encryption key** (X25519) -- lets others send you encrypted messages
 
-From this keypair, two hashes are derived:
+Think of it like a wax seal and a lockbox: the signing key is your personal seal that no one can forge, and the encryption key is a lockbox that only you can open. Together, they let you prove your identity and receive private messages without relying on any central authority.
+
+From these keys, Ratspeak derives your **destination hash** -- your address on the network:
 
 <div class="docs-diagram">
 <svg viewBox="0 0 660 180" xmlns="http://www.w3.org/2000/svg" fill="none">
@@ -73,43 +77,60 @@ From this keypair, two hashes are derived:
   <!-- Caption -->
   <text x="330" y="150" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="11" font-style="italic">Identity derivation: keypair to destination hashes</text>
 </svg>
+<figcaption>Identity derivation: keypair to destination hashes</figcaption>
 </div>
 
-- **Identity hash** — your node's identity on the Reticulum network
-- **LXMF destination hash** — your messaging address (what you share with contacts)
+The diagram above shows how your keypair flows through a one-way hash function to produce two addresses:
 
-These hashes are deterministic — the same keypair always produces the same addresses, so your identity is fully portable.
+- **Identity hash** -- your node's identity on the Reticulum network
+- **LXMF address** -- your messaging address, the one you share with contacts
 
-## Choosing a Display Name
+These hashes are deterministic. The same keypair always produces the same addresses, which means your identity is fully portable. Copy your key file to another machine and you bring your address with you.
 
-You'll be prompted to set a **display name** (also called an "announced name"). This is the human-readable name that appears when you announce your presence on the network. It's included in your LXMF announces, so other users see it in their contact lists.
+Your LXMF address is what you give to other people so they can reach you. It looks like this: `<13425ec15b621c1d928589718000d814>`.
 
-> **Note**: Display names are not unique or authenticated — they're a convenience label. The destination hash is the true identity.
+## Setting Your Display Name
 
-## Generated Files
+After identity creation, you are prompted to set a display name. This is the human-readable name that appears when you announce your presence on the network. Other users see it in their contact lists when they discover you.
 
-After first run, your project directory contains:
+Pick something recognizable. You can change it later in **Settings**.
+
+> **Note**: Display names are convenience labels, not unique identifiers. Your destination hash is your true address. Two people can have the same display name -- the hash distinguishes them.
+
+## Your Files
+
+After first run, Ratspeak creates the following directory structure:
 
 ```
 .ratspeak/
-  ratspeak.db              # SQLite database (messages, contacts, identities)
-  secret_key               # Flask session secret
+  ratspeak.db              # Database (messages, contacts, settings)
+  secret_key               # Session key
   identities/
-    <hash>/                # Per-identity directory
-      identity             # 64-byte RNS identity file (restricted permissions)
-      lxmf/                # LXMF storage for this identity
+    <hash>/                # Your identity directory
+      identity             # Your key file (64 bytes -- back this up!)
+      lxmf/                # Message storage
 ```
 
-The identity file is 64 bytes — the raw Ed25519 + X25519 private keys. This file **is your identity**. Back it up. If you lose it, you lose access to that address permanently.
+The `identity` file is 64 bytes containing your raw Ed25519 and X25519 private keys. This file is your identity on the network. Everything else -- your messages, contacts, settings -- can be rebuilt or recovered. The identity file cannot.
 
-> **Warning**: Never share your identity file. Anyone with this file can impersonate you on the network. Export and share only your destination hash.
+> **Warning**: Your identity file IS your identity. If you lose it, that address is gone forever. Back it up to a secure location. Never share it -- anyone with this file can impersonate you on the network and read messages intended for you.
 
 ## What You'll See
 
-After first run, the dashboard sidebar shows seven tabs: **Dashboard**, **Messages**, **Identity**, **Network**, **Graph**, **Games**, and **Settings**. The Dashboard tab is selected by default, showing your node status and interface health.
+After setup completes, the dashboard loads in your browser. The sidebar shows seven views:
 
-## Next Steps
+- **Dashboard** -- your node status and interface health
+- **Messages** -- send and receive encrypted messages
+- **Identity** -- view and manage your cryptographic identity
+- **Network** -- see connected interfaces and peers
+- **Graph** -- visualize the network topology
+- **Games** -- peer-to-peer games over the mesh
+- **Settings** -- configure your node and display name
 
-- [Your First Connection](../getting-started/your-first-connection) — connect to the mesh
-- [Sending Your First Message](../getting-started/sending-your-first-message) — send an encrypted message
-- [Identity Management](../using-ratspeak/identity-management) — managing multiple identities
+The **Dashboard** view is selected by default. From here you can verify that your node is running and check the status of your network interfaces before making your first connection.
+
+## What's Next
+
+- [Your First Connection](../getting-started/your-first-connection) -- connect to the mesh
+- [Sending Your First Message](../getting-started/sending-your-first-message) -- send an encrypted message
+- [Identity Management](../using-ratspeak/identity-management) -- create and manage multiple identities

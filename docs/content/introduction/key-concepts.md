@@ -1,59 +1,97 @@
 # Key Concepts
 
-Essential terminology for understanding Reticulum and Ratspeak, grouped by theme.
+Everything in Ratspeak builds on a small set of core ideas. This page introduces them in layers — start with the basics, and each layer adds depth.
 
-## Networking
-
-### Destination
-The fundamental addressing unit in Reticulum. A **16-byte truncated SHA-256 hash** derived from a cryptographic identity's public key and an application-specific name. Replaces IP addresses entirely. Displayed as hex: `<13425ec15b621c1d928589718000d814>`.
-
-Four types exist:
-- **Single** — asymmetric encryption, multi-hop capable (most common)
-- **Plain** — unencrypted broadcast, direct only
-- **Group** — symmetric encryption with shared key, direct only
-- **Link** — encrypted bidirectional channel with forward secrecy
-
-### Announce
-A broadcast packet containing a destination's public key and optional application data, signed to prove key ownership. Announces propagate through the network, building path tables so other nodes know how to reach you. Rate-limited to 2% of interface bandwidth by default.
-
-### Transport Node
-A Reticulum instance with `enable_transport = Yes`. Transport nodes forward packets, propagate announces, maintain path tables, and serve path requests. They should be fixed, persistently available systems. Regular instances only send and receive — they don't forward.
-
-### Interface
-A configured communication channel — LoRa radio, TCP socket, WiFi auto-discovery, serial port, etc. Each interface connects your node to other nodes or network segments. Multiple interfaces can be active simultaneously.
-
-### Path
-A route through the network to a destination, discovered via announce propagation. Stored in path tables. Directional — the path from A to B may differ from B to A. Path freshness is tracked by age.
-
-These networking concepts rely on Reticulum's cryptographic foundation:
-
-## Cryptography
+## The Basics — What You Need to Send a Message
 
 ### Identity
-A **512-bit Curve25519 keyset**: 256-bit Ed25519 signing key + 256-bit X25519 encryption key. This is who you are on the network. Your destination hash is derived from this identity. Identities can be created, exported, imported, and switched in Ratspeak.
+
+Your identity is a pair of cryptographic keys — one for encryption, one for signing. Think of it like a passport you create yourself: no government issues it, no company stores it, and it proves who you are with mathematical certainty.
+
+Technically, it's a 512-bit Curve25519 keyset: a 256-bit Ed25519 signing key paired with a 256-bit X25519 encryption key. In practice, it's a small file on your device that makes everything else work.
+
+### Destination
+
+Your address on the network. Instead of an IP address tied to a physical location, a destination is a 16-byte hash derived from your identity's public key. It looks like: `<13425ec15b621c1d928589718000d814>`.
+
+This address never changes regardless of how or where you connect. Switch from WiFi to LoRa to TCP — same destination hash, same identity.
+
+### Announce
+
+How others discover you. When your node announces, it broadcasts your public key and destination hash to the network. Other nodes receive this announce, store the route to you, and can now send you messages.
+
+Announces propagate through the network hop by hop, with each relay recording the path back to you. Rate-limited to 2% of interface bandwidth to prevent flooding.
+
+## The Network — How Messages Get There
+
+### Interface
+
+A communication channel connecting you to other nodes. Reticulum supports many interface types simultaneously:
+
+- **LoRa radio** (RNode) — long-range wireless, kilometers of range
+- **WiFi / LAN** — automatic local network discovery
+- **TCP** — connections over the internet
+- **BLE** — short-range Bluetooth mesh
+- **Serial** — direct cable connections
+- **I2P** — anonymous overlay network
+
+You can run multiple interfaces at once. A single node might use LoRa for local radio coverage, WiFi for nearby devices, and TCP for internet connectivity — all simultaneously.
+
+### Transport Node
+
+A node that volunteers to forward packets for others. Regular nodes only send and receive their own traffic. Transport nodes actively route packets, maintain path tables, and relay announces.
+
+Transport nodes should be fixed, always-on systems — like a relay station for the mesh. Not every node needs to be a transport node.
+
+### Path
+
+The route a packet takes through the network to reach a destination. Paths are discovered through announce propagation and stored in path tables. They can traverse multiple hops through transport nodes.
+
+Paths are directional — the route from you to someone else may be different from their route back to you.
+
+## Communication — How Messages Are Delivered
 
 ### Link
-An encrypted, bidirectional channel established via a **3-packet handshake (297 bytes)**. Links provide forward secrecy through ephemeral ECDH key exchange. The initiator remains completely anonymous — no source address is ever transmitted. Links support packets, resources (large data), channels (continuous messaging), and request/response patterns.
 
-### Forward Secrecy
-If long-term keys are compromised, past communications remain secure. Achieved through ephemeral key exchange during link establishment. Reticulum also supports per-destination key ratchets for ongoing forward secrecy.
+An encrypted tunnel between two destinations. Established with a 3-packet handshake totaling just 297 bytes. Links provide:
 
-### Ratchet
-A key rotation mechanism that provides ongoing forward secrecy for individual destinations. Keys rotate at configurable intervals and old keys expire, ensuring past communications remain secure even if current keys are compromised.
+- **Forward secrecy** — if keys are compromised later, past conversations stay secure
+- **Sender anonymity** — packets carry no source address
+- **Reliable delivery** — for larger data transfers
 
-## Messaging
+### LXMF (Lightweight Extensible Message Format)
 
-### LXMF
-**Lightweight Extensible Message Format** — a zero-configuration message routing protocol built on Reticulum. End-to-end encrypted with forward secrecy. Works over any medium Reticulum supports, including LoRa and packet radio. Compatible across Sideband, NomadNet, MeshChat, and Ratspeak.
+The messaging protocol built on top of Reticulum. LXMF handles message formatting, encryption, delivery, and store-and-forward. It's what makes Ratspeak, Sideband, NomadNet, and MeshChat all interoperable.
+
+Three delivery modes:
+
+- **Direct** — establish a link and deliver immediately (reliable, confirmed)
+- **Opportunistic** — fire and forget in a single packet (fast, small messages only)
+- **Propagated** — route through a propagation node for offline recipients
 
 ### Propagation Node
-An LXMF concept — a node that stores and forwards messages for destinations that are currently unreachable. Essential for delay-tolerant networks. When a recipient comes online and syncs with the propagation node, stored messages are delivered.
 
-### Delivery Modes
-Three ways to deliver an LXMF message:
-- **Direct** — establish a link and deliver immediately
-- **Opportunistic** — send without a link, hoping the path works (for small messages)
-- **Propagated** — route through a propagation node for store-and-forward delivery
+A node that stores messages for destinations that are currently offline. When the recipient comes back online and syncs with the propagation node, stored messages are delivered. Essential for delay-tolerant communication.
+
+## Advanced — Deeper Protocol Features
+
+### RLAP (Reticulum LXMF App Protocol)
+
+A protocol for interactive applications over LXMF messages. RLAP encodes app sessions (like chess games) as structured data inside LXMF custom fields. Designed to fit within the 295-byte limit of single-packet delivery.
+
+Non-Ratspeak clients see human-readable fallback text for any RLAP message, maintaining ecosystem compatibility.
+
+### Ratchet
+
+A key rotation mechanism providing ongoing forward secrecy. Keys rotate automatically at regular intervals (default: every 30 minutes), and old keys expire after 30 days. Even if someone captures your current keys, they can't decrypt past messages.
+
+### IFAC (Interface Access Code)
+
+A passphrase-based mechanism for creating private networks on shared mediums. Set the same passphrase on two interfaces, and they form an isolated virtual network — other nodes without the passphrase can't see or inject traffic.
+
+### Network Identity
+
+A cryptographic key representing a community or infrastructure group rather than an individual. Used for interface discovery, whitelisting trusted infrastructure, and network privacy.
 
 <div class="docs-diagram">
 <svg viewBox="0 0 700 340" xmlns="http://www.w3.org/2000/svg" fill="none">
@@ -131,39 +169,26 @@ Three ways to deliver an LXMF message:
 <figcaption>Conceptual relationships between core Reticulum and LXMF components</figcaption>
 </div>
 
-## Ratspeak-Specific
+## Ratspeak-Specific Concepts
 
 ### Hub Node
-The primary rnsd instance that Ratspeak connects to (default: `node_1`). All dashboard operations — messaging, interface changes, monitoring — flow through the hub node's Reticulum instance.
 
-### Safe Restart
-When interfaces are added or removed, rnsd must restart. Ratspeak patches RNS to reconnect gracefully instead of exiting, keeping the dashboard alive through the restart cycle.
+The primary network daemon instance that Ratspeak connects to. All dashboard operations — messaging, interface changes, monitoring — flow through the hub node.
 
 ### Contact Reachability
-Contacts are classified based on how recently they were seen in the path table:
-- **Reachable** — time since last route confirmation < 30 minutes (configurable)
-- **Stale** — time since last route confirmation 30-60 minutes
-- **Unreachable** — time since last route confirmation > 60 minutes or no path entry
 
-### Graph View
-An interactive force-directed network graph built with D3.js. Nodes represent your hub, contacts, transport nodes, and discovered peers. Color-coded by type and status, with zoom, pan, drag, and filter controls. See [Graph Visualization](../using-ratspeak/graph-visualization).
+Ratspeak tracks how recently each contact was seen:
 
-## App Layer
+- **Reachable** — route confirmed within 30 minutes
+- **Stale** — route confirmed 30-60 minutes ago
+- **Unreachable** — no confirmed route for over 60 minutes
 
-### RLAP
-**Reticulum LXMF App Protocol** — a lightweight protocol for interactive applications over LXMF. Encodes app sessions (games, tools) as structured envelopes in LXMF custom fields. Designed to fit within the 295-byte OPPORTUNISTIC delivery limit. See [RLAP Protocol](../understanding/rlap-protocol).
+### Safe Restart
 
-### Session
-An RLAP session is a series of structured messages between two contacts within a specific app (e.g., a chess game). Each session has a unique ID, a lifecycle (challenge, accept, actions, end), and per-status TTLs.
+When you add or remove interfaces, the network daemon briefly restarts. Ratspeak handles this gracefully — your dashboard stays connected through the restart.
 
-### RLAP Envelope
-The structured dict carried in LXMF's `fields[0xFD]`. Uses single-character keys (`a`, `c`, `s`, `p`) to minimize wire size. Contains the app ID, command, session ID, and app-specific payload.
-
-### Fallback Text
-Every RLAP message includes human-readable text in the LXMF `content` field. Non-RLAP clients (Sideband, NomadNet, MeshChat) display this as a regular message, ensuring compatibility across the ecosystem.
-
-## Next Steps
+## What's Next
 
 - [Zen of Reticulum](../introduction/zen-of-reticulum) — the philosophy behind the protocol
-- [Installing Ratspeak](../getting-started/installing-ratspeak) — get up and running
+- [Choosing Your Setup](../getting-started/choosing-your-setup) — pick the right installation
 - [Glossary](../reference/glossary) — complete term reference

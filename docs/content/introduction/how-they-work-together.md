@@ -1,120 +1,120 @@
 # How They Work Together
 
-Ratspeak isn't a single program — it's three processes working in concert. Understanding how they connect helps you troubleshoot issues and build more complex setups.
+Ratspeak, Reticulum, and LXMF each handle a different job. Understanding how they connect makes everything else in this documentation click.
 
-## The Stack
+## The Layer Cake
 
-Ratspeak sits at the top of a three-layer stack:
+Think of it like sending a letter. Reticulum is the roads and mail carriers — it moves packets from place to place. LXMF is the envelope and stamp — it formats your message, encrypts it, and handles delivery. Ratspeak is the desk where you write and read letters.
 
-| Layer | What It Does |
-|-------|-------------|
-| **Reticulum** | Cryptographic networking — routing, encryption, transport |
-| **LXMF (Lightweight Extensible Message Format)** | Messaging protocol — delivery modes, store-and-forward |
-| **RLAP (Reticulum LXMF App Protocol)** | App layer — interactive sessions (games, tools) encoded in LXMF custom fields |
-| **Ratspeak** | User interface — dashboard, controls, visualization |
+Here is how the layers stack up:
 
-Each layer depends on the one below it. Reticulum handles the network. LXMF handles messages. Ratspeak makes it all accessible through a browser.
+| Layer | Role | Analogy |
+|-------|------|---------|
+| **Reticulum** | Networking — routing, encryption, transport | The roads and mail carriers |
+| **LXMF** | Messaging — delivery modes, store-and-forward | The envelope and stamp |
+| **RLAP** | Apps — interactive sessions encoded in messages | A form inside the envelope |
+| **Ratspeak** | Interface — dashboard, controls, visualization | Your desk |
 
-## Three-Process Architecture
+Each layer depends on the one below it. Reticulum handles the network plumbing. LXMF handles message formatting and delivery. RLAP lets apps embed interactive sessions inside messages. Ratspeak ties it all together in a browser-based interface you can actually use.
 
-Ratspeak runs three types of processes that work together:
+## Under the Hood
+
+When you start Ratspeak, three things happen behind the scenes:
+
+1. **The network daemon starts** (`rnsd`) — This is the engine that talks to the outside world. It manages your radio connections, WiFi discovery, TCP links, and all the routing. Think of it as the radio operator in your station.
+
+2. **A bridge agent connects** — This small helper connects the network daemon to the dashboard, relaying network events back and forth.
+
+3. **The dashboard server starts** — This is what you see in your browser. It handles messaging, shows your network graph, and lets you manage everything through a graphical interface.
 
 <div class="docs-diagram">
-<svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" fill="none">
+<svg viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg" fill="none">
   <!-- rnsd process -->
-  <rect x="40" y="40" width="180" height="100" rx="10" stroke="#00D4AA" stroke-width="1.5" fill="rgba(0,212,170,0.06)"/>
-  <text x="130" y="70" text-anchor="middle" fill="#00D4AA" font-family="JetBrains Mono" font-size="13" font-weight="600">rnsd</text>
-  <text x="130" y="90" text-anchor="middle" fill="#9eadbf" font-family="Outfit" font-size="11">Reticulum Daemon</text>
-  <text x="130" y="108" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="10">Interfaces, transport, routing</text>
+  <rect x="40" y="40" width="180" height="90" rx="10" stroke="#00D4AA" stroke-width="1.5" fill="rgba(0,212,170,0.06)"/>
+  <text x="130" y="68" text-anchor="middle" fill="#00D4AA" font-family="JetBrains Mono" font-size="13" font-weight="600">rnsd</text>
+  <text x="130" y="88" text-anchor="middle" fill="#9eadbf" font-family="Outfit" font-size="11">Network Daemon</text>
+  <text x="130" y="108" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="10">Interfaces, routing, transport</text>
 
-  <!-- node_agent process -->
-  <rect x="260" y="40" width="180" height="100" rx="10" stroke="#F59E0B" stroke-width="1.5" fill="rgba(245,158,11,0.06)"/>
-  <text x="350" y="70" text-anchor="middle" fill="#F59E0B" font-family="JetBrains Mono" font-size="13" font-weight="600">node_agent.py</text>
-  <text x="350" y="90" text-anchor="middle" fill="#9eadbf" font-family="Outfit" font-size="11">Node Agent</text>
-  <text x="350" y="108" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="10">RNS bridge, packet relay</text>
+  <!-- Bridge agent -->
+  <rect x="260" y="40" width="180" height="90" rx="10" stroke="#F59E0B" stroke-width="1.5" fill="rgba(245,158,11,0.06)"/>
+  <text x="350" y="68" text-anchor="middle" fill="#F59E0B" font-family="JetBrains Mono" font-size="13" font-weight="600">Bridge Agent</text>
+  <text x="350" y="88" text-anchor="middle" fill="#9eadbf" font-family="Outfit" font-size="11">Node Agent</text>
+  <text x="350" y="108" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="10">Relays network events</text>
 
-  <!-- app.py process -->
-  <rect x="480" y="40" width="180" height="100" rx="10" stroke="#38BDF8" stroke-width="1.5" fill="rgba(56,189,248,0.06)"/>
-  <text x="570" y="70" text-anchor="middle" fill="#38BDF8" font-family="JetBrains Mono" font-size="13" font-weight="600">app.py</text>
-  <text x="570" y="90" text-anchor="middle" fill="#9eadbf" font-family="Outfit" font-size="11">Dashboard Server</text>
-  <text x="570" y="108" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="10">Web UI, Socket.IO, LXMF</text>
+  <!-- Dashboard server -->
+  <rect x="480" y="40" width="180" height="90" rx="10" stroke="#38BDF8" stroke-width="1.5" fill="rgba(56,189,248,0.06)"/>
+  <text x="570" y="68" text-anchor="middle" fill="#38BDF8" font-family="JetBrains Mono" font-size="13" font-weight="600">Dashboard</text>
+  <text x="570" y="88" text-anchor="middle" fill="#9eadbf" font-family="Outfit" font-size="11">Web Server</text>
+  <text x="570" y="108" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="10">UI, messaging, controls</text>
 
-  <!-- Connections -->
-  <!-- rnsd <-> agent (RNS shared instance) -->
-  <line x1="220" y1="75" x2="260" y2="75" stroke="#00D4AA" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <!-- Connection: rnsd <-> agent -->
+  <line x1="220" y1="75" x2="260" y2="75" stroke="#3a4759" stroke-width="1.5" stroke-dasharray="6 3"/>
   <text x="240" y="68" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">RNS</text>
 
-  <!-- agent <-> app (Socket.IO /agents) -->
-  <line x1="440" y1="75" x2="480" y2="75" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="6 3"/>
-  <text x="460" y="68" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">Socket.IO</text>
+  <!-- Connection: agent <-> dashboard -->
+  <line x1="440" y1="75" x2="480" y2="75" stroke="#3a4759" stroke-width="1.5" stroke-dasharray="6 3"/>
 
-  <!-- rnsd <-> app (RNS shared instance) -->
-  <path d="M130 140 L130 200 L570 200 L570 140" stroke="#38BDF8" stroke-width="1.5" stroke-dasharray="6 3"/>
-  <text x="350" y="218" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="10">RNS Shared Instance (hub node client)</text>
+  <!-- Connection: rnsd <-> dashboard (direct) -->
+  <path d="M130 130 L130 185 L570 185 L570 130" stroke="#38BDF8" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text x="350" y="200" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="10">Direct RNS connection for messaging</text>
 
   <!-- Browser -->
-  <rect x="430" y="240" width="280" height="60" rx="10" stroke="#C084FC" stroke-width="1.5" fill="rgba(192,132,252,0.06)"/>
-  <text x="570" y="268" text-anchor="middle" fill="#C084FC" font-family="JetBrains Mono" font-size="12" font-weight="600">Browser</text>
-  <text x="570" y="285" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="10">http://localhost:5050</text>
+  <rect x="440" y="225" width="280" height="55" rx="10" stroke="#C084FC" stroke-width="1.5" fill="rgba(192,132,252,0.06)"/>
+  <text x="580" y="250" text-anchor="middle" fill="#C084FC" font-family="JetBrains Mono" font-size="12" font-weight="600">Your Browser</text>
+  <text x="580" y="268" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="10">or Tauri Desktop App</text>
 
-  <!-- app <-> browser -->
-  <line x1="570" y1="140" x2="570" y2="240" stroke="#C084FC" stroke-width="1.5" stroke-dasharray="6 3"/>
-  <text x="590" y="190" fill="#7e8fa2" font-family="Outfit" font-size="9">HTTP + WS</text>
+  <!-- Dashboard <-> Browser -->
+  <line x1="570" y1="130" x2="570" y2="225" stroke="#C084FC" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text x="588" y="178" fill="#7e8fa2" font-family="Outfit" font-size="9">HTTP + WebSocket</text>
 
-  <!-- Animated data pulse on rnsd->app connection -->
-  <circle r="3" fill="#38BDF8" opacity="0.8">
+  <!-- Animated data pulse -->
+  <circle r="3" fill="#00D4AA" opacity="0.8">
     <animate attributeName="cx" values="130;350;570" dur="3s" repeatCount="indefinite"/>
-    <animate attributeName="cy" values="200;200;200" dur="3s" repeatCount="indefinite"/>
-  </circle>
-
-  <!-- Animated data pulse on app->browser -->
-  <circle r="3" fill="#C084FC" opacity="0.8">
-    <animate attributeName="cx" values="570;570" dur="1.5s" repeatCount="indefinite"/>
-    <animate attributeName="cy" values="140;240" dur="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="185;185;185" dur="3s" repeatCount="indefinite"/>
   </circle>
 </svg>
-<figcaption>The three-process model with data flow connections</figcaption>
+<figcaption>Ratspeak architecture: network daemon, bridge agent, and dashboard server</figcaption>
 </div>
 
-### 1. rnsd — Reticulum Daemon
+The network daemon (`rnsd`) is your primary node — sometimes called the hub node. When you add interfaces, change settings, or send messages, you are operating through this Reticulum instance. For most setups, a single hub node is all you need.
 
-The **rnsd** (Reticulum Network Stack Daemon) is the core networking process. It manages all configured interfaces (LoRa, TCP, WiFi, etc.), handles packet routing and transport, and maintains path tables for the network.
+## Ratspeak-py vs Ratspeak-rs
 
-Each node has its own rnsd instance with its own config directory under `nodes/<node_name>/`.
+Ratspeak has two implementations. They look the same from the outside and talk the same protocol, but they are built with different tools.
 
-### 2. node_agent.py — Node Agent
+| | Ratspeak-py | Ratspeak-rs |
+|---|---|---|
+| Language | Python | Rust |
+| Backend | Flask + Socket.IO | Axum + Socket.IO |
+| Network stack | Python RNS library | Native Rust implementation |
+| Best for | Getting started, broad platform support | Performance, security, long-term use |
+| Same frontend | Yes | Yes |
+| Interoperable | Yes — same protocol, same network | Yes |
 
-The **node agent** bridges rnsd and the dashboard. It connects to rnsd as a shared instance client (connecting to rnsd's local socket so multiple programs can share one Reticulum instance) and to the dashboard server via Socket.IO's `/agents` namespace. It relays packet send/receive commands between the two.
+Both implementations produce the same user experience. Messages sent from Ratspeak-py reach Ratspeak-rs users (and vice versa) because they speak the same Reticulum protocol. Pick whichever fits your situation — you can always switch later without losing compatibility with the rest of the network.
 
-### 3. app.py — Dashboard Server
+## Sending a Message — The Full Journey
 
-The **dashboard server** is a Flask + Socket.IO application. It connects to the hub node's rnsd as a shared instance client, runs the messaging system (LXMF router), serves the web UI, and handles all user interactions via Socket.IO events.
+Here is what happens when you send a message, start to finish:
 
-## The Hub Node
+1. You type a message and hit **Send** in your browser.
+2. The browser sends it to the dashboard server via WebSocket.
+3. The dashboard's messaging system (LXMF) encrypts the message with the recipient's public key.
+4. The encrypted packet is handed to the network daemon (`rnsd`).
+5. `rnsd` routes the packet out through the best available interface — LoRa radio, TCP connection, WiFi, whatever is available.
+6. The packet travels across the mesh, hopping through transport nodes if needed.
+7. The recipient's `rnsd` receives the packet.
+8. Their dashboard decrypts it and shows it in their message view.
+9. A delivery confirmation travels back to you.
 
-The **hub node** (`node_1` by default) is the primary rnsd instance. The dashboard connects directly to it. When you add interfaces, change settings, or send messages through Ratspeak, you're operating through the hub node's Reticulum instance.
+No central server touches the message at any point. The encryption happens on your device, and only the recipient's device can decrypt it. Transport nodes in between carry sealed packets they cannot read.
 
-Additional nodes can be added dynamically through the UI for multi-node deployments, but for most setups a single hub node is all you need.
+Adding or removing network interfaces requires a brief restart of the network daemon. Ratspeak handles this automatically — you will see a momentary reconnection, then the new interface appears.
 
-## Data Flow Example
+> **Tip**: BLE Mesh is the one interface that doesn't require restarting the network daemon. It connects directly at runtime — useful for quick ad-hoc connections.
 
-When you send a message through Ratspeak:
+## What's Next
 
-1. You type a message in the browser
-2. The browser sends it via Socket.IO to **app.py**
-3. **app.py**'s LXMF router encrypts it and hands it to **rnsd** via the shared instance connection
-4. **rnsd** routes the encrypted packet out through the appropriate interface (LoRa, TCP, WiFi, etc.)
-5. The packet traverses the mesh network to its destination
-6. Delivery confirmation travels back the same path
-
-## Interface Changes
-
-Adding or removing interfaces requires a brief restart of the Reticulum daemon. Ratspeak handles this automatically — you'll see a momentary reconnection, then the new interface appears.
-
-> **Tip**: BLE Mesh is the exception — it registers directly with the RNS transport layer at runtime without needing an rnsd restart.
-
-## Next Steps
-
-- [Key Concepts](../introduction/key-concepts) — essential terminology
-- [Installing Ratspeak](../getting-started/installing-ratspeak) — get up and running
+- [Key Concepts](../introduction/key-concepts) — essential terminology explained
+- [Choosing Your Setup](../getting-started/choosing-your-setup) — pick the right installation
 - [Dashboard Overview](../using-ratspeak/dashboard-overview) — tour the interface

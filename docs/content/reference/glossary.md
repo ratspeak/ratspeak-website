@@ -33,10 +33,10 @@ Mechanism to prevent announce flooding. Configured per-interface via `announce_r
 Application-specific data attached to an Announce packet. When a destination announces, it can include arbitrary bytes (commonly UTF-8 text like a display name or node description) that announce handlers on other nodes can read and process. In LXMF, the app data typically contains the sender's display name.
 
 ### App Manifest <span class="glossary-category glossary-category--tool">Tool</span>
-The metadata declaration for an RLAP app plugin, defined as class attributes on `AppBase`. Includes `app_id`, `version`, `display_name`, `session_type` (turn_based/real_time/one_shot), `max_players`, `validation` model, supported `actions`, `preferred_delivery` per action, and per-status `ttl`. The manifest is returned by `get_manifest()` and used by the App Router for dispatch and UI rendering. See [RLAP Protocol](../understanding/rlap-protocol).
+The metadata declaration for an RLAP app plugin, defined as class attributes on `AppBase`. Includes `app_id`, `version`, `display_name`, `session_type` (turn_based/real_time/one_shot), `max_players`, `validation` model, supported `actions`, `preferred_delivery` per action, and per-status `ttl`. The manifest is returned by `get_manifest()` and used by the App Router for dispatch and UI rendering. See [RLAP Protocol](../developer/rlap-protocol).
 
 ### App Router <span class="glossary-category glossary-category--tool">Tool</span>
-The RLAP dispatch module (`app_router.py`) that discovers installed app plugins, dispatches incoming/outgoing actions by `app_id`, and manages the app registry. Routes RLAP envelopes to the correct `AppBase` subclass and handles legacy v0 message translation. See [RLAP Protocol](../understanding/rlap-protocol).
+The RLAP dispatch module (`app_router.py`) that discovers installed app plugins, dispatches incoming/outgoing actions by `app_id`, and manages the app registry. Routes RLAP envelopes to the correct `AppBase` subclass and handles legacy v0 message translation. See [RLAP Protocol](../developer/rlap-protocol).
 
 ### Aspect <span class="glossary-category glossary-category--protocol">Protocol</span>
 A dot-separated naming component used to construct a destination's identity. Follows a hierarchical pattern like `app_name.service.function` (e.g., `lxmf.delivery`, `nomadnetwork.node`). The full aspect chain is hashed with the identity's public key to produce the destination hash. Aspects should be generic descriptors, not unique identifiers — the identity's keys provide uniqueness.
@@ -79,7 +79,7 @@ Stream abstraction over Channels providing `BufferedReader` and `BufferedWriter`
 ## C
 
 ### Capability Negotiation <span class="glossary-category glossary-category--tool">Tool</span>
-In RLAP, capabilities are not exchanged in every message. Instead, the `app_id.version` field (`"a"`) in the envelope implicitly declares the sender's protocol version. A client receiving `"chess.1"` knows the sender supports RLAP v1 chess. If a client receives an unknown `app_id`, it sends an `error` action with code `unsupported_app`. See [RLAP Protocol](../understanding/rlap-protocol).
+In RLAP, capabilities are not exchanged in every message. Instead, the `app_id.version` field (`"a"`) in the envelope implicitly declares the sender's protocol version. A client receiving `"chess.1"` knows the sender supports RLAP v1 chess. If a client receives an unknown `app_id`, it sends an `error` action with code `unsupported_app`. See [RLAP Protocol](../developer/rlap-protocol).
 
 ### Challenge / Accept / Decline <span class="glossary-category glossary-category--tool">Tool</span>
 The opening handshake of an RLAP session. A **challenge** initiates a new session (the challenger generates the session ID). The recipient responds with **accept** (providing initial state, e.g. starting board position) or **decline** (rejecting the challenge). Unanswered challenges expire after 24 hours. See [Games & Apps](../using-ratspeak/games-and-apps).
@@ -133,7 +133,7 @@ A temporary cryptographic key generated for a single session or exchange. In Ret
 ## F
 
 ### Fallback Text <span class="glossary-category glossary-category--tool">Tool</span>
-The human-readable text in the LXMF `content` field of every RLAP message. Non-RLAP clients (Sideband, NomadNet, MeshChat) display this as a regular message, ensuring cross-client compatibility. Format: `[Ratspeak <AppName>] <description>`. There is no separate fallback key in the RLAP envelope — the LXMF content field IS the fallback, saving ~30-40 bytes per message. See [RLAP Protocol](../understanding/rlap-protocol).
+The human-readable text in the LXMF `content` field of every RLAP message. Non-RLAP clients (Sideband, NomadNet, MeshChat) display this as a regular message, ensuring cross-client compatibility. Format: `[Ratspeak <AppName>] <description>`. There is no separate fallback key in the RLAP envelope — the LXMF content field IS the fallback, saving ~30-40 bytes per message. See [RLAP Protocol](../developer/rlap-protocol).
 
 ### Fernet <span class="glossary-category glossary-category--crypto">Crypto</span>
 Modified Fernet token format used for encrypted packets in Reticulum. Uses ephemeral keys from ECDH on Curve25519. Modified from the standard Fernet specification: no version or timestamp metadata fields are included, reducing overhead. Contains the ciphertext and HMAC authentication tag.
@@ -227,7 +227,7 @@ Internal interface type used when a Reticulum program connects to an existing sh
 Lightweight Extensible Message Format. Zero-configuration encrypted message routing over Reticulum. Three delivery modes: direct (Link-based), opportunistic (single packet), and propagated (store-and-forward). Messages contain: destination (16 bytes), source (16 bytes), Ed25519 signature (64 bytes), timestamp, optional title/content/fields. Protocol overhead: 111 bytes. Compatible across Sideband, NomadNet, MeshChat, and Ratspeak. See [LXMF Protocol](../understanding/lxmf-protocol).
 
 ### LXMF Custom Fields <span class="glossary-category glossary-category--messaging">Messaging</span>
-Extension fields in LXMF used by RLAP for app-layer communication: `FIELD_CUSTOM_TYPE` (`0xFB` / 251) carries the protocol identifier (`"rlap.v1"`), and `FIELD_CUSTOM_META` (`0xFD` / 253) carries the RLAP envelope dict. These fields are serialized via msgpack alongside standard LXMF fields. Any LXMF client can read these fields, enabling cross-client RLAP adoption. See [RLAP Protocol](../understanding/rlap-protocol).
+Extension fields in LXMF used by RLAP for app-layer communication: `FIELD_CUSTOM_TYPE` (`0xFB` / 251) carries the protocol identifier (`"rlap.v1"`), and `FIELD_CUSTOM_META` (`0xFD` / 253) carries the RLAP envelope dict. These fields are serialized via msgpack alongside standard LXMF fields. Any LXMF client can read these fields, enabling cross-client RLAP adoption. See [RLAP Protocol](../developer/rlap-protocol).
 
 ### LXMF Fields <span class="glossary-category glossary-category--messaging">Messaging</span>
 Extensible typed fields in LXMF messages. Standard fields include: `FIELD_EMBEDDED_LXMS` (0x01), `FIELD_TELEMETRY` (0x02), `FIELD_TELEMETRY_STREAM` (0x03), `FIELD_ICON_APPEARANCE` (0x04), `FIELD_FILE_ATTACHMENTS` (0x05), `FIELD_IMAGE` (0x06), `FIELD_AUDIO` (0x07), `FIELD_THREAD` (0x08), `FIELD_COMMANDS` (0x09), `FIELD_RESULTS` (0x0A), `FIELD_GROUP` (0x0B). Custom extension fields `0xFB` and `0xFD` are used by RLAP. Packed via MessagePack for efficient over-the-air transmission.
@@ -351,10 +351,10 @@ RPC-like mechanism over Links. The initiator sends a request to a registered han
 Mechanism for transferring arbitrarily large data over Links. Handles automatic compression, sequencing, integrity verification, and reassembly. Provides progress callbacks for tracking transfer state. Overcomes the 500-byte MTU limitation by segmenting data across multiple packets with reliable delivery.
 
 ### RLAP <span class="glossary-category glossary-category--tool">Tool</span>
-Reticulum LXMF App Protocol. A lightweight protocol for interactive applications (games, file sharing, collaborative tools) over LXMF messaging. Uses LXMF custom extension fields (`0xFB` for type, `0xFD` for envelope) with single-character keys and msgpack serialization. Designed to fit within the 295-byte OPPORTUNISTIC delivery limit. Clients that don't understand RLAP see human-readable fallback text. See [RLAP Protocol](../understanding/rlap-protocol).
+Reticulum LXMF App Protocol. A lightweight protocol for interactive applications (games, file sharing, collaborative tools) over LXMF messaging. Uses LXMF custom extension fields (`0xFB` for type, `0xFD` for envelope) with single-character keys and msgpack serialization. Designed to fit within the 295-byte OPPORTUNISTIC delivery limit. Clients that don't understand RLAP see human-readable fallback text. See [RLAP Protocol](../developer/rlap-protocol).
 
 ### RLAP Envelope <span class="glossary-category glossary-category--tool">Tool</span>
-The structured dict carried in LXMF `fields[0xFD]`. Contains four single-character keys: `"a"` (app_id.version), `"c"` (command), `"s"` (session_id), `"p"` (payload). The envelope must not exceed 200 bytes when packed via msgpack. Combined with the `"rlap.v1"` type marker in `fields[0xFB]`, it forms a complete RLAP message. See [RLAP Protocol](../understanding/rlap-protocol).
+The structured dict carried in LXMF `fields[0xFD]`. Contains four single-character keys: `"a"` (app_id.version), `"c"` (command), `"s"` (session_id), `"p"` (payload). The envelope must not exceed 200 bytes when packed via msgpack. Combined with the `"rlap.v1"` type marker in `fields[0xFB]`, it forms a complete RLAP message. See [RLAP Protocol](../developer/rlap-protocol).
 
 ### RNode <span class="glossary-category glossary-category--interface">Interface</span>
 Open-source LoRa radio interface using a custom MAC layer (not LoRaWAN). Supports sub-GHz ISM bands (430/868/900 MHz) and 2.4 GHz via SX1262/SX1268/SX1276/SX1278/SX1280 Semtech transceivers. Configurable spreading factor, bandwidth, coding rate, TX power, and frequency. Connects via USB serial or Bluetooth. Firmware supports normal mode (host-managed) and TNC mode (standalone). See [LoRa / RNode](../connecting/lora-rnode).
@@ -422,7 +422,7 @@ Signal-to-Noise Ratio, measured in dB. Indicates how much the received signal ex
 An RLAP session is a series of structured messages between two contacts within a specific app. Each session has a unique hex-encoded ID, a lifecycle (challenge -> accept -> actions -> end), per-status TTLs (pending: 24h, active: 7d), and local-only expiry. Sessions are persisted in the database with composite primary keys (session_id + identity_id). See [Games & Apps](../using-ratspeak/games-and-apps).
 
 ### Session Type <span class="glossary-category glossary-category--tool">Tool</span>
-The interaction pattern for an RLAP app: **turn_based** (players alternate actions — chess, tic-tac-toe), **real_time** (both players can act at any time — collaborative editing), or **one_shot** (single action, no ongoing session — file sharing). Declared in the app manifest. See [RLAP Protocol](../understanding/rlap-protocol).
+The interaction pattern for an RLAP app: **turn_based** (players alternate actions — chess, tic-tac-toe), **real_time** (both players can act at any time — collaborative editing), or **one_shot** (single action, no ongoing session — file sharing). Declared in the app manifest. See [RLAP Protocol](../developer/rlap-protocol).
 
 ### Spreading Factor <span class="glossary-category glossary-category--interface">Interface</span>
 LoRa modulation parameter (`spreadingfactor`, values 7–12) controlling the trade-off between range and data rate. Higher values (e.g., SF12) provide longer range and better sensitivity but slower data rates — each step roughly doubles the airtime. Lower values (e.g., SF7) give faster data rates but shorter range. Ratspeak presets: Long Range (SF12), Balanced (SF9), Fast (SF7). See [LoRa / RNode](../connecting/lora-rnode).
@@ -467,7 +467,7 @@ Reticulum interface for communication over IP networks using UDP. Supports unica
 ## V
 
 ### Validation Model <span class="glossary-category glossary-category--tool">Tool</span>
-The strategy an RLAP app uses to validate actions: **sender** (sender validates before sending, receiver trusts — used by chess), **receiver** (receiver validates on receipt, rejects invalid with error action), or **both** (both sides validate independently). Sender validation is appropriate for casual peer-to-peer play; receiver validation provides stronger guarantees for competitive or cross-client scenarios. See [RLAP Protocol](../understanding/rlap-protocol).
+The strategy an RLAP app uses to validate actions: **sender** (sender validates before sending, receiver trusts — used by chess), **receiver** (receiver validates on receipt, rejects invalid with error action), or **both** (both sides validate independently). Sender validation is appropriate for casual peer-to-peer play; receiver validation provides stronger guarantees for competitive or cross-client scenarios. See [RLAP Protocol](../developer/rlap-protocol).
 
 ### VPort <span class="glossary-category glossary-category--interface">Interface</span>
 Virtual port number used with `RNodeMultiInterface` to distinguish between multiple sub-interfaces sharing the same physical RNode device. Each sub-interface is configured with a unique `vport` value, enabling simultaneous operation on different frequency bands or with different radio parameters through one hardware device.

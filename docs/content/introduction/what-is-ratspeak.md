@@ -1,72 +1,64 @@
-# What Is Ratspeak?
+# What is Ratspeak?
 
-A real-time dashboard and desktop app for Reticulum mesh networks — messaging, network visualization, games, identity management, and monitoring in your browser or as a native application.
+Ratspeak is your window into encrypted mesh communication — send messages, manage your network, and monitor connections without servers, accounts, or surveillance.
 
 ## Overview
 
-Ratspeak gives you a graphical interface to the Reticulum network stack. Instead of managing configs by hand and monitoring from the terminal, you get a real-time dashboard with encrypted messaging, interactive network graphs, chess games over the mesh, dynamic interface management, and identity controls — all from a browser or the Tauri desktop app.
-
-It's built with Flask + Socket.IO on the backend and vanilla JavaScript on the frontend. No build tools, no framework lock-in, no accounts, no cloud services.
-
-<div class="screenshot-placeholder">
+<div class="screenshot-placeholder" data-caption="Ratspeak dashboard showing connections console with active network nodes, messaging sidebar, and network health indicators">
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#7e8fa2" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-    <div>Dashboard overview — screenshot placeholder</div>
+    <div>Ratspeak dashboard — screenshot coming soon</div>
 </div>
 
-## Features
+Ratspeak is a dashboard and desktop app for Reticulum mesh networks. It gives you a graphical interface for messaging, network visualization, identity management, connection monitoring, and interactive apps like chess.
 
-### Encrypted Messaging
-Send and receive LXMF (Lightweight Extensible Message Format) encrypted messages, compatible with Sideband, NomadNet, and MeshChat. Supports multiple delivery modes including store-and-forward for offline recipients. File attachments, full-text search, and delivery status tracking included.
+No accounts to create on someone else's server. No data stored in someone else's cloud. Your identity is a cryptographic key that lives on your device.
 
-### Network Graph
-A D3.js force-directed graph showing your mesh topology in real time. Nodes are color-coded by type — hub (green), contacts (blue), stale (yellow), offline (red), transport (purple), discovered (gray). Zoom, pan, drag, pin, search, and filter. See [Graph Visualization](../using-ratspeak/graph-visualization) for details.
+Ratspeak is available two ways:
 
-### Games & Apps
-Play chess and other interactive games with contacts over the mesh. Built on **RLAP** (Reticulum LXMF App Protocol) — a lightweight app protocol that encodes game actions into LXMF messages. Non-Ratspeak clients see human-readable fallback text. See [Games & Apps](../using-ratspeak/games-and-apps) for details.
+- **In your browser** — open localhost and start using it
+- **As a desktop app** — native app for macOS, Linux, and Windows via Tauri
 
-### Network Topology
-Live connections table showing all discovered destinations with hop counts, path ages, interface info, and reachability status. Interface health alerts, throughput sparklines, and status summaries.
+## Two Implementations
 
-### Identity Management
-Create, import, export, and switch between Reticulum identities without restarting. Each identity is an Ed25519 + X25519 keypair with isolated storage. Export identities for use in other Reticulum apps.
+Ratspeak exists in two implementations:
 
-### Interface Control
-Add and remove network interfaces through the UI — TCP connections, LoRa via RNode (open-source LoRa radio hardware), WiFi/LAN auto-discovery, and BLE mesh. LoRa presets for Long Range, Balanced, and Fast modes with region-specific frequencies.
+- **Ratspeak-py** — the original Python implementation (Flask + Socket.IO backend). Mature, full-featured, and the easiest way to get started.
+- **Ratspeak-rs** — a Rust implementation with the same features. Built on an actor-based architecture for better performance and security. This is the primary focus going forward.
 
-### Propagation Node
-Run a local propagation node for store-and-forward messaging. Sync messages from remote propagation nodes. Essential for delay-tolerant networks where recipients may be offline.
+Both use the same web frontend and are fully interoperable on the Reticulum network. Choose whichever suits your platform and preferences.
 
-### Contacts & Reachability
-Track contact reachability with configurable thresholds. See who's online, stale, or offline based on how recently a route to them was confirmed. Auto-path requests keep routes fresh.
+## What You Can Do
 
-### Desktop App
-Ratspeak runs as a native desktop application via **Tauri** (Rust-based app shell with WebView). The Python backend is bundled as a sidecar binary via PyInstaller. Available for macOS, Linux, and Windows.
+- **Send encrypted messages** — LXMF end-to-end encrypted messaging, compatible with other Reticulum apps (Sideband, NomadNet, MeshChat). Send files, search message history, and track delivery.
+- **Visualize your network** — interactive graph showing who's connected, how many hops away, and which interfaces carry traffic.
+- **Manage your identity** — create, import, export, and switch between identities. Your identity is your passport on the mesh.
+- **Monitor connections** — live table of every destination your node knows about, with reachability status, hop counts, and path ages.
+- **Connect radios and interfaces** — add LoRa radios, TCP links, WiFi discovery, and Bluetooth mesh through the UI.
+- **Run a propagation node** — store messages for offline contacts and deliver them when they reconnect.
+- **Play chess over the mesh** — interactive games via the RLAP protocol, with human-readable fallback for non-Ratspeak clients.
 
-## Tech Stack
+## Hardware Companions
 
-| Component | Technology |
-|-----------|-----------|
-| Backend | Python 3.11+, Flask, Socket.IO |
-| Frontend | Vanilla JavaScript (no build step) |
-| Protocol | Reticulum (RNS), LXMF, RLAP |
-| Desktop | Tauri v2 (Rust + WebView) |
-| Database | SQLite with WAL mode, FTS5 search |
-| Visualization | D3.js v7 (Canvas rendering) |
-| Real-time | Socket.IO WebSocket connections |
+Ratspeak also has dedicated hardware:
+
+- **RatDeck** — a portable LoRa messenger built on the LilyGo T-Deck Plus (ESP32-S3 with integrated display, keyboard, and LoRa radio).
+- **RatCom** — a pocket-sized Reticulum node built on the M5Stack Cardputer (ESP32-S3 with keyboard and LoRa module).
+
+Both run standalone firmware and can connect to your Ratspeak dashboard. See the [Hardware](../hardware/rnode-overview) section for details.
+
+## Who Is Ratspeak For?
+
+- **Privacy-conscious communicators** — you want encrypted messaging without trusting a company.
+- **Off-grid operators** — you need communication that works without internet or cell service.
+- **Community network builders** — you're setting up resilient infrastructure for your neighborhood.
+- **Developers** — you want to build apps on a decentralized protocol.
 
 ## The Ecosystem
 
-Ratspeak is one of several applications built on Reticulum:
+Ratspeak is part of the Reticulum ecosystem. Other apps include Sideband (mobile/desktop), NomadNet (terminal-based), MeshChat (web-based), and Columba (Android). They all speak LXMF over Reticulum, so messages sent from Ratspeak reach users on any compatible app.
 
-- **[Sideband](https://github.com/markqvist/Sideband)** — mobile/desktop messaging app with voice calls
-- **[NomadNet](https://github.com/markqvist/NomadNetwork)** — terminal-based mesh communication
-- **[MeshChat](https://github.com/liamcottle/reticulum-meshchat)** — web-based messaging
-- **[Columba](https://github.com/music-mind/Columba)** — native Android LXMF client
+## What's Next
 
-All of these speak LXMF over Reticulum, so messages sent from Ratspeak can be received by Sideband (and vice versa). RLAP game actions appear as readable text on non-Ratspeak clients.
-
-## Next Steps
-
-- [How They Work Together](../introduction/how-they-work-together) — understand the architecture
-- [Installing Ratspeak](../getting-started/installing-ratspeak) — get up and running
+- [What is Reticulum?](../introduction/what-is-reticulum) — the networking protocol underneath
+- [Choosing Your Setup](../getting-started/choosing-your-setup) — pick the right installation for you
 - [Dashboard Overview](../using-ratspeak/dashboard-overview) — tour the interface

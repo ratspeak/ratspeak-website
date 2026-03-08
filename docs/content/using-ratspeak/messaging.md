@@ -100,11 +100,15 @@ Messages can include file attachments up to **500 KB** per file. Supported attac
 
 Attachments are encrypted along with the message and sent via direct link.
 
+## Reactions
+
+You can react to any message with an emoji. Reactions are sent as lightweight LXMF messages and visible to both participants. Click the reaction button on a message to add or remove a reaction. Reaction counts are shown inline on the message.
+
 ## Full-Text Search
 
 All messages are indexed with FTS5 (SQLite full-text search). Use the search bar in the Messages view to search across all conversations by message content.
 
-## Next Steps
+## What's Next
 
 - [Contacts](../using-ratspeak/contacts) — manage contacts and reachability
 - [Propagation Node](../using-ratspeak/propagation-node) — set up store-and-forward

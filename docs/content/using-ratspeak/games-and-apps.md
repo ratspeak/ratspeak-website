@@ -8,7 +8,7 @@ The Games tab hosts interactive applications that run over the Reticulum mesh us
 
 Non-Ratspeak clients (Sideband, NomadNet, MeshChat) see human-readable fallback text for every action, so RLAP sessions don't break compatibility.
 
-<div class="screenshot-placeholder">
+<div class="screenshot-placeholder" data-caption="Games tab showing session list on the left and an active chess game with board and move history on the right">
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#7e8fa2" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
     <div>Games tab with chess session — screenshot placeholder</div>
 </div>
@@ -20,7 +20,7 @@ Non-Ratspeak clients (Sideband, NomadNet, MeshChat) see human-readable fallback 
 | **Chess** | Active | Turn-based | Standard chess with full rule enforcement |
 | **Tic-Tac-Toe** | In progress | Turn-based | Classic 3x3 grid game |
 
-More apps can be added through the RLAP plugin architecture. See [RLAP Protocol](../understanding/rlap-protocol) for the technical specification.
+More apps can be added through the RLAP plugin architecture. See [RLAP Protocol](../developer/rlap-protocol) for the technical specification.
 
 ## Games Tab Layout
 
@@ -57,12 +57,12 @@ Every game session follows a standard lifecycle:
   <text x="630" y="187" text-anchor="middle" fill="#00D4AA" font-family="JetBrains Mono" font-size="12" font-weight="600">end</text>
 
   <!-- Decline -->
-  <rect x="240" y="160" width="120" height="44" rx="8" stroke="#EF4444" stroke-width="1.5" fill="rgba(239,68,68,0.08)"/>
-  <text x="300" y="187" text-anchor="middle" fill="#EF4444" font-family="JetBrains Mono" font-size="12" font-weight="600">decline</text>
+  <rect x="240" y="160" width="120" height="44" rx="8" stroke="#FF6B6B" stroke-width="1.5" fill="rgba(255,107,107,0.08)"/>
+  <text x="300" y="187" text-anchor="middle" fill="#FF6B6B" font-family="JetBrains Mono" font-size="12" font-weight="600">decline</text>
 
   <!-- Resign -->
-  <rect x="440" y="160" width="120" height="44" rx="8" stroke="#EF4444" stroke-width="1.5" fill="rgba(239,68,68,0.08)"/>
-  <text x="500" y="187" text-anchor="middle" fill="#EF4444" font-family="JetBrains Mono" font-size="12" font-weight="600">resign</text>
+  <rect x="440" y="160" width="120" height="44" rx="8" stroke="#FF6B6B" stroke-width="1.5" fill="rgba(255,107,107,0.08)"/>
+  <text x="500" y="187" text-anchor="middle" fill="#FF6B6B" font-family="JetBrains Mono" font-size="12" font-weight="600">resign</text>
 
   <!-- Draw offer -->
   <rect x="340" y="240" width="120" height="44" rx="8" stroke="#C084FC" stroke-width="1.5" fill="rgba(192,132,252,0.08)"/>
@@ -131,7 +131,7 @@ Every game session follows a standard lifecycle:
 3. Choose a contact to challenge
 4. The challenge is sent as an LXMF message
 
-<div class="screenshot-placeholder">
+<div class="screenshot-placeholder" data-caption="Challenge dialog showing game type selection and contact picker">
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#7e8fa2" stroke-width="1.5" stroke-linecap="round"><path d="M12 2L9 9H3l5 4-2 7 6-4 6 4-2-7 5-4h-6z"/></svg>
     <div>Games tab challenge dialog — screenshot placeholder</div>
 </div>
@@ -176,8 +176,8 @@ Sessions with new activity (opponent moved, challenge received) show an unread b
 
 RLAP envelopes are designed to fit within LXMF's **OPPORTUNISTIC** delivery limit (295 bytes total content). The envelope dict itself must stay under **200 bytes** when packed. This ensures game actions are sent as fast single-packet messages — no link handshake required.
 
-## Next Steps
+## What's Next
 
-- [RLAP Protocol](../understanding/rlap-protocol) — technical protocol specification
+- [RLAP Protocol](../developer/rlap-protocol) — technical protocol specification
 - [Messaging](../using-ratspeak/messaging) — how LXMF messaging works
 - [Dashboard Overview](../using-ratspeak/dashboard-overview) — general interface tour

@@ -148,7 +148,7 @@ Public-facing interfaces have automatic rate limiting for new destinations:
 
 In config files, you can use short abbreviations for interface modes: `ap` for `access_point`, `gw` for `gateway`.
 
-## Next Steps
+## What's Next
 
 - [Interface Types Overview](../connecting/interface-types-overview) — compare all interfaces
 - [Building Networks](../connecting/building-networks) — topology design

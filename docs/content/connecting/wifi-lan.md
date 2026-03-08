@@ -96,7 +96,7 @@ To create isolated networks on the same physical LAN, use different `group_id` v
 - Some managed switches and WiFi access points block multicast traffic
 - VPNs may not support IPv6 multicast
 
-## Next Steps
+## What's Next
 
 - [Interface Types Overview](../connecting/interface-types-overview) — compare all interfaces
 - [BLE Mesh](../connecting/ble-mesh) — Bluetooth peer-to-peer

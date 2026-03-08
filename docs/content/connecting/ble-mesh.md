@@ -95,7 +95,7 @@ BLE Mesh uses the same deduplication pattern as AutoInterface: a fixed-size buff
 | Scan interval | 5 seconds |
 | Dedup buffer | 48 entries, 0.75s TTL |
 
-## Next Steps
+## What's Next
 
 - [Interface Types Overview](../connecting/interface-types-overview) — compare all interfaces
 - [Interface Modes](../connecting/interface-modes) — configure interface behavior

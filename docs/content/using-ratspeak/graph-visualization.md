@@ -6,7 +6,7 @@ A real-time, interactive force-directed graph of your Reticulum mesh network —
 
 The Graph view renders a live network topology using D3.js force simulation on an HTML Canvas. Nodes represent Reticulum destinations; edges represent known paths between them. The graph updates in real time as peers are discovered, go stale, or disappear.
 
-<div class="screenshot-placeholder">
+<div class="screenshot-placeholder" data-caption="Interactive network graph showing hub node, connected contacts, transport nodes, and discovered peers with color-coded status">
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#7e8fa2" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><line x1="9.5" y1="10" x2="6.5" y2="6.5"/><line x1="14.5" y1="10" x2="17.5" y2="6.5"/><line x1="9.5" y1="14" x2="6.5" y2="17.5"/><line x1="14.5" y1="14" x2="17.5" y2="17.5"/></svg>
     <div>Graph visualization view — screenshot placeholder</div>
 </div>
@@ -36,8 +36,8 @@ Each node is color-coded by its role and status:
   <text x="300" y="125" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">30-60 min</text>
 
   <!-- Offline -->
-  <circle cx="415" cy="75" r="14" fill="#EF4444" opacity="0.9"/>
-  <text x="415" y="110" text-anchor="middle" fill="#EF4444" font-family="JetBrains Mono" font-size="11" font-weight="600">Offline</text>
+  <circle cx="415" cy="75" r="14" fill="#FF6B6B" opacity="0.9"/>
+  <text x="415" y="110" text-anchor="middle" fill="#FF6B6B" font-family="JetBrains Mono" font-size="11" font-weight="600">Offline</text>
   <text x="415" y="125" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">&gt;60 min</text>
 
   <!-- Transport -->
@@ -108,7 +108,7 @@ The D3 force simulation **pauses when the graph view is not active** to avoid un
 ### Data Source
 Graph data comes from the same `stats_update` Socket.IO event that feeds the connections table and health cards. The `graphUpdate()` function in `graph.js` processes this data to add/remove/update nodes and edges.
 
-## Next Steps
+## What's Next
 
 - [Network Monitoring](../using-ratspeak/network-monitoring) — connections table and interface stats
 - [Dashboard Overview](../using-ratspeak/dashboard-overview) — general interface tour

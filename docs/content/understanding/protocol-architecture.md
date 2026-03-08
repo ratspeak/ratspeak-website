@@ -93,6 +93,7 @@ Announces are how destinations become reachable on the network. An announce cont
   <!-- Caption -->
   <text x="350" y="210" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="11" font-style="italic">Announce ripples outward, hop count incrementing at each transport node</text>
 </svg>
+<figcaption>Announce propagation: ripples outward with hop count incrementing at each transport node</figcaption>
 </div>
 
 ### Propagation Rules
@@ -135,7 +136,7 @@ Traffic is prioritized (highest to lowest):
 4. Data packets
 5. Announces (lowest — rate-limited)
 
-## Next Steps
+## What's Next
 
 - [Links & Communication](../understanding/links-and-communication) — encrypted channels
 - [Wire Format](../understanding/wire-format) — packet structure

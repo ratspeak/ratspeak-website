@@ -50,7 +50,7 @@ Export your identity for use in other Reticulum applications:
 
 > **Warning**: Your identity file contains your private keys. Anyone with this file can impersonate you. Share your destination hash, never your identity file.
 
-<div class="screenshot-placeholder">
+<div class="screenshot-placeholder" data-caption="Identity management view showing active identity card, identity list, and import/export controls">
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#7e8fa2" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     <div>Identity management view — screenshot placeholder</div>
 </div>
@@ -98,7 +98,7 @@ Each identity has a **display name** — the human-readable name announced on th
 
 Updating the display name on the active identity triggers a re-announce so the change propagates across the network.
 
-## Next Steps
+## What's Next
 
 - [First Run](../getting-started/first-run) — initial identity setup
 - [Messaging](../using-ratspeak/messaging) — communicate with your identity

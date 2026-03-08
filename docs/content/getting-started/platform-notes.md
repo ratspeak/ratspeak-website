@@ -1,50 +1,71 @@
 # Platform Notes
 
-Reticulum and Ratspeak run on almost anything with Python. Here are the platform-specific details you may need.
+Ratspeak runs on Linux, macOS, Windows, Raspberry Pi, and Android (via Termux). Here's what you need to know for each platform.
 
 ## Linux
 
-### Debian / Ubuntu (Bookworm+ / Lunar+)
+### Debian / Ubuntu
 
-Modern Debian-based systems use externally managed Python environments. Choose one approach:
-
-```bash
-# Option 1: Use pipx (recommended for system-wide tools)
-pipx install rns
-
-# Option 2: Use pip with system packages flag
-pip install rns --break-system-packages
-
-# Option 3: Add to pip config
-echo "[global]
-break-system-packages = true" >> ~/.config/pip/pip.conf
-pip install rns
-```
-
-For Ratspeak, always use a virtual environment:
+Modern Debian-based systems restrict pip installs. For Ratspeak-py, always use a virtual environment:
 
 ```bash
+sudo apt install python3 python3-pip python3-venv git
+git clone https://github.com/ratspeak/ratspeak.git && cd ratspeak
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
+./start.sh
+```
+
+For Ratspeak-rs:
+
+```bash
+# Install Rust (if building from source)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Build dependencies
+sudo apt install build-essential pkg-config libssl-dev libudev-dev
+
+git clone https://github.com/ratspeak/rustrat.git && cd rustrat
+cargo build --release
+./start.sh
 ```
 
 ### Arch Linux
 
 ```bash
-pip install rns
+# Ratspeak-py
+pip install -r requirements.txt
+
+# Ratspeak-rs
+sudo pacman -S base-devel openssl
+cargo build --release
 ```
 
 ### Fedora / RHEL
 
 ```bash
+# Ratspeak-py
 sudo dnf install python3 python3-pip
-pip install rns
+pip install -r requirements.txt
+
+# Ratspeak-rs
+sudo dnf groupinstall "Development Tools"
+sudo dnf install openssl-devel
+cargo build --release
 ```
 
 ## macOS
 
+### Ratspeak-py
+
 ```bash
-pip3 install rns
+# Install Python if needed (via Homebrew)
+brew install python@3.11
+
+git clone https://github.com/ratspeak/ratspeak.git && cd ratspeak
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+./start.sh
 ```
 
 If `rnsd` is not found after install, add the Python bin directory to your PATH:
@@ -53,64 +74,87 @@ If `rnsd` is not found after install, add the Python bin directory to your PATH:
 export PATH="$HOME/Library/Python/3.x/bin:$PATH"
 ```
 
-Replace `3.x` with your Python version (check with `python3 --version`).
+### Ratspeak-rs
+
+```bash
+# Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+git clone https://github.com/ratspeak/rustrat.git && cd rustrat
+cargo build --release
+./start.sh
+```
 
 ## Windows
 
-Ratspeak's startup scripts require a bash-compatible shell. Install WSL (Windows Subsystem for Linux) or Git Bash before proceeding.
+Ratspeak's startup scripts require a bash-compatible shell.
 
-1. Install **Python 3.11+** from [python.org](https://python.org)
-2. During install, check **"Add Python to PATH"**
-3. Open a terminal:
+### Option 1: WSL (Recommended)
 
-```bash
-pip install rns
-```
+Install WSL (Windows Subsystem for Linux) from the Microsoft Store, then follow the Linux instructions above.
 
-For Ratspeak, use Git Bash or WSL for the best experience with `start.sh`/`stop.sh`.
+### Option 2: Git Bash
+
+1. Install Python 3.11+ from python.org (check **Add Python to PATH** during install)
+2. Install Git for Windows
+3. Open Git Bash and follow the Linux instructions
+
+> **Note**: Ratspeak-rs can be built natively on Windows with `cargo build --release` from PowerShell or cmd -- no WSL needed.
 
 ## Raspberry Pi
 
-Use a **64-bit OS** for best compatibility:
+Raspberry Pi makes an excellent always-on Reticulum node. Use **64-bit Raspberry Pi OS** for best compatibility.
+
+### Ratspeak-py
 
 ```bash
-sudo apt install python3 python3-pip python3-cryptography python3-pyserial
-pip install rns --break-system-packages
+sudo apt install python3 python3-pip python3-venv python3-cryptography python3-pyserial
+git clone https://github.com/ratspeak/ratspeak.git && cd ratspeak
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+./start.sh
 ```
 
-Raspberry Pi makes an excellent always-on transport node. A Pi Zero 2 W with an RNode radio can serve as a standalone mesh gateway.
+### Ratspeak-rs
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+sudo apt install build-essential pkg-config libssl-dev libudev-dev
+git clone https://github.com/ratspeak/rustrat.git && cd rustrat
+cargo build --release
+./start.sh
+```
+
+> **Tip**: A Pi Zero 2 W with an RNode radio makes a compact, low-power mesh gateway. See [Raspberry Pi Gateway](../deployment/raspberry-pi-gateway) for a complete setup guide.
 
 ## Android (Termux)
 
 ```bash
-pkg install python python-cryptography
-pip install rns
+pkg update && pkg upgrade
+pkg install python python-cryptography git
+pip install rns lxmf
+
+# Clone and run Ratspeak-py
+git clone https://github.com/ratspeak/ratspeak.git && cd ratspeak
+pip install -r requirements.txt
+python dashboard/app.py
 ```
 
-> **Note**: For a full mobile Reticulum experience, consider [Sideband](https://github.com/markqvist/Sideband) — a native Android/desktop LXMF client.
+> **Note**: For a native Android experience, consider [Sideband](https://github.com/markqvist/Sideband) -- a dedicated LXMF client for Android. It interoperates with Ratspeak over the same Reticulum network.
 
-## Embedded / Constrained Environments
+## Pure Python Fallback (rnspure)
 
-### rnspure
-
-For systems without C compilation support or where the `cryptography` Python package can't be installed:
+On systems where the `cryptography` package can't be installed (no C compiler, no OpenSSL):
 
 ```bash
 pip install rnspure
-# Or equivalently:
-pip install rns --no-dependencies
 ```
 
-The `rns` and `rnspure` packages are identical in code. `rnspure` simply lists no dependencies, so pip doesn't try to install the `cryptography` Python package.
+This uses pure-Python cryptographic implementations. It works but is significantly slower and has received less security scrutiny.
 
-Reticulum will fall back to internal **pure-Python cryptographic implementations**. This works but has two drawbacks:
+> **Warning**: Only use `rnspure` when the standard `cryptography` package truly cannot be installed. For all other cases, use the regular install.
 
-- Significantly slower performance
-- Less security scrutiny than OpenSSL-backed implementations
-
-> **Warning**: Pure-Python crypto should only be used on systems where the `cryptography` Python package truly cannot be installed. For all other cases, use the standard `pip install rns`.
-
-### OpenWRT
+## OpenWRT
 
 ```bash
 opkg install python3 python3-pip python3-cryptography python3-pyserial
@@ -119,16 +163,8 @@ pip install rns
 
 AutoInterface requires link-local IPv6 support on the device.
 
-## First Run on Any Platform
+## What's Next
 
-After installing Reticulum, the first run creates a default config at `~/.reticulum/config` with AutoInterface enabled. Ratspeak uses its own config at `dashboard/ratspeak.conf` and stores data in `.ratspeak/`. Both can coexist. Config search order:
-
-1. `/etc/reticulum/`
-2. `~/.config/reticulum/`
-3. `~/.reticulum/`
-
-## Next Steps
-
-- [Installing Ratspeak](../getting-started/installing-ratspeak) — Ratspeak-specific setup
-- [First Run](../getting-started/first-run) — initial configuration
-- [Your First Connection](../getting-started/your-first-connection) — connect to the network
+- [First Run](../getting-started/first-run) -- complete the setup wizard
+- [Your First Connection](../getting-started/your-first-connection) -- connect to the network
+- [Choosing Your Setup](../getting-started/choosing-your-setup) -- compare implementations

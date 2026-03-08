@@ -111,8 +111,8 @@ These are hardcoded values relevant to operation:
 | Alert dedup window | 30 seconds | Duplicate alert suppression window |
 | Max alerts | 50 | Maximum active alerts retained |
 
-## Next Steps
+## What's Next
 
-- [Installing Ratspeak](../getting-started/installing-ratspeak) — installation guide
+- [Installing Ratspeak (Python)](../getting-started/installing-python) — installation guide
 - [Dashboard Overview](../using-ratspeak/dashboard-overview) — interface tour
 - [Network Monitoring](../using-ratspeak/network-monitoring) — monitoring features

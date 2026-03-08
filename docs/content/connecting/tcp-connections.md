@@ -90,7 +90,7 @@ For high-performance deployments, the **BackboneInterface** uses kernel-event I/
 
 > **Note**: BackboneInterface is only available on Linux and Android. It uses kernel-event I/O (`epoll`/similar) and is not supported on macOS or Windows.
 
-## Next Steps
+## What's Next
 
 - [Interface Types Overview](../connecting/interface-types-overview) — compare all interface types
 - [LoRa / RNode](../connecting/lora-rnode) — radio connections

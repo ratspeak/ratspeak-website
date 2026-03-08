@@ -144,7 +144,7 @@ Reticulum's encryption model means you can safely run **open-access networks**:
 
 Participants on the same network cannot interfere with each other's private communication.
 
-## Next Steps
+## What's Next
 
 - [Interface Modes](../connecting/interface-modes) — configure interface behavior
 - [Protocol Architecture](../understanding/protocol-architecture) — how routing works

@@ -93,7 +93,7 @@ If `PyCA/cryptography` (and therefore OpenSSL) is unavailable, Reticulum falls b
 
 > **Warning**: Reticulum has not been externally security audited. While the cryptographic design uses well-established primitives, the implementation has not undergone formal review.
 
-## Next Steps
+## What's Next
 
 - [Security Model](../understanding/security-model) — how these primitives create a secure system
 - [Wire Format](../understanding/wire-format) — where crypto meets the wire

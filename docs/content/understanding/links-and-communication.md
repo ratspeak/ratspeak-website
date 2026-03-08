@@ -104,7 +104,7 @@ An RPC-like mechanism over links:
 - Supports progress tracking and timeouts
 - Useful for remote procedure calls and queries
 
-## Next Steps
+## What's Next
 
 - [Protocol Architecture](../understanding/protocol-architecture) — addressing and routing
 - [Wire Format](../understanding/wire-format) — packet structure

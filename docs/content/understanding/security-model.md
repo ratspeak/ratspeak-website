@@ -119,7 +119,7 @@ This provides a defense against spam and abuse without compromising the zero-tru
 
 > **Warning**: Reticulum has not been externally security audited. Use appropriate caution for high-stakes applications.
 
-## Next Steps
+## What's Next
 
 - [Cryptographic Primitives](../understanding/cryptographic-primitives) — the algorithms
 - [Protocol Architecture](../understanding/protocol-architecture) — how routing works

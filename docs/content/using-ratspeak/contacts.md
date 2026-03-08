@@ -54,7 +54,7 @@ For each contact, the connections view shows:
 
 Contacts with a hop count of 0 are on your local shared instance (directly connected). Non-contact path entries older than 2 hours are filtered from display. This 2-hour filter is hardcoded and separate from the configurable `path_age_reachable` and `path_age_stale` thresholds.
 
-## Next Steps
+## What's Next
 
 - [Messaging](../using-ratspeak/messaging) — send and receive messages
 - [Network Monitoring](../using-ratspeak/network-monitoring) — interface stats and topology

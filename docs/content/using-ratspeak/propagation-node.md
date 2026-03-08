@@ -49,6 +49,7 @@ This is essential for **delay-tolerant networks** where participants aren't alwa
   <!-- Caption -->
   <text x="340" y="155" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="11" font-style="italic">Store-and-forward: messages wait for the recipient to come online</text>
 </svg>
+<figcaption>Store-and-forward: messages wait for the recipient to come online</figcaption>
 </div>
 
 ## Running a Local Propagation Node
@@ -90,7 +91,7 @@ The propagation status view shows:
 - The configured outbound propagation node (if any)
 - Number of messages stored (if running as a propagation node)
 
-## Next Steps
+## What's Next
 
 - [Messaging](../using-ratspeak/messaging) — message delivery modes
 - [LXMF Protocol](../understanding/lxmf-protocol) — protocol-level details

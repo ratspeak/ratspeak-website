@@ -15,7 +15,7 @@ The connections table is the primary view for network health. It shows all disco
 
 The table supports sorting by any column, filtering by interface type, and searching by name or hash.
 
-<div class="screenshot-placeholder">
+<div class="screenshot-placeholder" data-caption="Network monitoring view showing connections table, interface stats cards with throughput sparklines, and alert history">
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#7e8fa2" stroke-width="1.5" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
     <div>Network monitoring view with topology — screenshot placeholder</div>
 </div>
@@ -61,7 +61,7 @@ Every **5 minutes** (configurable via `status_summary_interval`), Ratspeak emits
 
 For a visual representation of your mesh topology, see the [Graph Visualization](../using-ratspeak/graph-visualization) view. The graph renders the same network data as the connections table but as an interactive force-directed node graph with color-coded node types and edge paths.
 
-## Next Steps
+## What's Next
 
 - [Graph Visualization](../using-ratspeak/graph-visualization) — interactive network graph
 - [Dashboard Overview](../using-ratspeak/dashboard-overview) — general interface tour

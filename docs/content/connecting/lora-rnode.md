@@ -146,7 +146,7 @@ For RNodes with multiple radio transceivers, use `RNodeMultiInterface` with sub-
     txpower = 14
 ```
 
-## Next Steps
+## What's Next
 
 - [Interface Types Overview](../connecting/interface-types-overview) — compare all interfaces
 - [Interface Modes](../connecting/interface-modes) — configure interface behavior

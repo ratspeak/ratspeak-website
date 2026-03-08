@@ -11,7 +11,7 @@ The dashboard is a single-page application with a consistent layout:
 - **Main content** (center) — the active view's content
 - **Status indicators** — real-time connection and interface status
 
-<div class="screenshot-placeholder">
+<div class="screenshot-placeholder" data-caption="Full Ratspeak dashboard layout showing sidebar navigation, header status bar, and main content area">
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#7e8fa2" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
     <div>Full dashboard with numbered callouts — screenshot placeholder</div>
 </div>
@@ -56,7 +56,7 @@ When interfaces go up or down, Ratspeak generates alerts:
 
 Alerts appear in the header and can be dismissed individually. Duplicate alerts within a 30-second window are suppressed.
 
-## Next Steps
+## What's Next
 
 - [Messaging](../using-ratspeak/messaging) — send and receive encrypted messages
 - [Graph Visualization](../using-ratspeak/graph-visualization) — interactive network graph

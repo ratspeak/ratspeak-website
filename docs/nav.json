@@ -4,8 +4,8 @@
       "title": "Introduction",
       "slug": "introduction",
       "pages": [
-        { "title": "What Is Reticulum?", "slug": "what-is-reticulum" },
-        { "title": "What Is Ratspeak?", "slug": "what-is-ratspeak" },
+        { "title": "What is Ratspeak?", "slug": "what-is-ratspeak" },
+        { "title": "What is Reticulum?", "slug": "what-is-reticulum" },
         { "title": "How They Work Together", "slug": "how-they-work-together" },
         { "title": "Key Concepts", "slug": "key-concepts" },
         { "title": "Zen of Reticulum", "slug": "zen-of-reticulum" }
@@ -15,7 +15,9 @@
       "title": "Getting Started",
       "slug": "getting-started",
       "pages": [
-        { "title": "Installing Ratspeak", "slug": "installing-ratspeak" },
+        { "title": "Choosing Your Setup", "slug": "choosing-your-setup" },
+        { "title": "Installing Ratspeak (Python)", "slug": "installing-python" },
+        { "title": "Installing Ratspeak (Rust)", "slug": "installing-rust" },
         { "title": "First Run", "slug": "first-run" },
         { "title": "Your First Connection", "slug": "your-first-connection" },
         { "title": "Sending Your First Message", "slug": "sending-your-first-message" },
@@ -28,12 +30,12 @@
       "pages": [
         { "title": "Dashboard Overview", "slug": "dashboard-overview" },
         { "title": "Messaging", "slug": "messaging" },
-        { "title": "Contacts", "slug": "contacts" },
+        { "title": "Managing Contacts", "slug": "contacts" },
         { "title": "Identity Management", "slug": "identity-management" },
         { "title": "Network Monitoring", "slug": "network-monitoring" },
-        { "title": "Graph Visualization", "slug": "graph-visualization" },
+        { "title": "Network Graph", "slug": "graph-visualization" },
         { "title": "Games & Apps", "slug": "games-and-apps" },
-        { "title": "Propagation Node", "slug": "propagation-node" },
+        { "title": "Propagation Nodes", "slug": "propagation-node" },
         { "title": "Configuration", "slug": "configuration" }
       ]
     },
@@ -42,12 +44,39 @@
       "slug": "connecting",
       "pages": [
         { "title": "Interface Types Overview", "slug": "interface-types-overview" },
-        { "title": "TCP Connections", "slug": "tcp-connections" },
-        { "title": "LoRa / RNode", "slug": "lora-rnode" },
         { "title": "WiFi & LAN", "slug": "wifi-lan" },
+        { "title": "TCP Connections", "slug": "tcp-connections" },
+        { "title": "LoRa with RNode", "slug": "lora-rnode" },
         { "title": "BLE Mesh", "slug": "ble-mesh" },
+        { "title": "Serial & Packet Radio", "slug": "serial-packet-radio" },
+        { "title": "I2P Anonymous Networking", "slug": "i2p-networking" },
         { "title": "Interface Modes", "slug": "interface-modes" },
         { "title": "Building Networks", "slug": "building-networks" }
+      ]
+    },
+    {
+      "title": "Hardware",
+      "slug": "hardware",
+      "pages": [
+        { "title": "RNode Overview", "slug": "rnode-overview" },
+        { "title": "Supported Boards & Buying Guide", "slug": "supported-boards" },
+        { "title": "RatDeck", "slug": "ratdeck" },
+        { "title": "RatCom", "slug": "ratcom" },
+        { "title": "Flashing Firmware", "slug": "flashing-firmware" },
+        { "title": "Antennas, Range & Power", "slug": "antennas-range-power" }
+      ]
+    },
+    {
+      "title": "Deployment Guides",
+      "slug": "deployment",
+      "pages": [
+        { "title": "Home User Setup", "slug": "home-user" },
+        { "title": "Friend Group Chat Network", "slug": "friend-group-chat" },
+        { "title": "Community Mesh Network", "slug": "community-mesh" },
+        { "title": "Emergency Communications", "slug": "emergency-comms" },
+        { "title": "Raspberry Pi Gateway", "slug": "raspberry-pi-gateway" },
+        { "title": "Docker Deployment", "slug": "docker-deployment" },
+        { "title": "Bridging Networks", "slug": "bridging-networks" }
       ]
     },
     {
@@ -55,19 +84,43 @@
       "slug": "understanding",
       "pages": [
         { "title": "Protocol Architecture", "slug": "protocol-architecture" },
+        { "title": "Destinations & Addressing", "slug": "destinations-addressing" },
+        { "title": "Transport & Routing", "slug": "transport-routing" },
         { "title": "Links & Communication", "slug": "links-and-communication" },
-        { "title": "Wire Format", "slug": "wire-format" },
-        { "title": "Cryptographic Primitives", "slug": "cryptographic-primitives" },
         { "title": "Security Model", "slug": "security-model" },
+        { "title": "Cryptographic Primitives", "slug": "cryptographic-primitives" },
         { "title": "LXMF Protocol", "slug": "lxmf-protocol" },
-        { "title": "RLAP Protocol", "slug": "rlap-protocol" }
+        { "title": "Wire Format", "slug": "wire-format" },
+        { "title": "Network Identities", "slug": "network-identities" }
+      ]
+    },
+    {
+      "title": "Developer Guide",
+      "slug": "developer",
+      "pages": [
+        { "title": "Architecture Overview", "slug": "architecture-overview" },
+        { "title": "Ratspeak-py Backend", "slug": "ratspeak-py" },
+        { "title": "Ratspeak-rs Backend", "slug": "ratspeak-rs" },
+        { "title": "Frontend Architecture", "slug": "frontend" },
+        { "title": "REST API Reference", "slug": "rest-api" },
+        { "title": "Socket.IO Events", "slug": "socketio-events" },
+        { "title": "RLAP Protocol & Building Apps", "slug": "rlap-protocol" },
+        { "title": "Database Schema", "slug": "database-schema" },
+        { "title": "Building & Contributing", "slug": "building-contributing" }
       ]
     },
     {
       "title": "Reference",
       "slug": "reference",
       "pages": [
-        { "title": "Glossary", "slug": "glossary" }
+        { "title": "Glossary", "slug": "glossary" },
+        { "title": "Configuration Reference", "slug": "configuration-reference" },
+        { "title": "Troubleshooting", "slug": "troubleshooting" },
+        { "title": "FAQ", "slug": "faq" },
+        { "title": "LoRa Frequency Bands", "slug": "lora-frequency-bands" },
+        { "title": "Ecosystem & Community", "slug": "ecosystem" },
+        { "title": "Ratspeak vs Other Clients", "slug": "comparison" },
+        { "title": "Keyboard Shortcuts", "slug": "keyboard-shortcuts" }
       ]
     }
   ]

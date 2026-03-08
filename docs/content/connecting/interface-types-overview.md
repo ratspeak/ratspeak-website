@@ -89,7 +89,7 @@ Interfaces managed through the Ratspeak UI can be added and removed dynamically.
 
 All UI-managed interfaces (except BLE) modify the hub node's config file and trigger a safe restart. BLE Mesh registers directly with the RNS transport layer at runtime — no restart needed.
 
-## Next Steps
+## What's Next
 
 - [TCP Connections](../connecting/tcp-connections) — connecting over IP
 - [LoRa / RNode](../connecting/lora-rnode) — long-range radio

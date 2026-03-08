@@ -101,7 +101,7 @@ For data larger than the MDU, use [Resources](../understanding/links-and-communi
 
 When IFAC is active, an Ed25519 signing identity is derived from the IFAC passphrase. Per-packet signatures are generated and prepended before the header. Signatures are truncated to a configurable length (`ifac_size`, default 8 bytes, range 8-512 bits). Receiving interfaces verify the signature and silently drop invalid packets.
 
-## Next Steps
+## What's Next
 
 - [Protocol Architecture](../understanding/protocol-architecture) — addressing and routing
 - [Cryptographic Primitives](../understanding/cryptographic-primitives) — algorithms used

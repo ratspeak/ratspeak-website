@@ -226,7 +226,7 @@ Currently, Ratspeak is the only Level 3 client. All other LXMF clients operate a
 
 Messages with `fields[0xFB] = "ratspeak.game"` are legacy v0 (pre-RLAP). The app router translates them to RLAP format on receipt. Legacy translation is **receive-only** — all outbound messages use RLAP v1.
 
-## Next Steps
+## What's Next
 
 - [Games & Apps](../using-ratspeak/games-and-apps) — using RLAP apps in Ratspeak
 - [LXMF Protocol](../understanding/lxmf-protocol) — the messaging layer RLAP builds on

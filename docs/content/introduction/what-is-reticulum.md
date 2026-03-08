@@ -1,37 +1,32 @@
-# What Is Reticulum?
+# What is Reticulum?
 
-A cryptography-based networking stack that lets you build resilient, private communication networks over any medium.
+Reticulum is a networking protocol that lets you build private, resilient communication networks using whatever hardware you have — radios, WiFi, internet connections, or all of them at once.
 
 ## The Core Idea
 
-Reticulum is not a network — it's a tool to **build** networks. It provides a complete networking stack that works over virtually any communication medium, from a 300 bps radio link to a 10 Gbps fiber connection. WiFi, LoRa, serial ports, TCP/IP, I2P, satellite links — if it can carry data, Reticulum can run on it.
+Reticulum is not a single network — it's a tool for *building* networks. You combine whatever communication hardware you have, and Reticulum handles the rest: routing, encryption, addressing, and authentication.
 
-Unlike traditional networking, Reticulum doesn't need IP addresses, DNS servers, certificate authorities, or any central infrastructure. Every participant generates a cryptographic identity — a pair of mathematically linked keys used for encryption and signing, and everything flows from there: addressing, routing, encryption, and authentication.
+It works over any medium that can carry data. LoRa radios. WiFi. Ethernet. TCP/IP over the internet. Serial cables. Packet radio. Even I2P anonymous tunnels. If it can move bits, Reticulum can run on it — from 5 bits per second on a slow radio link up to hundreds of megabits on a wired connection.
 
-## Key Properties
+There are no servers. No accounts. No central authority. You don't register with anyone or ask permission to participate. You generate a cryptographic key pair, and that key pair *is* your identity on the network. Your address comes from your keys, not from a username on someone else's server.
 
-- **Hardware agnostic** — works from 5 bps to multi-gigabit, across LoRa radios, WiFi, Ethernet, serial lines, TCP tunnels, and more
-- **Encryption is fundamental** — not bolted on as an afterthought. Routing itself depends on the randomness of encrypted packet data — meaning encryption isn't just a privacy feature, it's structurally required for the network to function
-- **No central infrastructure** — no servers, no registries, no authorities. Every node is an equal peer
-- **Tiny footprint** — the maximum packet size (MTU) is 500 bytes. Establishing an encrypted connection takes just 297 bytes. A destination address is 16 bytes
-- **Sender anonymity** — packets carry no source address. Only the destination can prove who sent a message
-- **Delay tolerant** — store-and-forward — where messages are held until the recipient comes online — is a first-class mode, not a fallback
+Think of Reticulum like a postal system where everyone is both a sender and a mail carrier. There's no post office — just people passing letters to each other along the best path available.
 
-## How Addressing Works
+## Why It Matters
 
-In traditional networks, your address is tied to your location (IP address). In Reticulum, your address is tied to **who you are** — specifically, to your cryptographic identity.
+**No infrastructure required.** Two laptops with WiFi can form a Reticulum network right now. Add a LoRa radio and your network extends for kilometers. Add a TCP link and it reaches across the internet. All simultaneously, all automatically. You don't configure routes between these different links — Reticulum figures it out.
 
-Your **destination hash** is a 16-byte truncated SHA-256 hash derived from your public key and application name. It looks like this:
+**Encryption is built in** — not added as an afterthought. In Reticulum, encryption is so fundamental that the routing itself depends on it. The network uses the randomness of encrypted data to function correctly. Strip away the encryption and the network stops working. Privacy is not a feature you enable; it's a structural requirement.
 
-```
-<13425ec15b621c1d928589718000d814>
-```
+**Your identity travels with you.** Your address is derived from your cryptographic key, not your physical location or network connection. Switch from WiFi to LoRa to TCP — your address stays the same. You are not tied to an IP range, a cell tower, or an ISP.
 
-This address is the same whether you're connected via WiFi, LoRa, or a serial cable halfway around the world. Your identity is portable and location-independent.
+**Works when the internet doesn't.** Reticulum was designed for environments where traditional networking fails: natural disasters, remote areas, censored regions, or simply places without cell coverage. If two devices can communicate at all — even over a slow radio channel — they can form a Reticulum network.
+
+**Sender anonymity by default.** Packets carry no source address. Only the intended recipient can verify who sent a message. You don't broadcast your identity every time you communicate.
 
 ## Heterogeneous Mesh
 
-One of Reticulum's most powerful properties is its ability to seamlessly mix different communication mediums. A single packet might traverse a LoRa radio link, hop through a WiFi mesh, cross a TCP tunnel over the internet, and arrive at a device connected via serial port — all transparently.
+One of Reticulum's most powerful properties: a single message can traverse completely different communication mediums seamlessly. A packet might start on a LoRa radio, hop through a WiFi network, cross a TCP tunnel over the internet, and arrive at a device connected via serial port — all without you doing anything special.
 
 <div class="docs-diagram">
 <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" fill="none">
@@ -76,25 +71,54 @@ One of Reticulum's most powerful properties is its ability to seamlessly mix dif
   <!-- Label -->
   <text x="360" y="170" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="12" font-style="italic">A single packet traversing four different mediums</text>
 </svg>
+<figcaption>A single packet traversing four different communication mediums seamlessly</figcaption>
 </div>
+
+Reticulum handles the differences between these links automatically. You don't write routing rules or configure gateways. Each node discovers paths to other nodes and forwards packets accordingly.
+
+## How Addressing Works
+
+In traditional networks, your address is tied to your location. Your IP address tells the network where your device sits in the topology. Move your computer to a different network and your address changes.
+
+Reticulum works differently. Your address is tied to *who you are* — your cryptographic identity. Your destination hash is a 16-byte identifier derived from your public key and application name. It looks like this:
+
+`<13425ec15b621c1d928589718000d814>`
+
+This address stays the same whether you're on WiFi, LoRa, or a serial cable halfway around the world. Your identity is portable. You can move between networks, switch communication mediums, or connect through multiple links at once — your address never changes.
+
+## At a Glance
+
+| Property | Detail |
+|---|---|
+| Minimum speed | 5 bits per second |
+| Maximum packet size | 500 bytes |
+| Encrypted connection setup | 297 bytes (3 packets) |
+| Address size | 16 bytes (128-bit hash) |
+| Identity | 512-bit key pair (signing + encryption) |
+| Central infrastructure | None required |
+
+> **Tip**: Those numbers are not typos. Reticulum is designed to work in extremely constrained environments. The entire handshake to establish an encrypted connection fits in three small packets.
 
 ## Status
 
-Reticulum reached **stable release (v1.0.0)** in July 2025, exiting beta. The wire format and API are considered stable. The current version is **1.1.3**. The protocol specification is in the **public domain** — it belongs to humanity. The reference implementation carries the Reticulum License, which permits all use except systems designed to harm people.
+Reticulum reached stable release (v1.0.0) in July 2025, exiting beta. The wire format and API are considered stable. The current version is 1.1.3 (January 2026).
 
-The reference implementation was created by Mark Qvist, who stepped back from active development in December 2025. The codebase is open source and distributed across hundreds of thousands of devices.
+The protocol specification is in the **public domain** — it belongs to humanity. The reference implementation is open source under the Reticulum License, which permits all use except systems designed to harm people.
 
-> **Note**: Reticulum has not been externally security audited. While the cryptographic design is sound, use it with appropriate caution for high-stakes applications.
+The reference implementation was created by Mark Qvist, who stepped back from active development in December 2025. The codebase is distributed across hundreds of thousands of devices.
+
+> **Note**: Reticulum has not been externally security audited. While the cryptographic design follows best practices, use appropriate caution for high-stakes applications.
 
 ## What Reticulum Is Not
 
 - **Not a VPN** — it's a complete networking stack, not a tunnel over IP
-- **Not LoRaWAN** — RNode uses LoRa radio chips but its own communication protocol, not the LoRaWAN protocol
-- **Not a blockchain** — there are no tokens, no consensus mechanism, no ledger
-- **Not just for emergencies** — it works great for everyday private communication
+- **Not LoRaWAN** — RNode uses LoRa radio chips but a completely different protocol
+- **Not Meshtastic** — Meshtastic floods messages to all nodes; Reticulum uses intelligent routing
+- **Not a blockchain** — no tokens, no consensus, no ledger
+- **Not just for emergencies** — works for everyday private communication
 
-## Next Steps
+## What's Next
 
-- [What Is Ratspeak?](../introduction/what-is-ratspeak) — the dashboard that makes Reticulum accessible
-- [Key Concepts](../introduction/key-concepts) — essential terminology explained
-- [Installing Ratspeak](../getting-started/installing-ratspeak) — get up and running
+- [How They Work Together](../introduction/how-they-work-together) — understand the architecture
+- [Key Concepts](../introduction/key-concepts) — essential terminology
+- [Choosing Your Setup](../getting-started/choosing-your-setup) — pick the right installation
