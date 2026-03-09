@@ -2513,9 +2513,11 @@
             var terminal = createTerminal();
             var esploader = new esptool.ESPLoader({
                 transport: transport,
-                baudrate: 921600,
+                baudrate: 115200,
                 terminal: terminal,
-                romBaudrate: 115200
+                romBaudrate: 115200,
+                enableTracing: false,
+                noStub: true
             });
             state.esploader = esploader;
 
