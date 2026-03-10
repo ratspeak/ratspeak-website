@@ -1020,7 +1020,7 @@
 <section class="hero">
     <div class="hero-text">
         <h1>Your Network.<br>Your <span class="accent" id="hero-cycle">Freedom.</span></h1>
-        <p class="hero-sub">No sign-up. No authority. No catch.<br>A communication network built by the people, for the people — where privacy is fundamental.</p>
+        <p class="hero-sub">No sign-up. No payment. No catch. An alternative way to communicate, resistant to chaos, where privacy is fundamental.</p>
         <p class="hero-built-on">Built with <a href="https://github.com/markqvist/Reticulum" target="_blank" rel="noopener noreferrer">Reticulum</a></p>
         <div class="hero-buttons">
             <a href="download.html" class="nr-btn nr-btn-lg">
@@ -1046,12 +1046,83 @@
 
 <!-- ── WHY ─────────────────────────────────────────────── -->
 <section class="why" id="why">
-    <!-- Feature 1: Privacy First -->
-    <div class="why-feature why-feature--left fade-in" data-accent="green">
+    <!-- Feature 1: No Account -->
+    <div class="why-feature why-feature--left fade-in" data-accent="blue">
         <div class="why-feature__text">
             <span class="why-feature__number">01</span>
+            <h3 class="why-feature__title">No Account</h3>
+            <p class="why-feature__tagline">Say goodbye to e-mail or phone number. There's no accounts. No signing up. Your identity is a key that only you can manage.</p>
+            <div class="why-feature__accent-line"></div>
+        </div>
+        <div class="why-feature__visual">
+            <svg class="why-feature__svg" viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="glow-blue" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="4" result="blur"/>
+                        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                    </filter>
+                </defs>
+                <!-- Ambient background -->
+                <circle cx="140" cy="100" r="85" fill="currentColor" opacity="0.04"/>
+                <!-- Key group with gentle rotation -->
+                <g>
+                    <animateTransform attributeName="transform" type="rotate" values="-2 140 100;2 140 100;-2 140 100" dur="6s" repeatCount="indefinite"/>
+                    <!-- Key bow (top ring) -->
+                    <circle cx="140" cy="55" r="22" stroke="currentColor" stroke-width="2" fill="none" opacity="0.6"/>
+                    <circle cx="140" cy="55" r="10" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.3" stroke-dasharray="4,3">
+                        <animateTransform attributeName="transform" type="rotate" values="0 140 55;-360 140 55" dur="12s" repeatCount="indefinite"/>
+                    </circle>
+                    <!-- Key core dot -->
+                    <circle cx="140" cy="55" r="4" fill="currentColor" opacity="0.8" filter="url(#glow-blue)">
+                        <animate attributeName="r" values="3.5;5;3.5" dur="2.5s" repeatCount="indefinite"/>
+                    </circle>
+                    <!-- Key shaft -->
+                    <line x1="140" y1="77" x2="140" y2="145" stroke="currentColor" stroke-width="2" opacity="0.5" stroke-linecap="round"/>
+                    <!-- Key teeth -->
+                    <line x1="140" y1="120" x2="155" y2="120" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <animate attributeName="opacity" values="0.35;0.65;0.35" dur="3s" repeatCount="indefinite"/>
+                    </line>
+                    <line x1="140" y1="132" x2="152" y2="132" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <animate attributeName="opacity" values="0.35;0.65;0.35" dur="3s" repeatCount="indefinite" begin="0.6s"/>
+                    </line>
+                    <line x1="140" y1="145" x2="158" y2="145" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <animate attributeName="opacity" values="0.35;0.65;0.35" dur="3s" repeatCount="indefinite" begin="1.2s"/>
+                    </line>
+                </g>
+                <!-- Hash identity fragments with scroll-triggered fade -->
+                <text class="c02-fade" style="--glow-dur:5.3s;--glow-delay:0.5s;--glow-peak:0.35" x="42" y="45" font-family="'JetBrains Mono', monospace" font-size="8" fill="currentColor" transform="rotate(-10, 42, 45)">a7f3::bd</text>
+                <text class="c02-fade" style="--glow-dur:7.1s;--glow-delay:1.8s;--glow-peak:0.30" x="192" y="50" font-family="'JetBrains Mono', monospace" font-size="8" fill="currentColor" transform="rotate(8, 192, 50)">e2d1::9b</text>
+                <text class="c02-fade" style="--glow-dur:4.7s;--glow-delay:3.2s;--glow-peak:0.35" x="185" y="155" font-family="'JetBrains Mono', monospace" font-size="8" fill="currentColor" transform="rotate(5, 185, 155)">4cf0::8a</text>
+                <text class="c02-fade" style="--glow-dur:6.2s;--glow-delay:0.9s;--glow-peak:0.30" x="32" y="150" font-family="'JetBrains Mono', monospace" font-size="8" fill="currentColor" transform="rotate(-6, 32, 150)">b7c3::e1</text>
+                <!-- Crossed-out database icon -->
+                <g class="c02-fade" style="--glow-dur:5.8s;--glow-delay:2.1s;--glow-peak:0.28">
+                    <animateTransform attributeName="transform" type="translate" values="0,0;0,2;0,0" dur="7s" repeatCount="indefinite"/>
+                    <ellipse cx="48" cy="85" rx="12" ry="5" stroke="currentColor" stroke-width="1" fill="none"/>
+                    <path d="M36,85 L36,100 C36,103 41,106 48,106 C55,106 60,103 60,100 L60,85" stroke="currentColor" stroke-width="1" fill="none"/>
+                    <line x1="36" y1="102" x2="60" y2="78" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </g>
+                <!-- Crossed-out server icon -->
+                <g class="c02-fade" style="--glow-dur:6.5s;--glow-delay:4.0s;--glow-peak:0.28">
+                    <animateTransform attributeName="transform" type="translate" values="0,0;0,2;0,0" dur="7s" repeatCount="indefinite" begin="3.5s"/>
+                    <rect x="220" y="78" width="24" height="18" rx="2" stroke="currentColor" stroke-width="1" fill="none"/>
+                    <circle cx="226" cy="87" r="1.5" fill="currentColor"/>
+                    <line x1="218" y1="100" x2="246" y2="74" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </g>
+                <!-- Pulsing identity ring -->
+                <circle cx="140" cy="55" r="32" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.15">
+                    <animate attributeName="r" values="30;36;30" dur="3s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.12;0.40;0.12" dur="3s" repeatCount="indefinite"/>
+                </circle>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Feature 2: Privacy First -->
+    <div class="why-feature why-feature--right fade-in" data-accent="green">
+        <div class="why-feature__text">
+            <span class="why-feature__number">02</span>
             <h3 class="why-feature__title">Privacy First</h3>
-            <p class="why-feature__tagline">Every peer is assumed hostile. Encryption isn't optional — Ratspeak cannot function without it.</p>
+            <p class="why-feature__tagline">It doesn't stop at end-to-end encrypted, the entire stack is secure. Safe even in an environment where all peers are hostile.</p>
             <div class="why-feature__accent-line"></div>
         </div>
         <div class="why-feature__visual">
@@ -1144,83 +1215,12 @@
         </div>
     </div>
 
-    <!-- Feature 2: No Account -->
-    <div class="why-feature why-feature--right fade-in" data-accent="blue">
-        <div class="why-feature__text">
-            <span class="why-feature__number">02</span>
-            <h3 class="why-feature__title">No Account</h3>
-            <p class="why-feature__tagline">You can't sign up. No database. No server. Your identity is a cryptographic key that only you control.</p>
-            <div class="why-feature__accent-line"></div>
-        </div>
-        <div class="why-feature__visual">
-            <svg class="why-feature__svg" viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <filter id="glow-blue" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation="4" result="blur"/>
-                        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-                    </filter>
-                </defs>
-                <!-- Ambient background -->
-                <circle cx="140" cy="100" r="85" fill="currentColor" opacity="0.04"/>
-                <!-- Key group with gentle rotation -->
-                <g>
-                    <animateTransform attributeName="transform" type="rotate" values="-2 140 100;2 140 100;-2 140 100" dur="6s" repeatCount="indefinite"/>
-                    <!-- Key bow (top ring) -->
-                    <circle cx="140" cy="55" r="22" stroke="currentColor" stroke-width="2" fill="none" opacity="0.6"/>
-                    <circle cx="140" cy="55" r="10" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.3" stroke-dasharray="4,3">
-                        <animateTransform attributeName="transform" type="rotate" values="0 140 55;-360 140 55" dur="12s" repeatCount="indefinite"/>
-                    </circle>
-                    <!-- Key core dot -->
-                    <circle cx="140" cy="55" r="4" fill="currentColor" opacity="0.8" filter="url(#glow-blue)">
-                        <animate attributeName="r" values="3.5;5;3.5" dur="2.5s" repeatCount="indefinite"/>
-                    </circle>
-                    <!-- Key shaft -->
-                    <line x1="140" y1="77" x2="140" y2="145" stroke="currentColor" stroke-width="2" opacity="0.5" stroke-linecap="round"/>
-                    <!-- Key teeth -->
-                    <line x1="140" y1="120" x2="155" y2="120" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                        <animate attributeName="opacity" values="0.35;0.65;0.35" dur="3s" repeatCount="indefinite"/>
-                    </line>
-                    <line x1="140" y1="132" x2="152" y2="132" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                        <animate attributeName="opacity" values="0.35;0.65;0.35" dur="3s" repeatCount="indefinite" begin="0.6s"/>
-                    </line>
-                    <line x1="140" y1="145" x2="158" y2="145" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                        <animate attributeName="opacity" values="0.35;0.65;0.35" dur="3s" repeatCount="indefinite" begin="1.2s"/>
-                    </line>
-                </g>
-                <!-- Hash identity fragments with scroll-triggered fade -->
-                <text class="c02-fade" style="--glow-dur:5.3s;--glow-delay:0.5s;--glow-peak:0.35" x="42" y="45" font-family="'JetBrains Mono', monospace" font-size="8" fill="currentColor" transform="rotate(-10, 42, 45)">a7f3::bd</text>
-                <text class="c02-fade" style="--glow-dur:7.1s;--glow-delay:1.8s;--glow-peak:0.30" x="192" y="50" font-family="'JetBrains Mono', monospace" font-size="8" fill="currentColor" transform="rotate(8, 192, 50)">e2d1::9b</text>
-                <text class="c02-fade" style="--glow-dur:4.7s;--glow-delay:3.2s;--glow-peak:0.35" x="185" y="155" font-family="'JetBrains Mono', monospace" font-size="8" fill="currentColor" transform="rotate(5, 185, 155)">4cf0::8a</text>
-                <text class="c02-fade" style="--glow-dur:6.2s;--glow-delay:0.9s;--glow-peak:0.30" x="32" y="150" font-family="'JetBrains Mono', monospace" font-size="8" fill="currentColor" transform="rotate(-6, 32, 150)">b7c3::e1</text>
-                <!-- Crossed-out database icon -->
-                <g class="c02-fade" style="--glow-dur:5.8s;--glow-delay:2.1s;--glow-peak:0.28">
-                    <animateTransform attributeName="transform" type="translate" values="0,0;0,2;0,0" dur="7s" repeatCount="indefinite"/>
-                    <ellipse cx="48" cy="85" rx="12" ry="5" stroke="currentColor" stroke-width="1" fill="none"/>
-                    <path d="M36,85 L36,100 C36,103 41,106 48,106 C55,106 60,103 60,100 L60,85" stroke="currentColor" stroke-width="1" fill="none"/>
-                    <line x1="36" y1="102" x2="60" y2="78" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                </g>
-                <!-- Crossed-out server icon -->
-                <g class="c02-fade" style="--glow-dur:6.5s;--glow-delay:4.0s;--glow-peak:0.28">
-                    <animateTransform attributeName="transform" type="translate" values="0,0;0,2;0,0" dur="7s" repeatCount="indefinite" begin="3.5s"/>
-                    <rect x="220" y="78" width="24" height="18" rx="2" stroke="currentColor" stroke-width="1" fill="none"/>
-                    <circle cx="226" cy="87" r="1.5" fill="currentColor"/>
-                    <line x1="218" y1="100" x2="246" y2="74" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                </g>
-                <!-- Pulsing identity ring -->
-                <circle cx="140" cy="55" r="32" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.15">
-                    <animate attributeName="r" values="30;36;30" dur="3s" repeatCount="indefinite"/>
-                    <animate attributeName="opacity" values="0.12;0.40;0.12" dur="3s" repeatCount="indefinite"/>
-                </circle>
-            </svg>
-        </div>
-    </div>
-
     <!-- Feature 3: Chaos Resistant -->
     <div class="why-feature why-feature--left fade-in" data-accent="orange">
         <div class="why-feature__text">
             <span class="why-feature__number">03</span>
             <h3 class="why-feature__title">Chaos Resistant</h3>
-            <p class="why-feature__tagline">Even if modern internet dies, Ratspeak lives. Supports long range radio, WiFi, TCP/IP, serial, and more — all reachable in the same network.</p>
+            <p class="why-feature__tagline">Ratspeak is transport agnostic. Any data layer can be woven in to the mesh network, all speaking to each other, with the same network - same security.</p>
             <div class="why-feature__accent-line"></div>
         </div>
         <div class="why-feature__visual">
