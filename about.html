@@ -858,6 +858,7 @@
             position: relative;
             max-width: 780px;
             margin: 0 auto 48px;
+            overflow: visible;
         }
         .portal-glow {
             position: absolute;
@@ -876,47 +877,54 @@
             z-index: 1;
         }
 
-        /* Feature pills */
-        .portal-features {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            max-width: 660px;
-            margin: 0 auto 32px;
-        }
-        .portal-pill {
+        /* ── Floating Feature Labels ─────────────── */
+        .portal-label {
+            position: absolute;
+            z-index: 2;
             display: inline-flex;
             align-items: center;
             gap: 7px;
-            padding: 8px 16px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            backdrop-filter: blur(8px);
-            font-size: 13px;
+            padding: 7px 14px;
+            white-space: nowrap;
+            pointer-events: none;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            backdrop-filter: blur(24px) saturate(1.2);
+            -webkit-backdrop-filter: blur(24px) saturate(1.2);
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.12),
+                0 0.5px 0 rgba(255, 255, 255, 0.10) inset;
+            font-size: 12px;
             font-weight: 500;
-            color: var(--text-secondary);
-            opacity: 0;
-            transform: translateY(12px);
-            transition: border-color 0.3s, color 0.3s, transform 0.3s, opacity 0.5s;
-            transition-delay: calc(var(--pill-i, 0) * 0.06s);
-        }
-        .portal-features.visible .portal-pill {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .portal-pill:hover {
-            border-color: rgba(0,212,170,0.3);
             color: var(--text-primary);
-            transform: translateY(-2px);
+            opacity: 0;
+            transform: translateY(10px) scale(0.97);
+            transition: opacity 0.6s cubic-bezier(0.16,1,0.3,1),
+                        transform 0.6s cubic-bezier(0.16,1,0.3,1);
+            transition-delay: calc(0.3s + var(--label-i, 0) * 0.1s);
         }
-        .portal-pill svg {
-            width: 15px; height: 15px;
+        .portal-label svg {
+            width: 14px; height: 14px;
             color: var(--green);
             flex-shrink: 0;
-            opacity: 0.8;
+            opacity: 0.85;
         }
+        .portal-hero.visible .portal-label {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            animation: labelFloat 7s ease-in-out infinite;
+            animation-delay: calc(1.2s + var(--label-i, 0) * 1.5s);
+        }
+        @keyframes labelFloat {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            50%      { transform: translateY(-7px) translateX(2px); }
+        }
+        /* Positions — contextual to what each feature relates to */
+        .portal-label--messaging { top: 37%; left: 81%; }
+        .portal-label--identity  { top: -2%; left: 0%;  }
+        .portal-label--games     { top: 4%;  left: 58%; }
+        .portal-label--future    { top: 79%; left: 15%; }
 
         /* Platform row */
         .portal-platforms {
@@ -981,8 +989,10 @@
 
             .portal-section { padding: 56px 0 0; }
             .portal-hero { margin-bottom: 36px; }
-            .portal-features { gap: 8px; margin-bottom: 24px; }
-            .portal-pill { padding: 6px 12px; font-size: 12px; }
+            .portal-label { font-size: 11px; padding: 5px 11px; border-radius: 12px; }
+            .portal-label svg { width: 12px; height: 12px; }
+            .portal-label--messaging { left: 72%; }
+            .portal-label--games { left: 56%; }
             .portal-platforms { flex-direction: column; gap: 10px; padding-bottom: 40px; }
 
             .hero-title { letter-spacing: -0.5px; }
@@ -995,6 +1005,23 @@
         @media (max-width: 480px) {
             .hero-banner { padding: 100px 20px 60px; }
             .centerpiece-stats { flex-direction: column; align-items: center; }
+            .portal-hero {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
+                padding-bottom: 12px;
+            }
+            .portal-monitor-svg { flex: 0 0 100%; }
+            .portal-label {
+                position: static;
+                opacity: 1;
+                transform: none;
+                animation: none !important;
+                pointer-events: auto;
+                font-size: 11px;
+                padding: 5px 11px;
+            }
         }
     </style>
 </head>
@@ -2380,27 +2407,20 @@
                 <rect x="710" y="578" width="52" height="3" rx="1.5" fill="rgba(158,173,191,0.15)"/>
             </g>
         </svg>
-    </div>
 
-    <!-- Feature pills -->
-    <div class="portal-features fade-in">
-        <div class="portal-pill" style="--pill-i:0">
+        <div class="portal-label portal-label--messaging" style="--label-i:0">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
             <span>Private Messaging</span>
         </div>
-        <div class="portal-pill" style="--pill-i:1">
+        <div class="portal-label portal-label--identity" style="--label-i:1">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
             <span>Identity Management</span>
         </div>
-        <div class="portal-pill" style="--pill-i:2">
+        <div class="portal-label portal-label--games" style="--label-i:2">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>
             <span>Multiplayer Games</span>
         </div>
-        <div class="portal-pill" style="--pill-i:3">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 010 8.49m-8.48-.01a6 6 0 010-8.49m11.31-2.82a10 10 0 010 14.14m-14.14 0a10 10 0 010-14.14"/></svg>
-            <span>Modern Dashboard</span>
-        </div>
-        <div class="portal-pill" style="--pill-i:4">
+        <div class="portal-label portal-label--future" style="--label-i:3">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
             <span>Future Apps</span>
         </div>
