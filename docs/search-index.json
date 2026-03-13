@@ -4,7 +4,7 @@
     "section": "Introduction",
     "path": "introduction/what-is-ratspeak",
     "headings": "Overview, Two Implementations, What You Can Do, Hardware Companions, Who Is Ratspeak For?, The Ecosystem, What's Next",
-    "content": "What is Ratspeak? Ratspeak is your window into encrypted mesh communication — send messages, manage your network, and monitor connections without servers, accounts, or surveillance. Overview Ratspeak dashboard — screenshot coming soon Ratspeak is a dashboard and desktop app for Reticulum mesh networ"
+    "content": "What is Ratspeak? Ratspeak is your window into encrypted mesh communication — send messages, manage your network, and monitor connections without servers, accounts, or surveillance. Overview Ratspeak is a dashboard and desktop app for Reticulum mesh networks. It gives you a graphical interface for m"
   },
   {
     "title": "What is Reticulum?",
@@ -24,7 +24,7 @@
     "title": "Key Concepts",
     "section": "Introduction",
     "path": "introduction/key-concepts",
-    "headings": "The Basics — What You Need to Send a Message, Identity, Destination, Announce, The Network — How Messages Get There, Interface, Transport Node, Path, Communication — How Messages Are Delivered, Link, LXMF (Lightweight Extensible Message Format), Propagation Node, Advanced — Deeper Protocol Features, RLAP (Reticulum LXMF App Protocol), Ratchet, IFAC (Interface Access Code), Network Identity, Ratspeak-Specific Concepts, Hub Node, Contact Reachability, Safe Restart, What's Next",
+    "headings": "The Basics — What You Need to Send a Message, Identity, Destination, Announce, The Network — How Messages Get There, Interface, Transport Node, Path, Communication — How Messages Are Delivered, Link, LXMF (Lightweight Extensible Message Format), Propagation Node, Advanced — Deeper Protocol Features, LRGP (Lightweight Reticulum Gaming Protocol), Ratchet, IFAC (Interface Access Code), Network Identity, Ratspeak-Specific Concepts, Hub Node, Contact Reachability, Safe Restart, What's Next",
     "content": "Key Concepts Everything in Ratspeak builds on a small set of core ideas. This page introduces them in layers — start with the basics, and each layer adds depth. The Basics — What You Need to Send a Message Identity Your identity is a pair of cryptographic keys — one for encryption, one for signing. "
   },
   {
@@ -39,7 +39,7 @@
     "section": "Getting Started",
     "path": "getting-started/choosing-your-setup",
     "headings": "Two Implementations, Two Modes, Which Setup Should You Choose?, Requirements, What's Next",
-    "content": "Choosing Your Setup Ratspeak comes in two flavors and runs two ways. This page helps you pick the right combination. What matters most to you? Quick start / Extensibility Ratspeak-py (Python) Speed / Single binary Ratspeak-rs (Rust) Off-grid / No internet Add RNode hardware Both share the same dashb"
+    "content": "Choosing Your Setup Ratspeak comes in two flavors and runs two ways. This page helps you pick the right combination. Which setup is right for you? - Just want to try it out? Install the Python version (pip install ratspeak) — it's the fastest way to get started on any platform - Want the best perfor"
   },
   {
     "title": "Installing Ratspeak (Python)",
@@ -53,7 +53,7 @@
     "section": "Getting Started",
     "path": "getting-started/installing-rust",
     "headings": "Prerequisites, Option 1: Pre-built Binary, Option 2: Build from Source, Install the Rust Toolchain, Clone and Build, What Gets Built, Starting Ratspeak-rs, Stopping Ratspeak-rs, Key Differences from Ratspeak-py, Troubleshooting, What's Next",
-    "content": "Installing Ratspeak (Rust) Get Ratspeak-rs running on your system. Faster, more secure, and the primary implementation going forward. Prerequisites You have two options for installing Ratspeak-rs: - Pre-built binary — no Rust toolchain needed. Download the binary for your platform and run it. - Buil"
+    "content": "Installing Ratspeak (Rust) Get ratspeak-rs running on your system. Faster startup, lower memory usage, and a single native binary. Prerequisites You have two options for installing Ratspeak-rs: - Pre-built binary — no Rust toolchain needed. Download the binary for your platform and run it. - Build f"
   },
   {
     "title": "First Run",
@@ -91,6 +91,13 @@
     "content": "Dashboard Overview A tour of the Ratspeak interface — what's where and how to navigate. Layout The dashboard is a single-page application with a consistent layout: - Sidebar (left) — main navigation between views - Header — node status, alerts, identity info - Main content (center) — the active view"
   },
   {
+    "title": "Configuration",
+    "section": "Using Ratspeak",
+    "path": "using-ratspeak/configuration",
+    "headings": "Config File, Environment Variable Overrides, Settings Reference, `[server]`, `[nodes]`, `[dashboard]`, `[electron]`, Data Directories, Key Constants, What's Next",
+    "content": "Configuration Complete reference for Ratspeak settings — config file, environment variables, and all available options. Config File Ratspeak reads configuration from dashboard/ratspeak.conf in INI format: Environment Variable Overrides Every setting can be overridden with an environment variable usi"
+  },
+  {
     "title": "Messaging",
     "section": "Using Ratspeak",
     "path": "using-ratspeak/messaging",
@@ -126,11 +133,11 @@
     "content": "Graph Visualization A real-time, interactive force-directed graph of your Reticulum mesh network — see your hub, contacts, transport nodes, and discovered peers at a glance. Overview The Graph view renders a live network topology using D3.js force simulation on an HTML Canvas. Nodes represent Reticu"
   },
   {
-    "title": "Apps & RLAP",
+    "title": "Games & LRGP",
     "section": "Using Ratspeak",
     "path": "using-ratspeak/games-and-apps",
-    "headings": "Overview, Current Apps, Games Tab Layout, Session Lifecycle, Playing Tic-Tac-Toe, Starting a Game, Making Moves, Game End, Fallback Text, Session Details, Status and TTLs, Unread Badges, Size Budget, What's Next",
-    "content": "Apps & RLAP Ratspeak supports interactive applications over the mesh through RLAP — a lightweight protocol that encodes app actions inside standard LXMF messages. Overview The Apps tab is an experimental feature that demonstrates interactive communication over Reticulum. Under the hood, apps use RLA"
+    "headings": "Overview, Current Games, Games Tab Layout, Session Lifecycle, Playing Tic-Tac-Toe, Starting a Game, Making Moves, Game End, Fallback Text, Session Details, Status and TTLs, Unread Badges, Size Budget, What's Next",
+    "content": "Games & LRGP Ratspeak supports multiplayer games over the mesh through LRGP — a lightweight protocol that encodes game actions inside standard LXMF messages. Overview The Games tab lets you play multiplayer games with your contacts over the Reticulum mesh. Under the hood, games use LRGP (Lightweight"
   },
   {
     "title": "Propagation Nodes",
@@ -138,13 +145,6 @@
     "path": "using-ratspeak/propagation-node",
     "headings": "What Is a Propagation Node?, Running a Local Propagation Node, Setting an Outbound Propagation Node, Syncing Messages, Propagation Status, What's Next",
     "content": "Propagation Node Store-and-forward messaging for offline contacts — how propagation nodes work and how to use them in Ratspeak. What Is a Propagation Node? A propagation node stores encrypted messages for recipients who are currently offline. When the recipient comes back online and syncs with the p"
-  },
-  {
-    "title": "Configuration",
-    "section": "Using Ratspeak",
-    "path": "using-ratspeak/configuration",
-    "headings": "Config File, Environment Variable Overrides, Settings Reference, `[server]`, `[nodes]`, `[dashboard]`, `[electron]`, Data Directories, Key Constants, What's Next",
-    "content": "Configuration Complete reference for Ratspeak settings — config file, environment variables, and all available options. Config File Ratspeak reads configuration from dashboard/ratspeak.conf in INI format: Environment Variable Overrides Every setting can be overridden with an environment variable usi"
   },
   {
     "title": "Interface Types Overview",
@@ -208,6 +208,13 @@
     "path": "connecting/building-networks",
     "headings": "Transport Nodes vs Instances, Topology Patterns, Star, Mesh, Hierarchical, Backbone + Access, Mixing Hardware Types, Starting Small, Trustless Open Access, What's Next",
     "content": "Building Networks Network topology patterns, mixing hardware types, and growing a Reticulum mesh from scratch. Transport Nodes vs Instances The most important architectural decision is which nodes should be Transport Nodes: Type Config Role Requirements ------ -------- ------ ------------- Instance "
+  },
+  {
+    "title": "Shared Instances",
+    "section": "Connecting Your Network",
+    "path": "connecting/shared-instances",
+    "headings": "What Is a Shared Instance?, How It Works, Configuration, Running Multiple Isolated Instances, The Daemon Pattern, Common Use Cases, Running Ratspeak Alongside Other Reticulum Apps, Development and Testing, Disabling Sharing, What's Next",
+    "content": "Shared Instances How multiple programs share a single Reticulum instance on the same system, avoiding duplicate transport stacks and hardware conflicts. What Is a Shared Instance? When you run a Reticulum program, it initializes the full protocol stack — bringing up interfaces, managing transport ta"
   },
   {
     "title": "RNode Overview",
@@ -315,6 +322,13 @@
     "content": "Bridging Networks Connecting separate Reticulum networks together — linking a LoRa mesh to the internet, joining two communities, or creating redundant paths. What Is Bridging? Bridging connects two or more separate network segments so that nodes on one segment can communicate with nodes on another."
   },
   {
+    "title": "Remote Management",
+    "section": "Deployment Guides",
+    "path": "deployment/remote-management",
+    "headings": "Overview, Enabling Built-in Remote Management, Querying Remote Status, Managing Remote Blackhole Lists, Remote Command Execution with rnx, Setting Up the Remote Node, Executing Remote Commands, SSH + Reticulum Patterns, Monitoring Node Health, Status Checks, Connectivity Testing, Security Considerations, What's Next",
+    "content": "Remote Management Managing headless Reticulum and Ratspeak nodes remotely — monitoring status, executing commands, and maintaining infrastructure over the mesh. Overview Once you have Reticulum nodes deployed as headless infrastructure — Raspberry Pi gateways, VPS transport nodes, or remote relay st"
+  },
+  {
     "title": "Protocol Architecture",
     "section": "Understanding Reticulum",
     "path": "understanding/protocol-architecture",
@@ -339,7 +353,7 @@
     "title": "Links & Communication",
     "section": "Understanding Reticulum",
     "path": "understanding/links-and-communication",
-    "headings": "Link Establishment, Key Properties, Link Timers, Resources, Channels, Buffers, Request / Response, What's Next",
+    "headings": "Link Establishment, The Handshake, Key Properties, Link Timers, Resources, Channels, Buffers, Request / Response, What's Next",
     "content": "Links & Communication Encrypted bidirectional channels — the 297-byte handshake, forward secrecy, resources, channels, and request/response. Link Establishment Links provide encrypted, bidirectional communication with forward secrecy and initiator anonymity. The entire handshake takes just 3 packets"
   },
   {
@@ -368,7 +382,7 @@
     "section": "Understanding Reticulum",
     "path": "understanding/wire-format",
     "headings": "Packet Structure, Header Byte 1 (Flags), Header Byte 2 (Hop Count), Address Field, Maximum Data Units, Why 500 Bytes?, IFAC Packets, What's Next",
-    "content": "Wire Format The binary structure of Reticulum packets — header fields, addressing, and the 500-byte MTU. Packet Structure Every Reticulum packet follows this format: Total maximum size: 500 bytes (network-wide MTU, fixed). HEADER 2 bytes flags + hop count ADDRESSES 16 or 32 bytes dest hash [+ transp"
+    "content": "Wire Format The binary structure of Reticulum packets — header fields, addressing, and the 500-byte MTU. Packet Structure Every Reticulum packet follows this format: Total maximum size: 500 bytes (network-wide MTU, fixed). Header Byte 1 (Flags) Bit Field Values ----- ------- -------- 7 IFAC Flag 0 ="
   },
   {
     "title": "Network Identities",
@@ -378,10 +392,31 @@
     "content": "Network Identities Using Reticulum identities to represent networks, communities, and groups of nodes — beyond individual user identities. What Are Network Identities? A Network Identity is a standard Reticulum identity (512-bit Ed25519 + X25519 keyset) used to represent a logical group rather than "
   },
   {
+    "title": "Stamps & Proof-of-Work",
+    "section": "Understanding Reticulum",
+    "path": "understanding/stamps",
+    "headings": "What Are Stamps?, Why Stamps Exist, How Stamps Work, Verification, Configuring Stamp Difficulty, On Discoverable Interfaces, On Receiving Nodes, When Stamps Are Required, Stamps and Network Identities, What's Next",
+    "content": "Stamps & Proof-of-Work How Reticulum uses cryptographic stamps to prevent spam, rate-limit announces, and ensure fair resource usage on constrained networks. What Are Stamps? A stamp is a proof-of-work value attached to certain Reticulum operations — primarily interface discovery announces. The send"
+  },
+  {
+    "title": "Ingress Control",
+    "section": "Understanding Reticulum",
+    "path": "understanding/ingress-control",
+    "headings": "What Is Ingress Control?, Why It Matters, How It Works, Configuration, Parameters, New vs Established Sub-Interfaces, Interaction with Other Rate Controls, Tuning for Your Network, Public Internet Gateways, LoRa Access Points, Private Networks, What's Next",
+    "content": "Ingress Control How Reticulum rate-limits incoming announces to protect nodes from being overwhelmed, especially on public interfaces and constrained links. What Is Ingress Control? Ingress control is Reticulum's mechanism for rate-limiting incoming announce traffic on a per-interface basis. When a "
+  },
+  {
+    "title": "Blackhole Management",
+    "section": "Understanding Reticulum",
+    "path": "understanding/blackhole-management",
+    "headings": "What Is Blackholing?, Local Blackhole Management, Blocking an Identity, Removing a Blackhole, Viewing the Blackhole List, Automated List Sourcing, Subscribing to a Source, Previewing a Remote List, Publishing Your Blackhole List, Best Practices for Publishers, Remote Blackhole Management, Use Cases, Blocking Announce Spam, Managing Network Access, Community Moderation, Limitations, What's Next",
+    "content": "Blackhole Management Blocking specific identities at the transport layer — managing local blackhole lists, subscribing to trusted sources, and publishing lists for your network. What Is Blackholing? Blackholing is Reticulum's mechanism for blocking specific identities at the transport layer. When an"
+  },
+  {
     "title": "Architecture Overview",
     "section": "Developer Guide",
     "path": "developer/architecture-overview",
-    "headings": "Dual Implementation, System Architecture, Core Components, Web Server Layer, LXMF Manager, App Router (RLAP), RNS Manager, Database, Data Flow, Sending a Message, Receiving a Message, Thread Model, Python (Ratspeak-py), Rust (Ratspeak-rs), Configuration, Directory Structure, What's Next",
+    "headings": "Dual Implementation, System Architecture, Core Components, Web Server Layer, LXMF Manager, Game Router (LRGP), RNS Manager, Database, Data Flow, Sending a Message, Receiving a Message, Thread Model, Python (Ratspeak-py), Rust (Ratspeak-rs), Configuration, Directory Structure, What's Next",
     "content": "Architecture Overview A high-level look at how Ratspeak is built — both the Python and Rust implementations, their shared design philosophy, and how the pieces fit together. Dual Implementation Ratspeak has two independent backends that share the same frontend and database schema: Component Ratspeak"
   },
   {
@@ -402,29 +437,29 @@
     "title": "Frontend Architecture",
     "section": "Developer Guide",
     "path": "developer/frontend",
-    "headings": "Technology Stack, File Structure, Architecture Pattern, Data Flow, Core Modules, state.js — Global State, socketio_handlers.js — Event Dispatch, lxmf.js — Messaging, games.js — Apps & RLAP, graph.js — Network Visualization, events.js — Event Log, UI Components, Modal System (modals.js), Toast Notifications (toasts.js), Emoji Picker (emoji_picker.js), Authentication, Keyboard Shortcuts, Static Asset Serving, What's Next",
-    "content": "Frontend Architecture Ratspeak's browser-side code — a vanilla JavaScript application using Socket.IO for real-time updates, D3.js for network visualization, and RLAP for interactive apps. Technology Stack Library Version Purpose --------- --------- --------- Socket.IO 4.7.4 Real-time WebSocket comm"
+    "headings": "Technology Stack, File Structure, Architecture Pattern, Data Flow, Core Modules, state.js — Global State, socketio_handlers.js — Event Dispatch, lxmf.js — Messaging, games.js — Games & LRGP, graph.js — Network Visualization, events.js — Event Log, UI Components, Modal System (modals.js), Toast Notifications (toasts.js), Emoji Picker (emoji_picker.js), Authentication, Keyboard Shortcuts, Static Asset Serving, What's Next",
+    "content": "Frontend Architecture Ratspeak's browser-side code — a vanilla JavaScript application using Socket.IO for real-time updates, D3.js for network visualization, and LRGP for multiplayer games. Technology Stack Library Version Purpose --------- --------- --------- Socket.IO 4.7.4 Real-time WebSocket com"
   },
   {
     "title": "REST API Reference",
     "section": "Developer Guide",
     "path": "developer/rest-api",
-    "headings": "Authentication, Response Format, Setup & System, GET /api/setup/status, POST /api/setup/complete, POST /api/setup/restart, GET /api/version, GET /api/startup-progress, POST /api/system/restart, POST /api/system/shutdown, Identity, GET /api/identity, POST /api/identity/display-name, POST /api/identity/reset, Identity Management (Multi-Identity), GET /api/identities, POST /api/identities/create, POST /api/identities/import, POST /api/identities/import-base64, GET /api/identities/:hash/export, GET /api/identities/:hash/export-base64, POST /api/identities/:hash/activate, PUT /api/identities/:hash, DELETE /api/identities/:hash, Contacts & Conversations, GET /api/contacts, GET /api/lxmf/conversations, GET /api/conversation/:dest_hash, GET /api/messages/search?q=:query, Files, GET /api/files, GET /api/files/:stored_name, Network & Topology, GET /api/topology, GET /api/announces, GET /api/interfaces/throughput, GET /api/alerts, GET /api/connection-history, DELETE /api/connection-history/:id, POST /api/clear-paths, POST /api/clear-announces, Propagation, GET /api/propagation, Hardware, GET /api/serial/ports, GET /api/rnode/presets, GET /api/ble/available, GET /api/ble/scan?timeout=:seconds, GET /api/ble/peer/available, GET /api/ble/peer/status, Hub Node, GET /api/hub/interfaces, Apps & RLAP, GET /api/available-games, Data Management, POST /api/clear-messages, POST /api/clear-contacts, GET /api/database-stats, GET /api/settings/delete-identity-data, POST /api/settings/delete-identity-data, What's Next",
+    "headings": "Authentication, Response Format, Setup & System, GET /api/setup/status, POST /api/setup/complete, POST /api/setup/restart, GET /api/version, GET /api/startup-progress, POST /api/system/restart, POST /api/system/shutdown, Identity, GET /api/identity, POST /api/identity/display-name, POST /api/identity/reset, Identity Management (Multi-Identity), GET /api/identities, POST /api/identities/create, POST /api/identities/import, POST /api/identities/import-base64, GET /api/identities/:hash/export, GET /api/identities/:hash/export-base64, POST /api/identities/:hash/activate, PUT /api/identities/:hash, DELETE /api/identities/:hash, Contacts & Conversations, GET /api/contacts, GET /api/lxmf/conversations, GET /api/conversation/:dest_hash, GET /api/messages/search?q=:query, Files, GET /api/files, GET /api/files/:stored_name, Network & Topology, GET /api/topology, GET /api/announces, GET /api/interfaces/throughput, GET /api/alerts, GET /api/connection-history, DELETE /api/connection-history/:id, POST /api/clear-paths, POST /api/clear-announces, Propagation, GET /api/propagation, Hardware, GET /api/serial/ports, GET /api/rnode/presets, GET /api/ble/available, GET /api/ble/scan?timeout=:seconds, GET /api/ble/peer/available, GET /api/ble/peer/status, Hub Node, GET /api/hub/interfaces, Games & LRGP, GET /api/available-games, Data Management, POST /api/clear-messages, POST /api/clear-contacts, GET /api/database-stats, GET /api/settings/delete-identity-data, POST /api/settings/delete-identity-data, What's Next",
     "content": "REST API Reference Complete reference for Ratspeak's HTTP API — all endpoints, parameters, and response formats. Both the Python and Rust backends implement the same API. Authentication If api_token is configured in ratspeak.conf, all /api/ endpoints require authentication: Alternatively, pass the t"
   },
   {
     "title": "Socket.IO Events",
     "section": "Developer Guide",
     "path": "developer/socketio-events",
-    "headings": "Connection, connect (client → server), Messaging, send_lxmf_message (client → server), send_lxmf_reply (client → server), send_lxmf_propagated (client → server), send_lxmf_with_attachment (client → server), send_reaction (client → server), new_message (server → client), Contacts & Conversations, add_contact (client → server), remove_contact (client → server), get_conversation (client → server), mark_read (client → server), hide_conversation (client → server), delete_conversation (client → server), contacts_update (server → client), unread_total (server → client), Games & Interactive Apps (RLAP), send_game_action (client → server), get_active_games (client → server), get_all_game_sessions (client → server), mark_game_read (client → server), get_game_session_detail (client → server), get_available_games (client → server), game_update (server → client), Propagation, set_propagation_node (client → server), enable_propagation (client → server), sync_propagation (client → server), get_propagation_status (client → server), Network & Paths, trigger_announce (client → server), request_path (client → server), request_all_paths (client → server), check_contact_status (client → server), Network Status (server → client), stats_update, topology_updated, alert, event, Identity, switch_identity (client → server), lxmf_identity (server → client), Alerts, dismiss_alert (client → server), Hub Node Management, node_add_rnode (client → server), node_add_auto (client → server), node_add_tcp_client (client → server), node_add_tcp_server (client → server), node_remove_interface (client → server), node_restart (client → server), node_stop (client → server), hub_interfaces_update (server → client), node_operation_status (server → client), What's Next",
+    "headings": "Connection, connect (client → server), Messaging, send_lxmf_message (client → server), send_lxmf_reply (client → server), send_lxmf_propagated (client → server), send_lxmf_with_attachment (client → server), send_reaction (client → server), new_message (server → client), Contacts & Conversations, add_contact (client → server), remove_contact (client → server), get_conversation (client → server), mark_read (client → server), hide_conversation (client → server), delete_conversation (client → server), contacts_update (server → client), unread_total (server → client), Games (LRGP), send_game_action (client → server), get_active_games (client → server), get_all_game_sessions (client → server), mark_game_read (client → server), get_game_session_detail (client → server), get_available_games (client → server), game_update (server → client), Propagation, set_propagation_node (client → server), enable_propagation (client → server), sync_propagation (client → server), get_propagation_status (client → server), Network & Paths, trigger_announce (client → server), request_path (client → server), request_all_paths (client → server), check_contact_status (client → server), Network Status (server → client), stats_update, topology_updated, alert, event, Identity, switch_identity (client → server), lxmf_identity (server → client), Alerts, dismiss_alert (client → server), Hub Node Management, node_add_rnode (client → server), node_add_auto (client → server), node_add_tcp_client (client → server), node_add_tcp_server (client → server), node_remove_interface (client → server), node_restart (client → server), node_stop (client → server), hub_interfaces_update (server → client), node_operation_status (server → client), What's Next",
     "content": "Socket.IO Events Complete reference for Ratspeak's real-time Socket.IO events — both client-emitted (browser → server) and server-emitted (server → browser). Connection connect (client → server) Establishes the WebSocket connection. If API token is configured, the token must be included in the auth "
   },
   {
-    "title": "RLAP Protocol & Building Apps",
+    "title": "LRGP Protocol & Building Games",
     "section": "Developer Guide",
-    "path": "developer/rlap-protocol",
-    "headings": "What is RLAP?, Protocol Overview, Envelope Format, Size Budget, Session Lifecycle, State Machine, Standard Commands, Session Status, Delivery Preferences, Validation Models, Session Types, Error Handling, Fallback Text, Tic-Tac-Toe Payload Schema, Building a New App, Plugin Architecture, Registration, Design Constraints, Cross-Client Compatibility, Legacy Compatibility, What's Next",
-    "content": "RLAP Protocol & Building Apps The Reticulum LXMF App Protocol (RLAP) — a lightweight standard for interactive applications over LXMF messaging. How it works, how to build new apps, and the full protocol specification. What is RLAP? RLAP enables interactive, session-based applications (games, collabo"
+    "path": "developer/lrgp-protocol",
+    "headings": "What is LRGP?, Protocol Overview, Legacy Markers, Envelope Format, Size Budget, Session Lifecycle, State Machine, Commands, Session Status, Session Types, Delivery Preferences, Validation Models, Error Handling, Fallback Text, Tic-Tac-Toe Payload Schema, Building a New Game, Game Manifest, Plugin Architecture, Registration, Design Constraints, Storage Schema, game_sessions, game_actions, Cross-Client Compatibility, Legacy Compatibility, What's Next",
+    "content": "LRGP Protocol & Building Games The Lightweight Reticulum Gaming Protocol (LRGP) — a protocol for multiplayer games over LXMF messaging. How it works, how to build new games, and the full protocol specification. What is LRGP? LRGP enables multiplayer game sessions to run over LXMF messages. It works "
   },
   {
     "title": "Database Schema",
@@ -438,13 +473,13 @@
     "section": "Developer Guide",
     "path": "developer/building-contributing",
     "headings": "Repository Structure, Building Ratspeak-py, Prerequisites, Setup, Run, Key Dependencies, Building Ratspeak-rs, Prerequisites, Setup, Build, Run, Run with Tauri (desktop app), Feature Flags, Run Tests, Building the Documentation, Documentation Structure, Adding a New Page, Page Template, First Section, Second Section, What's Next, Conventions, Development Workflow, Branching, Code Style, Testing, Common Development Tasks, What's Next",
-    "content": "Building & Contributing How to set up a development environment, build from source, run tests, and contribute to Ratspeak. Repository Structure Ratspeak has two main repositories: Repository Language URL ------------ ---------- ----- ratspeak Python github.com/ratspeak/ratspeak RustRat Rust github.c"
+    "content": "Building & Contributing How to set up a development environment, build from source, run tests, and contribute to Ratspeak. Repository Structure Ratspeak has two main repositories: Repository Language URL ------------ ---------- ----- ratspeak Python github.com/ratspeak/ratspeak ratspeak-rs Rust gith"
   },
   {
     "title": "Glossary",
     "section": "Reference",
     "path": "reference/glossary",
-    "headings": "A, Announce, AutoInterface, D, Destination, Destination Hash, F, Forward Secrecy, I, Identity, IFAC, Interface, Interface Mode, L, Link, LXMF, M, MDU, MTU, N, Network Identity, P, Path, Propagation Node, R, Ratchet, RLAP, RNode, rnsd, S, Spreading Factor, T, Transport Node, W, Wire Format",
+    "headings": "A, Announce, AutoInterface, D, Destination, Destination Hash, F, Forward Secrecy, I, Identity, IFAC, Interface, Interface Mode, L, Link, LRGP, LXMF, M, MDU, MTU, N, Network Identity, P, Path, Propagation Node, R, Ratchet, RNode, rnsd, S, Spreading Factor, T, Transport Node, W, Wire Format",
     "content": "Glossary Key terms used throughout the Ratspeak and Reticulum documentation. A Announce A broadcast packet that advertises a destination's existence and public key to the network. Announces propagate through transport nodes with hop count incrementing, duplicate detection, and rate limiting (2% of b"
   },
   {
@@ -465,7 +500,7 @@
     "title": "FAQ",
     "section": "Reference",
     "path": "reference/faq",
-    "headings": "General, What is the difference between Ratspeak and Reticulum?, Do I need internet to use Ratspeak?, Is Ratspeak free and open source?, Should I use the Python or Rust version?, Privacy & Security, Can anyone read my messages?, Can transport nodes see my communication patterns?, What encryption does Reticulum use?, What if someone gets my identity file?, Is Ratspeak anonymous?, Messaging, How long do messages take to deliver?, What's the maximum message size?, What happens if the recipient is offline?, Can I send messages to non-Ratspeak users?, Networking, What is a transport node?, How many transport nodes do I need?, What's the range of LoRa?, Can I bridge LoRa to the internet?, What's the difference between AutoInterface and TCP?, Hardware, Do I need an RNode?, What RNode hardware should I buy?, What's the difference between RatDeck and RatCom?, Apps & RLAP, What is RLAP?, What apps are available?, Can non-Ratspeak clients participate in RLAP sessions?, Deployment, Can I run Ratspeak on a Raspberry Pi?, Can I run Ratspeak in Docker?, How do I expose Ratspeak to the internet?, What's Next",
+    "headings": "General, What is the difference between Ratspeak and Reticulum?, Do I need internet to use Ratspeak?, Is Ratspeak free and open source?, Should I use the Python or Rust version?, Privacy & Security, Can anyone read my messages?, Can transport nodes see my communication patterns?, What encryption does Reticulum use?, What if someone gets my identity file?, Is Ratspeak anonymous?, Messaging, How long do messages take to deliver?, What's the maximum message size?, What happens if the recipient is offline?, Can I send messages to non-Ratspeak users?, Networking, What is a transport node?, How many transport nodes do I need?, What's the range of LoRa?, Can I bridge LoRa to the internet?, What's the difference between AutoInterface and TCP?, Hardware, Do I need an RNode?, What RNode hardware should I buy?, What's the difference between RatDeck and RatCom?, Games & LRGP, What is LRGP?, What games are available?, Can non-Ratspeak clients participate in LRGP sessions?, Deployment, Can I run Ratspeak on a Raspberry Pi?, Can I run Ratspeak in Docker?, How do I expose Ratspeak to the internet?, What's Next",
     "content": "FAQ Frequently asked questions about Ratspeak and Reticulum. General What is the difference between Ratspeak and Reticulum? Reticulum is the mesh networking protocol — it handles encryption, routing, and transport across diverse physical media (LoRa, TCP, WiFi, serial, etc.). Ratspeak is a web dashb"
   },
   {
@@ -486,7 +521,7 @@
     "title": "Ratspeak vs Other Clients",
     "section": "Reference",
     "path": "reference/comparison",
-    "headings": "LXMF Client Comparison, When to Use Each, Mesh Platform Comparison, Reticulum vs Meshtastic, Reticulum vs Traditional Messengers, Feature Highlights Unique to Ratspeak, Interactive Games (RLAP), Network Visualization, Interface Management, Full-Text Message Search, What's Next",
+    "headings": "LXMF Client Comparison, When to Use Each, Mesh Platform Comparison, Reticulum vs Meshtastic, Reticulum vs Traditional Messengers, Feature Highlights Unique to Ratspeak, Interactive Games (LRGP), Network Visualization, Interface Management, Full-Text Message Search, What's Next",
     "content": "Ratspeak vs Other Clients How Ratspeak compares to other Reticulum/LXMF messaging clients and alternative mesh communication platforms. LXMF Client Comparison All LXMF clients can send messages to each other. They differ in interface, features, and platform support. Feature Ratspeak Sideband NomadNe"
   },
   {

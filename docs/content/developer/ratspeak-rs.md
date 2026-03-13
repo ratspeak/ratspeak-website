@@ -19,7 +19,7 @@ The Rust implementation of Ratspeak — a pure Rust protocol stack with an Axum 
 
 ## Workspace Structure
 
-The project is organized as a Cargo workspace with 15 crates in three layers:
+The project is organized as a Cargo workspace with 14 crates in three layers:
 
 ### Protocol Layer (Core)
 
@@ -36,7 +36,7 @@ The project is organized as a Cargo workspace with 15 crates in three layers:
 | **rns-transport** | Transport actor, path/link/announce tables, rate limiting, persistence |
 | **rns-link** | Encrypted channel establishment, handshake, keepalive |
 | **rns-protocol** | Channels (reliable sequenced) and Resources (large file transfer), BZIP2 compression |
-| **rns-interface** | Interface trait + implementations: TCP, UDP, Serial, KISS, RNode, Local, Auto |
+| **rns-interface** | Interface trait + implementations: TCP, UDP, Serial, KISS, RNode, Local, Auto, HDLC |
 | **rns-runtime** | Reticulum singleton, config parsing, interface factory, RPC server |
 | **rns-tools** | CLI binaries: rnsd, rnstatus, rnpath, rnid |
 
@@ -46,21 +46,21 @@ The project is organized as a Cargo workspace with 15 crates in three layers:
 |-------|---------|
 | **lxmf-core** | LXMF message format, routing, propagation, signing, sync |
 | **lxmf-tools** | LXMF daemon (lxmd) |
-| **rlap** | Session-based interactive apps over LXMF (MessagePack serialization) |
+| **lrgp** | Multiplayer games over LXMF (MessagePack serialization) |
 | **ratspeak-dashboard** | Axum web server, Socket.IO, SQLite, LXMF/RNS integration |
-| **raticulum-tests** | Integration test suites (567 tests) |
-| **src-tauri** | Tauri 2 desktop app wrapper |
+| **raticulum-tests** | Integration test suites (run `cargo test --workspace` for current count) |
 
 ## Dashboard Crate
 
-The `ratspeak-dashboard` crate (~5,200 lines) is the web application:
+The `ratspeak-dashboard` crate is the web application:
 
 ```
 crates/ratspeak-dashboard/src/
+├── main.rs         # Binary entry point
 ├── lib.rs          # Server init, Axum setup, background tasks
 ├── config.rs       # Env var config (port, host, RNS config dir)
-├── routes.rs       # REST API endpoints (~40 routes)
-├── socketio.rs     # Socket.IO event handlers (~30 events)
+├── routes.rs       # REST API endpoints
+├── socketio.rs     # Socket.IO event handlers
 ├── db.rs           # SQLite schema, migrations, queries
 ├── lxmf.rs         # LXMF manager (identity, messaging, contacts)
 ├── rns.rs          # RNS runtime integration
@@ -116,15 +116,17 @@ All network interfaces are implemented as async Rust code:
 
 ```
 rns-interface/src/
-├── tcp.rs       # TCP Client + Server (26KB)
-├── udp.rs       # UDP Broadcast
-├── serial.rs    # Serial port (feature-gated)
-├── kiss.rs      # KISS framing
-├── kiss_iface.rs# KISS interface
-├── rnode.rs     # RNode LoRa (14KB)
-├── local.rs     # Local IPC (20KB)
-├── auto.rs      # Auto-discovery (13KB)
-└── lib.rs       # Interface trait definition
+├── lib.rs        # Module root and re-exports
+├── traits.rs     # Interface trait definition
+├── tcp.rs        # TCP Client + Server
+├── udp.rs        # UDP Broadcast
+├── serial.rs     # Serial port (feature-gated)
+├── kiss.rs       # KISS framing
+├── kiss_iface.rs # KISS interface
+├── rnode.rs      # RNode LoRa
+├── local.rs      # Local IPC
+├── auto.rs       # Auto-discovery
+└── hdlc.rs       # HDLC framing
 ```
 
 Feature flag `serial` (enabled by default) controls serial/KISS/RNode inclusion.
@@ -142,13 +144,13 @@ Feature flag `serial` (enabled by default) controls serial/KISS/RNode inclusion.
 ### Build
 
 ```bash
-cd RustRat
+cd rustrat
 
 # Build all crates
 cargo build --release
 
-# Run tests (567 integration tests)
-cargo test
+# Run tests (over 600 unit + integration tests)
+cargo test --workspace
 
 # Build specific crate
 cargo build -p ratspeak-dashboard --release

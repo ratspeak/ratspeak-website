@@ -28,51 +28,7 @@ Think of Reticulum like a postal system where everyone is both a sender and a ma
 
 One of Reticulum's most powerful properties: a single message can traverse completely different communication mediums seamlessly. A packet might start on a LoRa radio, hop through a WiFi network, cross a TCP tunnel over the internet, and arrive at a device connected via serial port — all without you doing anything special.
 
-<div class="docs-diagram">
-<svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" fill="none">
-  <!-- LoRa Node -->
-  <rect x="20" y="70" width="100" height="60" rx="8" stroke="#00D4AA" stroke-width="1.5" fill="rgba(0,212,170,0.08)"/>
-  <text x="70" y="95" text-anchor="middle" fill="#00D4AA" font-family="JetBrains Mono" font-size="11" font-weight="600">LoRa</text>
-  <text x="70" y="115" text-anchor="middle" fill="#9eadbf" font-family="Outfit" font-size="10">~37 bps</text>
-  <!-- Radio waves -->
-  <path d="M120 100 Q140 80 160 100" stroke="#00D4AA" stroke-width="1" stroke-dasharray="4 3" opacity="0.6"/>
-  <path d="M125 100 Q140 85 155 100" stroke="#00D4AA" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
-  <!-- WiFi Node -->
-  <rect x="170" y="70" width="100" height="60" rx="8" stroke="#F59E0B" stroke-width="1.5" fill="rgba(245,158,11,0.08)"/>
-  <text x="220" y="95" text-anchor="middle" fill="#F59E0B" font-family="JetBrains Mono" font-size="11" font-weight="600">WiFi</text>
-  <text x="220" y="115" text-anchor="middle" fill="#9eadbf" font-family="Outfit" font-size="10">~54 Mbps</text>
-  <!-- Arrow -->
-  <line x1="270" y1="100" x2="318" y2="100" stroke="#3a4759" stroke-width="1.5"/>
-  <polygon points="318,96 326,100 318,104" fill="#3a4759"/>
-  <!-- TCP Node -->
-  <rect x="330" y="70" width="100" height="60" rx="8" stroke="#38BDF8" stroke-width="1.5" fill="rgba(56,189,248,0.08)"/>
-  <text x="380" y="95" text-anchor="middle" fill="#38BDF8" font-family="JetBrains Mono" font-size="11" font-weight="600">TCP</text>
-  <text x="380" y="115" text-anchor="middle" fill="#9eadbf" font-family="Outfit" font-size="10">Internet</text>
-  <!-- Arrow -->
-  <line x1="430" y1="100" x2="478" y2="100" stroke="#3a4759" stroke-width="1.5"/>
-  <polygon points="478,96 486,100 478,104" fill="#3a4759"/>
-  <!-- Serial Node -->
-  <rect x="490" y="70" width="100" height="60" rx="8" stroke="#C084FC" stroke-width="1.5" fill="rgba(192,132,252,0.08)"/>
-  <text x="540" y="95" text-anchor="middle" fill="#C084FC" font-family="JetBrains Mono" font-size="11" font-weight="600">Serial</text>
-  <text x="540" y="115" text-anchor="middle" fill="#9eadbf" font-family="Outfit" font-size="10">115200 bps</text>
-  <!-- Arrow -->
-  <line x1="590" y1="100" x2="618" y2="100" stroke="#3a4759" stroke-width="1.5"/>
-  <polygon points="618,96 626,100 618,104" fill="#3a4759"/>
-  <!-- Destination -->
-  <rect x="630" y="70" width="70" height="60" rx="8" stroke="#00D4AA" stroke-width="2" fill="rgba(0,212,170,0.12)"/>
-  <circle cx="665" cy="92" r="8" stroke="#00D4AA" stroke-width="1.5" fill="none"/>
-  <text x="665" y="120" text-anchor="middle" fill="#e2e8f0" font-family="Outfit" font-size="10">Dest</text>
-  <!-- Packet dot traveling -->
-  <circle r="4" fill="#00D4AA" opacity="0.9">
-    <animate attributeName="cx" values="70;220;380;540;665" dur="4s" repeatCount="indefinite"/>
-    <animate attributeName="cy" values="100;100;100;100;100" dur="4s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0.9;0.9;0.9;0.9;0" dur="4s" repeatCount="indefinite"/>
-  </circle>
-  <!-- Label -->
-  <text x="360" y="170" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="12" font-style="italic">A single packet traversing four different mediums</text>
-</svg>
-<figcaption>A single packet traversing four different communication mediums seamlessly</figcaption>
-</div>
+Reticulum is medium-agnostic: a single packet can traverse WiFi, LoRa radio, serial links, TCP tunnels, and I2P connections in one path. Every interface type participates as a peer in the same mesh — there is no hierarchy of "better" or "worse" transport media.
 
 Reticulum handles the differences between these links automatically. You don't write routing rules or configure gateways. Each node discovers paths to other nodes and forwards packets accordingly.
 

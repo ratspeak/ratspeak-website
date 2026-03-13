@@ -1017,24 +1017,6 @@ body::after {
     text-decoration: none;
 }
 
-/* ── Screenshot Placeholder ──────────────────────────── */
-
-.screenshot-placeholder {
-    border: 2px dashed var(--border);
-    border-radius: 10px;
-    padding: 48px 24px;
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 14px;
-    margin: 20px 0;
-    background: rgba(36, 45, 63, 0.3);
-}
-
-.screenshot-placeholder svg {
-    display: block;
-    margin: 0 auto 12px;
-}
-
 /* ── Glossary ────────────────────────────────────────── */
 
 .glossary-empty {
@@ -1110,25 +1092,6 @@ body::after {
     color: var(--text-primary);
     font-style: italic;
     line-height: 1.7;
-}
-
-/* ── SVG Diagrams ────────────────────────────────────── */
-
-.docs-diagram {
-    margin: 24px 0;
-    text-align: center;
-}
-
-.docs-diagram svg {
-    max-width: 100%;
-    height: auto;
-}
-
-.docs-diagram figcaption {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-top: 8px;
-    font-style: italic;
 }
 
 /* ── Responsive ──────────────────────────────────────── */
@@ -1212,14 +1175,6 @@ body::after {
         padding: 8px 10px;
     }
 
-    .docs-diagram {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .docs-diagram svg {
-        min-width: 500px;
-    }
 }
 
 /* ── Sidebar Footer ──────────────────────────────────── */

@@ -14,36 +14,7 @@ LXMF is a messaging protocol built on top of Reticulum that provides:
 
 LXMF messages can even be encoded as **QR codes** or **text-based URIs** for analog transport on paper.
 
-<div class="docs-diagram">
-<svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" fill="none">
-  <!-- Outer box: LXMF Message -->
-  <rect x="40" y="10" width="620" height="170" rx="12" fill="rgba(192,132,252,0.05)" stroke="#C084FC" stroke-width="2"/>
-  <text x="350" y="34" text-anchor="middle" font-family="Outfit" font-size="14" font-weight="600" fill="#C084FC">LXMF Message</text>
-
-  <!-- Inner field boxes -->
-  <!-- Row 1 -->
-  <rect x="60" y="48" width="185" height="32" rx="6" fill="rgba(56,189,248,0.08)" stroke="#38BDF8" stroke-width="1"/>
-  <text x="152" y="69" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#38BDF8">Source Hash</text>
-
-  <rect x="257" y="48" width="185" height="32" rx="6" fill="rgba(56,189,248,0.08)" stroke="#38BDF8" stroke-width="1"/>
-  <text x="349" y="69" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#38BDF8">Destination Hash</text>
-
-  <rect x="454" y="48" width="185" height="32" rx="6" fill="rgba(0,212,170,0.08)" stroke="#00D4AA" stroke-width="1"/>
-  <text x="546" y="69" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#00D4AA">Title</text>
-
-  <!-- Row 2 -->
-  <rect x="60" y="92" width="382" height="32" rx="6" fill="rgba(0,212,170,0.08)" stroke="#00D4AA" stroke-width="1"/>
-  <text x="251" y="113" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#00D4AA">Content</text>
-
-  <rect x="454" y="92" width="185" height="32" rx="6" fill="rgba(245,158,11,0.08)" stroke="#F59E0B" stroke-width="1"/>
-  <text x="546" y="113" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#F59E0B">Fields { }</text>
-
-  <!-- Row 3 -->
-  <rect x="60" y="136" width="579" height="32" rx="6" fill="rgba(192,132,252,0.08)" stroke="#C084FC" stroke-width="1"/>
-  <text x="349" y="157" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#C084FC">Ed25519 Signature</text>
-</svg>
-<figcaption>LXMF message structure — addressing, content, extensible fields, and cryptographic signature</figcaption>
-</div>
+An LXMF message contains a source hash, destination hash, title, content, extensible fields, and an Ed25519 signature from the sender.
 
 ## Delivery Modes
 
@@ -85,14 +56,14 @@ Messages can carry several types of content:
 | Title | — | Optional message title/subject |
 | Content | — | Message body text |
 
-Additional standard fields exist for telemetry, threading, commands, and group messaging. LXMF also defines **custom extension fields** used by protocols like RLAP:
+Additional standard fields exist for telemetry, threading, commands, and group messaging. LXMF also defines **custom extension fields** used by protocols like LRGP:
 
 | Field | Constant | Description |
 |-------|----------|-------------|
-| Custom Type | `FIELD_CUSTOM_TYPE` (`0xFB`) | Protocol identifier (e.g., `"rlap.v1"`) |
-| Custom Meta | `FIELD_CUSTOM_META` (`0xFD`) | Protocol-specific metadata (e.g., RLAP envelope dict) |
+| Custom Type | `FIELD_CUSTOM_TYPE` (`0xFB`) | Protocol identifier (e.g., `"lrgp.v1"`) |
+| Custom Meta | `FIELD_CUSTOM_META` (`0xFD`) | Protocol-specific metadata (e.g., LRGP envelope dict) |
 
-These custom fields enable app-layer protocols to piggyback on LXMF messages while maintaining backward compatibility — clients that don't understand the custom fields simply ignore them and display the standard content. See [RLAP Protocol](../developer/rlap-protocol) for how Ratspeak uses these fields.
+These custom fields enable app-layer protocols to piggyback on LXMF messages while maintaining backward compatibility — clients that don't understand the custom fields simply ignore them and display the standard content. See [LRGP Protocol](../developer/lrgp-protocol) for how Ratspeak uses these fields.
 
 ## Propagation Nodes
 

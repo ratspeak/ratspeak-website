@@ -453,11 +453,11 @@ Get hub's configured interfaces.
 
 ---
 
-## Apps & RLAP
+## Games & LRGP
 
 ### GET /api/available-games
 
-List registered RLAP apps.
+List registered LRGP games.
 
 **Response:**
 ```json

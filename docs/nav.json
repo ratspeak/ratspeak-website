@@ -29,14 +29,14 @@
       "slug": "using-ratspeak",
       "pages": [
         { "title": "Dashboard Overview", "slug": "dashboard-overview" },
+        { "title": "Configuration", "slug": "configuration" },
         { "title": "Messaging", "slug": "messaging" },
         { "title": "Managing Contacts", "slug": "contacts" },
         { "title": "Identity Management", "slug": "identity-management" },
         { "title": "Network Monitoring", "slug": "network-monitoring" },
         { "title": "Network Graph", "slug": "graph-visualization" },
-        { "title": "Apps & RLAP", "slug": "games-and-apps" },
-        { "title": "Propagation Nodes", "slug": "propagation-node" },
-        { "title": "Configuration", "slug": "configuration" }
+        { "title": "Games & LRGP", "slug": "games-and-apps" },
+        { "title": "Propagation Nodes", "slug": "propagation-node" }
       ]
     },
     {
@@ -51,7 +51,8 @@
         { "title": "Serial & Packet Radio", "slug": "serial-packet-radio" },
         { "title": "I2P Anonymous Networking", "slug": "i2p-networking" },
         { "title": "Interface Modes", "slug": "interface-modes" },
-        { "title": "Building Networks", "slug": "building-networks" }
+        { "title": "Building Networks", "slug": "building-networks" },
+        { "title": "Shared Instances", "slug": "shared-instances" }
       ]
     },
     {
@@ -78,7 +79,8 @@
         { "title": "Emergency Communications", "slug": "emergency-comms" },
         { "title": "Raspberry Pi Gateway", "slug": "raspberry-pi-gateway" },
         { "title": "Docker Deployment", "slug": "docker-deployment" },
-        { "title": "Bridging Networks", "slug": "bridging-networks" }
+        { "title": "Bridging Networks", "slug": "bridging-networks" },
+        { "title": "Remote Management", "slug": "remote-management" }
       ]
     },
     {
@@ -93,7 +95,10 @@
         { "title": "Cryptographic Primitives", "slug": "cryptographic-primitives" },
         { "title": "LXMF Protocol", "slug": "lxmf-protocol" },
         { "title": "Wire Format", "slug": "wire-format" },
-        { "title": "Network Identities", "slug": "network-identities" }
+        { "title": "Network Identities", "slug": "network-identities" },
+        { "title": "Stamps & Proof-of-Work", "slug": "stamps" },
+        { "title": "Ingress Control", "slug": "ingress-control" },
+        { "title": "Blackhole Management", "slug": "blackhole-management" }
       ]
     },
     {
@@ -106,7 +111,7 @@
         { "title": "Frontend Architecture", "slug": "frontend" },
         { "title": "REST API Reference", "slug": "rest-api" },
         { "title": "Socket.IO Events", "slug": "socketio-events" },
-        { "title": "RLAP Protocol & Building Apps", "slug": "rlap-protocol" },
+        { "title": "LRGP Protocol & Building Games", "slug": "lrgp-protocol" },
         { "title": "Database Schema", "slug": "database-schema" },
         { "title": "Building & Contributing", "slug": "building-contributing" }
       ]

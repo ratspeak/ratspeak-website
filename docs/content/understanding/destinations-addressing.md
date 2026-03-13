@@ -27,53 +27,6 @@ Reticulum defines four destination types, each with different encryption and rou
 
 ## Hash Derivation
 
-<div class="docs-diagram">
-<svg viewBox="0 0 700 150" xmlns="http://www.w3.org/2000/svg" fill="none">
-  <!-- Input boxes -->
-  <rect x="10" y="20" width="145" height="36" rx="6" fill="rgba(56,189,248,0.08)" stroke="#38BDF8" stroke-width="1.5"/>
-  <text x="82" y="43" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#38BDF8">app_name.aspects</text>
-
-  <rect x="165" y="20" width="125" height="36" rx="6" fill="rgba(56,189,248,0.08)" stroke="#38BDF8" stroke-width="1.5"/>
-  <text x="227" y="43" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#38BDF8">Ed25519 pub</text>
-
-  <rect x="300" y="20" width="125" height="36" rx="6" fill="rgba(56,189,248,0.08)" stroke="#38BDF8" stroke-width="1.5"/>
-  <text x="362" y="43" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#38BDF8">X25519 pub</text>
-
-  <!-- Plus signs -->
-  <text x="155" y="44" text-anchor="middle" font-family="Outfit" font-size="16" fill="#7e8fa2">+</text>
-  <text x="290" y="44" text-anchor="middle" font-family="Outfit" font-size="16" fill="#7e8fa2">+</text>
-
-  <!-- Arrows into SHA-256 -->
-  <line x1="82" y1="56" x2="82" y2="72" stroke="#7e8fa2" stroke-width="1"/>
-  <line x1="227" y1="56" x2="227" y2="72" stroke="#7e8fa2" stroke-width="1"/>
-  <line x1="362" y1="56" x2="362" y2="72" stroke="#7e8fa2" stroke-width="1"/>
-  <line x1="82" y1="72" x2="362" y2="72" stroke="#7e8fa2" stroke-width="1"/>
-  <line x1="222" y1="72" x2="222" y2="82" stroke="#C084FC" stroke-width="1.5"/>
-  <polygon points="222,84 217,77 227,77" fill="#C084FC"/>
-
-  <!-- SHA-256 box -->
-  <rect x="172" y="86" width="100" height="32" rx="6" fill="rgba(192,132,252,0.10)" stroke="#C084FC" stroke-width="2"/>
-  <text x="222" y="107" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#C084FC">SHA-256</text>
-
-  <!-- Arrow to truncate -->
-  <line x1="272" y1="102" x2="380" y2="102" stroke="#C084FC" stroke-width="1.5"/>
-  <polygon points="382,102 374,97 374,107" fill="#C084FC"/>
-
-  <!-- Truncate box -->
-  <rect x="384" y="86" width="150" height="32" rx="6" fill="rgba(126,143,162,0.08)" stroke="#7e8fa2" stroke-width="1.5"/>
-  <text x="459" y="107" text-anchor="middle" font-family="Outfit" font-size="12" fill="#e0e6ed">Truncate to 16 bytes</text>
-
-  <!-- Arrow to destination hash -->
-  <line x1="534" y1="102" x2="556" y2="102" stroke="#00D4AA" stroke-width="1.5"/>
-  <polygon points="558,102 550,97 550,107" fill="#00D4AA"/>
-
-  <!-- Destination hash box -->
-  <rect x="560" y="86" width="130" height="32" rx="6" fill="rgba(0,212,170,0.10)" stroke="#00D4AA" stroke-width="2"/>
-  <text x="625" y="107" text-anchor="middle" font-family="Outfit" font-size="12" fill="#00D4AA">Destination Hash</text>
-</svg>
-<figcaption>Hash derivation — public keys and naming are hashed then truncated to 16 bytes</figcaption>
-</div>
-
 ### Single Destinations
 
 For Single destinations (tied to a cryptographic identity):

@@ -11,11 +11,6 @@ The dashboard is a single-page application with a consistent layout:
 - **Main content** (center) — the active view's content
 - **Status indicators** — real-time connection and interface status
 
-<div class="screenshot-placeholder" data-caption="Full Ratspeak dashboard layout showing sidebar navigation, header status bar, and main content area">
-    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#7e8fa2" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-    <div>Full dashboard with numbered callouts — screenshot placeholder</div>
-</div>
-
 ## Main Views
 
 The sidebar provides access to seven views:
@@ -36,7 +31,7 @@ Network monitoring and interface management — connections table with sorting a
 Interactive force-directed network graph showing your hub, contacts, transport nodes, and discovered peers. Color-coded nodes, zoom/pan/drag, search and filter. See [Graph Visualization](../using-ratspeak/graph-visualization) for full details.
 
 ### Apps
-Experimental interactive applications over the mesh, built on the RLAP protocol. Tic-Tac-Toe is included as a proof-of-concept. See [Apps & RLAP](../using-ratspeak/games-and-apps) for details.
+Multiplayer games over the mesh, built on the LRGP protocol. Tic-Tac-Toe is included as a proof-of-concept. See [Games & LRGP](../using-ratspeak/games-and-apps) for details.
 
 ### Settings
 Configuration panel — ratspeak.conf settings, propagation node controls, path table management, and system information.
@@ -60,6 +55,6 @@ Alerts appear in the header and can be dismissed individually. Duplicate alerts 
 
 - [Messaging](../using-ratspeak/messaging) — send and receive encrypted messages
 - [Graph Visualization](../using-ratspeak/graph-visualization) — interactive network graph
-- [Apps & RLAP](../using-ratspeak/games-and-apps) — interactive apps over the mesh
+- [Games & LRGP](../using-ratspeak/games-and-apps) — multiplayer games over the mesh
 - [Network Monitoring](../using-ratspeak/network-monitoring) — monitor your mesh
 - [Configuration](../using-ratspeak/configuration) — customize Ratspeak settings

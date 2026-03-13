@@ -8,46 +8,6 @@ RNode is firmware that runs on LoRa-capable microcontroller boards, turning them
 
 An RNode connects to your computer (or runs standalone) and provides a radio interface that Reticulum uses like any other network connection. Messages are encrypted end-to-end by Reticulum before they reach the radio — RNode simply transmits and receives packets.
 
-<div class="docs-diagram">
-<svg viewBox="0 0 700 180" xmlns="http://www.w3.org/2000/svg" fill="none">
-  <!-- Computer -->
-  <rect x="20" y="50" width="120" height="60" rx="8" stroke="#38BDF8" stroke-width="1.5" fill="rgba(56,189,248,0.08)"/>
-  <text x="80" y="75" text-anchor="middle" fill="#38BDF8" font-family="JetBrains Mono" font-size="11" font-weight="600">Ratspeak</text>
-  <text x="80" y="95" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">Your computer</text>
-
-  <!-- USB/BLE/TCP arrow -->
-  <line x1="140" y1="80" x2="210" y2="80" stroke="#00D4AA" stroke-width="1.5"/>
-  <polygon points="210,76 218,80 210,84" fill="#00D4AA"/>
-  <text x="178" y="72" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">USB / BLE / TCP</text>
-
-  <!-- RNode -->
-  <rect x="220" y="40" width="130" height="80" rx="10" stroke="#00D4AA" stroke-width="2" fill="rgba(0,212,170,0.10)"/>
-  <text x="285" y="68" text-anchor="middle" fill="#00D4AA" font-family="JetBrains Mono" font-size="13" font-weight="600">RNode</text>
-  <text x="285" y="86" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">LoRa radio interface</text>
-  <text x="285" y="104" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">Custom MAC layer</text>
-
-  <!-- Radio waves -->
-  <path d="M360 70 Q380 60 380 80 Q380 100 360 90" stroke="#F59E0B" stroke-width="1.5" fill="none" stroke-dasharray="4 2"/>
-  <path d="M380 65 Q405 50 405 80 Q405 110 380 95" stroke="#F59E0B" stroke-width="1" fill="none" stroke-dasharray="4 2" opacity="0.6"/>
-
-  <!-- Animated radio packet -->
-  <circle r="3" fill="#F59E0B" opacity="0.8">
-    <animate attributeName="cx" values="360;550" dur="2s" repeatCount="indefinite"/>
-    <animate attributeName="cy" values="80;80" dur="2s" repeatCount="indefinite"/>
-  </circle>
-
-  <!-- Remote RNode -->
-  <rect x="550" y="40" width="130" height="80" rx="10" stroke="#C084FC" stroke-width="1.5" fill="rgba(192,132,252,0.08)"/>
-  <text x="615" y="68" text-anchor="middle" fill="#C084FC" font-family="JetBrains Mono" font-size="13" font-weight="600">Remote</text>
-  <text x="615" y="86" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">Another RNode</text>
-  <text x="615" y="104" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">1–50+ km away</text>
-
-  <text x="450" y="55" text-anchor="middle" fill="#F59E0B" font-family="Outfit" font-size="10" font-style="italic">LoRa radio link</text>
-  <text x="350" y="155" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="11" font-style="italic">Encrypted packets travel over radio — no internet required</text>
-</svg>
-<figcaption>RNode provides a LoRa radio interface between Reticulum nodes</figcaption>
-</div>
-
 ## Key Properties
 
 | Property | Value |
@@ -58,7 +18,7 @@ An RNode connects to your computer (or runs standalone) and provides a radio int
 | **Encryption** | Handled by Reticulum (end-to-end) |
 | **Connection** | USB serial, Bluetooth LE, or WiFi TCP |
 | **Power** | Low — solar/battery capable |
-| **Cost** | ~$25–100 USD depending on board |
+| **Cost** | ~$25–100 USD depending on board (as of early 2025) |
 
 ## RNode vs LoRaWAN
 

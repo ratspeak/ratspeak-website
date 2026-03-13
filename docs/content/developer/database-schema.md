@@ -141,8 +141,8 @@ CREATE INDEX idx_messages_identity ON messages(identity_id);
 | `image_stored_name` | TEXT | Local stored image filename |
 | `reply_to_id` | TEXT | UUID of message being replied to |
 | `reply_to_preview` | TEXT | Preview text of original message |
-| `game_id` | TEXT | RLAP session UUID (if game message) |
-| `game_action` | TEXT | RLAP action type |
+| `game_id` | TEXT | LRGP session UUID (if game message) |
+| `game_action` | TEXT | LRGP action type |
 | `game_move_san` | TEXT | Human-readable move notation (if applicable) |
 
 ### messages_fts
@@ -266,7 +266,7 @@ CREATE INDEX idx_games_status ON games(status);
 
 ### app_sessions
 
-RLAP app session tracking (replaces games table for new sessions).
+LRGP game session tracking (replaces games table for new sessions).
 
 ```sql
 CREATE TABLE app_sessions (
@@ -292,7 +292,7 @@ CREATE INDEX idx_app_sessions_app ON app_sessions(app_id);
 
 ### app_actions
 
-RLAP action history for each session.
+LRGP action history for each session.
 
 ```sql
 CREATE TABLE app_actions (

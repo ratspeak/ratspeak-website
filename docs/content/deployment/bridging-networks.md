@@ -4,40 +4,7 @@ Connecting separate Reticulum networks together — linking a LoRa mesh to the i
 
 ## What Is Bridging?
 
-Bridging connects two or more separate network segments so that nodes on one segment can communicate with nodes on another. A bridge node has interfaces on both networks and forwards traffic between them.
-
-<div class="docs-diagram">
-<svg viewBox="0 0 700 180" xmlns="http://www.w3.org/2000/svg" fill="none">
-  <!-- Network A -->
-  <rect x="20" y="40" width="200" height="100" rx="12" stroke="#38BDF8" stroke-width="1.5" fill="rgba(56,189,248,0.05)"/>
-  <text x="120" y="65" text-anchor="middle" fill="#38BDF8" font-family="Outfit" font-size="12" font-weight="600">LoRa Mesh</text>
-  <circle cx="70" cy="105" r="12" stroke="#38BDF8" stroke-width="1" fill="rgba(56,189,248,0.08)"/>
-  <circle cx="120" cy="115" r="12" stroke="#38BDF8" stroke-width="1" fill="rgba(56,189,248,0.08)"/>
-  <circle cx="170" cy="100" r="12" stroke="#38BDF8" stroke-width="1" fill="rgba(56,189,248,0.08)"/>
-
-  <!-- Bridge node -->
-  <rect x="270" y="55" width="160" height="70" rx="10" stroke="#00D4AA" stroke-width="2" fill="rgba(0,212,170,0.10)"/>
-  <text x="350" y="80" text-anchor="middle" fill="#00D4AA" font-family="JetBrains Mono" font-size="12" font-weight="600">Bridge Node</text>
-  <text x="350" y="98" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">LoRa + TCP interfaces</text>
-  <text x="350" y="112" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">transport enabled</text>
-
-  <!-- Network B -->
-  <rect x="480" y="40" width="200" height="100" rx="12" stroke="#C084FC" stroke-width="1.5" fill="rgba(192,132,252,0.05)"/>
-  <text x="580" y="65" text-anchor="middle" fill="#C084FC" font-family="Outfit" font-size="12" font-weight="600">TCP Network</text>
-  <circle cx="530" cy="105" r="12" stroke="#C084FC" stroke-width="1" fill="rgba(192,132,252,0.08)"/>
-  <circle cx="580" cy="115" r="12" stroke="#C084FC" stroke-width="1" fill="rgba(192,132,252,0.08)"/>
-  <circle cx="630" cy="100" r="12" stroke="#C084FC" stroke-width="1" fill="rgba(192,132,252,0.08)"/>
-
-  <!-- Connections -->
-  <line x1="220" y1="90" x2="270" y2="90" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 2"/>
-  <line x1="430" y1="90" x2="480" y2="90" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 2"/>
-  <text x="245" y="82" text-anchor="middle" fill="#F59E0B" font-family="Outfit" font-size="8">LoRa</text>
-  <text x="455" y="82" text-anchor="middle" fill="#F59E0B" font-family="Outfit" font-size="8">TCP</text>
-
-  <text x="350" y="170" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="11" font-style="italic">Bridge node connects LoRa mesh to TCP network — traffic flows both ways</text>
-</svg>
-<figcaption>A bridge node with interfaces on two networks forwards traffic between them</figcaption>
-</div>
+Bridging connects two or more separate network segments so that nodes on one segment can communicate with nodes on another. A bridge node has interfaces on both networks and forwards traffic between them. For example, a node with both a LoRa radio and a TCP connection can relay packets from a local radio mesh to the wider internet-connected Reticulum network, and vice versa. The bridge must have `enable_transport = yes` to forward packets.
 
 ## Common Bridging Scenarios
 

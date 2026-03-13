@@ -33,11 +33,11 @@ Reticulum routing is based on **announce propagation** — there's no routing pr
 
 ### Step by Step
 
-1. **Node A announces** its destination on all interfaces
-2. **Transport Node T1** receives the announce, records "A is reachable through interface X with hop count 1"
-3. **T1 re-broadcasts** the announce (incrementing hop count to 2)
-4. **Transport Node T2** receives it, records "A is reachable through T1 with hop count 2"
-5. Continue until announce reaches all reachable transport nodes
+1. **Node A announces** its destination on all interfaces (hop count 0)
+2. **Transport Node T1** receives the announce, records "A is reachable through interface X"
+3. **T1 re-broadcasts** the announce with hop count incremented to 1
+4. **Transport Node T2** receives it, records "A is reachable through T1"
+5. **T2 re-broadcasts** with hop count incremented to 2, and so on until all reachable transport nodes are reached
 
 When **Node B** wants to send a packet to **Node A**:
 
@@ -45,81 +45,6 @@ When **Node B** wants to send a packet to **Node A**:
 2. If found: packet sent to the recorded next-hop neighbor
 3. Each transport node forwards toward A using its own path table
 4. If not found: B broadcasts a path request, or waits for A's next announce
-
-<div class="docs-diagram">
-<svg viewBox="0 0 700 180" xmlns="http://www.w3.org/2000/svg" fill="none">
-  <defs>
-    <marker id="arrowGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#00D4AA"/>
-    </marker>
-    <marker id="arrowOrange" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#F59E0B"/>
-    </marker>
-  </defs>
-
-  <!-- Node A -->
-  <rect x="20" y="40" width="100" height="44" rx="10" fill="rgba(56,189,248,0.10)" stroke="#38BDF8" stroke-width="2"/>
-  <text x="70" y="58" text-anchor="middle" font-family="Outfit" font-size="13" fill="#38BDF8">Node A</text>
-  <text x="70" y="73" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#7e8fa2">source</text>
-
-  <!-- Transport T1 -->
-  <rect x="200" y="40" width="120" height="44" rx="10" fill="rgba(245,158,11,0.10)" stroke="#F59E0B" stroke-width="2"/>
-  <text x="260" y="58" text-anchor="middle" font-family="Outfit" font-size="13" fill="#F59E0B">Transport T1</text>
-  <text x="260" y="73" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#7e8fa2">hop 1</text>
-
-  <!-- Transport T2 -->
-  <rect x="390" y="40" width="120" height="44" rx="10" fill="rgba(245,158,11,0.10)" stroke="#F59E0B" stroke-width="2"/>
-  <text x="450" y="58" text-anchor="middle" font-family="Outfit" font-size="13" fill="#F59E0B">Transport T2</text>
-  <text x="450" y="73" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#7e8fa2">hop 2</text>
-
-  <!-- Node B -->
-  <rect x="580" y="40" width="100" height="44" rx="10" fill="rgba(56,189,248,0.10)" stroke="#38BDF8" stroke-width="2"/>
-  <text x="630" y="58" text-anchor="middle" font-family="Outfit" font-size="13" fill="#38BDF8">Node B</text>
-  <text x="630" y="73" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#7e8fa2">destination</text>
-
-  <!-- Announce arrows (flowing right) -->
-  <line x1="120" y1="50" x2="195" y2="50" stroke="#00D4AA" stroke-width="1.5" stroke-dasharray="6 3" marker-end="url(#arrowGreen)">
-    <animate attributeName="stroke-dashoffset" from="18" to="0" dur="1.5s" repeatCount="indefinite"/>
-  </line>
-  <line x1="320" y1="50" x2="385" y2="50" stroke="#00D4AA" stroke-width="1.5" stroke-dasharray="6 3" marker-end="url(#arrowGreen)">
-    <animate attributeName="stroke-dashoffset" from="18" to="0" dur="1.5s" repeatCount="indefinite"/>
-  </line>
-  <line x1="510" y1="50" x2="575" y2="50" stroke="#00D4AA" stroke-width="1.5" stroke-dasharray="6 3" marker-end="url(#arrowGreen)">
-    <animate attributeName="stroke-dashoffset" from="18" to="0" dur="1.5s" repeatCount="indefinite"/>
-  </line>
-
-  <!-- Announce label -->
-  <text x="350" y="22" text-anchor="middle" font-family="Outfit" font-size="11" fill="#00D4AA">Announce propagation</text>
-  <line x1="200" y1="26" x2="500" y2="26" stroke="#00D4AA" stroke-width="0.5" stroke-dasharray="2 2"/>
-
-  <!-- Packet arrows (flowing left) -->
-  <line x1="575" y1="74" x2="515" y2="74" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="6 3" marker-end="url(#arrowOrange)">
-    <animate attributeName="stroke-dashoffset" from="0" to="18" dur="1.5s" repeatCount="indefinite"/>
-  </line>
-  <line x1="385" y1="74" x2="325" y2="74" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="6 3" marker-end="url(#arrowOrange)">
-    <animate attributeName="stroke-dashoffset" from="0" to="18" dur="1.5s" repeatCount="indefinite"/>
-  </line>
-  <line x1="195" y1="74" x2="125" y2="74" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="6 3" marker-end="url(#arrowOrange)">
-    <animate attributeName="stroke-dashoffset" from="0" to="18" dur="1.5s" repeatCount="indefinite"/>
-  </line>
-
-  <!-- Packet label -->
-  <text x="350" y="104" text-anchor="middle" font-family="Outfit" font-size="11" fill="#F59E0B">Packet delivery (reverse path)</text>
-  <line x1="200" y1="97" x2="500" y2="97" stroke="#F59E0B" stroke-width="0.5" stroke-dasharray="2 2"/>
-
-  <!-- Hop count labels -->
-  <text x="160" y="134" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#7e8fa2">hop 1</text>
-  <text x="350" y="134" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#7e8fa2">hop 2</text>
-  <text x="545" y="134" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#7e8fa2">hop 3</text>
-
-  <!-- Legend -->
-  <line x1="180" y1="160" x2="210" y2="160" stroke="#00D4AA" stroke-width="1.5" stroke-dasharray="6 3"/>
-  <text x="218" y="164" font-family="Outfit" font-size="10" fill="#7e8fa2">Announce (A → B)</text>
-  <line x1="370" y1="160" x2="400" y2="160" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="6 3"/>
-  <text x="408" y="164" font-family="Outfit" font-size="10" fill="#7e8fa2">Packet (B → A)</text>
-</svg>
-<figcaption>Routing step by step — announces flow outward, packets follow the reverse path</figcaption>
-</div>
 
 ### Path Table
 

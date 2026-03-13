@@ -12,37 +12,7 @@ A central transport node on a VPS (Virtual Private Server) that:
 - Stores messages for offline friends (propagation node)
 - Requires no special networking on the client side
 
-<div class="docs-diagram">
-<svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" fill="none">
-  <!-- VPS -->
-  <rect x="260" y="30" width="180" height="80" rx="10" stroke="#00D4AA" stroke-width="2" fill="rgba(0,212,170,0.10)"/>
-  <text x="350" y="58" text-anchor="middle" fill="#00D4AA" font-family="JetBrains Mono" font-size="13" font-weight="600">VPS Hub</text>
-  <text x="350" y="76" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">Transport + Propagation</text>
-  <text x="350" y="92" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">TCP Server :4242</text>
-
-  <!-- Friends -->
-  <rect x="20" y="150" width="100" height="50" rx="8" stroke="#38BDF8" stroke-width="1.5" fill="rgba(56,189,248,0.08)"/>
-  <text x="70" y="178" text-anchor="middle" fill="#38BDF8" font-family="Outfit" font-size="10">Alice</text>
-
-  <rect x="170" y="150" width="100" height="50" rx="8" stroke="#F59E0B" stroke-width="1.5" fill="rgba(245,158,11,0.08)"/>
-  <text x="220" y="178" text-anchor="middle" fill="#F59E0B" font-family="Outfit" font-size="10">Bob</text>
-
-  <rect x="430" y="150" width="100" height="50" rx="8" stroke="#C084FC" stroke-width="1.5" fill="rgba(192,132,252,0.08)"/>
-  <text x="480" y="178" text-anchor="middle" fill="#C084FC" font-family="Outfit" font-size="10">Charlie</text>
-
-  <rect x="580" y="150" width="100" height="50" rx="8" stroke="#FF6B6B" stroke-width="1.5" fill="rgba(255,107,107,0.08)"/>
-  <text x="630" y="178" text-anchor="middle" fill="#FF6B6B" font-family="Outfit" font-size="10">Dana</text>
-
-  <!-- Connections -->
-  <line x1="70" y1="150" x2="300" y2="110" stroke="#3a4759" stroke-width="1"/>
-  <line x1="220" y1="150" x2="330" y2="110" stroke="#3a4759" stroke-width="1"/>
-  <line x1="480" y1="150" x2="380" y2="110" stroke="#3a4759" stroke-width="1"/>
-  <line x1="630" y1="150" x2="400" y2="110" stroke="#3a4759" stroke-width="1"/>
-
-  <text x="350" y="210" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="11" font-style="italic">Everyone connects to the VPS — messages relay through it automatically</text>
-</svg>
-<figcaption>Star topology with a VPS hub — the simplest multi-user deployment</figcaption>
-</div>
+In a friend group network, one node acts as a central hub (typically on a home server or Raspberry Pi running 24/7), and all other nodes connect to it via TCP. The hub relays messages between members who aren't directly connected. This star topology is the simplest deployment — only the hub needs a stable IP address or dynamic DNS, and all traffic between friends is end-to-end encrypted regardless of the relay.
 
 ## Prerequisites
 

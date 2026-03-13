@@ -1,6 +1,6 @@
 # Installing Ratspeak (Rust)
 
-Get Ratspeak-rs running on your system. Faster, more secure, and the primary implementation going forward.
+Get ratspeak-rs running on your system. Faster startup, lower memory usage, and a single native binary.
 
 ## Prerequisites
 

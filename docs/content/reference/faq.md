@@ -108,7 +108,7 @@ Yes! Ratspeak uses standard LXMF for messaging. You can message anyone running a
 - **NomadNet** (terminal-based)
 - **Any LXMF client**
 
-Game moves (RLAP) will appear as human-readable text in non-Ratspeak clients.
+Game moves (LRGP) will appear as human-readable text in non-Ratspeak clients.
 
 ---
 
@@ -182,19 +182,19 @@ Both run custom firmware that connects to the Reticulum mesh via built-in LoRa r
 
 ---
 
-## Apps & RLAP
+## Games & LRGP
 
-### What is RLAP?
+### What is LRGP?
 
-RLAP (Reticulum LXMF App Protocol) embeds interactive app actions inside tiny LXMF messages. An action is about 60 bytes — well within a single LoRa packet. Sessions are asynchronous by design.
+LRGP (Lightweight Reticulum Gaming Protocol) embeds multiplayer game actions inside tiny LXMF messages. An action is about 60 bytes — well within a single LoRa packet. Sessions are asynchronous by design.
 
-### What apps are available?
+### What games are available?
 
-Tic-Tac-Toe is included as a proof-of-concept to validate the RLAP protocol. The architecture is extensible — new app types can be added as plugins.
+Tic-Tac-Toe is included as a proof-of-concept to validate the LRGP protocol. The architecture is extensible — new game types can be added as plugins.
 
-### Can non-Ratspeak clients participate in RLAP sessions?
+### Can non-Ratspeak clients participate in LRGP sessions?
 
-Not interactively. Sideband and other LXMF clients see human-readable fallback text like "[Ratspeak Tic-Tac-Toe] X plays center" but cannot interact with sessions. Full RLAP participation requires Ratspeak.
+Not interactively. Sideband and other LXMF clients see human-readable fallback text like "[LRGP TTT] X plays center" but cannot interact with sessions. Full LRGP participation requires Ratspeak.
 
 ---
 

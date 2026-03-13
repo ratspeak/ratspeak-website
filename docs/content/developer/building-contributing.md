@@ -9,7 +9,7 @@ Ratspeak has two main repositories:
 | Repository | Language | URL |
 |------------|----------|-----|
 | **ratspeak** | Python | github.com/ratspeak/ratspeak |
-| **RustRat** | Rust | github.com/ratspeak/rustrat |
+| **ratspeak-rs** | Rust | github.com/ratspeak/rustrat |
 
 Both share the same frontend code (HTML/CSS/JS) and database schema.
 
@@ -119,8 +119,8 @@ cargo build --no-default-features
 ### Run Tests
 
 ```bash
-# All tests (567 integration tests)
-cargo test
+# All tests (over 600 unit + integration tests)
+cargo test --workspace
 
 # Specific test suite
 cargo test -p raticulum-tests
@@ -134,7 +134,7 @@ cargo test -- --nocapture
 The documentation site (this site) is built separately:
 
 ```bash
-cd ratspeak-website-main
+cd ratspeak-website
 
 # Build docs content
 python3 build-docs.py
@@ -252,7 +252,7 @@ RUST_LOG=debug cargo test -- --nocapture
 | Add REST endpoint | `@app.route` in `app.py` | Handler in `routes.rs` |
 | Add Socket.IO event | `@socketio.on` in `app.py` | Handler in `socketio.rs` |
 | Add database table | Migration in `database.py` | Migration in `db.rs` |
-| Add RLAP app | Subclass `AppBase` in `rlap.apps` | Implement in `rlap` crate |
+| Add LRGP game | Subclass `GameBase` in `lrgp.games` | Implement in `lrgp` crate |
 | Add network interface | Not applicable (uses python-rns) | Implement in `rns-interface` |
 
 ## What's Next

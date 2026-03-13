@@ -15,44 +15,6 @@ I2P is valuable when:
 - **You need anonymity** — I2P hides your real IP from peers and network observers
 - **You're behind restrictive firewalls** — I2P can tunnel through many firewall configurations
 
-<div class="docs-diagram">
-<svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" fill="none">
-  <!-- Node A -->
-  <rect x="20" y="60" width="100" height="50" rx="8" stroke="#00D4AA" stroke-width="1.5" fill="rgba(0,212,170,0.08)"/>
-  <text x="70" y="82" text-anchor="middle" fill="#00D4AA" font-family="JetBrains Mono" font-size="11" font-weight="600">Node A</text>
-  <text x="70" y="98" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">IP hidden</text>
-
-  <!-- Arrow to I2P cloud -->
-  <line x1="120" y1="85" x2="190" y2="85" stroke="#C084FC" stroke-width="1.5"/>
-  <polygon points="190,81 198,85 190,89" fill="#C084FC"/>
-
-  <!-- I2P cloud -->
-  <rect x="200" y="40" width="300" height="90" rx="20" stroke="#C084FC" stroke-width="2" fill="rgba(192,132,252,0.06)"/>
-  <text x="350" y="68" text-anchor="middle" fill="#C084FC" font-family="JetBrains Mono" font-size="14" font-weight="600">I2P Network</text>
-  <text x="350" y="88" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="10">Encrypted multi-hop tunnels</text>
-  <text x="350" y="106" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">Neither side knows the other's IP</text>
-
-  <!-- Animated packet -->
-  <circle r="3" fill="#C084FC" opacity="0.8">
-    <animate attributeName="cx" values="130;500" dur="2.5s" repeatCount="indefinite"/>
-    <animate attributeName="cy" values="85;85" dur="2.5s" repeatCount="indefinite"/>
-  </circle>
-
-  <!-- Arrow to Node B -->
-  <line x1="500" y1="85" x2="570" y2="85" stroke="#C084FC" stroke-width="1.5"/>
-  <polygon points="570,81 578,85 570,89" fill="#C084FC"/>
-
-  <!-- Node B -->
-  <rect x="580" y="60" width="100" height="50" rx="8" stroke="#38BDF8" stroke-width="1.5" fill="rgba(56,189,248,0.08)"/>
-  <text x="630" y="82" text-anchor="middle" fill="#38BDF8" font-family="JetBrains Mono" font-size="11" font-weight="600">Node B</text>
-  <text x="630" y="98" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">IP hidden</text>
-
-  <!-- Caption -->
-  <text x="350" y="170" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="11" font-style="italic">I2P provides anonymous transport — Reticulum handles encryption and routing on top</text>
-</svg>
-<figcaption>Reticulum traffic routed through I2P's anonymous tunnel network</figcaption>
-</div>
-
 > **Note**: Reticulum already encrypts all traffic end-to-end. I2P adds an additional layer of **transport anonymity** — hiding *who* is communicating, not just *what* they're saying.
 
 ## Prerequisites

@@ -56,13 +56,13 @@ RNode firmware runs on 14+ boards across three microcontroller platforms. All ca
 ## Buying Recommendations
 
 ### Best for Beginners
-**LilyGO T-Beam Supreme** (~$35–50) — GPS, battery holder, SX1262, widely documented. Plug in a battery and antenna, flash with `rnodeconf`, and you're on the mesh.
+**LilyGO T-Beam Supreme** (~$35–50 as of early 2025) — GPS, battery holder, SX1262, widely documented. Plug in a battery and antenna, flash with `rnodeconf`, and you're on the mesh.
 
 ### Best Budget Option
-**Heltec LoRa32 v3.0** (~$18–25) — Compact, USB-C, OLED display, SX1262. Great value for fixed nodes.
+**Heltec LoRa32 v3.0** (~$18–25 as of early 2025) — Compact, USB-C, OLED display, SX1262. Great value for fixed nodes.
 
 ### Best for Portable Use
-**LilyGO T-Echo** (~$30–40) — nRF52 with e-ink display, extremely low power consumption. Ideal for battery-powered field use.
+**LilyGO T-Echo** (~$30–40 as of early 2025) — nRF52 with e-ink display, extremely low power consumption. Ideal for battery-powered field use.
 
 ### Best for Dual-Band
 **OpenCom XL** — nRF52 with both SX1262 (sub-GHz) and SX1280 (2.4 GHz) transceivers. Run two radio links simultaneously with `RNodeMultiInterface`.
@@ -81,7 +81,7 @@ RNode firmware runs on 14+ boards across three microcontroller platforms. All ca
 | **Amazon** | amazon.com | Higher prices, faster shipping |
 | **unsigned.io** | unsigned.io | Original RNode hardware, pre-flashed |
 
-> **Note**: A complete RNode setup (board + antenna + USB cable) typically costs **$25–100 USD**.
+> **Note**: A complete RNode setup (board + antenna + USB cable) typically costs **$25–100 USD** (as of early 2025).
 
 ## What You Need
 

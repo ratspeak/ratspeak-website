@@ -2,11 +2,6 @@
 
 Key terms used throughout the Ratspeak and Reticulum documentation.
 
-<div class="glossary-search">
-<svg class="glossary-search__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-<input id="glossarySearchInput" type="text" placeholder="Filter terms..." />
-</div>
-
 ---
 
 ## A
@@ -49,6 +44,9 @@ Controls how an interface participates in the network: **full** (default, bidire
 ### Link
 An encrypted bidirectional channel between two destinations, established via a 3-packet handshake (297 bytes total). Provides forward secrecy through ephemeral key exchange. Used for larger data transfers and interactive communication. See [Links & Communication](../understanding/links-and-communication).
 
+### LRGP
+Lightweight Reticulum Gaming Protocol. A protocol for multiplayer games (like Tic-Tac-Toe) over LXMF messaging. Encodes game actions in LXMF custom fields using single-character keys and MessagePack serialization, designed to fit within LoRa's tight bandwidth constraints. See [LRGP Protocol](../developer/lrgp-protocol).
+
 ### LXMF
 Lightweight Extensible Message Format. The messaging protocol built on top of Reticulum. Handles message encryption, delivery tracking, store-and-forward via propagation nodes, and file attachments. Ratspeak, Sideband, and NomadNet all use LXMF. See [LXMF Protocol](../understanding/lxmf-protocol).
 
@@ -77,9 +75,6 @@ An LXMF node that stores messages for offline recipients and delivers them when 
 
 ### Ratchet
 A key rotation mechanism providing forward secrecy for Single destinations. Keys rotate periodically (default every 30 minutes) with a 512-key retention window, ensuring old messages remain decryptable while future keys stay protected. See [Security Model](../understanding/security-model).
-
-### RLAP
-Reticulum LXMF App Protocol. A lightweight protocol for interactive applications (like Tic-Tac-Toe) over LXMF messaging. Encodes app actions in LXMF custom fields using single-character keys and MessagePack serialization, designed to fit within LoRa's tight bandwidth constraints. See [RLAP Protocol](../developer/rlap-protocol).
 
 ### RNode
 An open-source LoRa radio interface for Reticulum. Runs on ESP32 and nRF52 boards, connecting via USB, BLE, or TCP. Provides long-range off-grid communication (1-50+ km depending on conditions). See [RNode Overview](../hardware/rnode-overview).

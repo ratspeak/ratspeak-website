@@ -6,11 +6,6 @@ A standalone LoRa mesh communicator built on the LilyGo T-Deck Plus — encrypte
 
 RatDeck is a complete Reticulum mesh node that doesn't need a computer. It runs custom firmware on the LilyGo T-Deck Plus, providing encrypted LXMF messaging, contact management, node discovery, and configurable LoRa radio — all through a cyberpunk-themed touchscreen UI with a physical QWERTY keyboard.
 
-<div class="screenshot-placeholder" data-caption="RatDeck device showing the home screen with identity info, connection status, and online node count">
-    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#7e8fa2" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-    <div>RatDeck device — photo placeholder</div>
-</div>
-
 ## Hardware
 
 | Component | Specification |
@@ -100,7 +95,7 @@ Your desktop Ratspeak instance now has access to the LoRa mesh through the RatDe
 
 ## Getting a RatDeck
 
-1. **Buy a LilyGo T-Deck Plus** — available from LilyGo, AliExpress, or Amazon (~$50–70)
+1. **Buy a LilyGo T-Deck Plus** — available from LilyGo, AliExpress, or Amazon (~$50–70 as of early 2025)
 2. **Flash the firmware** — via [ratspeak.org/download](https://ratspeak.org/download) (web flasher) or PlatformIO
 3. **Attach an antenna** — 915 MHz SMA antenna (usually included with the T-Deck Plus)
 

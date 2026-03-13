@@ -14,7 +14,7 @@ The Python implementation of Ratspeak — built on Flask, Flask-SocketIO, and th
 | Serial ports | pyserial | >= 3.5 |
 | BLE scanning | bleak | Latest |
 | Cryptography | cryptography | >= 3.4.7 |
-| App protocol | rlap | Local package |
+| App protocol | lrgp | Local package |
 
 ## Module Map
 
@@ -23,7 +23,7 @@ dashboard/
 ├── app.py                  # Main entry — Flask routes, Socket.IO handlers
 ├── database.py             # SQLite schema, migrations, CRUD
 ├── lxmf_manager.py         # LXMF router, messaging, contacts
-├── app_router.py           # RLAP bridge (games/interactive apps)
+├── app_router.py           # LRGP bridge (multiplayer games)
 ├── rns_manager.py          # RNS init, announce handling, stats polling
 ├── node_manager.py         # Hub node config, process lifecycle
 ├── identity_manager.py     # Multi-identity create/import/export/switch
@@ -91,12 +91,12 @@ When switching identities, `init_lxmf_for_identity()` tears down the current LXM
 
 ### app_router.py (~350 lines)
 
-Bridges the RLAP library to Ratspeak's infrastructure (SQLite + Socket.IO + LXMF).
+Bridges the LRGP library to Ratspeak's infrastructure (SQLite + Socket.IO + LXMF).
 
 **Flow for outgoing game action:**
 1. Socket.IO handler calls `handle_outgoing_action()`
 2. Loads existing session from database into app memory
-3. RLAP library builds the envelope (msgpack-serialized)
+3. LRGP library builds the envelope (msgpack-serialized)
 4. Packs into LXMF custom fields (`0xFB` and `0xFD`)
 5. Sends via LXMF with appropriate delivery method
 6. Persists updated session and emits Socket.IO events

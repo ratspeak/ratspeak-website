@@ -161,11 +161,11 @@ Broadcast when contact list changes. Contains full contact array.
 
 ---
 
-## Games & Interactive Apps (RLAP)
+## Games (LRGP)
 
 ### send_game_action (client → server)
 
-Send a game/app action via RLAP protocol.
+Send a game action via LRGP protocol.
 
 **Payload:**
 ```json
@@ -213,7 +213,7 @@ Get session with full action history.
 
 ### get_available_games (client → server)
 
-List registered RLAP apps.
+List registered LRGP games.
 
 **Server emits:** `available_games` with app list.
 
@@ -378,5 +378,5 @@ Progress update for hub operations (adding/removing interfaces).
 ## What's Next
 
 - [REST API Reference](../developer/rest-api) — HTTP endpoint reference
-- [RLAP Protocol & Building Apps](../developer/rlap-protocol) — game/app protocol details
+- [LRGP Protocol & Building Games](../developer/lrgp-protocol) — game protocol details
 - [Architecture Overview](../developer/architecture-overview) — system design

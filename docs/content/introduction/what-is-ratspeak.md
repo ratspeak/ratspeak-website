@@ -4,12 +4,7 @@ Ratspeak is your window into encrypted mesh communication — send messages, man
 
 ## Overview
 
-<div class="screenshot-placeholder" data-caption="Ratspeak dashboard showing connections console with active network nodes, messaging sidebar, and network health indicators">
-    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#7e8fa2" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-    <div>Ratspeak dashboard — screenshot coming soon</div>
-</div>
-
-Ratspeak is a dashboard and desktop app for Reticulum mesh networks. It gives you a graphical interface for messaging, network visualization, identity management, connection monitoring, and interactive apps over RLAP.
+Ratspeak is a dashboard and desktop app for Reticulum mesh networks. It gives you a graphical interface for messaging, network visualization, identity management, connection monitoring, and multiplayer games over LRGP.
 
 No accounts to create on someone else's server. No data stored in someone else's cloud. Your identity is a cryptographic key that lives on your device.
 
@@ -22,8 +17,8 @@ Ratspeak is available two ways:
 
 Ratspeak exists in two implementations:
 
-- **Ratspeak-py** — the original Python implementation (Flask + Socket.IO backend). Mature, full-featured, and the easiest way to get started.
-- **Ratspeak-rs** — a Rust implementation with the same features. Built on an actor-based architecture for better performance and security. This is the primary focus going forward.
+- **Ratspeak-py** — the Python implementation (Flask + Socket.IO backend). Full-featured and the easiest way to get started.
+- **Ratspeak-rs** — the Rust implementation with the same features. Built on an actor-based architecture for better performance and security.
 
 Both use the same web frontend and are fully interoperable on the Reticulum network. Choose whichever suits your platform and preferences.
 
@@ -35,7 +30,7 @@ Both use the same web frontend and are fully interoperable on the Reticulum netw
 - **Monitor connections** — live table of every destination your node knows about, with reachability status, hop counts, and path ages.
 - **Connect radios and interfaces** — add LoRa radios, TCP links, WiFi discovery, and Bluetooth mesh through the UI.
 - **Run a propagation node** — store messages for offline contacts and deliver them when they reconnect.
-- **Play games over the mesh** — interactive apps like Tic-Tac-Toe via the RLAP protocol, with human-readable fallback for non-Ratspeak clients.
+- **Play games over the mesh** — multiplayer games like Tic-Tac-Toe via the LRGP protocol, with human-readable fallback for non-Ratspeak clients.
 
 ## Hardware Companions
 

@@ -8,7 +8,7 @@ Ratspeak has two independent backends that share the same frontend and database 
 
 | Component | Ratspeak-py | Ratspeak-rs |
 |-----------|-------------|-------------|
-| **Language** | Python 3.11+ | Rust (2021 edition) |
+| **Language** | Python 3.11+ | Rust (2024 edition) |
 | **Web framework** | Flask + Flask-SocketIO | Axum 0.8 + socketioxide |
 | **Async model** | Threading (thread pool) | Tokio (async/await) |
 | **Database** | SQLite 3 (direct) | SQLite via rusqlite + r2d2 pool |
@@ -21,66 +21,14 @@ Both implementations produce the same REST API, Socket.IO events, and database s
 
 ## System Architecture
 
-<div class="docs-diagram">
-<svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg" fill="none">
-  <!-- Browser -->
-  <rect x="220" y="10" width="260" height="60" rx="10" stroke="#38BDF8" stroke-width="1.5" fill="rgba(56,189,248,0.05)"/>
-  <text x="350" y="35" text-anchor="middle" fill="#38BDF8" font-family="Outfit" font-size="13" font-weight="600">Browser / Tauri Window</text>
-  <text x="350" y="52" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">HTML + Vanilla JS + Socket.IO + D3.js</text>
+Data flows through the system in layers:
 
-  <!-- REST + Socket.IO arrows -->
-  <line x1="310" y1="70" x2="310" y2="110" stroke="#F59E0B" stroke-width="1.5"/>
-  <text x="295" y="95" text-anchor="end" fill="#F59E0B" font-family="JetBrains Mono" font-size="8">REST</text>
-  <line x1="390" y1="70" x2="390" y2="110" stroke="#C084FC" stroke-width="1.5"/>
-  <text x="405" y="95" text-anchor="start" fill="#C084FC" font-family="JetBrains Mono" font-size="8">Socket.IO</text>
-
-  <!-- Web Server -->
-  <rect x="200" y="110" width="300" height="50" rx="10" stroke="#00D4AA" stroke-width="2" fill="rgba(0,212,170,0.08)"/>
-  <text x="350" y="135" text-anchor="middle" fill="#00D4AA" font-family="JetBrains Mono" font-size="12" font-weight="600">Web Server (Flask / Axum)</text>
-  <text x="350" y="150" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">Routes + Socket.IO handlers + Auth</text>
-
-  <!-- Three columns below -->
-  <!-- LXMF Manager -->
-  <rect x="30" y="200" width="180" height="70" rx="8" stroke="#C084FC" stroke-width="1.5" fill="rgba(192,132,252,0.05)"/>
-  <text x="120" y="225" text-anchor="middle" fill="#C084FC" font-family="JetBrains Mono" font-size="11" font-weight="600">LXMF Manager</text>
-  <text x="120" y="242" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">Messages, contacts,</text>
-  <text x="120" y="255" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">propagation, reactions</text>
-
-  <!-- App Router -->
-  <rect x="260" y="200" width="180" height="70" rx="8" stroke="#F59E0B" stroke-width="1.5" fill="rgba(245,158,11,0.05)"/>
-  <text x="350" y="225" text-anchor="middle" fill="#F59E0B" font-family="JetBrains Mono" font-size="11" font-weight="600">App Router (RLAP)</text>
-  <text x="350" y="242" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">Games, interactive apps,</text>
-  <text x="350" y="255" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">session management</text>
-
-  <!-- RNS Manager -->
-  <rect x="490" y="200" width="180" height="70" rx="8" stroke="#38BDF8" stroke-width="1.5" fill="rgba(56,189,248,0.05)"/>
-  <text x="580" y="225" text-anchor="middle" fill="#38BDF8" font-family="JetBrains Mono" font-size="11" font-weight="600">RNS Manager</text>
-  <text x="580" y="242" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">Interfaces, announces,</text>
-  <text x="580" y="255" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">topology, stats polling</text>
-
-  <!-- Connections from web server to managers -->
-  <line x1="280" y1="160" x2="120" y2="200" stroke="#7e8fa2" stroke-width="1" stroke-dasharray="4 2"/>
-  <line x1="350" y1="160" x2="350" y2="200" stroke="#7e8fa2" stroke-width="1" stroke-dasharray="4 2"/>
-  <line x1="420" y1="160" x2="580" y2="200" stroke="#7e8fa2" stroke-width="1" stroke-dasharray="4 2"/>
-
-  <!-- Database -->
-  <rect x="140" y="310" width="160" height="50" rx="8" stroke="#00D4AA" stroke-width="1.5" fill="rgba(0,212,170,0.05)"/>
-  <text x="220" y="335" text-anchor="middle" fill="#00D4AA" font-family="JetBrains Mono" font-size="11" font-weight="600">SQLite (WAL)</text>
-  <text x="220" y="350" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">Schema v12 + FTS5</text>
-
-  <!-- Reticulum -->
-  <rect x="400" y="310" width="200" height="50" rx="8" stroke="#FF6B6B" stroke-width="1.5" fill="rgba(255,107,107,0.05)"/>
-  <text x="500" y="335" text-anchor="middle" fill="#FF6B6B" font-family="JetBrains Mono" font-size="11" font-weight="600">Reticulum Network</text>
-  <text x="500" y="350" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">LoRa, TCP, UDP, BLE, Serial</text>
-
-  <!-- Connections to bottom layer -->
-  <line x1="120" y1="270" x2="200" y2="310" stroke="#7e8fa2" stroke-width="1" stroke-dasharray="4 2"/>
-  <line x1="350" y1="270" x2="240" y2="310" stroke="#7e8fa2" stroke-width="1" stroke-dasharray="4 2"/>
-  <line x1="580" y1="270" x2="500" y2="310" stroke="#7e8fa2" stroke-width="1" stroke-dasharray="4 2"/>
-  <line x1="120" y1="270" x2="450" y2="310" stroke="#7e8fa2" stroke-width="1" stroke-dasharray="4 2"/>
-</svg>
-<figcaption>Ratspeak architecture — browser connects via REST and Socket.IO to a web server backed by three core managers</figcaption>
-</div>
+1. **Network interfaces** (TCP, UDP, LoRa/RNode, Serial, BLE, I2P) receive raw packets from the wire
+2. **Transport layer** (rns-transport) routes packets based on destination hashes, maintaining path tables and announce history
+3. **Link layer** (rns-link) manages encrypted point-to-point channels with forward secrecy via X25519 key exchange
+4. **Protocol layer** (rns-protocol) provides reliable delivery, resource transfers, and channel management over Links
+5. **LXMF layer** (lxmf-core) adds message semantics, store-and-forward via Propagation Nodes, and delivery receipts
+6. **Application layer** (ratspeak-dashboard) serves the web UI via Axum + Socket.IO, backed by SQLite, with static assets embedded via rust-embed
 
 ## Core Components
 
@@ -105,9 +53,9 @@ The messaging engine. Responsibilities:
 - Background announce loop (every 120 seconds)
 - Message delivery timeout tracking (every 5 seconds)
 
-### App Router (RLAP)
+### Game Router (LRGP)
 
-Bridges the RLAP protocol to the dashboard. Handles:
+Bridges the LRGP protocol to the dashboard. Handles:
 
 - Game challenges, moves, resignations, draw offers
 - Session lifecycle (pending, active, completed, expired)
@@ -150,7 +98,7 @@ SQLite with WAL (Write-Ahead Logging) mode for concurrent access:
 
 1. LXMF router receives encrypted packet from RNS
 2. LXMF Manager decrypts and parses the message
-3. If RLAP envelope detected: App Router processes the game/app action
+3. If LRGP envelope detected: Game Router processes the game action
 4. Message saved to database with identity scoping
 5. Socket.IO broadcasts `new_message` to all connected browsers
 6. Unread count updated and emitted

@@ -6,11 +6,6 @@ A pocket-sized Reticulum mesh node built on the M5Stack Cardputer — encrypted 
 
 RatCom is a compact, standalone mesh communicator running on the M5Stack Cardputer. It provides the same core functionality as RatDeck — encrypted LXMF messaging, node discovery, and configurable LoRa radio — in a smaller form factor with a built-in keyboard.
 
-<div class="screenshot-placeholder" data-caption="RatCom device showing the home screen with identity info and network status">
-    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#7e8fa2" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-    <div>RatCom device — photo placeholder</div>
-</div>
-
 ## Hardware
 
 | Component | Specification |
@@ -30,7 +25,7 @@ RatCom is a compact, standalone mesh communicator running on the M5Stack Cardput
 |---------|----------------------|-------------------|
 | **Display** | 320x240 IPS | 240x135 TFT |
 | **Flash** | 16 MB (7.8 MB storage) | 8 MB (1.9 MB storage) |
-| **PSRAM** | 8 MB | Standard |
+| **PSRAM** | 8 MB | None |
 | **Input** | Keyboard + trackball | Keyboard only |
 | **Size** | Larger, more screen | Pocket-sized |
 | **Battery** | External (varies) | 1750 mAh built-in |
@@ -81,7 +76,7 @@ RatCom includes reliability features for field use:
 
 ## Getting a RatCom
 
-1. **Buy an M5Stack Cardputer** — available from M5Stack, AliExpress, or Amazon (~$30–40)
+1. **Buy an M5Stack Cardputer** — available from M5Stack, AliExpress, or Amazon (~$30–40 as of early 2025)
 2. **Buy a Cap LoRa-1262 module** — the LoRa radio add-on for the Cardputer
 3. **Flash the firmware** — via PlatformIO or esptool
 4. **Attach an antenna** — 915 MHz antenna for the LoRa module

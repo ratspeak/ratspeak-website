@@ -13,57 +13,12 @@ A multi-node mesh network covering a neighborhood or community:
 
 ## Network Architecture
 
-<div class="docs-diagram">
-<svg viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg" fill="none">
-  <!-- Backbone -->
-  <text x="350" y="24" text-anchor="middle" fill="#e2e8f0" font-family="Outfit" font-size="13" font-weight="600">Community Mesh — Backbone + Coverage</text>
+A community mesh uses multiple interconnected Transport Nodes to cover a geographic area. Each Transport Node relays traffic for the whole network. Typical node roles include:
 
-  <!-- Transport nodes -->
-  <rect x="60" y="60" width="120" height="55" rx="8" stroke="#C084FC" stroke-width="1.5" fill="rgba(192,132,252,0.08)"/>
-  <text x="120" y="82" text-anchor="middle" fill="#C084FC" font-family="JetBrains Mono" font-size="10" font-weight="600">North Tower</text>
-  <text x="120" y="100" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">LoRa + TCP transport</text>
-
-  <rect x="290" y="60" width="120" height="55" rx="8" stroke="#C084FC" stroke-width="1.5" fill="rgba(192,132,252,0.08)"/>
-  <text x="350" y="82" text-anchor="middle" fill="#C084FC" font-family="JetBrains Mono" font-size="10" font-weight="600">Central Hub</text>
-  <text x="350" y="100" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">Propagation + TCP</text>
-
-  <rect x="520" y="60" width="120" height="55" rx="8" stroke="#C084FC" stroke-width="1.5" fill="rgba(192,132,252,0.08)"/>
-  <text x="580" y="82" text-anchor="middle" fill="#C084FC" font-family="JetBrains Mono" font-size="10" font-weight="600">South Tower</text>
-  <text x="580" y="100" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">LoRa + TCP transport</text>
-
-  <!-- Backbone links -->
-  <line x1="180" y1="87" x2="290" y2="87" stroke="#C084FC" stroke-width="2"/>
-  <line x1="410" y1="87" x2="520" y2="87" stroke="#C084FC" stroke-width="2"/>
-  <text x="235" y="78" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="8">TCP</text>
-  <text x="465" y="78" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="8">TCP</text>
-
-  <!-- Client devices -->
-  <circle cx="80" cy="180" r="18" stroke="#38BDF8" stroke-width="1" fill="rgba(56,189,248,0.08)"/>
-  <text x="80" y="184" text-anchor="middle" fill="#38BDF8" font-family="Outfit" font-size="8">Laptop</text>
-
-  <circle cx="160" cy="200" r="18" stroke="#F59E0B" stroke-width="1" fill="rgba(245,158,11,0.08)"/>
-  <text x="160" y="204" text-anchor="middle" fill="#F59E0B" font-family="Outfit" font-size="8">RatDeck</text>
-
-  <circle cx="350" cy="190" r="18" stroke="#00D4AA" stroke-width="1" fill="rgba(0,212,170,0.08)"/>
-  <text x="350" y="194" text-anchor="middle" fill="#00D4AA" font-family="Outfit" font-size="8">Phone</text>
-
-  <circle cx="540" cy="200" r="18" stroke="#38BDF8" stroke-width="1" fill="rgba(56,189,248,0.08)"/>
-  <text x="540" y="204" text-anchor="middle" fill="#38BDF8" font-family="Outfit" font-size="8">RatCom</text>
-
-  <circle cx="620" cy="180" r="18" stroke="#F59E0B" stroke-width="1" fill="rgba(245,158,11,0.08)"/>
-  <text x="620" y="184" text-anchor="middle" fill="#F59E0B" font-family="Outfit" font-size="8">Pi Node</text>
-
-  <!-- LoRa coverage arcs -->
-  <path d="M120 115 Q120 150 80 165" stroke="#F59E0B" stroke-width="1" stroke-dasharray="3 2" fill="none"/>
-  <path d="M120 115 Q140 150 160 185" stroke="#F59E0B" stroke-width="1" stroke-dasharray="3 2" fill="none"/>
-  <path d="M580 115 Q560 150 540 185" stroke="#F59E0B" stroke-width="1" stroke-dasharray="3 2" fill="none"/>
-  <path d="M580 115 Q600 150 620 165" stroke="#F59E0B" stroke-width="1" stroke-dasharray="3 2" fill="none"/>
-  <path d="M350 115 Q350 150 350 175" stroke="#F59E0B" stroke-width="1" stroke-dasharray="3 2" fill="none"/>
-
-  <text x="350" y="245" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="10" font-style="italic">TCP backbone between towers, LoRa radio for local coverage</text>
-</svg>
-<figcaption>Community mesh: fixed transport nodes connected by TCP, LoRa radios providing coverage to client devices</figcaption>
-</div>
+- **Backbone nodes** — high-power LoRa stations on rooftops or towers, connected to each other via TCP or long-range radio links
+- **Gateway nodes** — bridge between LoRa radio and TCP/internet, allowing remote participants to join
+- **Edge nodes** — end-user devices (phones, laptops, RatDecks) that connect to the nearest backbone or gateway node
+- **Propagation nodes** — store and forward LXMF messages for offline users, ensuring delivery even when recipients are temporarily unreachable
 
 ## Planning Your Network
 

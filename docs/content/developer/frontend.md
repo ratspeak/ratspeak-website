@@ -1,6 +1,6 @@
 # Frontend Architecture
 
-Ratspeak's browser-side code — a vanilla JavaScript application using Socket.IO for real-time updates, D3.js for network visualization, and RLAP for interactive apps.
+Ratspeak's browser-side code — a vanilla JavaScript application using Socket.IO for real-time updates, D3.js for network visualization, and LRGP for multiplayer games.
 
 ## Technology Stack
 
@@ -8,7 +8,7 @@ Ratspeak's browser-side code — a vanilla JavaScript application using Socket.I
 |---------|---------|---------|
 | Socket.IO | 4.7.4 | Real-time WebSocket communication |
 | D3.js | 7 | Force-directed network graph |
-| — | — | Game logic handled by RLAP app engines |
+| — | — | Game logic handled by LRGP game engines |
 | jdenticon | 3.3.0 | Deterministic avatar generation from identity hashes |
 
 No framework (React, Vue, Angular). The frontend uses a **module pattern** with vanilla JavaScript and DOM manipulation.
@@ -16,32 +16,34 @@ No framework (React, Vue, Angular). The frontend uses a **module pattern** with 
 ## File Structure
 
 ```
-dashboard/static/js/
-├── state.js                # Global state, Socket.IO init, API auth
-├── socketio_handlers.js    # Real-time event handlers
-├── nav.js                  # View switching, navigation UI
-├── lxmf.js                 # Messaging UI, conversations, contacts
-├── identity.js             # Identity management, profile
-├── games.js                # Game modal, RLAP UI, challenges
-├── game_engines.js         # Game engine implementations
-├── games_tab.js            # Games tab view controller
-├── graph.js                # D3.js network graph (canvas)
-├── topology.js             # Topology display, node status
-├── health.js               # Health metrics, interface cards
-├── events.js               # Event log, filtering, timestamps
-├── settings.js             # Settings UI, interface management
-├── propagation.js          # Propagation node UI
-├── setup.js                # First-run setup flow
-├── modals.js               # Modal system, focus trapping
-├── dialogs.js              # Confirmation dialogs
-├── toasts.js               # Toast notifications
-├── emoji_picker.js         # Emoji picker with keyboard nav
-├── emoji_data.js           # Emoji dataset
-└── vendor/
-    ├── socket.io-4.7.4.min.js
-    ├── d3.v7.min.js
-    ├── jdenticon-3.3.0.min.js
-    └── (no game-specific vendor libs)
+dashboard/static/
+├── vendor/
+│   ├── socket.io-4.7.4.min.js
+│   ├── d3.v7.min.js
+│   └── jdenticon-3.3.0.min.js
+└── js/
+    ├── state.js                # Global state, Socket.IO init, API auth
+    ├── socketio_handlers.js    # Real-time event handlers
+    ├── nav.js                  # View switching, navigation UI
+    ├── lxmf.js                 # Messaging UI, conversations, contacts
+    ├── identity.js             # Identity management, profile
+    ├── games.js                # Game modal, LRGP UI, challenges
+    ├── game_engines.js         # Game engine implementations
+    ├── games_tab.js            # Games tab view controller
+    ├── graph.js                # D3.js network graph (canvas)
+    ├── topology.js             # Topology display, node status
+    ├── health.js               # Health metrics, interface cards
+    ├── events.js               # Event log, filtering, timestamps
+    ├── settings.js             # Settings UI, interface management
+    ├── propagation.js          # Propagation node UI
+    ├── setup.js                # First-run setup flow
+    ├── modals.js               # Modal system, focus trapping
+    ├── dialogs.js              # Confirmation dialogs
+    ├── toasts.js               # Toast notifications
+    ├── emoji_picker.js         # Emoji picker with keyboard nav
+    ├── emoji_data.js           # Emoji dataset
+    └── vendor/
+        └── chess.min.js
 ```
 
 ## Architecture Pattern
@@ -114,7 +116,7 @@ The messaging interface:
 - **Contact list** with trust levels and last-seen status
 - **Message deduplication** — Prevents duplicate display from multiple Socket.IO events
 
-### games.js — Apps & RLAP
+### games.js — Games & LRGP
 
 Interactive application UI:
 
@@ -197,4 +199,4 @@ The HTML template (`index.html`) is a single-page application shell. All views a
 
 - [REST API Reference](../developer/rest-api) — endpoints the frontend calls
 - [Socket.IO Events](../developer/socketio-events) — real-time events the frontend listens to
-- [RLAP Protocol & Building Apps](../developer/rlap-protocol) — game/app protocol
+- [LRGP Protocol & Building Games](../developer/lrgp-protocol) — game protocol

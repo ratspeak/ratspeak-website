@@ -26,49 +26,7 @@ Every link establishment generates fresh ephemeral X25519 keypairs on both sides
 
 For packets to Single destinations outside of Links, an optional ratchet system provides forward secrecy:
 
-<div class="docs-diagram">
-<svg viewBox="0 0 680 160" xmlns="http://www.w3.org/2000/svg" fill="none">
-  <!-- Timeline -->
-  <line x1="40" y1="80" x2="640" y2="80" stroke="#3a4759" stroke-width="1.5"/>
-
-  <!-- Ratchet keys -->
-  <rect x="60" y="55" width="60" height="50" rx="4" stroke="#C084FC" stroke-width="1" fill="rgba(192,132,252,0.08)"/>
-  <text x="90" y="76" text-anchor="middle" fill="#C084FC" font-family="JetBrains Mono" font-size="9" font-weight="600">Key 1</text>
-  <text x="90" y="92" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="8">t=0</text>
-
-  <rect x="160" y="55" width="60" height="50" rx="4" stroke="#C084FC" stroke-width="1" fill="rgba(192,132,252,0.08)"/>
-  <text x="190" y="76" text-anchor="middle" fill="#C084FC" font-family="JetBrains Mono" font-size="9" font-weight="600">Key 2</text>
-  <text x="190" y="92" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="8">t=30m</text>
-
-  <rect x="260" y="55" width="60" height="50" rx="4" stroke="#00D4AA" stroke-width="1.5" fill="rgba(0,212,170,0.12)"/>
-  <text x="290" y="76" text-anchor="middle" fill="#00D4AA" font-family="JetBrains Mono" font-size="9" font-weight="600">Key 3</text>
-  <text x="290" y="92" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="8">t=60m</text>
-  <text x="290" y="45" text-anchor="middle" fill="#00D4AA" font-family="Outfit" font-size="8">current</text>
-
-  <!-- Future keys (dimmed) -->
-  <rect x="360" y="55" width="60" height="50" rx="4" stroke="#3a4759" stroke-width="1" fill="rgba(45,55,72,0.2)" stroke-dasharray="3 2"/>
-  <text x="390" y="76" text-anchor="middle" fill="#7e8fa2" font-family="JetBrains Mono" font-size="9">Key 4</text>
-  <text x="390" y="92" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="8">t=90m</text>
-
-  <rect x="460" y="55" width="60" height="50" rx="4" stroke="#3a4759" stroke-width="1" fill="rgba(45,55,72,0.2)" stroke-dasharray="3 2"/>
-  <text x="490" y="76" text-anchor="middle" fill="#7e8fa2" font-family="JetBrains Mono" font-size="9">Key 5</text>
-
-  <!-- Dots -->
-  <text x="555" y="82" fill="#7e8fa2" font-family="Outfit" font-size="14">...</text>
-
-  <!-- Retention window bracket -->
-  <line x1="60" y1="120" x2="320" y2="120" stroke="#F59E0B" stroke-width="1"/>
-  <line x1="60" y1="115" x2="60" y2="125" stroke="#F59E0B" stroke-width="1"/>
-  <line x1="320" y1="115" x2="320" y2="125" stroke="#F59E0B" stroke-width="1"/>
-  <text x="190" y="140" text-anchor="middle" fill="#F59E0B" font-family="Outfit" font-size="10">Retention window (512 keys, 30-day expiry)</text>
-
-  <!-- Arrow for rotation -->
-  <text x="130" y="42" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">30-min rotation</text>
-  <line x1="120" y1="50" x2="160" y2="50" stroke="#7e8fa2" stroke-width="1"/>
-  <polygon points="158,47 164,50 158,53" fill="#7e8fa2"/>
-</svg>
-<figcaption>Ratchet timeline: keys rotate every 30 minutes with a 512-key retention window</figcaption>
-</div>
+Ratchet keys rotate at a configurable interval (default every 30 minutes). A window of previous keys is retained to allow decryption of recently-encrypted messages, after which forward secrecy is absolute.
 
 ### Ratchet Parameters
 

@@ -75,11 +75,11 @@ A node that stores messages for destinations that are currently offline. When th
 
 ## Advanced — Deeper Protocol Features
 
-### RLAP (Reticulum LXMF App Protocol)
+### LRGP (Lightweight Reticulum Gaming Protocol)
 
-A protocol for interactive applications over LXMF messages. RLAP encodes app sessions (like Tic-Tac-Toe games) as structured data inside LXMF custom fields. Designed to fit within the 295-byte limit of single-packet delivery.
+A protocol for multiplayer games over LXMF messages. LRGP encodes game sessions (like Tic-Tac-Toe) as structured data inside LXMF custom fields. Designed to fit within the 295-byte limit of single-packet delivery.
 
-Non-Ratspeak clients see human-readable fallback text for any RLAP message, maintaining ecosystem compatibility.
+Non-Ratspeak clients see human-readable fallback text for any LRGP message, maintaining ecosystem compatibility.
 
 ### Ratchet
 
@@ -93,81 +93,14 @@ A passphrase-based mechanism for creating private networks on shared mediums. Se
 
 A cryptographic key representing a community or infrastructure group rather than an individual. Used for interface discovery, whitelisting trusted infrastructure, and network privacy.
 
-<div class="docs-diagram">
-<svg viewBox="0 0 700 340" xmlns="http://www.w3.org/2000/svg" fill="none">
-  <!-- Title -->
-  <text x="350" y="24" text-anchor="middle" fill="#e2e8f0" font-family="Outfit" font-size="14" font-weight="600">How Concepts Relate</text>
+These concepts form a layered dependency chain:
 
-  <!-- Identity (center) -->
-  <rect x="280" y="60" width="140" height="50" rx="8" stroke="#C084FC" stroke-width="1.5" fill="rgba(192,132,252,0.08)"/>
-  <text x="350" y="82" text-anchor="middle" fill="#C084FC" font-family="JetBrains Mono" font-size="12" font-weight="600">Identity</text>
-  <text x="350" y="98" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="10">Ed25519 + X25519</text>
-
-  <!-- Destination (left) -->
-  <rect x="60" y="60" width="140" height="50" rx="8" stroke="#00D4AA" stroke-width="1.5" fill="rgba(0,212,170,0.08)"/>
-  <text x="130" y="82" text-anchor="middle" fill="#00D4AA" font-family="JetBrains Mono" font-size="12" font-weight="600">Destination</text>
-  <text x="130" y="98" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="10">16-byte hash</text>
-
-  <!-- Link to Identity->Destination -->
-  <line x1="280" y1="85" x2="200" y2="85" stroke="#3a4759" stroke-width="1"/>
-  <text x="240" y="78" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">derives</text>
-
-  <!-- Announce (right) -->
-  <rect x="500" y="60" width="140" height="50" rx="8" stroke="#F59E0B" stroke-width="1.5" fill="rgba(245,158,11,0.08)"/>
-  <text x="570" y="82" text-anchor="middle" fill="#F59E0B" font-family="JetBrains Mono" font-size="12" font-weight="600">Announce</text>
-  <text x="570" y="98" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="10">broadcast + signed</text>
-
-  <!-- Link Identity->Announce -->
-  <line x1="420" y1="85" x2="500" y2="85" stroke="#3a4759" stroke-width="1"/>
-  <text x="460" y="78" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">proves</text>
-
-  <!-- Link (below Identity) -->
-  <rect x="280" y="160" width="140" height="50" rx="8" stroke="#38BDF8" stroke-width="1.5" fill="rgba(56,189,248,0.08)"/>
-  <text x="350" y="182" text-anchor="middle" fill="#38BDF8" font-family="JetBrains Mono" font-size="12" font-weight="600">Link</text>
-  <text x="350" y="198" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="10">297-byte handshake</text>
-
-  <!-- Identity->Link -->
-  <line x1="350" y1="110" x2="350" y2="160" stroke="#3a4759" stroke-width="1"/>
-  <text x="370" y="138" fill="#7e8fa2" font-family="Outfit" font-size="9">establishes</text>
-
-  <!-- Interface (left below) -->
-  <rect x="60" y="160" width="140" height="50" rx="8" stroke="#F59E0B" stroke-width="1.5" fill="rgba(245,158,11,0.08)"/>
-  <text x="130" y="182" text-anchor="middle" fill="#F59E0B" font-family="JetBrains Mono" font-size="12" font-weight="600">Interface</text>
-  <text x="130" y="198" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="10">LoRa, TCP, WiFi...</text>
-
-  <!-- Transport (right below) -->
-  <rect x="500" y="160" width="140" height="50" rx="8" stroke="#00D4AA" stroke-width="1.5" fill="rgba(0,212,170,0.08)"/>
-  <text x="570" y="182" text-anchor="middle" fill="#00D4AA" font-family="JetBrains Mono" font-size="12" font-weight="600">Transport</text>
-  <text x="570" y="198" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="10">routing + paths</text>
-
-  <!-- Interface connects -->
-  <line x1="200" y1="185" x2="280" y2="185" stroke="#3a4759" stroke-width="1"/>
-  <text x="240" y="178" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">carries</text>
-
-  <!-- Transport connects -->
-  <line x1="420" y1="185" x2="500" y2="185" stroke="#3a4759" stroke-width="1"/>
-  <text x="460" y="178" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">routes via</text>
-
-  <!-- LXMF (bottom center) -->
-  <rect x="230" y="260" width="140" height="50" rx="8" stroke="#00D4AA" stroke-width="2" fill="rgba(0,212,170,0.10)"/>
-  <text x="300" y="282" text-anchor="middle" fill="#00D4AA" font-family="JetBrains Mono" font-size="12" font-weight="600">LXMF</text>
-  <text x="300" y="298" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="10">messaging protocol</text>
-
-  <!-- Propagation Node -->
-  <rect x="420" y="260" width="140" height="50" rx="8" stroke="#C084FC" stroke-width="1.5" fill="rgba(192,132,252,0.08)"/>
-  <text x="490" y="282" text-anchor="middle" fill="#C084FC" font-family="JetBrains Mono" font-size="12" font-weight="600">Prop Node</text>
-  <text x="490" y="298" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="10">store + forward</text>
-
-  <!-- Link->LXMF -->
-  <line x1="330" y1="210" x2="310" y2="260" stroke="#3a4759" stroke-width="1"/>
-  <text x="300" y="238" fill="#7e8fa2" font-family="Outfit" font-size="9">delivers via</text>
-
-  <!-- LXMF->Prop Node -->
-  <line x1="370" y1="285" x2="420" y2="285" stroke="#3a4759" stroke-width="1"/>
-  <text x="395" y="278" text-anchor="middle" fill="#7e8fa2" font-family="Outfit" font-size="9">stores</text>
-</svg>
-<figcaption>Conceptual relationships between core Reticulum and LXMF components</figcaption>
-</div>
+- An **Identity** is a cryptographic key pair (X25519 + Ed25519) that proves who you are on the network
+- Each Identity creates one or more **Destinations** — named endpoints that other nodes can address
+- Destinations define **Aspects** — dot-separated strings (like `app.service.function`) that describe their purpose
+- **Links** are encrypted point-to-point channels established between Destinations via a three-step handshake
+- **Transport** routes packets across multiple hops when source and destination are not directly reachable
+- **LXMF** provides reliable, store-and-forward messaging over Links — this is the layer Ratspeak uses for chat
 
 ## Ratspeak-Specific Concepts
 

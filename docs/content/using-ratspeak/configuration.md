@@ -92,7 +92,7 @@ Legacy section from the Electron desktop wrapper (Ratspeak now uses Tauri). Thes
 |------|----------|
 | `.ratspeak/` | Project data directory |
 | `.ratspeak/ratspeak.db` | SQLite database (WAL mode) |
-| `.ratspeak/.secret_key` | Flask session secret |
+| `.ratspeak/.secret_key` | Session secret key |
 | `.ratspeak/identities/<hash>/` | Per-identity RNS keys and LXMF storage |
 | `.ratspeak/files/` | Received file attachments |
 | `nodes/<node_name>/` | Per-node rnsd config and storage |
