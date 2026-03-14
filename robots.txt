@@ -2,5 +2,7 @@ User-agent: *
 Allow: /
 Disallow: /letter.html
 Disallow: /api/
+Disallow: /discord
+Disallow: /telegram
 
 Sitemap: https://ratspeak.org/sitemap.xml

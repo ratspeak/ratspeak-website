@@ -1,4 +1,8 @@
 {
+  "rewrites": [
+    { "source": "/discord", "destination": "/discord.html" },
+    { "source": "/telegram", "destination": "/telegram.html" }
+  ],
   "functions": {
     "api/firmware.js": {
       "maxDuration": 30
