@@ -911,48 +911,32 @@
             transition: opacity 0.4s, filter 0.4s;
         }
 
-        .footer-name {
-            font-family: var(--font-sans);
-            font-weight: 600;
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
         .footer-built {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--text-muted);
         }
-
         .footer-built a {
             color: var(--green);
             text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
         }
-
-        .footer-built a:hover {
-            text-decoration: underline;
-        }
-
+        .footer-built a:hover { border-bottom-color: var(--green); }
         .footer-links {
-            font-size: 12px;
-            color: var(--text-muted);
+            margin-top: 16px;
             display: flex;
-            gap: 8px;
             align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 13px;
         }
-
         .footer-links a {
-            color: var(--text-secondary);
+            color: var(--text-muted);
             text-decoration: none;
             transition: color 0.2s;
         }
-
-        .footer-links a:hover {
-            color: var(--green);
-        }
-
-        .footer-links .dot-sep {
-            color: var(--text-muted);
-            opacity: 0.5;
+        .footer-links a:hover { color: var(--text-primary); }
+        .dot-sep { color: var(--border);
         }
 
         .footer-license {

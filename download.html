@@ -378,7 +378,7 @@
         /* ── Device Selection View ─────────────────────── */
 
         .device-selection {
-            padding: 40px 0 80px;
+            padding: 40px 0 24px;
             transition: opacity 0.4s ease, transform 0.4s ease;
         }
 
@@ -593,6 +593,7 @@
         /* ── Download Section Headings ────────────────── */
 
         .download-section { margin-bottom: 48px; }
+        .download-section:last-of-type { margin-bottom: 0; }
 
         .download-section__label {
             font-family: var(--font-mono);
@@ -1281,31 +1282,12 @@
         /* ── Footer ────────────────────────────────────── */
 
         .footer {
-            padding: 56px 32px 48px;
-            border-top: 1px solid var(--border);
+            padding: 24px 32px 48px;
             text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 12px;
-        }
-
-        .footer-quote {
-            font-family: var(--font-sans);
-            font-size: clamp(18px, 2.5vw, 24px);
-            font-weight: 500;
-            letter-spacing: -0.3px;
-            color: var(--text-secondary);
-            text-align: center;
-            padding: 0;
-            margin: 0 0 20px;
-            max-width: 600px;
-            line-height: 1.4;
-        }
-
-        .footer-quote em {
-            font-style: normal;
-            color: var(--green);
         }
 
         .footer-divider {
@@ -1338,33 +1320,31 @@
         }
 
         .footer-built {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--text-muted);
         }
-
         .footer-built a {
             color: var(--green);
             text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
         }
-
-        .footer-built a:hover { text-decoration: underline; }
-
+        .footer-built a:hover { border-bottom-color: var(--green); }
         .footer-links {
-            font-size: 12px;
-            color: var(--text-muted);
+            margin-top: 16px;
             display: flex;
-            gap: 8px;
             align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 13px;
         }
-
         .footer-links a {
-            color: var(--text-secondary);
+            color: var(--text-muted);
             text-decoration: none;
             transition: color 0.2s;
         }
-
-        .footer-links a:hover { color: var(--green); }
-        .footer-links .dot-sep { color: var(--text-muted); opacity: 0.5; }
+        .footer-links a:hover { color: var(--text-primary); }
+        .dot-sep { color: var(--border); }
 
         /* ── Responsive ────────────────────────────────── */
 
@@ -1398,7 +1378,7 @@
 
             .flash-panel__header { flex-direction: column; align-items: flex-start; gap: 12px; }
 
-            .footer { padding: 48px 20px 36px; }
+            .footer { padding: 36px 20px 36px; }
         }
 
         @media (max-width: 480px) {
@@ -2047,7 +2027,6 @@
 
 <!-- ── Footer ──────────────────────────────────────────── -->
 <footer class="footer">
-    <p class="footer-quote">Privacy <em>shouldn&rsquo;t</em> be opt-in.</p>
     <div class="footer-divider"></div>
     <a href="letter.html" class="footer-logo-link" aria-label="A letter">
         <svg class="footer-logo" viewBox="243 243 282 282" fill="var(--text-muted)">
