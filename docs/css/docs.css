@@ -21,7 +21,7 @@
     --glass-border:  rgba(58, 71, 89, 0.55);
     --sidebar-width: 280px;
     --toc-width:     220px;
-    --navbar-height: 56px;
+    --navbar-height: 70px;
     --content-max:   780px;
 }
 
@@ -61,7 +61,7 @@ body::after {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 32px;
+    padding: 0 44px;
     height: var(--navbar-height);
     background: linear-gradient(180deg, rgba(28, 35, 51, 0.95) 0%, rgba(28, 35, 51, 0.9) 100%);
     backdrop-filter: blur(16px);
@@ -78,23 +78,25 @@ body::after {
 .navbar-left {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 14px;
 }
 
 .navbar-left a {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 14px;
     text-decoration: none;
 }
 
 .navbar-logo {
+    width: 28px;
+    height: 28px;
     flex-shrink: 0;
     filter: drop-shadow(0 0 6px rgba(0, 212, 170, 0.4));
 }
 
 .navbar-title {
-    font-size: 15px;
+    font-size: 21px;
     font-weight: 700;
     color: var(--text-primary);
     letter-spacing: 1px;
@@ -104,12 +106,17 @@ body::after {
 .navbar-right {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 17px;
+}
+
+.navbar-hamburger svg, .navbar-gh svg {
+    width: 28px;
+    height: 28px;
 }
 
 .navbar-sep {
     width: 1px;
-    height: 20px;
+    height: 26px;
     background: var(--border);
     opacity: 0.6;
 }
@@ -147,7 +154,7 @@ body::after {
 .navbar-menu {
     display: flex;
     position: fixed;
-    top: 56px;
+    top: 70px;
     right: 16px;
     min-width: 160px;
     background: linear-gradient(180deg, rgba(28, 35, 51, 0.98) 0%, rgba(36, 45, 63, 0.98) 100%);
@@ -1108,8 +1115,16 @@ body::after {
 
 @media (max-width: 768px) {
     .navbar {
-        padding: 0 16px;
+        padding: 0 20px;
+        --navbar-height: 64px;
     }
+    .navbar-left, .navbar-left a { gap: 13px; }
+    .navbar-logo { width: 25px; height: 25px; }
+    .navbar-title { font-size: 19px; }
+    .navbar-right { gap: 15px; }
+    .navbar-hamburger svg, .navbar-gh svg { width: 25px; height: 25px; }
+    .navbar-sep { height: 24px; }
+    .navbar-menu { top: 64px; }
 
     .sidebar-toggle {
         display: flex;
