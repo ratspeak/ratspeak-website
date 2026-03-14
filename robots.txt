@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /letter.html
+Disallow: /api/
+
+Sitemap: https://ratspeak.org/sitemap.xml
