@@ -1,7 +1,7 @@
 {
-  "rewrites": [
-    { "source": "/discord", "destination": "/discord.html" },
-    { "source": "/telegram", "destination": "/telegram.html" }
+  "redirects": [
+    { "source": "/discord", "destination": "https://discord.gg/mvS6adBEdW", "statusCode": 302 },
+    { "source": "/telegram", "destination": "https://t.me/ratspeak", "statusCode": 302 }
   ],
   "functions": {
     "api/firmware.js": {
