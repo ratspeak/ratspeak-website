@@ -57,11 +57,11 @@ This address stays the same whether you're on WiFi, LoRa, or a serial cable half
 
 ## Status
 
-Reticulum reached stable release (v1.0.0) in July 2025, exiting beta. The wire format and API are considered stable. The current version is 1.1.3 (January 2026).
+Reticulum reached stable release (v1.0.0) in July 2025, exiting beta. The wire format and API are considered stable. The current version is 1.1.4 (March 2026).
 
 The protocol specification is in the **public domain** — it belongs to humanity. The reference implementation is open source under the Reticulum License, which permits all use except systems designed to harm people.
 
-The reference implementation was created by Mark Qvist, who stepped back from active development in December 2025. The codebase is distributed across hundreds of thousands of devices.
+The reference implementation was created and is maintained by Mark Qvist, who is developing reticulum in his own private repo which is being mirrored to github. Commits can be submitted via email or LXMF. The codebase is distributed across hundreds of thousands of devices.
 
 > **Note**: Reticulum has not been externally security audited. While the cryptographic design follows best practices, use appropriate caution for high-stakes applications.
 
