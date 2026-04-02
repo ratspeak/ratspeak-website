@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#1c2333">
+    <meta name="theme-color" content="#EBEFEE">
     <title>Ratspeak — A New Network</title>
     <meta name="description" content="Communicate freely — no servers, no account, no sign-up.">
     <link rel="canonical" href="https://ratspeak.org/">
@@ -34,26 +34,52 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>!function(){var t=localStorage.getItem('ratspeak-theme');if(t)document.documentElement.setAttribute('data-theme',t);else if(window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.setAttribute('data-theme','dark')}()</script>
     <style>
         :root {
-            --bg-primary:    #1c2333;
-            --bg-secondary:  #242d3f;
-            --bg-tertiary:   #2d3748;
-            --border:        #3a4759;
-            --border-light:  #4a5a6e;
-            --text-primary:  #e2e8f0;
-            --text-secondary:#9eadbf;
-            --text-muted:    #7e8fa2;
-            --green:         #00D4AA;
-            --green-dim:     #00A080;
-            --red:           #FF6B6B;
-            --blue:          #38BDF8;
-            --purple:        #C084FC;
-            --orange:        #F59E0B;
+            --bg-primary:    #EBEFEE;
+            --bg-secondary:  #E3E5E3;
+            --bg-tertiary:   #DAD9D5;
+            --bg-dark:       #4A413C;
+            --bg-dark-alt:   #564C46;
+            --border:        #CCB499;
+            --border-subtle: #DACCBA;
+            --text-primary:  #4A413C;
+            --text-secondary:#6D6259;
+            --text-muted:    #8A7E74;
+            --accent:        #BB6C43;
+            --accent-light:  #F5EBE3;
+            --accent-dark:   #9A5432;
+            --blue:          #3A76F0;
+            --blue-light:    #ebf2fe;
+            --red:           #CF222E;
+            --orange:        #D4A72C;
+            --purple:        #8B5CF6;
+            --purple-light:  #f3effe;
             --font-mono:     'JetBrains Mono', 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
             --font-sans:     'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-            --glass-bg:      rgba(36, 45, 63, 0.75);
-            --glass-border:  rgba(58, 71, 89, 0.55);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary:    #1a1a1e;
+            --bg-secondary:  #222226;
+            --bg-tertiary:   #2a2a2e;
+            --bg-dark:       #e8e4e0;
+            --bg-dark-alt:   #d4cfc9;
+            --border:        #3d3832;
+            --border-subtle: #2e2a26;
+            --text-primary:  #e8e4e0;
+            --text-secondary:#a89f96;
+            --text-muted:    #7a7068;
+            --accent:        #d4884f;
+            --accent-light:  #2a2218;
+            --accent-dark:   #e8a06a;
+            --blue:          #5b93f5;
+            --blue-light:    #1a2236;
+            --red:           #e5534b;
+            --orange:        #e0b83e;
+            --purple:        #a78bfa;
+            --purple-light:  #1f1a2e;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -66,33 +92,12 @@
             background: var(--bg-primary);
             color: var(--text-primary);
             font-family: var(--font-sans);
-            font-size: 14px;
-            line-height: 1.5;
+            font-size: 16px;
+            line-height: 1.6;
             position: relative;
             overflow-x: hidden;
-        }
-
-        /* Noise texture overlay */
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 99999;
-            opacity: 0.015;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-            background-repeat: repeat;
-            background-size: 256px 256px;
-        }
-
-        /* ── Animations ───────────────────────────────── */
-
-        @keyframes glowPulse {
-            0%, 100% { box-shadow: 0 0 8px var(--green), 0 0 16px rgba(0, 212, 170, 0.2); }
-            50%      { box-shadow: 0 0 12px var(--green), 0 0 24px rgba(0, 212, 170, 0.35); }
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         /* ── Navbar ────────────────────────────────────── */
@@ -107,63 +112,94 @@
             align-items: center;
             justify-content: space-between;
             padding: 0 44px;
-            height: 70px;
-            background: linear-gradient(180deg, rgba(28, 35, 51, 0.95) 0%, rgba(28, 35, 51, 0.9) 100%);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border);
-            box-shadow: 0 1px 0 rgba(0, 212, 170, 0.05), 0 4px 24px rgba(0, 0, 0, 0.3);
+            height: 64px;
+            background: rgba(235, 239, 238, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid transparent;
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .navbar.scrolled {
-            border-bottom-color: var(--border-light);
-            box-shadow: 0 1px 0 rgba(0, 212, 170, 0.08), 0 8px 32px rgba(0, 0, 0, 0.5);
+            border-bottom-color: var(--border-subtle);
+            box-shadow: 0 1px 3px rgba(74, 65, 60, 0.04), 0 8px 24px rgba(74, 65, 60, 0.03);
         }
 
         .navbar-left {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
         }
 
         .navbar-left a {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
             text-decoration: none;
         }
 
         .navbar-logo {
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             flex-shrink: 0;
-            filter: drop-shadow(0 0 6px rgba(0, 212, 170, 0.4));
         }
 
         .navbar-title {
-            font-size: 21px;
+            font-size: 18px;
             font-weight: 700;
             color: var(--text-primary);
-            letter-spacing: 1px;
-            text-transform: uppercase;
+            letter-spacing: -0.01em;
+        }
+
+        .navbar-center {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .navbar-center a {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.15s ease;
+            position: relative;
+            padding: 4px 0;
+        }
+
+        .navbar-center a:hover {
+            color: var(--text-primary);
+        }
+
+        .navbar-center a::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent);
+            border-radius: 1px;
+            transform: scaleX(0);
+            transition: transform 0.2s ease;
+        }
+
+        .navbar-center a:hover::after {
+            transform: scaleX(1);
+        }
+
+        .navbar-center a.nav-active {
+            color: var(--text-primary);
+        }
+
+        .navbar-center a.nav-active::after {
+            transform: scaleX(1);
         }
 
         .navbar-right {
             display: flex;
             align-items: center;
-            gap: 17px;
-        }
-
-        .navbar-hamburger svg, .navbar-gh svg {
-            width: 28px;
-            height: 28px;
-        }
-
-        .navbar-sep {
-            width: 1px;
-            height: 26px;
-            background: var(--border);
-            opacity: 0.6;
+            gap: 16px;
         }
 
         .navbar-gh {
@@ -178,10 +214,86 @@
             color: var(--text-primary);
         }
 
-        /* ── Hamburger Menu ───────────────────────────────── */
+        .navbar-gh svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .navbar-theme {
+            display: flex;
+            align-items: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: color 0.2s;
+            padding: 4px;
+        }
+        .navbar-theme:hover { color: var(--text-primary); }
+        .navbar-theme svg { width: 20px; height: 20px; }
+        .theme-icon-sun { display: none; }
+        .theme-icon-moon { display: block; }
+        [data-theme="dark"] .theme-icon-sun { display: block; }
+        [data-theme="dark"] .theme-icon-moon { display: none; }
+
+        .nr-btn {
+            background: var(--accent);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--font-sans);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nr-btn:hover {
+            background: #9A5432;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(187, 108, 67, 0.25);
+        }
+
+        .nr-btn-lg {
+            padding: 14px 32px;
+            font-size: 16px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .nr-btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1.5px solid var(--border);
+            padding: 14px 28px;
+            font-size: 16px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .nr-btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent-dark);
+            background: var(--accent-light);
+            transform: translateY(-1px);
+        }
+
+        .nr-btn-sm {
+            padding: 6px 14px;
+            font-size: 13px;
+            border-radius: 6px;
+        }
+
+        /* ── Hamburger (mobile only) ─────────────────── */
 
         .navbar-hamburger {
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             background: none;
@@ -195,24 +307,28 @@
 
         .navbar-hamburger:hover {
             color: var(--text-primary);
-            background: rgba(255, 255, 255, 0.04);
+            background: var(--bg-secondary);
+        }
+
+        .navbar-hamburger svg {
+            width: 24px;
+            height: 24px;
         }
 
         .navbar-menu {
-            display: flex;
+            display: none;
             position: fixed;
-            top: 70px;
+            top: 64px;
             right: 16px;
-            min-width: 160px;
-            background: linear-gradient(180deg, rgba(28, 35, 51, 0.98) 0%, rgba(36, 45, 63, 0.98) 100%);
-            backdrop-filter: blur(20px);
+            min-width: 180px;
+            background: var(--bg-primary);
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 8px;
             flex-direction: column;
             gap: 2px;
             z-index: 99;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 8px 32px rgba(74, 65, 60, 0.12);
             opacity: 0;
             transform: translateY(-8px);
             transition: opacity 0.2s ease, transform 0.2s ease;
@@ -232,167 +348,42 @@
             padding: 10px 14px;
             color: var(--text-secondary);
             text-decoration: none;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 500;
             border-radius: 8px;
             transition: background 0.15s, color 0.15s;
         }
 
         .navbar-menu a:hover {
-            background: rgba(255, 255, 255, 0.06);
+            background: var(--bg-secondary);
             color: var(--text-primary);
         }
 
-        .nr-btn {
-            background: rgba(0, 160, 128, 0.1);
-            color: var(--green);
-            border: 1px solid rgba(0, 212, 170, 0.3);
-            border-radius: 8px;
-            padding: 8px 18px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: var(--font-sans);
-            transition: all 0.25s ease;
-            white-space: nowrap;
-            letter-spacing: 0.3px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .nr-btn:hover {
-            background: rgba(0, 160, 128, 0.2);
-            border-color: rgba(0, 212, 170, 0.5);
-            color: var(--green);
-            box-shadow: 0 0 20px rgba(0, 212, 170, 0.15);
-        }
-
-        .nr-btn-lg {
-            padding: 14px 36px;
-            font-size: 15px;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #00D4AA 0%, #00B894 50%, #00A87E 100%);
-            color: var(--bg-primary);
-            border: 1px solid rgba(0, 232, 186, 0.4);
-            font-weight: 700;
-            letter-spacing: 0.4px;
-            box-shadow:
-                0 0 20px rgba(0, 212, 170, 0.2),
-                0 2px 8px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
-            position: relative;
-        }
-
-        .nr-btn-lg:hover {
-            background: linear-gradient(135deg, #00e8ba 0%, #00D4AA 50%, #00B894 100%);
-            border-color: rgba(0, 232, 186, 0.6);
-            color: var(--bg-primary);
-            box-shadow:
-                0 0 32px rgba(0, 212, 170, 0.35),
-                0 4px 16px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-        }
-
-        .nr-btn-secondary {
-            padding: 14px 28px;
-            font-size: 15px;
-            border-radius: 10px;
-            font-weight: 600;
-        }
-
-        .nr-btn-secondary:hover {
-            background: rgba(0, 160, 128, 0.15);
-        }
-
-        .hero-buttons {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-top: 28px;
-        }
-
-        /* ── Coming Soon Toast ─────────────────────────── */
-
-        .coming-soon-toast {
-            position: fixed;
-            bottom: 32px;
-            left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-left: 3px solid var(--green);
-            border-radius: 10px;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-primary);
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
-            z-index: 10000;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            pointer-events: none;
-        }
-
-        .coming-soon-toast.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(-50%) translateY(0);
+        .navbar-menu a.menu-active {
+            color: var(--accent);
         }
 
         /* ── Hero ──────────────────────────────────────── */
 
+        .hero-fold {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
         .hero {
-            min-height: calc(100vh - 80px);
-            padding: 140px 32px 80px;
-            max-width: 1000px;
+            padding: 80px 32px 32px;
+            max-width: 1200px;
             margin: 0 auto;
             display: flex;
             align-items: center;
-            gap: 48px;
+            gap: 64px;
             position: relative;
-        }
-
-        .scroll-hint {
-            position: absolute;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            color: var(--text-muted);
-            opacity: 0.6;
-            animation: scrollBounce 2s ease-in-out infinite;
-            transition: opacity 0.4s;
-            z-index: 5;
-        }
-
-        .scroll-hint svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        .scroll-hint.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        @keyframes scrollBounce {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(6px); }
+            flex: 1;
         }
 
         .hero-text {
-            flex: 0 0 45%;
+            flex: 0 0 50%;
             position: relative;
             z-index: 2;
         }
@@ -400,18 +391,20 @@
         .hero h1 {
             font-family: var(--font-sans);
             font-weight: 700;
-            font-size: 48px;
-            line-height: 1.15;
+            font-size: clamp(40px, 5vw, 56px);
+            line-height: 1.1;
             color: var(--text-primary);
-            margin-bottom: 28px;
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
         }
 
         .hero h1 .accent {
-            color: var(--green);
+            color: var(--accent);
             display: inline-block;
             min-width: 180px;
             transition: opacity 0.4s ease;
         }
+
         .hero h1 .accent.fade-out {
             opacity: 0;
         }
@@ -419,24 +412,32 @@
         .hero-sub {
             font-size: 18px;
             color: var(--text-secondary);
-            max-width: 520px;
-            line-height: 1.6;
-            margin-bottom: 20px;
+            max-width: 500px;
+            line-height: 1.7;
+            margin-bottom: 12px;
         }
 
         .hero-built-on {
             font-size: 14px;
             color: var(--text-muted);
-            margin-bottom: 40px;
+            margin-bottom: 32px;
         }
+
         .hero-built-on a {
-            color: var(--green);
+            color: var(--accent-dark);
             text-decoration: none;
             border-bottom: 1px solid transparent;
             transition: border-color 0.2s;
         }
+
         .hero-built-on a:hover {
-            border-bottom-color: var(--green);
+            border-bottom-color: var(--accent-dark);
+        }
+
+        .hero-buttons {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .hero-visual {
@@ -454,48 +455,87 @@
             display: block;
         }
 
-        /* ── Section Shared ────────────────────────────── */
+        /* ── Trust Strip ──────────────────────────────── */
+
+        .trust-strip {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 48px 32px;
+        }
+
+        .trust-strip-inner {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+            text-align: center;
+        }
+
+        .trust-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .trust-item svg {
+            width: 24px;
+            height: 24px;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .trust-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .trust-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* ── Section Shared ──────────────────────────── */
+
+        .section-label {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent);
+            letter-spacing: 0.05em;
+            text-align: center;
+            display: block;
+            margin-bottom: 12px;
+        }
 
         .section-heading {
             font-family: var(--font-sans);
             font-weight: 700;
-            font-size: clamp(36px, 5vw, 56px);
-            line-height: 1;
-            letter-spacing: -1.5px;
+            font-size: clamp(32px, 4vw, 44px);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
             text-align: center;
-            margin-bottom: 64px;
-            background: linear-gradient(180deg, var(--text-primary) 40%, var(--text-muted) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            margin-bottom: 16px;
+            color: var(--text-primary);
         }
 
-        .section-divider {
-            position: relative;
-            height: 1px;
-            background: linear-gradient(90deg, transparent 0%, var(--border) 50%, transparent 100%);
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        .section-divider::after {
-            content: '';
-            position: absolute;
-            top: -4px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 9px;
-            height: 9px;
-            border-radius: 50%;
-            background: var(--green);
-            animation: glowPulse 2.5s ease-in-out infinite;
+        .section-subheading {
+            font-size: 18px;
+            color: var(--text-secondary);
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 64px;
+            line-height: 1.6;
         }
 
         .fade-in {
             opacity: 0;
-            transform: translateY(24px);
-            transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-                        transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateY(16px);
+            transition: opacity 0.5s cubic-bezier(0.25, 0.1, 0.25, 1),
+                        transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
 
         .fade-in.visible {
@@ -503,167 +543,162 @@
             transform: translateY(0);
         }
 
-        /* ── WHY Section ───────────────────────────────── */
+        /* ── WHY Section ─────────────────────────────── */
 
         .why {
-            padding: 60px 32px 60px;
-            max-width: 1000px;
+            padding: 96px 32px;
+            max-width: 1200px;
             margin: 0 auto;
-            overflow: hidden;
         }
 
-        .why-feature {
+        .why-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .why-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 32px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .why-card:hover {
+            border-color: var(--border);
+            box-shadow: 0 4px 16px rgba(74, 65, 60, 0.06);
+        }
+
+        .why-card__icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        .why-card__icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .why-card__title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        .why-card__desc {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ── Features (Deep Dive) ────────────────────── */
+
+        .features {
+            padding: 96px 32px;
+            background: var(--bg-secondary);
+        }
+
+        .features-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .feature-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 48px;
+            gap: 64px;
             align-items: center;
-            padding: 56px 0;
-            border-bottom: 1px solid rgba(58, 71, 89, 0.35);
+            padding: 64px 0;
+            border-bottom: 1px solid var(--border-subtle);
         }
 
-        .why-feature:last-child {
+        .feature-row:last-child {
             border-bottom: none;
             padding-bottom: 0;
         }
 
-        .why-feature:first-of-type {
+        .feature-row:first-child {
             padding-top: 0;
         }
 
-        .why-feature--right .why-feature__visual {
-            order: 2;
+        .feature-row--reverse .feature-visual {
+            order: -1;
         }
 
-        .why-feature--left .why-feature__text {
-            order: 2;
-        }
-
-        .why-feature__number {
+        .feature-number {
             font-family: var(--font-mono);
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            letter-spacing: 2px;
+            letter-spacing: 0.05em;
+            color: var(--accent);
             display: block;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
-        [data-accent="green"] .why-feature__number  { color: var(--green); opacity: 0.75; }
-        [data-accent="blue"] .why-feature__number    { color: var(--blue); opacity: 0.75; }
-        [data-accent="orange"] .why-feature__number  { color: var(--orange); opacity: 0.75; }
-        [data-accent="purple"] .why-feature__number  { color: var(--purple); opacity: 0.75; }
-
-        .why-feature__title {
+        .feature-title {
             font-family: var(--font-sans);
             font-weight: 700;
-            font-size: clamp(28px, 4vw, 42px);
+            font-size: clamp(24px, 3vw, 32px);
             color: var(--text-primary);
-            line-height: 1.15;
-            margin-bottom: 16px;
-            letter-spacing: -0.5px;
+            line-height: 1.2;
+            margin-bottom: 12px;
+            letter-spacing: -0.01em;
         }
 
-        .why-feature__tagline {
+        .feature-desc {
             font-size: 16px;
             color: var(--text-secondary);
-            line-height: 1.6;
+            line-height: 1.7;
             max-width: 460px;
         }
 
-        .why-feature__accent-line {
-            width: 56px;
-            height: 3px;
-            margin-top: 24px;
-            border-radius: 2px;
-        }
-
-        [data-accent="green"] .why-feature__accent-line  { background: var(--green); box-shadow: 0 0 12px rgba(0, 212, 170, 0.5), 0 0 28px rgba(0, 212, 170, 0.2); }
-        [data-accent="blue"] .why-feature__accent-line    { background: var(--blue); box-shadow: 0 0 12px rgba(56, 189, 248, 0.5), 0 0 28px rgba(56, 189, 248, 0.2); }
-        [data-accent="orange"] .why-feature__accent-line  { background: var(--orange); box-shadow: 0 0 12px rgba(245, 158, 11, 0.5), 0 0 28px rgba(245, 158, 11, 0.2); }
-        [data-accent="purple"] .why-feature__accent-line  { background: var(--purple); box-shadow: 0 0 12px rgba(192, 132, 252, 0.5), 0 0 28px rgba(192, 132, 252, 0.2); }
-
-        .why-feature__visual {
+        .feature-visual {
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
         }
 
-        .why-feature__visual::before {
-            content: '';
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            filter: blur(60px);
-            opacity: 0.08;
-            z-index: 0;
-        }
-        [data-accent="green"] .why-feature__visual::before  { background: var(--green); }
-        [data-accent="blue"] .why-feature__visual::before    { background: var(--blue); }
-        [data-accent="orange"] .why-feature__visual::before  { background: var(--orange); }
-        [data-accent="purple"] .why-feature__visual::before  { background: var(--purple); }
-
-        .why-feature__svg {
+        .feature-visual svg {
             width: 100%;
-            max-width: 280px;
+            max-width: 320px;
             height: auto;
-            opacity: 1.0;
+            color: var(--accent);
         }
 
-        [data-accent="green"] .why-feature__svg  { color: var(--green); }
-        [data-accent="blue"] .why-feature__svg    { color: var(--blue); }
-        [data-accent="orange"] .why-feature__svg  { color: var(--orange); }
-        [data-accent="purple"] .why-feature__svg  { color: var(--purple); }
+        /* ── How It Works ────────────────────────────── */
 
-        /* WHY feature animation stagger */
-        .why-feature.visible .why-feature__text {
-            animation: whySlide 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
-        }
-        .why-feature.visible .why-feature__visual {
-            animation: whySlide 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+        .how {
+            padding: 96px 32px;
+            background: var(--bg-secondary);
         }
 
-        @keyframes whySlide {
-            from { opacity: 0; transform: translateY(20px); }
-            to   { opacity: 1; transform: translateY(0); }
+        .how-inner {
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
-        /* C02 peripheral fade — invisible until card enters viewport */
-        .c02-fade { opacity: 0; }
-        .why-feature.visible .c02-fade {
-            animation: c02Glow var(--glow-dur, 5s) ease-in-out var(--glow-delay, 0s) infinite both;
-        }
-        @keyframes c02Glow {
-            0%, 100% { opacity: 0.05; }
-            50% { opacity: var(--glow-peak, 0.3); }
-        }
-
-        /* ── GET STARTED Section ──────────────────────────── */
-
-        .gs {
-            padding: 100px 32px 80px;
-            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%);
-        }
-
-        .gs .section-heading {
-            max-width: 880px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .gs-timeline {
+        .how-timeline {
             position: relative;
             max-width: 760px;
             margin: 0 auto;
         }
 
-        /* Vertical connector line */
-        .gs-timeline::before {
+        .how-timeline::before {
             content: '';
             position: absolute;
             left: 35px;
-            top: 56px;
-            bottom: 56px;
+            top: 52px;
+            bottom: 52px;
             width: 2px;
             background: var(--border);
             border-radius: 1px;
@@ -671,302 +706,350 @@
             transition: opacity 1s ease 0.3s;
         }
 
-        .gs-timeline.revealed::before {
-            opacity: 0.35;
+        .how-timeline.revealed::before {
+            opacity: 0.5;
         }
 
-        .gs-step {
+        .how-step {
             display: grid;
             grid-template-columns: 72px 1fr;
             gap: 24px;
             padding-bottom: 12px;
         }
 
-        .gs-step:last-child { padding-bottom: 0; }
+        .how-step:last-child { padding-bottom: 0; }
 
-        /* ── Marker column ── */
-        .gs-step__marker {
+        .how-step__marker {
             display: flex;
             flex-direction: column;
             align-items: center;
             padding-top: 24px;
         }
 
-        .gs-step__icon {
-            width: 64px;
-            height: 64px;
-            border-radius: 18px;
+        .how-step__icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
             z-index: 1;
-            border: 1px solid;
+            background: var(--accent-light);
+            border: 1.5px solid rgba(187, 108, 67, 0.2);
+            color: var(--accent);
             transform: scale(0);
-            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--step-index, 0) * 0.15s + 0.1s),
-                        box-shadow 0.3s ease;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--step-index, 0) * 0.15s + 0.1s);
         }
 
-        .gs-step.visible .gs-step__icon { transform: scale(1); }
+        .how-step.visible .how-step__icon { transform: scale(1); }
 
-        .gs-step__icon svg {
-            width: 28px;
-            height: 28px;
+        .how-step__icon svg {
+            width: 24px;
+            height: 24px;
         }
 
-        .gs-step__number {
+        .how-step__num {
+            color: var(--accent);
             font-family: var(--font-mono);
-            font-size: 11px;
-            font-weight: 600;
-            margin-top: 8px;
-            letter-spacing: 1px;
-            opacity: 0.5;
-        }
-
-        /* ── Card column ── */
-        .gs-step__card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 14px;
-            padding: 24px 28px;
-            backdrop-filter: blur(8px);
-            transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .gs-step__card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 20px;
-            right: 20px;
-            height: 1px;
-            border-radius: 1px;
-        }
-
-        .gs-step__card:hover { transform: translateY(-2px); }
-
-        .gs-step__title {
-            font-family: var(--font-sans);
             font-weight: 700;
+        }
+
+        .how-step__card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 24px 28px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .how-step__card:hover {
+            border-color: var(--border);
+            box-shadow: 0 4px 16px rgba(74, 65, 60, 0.06);
+            transform: translateY(-2px);
+        }
+
+        .how-step__title {
+            font-family: var(--font-sans);
+            font-weight: 600;
             font-size: 20px;
             color: var(--text-primary);
-            line-height: 1.2;
-            margin-bottom: 8px;
-            letter-spacing: -0.3px;
+            line-height: 1.3;
+            margin-bottom: 6px;
+            letter-spacing: -0.01em;
         }
 
-        .gs-step__desc {
-            font-size: 15px;
+        .how-step__desc {
+            font-size: 16px;
             color: var(--text-secondary);
-            line-height: 1.65;
+            line-height: 1.6;
         }
-
-        /* ── Per-step accent theming ── */
-
-        [data-accent="green"] .gs-step__icon {
-            background: rgba(0, 212, 170, 0.06);
-            border-color: rgba(0, 212, 170, 0.25);
-            box-shadow: 0 0 20px rgba(0, 212, 170, 0.06);
-            color: var(--green);
-        }
-        [data-accent="green"] .gs-step__number { color: var(--green); }
-        [data-accent="green"] .gs-step__card::before { background: linear-gradient(90deg, transparent, rgba(0, 212, 170, 0.25), transparent); }
-        [data-accent="green"] .gs-step__card:hover { border-color: rgba(0, 212, 170, 0.2); box-shadow: 0 4px 24px rgba(0, 212, 170, 0.06); }
-        [data-accent="green"]:hover .gs-step__icon { box-shadow: 0 0 32px rgba(0, 212, 170, 0.2); }
-
-        [data-accent="purple"] .gs-step__icon {
-            background: rgba(192, 132, 252, 0.06);
-            border-color: rgba(192, 132, 252, 0.25);
-            box-shadow: 0 0 20px rgba(192, 132, 252, 0.06);
-            color: var(--purple);
-        }
-        [data-accent="purple"] .gs-step__number { color: var(--purple); }
-        [data-accent="purple"] .gs-step__card::before { background: linear-gradient(90deg, transparent, rgba(192, 132, 252, 0.25), transparent); }
-        [data-accent="purple"] .gs-step__card:hover { border-color: rgba(192, 132, 252, 0.2); box-shadow: 0 4px 24px rgba(192, 132, 252, 0.06); }
-        [data-accent="purple"]:hover .gs-step__icon { box-shadow: 0 0 32px rgba(192, 132, 252, 0.2); }
-
-        [data-accent="blue"] .gs-step__icon {
-            background: rgba(56, 189, 248, 0.06);
-            border-color: rgba(56, 189, 248, 0.25);
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.06);
-            color: var(--blue);
-        }
-        [data-accent="blue"] .gs-step__number { color: var(--blue); }
-        [data-accent="blue"] .gs-step__card::before { background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.25), transparent); }
-        [data-accent="blue"] .gs-step__card:hover { border-color: rgba(56, 189, 248, 0.2); box-shadow: 0 4px 24px rgba(56, 189, 248, 0.06); }
-        [data-accent="blue"]:hover .gs-step__icon { box-shadow: 0 0 32px rgba(56, 189, 248, 0.2); }
-
-        [data-accent="orange"] .gs-step__icon {
-            background: rgba(245, 158, 11, 0.06);
-            border-color: rgba(245, 158, 11, 0.25);
-            box-shadow: 0 0 20px rgba(245, 158, 11, 0.06);
-            color: var(--orange);
-        }
-        [data-accent="orange"] .gs-step__number { color: var(--orange); }
-        [data-accent="orange"] .gs-step__card::before { background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.25), transparent); }
-        [data-accent="orange"] .gs-step__card:hover { border-color: rgba(245, 158, 11, 0.2); box-shadow: 0 4px 24px rgba(245, 158, 11, 0.06); }
-        [data-accent="orange"]:hover .gs-step__icon { box-shadow: 0 0 32px rgba(245, 158, 11, 0.2); }
 
         /* Fade-in stagger */
-        .gs-step.fade-in {
-            transition-delay: calc(var(--step-index, 0) * 0.15s);
+        .how-step.fade-in {
+            transition-delay: calc(var(--step-index, 0) * 0.1s);
         }
 
-        /* ── DOWNLOAD Section ─────────────────────────────── */
+        /* ── Community CTA ───────────────────────────── */
 
-        .dl {
-            padding: 60px 32px 24px;
-        }
-
-        .dl-inner {
-            max-width: 480px;
-            margin: 0 auto;
+        .community {
+            background: var(--bg-primary);
+            padding: 96px 32px;
             text-align: center;
         }
 
-        .dl-title {
-            font-family: var(--font-sans);
-            font-weight: 700;
-            font-size: 28px;
-            color: var(--text-primary);
-            margin-bottom: 0;
-            letter-spacing: -0.5px;
+        .community .section-label {
+            color: var(--accent);
         }
 
-        .dl-buttons {
+        .community .section-heading {
+            color: var(--text-primary);
+        }
+
+        .community .section-subheading {
+            color: var(--text-secondary);
+            margin-bottom: 36px;
+        }
+
+        .community-cta {
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 12px;
-            margin-top: 20px;
+            flex-wrap: wrap;
         }
 
-        .dl-buttons .nr-btn-lg {
-            padding: 14px 28px;
-        }
-
-        .dl-buttons .nr-btn-secondary {
-            height: 49px;
-            width: 49px;
-            padding: 0;
+        .community-link {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
         }
 
-        .dl-sub {
+        .community-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .community-link--primary {
+            background: var(--accent);
+            color: #ffffff;
+        }
+
+        .community-link--primary:hover {
+            background: #9A5432;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(187, 108, 67, 0.25);
+        }
+
+        .community-link--icon {
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+            border: 1px solid var(--border-subtle);
+            padding: 14px;
+        }
+
+        .community-link--icon:hover {
+            border-color: var(--accent);
+            color: var(--accent-dark);
+            transform: translateY(-1px);
+        }
+
+        /* ── Download CTA (inside community) ──────────── */
+
+        .dl-cta-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .dl-cta-note {
             font-size: 14px;
             color: var(--text-muted);
-            line-height: 1.5;
-            margin-top: 16px;
-            margin-bottom: 0;
+            margin-top: 24px;
         }
 
-        .dl-sub .dl-soon {
+        .dl-cta-note span {
             display: block;
             margin-top: 2px;
             font-size: 13px;
-            opacity: 0.5;
+            opacity: 0.7;
         }
 
-        /* ── Footer ────────────────────────────────────── */
+        /* ── Footer ──────────────────────────────────── */
 
         .footer {
-            padding: 40px 32px 48px;
-            text-align: center;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-subtle);
+            padding: 48px 32px;
+        }
+
+        .footer-inner {
+            max-width: 1200px;
+            margin: 0 auto;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 12px;
+            justify-content: space-between;
         }
 
-        .footer-divider {
-            width: 40px;
-            height: 1px;
-            background: var(--border-light);
-            margin: 0 0 8px;
-            opacity: 0.5;
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
         }
 
-        .footer-logo {
-            display: block;
-            width: 28px;
-            height: 28px;
-            margin: 0 auto 8px;
-            opacity: 0.4;
-        }
-        .footer-logo-link {
-            display: block;
-            text-align: center;
-            padding: 12px;
-            margin: -12px auto;
-            -webkit-tap-highlight-color: transparent;
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             text-decoration: none;
         }
-        .footer-logo-link:hover .footer-logo {
+
+        .footer-brand svg {
+            width: 22px;
+            height: 22px;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+
+        .footer-brand:hover svg {
             opacity: 1;
-            filter: drop-shadow(0 0 6px rgba(0, 212, 170, 0.3));
-            transition: opacity 0.4s, filter 0.4s;
         }
 
         .footer-built {
             font-size: 13px;
             color: var(--text-muted);
         }
+
         .footer-built a {
-            color: var(--green);
+            color: var(--accent-dark);
             text-decoration: none;
-            border-bottom: 1px solid transparent;
-            transition: border-color 0.2s;
+            transition: color 0.2s;
         }
-        .footer-built a:hover { border-bottom-color: var(--green); }
+
+        .footer-built a:hover {
+            color: var(--accent);
+        }
+
         .footer-links {
-            margin-top: 16px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 12px;
-            font-size: 13px;
+            gap: 24px;
+            font-size: 14px;
         }
+
         .footer-links a {
             color: var(--text-muted);
             text-decoration: none;
             transition: color 0.2s;
         }
-        .footer-links a:hover { color: var(--text-primary); }
-        .dot-sep { color: var(--border);
+
+        .footer-links a:hover {
+            color: var(--text-primary);
         }
 
         .footer-license {
             font-family: var(--font-mono);
-            font-size: 10px;
+            font-size: 11px;
             color: var(--text-muted);
-            margin-top: 4px;
+            text-align: center;
+            margin-top: 32px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 32px;
+            opacity: 0.6;
         }
 
-        /* ── Responsive ────────────────────────────────── */
+        /* ── Coming Soon Toast ────────────────────────── */
+
+        .coming-soon-toast {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: 10px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+            z-index: 10000;
+            box-shadow: 0 8px 32px rgba(74, 65, 60, 0.12);
+            pointer-events: none;
+        }
+
+        .coming-soon-toast.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ── Dark Mode Overrides ─────────────────── */
+        [data-theme="dark"] .navbar {
+            background: rgba(26, 26, 30, 0.85);
+        }
+        [data-theme="dark"] .navbar.scrolled {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+        [data-theme="dark"] .navbar-menu {
+            background: var(--bg-primary);
+            border-color: var(--border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        [data-theme="dark"] .nr-btn:hover {
+            box-shadow: 0 4px 12px rgba(212, 136, 79, 0.3);
+        }
+
+        /* ── Responsive ──────────────────────────────── */
+
+        @media (max-width: 1024px) {
+            .why-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .feature-row {
+                gap: 40px;
+            }
+        }
 
         @media (max-width: 768px) {
             .navbar {
                 padding: 0 20px;
-                height: 64px;
             }
-            .navbar-left, .navbar-left a { gap: 13px; }
-            .navbar-logo { width: 25px; height: 25px; }
-            .navbar-title { font-size: 19px; }
-            .navbar-right { gap: 15px; }
-            .navbar-hamburger svg, .navbar-gh svg { width: 25px; height: 25px; }
-            .navbar-sep { height: 24px; }
-            .navbar-menu { top: 64px; }
+
+            .navbar-center { display: none; }
+            .navbar-gh { display: none; }
+
+            .navbar-hamburger { display: flex; }
+
+            .navbar-menu { display: flex; }
+
+            .hero-fold {
+                min-height: 100svh;
+            }
 
             .hero {
                 flex-direction: column;
-                padding: 120px 20px 60px;
+                justify-content: center;
+                padding: 80px 20px 24px;
                 gap: 32px;
                 text-align: center;
-                min-height: calc(100svh - 60px);
             }
 
             .hero-text {
@@ -975,7 +1058,7 @@
             }
 
             .hero h1 {
-                font-size: 32px;
+                font-size: 36px;
             }
 
             .hero h1 .accent {
@@ -986,6 +1069,10 @@
                 font-size: 16px;
                 margin-left: auto;
                 margin-right: auto;
+            }
+
+            .hero-built-on {
+                margin-bottom: 24px;
             }
 
             .hero-buttons {
@@ -999,7 +1086,7 @@
                 left: 0;
                 right: 0;
                 bottom: 0;
-                opacity: 0.15;
+                opacity: 0.08;
                 z-index: 0;
                 pointer-events: none;
             }
@@ -1008,62 +1095,82 @@
                 z-index: 2;
             }
 
-            /* Section shared */
-            .section-heading {
-                margin-bottom: 48px;
-                letter-spacing: -2px;
-            }
-
-            .section-divider {
-                max-width: 200px;
-            }
-
-            /* WHY */
-            .why {
-                padding: 60px 20px 40px;
-            }
-
-            .why-feature {
-                grid-template-columns: 1fr;
+            .trust-strip-inner {
+                grid-template-columns: repeat(2, 1fr);
                 gap: 24px;
+            }
+
+            .why {
+                padding: 64px 20px;
+            }
+
+            .why-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .features {
+                padding: 64px 20px;
+            }
+
+            .feature-row {
+                grid-template-columns: 1fr;
+                gap: 32px;
                 padding: 40px 0;
             }
 
-            .why-feature--right .why-feature__visual,
-            .why-feature--left .why-feature__text {
+            .feature-row--reverse .feature-visual {
                 order: 0;
             }
 
-            .why-feature__svg {
-                max-width: 160px;
+            .feature-visual svg {
+                max-width: 200px;
             }
 
-            .why-feature__title {
-                font-size: 24px;
+            .how {
+                padding: 64px 20px;
             }
 
-            .why-feature__tagline {
-                font-size: 14px;
+            .how-timeline::before { left: 27px; top: 44px; bottom: 44px; }
+
+            .how-step {
+                grid-template-columns: 56px 1fr;
+                gap: 16px;
+                padding-bottom: 8px;
             }
 
-            /* GET STARTED */
-            .gs { padding: 60px 20px 80px; }
-            .gs-timeline { max-width: 100%; }
-            .gs-timeline::before { left: 27px; top: 44px; bottom: 44px; }
-            .gs-step { grid-template-columns: 56px 1fr; gap: 16px; padding-bottom: 8px; }
-            .gs-step__marker { padding-top: 16px; }
-            .gs-step__icon { width: 48px; height: 48px; border-radius: 14px; }
-            .gs-step__icon svg { width: 22px; height: 22px; }
-            .gs-step__card { padding: 20px; }
-            .gs-step__title { font-size: 18px; }
-            .gs-step__desc { font-size: 14px; }
-            .dl { padding: 40px 20px 20px; }
-            .dl-title { font-size: 22px; }
-            .dl-sub { font-size: 13px; }
+            .how-step__marker { padding-top: 16px; }
+            .how-step__icon { width: 48px; height: 48px; border-radius: 12px; }
+            .how-step__icon svg { width: 20px; height: 20px; }
+            .how-step__card { padding: 20px; }
+            .how-step__title { font-size: 18px; }
+            .how-step__desc { font-size: 15px; }
 
-            /* Footer */
-            .footer {
-                padding: 36px 20px 36px;
+            .community { padding: 64px 20px; }
+            .community-dropdown__menu { min-width: 160px; }
+
+
+            .footer-inner {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .footer-left { flex-direction: column; gap: 12px; }
+        }
+
+        @media (max-width: 480px) {
+            .trust-strip-inner {
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+
+            .section-heading {
+                font-size: 28px;
+            }
+
+            .community-cta {
+                flex-direction: column;
+                align-items: stretch;
             }
         }
     </style>
@@ -1085,7 +1192,7 @@
 <nav class="navbar" id="navbar">
     <div class="navbar-left">
         <a href="index.html">
-            <svg class="navbar-logo" viewBox="243 243 282 282" fill="var(--green)" width="25" height="25">
+            <svg class="navbar-logo" viewBox="243 243 282 282" fill="var(--accent)" width="26" height="26">
                 <path d="M327.97,501.16C314.61,508.03 301.57,514.72 288.56,521.48C283.91,523.91 279.2,524.61 275.05,520.98C271.05,517.49 271.26,512.87 272.63,508.05C275.23,498.93 277.46,489.7 280.08,480.58C281.03,477.27 280.4,475.51 277.14,473.92C255.84,463.53 245.61,446.29 245.66,422.66C245.75,381.16 245.55,339.66 245.75,298.16C245.86,275.62 256.63,259.57 276.93,249.98C283.68,246.79 291.07,246.01 298.4,246C355.74,245.88 413.07,245.83 470.4,245.95C495.22,246.01 516.64,265.69 519.52,290.03C520.6,299.2 520.12,308.32 520.21,317.46C520.37,333.46 520.29,349.46 520.2,365.46C520.17,371.38 518.89,372.03 513.77,369.13C498.9,360.71 498.91,360.71 498.9,343.65C498.88,328.81 498.92,313.98 498.81,299.15C498.66,279.74 486.18,267.28 466.77,267.26C410.94,267.23 355.11,267.23 299.27,267.32C279.54,267.35 267.32,279.36 267.23,299.05C267.05,340.71 267.04,382.38 267.09,424.04C267.11,441.62 277.67,453.85 295.43,456.58C310.83,458.95 307.84,458.98 304.51,471.32C303.3,475.82 302.05,480.31 300.83,484.81C300.35,486.56 299.66,488.32 300.92,490.33C304.48,490.2 307.24,487.87 310.31,486.46C314.99,484.3 319.61,481.95 324.04,479.31C328.78,476.49 333.17,476.59 338.23,478.73C355.38,485.99 373.44,488.84 391.95,487.72C430.98,485.37 461.99,468.13 484.6,436.22C489.79,428.9 493.71,420.74 496.43,412.08C497.17,409.7 496.94,408 494.74,406.52C489.6,403.07 487.33,398.05 487.7,391.96C487.91,388.37 486.58,386.13 483.49,384.24C461.58,370.79 438.6,360.13 412.77,356.87C403.65,355.71 394.49,355.67 385.35,356.73C376.09,357.8 372.64,358.02 369.74,347.74C368.12,341.98 365.71,336.47 362.24,331.47C356.28,322.9 346.68,319.02 337.45,321.63C328.92,324.05 321.83,333.47 321.32,343.14C320.63,356 327.03,371.92 346.66,374.88C350.07,375.39 352.59,376.98 353.16,380.74C353.7,384.21 352.02,386.53 349.33,388.25C347.4,389.48 345.13,389.39 343,389.01C325.7,385.88 313.84,376.01 308.73,359.24C303.68,342.67 306.62,327.49 319.94,315.42C336.41,300.5 361.24,303.86 373.4,322.51C376.14,326.7 378.7,331.06 380.19,335.83C381.41,339.73 383.56,341.03 387.54,340.77C406.5,339.53 425.15,341.26 443.29,347.18C469.21,355.64 492.63,368.82 514.47,384.97C521.5,390.18 521.02,397.62 519.75,405.01C515.1,432.25 501.28,454.4 481.02,472.62C460.48,491.09 436.54,502.92 409.2,507.52C385.77,511.46 362.77,509.7 340.18,502.3C336.39,501.06 332.58,498.31 327.97,501.16z"/>
                 <path d="M414.19,335.38C405.75,335.93 397.65,334.86 389.54,335.84C387,336.15 385.78,334.06 384.8,332.07C380.73,323.83 376.21,315.95 368.77,310.17C366.48,308.38 367.23,307 369.43,305.62C379.53,299.3 389.62,299.22 399.19,306.49C408.52,313.58 414.08,323.09 414.19,335.38z"/>
                 <path d="M417.09,390.21C410.66,388.78 407.34,384.6 408.1,379.44C408.81,374.6 413.31,370.91 418.31,371.05C423.12,371.19 426.94,375.02 427.27,380C427.63,385.61 424.18,389.22 417.09,390.21z"/>
@@ -1095,485 +1202,277 @@
             <span class="navbar-title">Ratspeak</span>
         </a>
     </div>
+    <div class="navbar-center">
+        <a href="index.html" class="nav-active">Home</a>
+        <a href="about.html">About</a>
+        <a href="docs.html">Docs</a>
+        <a href="download.html">Download</a>
+    </div>
     <div class="navbar-right">
-        <button class="navbar-hamburger" id="navHamburger" aria-label="Menu">
-            <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+        <button class="navbar-theme" id="themeToggle" aria-label="Toggle theme">
+            <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
         </button>
-        <div class="navbar-sep"></div>
         <a href="https://github.com/ratspeak" class="navbar-gh" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-            <svg width="25" height="25" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
         </a>
+        <button class="navbar-hamburger" id="navHamburger" aria-label="Menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+        </button>
     </div>
 </nav>
 <div class="navbar-menu" id="navMobileMenu">
-    <a href="download.html">Download</a>
+    <a href="index.html" class="menu-active">Home</a>
     <a href="about.html">About</a>
     <a href="docs.html">Docs</a>
+    <a href="download.html">Download</a>
+    <a href="https://github.com/ratspeak" target="_blank" rel="noopener noreferrer">GitHub</a>
 </div>
+
+<!-- ── Hero + Trust Strip (fills viewport) ─────────────── -->
+<div class="hero-fold">
 
 <!-- ── Hero ────────────────────────────────────────────── -->
 <section class="hero">
     <div class="hero-text">
-        <h1>New Networks.<br>New <span class="accent" id="hero-cycle">Privacy.</span></h1>
-        <p class="hero-sub">No sign-up. No payment. No catch. An alternative way to communicate, resilient to chaos, where privacy is fundamental.</p>
-        <p class="hero-built-on">Built with <a href="https://github.com/markqvist/Reticulum" target="_blank" rel="noopener noreferrer">Reticulum</a></p>
+        <h1>New Network.<br>New <span class="accent" id="hero-cycle">Privacy.</span></h1>
+        <p class="hero-sub">No sign-up. No payment. No catch. Private by design. Resilient by default. A new way to communicate.</p>
+        <p class="hero-built-on">Built with <a href="https://reticulum.network" target="_blank" rel="noopener noreferrer">Reticulum</a></p>
         <div class="hero-buttons">
             <a href="download.html" class="nr-btn nr-btn-lg">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Download
             </a>
-            <a href="https://github.com/ratspeak" class="nr-btn nr-btn-secondary" target="_blank" rel="noopener noreferrer">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                GitHub
+            <a href="/discord" class="community-link community-link--icon" aria-label="Discord">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+            </a>
+            <a href="/telegram" class="community-link community-link--icon" aria-label="Telegram">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0a12 12 0 00-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
             </a>
         </div>
     </div>
     <div class="hero-visual">
         <canvas id="meshCanvas"></canvas>
     </div>
-    <div class="scroll-hint" id="scrollHint">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l5 5 5-5"/></svg>
+</section>
+
+<!-- ── Trust Strip ─────────────────────────────────────── -->
+<section class="trust-strip">
+    <div class="trust-strip-inner">
+        <div class="trust-item fade-in">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            <span class="trust-label">End-to-End Encrypted</span>
+            <span class="trust-desc">Every message, every packet</span>
+        </div>
+        <div class="trust-item fade-in">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5h-3a1.5 1.5 0 000 3h1a1.5 1.5 0 010 3h-3"/><path d="M12 6.5v1"/><path d="M12 16.5v1"/></svg>
+            <span class="trust-label">Zero Tokens</span>
+            <span class="trust-desc">Sorry, this isn't blockchain</span>
+        </div>
+        <div class="trust-item fade-in">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/></svg>
+            <span class="trust-label">No Account Required</span>
+            <span class="trust-desc">No email, no phone number</span>
+        </div>
+        <div class="trust-item fade-in">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span class="trust-label">Fully Open Source</span>
+            <span class="trust-desc">Don't trust, verify</span>
+        </div>
     </div>
 </section>
 
-<!-- ── Divider ─────────────────────────────────────────── -->
-<div class="section-divider"></div>
+</div><!-- .hero-fold -->
 
-<!-- ── WHY ─────────────────────────────────────────────── -->
+<!-- ── Why Ratspeak ───────────────────────────────────── -->
 <section class="why" id="why">
-    <!-- Feature 1: No Account -->
-    <div class="why-feature why-feature--left fade-in" data-accent="blue">
-        <div class="why-feature__text">
-            <span class="why-feature__number">01</span>
-            <h3 class="why-feature__title">No Account</h3>
-            <p class="why-feature__tagline">Say goodbye to e-mail or phone numbers. There's no registration. No database. Your identity is a public key that only you manage.</p>
-            <div class="why-feature__accent-line"></div>
-        </div>
-        <div class="why-feature__visual">
-            <svg class="why-feature__svg" viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <filter id="glow-blue" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation="4" result="blur"/>
-                        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-                    </filter>
-                </defs>
-                <!-- Ambient background -->
-                <circle cx="140" cy="100" r="85" fill="currentColor" opacity="0.04"/>
-                <!-- Key group with gentle rotation -->
-                <g>
-                    <animateTransform attributeName="transform" type="rotate" values="-2 140 100;2 140 100;-2 140 100" dur="6s" repeatCount="indefinite"/>
-                    <!-- Key bow (top ring) -->
-                    <circle cx="140" cy="55" r="22" stroke="currentColor" stroke-width="2" fill="none" opacity="0.6"/>
-                    <circle cx="140" cy="55" r="10" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.3" stroke-dasharray="4,3">
-                        <animateTransform attributeName="transform" type="rotate" values="0 140 55;-360 140 55" dur="12s" repeatCount="indefinite"/>
-                    </circle>
-                    <!-- Key core dot -->
-                    <circle cx="140" cy="55" r="4" fill="currentColor" opacity="0.8" filter="url(#glow-blue)">
-                        <animate attributeName="r" values="3.5;5;3.5" dur="2.5s" repeatCount="indefinite"/>
-                    </circle>
-                    <!-- Key shaft -->
-                    <line x1="140" y1="77" x2="140" y2="145" stroke="currentColor" stroke-width="2" opacity="0.5" stroke-linecap="round"/>
-                    <!-- Key teeth -->
-                    <line x1="140" y1="120" x2="155" y2="120" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                        <animate attributeName="opacity" values="0.35;0.65;0.35" dur="3s" repeatCount="indefinite"/>
-                    </line>
-                    <line x1="140" y1="132" x2="152" y2="132" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                        <animate attributeName="opacity" values="0.35;0.65;0.35" dur="3s" repeatCount="indefinite" begin="0.6s"/>
-                    </line>
-                    <line x1="140" y1="145" x2="158" y2="145" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                        <animate attributeName="opacity" values="0.35;0.65;0.35" dur="3s" repeatCount="indefinite" begin="1.2s"/>
-                    </line>
-                </g>
-                <!-- Hash identity fragments with scroll-triggered fade -->
-                <text class="c02-fade" style="--glow-dur:5.3s;--glow-delay:0.5s;--glow-peak:0.35" x="42" y="45" font-family="'JetBrains Mono', monospace" font-size="8" fill="currentColor" transform="rotate(-10, 42, 45)">a7f3::bd</text>
-                <text class="c02-fade" style="--glow-dur:7.1s;--glow-delay:1.8s;--glow-peak:0.30" x="192" y="50" font-family="'JetBrains Mono', monospace" font-size="8" fill="currentColor" transform="rotate(8, 192, 50)">e2d1::9b</text>
-                <text class="c02-fade" style="--glow-dur:4.7s;--glow-delay:3.2s;--glow-peak:0.35" x="185" y="155" font-family="'JetBrains Mono', monospace" font-size="8" fill="currentColor" transform="rotate(5, 185, 155)">4cf0::8a</text>
-                <text class="c02-fade" style="--glow-dur:6.2s;--glow-delay:0.9s;--glow-peak:0.30" x="32" y="150" font-family="'JetBrains Mono', monospace" font-size="8" fill="currentColor" transform="rotate(-6, 32, 150)">b7c3::e1</text>
-                <!-- Crossed-out database icon -->
-                <g class="c02-fade" style="--glow-dur:5.8s;--glow-delay:2.1s;--glow-peak:0.28">
-                    <animateTransform attributeName="transform" type="translate" values="0,0;0,2;0,0" dur="7s" repeatCount="indefinite"/>
-                    <ellipse cx="48" cy="85" rx="12" ry="5" stroke="currentColor" stroke-width="1" fill="none"/>
-                    <path d="M36,85 L36,100 C36,103 41,106 48,106 C55,106 60,103 60,100 L60,85" stroke="currentColor" stroke-width="1" fill="none"/>
-                    <line x1="36" y1="102" x2="60" y2="78" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                </g>
-                <!-- Crossed-out server icon -->
-                <g class="c02-fade" style="--glow-dur:6.5s;--glow-delay:4.0s;--glow-peak:0.28">
-                    <animateTransform attributeName="transform" type="translate" values="0,0;0,2;0,0" dur="7s" repeatCount="indefinite" begin="3.5s"/>
-                    <rect x="220" y="78" width="24" height="18" rx="2" stroke="currentColor" stroke-width="1" fill="none"/>
-                    <circle cx="226" cy="87" r="1.5" fill="currentColor"/>
-                    <line x1="218" y1="100" x2="246" y2="74" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                </g>
-                <!-- Pulsing identity ring -->
-                <circle cx="140" cy="55" r="32" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.15">
-                    <animate attributeName="r" values="30;36;30" dur="3s" repeatCount="indefinite"/>
-                    <animate attributeName="opacity" values="0.12;0.40;0.12" dur="3s" repeatCount="indefinite"/>
-                </circle>
-            </svg>
-        </div>
-    </div>
+    <span class="section-label fade-in">Why Ratspeak</span>
+    <h2 class="section-heading fade-in">Built without compromise.</h2>
+    <p class="section-subheading fade-in">Not just another encrypted messenger. An entirely different network, where privacy, identity, and self-sovereignty are built into the protocol itself.</p>
 
-    <!-- Feature 2: Privacy First -->
-    <div class="why-feature why-feature--right fade-in" data-accent="green">
-        <div class="why-feature__text">
-            <span class="why-feature__number">02</span>
-            <h3 class="why-feature__title">Privacy First</h3>
-            <p class="why-feature__tagline">End-to-end encrypted messaging, with an encrypted data-layer underneath. Privacy is a fundamental freedom and right.</p>
-            <div class="why-feature__accent-line"></div>
+    <div class="why-grid">
+        <div class="why-card fade-in">
+            <div class="why-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+            </div>
+            <h3 class="why-card__title">No Account</h3>
+            <p class="why-card__desc">Your identity is a cryptographic key — generated by you, owned by nobody else. No email, no phone number, no registration.</p>
         </div>
-        <div class="why-feature__visual">
-            <svg class="why-feature__svg" viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <filter id="glow-green" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation="4" result="blur"/>
-                        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-                    </filter>
-                </defs>
-                <!-- Ambient background -->
-                <circle cx="140" cy="118" r="80" fill="currentColor" opacity="0.04"/>
-                <!-- Scanning ring (slow rotation) -->
-                <circle cx="140" cy="118" r="70" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.2" stroke-dasharray="12,8">
-                    <animateTransform attributeName="transform" type="rotate" values="0 140 118;360 140 118" dur="20s" repeatCount="indefinite"/>
-                </circle>
-                <!-- Open padlock body -->
-                <rect x="105" y="100" width="70" height="55" rx="6" stroke="currentColor" stroke-width="2" fill="none">
-                    <animate attributeName="opacity" values="0.5;0.7;0.5" dur="5s" repeatCount="indefinite"/>
-                </rect>
-                <!-- Open shackle (breathing) -->
-                <path d="M122,100 L122,72 A18,18 0 0,1 158,72 L158,85" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.8">
-                    <animate attributeName="d"
-                        values="M122,100 L122,72 A18,18 0 0,1 158,72 L158,85;
-                                M122,100 L122,72 A18,18 0 0,1 158,72 L158,100;
-                                M122,100 L122,72 A18,18 0 0,1 158,72 L158,100;
-                                M122,100 L122,72 A18,18 0 0,1 158,72 L158,85"
-                        dur="8s" repeatCount="indefinite"/>
-                </path>
-                <!-- Keyhole (pulsing glow) -->
-                <circle cx="140" cy="123" r="5" fill="currentColor" filter="url(#glow-green)">
-                    <animate attributeName="r" values="4;7;4" dur="2.5s" repeatCount="indefinite"/>
-                    <animate attributeName="opacity" values="0.5;0.9;0.5" dur="2.5s" repeatCount="indefinite"/>
-                </circle>
-                <line x1="140" y1="128" x2="140" y2="140" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
-                <!-- Radiating lines (flowing dashes) -->
-                <line x1="85" y1="80" x2="60" y2="58" stroke="currentColor" stroke-width="1" opacity="0.3" stroke-linecap="round" stroke-dasharray="4,6">
-                    <animate attributeName="stroke-dashoffset" values="0;-20" dur="3s" repeatCount="indefinite"/>
-                </line>
-                <line x1="195" y1="80" x2="220" y2="58" stroke="currentColor" stroke-width="1" opacity="0.3" stroke-linecap="round" stroke-dasharray="4,6">
-                    <animate attributeName="stroke-dashoffset" values="0;-20" dur="3s" repeatCount="indefinite" begin="0.5s"/>
-                </line>
-                <line x1="82" y1="125" x2="50" y2="125" stroke="currentColor" stroke-width="1" opacity="0.3" stroke-linecap="round" stroke-dasharray="4,6">
-                    <animate attributeName="stroke-dashoffset" values="0;-20" dur="3s" repeatCount="indefinite" begin="1.0s"/>
-                </line>
-                <line x1="198" y1="125" x2="230" y2="125" stroke="currentColor" stroke-width="1" opacity="0.3" stroke-linecap="round" stroke-dasharray="4,6">
-                    <animate attributeName="stroke-dashoffset" values="0;-20" dur="3s" repeatCount="indefinite" begin="1.5s"/>
-                </line>
-                <line x1="88" y1="168" x2="62" y2="182" stroke="currentColor" stroke-width="1" opacity="0.3" stroke-linecap="round" stroke-dasharray="4,6">
-                    <animate attributeName="stroke-dashoffset" values="0;-20" dur="3s" repeatCount="indefinite" begin="2.0s"/>
-                </line>
-                <line x1="192" y1="168" x2="218" y2="182" stroke="currentColor" stroke-width="1" opacity="0.3" stroke-linecap="round" stroke-dasharray="4,6">
-                    <animate attributeName="stroke-dashoffset" values="0;-20" dur="3s" repeatCount="indefinite" begin="2.5s"/>
-                </line>
-                <!-- Data particles flowing along lines -->
-                <circle r="1.8" fill="currentColor" opacity="0.8">
-                    <animateMotion dur="4.0s" repeatCount="indefinite" path="M140,123 L60,58"/>
-                </circle>
-                <circle r="1.5" fill="currentColor" opacity="0">
-                    <animateMotion dur="3.5s" repeatCount="indefinite" begin="1.3s" path="M140,123 L230,125"/>
-                    <set attributeName="opacity" to="0.7" begin="1.3s"/>
-                </circle>
-                <circle r="1.3" fill="currentColor" opacity="0">
-                    <animateMotion dur="4.5s" repeatCount="indefinite" begin="2.7s" path="M140,123 L218,182"/>
-                    <set attributeName="opacity" to="0.6" begin="2.7s"/>
-                </circle>
-                <!-- Inward particles (bidirectional encryption) -->
-                <circle r="1.4" fill="currentColor" opacity="0">
-                    <animateMotion dur="3.8s" repeatCount="indefinite" begin="0.9s" path="M220,58 L140,123"/>
-                    <set attributeName="opacity" to="0.6" begin="0.9s"/>
-                </circle>
-                <circle r="1.2" fill="currentColor" opacity="0">
-                    <animateMotion dur="4.2s" repeatCount="indefinite" begin="2.4s" path="M50,125 L140,123"/>
-                    <set attributeName="opacity" to="0.5" begin="2.4s"/>
-                </circle>
-                <!-- Pulsing endpoint dots -->
-                <circle cx="60" cy="58" r="2.5" fill="currentColor">
-                    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3s" repeatCount="indefinite"/>
-                </circle>
-                <circle cx="220" cy="58" r="2.5" fill="currentColor" opacity="0.5"/>
-                <circle cx="50" cy="125" r="2.5" fill="currentColor" opacity="0.5"/>
-                <circle cx="230" cy="125" r="2.5" fill="currentColor">
-                    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3s" repeatCount="indefinite" begin="1.5s"/>
-                </circle>
-                <circle cx="62" cy="182" r="2.5" fill="currentColor" opacity="0.5"/>
-                <circle cx="218" cy="182" r="2.5" fill="currentColor">
-                    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3s" repeatCount="indefinite" begin="2.5s"/>
-                </circle>
-            </svg>
+        <div class="why-card fade-in">
+            <div class="why-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            </div>
+            <h3 class="why-card__title">Privacy First</h3>
+            <p class="why-card__desc">Messages, packets, routing — encrypted at every layer. Even the network itself can't see what you're sending, or to who.</p>
         </div>
-    </div>
-
-    <!-- Feature 3: Chaos Resistant -->
-    <div class="why-feature why-feature--left fade-in" data-accent="orange">
-        <div class="why-feature__text">
-            <span class="why-feature__number">03</span>
-            <h3 class="why-feature__title">Built Resilient</h3>
-            <p class="why-feature__tagline">Transport-agnostic — any communication protocol can be woven in to the network. All speaking to each other, with the same security, and same system.</p>
-            <div class="why-feature__accent-line"></div>
+        <div class="why-card fade-in">
+            <div class="why-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 010 8.49m-8.48-.01a6 6 0 010-8.49m11.31-2.82a10 10 0 010 14.14m-14.14 0a10 10 0 010-14.14"/></svg>
+            </div>
+            <h3 class="why-card__title">Transport Agnostic</h3>
+            <p class="why-card__desc">WiFi, LoRa, 5G, Bluetooth, anything. If it moves data, it works, and they all use the same private transport protocol.</p>
         </div>
-        <div class="why-feature__visual">
-            <svg class="why-feature__svg" viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <filter id="glow-orange" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation="4" result="blur"/>
-                        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-                    </filter>
-                </defs>
-                <!-- Ambient background -->
-                <circle cx="200" cy="100" r="55" fill="currentColor" opacity="0.05"/>
-                <!-- Four transport lines converging -->
-                <path d="M50,49 C120,49 160,100 200,100" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.5" stroke-dasharray="5,7">
-                    <animate attributeName="stroke-dashoffset" values="12;0" dur="4s" repeatCount="indefinite"/>
-                </path>
-                <path d="M50,83 C120,83 160,100 200,100" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.5" stroke-dasharray="5,7">
-                    <animate attributeName="stroke-dashoffset" values="12;0" dur="4s" repeatCount="indefinite" begin="0.7s"/>
-                </path>
-                <path d="M50,117 C120,117 160,100 200,100" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.5" stroke-dasharray="5,7">
-                    <animate attributeName="stroke-dashoffset" values="12;0" dur="4s" repeatCount="indefinite" begin="1.4s"/>
-                </path>
-                <path d="M50,151 C120,151 160,100 200,100" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.5" stroke-dasharray="5,7">
-                    <animate attributeName="stroke-dashoffset" values="12;0" dur="4s" repeatCount="indefinite" begin="2.1s"/>
-                </path>
-                <!-- Transport labels -->
-                <text x="44" y="53" font-family="'JetBrains Mono', monospace" font-size="10" fill="currentColor" opacity="0.55" text-anchor="end">LoRa</text>
-                <text x="44" y="87" font-family="'JetBrains Mono', monospace" font-size="10" fill="currentColor" opacity="0.55" text-anchor="end">WiFi</text>
-                <text x="44" y="121" font-family="'JetBrains Mono', monospace" font-size="10" fill="currentColor" opacity="0.55" text-anchor="end">TCP/IP</text>
-                <text x="44" y="155" font-family="'JetBrains Mono', monospace" font-size="10" fill="currentColor" opacity="0.55" text-anchor="end">Serial</text>
-                <!-- Source nodes -->
-                <circle cx="50" cy="49" r="3" fill="currentColor" opacity="0.6"/>
-                <circle cx="50" cy="83" r="3" fill="currentColor" opacity="0.6"/>
-                <circle cx="50" cy="117" r="3" fill="currentColor" opacity="0.6"/>
-                <circle cx="50" cy="151" r="3" fill="currentColor" opacity="0.6"/>
-                <!-- Convergence point -->
-                <circle cx="200" cy="100" r="20" stroke="currentColor" stroke-width="0.8" fill="none">
-                    <animate attributeName="r" values="18;24;18" dur="4s" repeatCount="indefinite"/>
-                    <animate attributeName="opacity" values="0.06;0.15;0.06" dur="4s" repeatCount="indefinite"/>
-                </circle>
-                <circle cx="200" cy="100" r="5" fill="currentColor" filter="url(#glow-orange)">
-                    <animate attributeName="r" values="4;7;4" dur="3s" repeatCount="indefinite"/>
-                    <animate attributeName="opacity" values="0.7;1;0.7" dur="3s" repeatCount="indefinite"/>
-                </circle>
-                <!-- Animated packets -->
-                <circle r="2.5" fill="currentColor" opacity="0.9">
-                    <animateMotion dur="3s" repeatCount="indefinite" path="M50,49 C120,49 160,100 200,100"/>
-                </circle>
-                <circle r="2.5" fill="currentColor" opacity="0">
-                    <animateMotion dur="3.5s" repeatCount="indefinite" begin="0.7s" path="M50,151 C120,151 160,100 200,100"/>
-                    <set attributeName="opacity" to="0.8" begin="0.7s"/>
-                </circle>
-                <circle r="2" fill="currentColor" opacity="0">
-                    <animateMotion dur="3.2s" repeatCount="indefinite" begin="2.1s" path="M50,83 C120,83 160,100 200,100"/>
-                    <set attributeName="opacity" to="0.75" begin="2.1s"/>
-                </circle>
-                <circle r="1.8" fill="currentColor" opacity="0">
-                    <animateMotion dur="2.5s" repeatCount="indefinite" begin="1.8s" path="M50,117 C120,117 160,100 200,100"/>
-                    <set attributeName="opacity" to="0.65" begin="1.8s"/>
-                </circle>
-            </svg>
+        <div class="why-card fade-in">
+            <div class="why-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h3 class="why-card__title">Built Resilient</h3>
+            <p class="why-card__desc">No servers. No database. No single point of control. The mesh routes around failures on its own.</p>
         </div>
-    </div>
-
-    <!-- Feature 4: Open Source -->
-    <div class="why-feature why-feature--right fade-in" data-accent="purple">
-        <div class="why-feature__text">
-            <span class="why-feature__number">04</span>
-            <h3 class="why-feature__title">Open Source</h3>
-            <p class="why-feature__tagline">We believe in open source. Everything you see is available on GitHub. Be curious, don't trust blindly, and verify things yourself.</p>
-            <div class="why-feature__accent-line"></div>
+        <div class="why-card fade-in">
+            <div class="why-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <h3 class="why-card__title">Multi-Platform</h3>
+            <p class="why-card__desc">Desktop, mobile, MCU, SBC. One protocol shared across all form factors.</p>
         </div>
-        <div class="why-feature__visual">
-            <svg class="why-feature__svg" viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <filter id="glow-purple" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation="4" result="blur"/>
-                        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-                    </filter>
-                </defs>
-                <!-- Ambient background -->
-                <circle cx="140" cy="100" r="85" fill="currentColor" opacity="0.04"/>
-                <!-- Code brackets </> (breathing pulse) -->
-                <!-- Left bracket < -->
-                <path d="M115,75 L90,100 L115,125" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <animate attributeName="opacity" values="0.65;0.9;0.65" dur="3s" repeatCount="indefinite"/>
-                </path>
-                <!-- Right bracket > -->
-                <path d="M165,75 L190,100 L165,125" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <animate attributeName="opacity" values="0.65;0.9;0.65" dur="3s" repeatCount="indefinite"/>
-                </path>
-                <!-- Forward slash / -->
-                <line x1="148" y1="70" x2="132" y2="130" stroke="currentColor" stroke-width="2" opacity="0.45" stroke-linecap="round"/>
-                <!-- Git branch lines — left -->
-                <path d="M90,100 C65,100 55,65 35,65" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.35"/>
-                <path d="M90,100 C65,100 55,135 35,135" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.35"/>
-                <path d="M90,100 C70,100 60,100 35,100" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.35"/>
-                <!-- Git branch lines — right -->
-                <path d="M190,100 C215,100 225,60 245,60" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.35"/>
-                <path d="M190,100 C215,100 225,140 245,140" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.35"/>
-                <!-- Data packets flowing along branches -->
-                <circle r="1.5" fill="currentColor" opacity="0.8">
-                    <animateMotion dur="2.5s" repeatCount="indefinite" path="M90,100 C65,100 55,65 35,65"/>
-                </circle>
-                <circle r="1.5" fill="currentColor" opacity="0">
-                    <animateMotion dur="3s" repeatCount="indefinite" begin="0.6s" path="M190,100 C215,100 225,60 245,60"/>
-                    <set attributeName="opacity" to="0.7" begin="0.6s"/>
-                </circle>
-                <circle r="1.5" fill="currentColor" opacity="0">
-                    <animateMotion dur="2.8s" repeatCount="indefinite" begin="1.2s" path="M90,100 C65,100 55,135 35,135"/>
-                    <set attributeName="opacity" to="0.7" begin="1.2s"/>
-                </circle>
-                <!-- Branch endpoint dots -->
-                <circle cx="35" cy="65" r="3" fill="currentColor">
-                    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2.5s" repeatCount="indefinite"/>
-                </circle>
-                <circle cx="35" cy="100" r="3" fill="currentColor">
-                    <animate attributeName="opacity" values="0.35;0.75;0.35" dur="3s" repeatCount="indefinite" begin="0.5s"/>
-                </circle>
-                <circle cx="35" cy="135" r="3" fill="currentColor">
-                    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2.8s" repeatCount="indefinite" begin="1s"/>
-                </circle>
-                <circle cx="245" cy="60" r="3" fill="currentColor">
-                    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3.2s" repeatCount="indefinite" begin="0.3s"/>
-                </circle>
-                <circle cx="245" cy="140" r="3" fill="currentColor">
-                    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2.6s" repeatCount="indefinite" begin="0.8s"/>
-                </circle>
-                <!-- Magnifying glass (scanning sweep) -->
-                <g>
-                    <animateTransform attributeName="transform" type="translate" values="0,0;3,-2;0,0;-3,2;0,0" dur="6s" repeatCount="indefinite"/>
-                    <circle cx="205" cy="162" r="14" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.3"/>
-                    <line x1="215" y1="172" x2="228" y2="185" stroke="currentColor" stroke-width="2" opacity="0.35" stroke-linecap="round"/>
-                    <circle cx="205" cy="162" r="5" fill="currentColor" opacity="0.15">
-                        <animate attributeName="opacity" values="0.1;0.35;0.1" dur="3s" repeatCount="indefinite"/>
-                    </circle>
-                </g>
-                <!-- Bracket center glow (radius + opacity pulse) -->
-                <circle cx="140" cy="100" r="8" fill="currentColor" opacity="0.12" filter="url(#glow-purple)">
-                    <animate attributeName="r" values="6;12;6" dur="3s" repeatCount="indefinite"/>
-                    <animate attributeName="opacity" values="0.08;0.25;0.08" dur="3s" repeatCount="indefinite"/>
-                </circle>
-            </svg>
+        <div class="why-card fade-in">
+            <div class="why-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+            </div>
+            <h3 class="why-card__title">Open Source</h3>
+            <p class="why-card__desc">Every line of code is public. Read it, audit it, fork it. Trust through transparency.</p>
         </div>
     </div>
 </section>
 
-<!-- ── Divider ─────────────────────────────────────────── -->
-<div class="section-divider"></div>
+<!-- ── Getting Started ────────────────────────────────── -->
+<section class="how" id="get-started">
+<div class="how-inner">
+    <span class="section-label fade-in">Getting Started</span>
+    <h2 class="section-heading fade-in">Four steps. That's it.</h2>
+    <p class="section-subheading fade-in">Download, launch, connect, talk. No setup wizards, no config files, no waiting.</p>
 
-<!-- ── GET STARTED ────────────────────────────────────── -->
-<section class="gs" id="get-started">
-    <h2 class="section-heading fade-in">Getting Started</h2>
-
-    <div class="gs-timeline" id="gs-timeline">
-        <div class="gs-step fade-in" style="--step-index: 0;" data-accent="green">
-            <div class="gs-step__marker">
-                <div class="gs-step__icon">
+    <div class="how-timeline" id="how-timeline">
+        <div class="how-step fade-in" style="--step-index: 0;">
+            <div class="how-step__marker">
+                <div class="how-step__icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 </div>
-                <span class="gs-step__number">01</span>
             </div>
-            <div class="gs-step__card">
-                <h3 class="gs-step__title">Download Ratspeak</h3>
-                <p class="gs-step__desc">Flash firmware to your T-Deck or Cardputer directly from your browser — no drivers, no terminal.</p>
+            <div class="how-step__card">
+                <h3 class="how-step__title"><span class="how-step__num">1.</span> Download</h3>
+                <p class="how-step__desc">Grab the app or flash your device. A couple clicks, that's it.</p>
             </div>
         </div>
 
-        <div class="gs-step fade-in" style="--step-index: 1;" data-accent="purple">
-            <div class="gs-step__marker">
-                <div class="gs-step__icon">
+        <div class="how-step fade-in" style="--step-index: 1;">
+            <div class="how-step__marker">
+                <div class="how-step__icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
                 </div>
-                <span class="gs-step__number">02</span>
             </div>
-            <div class="gs-step__card">
-                <h3 class="gs-step__title">Create Your Identity</h3>
-                <p class="gs-step__desc">Your device generates a cryptographic key pair on first boot. No account, no email, no phone number.</p>
+            <div class="how-step__card">
+                <h3 class="how-step__title"><span class="how-step__num">2.</span> Create Identity</h3>
+                <p class="how-step__desc">Initial setup generates a cryptographic identity that always belongs to just you.</p>
             </div>
         </div>
 
-        <div class="gs-step fade-in" style="--step-index: 2;" data-accent="blue">
-            <div class="gs-step__marker">
-                <div class="gs-step__icon">
+        <div class="how-step fade-in" style="--step-index: 2;">
+            <div class="how-step__marker">
+                <div class="how-step__icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 010 8.49m-8.48-.01a6 6 0 010-8.49m11.31-2.82a10 10 0 010 14.14m-14.14 0a10 10 0 010-14.14"/></svg>
                 </div>
-                <span class="gs-step__number">03</span>
             </div>
-            <div class="gs-step__card">
-                <h3 class="gs-step__title">Join the Network</h3>
-                <p class="gs-step__desc">Connect over LoRa, WiFi, or TCP/IP and watch the mesh route itself — no configuration, no central server.</p>
+            <div class="how-step__card">
+                <h3 class="how-step__title"><span class="how-step__num">3.</span> Connect</h3>
+                <p class="how-step__desc">Pick your transport method, and the mesh handles the rest.</p>
             </div>
         </div>
 
-        <div class="gs-step fade-in" style="--step-index: 3;" data-accent="orange">
-            <div class="gs-step__marker">
-                <div class="gs-step__icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <div class="how-step fade-in" style="--step-index: 3;">
+            <div class="how-step__marker">
+                <div class="how-step__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
                 </div>
-                <span class="gs-step__number">04</span>
             </div>
-            <div class="gs-step__card">
-                <h3 class="gs-step__title">Communicate Freely</h3>
-                <p class="gs-step__desc">Send encrypted messages across any path the mesh offers. Your traffic is ciphertext from the moment it leaves your hands.</p>
+            <div class="how-step__card">
+                <h3 class="how-step__title"><span class="how-step__num">4.</span> Start Talking</h3>
+                <p class="how-step__desc">Send messages, files, play games, you're in — welcome to a better system.</p>
             </div>
         </div>
     </div>
-
+</div>
 </section>
 
-<!-- ── Divider ─────────────────────────────────────────── -->
-<div class="section-divider"></div>
+<!-- ── Community + Download CTA ─────────────────────────── -->
+<section class="community" id="download">
+    <span class="section-label fade-in">Community</span>
+    <h2 class="section-heading fade-in">Join the network.</h2>
+    <p class="section-subheading fade-in">Communicate on your own terms. Enter the mesh.</p>
 
-<!-- ── DOWNLOAD ───────────────────────────────────────── -->
-<section class="dl" id="download">
-    <div class="dl-inner fade-in">
-        <h3 class="dl-title">Download Ratspeak</h3>
-        <div class="dl-buttons">
-            <a href="download.html" class="nr-btn nr-btn-lg">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Get Started
-            </a>
-            <a href="https://github.com/ratspeak" class="nr-btn nr-btn-secondary" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-            </a>
-        </div>
-        <p class="dl-sub">Available on T-Deck &amp; Cardputer Adv.<span class="dl-soon">Windows, macOS, and Linux coming soon.</span></p>
+    <div class="community-cta fade-in">
+        <a href="download.html" class="community-link community-link--primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+        </a>
+        <a href="/discord" class="community-link community-link--icon" aria-label="Discord">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+        </a>
+        <a href="/telegram" class="community-link community-link--icon" aria-label="Telegram">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0a12 12 0 00-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        </a>
     </div>
 </section>
 
 <!-- ── Footer ──────────────────────────────────────────── -->
 <footer class="footer">
-    <div class="footer-divider"></div>
-    <a href="letter.html" class="footer-logo-link" aria-label="A letter">
-        <svg class="footer-logo" viewBox="243 243 282 282" fill="var(--text-muted)">
-            <path d="M327.97,501.16C314.61,508.03 301.57,514.72 288.56,521.48C283.91,523.91 279.2,524.61 275.05,520.98C271.05,517.49 271.26,512.87 272.63,508.05C275.23,498.93 277.46,489.7 280.08,480.58C281.03,477.27 280.4,475.51 277.14,473.92C255.84,463.53 245.61,446.29 245.66,422.66C245.75,381.16 245.55,339.66 245.75,298.16C245.86,275.62 256.63,259.57 276.93,249.98C283.68,246.79 291.07,246.01 298.4,246C355.74,245.88 413.07,245.83 470.4,245.95C495.22,246.01 516.64,265.69 519.52,290.03C520.6,299.2 520.12,308.32 520.21,317.46C520.37,333.46 520.29,349.46 520.2,365.46C520.17,371.38 518.89,372.03 513.77,369.13C498.9,360.71 498.91,360.71 498.9,343.65C498.88,328.81 498.92,313.98 498.81,299.15C498.66,279.74 486.18,267.28 466.77,267.26C410.94,267.23 355.11,267.23 299.27,267.32C279.54,267.35 267.32,279.36 267.23,299.05C267.05,340.71 267.04,382.38 267.09,424.04C267.11,441.62 277.67,453.85 295.43,456.58C310.83,458.95 307.84,458.98 304.51,471.32C303.3,475.82 302.05,480.31 300.83,484.81C300.35,486.56 299.66,488.32 300.92,490.33C304.48,490.2 307.24,487.87 310.31,486.46C314.99,484.3 319.61,481.95 324.04,479.31C328.78,476.49 333.17,476.59 338.23,478.73C355.38,485.99 373.44,488.84 391.95,487.72C430.98,485.37 461.99,468.13 484.6,436.22C489.79,428.9 493.71,420.74 496.43,412.08C497.17,409.7 496.94,408 494.74,406.52C489.6,403.07 487.33,398.05 487.7,391.96C487.91,388.37 486.58,386.13 483.49,384.24C461.58,370.79 438.6,360.13 412.77,356.87C403.65,355.71 394.49,355.67 385.35,356.73C376.09,357.8 372.64,358.02 369.74,347.74C368.12,341.98 365.71,336.47 362.24,331.47C356.28,322.9 346.68,319.02 337.45,321.63C328.92,324.05 321.83,333.47 321.32,343.14C320.63,356 327.03,371.92 346.66,374.88C350.07,375.39 352.59,376.98 353.16,380.74C353.7,384.21 352.02,386.53 349.33,388.25C347.4,389.48 345.13,389.39 343,389.01C325.7,385.88 313.84,376.01 308.73,359.24C303.68,342.67 306.62,327.49 319.94,315.42C336.41,300.5 361.24,303.86 373.4,322.51C376.14,326.7 378.7,331.06 380.19,335.83C381.41,339.73 383.56,341.03 387.54,340.77C406.5,339.53 425.15,341.26 443.29,347.18C469.21,355.64 492.63,368.82 514.47,384.97C521.5,390.18 521.02,397.62 519.75,405.01C515.1,432.25 501.28,454.4 481.02,472.62C460.48,491.09 436.54,502.92 409.2,507.52C385.77,511.46 362.77,509.7 340.18,502.3C336.39,501.06 332.58,498.31 327.97,501.16z"/>
-            <path d="M414.19,335.38C405.75,335.93 397.65,334.86 389.54,335.84C387,336.15 385.78,334.06 384.8,332.07C380.73,323.83 376.21,315.95 368.77,310.17C366.48,308.38 367.23,307 369.43,305.62C379.53,299.3 389.62,299.22 399.19,306.49C408.52,313.58 414.08,323.09 414.19,335.38z"/>
-            <path d="M417.09,390.21C410.66,388.78 407.34,384.6 408.1,379.44C408.81,374.6 413.31,370.91 418.31,371.05C423.12,371.19 426.94,375.02 427.27,380C427.63,385.61 424.18,389.22 417.09,390.21z"/>
-            <path d="M430.83,418.71C429.47,419.23 428.59,420.25 427.03,419.59C426.81,417.6 428.52,416.83 429.77,416.07C441.62,408.88 453.85,402.56 467.79,400.42C469.45,400.16 471.08,399.82 472.69,400.53C474.42,401.28 475.23,402.66 475.09,404.49C474.92,406.75 473.27,407.6 471.34,407.79C465.71,408.35 460.12,409.05 454.59,410.3C446.44,412.13 438.57,414.68 430.83,418.71z"/>
-            <path d="M448.63,432.62C455.17,424.82 461.54,417.3 470.21,412.35C473.17,410.66 477.33,407.48 479.7,412.18C482.09,416.9 476.91,417.67 473.97,418.99C464.9,423.07 457.39,429.35 449.85,435.63C448.67,436.61 447.95,438.42 445.79,438.04C445.62,435.72 447.39,434.49 448.63,432.62z"/>
-        </svg>
-    </a>
-    <span class="footer-built">Built with <a href="https://reticulum.network" target="_blank" rel="noopener noreferrer">Reticulum</a></span>
-    <div class="footer-links">
-        <a href="download.html">Download</a>
-        <span class="dot-sep">&middot;</span>
-        <a href="https://github.com/ratspeak" target="_blank" rel="noopener noreferrer">GitHub</a>
-        <span class="dot-sep">&middot;</span>
-        <a href="docs.html">Documentation</a>
+    <div class="footer-inner">
+        <div class="footer-left">
+            <a href="letter.html" class="footer-brand" aria-label="A letter">
+                <svg viewBox="243 243 282 282" fill="var(--text-muted)">
+                    <path d="M327.97,501.16C314.61,508.03 301.57,514.72 288.56,521.48C283.91,523.91 279.2,524.61 275.05,520.98C271.05,517.49 271.26,512.87 272.63,508.05C275.23,498.93 277.46,489.7 280.08,480.58C281.03,477.27 280.4,475.51 277.14,473.92C255.84,463.53 245.61,446.29 245.66,422.66C245.75,381.16 245.55,339.66 245.75,298.16C245.86,275.62 256.63,259.57 276.93,249.98C283.68,246.79 291.07,246.01 298.4,246C355.74,245.88 413.07,245.83 470.4,245.95C495.22,246.01 516.64,265.69 519.52,290.03C520.6,299.2 520.12,308.32 520.21,317.46C520.37,333.46 520.29,349.46 520.2,365.46C520.17,371.38 518.89,372.03 513.77,369.13C498.9,360.71 498.91,360.71 498.9,343.65C498.88,328.81 498.92,313.98 498.81,299.15C498.66,279.74 486.18,267.28 466.77,267.26C410.94,267.23 355.11,267.23 299.27,267.32C279.54,267.35 267.32,279.36 267.23,299.05C267.05,340.71 267.04,382.38 267.09,424.04C267.11,441.62 277.67,453.85 295.43,456.58C310.83,458.95 307.84,458.98 304.51,471.32C303.3,475.82 302.05,480.31 300.83,484.81C300.35,486.56 299.66,488.32 300.92,490.33C304.48,490.2 307.24,487.87 310.31,486.46C314.99,484.3 319.61,481.95 324.04,479.31C328.78,476.49 333.17,476.59 338.23,478.73C355.38,485.99 373.44,488.84 391.95,487.72C430.98,485.37 461.99,468.13 484.6,436.22C489.79,428.9 493.71,420.74 496.43,412.08C497.17,409.7 496.94,408 494.74,406.52C489.6,403.07 487.33,398.05 487.7,391.96C487.91,388.37 486.58,386.13 483.49,384.24C461.58,370.79 438.6,360.13 412.77,356.87C403.65,355.71 394.49,355.67 385.35,356.73C376.09,357.8 372.64,358.02 369.74,347.74C368.12,341.98 365.71,336.47 362.24,331.47C356.28,322.9 346.68,319.02 337.45,321.63C328.92,324.05 321.83,333.47 321.32,343.14C320.63,356 327.03,371.92 346.66,374.88C350.07,375.39 352.59,376.98 353.16,380.74C353.7,384.21 352.02,386.53 349.33,388.25C347.4,389.48 345.13,389.39 343,389.01C325.7,385.88 313.84,376.01 308.73,359.24C303.68,342.67 306.62,327.49 319.94,315.42C336.41,300.5 361.24,303.86 373.4,322.51C376.14,326.7 378.7,331.06 380.19,335.83C381.41,339.73 383.56,341.03 387.54,340.77C406.5,339.53 425.15,341.26 443.29,347.18C469.21,355.64 492.63,368.82 514.47,384.97C521.5,390.18 521.02,397.62 519.75,405.01C515.1,432.25 501.28,454.4 481.02,472.62C460.48,491.09 436.54,502.92 409.2,507.52C385.77,511.46 362.77,509.7 340.18,502.3C336.39,501.06 332.58,498.31 327.97,501.16z"/>
+                    <path d="M414.19,335.38C405.75,335.93 397.65,334.86 389.54,335.84C387,336.15 385.78,334.06 384.8,332.07C380.73,323.83 376.21,315.95 368.77,310.17C366.48,308.38 367.23,307 369.43,305.62C379.53,299.3 389.62,299.22 399.19,306.49C408.52,313.58 414.08,323.09 414.19,335.38z"/>
+                    <path d="M417.09,390.21C410.66,388.78 407.34,384.6 408.1,379.44C408.81,374.6 413.31,370.91 418.31,371.05C423.12,371.19 426.94,375.02 427.27,380C427.63,385.61 424.18,389.22 417.09,390.21z"/>
+                    <path d="M430.83,418.71C429.47,419.23 428.59,420.25 427.03,419.59C426.81,417.6 428.52,416.83 429.77,416.07C441.62,408.88 453.85,402.56 467.79,400.42C469.45,400.16 471.08,399.82 472.69,400.53C474.42,401.28 475.23,402.66 475.09,404.49C474.92,406.75 473.27,407.6 471.34,407.79C465.71,408.35 460.12,409.05 454.59,410.3C446.44,412.13 438.57,414.68 430.83,418.71z"/>
+                    <path d="M448.63,432.62C455.17,424.82 461.54,417.3 470.21,412.35C473.17,410.66 477.33,407.48 479.7,412.18C482.09,416.9 476.91,417.67 473.97,418.99C464.9,423.07 457.39,429.35 449.85,435.63C448.67,436.61 447.95,438.42 445.79,438.04C445.62,435.72 447.39,434.49 448.63,432.62z"/>
+                </svg>
+            </a>
+            <span class="footer-built">Built with <a href="https://reticulum.network" target="_blank" rel="noopener noreferrer">Reticulum</a></span>
+        </div>
+        <div class="footer-links">
+            <a href="about.html">About</a>
+            <a href="docs.html">Docs</a>
+            <a href="download.html">Download</a>
+            <a href="https://github.com/ratspeak" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </div>
     </div>
 </footer>
+
+<!-- ── Coming Soon Toast ──────────────────────────────── -->
+<div class="coming-soon-toast" id="comingSoonToast">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Coming soon
+</div>
 
 <script>
 (function() {
     'use strict';
 
+    // ── Theme toggle ──
+    var themeToggle = document.getElementById('themeToggle');
+    var htmlEl = document.documentElement;
+    var savedTheme = localStorage.getItem('ratspeak-theme');
+    if (savedTheme) {
+        htmlEl.setAttribute('data-theme', savedTheme);
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        htmlEl.setAttribute('data-theme', 'dark');
+    }
+    if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+            var current = htmlEl.getAttribute('data-theme');
+            var next = current === 'dark' ? 'light' : 'dark';
+            htmlEl.setAttribute('data-theme', next);
+            localStorage.setItem('ratspeak-theme', next);
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', next === 'dark' ? '#1a1a1e' : '#EBEFEE');
+        });
+    }
+
+    // ── Mesh Canvas ──
     var CFG = {
-        GREEN: '#00D4AA',
+        GREEN: '#BB6C43',
+        DARK: '#4A413C',
         NODE_COUNT: 22,
         NODE_RADIUS: 2.5,
         HUB_RADIUS: 5,
@@ -1599,7 +1498,6 @@
     var w = 0, h = 0, time = 0, lastPacket = 0;
     var isMobile = window.matchMedia('(max-width: 768px)').matches;
     var nodes = [], bgParts = [], packets = [], ripples = [];
-    var connAges = {};
 
     function resize() {
         var rect = canvas.parentElement.getBoundingClientRect();
@@ -1613,7 +1511,6 @@
 
     function rand(a, b) { return a + Math.random() * (b - a); }
 
-    // Node
     function Node(x, y, r, depth, isHub) {
         this.x = x; this.y = y;
         this.r = r; this.baseR = r;
@@ -1640,14 +1537,13 @@
         this.x += this.vx;
         this.y += this.vy;
         var pad = 30;
-        if (this.x < pad) { this.vx = Math.abs(this.vx); }
-        if (this.x > w - pad) { this.vx = -Math.abs(this.vx); }
-        if (this.y < pad) { this.vy = Math.abs(this.vy); }
-        if (this.y > h - pad) { this.vy = -Math.abs(this.vy); }
+        if (this.x < pad) this.vx = Math.abs(this.vx);
+        if (this.x > w - pad) this.vx = -Math.abs(this.vx);
+        if (this.y < pad) this.vy = Math.abs(this.vy);
+        if (this.y > h - pad) this.vy = -Math.abs(this.vy);
         this.r = this.baseR + Math.sin(time * 0.03 + this.phase) * 0.6;
     };
 
-    // Background particle
     function BgPart() {
         this.x = rand(0, w || 400);
         this.y = rand(0, h || 400);
@@ -1655,7 +1551,6 @@
         this.o = rand(0.06, 0.18);
         this.vx = rand(-0.03, 0.03);
         this.vy = rand(-0.03, 0.03);
-        this.depth = rand(0.1, 0.3);
     }
 
     BgPart.prototype.update = function() {
@@ -1667,7 +1562,6 @@
         if (this.y > h) this.y = 0;
     };
 
-    // Packet
     function Packet(from, to) {
         this.from = from; this.to = to;
         this.progress = 0;
@@ -1676,39 +1570,17 @@
         this.cipherFrame = 0;
         this.trail = [];
         this.done = false;
-        // Bezier control point offset
-        var dx = to.x - from.x, dy = to.y - from.y;
-        var len = Math.sqrt(dx * dx + dy * dy) || 1;
-        var nx = -dy / len, ny = dx / len;
-        var off = rand(10, 20) * (Math.random() < 0.5 ? 1 : -1);
-        this.cx = (from.x + to.x) / 2 + nx * off;
-        this.cy = (from.y + to.y) / 2 + ny * off;
     }
 
     Packet.prototype.update = function() {
-        if (this.state === 'encrypting') {
-            this.cipherFrame++;
-            if (this.cipherFrame >= CFG.CIPHER_DUR) {
-                this.state = 'transit';
-            }
-            this.x = this.from.x;
-            this.y = this.from.y;
-        } else {
-            this.progress += CFG.PACKET_SPEED / (dist(this.from, this.to) || 100);
-            if (this.progress >= 1) {
-                this.progress = 1;
-                this.done = true;
-            }
-            var t = this.progress;
-            var it = 1 - t;
-            this.x = it * it * this.from.x + 2 * it * t * this.cx + t * t * this.to.x;
-            this.y = it * it * this.from.y + 2 * it * t * this.cy + t * t * this.to.y;
-        }
+        this.progress += CFG.PACKET_SPEED / (dist(this.from, this.to) || 100);
+        if (this.progress >= 1) { this.progress = 1; this.done = true; }
+        this.x = this.from.x + (this.to.x - this.from.x) * this.progress;
+        this.y = this.from.y + (this.to.y - this.from.y) * this.progress;
         this.trail.unshift({ x: this.x, y: this.y });
         if (this.trail.length > 6) this.trail.pop();
     };
 
-    // Ripple
     function Ripple(x, y) {
         this.x = x; this.y = y;
         this.frame = 0;
@@ -1725,46 +1597,28 @@
         return Math.sqrt(dx * dx + dy * dy);
     }
 
-    function easeOut(t) { var it = 1 - t; return 1 - it * it * it; }
-
     function init() {
         resize();
         var count = isMobile ? CFG.MOBILE_NODES : CFG.NODE_COUNT;
         var bgCount = isMobile ? CFG.MOBILE_BG : CFG.BG_COUNT;
 
-        // Hub node near center
-        nodes.push(new Node(
-            w / 2 + rand(-20, 20),
-            h / 2 + rand(-20, 20),
-            CFG.HUB_RADIUS, 1.0, true
-        ));
+        nodes.push(new Node(w / 2 + rand(-20, 20), h / 2 + rand(-20, 20), CFG.HUB_RADIUS, 1.0, true));
 
-        // Other nodes with center-biased distribution
         for (var i = 1; i < count; i++) {
             var angle = Math.random() * Math.PI * 2;
             var d = (Math.random() * 0.35 + Math.random() * 0.35) * Math.min(w, h) / 2;
-            nodes.push(new Node(
-                w / 2 + Math.cos(angle) * d,
-                h / 2 + Math.sin(angle) * d,
-                CFG.NODE_RADIUS,
-                rand(0.3, 1.0)
-            ));
+            nodes.push(new Node(w / 2 + Math.cos(angle) * d, h / 2 + Math.sin(angle) * d, CFG.NODE_RADIUS, rand(0.3, 1.0)));
         }
 
-        for (var j = 0; j < bgCount; j++) {
-            bgParts.push(new BgPart());
-        }
+        for (var j = 0; j < bgCount; j++) bgParts.push(new BgPart());
     }
 
     function spawnPacket() {
         if (packets.length >= 6) return;
-        // Find connected pairs
         var pairs = [];
         for (var i = 0; i < nodes.length; i++) {
             for (var j = i + 1; j < nodes.length; j++) {
-                if (dist(nodes[i], nodes[j]) < CFG.CONN_DIST) {
-                    pairs.push([i, j]);
-                }
+                if (dist(nodes[i], nodes[j]) < CFG.CONN_DIST) pairs.push([i, j]);
             }
         }
         if (pairs.length === 0) return;
@@ -1779,13 +1633,11 @@
         for (var i = 0; i < nodes.length; i++) nodes[i].update();
         for (var j = 0; j < bgParts.length; j++) bgParts[j].update();
 
-        // Spawn packets
         if (time * 16.67 - lastPacket > CFG.PACKET_INTERVAL) {
             spawnPacket();
             lastPacket = time * 16.67;
         }
 
-        // Update packets
         for (var k = packets.length - 1; k >= 0; k--) {
             packets[k].update();
             if (packets[k].done) {
@@ -1794,342 +1646,195 @@
             }
         }
 
-        // Update ripples
         for (var r = ripples.length - 1; r >= 0; r--) {
             ripples[r].update();
             if (ripples[r].done) ripples.splice(r, 1);
-        }
-
-        // Update connection ages
-        var current = {};
-        for (var a = 0; a < nodes.length; a++) {
-            for (var b = a + 1; b < nodes.length; b++) {
-                if (dist(nodes[a], nodes[b]) < CFG.CONN_DIST) {
-                    var key = a + '-' + b;
-                    current[key] = true;
-                    connAges[key] = Math.min((connAges[key] || 0) + 1, 20);
-                }
-            }
-        }
-        for (var ck in connAges) {
-            if (!current[ck]) {
-                connAges[ck] -= 1.5;
-                if (connAges[ck] <= 0) delete connAges[ck];
-            }
         }
     }
 
     function draw() {
         ctx.clearRect(0, 0, w, h);
-        var px = 0;
-        var py = 0;
 
-        // 1. Background particles
-        for (var i = 0; i < bgParts.length; i++) {
-            var bp = bgParts[i];
-            var bx = bp.x - px * bp.depth * 1.5;
-            var by = bp.y - py * bp.depth * 1.5;
+        // Background particles
+        for (var b = 0; b < bgParts.length; b++) {
+            var bp = bgParts[b];
             ctx.beginPath();
-            ctx.arc(bx, by, bp.r, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(0, 212, 170, ' + bp.o + ')';
+            ctx.arc(bp.x, bp.y, bp.r, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(187, 108, 67, ' + bp.o + ')';
             ctx.fill();
         }
 
-        // 2. Connection lines with draw-in animation
-        for (var ck in connAges) {
-            var parts = ck.split('-');
-            var ai = parseInt(parts[0]), bi = parseInt(parts[1]);
-            var na = nodes[ai], nb = nodes[bi];
-            var d = dist(na, nb);
-            var opacity = (1 - d / CFG.CONN_DIST) * 0.45;
-            var avgD = (na.depth + nb.depth) / 2;
-            var age = connAges[ck] / 20; // 0 to 1
-
-            var ax = na.x + px * na.depth;
-            var ay = na.y + py * na.depth;
-            var bxp = nb.x + px * nb.depth;
-            var byp = nb.y + py * nb.depth;
-
-            // Draw from midpoint outward based on age
-            var midX = (ax + bxp) / 2;
-            var midY = (ay + byp) / 2;
-            var x1 = midX + (ax - midX) * age;
-            var y1 = midY + (ay - midY) * age;
-            var x2 = midX + (bxp - midX) * age;
-            var y2 = midY + (byp - midY) * age;
-
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.strokeStyle = 'rgba(0, 212, 170, ' + (opacity * avgD * age) + ')';
-            ctx.lineWidth = 0.8;
-            ctx.stroke();
-        }
-
-        // 3. Ripples
-        for (var r = 0; r < ripples.length; r++) {
-            var rp = ripples[r];
-            var rt = rp.frame / CFG.RIPPLE_DUR;
-            var rr = easeOut(rt) * CFG.RIPPLE_MAX;
-            var ro = 0.4 * (1 - rt);
-            ctx.beginPath();
-            ctx.arc(rp.x + px, rp.y + py, rr, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(0, 212, 170, ' + ro + ')';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-        }
-
-        // 4. Regular nodes
-        for (var n = 0; n < nodes.length; n++) {
-            var nd = nodes[n];
-            if (nd.isHub) continue;
-            var nx = nd.x + px * nd.depth;
-            var ny = nd.y + py * nd.depth;
-            var no = 0.4 + nd.depth * 0.6;
-
-            ctx.beginPath();
-            ctx.arc(nx, ny, nd.r, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(0, 212, 170, ' + no + ')';
-            ctx.fill();
-
-            // Subtle glow
-            ctx.beginPath();
-            ctx.arc(nx, ny, nd.r + 3, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(0, 212, 170, ' + (no * 0.2) + ')';
-            ctx.fill();
-        }
-
-        // 5. Hub node
-        var hub = nodes[0];
-        var hx = hub.x + px * hub.depth;
-        var hy = hub.y + py * hub.depth;
-
-        // Hub ambient glow
-        var grad = ctx.createRadialGradient(hx, hy, 0, hx, hy, 28);
-        grad.addColorStop(0, 'rgba(0, 212, 170, 0.22)');
-        grad.addColorStop(1, 'rgba(0, 212, 170, 0)');
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(hx, hy, 28, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Outer orbital ring
-        ctx.save();
-        ctx.translate(hx, hy);
-        ctx.rotate(time * CFG.HUB_RING_SPEED);
-        ctx.beginPath();
-        ctx.arc(0, 0, CFG.HUB_RING_R, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(0, 212, 170, ' + (0.25 + Math.sin(time * 0.03) * 0.12) + ')';
-        ctx.lineWidth = 0.9;
-        ctx.setLineDash([4, 8]);
-        ctx.stroke();
-        ctx.restore();
-
-        // Inner orbital ring
-        ctx.save();
-        ctx.translate(hx, hy);
-        ctx.rotate(-time * CFG.HUB_RING_SPEED * 0.7);
-        ctx.beginPath();
-        ctx.arc(0, 0, 12, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(0, 212, 170, ' + (0.15 + Math.sin(time * 0.04) * 0.08) + ')';
-        ctx.lineWidth = 0.6;
-        ctx.setLineDash([2, 6]);
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.setLineDash([]);
-
-        // Hub circle
-        ctx.beginPath();
-        ctx.arc(hx, hy, hub.r, 0, Math.PI * 2);
-        ctx.fillStyle = CFG.GREEN;
-        ctx.shadowBlur = 16;
-        ctx.shadowColor = 'rgba(0, 212, 170, 0.7)';
-        ctx.fill();
-        ctx.shadowBlur = 0;
-
-        // 6. Packets + cipher effect + trails
-        for (var p = 0; p < packets.length; p++) {
-            var pkt = packets[p];
-
-            // Trail
-            for (var t = 1; t < pkt.trail.length; t++) {
-                var tr = pkt.trail[t];
-                var to2 = (1 - t / pkt.trail.length) * 0.5;
-                var ts = CFG.PACKET_SIZE * (1 - t / pkt.trail.length * 0.6);
-                ctx.beginPath();
-                ctx.arc(tr.x + px, tr.y + py, ts, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(0, 212, 170, ' + to2 + ')';
-                ctx.fill();
-            }
-
-            // Packet dot
-            ctx.beginPath();
-            ctx.arc(pkt.x + px, pkt.y + py, CFG.PACKET_SIZE, 0, Math.PI * 2);
-            ctx.fillStyle = CFG.GREEN;
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = 'rgba(0, 212, 170, 0.8)';
-            ctx.fill();
-            ctx.shadowBlur = 0;
-
-            // Cipher effect
-            if (pkt.state === 'encrypting') {
-                var cp = pkt.cipherFrame / CFG.CIPHER_DUR;
-                var spread = 6 + cp * 14;
-                var co = 0.8 * (1 - cp * 0.7);
-                ctx.font = '8px JetBrains Mono, monospace';
-                ctx.fillStyle = 'rgba(0, 212, 170, ' + co + ')';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                for (var c = 0; c < 4; c++) {
-                    var ca = (c / 4) * Math.PI * 2 + time * 0.15;
-                    var ccx = pkt.x + px + Math.cos(ca) * spread;
-                    var ccy = pkt.y + py + Math.sin(ca) * spread;
-                    var ch = CFG.CIPHER_CHARS[Math.floor(Math.random() * 16)];
-                    ctx.fillText(ch, ccx, ccy);
+        // Connections
+        for (var i = 0; i < nodes.length; i++) {
+            for (var j = i + 1; j < nodes.length; j++) {
+                var d = dist(nodes[i], nodes[j]);
+                if (d < CFG.CONN_DIST) {
+                    var alpha = (1 - d / CFG.CONN_DIST) * 0.20;
+                    ctx.beginPath();
+                    ctx.moveTo(nodes[i].x, nodes[i].y);
+                    ctx.lineTo(nodes[j].x, nodes[j].y);
+                    ctx.strokeStyle = 'rgba(187, 108, 67, ' + alpha + ')';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
                 }
             }
         }
+
+        // Nodes
+        for (var n = 0; n < nodes.length; n++) {
+            var nd = nodes[n];
+            ctx.beginPath();
+            ctx.arc(nd.x, nd.y, nd.r, 0, Math.PI * 2);
+            var nodeAlpha = nd.isHub ? 0.65 : nd.depth * 0.50;
+            ctx.fillStyle = 'rgba(187, 108, 67, ' + nodeAlpha + ')';
+            ctx.fill();
+
+            if (nd.isHub) {
+                var hubAngle = time * CFG.HUB_RING_SPEED;
+                ctx.beginPath();
+                ctx.arc(nd.x, nd.y, CFG.HUB_RING_R, hubAngle, hubAngle + Math.PI * 1.2);
+                ctx.strokeStyle = 'rgba(187, 108, 67, 0.25)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+        }
+
+        // Packets
+        for (var p = 0; p < packets.length; p++) {
+            var pkt = packets[p];
+            // Trail
+            for (var t = 1; t < pkt.trail.length; t++) {
+                ctx.beginPath();
+                ctx.arc(pkt.trail[t].x, pkt.trail[t].y, CFG.PACKET_SIZE * (1 - t / pkt.trail.length), 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(187, 108, 67, ' + (0.55 * (1 - t / pkt.trail.length)) + ')';
+                ctx.fill();
+            }
+            // Head
+            ctx.beginPath();
+            ctx.arc(pkt.x, pkt.y, CFG.PACKET_SIZE, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(187, 108, 67, 0.85)';
+            ctx.fill();
+
+        }
+
+        // Ripples
+        for (var rp = 0; rp < ripples.length; rp++) {
+            var rip = ripples[rp];
+            var progress = rip.frame / CFG.RIPPLE_DUR;
+            var radius = progress * CFG.RIPPLE_MAX;
+            var alpha = 0.35 * (1 - progress);
+            ctx.beginPath();
+            ctx.arc(rip.x, rip.y, radius, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(187, 108, 67, ' + alpha + ')';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
     }
 
+    var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     function loop() {
+        if (document.hidden) { requestAnimationFrame(loop); return; }
         update();
         draw();
         requestAnimationFrame(loop);
     }
 
+    init();
+    if (prefersReducedMotion) {
+        update(); draw(); // draw one static frame
+    } else {
+        loop();
+    }
+    document.addEventListener('visibilitychange', function() {}); // no-op, loop checks document.hidden
     window.addEventListener('resize', function() {
+        isMobile = window.matchMedia('(max-width: 768px)').matches;
         resize();
-        for (var i = 0; i < nodes.length; i++) {
-            nodes[i].x = Math.min(Math.max(nodes[i].x, 30), w - 30);
-            nodes[i].y = Math.min(Math.max(nodes[i].y, 30), h - 30);
+    });
+
+    // ── Navbar scroll ──
+    var navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', function() {
+        if (window.scrollY > 10) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
         }
     });
 
-    init();
-    loop();
-})();
-</script>
+    // ── Hamburger ──
+    var hamburger = document.getElementById('navHamburger');
+    var mobileMenu = document.getElementById('navMobileMenu');
+    if (hamburger && mobileMenu) {
+        hamburger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            mobileMenu.classList.toggle('open');
+        });
+        document.addEventListener('click', function(e) {
+            if (!mobileMenu.contains(e.target) && !hamburger.contains(e.target)) {
+                mobileMenu.classList.remove('open');
+            }
+        });
+    }
 
-<script>
-(function() {
-    'use strict';
+    // ── Intersection Observer (fade-in) ──
+    var fadeEls = document.querySelectorAll('.fade-in');
+    if ('IntersectionObserver' in window) {
+        var obs = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    obs.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        fadeEls.forEach(function(el) { obs.observe(el); });
+    } else {
+        fadeEls.forEach(function(el) { el.classList.add('visible'); });
+    }
 
-    // Navbar scroll shadow + scroll hint fade
-    var navbar = document.getElementById('navbar');
-    var scrollHint = document.getElementById('scrollHint');
-    window.addEventListener('scroll', function() {
-        navbar.classList.toggle('scrolled', window.scrollY > 50);
-        if (scrollHint) scrollHint.classList.toggle('hidden', window.scrollY > 80);
-    });
+    // ── Timeline reveal ──
+    var timeline = document.getElementById('how-timeline');
+    if (timeline && 'IntersectionObserver' in window) {
+        var tObs = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    timeline.classList.add('revealed');
+                    tObs.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.2 });
+        tObs.observe(timeline);
+    }
 
-    // Hero text cycling
-    var words = ['Privacy.', 'Freedom.', 'Foundation.'];
-    var idx = 0;
-    var el = document.getElementById('hero-cycle');
-    if (el) {
+    // ── Hero word cycle ──
+    var cycleWords = ['Privacy.', 'Freedom.', 'Foundation.'];
+    var cycleIndex = 0;
+    var cycleEl = document.getElementById('hero-cycle');
+    if (cycleEl) {
         setInterval(function() {
-            el.classList.add('fade-out');
+            cycleEl.classList.add('fade-out');
             setTimeout(function() {
-                idx = (idx + 1) % words.length;
-                el.textContent = words[idx];
-                el.classList.remove('fade-out');
+                cycleIndex = (cycleIndex + 1) % cycleWords.length;
+                cycleEl.textContent = cycleWords[cycleIndex];
+                cycleEl.classList.remove('fade-out');
             }, 400);
         }, 3000);
     }
 
-    // Scroll-triggered animations
-    if ('IntersectionObserver' in window) {
-        var observer = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.15 });
-        document.querySelectorAll('.fade-in').forEach(function(el) {
-            observer.observe(el);
-        });
-    } else {
-        document.querySelectorAll('.fade-in').forEach(function(el) {
-            el.classList.add('visible');
-        });
-    }
-
-    // Get Started — timeline reveal on scroll
-    (function() {
-        var timeline = document.getElementById('gs-timeline');
-        if (!timeline) return;
-        if ('IntersectionObserver' in window) {
-            new IntersectionObserver(function(entries) {
-                entries.forEach(function(entry) {
-                    if (entry.isIntersecting) {
-                        timeline.classList.add('revealed');
-                    }
-                });
-            }, { threshold: 0.1 }).observe(timeline);
-        } else {
-            timeline.classList.add('revealed');
-        }
-    })();
-})();
-</script>
-
-<!-- Coming Soon Toast -->
-<div class="coming-soon-toast" id="comingSoonToast">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    Coming Soon
-</div>
-
-<script>
-(function() {
-    var toastTimer = null;
-    window.showComingSoon = function(e) {
-        e.preventDefault();
+    // ── Coming Soon Toast ──
+    window.showComingSoon = function(msg) {
         var toast = document.getElementById('comingSoonToast');
-        if (toastTimer) clearTimeout(toastTimer);
-        toast.classList.remove('show');
-        void toast.offsetWidth;
+        if (!toast) return;
+        toast.querySelector('span') || (toast.textContent = msg || 'Coming soon');
         toast.classList.add('show');
-        toastTimer = setTimeout(function() {
-            toast.classList.remove('show');
-            toastTimer = null;
-        }, 2500);
+        setTimeout(function() { toast.classList.remove('show'); }, 2500);
     };
 })();
 </script>
-
-<script>
-(function() {
-    var btn = document.getElementById('navHamburger');
-    var menu = document.getElementById('navMobileMenu');
-    if (!btn || !menu) return;
-    var iconOpen = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>';
-    var iconClosed = '<svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>';
-    function close() {
-        menu.classList.remove('open');
-        btn.innerHTML = iconClosed;
-    }
-    btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        var isOpen = menu.classList.toggle('open');
-        btn.innerHTML = isOpen ? iconOpen : iconClosed;
-    });
-    menu.addEventListener('click', function(e) {
-        if (e.target.closest('a')) close();
-    });
-    document.addEventListener('click', function(e) {
-        if (!btn.contains(e.target) && !menu.contains(e.target)) close();
-    });
-})();
-</script>
-
-<!-- Vercel Web Analytics -->
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
-
 </body>
 </html>

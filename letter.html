@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#EBEFEE">
+    <title>Letter — Ratspeak</title>
+    <meta name="robots" content="noindex, nofollow">
+    <!-- Favicons -->
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>!function(){var t=localStorage.getItem('ratspeak-theme');if(t)document.documentElement.setAttribute('data-theme',t);else if(window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.setAttribute('data-theme','dark')}()</script>
+    <style>
+        :root {
+            --bg-primary:    #EBEFEE;
+            --bg-secondary:  #E3E5E3;
+            --bg-tertiary:   #DAD9D5;
+            --border:        #CCB499;
+            --border-subtle: #DACCBA;
+            --text-primary:  #4A413C;
+            --text-secondary:#6D6259;
+            --text-muted:    #8A7E74;
+            --accent:        #BB6C43;
+            --accent-dark:   #9A5432;
+            --font-mono:     'JetBrains Mono', 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+            --font-sans:     'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary:    #1a1a1e;
+            --bg-secondary:  #222226;
+            --bg-tertiary:   #2a2a2e;
+            --bg-dark:       #e8e4e0;
+            --bg-dark-alt:   #d4cfc9;
+            --border:        #3d3832;
+            --border-subtle: #2e2a26;
+            --text-primary:  #e8e4e0;
+            --text-secondary:#a89f96;
+            --text-muted:    #7a7068;
+            --accent:        #d4884f;
+            --accent-light:  #2a2218;
+            --accent-dark:   #e8a06a;
+            --blue:          #5b93f5;
+            --blue-light:    #1a2236;
+            --red:           #e5534b;
+            --orange:        #e0b83e;
+            --purple:        #a78bfa;
+            --purple-light:  #1f1a2e;
+        }
+
+        /* ── Navbar ── */
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 44px;
+            height: 64px;
+            background: rgba(235, 239, 238, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .navbar.scrolled {
+            border-bottom-color: var(--border-subtle);
+            box-shadow: 0 1px 3px rgba(74, 65, 60, 0.04), 0 8px 24px rgba(74, 65, 60, 0.03);
+        }
+        .navbar-left { display: flex; align-items: center; gap: 12px; }
+        .navbar-left a { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .navbar-logo { width: 26px; height: 26px; flex-shrink: 0; }
+        .navbar-title { font-size: 18px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.01em; }
+        .navbar-center { display: flex; align-items: center; gap: 32px; }
+        .navbar-center a {
+            font-size: 15px; font-weight: 500; color: var(--text-secondary);
+            text-decoration: none; transition: color 0.15s ease;
+            position: relative; padding: 4px 0;
+        }
+        .navbar-center a:hover { color: var(--text-primary); }
+        .navbar-center a::after {
+            content: ''; position: absolute; bottom: -1px; left: 0;
+            width: 100%; height: 2px; background: var(--accent);
+            border-radius: 1px; transform: scaleX(0); transition: transform 0.2s ease;
+        }
+        .navbar-center a:hover::after { transform: scaleX(1); }
+        .navbar-right { display: flex; align-items: center; gap: 16px; }
+        .navbar-gh { display: flex; align-items: center; color: var(--text-muted); transition: color 0.2s; padding: 4px; }
+        .navbar-gh:hover { color: var(--text-primary); }
+        .navbar-gh svg { width: 22px; height: 22px; }
+        .navbar-theme {
+            display: flex;
+            align-items: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: color 0.2s;
+            padding: 4px;
+        }
+        .navbar-theme:hover { color: var(--text-primary); }
+        .navbar-theme svg { width: 20px; height: 20px; }
+        .theme-icon-sun { display: none; }
+        .theme-icon-moon { display: block; }
+        [data-theme="dark"] .theme-icon-sun { display: block; }
+        [data-theme="dark"] .theme-icon-moon { display: none; }
+        .nr-btn {
+            background: var(--accent); color: #ffffff; border: none; border-radius: 8px;
+            padding: 8px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+            font-family: var(--font-sans); transition: all 0.2s ease;
+            white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .nr-btn:hover { background: #9A5432; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(187, 108, 67, 0.25); }
+        .nr-btn-sm { padding: 6px 14px; font-size: 13px; border-radius: 6px; }
+        .navbar-hamburger {
+            display: none; align-items: center; justify-content: center;
+            background: none; border: none; cursor: pointer; padding: 6px;
+            color: var(--text-secondary); transition: color 0.2s; border-radius: 6px;
+        }
+        .navbar-hamburger:hover { color: var(--text-primary); background: var(--bg-secondary); }
+        .navbar-hamburger svg { width: 24px; height: 24px; }
+        .navbar-menu {
+            display: none; position: fixed; top: 64px; right: 16px; min-width: 180px;
+            background: var(--bg-primary); border: 1px solid var(--border); border-radius: 12px;
+            padding: 8px; flex-direction: column; gap: 2px; z-index: 99;
+            box-shadow: 0 8px 32px rgba(74, 65, 60, 0.12);
+            opacity: 0; transform: translateY(-8px);
+            transition: opacity 0.2s ease, transform 0.2s ease; pointer-events: none;
+        }
+        .navbar-menu.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .navbar-menu a {
+            display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+            color: var(--text-secondary); text-decoration: none; font-size: 15px;
+            font-weight: 500; border-radius: 8px; transition: background 0.15s, color 0.15s;
+        }
+        .navbar-menu a:hover { background: var(--bg-secondary); color: var(--text-primary); }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 16px;
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ── Entry Threshold ── */
+        .threshold {
+            padding-top: 64px;
+            height: clamp(180px, 24vh, 300px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 0;
+        }
+
+        .threshold-line {
+            width: 40px;
+            height: 1px;
+            background: var(--border);
+            opacity: 0;
+            transition: opacity 0.4s;
+            animation: fadeIn 0.6s ease forwards;
+            animation-delay: 0.1s;
+        }
+
+        .threshold-logo {
+            width: 48px;
+            height: 48px;
+            opacity: 0;
+            transition: opacity 0.4s;
+            animation: fadeIn 0.6s ease forwards;
+            animation-delay: 0.3s;
+            margin-top: 20px;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 0.3; }
+        }
+
+        /* ── Label ── */
+        .letter-label {
+            text-align: center;
+            margin-top: 32px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            opacity: 0;
+            animation: fadeInLabel 0.8s ease forwards;
+            animation-delay: 0.5s;
+        }
+
+        @keyframes fadeInLabel {
+            to { opacity: 0.6; }
+        }
+
+        /* ── Title ── */
+        .letter-title {
+            text-align: center;
+            margin-top: 40px;
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: clamp(26px, 5vw, 44px);
+            line-height: 1.2;
+            background: linear-gradient(180deg, var(--text-primary) 30%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            opacity: 0;
+            animation: fadeInTitle 1s ease forwards;
+            animation-delay: 0.7s;
+        }
+
+        @keyframes fadeInTitle {
+            to { opacity: 1; }
+        }
+
+        .title-accent {
+            display: block;
+            width: 56px;
+            height: 3px;
+            background: var(--accent);
+            margin: 28px auto 0;
+            border-radius: 2px;
+            opacity: 0;
+            animation: fadeInTitle 0.8s ease forwards;
+            animation-delay: 0.9s;
+        }
+
+        /* ── Letter Body ── */
+        .letter-container {
+            max-width: 540px;
+            margin: 64px auto 16px;
+            padding: 0 32px;
+            position: relative;
+        }
+
+        .letter-p {
+            color: var(--text-secondary);
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 28px;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .letter-p.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .letter-aside {
+            text-align: center;
+            font-style: italic;
+            font-size: clamp(18px, 3vw, 24px);
+            line-height: 1.6;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 32px auto;
+            padding: 0 16px;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .letter-aside.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .letter-aside em {
+            color: var(--accent);
+            font-style: italic;
+        }
+
+        .letter-break {
+            width: 24px;
+            height: 1px;
+            background: var(--border);
+            opacity: 0.5;
+            margin: 36px auto;
+        }
+
+        .letter-cta {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--accent);
+            margin-top: 40px;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .letter-cta.visible {
+            opacity: 0.8;
+            transform: translateY(0);
+        }
+
+        /* ── Atmospheric margin line ── */
+        .margin-line {
+            position: fixed;
+            left: calc(50% - 300px);
+            top: 0;
+            width: 1px;
+            height: 100%;
+            background: linear-gradient(
+                180deg,
+                transparent 0%,
+                var(--border-subtle) 20%,
+                var(--border-subtle) 80%,
+                transparent 100%
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* ── Sign-off ── */
+        .letter-signoff {
+            max-width: 540px;
+            margin: 48px auto 0;
+            padding: 0 32px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .letter-signoff.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .signoff-line {
+            width: 100%;
+            height: 1px;
+            background: var(--border);
+            opacity: 0.4;
+            margin-bottom: 28px;
+        }
+
+        .signoff-name {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            letter-spacing: 2px;
+            color: var(--accent);
+            opacity: 0.8;
+        }
+
+        .signoff-logo {
+            display: block;
+            width: 28px;
+            height: 28px;
+            margin: 16px auto;
+            opacity: 0.3;
+        }
+
+        /* ── Bottom Void ── */
+        .bottom-void {
+            height: clamp(120px, 20vh, 200px);
+        }
+
+        /* ── Dark Mode Overrides ─────────────────── */
+        [data-theme="dark"] .navbar {
+            background: rgba(26, 26, 30, 0.85);
+        }
+        [data-theme="dark"] .navbar.scrolled {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+        [data-theme="dark"] .navbar-menu {
+            background: var(--bg-primary);
+            border-color: var(--border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        [data-theme="dark"] .nr-btn:hover {
+            box-shadow: 0 4px 12px rgba(212, 136, 79, 0.3);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .navbar { padding: 0 20px; }
+            .navbar-center { display: none; }
+            .navbar-gh { display: none; }
+            .navbar-hamburger { display: flex; }
+            .navbar-menu { display: flex; }
+
+            .threshold {
+                height: clamp(140px, 18vh, 220px);
+            }
+
+            .letter-container,
+            .letter-signoff {
+                padding: 0 24px;
+            }
+
+            .letter-aside {
+                font-size: 18px;
+            }
+
+            .margin-line {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .letter-container,
+            .letter-signoff {
+                padding: 0 20px;
+            }
+
+            .letter-aside {
+                font-size: 17px;
+            }
+
+            .letter-break {
+                max-width: 100px;
+            }
+        }
+
+        /* ── Reduced Motion ── */
+        @media (prefers-reduced-motion: reduce) {
+            .threshold-line,
+            .threshold-logo,
+            .letter-label,
+            .letter-title,
+            .title-accent {
+                animation: none;
+                opacity: 0.3;
+            }
+
+            .letter-title {
+                opacity: 1;
+            }
+
+            .letter-label {
+                opacity: 0.6;
+            }
+
+            .title-accent {
+                opacity: 1;
+            }
+
+            .letter-p,
+            .letter-aside,
+            .letter-signoff {
+                opacity: 1;
+                transform: none;
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Navbar ── -->
+<nav class="navbar" id="navbar">
+    <div class="navbar-left">
+        <a href="index.html">
+            <svg class="navbar-logo" viewBox="243 243 282 282" fill="var(--accent)" width="26" height="26">
+                <path d="M327.97,501.16C314.61,508.03 301.57,514.72 288.56,521.48C283.91,523.91 279.2,524.61 275.05,520.98C271.05,517.49 271.26,512.87 272.63,508.05C275.23,498.93 277.46,489.7 280.08,480.58C281.03,477.27 280.4,475.51 277.14,473.92C255.84,463.53 245.61,446.29 245.66,422.66C245.75,381.16 245.55,339.66 245.75,298.16C245.86,275.62 256.63,259.57 276.93,249.98C283.68,246.79 291.07,246.01 298.4,246C355.74,245.88 413.07,245.83 470.4,245.95C495.22,246.01 516.64,265.69 519.52,290.03C520.6,299.2 520.12,308.32 520.21,317.46C520.37,333.46 520.29,349.46 520.2,365.46C520.17,371.38 518.89,372.03 513.77,369.13C498.9,360.71 498.91,360.71 498.9,343.65C498.88,328.81 498.92,313.98 498.81,299.15C498.66,279.74 486.18,267.28 466.77,267.26C410.94,267.23 355.11,267.23 299.27,267.32C279.54,267.35 267.32,279.36 267.23,299.05C267.05,340.71 267.04,382.38 267.09,424.04C267.11,441.62 277.67,453.85 295.43,456.58C310.83,458.95 307.84,458.98 304.51,471.32C303.3,475.82 302.05,480.31 300.83,484.81C300.35,486.56 299.66,488.32 300.92,490.33C304.48,490.2 307.24,487.87 310.31,486.46C314.99,484.3 319.61,481.95 324.04,479.31C328.78,476.49 333.17,476.59 338.23,478.73C355.38,485.99 373.44,488.84 391.95,487.72C430.98,485.37 461.99,468.13 484.6,436.22C489.79,428.9 493.71,420.74 496.43,412.08C497.17,409.7 496.94,408 494.74,406.52C489.6,403.07 487.33,398.05 487.7,391.96C487.91,388.37 486.58,386.13 483.49,384.24C461.58,370.79 438.6,360.13 412.77,356.87C403.65,355.71 394.49,355.67 385.35,356.73C376.09,357.8 372.64,358.02 369.74,347.74C368.12,341.98 365.71,336.47 362.24,331.47C356.28,322.9 346.68,319.02 337.45,321.63C328.92,324.05 321.83,333.47 321.32,343.14C320.63,356 327.03,371.92 346.66,374.88C350.07,375.39 352.59,376.98 353.16,380.74C353.7,384.21 352.02,386.53 349.33,388.25C347.4,389.48 345.13,389.39 343,389.01C325.7,385.88 313.84,376.01 308.73,359.24C303.68,342.67 306.62,327.49 319.94,315.42C336.41,300.5 361.24,303.86 373.4,322.51C376.14,326.7 378.7,331.06 380.19,335.83C381.41,339.73 383.56,341.03 387.54,340.77C406.5,339.53 425.15,341.26 443.29,347.18C469.21,355.64 492.63,368.82 514.47,384.97C521.5,390.18 521.02,397.62 519.75,405.01C515.1,432.25 501.28,454.4 481.02,472.62C460.48,491.09 436.54,502.92 409.2,507.52C385.77,511.46 362.77,509.7 340.18,502.3C336.39,501.06 332.58,498.31 327.97,501.16z"/>
+                <path d="M414.19,335.38C405.75,335.93 397.65,334.86 389.54,335.84C387,336.15 385.78,334.06 384.8,332.07C380.73,323.83 376.21,315.95 368.77,310.17C366.48,308.38 367.23,307 369.43,305.62C379.53,299.3 389.62,299.22 399.19,306.49C408.52,313.58 414.08,323.09 414.19,335.38z"/>
+                <path d="M417.09,390.21C410.66,388.78 407.34,384.6 408.1,379.44C408.81,374.6 413.31,370.91 418.31,371.05C423.12,371.19 426.94,375.02 427.27,380C427.63,385.61 424.18,389.22 417.09,390.21z"/>
+                <path d="M430.83,418.71C429.47,419.23 428.59,420.25 427.03,419.59C426.81,417.6 428.52,416.83 429.77,416.07C441.62,408.88 453.85,402.56 467.79,400.42C469.45,400.16 471.08,399.82 472.69,400.53C474.42,401.28 475.23,402.66 475.09,404.49C474.92,406.75 473.27,407.6 471.34,407.79C465.71,408.35 460.12,409.05 454.59,410.3C446.44,412.13 438.57,414.68 430.83,418.71z"/>
+                <path d="M448.63,432.62C455.17,424.82 461.54,417.3 470.21,412.35C473.17,410.66 477.33,407.48 479.7,412.18C482.09,416.9 476.91,417.67 473.97,418.99C464.9,423.07 457.39,429.35 449.85,435.63C448.67,436.61 447.95,438.42 445.79,438.04C445.62,435.72 447.39,434.49 448.63,432.62z"/>
+            </svg>
+            <span class="navbar-title">Ratspeak</span>
+        </a>
+    </div>
+    <div class="navbar-center">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="docs.html">Docs</a>
+        <a href="download.html">Download</a>
+    </div>
+    <div class="navbar-right">
+        <button class="navbar-theme" id="themeToggle" aria-label="Toggle theme">
+            <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+        <a href="https://github.com/ratspeak" class="navbar-gh" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+        <button class="navbar-hamburger" id="navHamburger" aria-label="Menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+        </button>
+    </div>
+</nav>
+<div class="navbar-menu" id="navMobileMenu">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="docs.html">Docs</a>
+    <a href="download.html">Download</a>
+    <a href="https://github.com/ratspeak" target="_blank" rel="noopener noreferrer">GitHub</a>
+</div>
+
+<!-- Atmospheric margin line -->
+<div class="margin-line" aria-hidden="true"></div>
+
+<!-- ── Entry Threshold ── -->
+<div class="threshold">
+    <div class="threshold-line" aria-hidden="true"></div>
+    <svg class="threshold-logo" viewBox="243 243 282 282" fill="var(--text-muted)" aria-hidden="true">
+        <path d="M327.97,501.16C314.61,508.03 301.57,514.72 288.56,521.48C283.91,523.91 279.2,524.61 275.05,520.98C271.05,517.49 271.26,512.87 272.63,508.05C275.23,498.93 277.46,489.7 280.08,480.58C281.03,477.27 280.4,475.51 277.14,473.92C255.84,463.53 245.61,446.29 245.66,422.66C245.75,381.16 245.55,339.66 245.75,298.16C245.86,275.62 256.63,259.57 276.93,249.98C283.68,246.79 291.07,246.01 298.4,246C355.74,245.88 413.07,245.83 470.4,245.95C495.22,246.01 516.64,265.69 519.52,290.03C520.6,299.2 520.12,308.32 520.21,317.46C520.37,333.46 520.29,349.46 520.2,365.46C520.17,371.38 518.89,372.03 513.77,369.13C498.9,360.71 498.91,360.71 498.9,343.65C498.88,328.81 498.92,313.98 498.81,299.15C498.66,279.74 486.18,267.28 466.77,267.26C410.94,267.23 355.11,267.23 299.27,267.32C279.54,267.35 267.32,279.36 267.23,299.05C267.05,340.71 267.04,382.38 267.09,424.04C267.11,441.62 277.67,453.85 295.43,456.58C310.83,458.95 307.84,458.98 304.51,471.32C303.3,475.82 302.05,480.31 300.83,484.81C300.35,486.56 299.66,488.32 300.92,490.33C304.48,490.2 307.24,487.87 310.31,486.46C314.99,484.3 319.61,481.95 324.04,479.31C328.78,476.49 333.17,476.59 338.23,478.73C355.38,485.99 373.44,488.84 391.95,487.72C430.98,485.37 461.99,468.13 484.6,436.22C489.79,428.9 493.71,420.74 496.43,412.08C497.17,409.7 496.94,408 494.74,406.52C489.6,403.07 487.33,398.05 487.7,391.96C487.91,388.37 486.58,386.13 483.49,384.24C461.58,370.79 438.6,360.13 412.77,356.87C403.65,355.71 394.49,355.67 385.35,356.73C376.09,357.8 372.64,358.02 369.74,347.74C368.12,341.98 365.71,336.47 362.24,331.47C356.28,322.9 346.68,319.02 337.45,321.63C328.92,324.05 321.83,333.47 321.32,343.14C320.63,356 327.03,371.92 346.66,374.88C350.07,375.39 352.59,376.98 353.16,380.74C353.7,384.21 352.02,386.53 349.33,388.25C347.4,389.48 345.13,389.39 343,389.01C325.7,385.88 313.84,376.01 308.73,359.24C303.68,342.67 306.62,327.49 319.94,315.42C336.41,300.5 361.24,303.86 373.4,322.51C376.14,326.7 378.7,331.06 380.19,335.83C381.41,339.73 383.56,341.03 387.54,340.77C406.5,339.53 425.15,341.26 443.29,347.18C469.21,355.64 492.63,368.82 514.47,384.97C521.5,390.18 521.02,397.62 519.75,405.01C515.1,432.25 501.28,454.4 481.02,472.62C460.48,491.09 436.54,502.92 409.2,507.52C385.77,511.46 362.77,509.7 340.18,502.3C336.39,501.06 332.58,498.31 327.97,501.16z"/>
+        <path d="M414.19,335.38C405.75,335.93 397.65,334.86 389.54,335.84C387,336.15 385.78,334.06 384.8,332.07C380.73,323.83 376.21,315.95 368.77,310.17C366.48,308.38 367.23,307 369.43,305.62C379.53,299.3 389.62,299.22 399.19,306.49C408.52,313.58 414.08,323.09 414.19,335.38z"/>
+        <path d="M417.09,390.21C410.66,388.78 407.34,384.6 408.1,379.44C408.81,374.6 413.31,370.91 418.31,371.05C423.12,371.19 426.94,375.02 427.27,380C427.63,385.61 424.18,389.22 417.09,390.21z"/>
+        <path d="M430.83,418.71C429.47,419.23 428.59,420.25 427.03,419.59C426.81,417.6 428.52,416.83 429.77,416.07C441.62,408.88 453.85,402.56 467.79,400.42C469.45,400.16 471.08,399.82 472.69,400.53C474.42,401.28 475.23,402.66 475.09,404.49C474.92,406.75 473.27,407.6 471.34,407.79C465.71,408.35 460.12,409.05 454.59,410.3C446.44,412.13 438.57,414.68 430.83,418.71z"/>
+        <path d="M448.63,432.62C455.17,424.82 461.54,417.3 470.21,412.35C473.17,410.66 477.33,407.48 479.7,412.18C482.09,416.9 476.91,417.67 473.97,418.99C464.9,423.07 457.39,429.35 449.85,435.63C448.67,436.61 447.95,438.42 445.79,438.04C445.62,435.72 447.39,434.49 448.63,432.62z"/>
+    </svg>
+</div>
+
+<!-- ── Label ── -->
+<p class="letter-label">A letter to our community:</p>
+
+<!-- ── Title ── -->
+<h1 class="letter-title">
+    Building For<br>A Shared Future
+</h1>
+<div class="title-accent" aria-hidden="true"></div>
+
+<!-- ── Letter Body ── -->
+<div class="letter-container">
+
+    <p class="letter-p">
+        There is a particular kind of silence that exists between two devices when they first find each other. Not the silence of nothing happening, but the silence of everything working exactly as it should. A private line, opened. Communication that belongs to nobody else. Today, that silence no longer belongs to you. We believe it should.
+    </p>
+
+    <p class="letter-p">
+        Ratspeak started with frustration. Frustration at watching communication infrastructure turn into surveillance infrastructure. Frustration that a conversation between two people no longer stays between two people. Frustration at the assumption that privacy is a feature you subscribe to, rather than a right you are born with.
+    </p>
+
+    <p class="letter-p">
+        We looked at the landscape of messaging apps and saw tools that were good but incomplete. Apps that promised privacy but still required servers, phone numbers, accounts, and identity brokers. Systems that could be shut down with a single disaster or corporate acquisition. The reality is, this isn&rsquo;t solvable at just the application layer.
+    </p>
+
+    <p class="letter-p">
+        The world doesn&rsquo;t lack another messaging app, it lacks honest messaging infrastructure. One that can&rsquo;t be co-opted. Infrastructure that works when the internet does not. Infrastructure that doesn&rsquo;t treat its participants as products.
+    </p>
+
+    <aside class="letter-aside">
+        We need something that <em>can&rsquo;t be turned off</em>, because there is nothing to turn off.
+    </aside>
+
+    <div class="letter-break" aria-hidden="true"></div>
+
+    <p class="letter-p">
+        Reticulum gave us the foundation: a networking stack designed from the ground up for autonomy. No dependency on the traditional internet. No assumption of working infrastructure. Just one radical idea that any two devices should be able to find each other and talk securely, whether they are separated by a wall or an ocean. Through radio waves or wires.
+    </p>
+
+    <p class="letter-p">
+        We took that foundation and asked: what would it look like if we built a complete ecosystem on top of it? Something that puts the power of Reticulum in the hands of the user, without all the technical jargon. A system that just works, one that is equally convenient.
+    </p>
+
+    <p class="letter-p">
+        Most of what we are building is invisible by design. The best infrastructure always is.
+    </p>
+
+    <p class="letter-p">
+        But invisibility is not insignificance. Every single packet relayed is end-to-end encrypted. Every identity is self-sovereign and ungovernable. Every user is a participant, strengthening the network. There is no privilege. No authority.
+    </p>
+
+    <aside class="letter-aside">
+        Privacy should not be a product, but a <em>non-negotiable</em> property.
+    </aside>
+
+    <div class="letter-break" aria-hidden="true"></div>
+
+    <p class="letter-p">
+        We are building this in the open because we believe tools that enable our basic human rights should not be kept behind walled gardens. Every line of code is available for scrutiny. Discussion is encouraged. Trust should be verifiable, else it remains hope and faith. A world built on hope and faith is what got us here.
+    </p>
+
+    <p class="letter-p">
+        To those of you who have contributed code, raised issues, tested software/firmware, or simply told a friend: you are no longer a user. You are a builder.
+    </p>
+
+    <aside class="letter-aside">
+        This network exists because enough people decided things should be <em>different</em>.
+    </aside>
+
+    <div class="letter-break" aria-hidden="true"></div>
+
+    <p class="letter-p">
+        We don&rsquo;t know what the future holds for Ratspeak. We do not know if it will be adopted by thousands or remain a quiet tool used by a dedicated few. What we do know is that the principles it embodies are not negotiable. Privacy is not a feature. Autonomy is not a premium tier. The ability to communicate without permission is not a privilege to be granted by those in power.
+    </p>
+
+    <p class="letter-p">
+        If you have read this far, you are the right kind of curious. The world needs more curiosity, it&rsquo;s not too late.
+    </p>
+
+    <p class="letter-cta">Join us.</p>
+
+</div>
+
+<!-- ── Sign-off ── -->
+<div class="letter-signoff">
+    <div class="signoff-line" aria-hidden="true"></div>
+    <p class="signoff-name">-- THE BUILDERS</p>
+    <svg class="signoff-logo" viewBox="243 243 282 282" fill="var(--accent)" aria-hidden="true">
+        <path d="M327.97,501.16C314.61,508.03 301.57,514.72 288.56,521.48C283.91,523.91 279.2,524.61 275.05,520.98C271.05,517.49 271.26,512.87 272.63,508.05C275.23,498.93 277.46,489.7 280.08,480.58C281.03,477.27 280.4,475.51 277.14,473.92C255.84,463.53 245.61,446.29 245.66,422.66C245.75,381.16 245.55,339.66 245.75,298.16C245.86,275.62 256.63,259.57 276.93,249.98C283.68,246.79 291.07,246.01 298.4,246C355.74,245.88 413.07,245.83 470.4,245.95C495.22,246.01 516.64,265.69 519.52,290.03C520.6,299.2 520.12,308.32 520.21,317.46C520.37,333.46 520.29,349.46 520.2,365.46C520.17,371.38 518.89,372.03 513.77,369.13C498.9,360.71 498.91,360.71 498.9,343.65C498.88,328.81 498.92,313.98 498.81,299.15C498.66,279.74 486.18,267.28 466.77,267.26C410.94,267.23 355.11,267.23 299.27,267.32C279.54,267.35 267.32,279.36 267.23,299.05C267.05,340.71 267.04,382.38 267.09,424.04C267.11,441.62 277.67,453.85 295.43,456.58C310.83,458.95 307.84,458.98 304.51,471.32C303.3,475.82 302.05,480.31 300.83,484.81C300.35,486.56 299.66,488.32 300.92,490.33C304.48,490.2 307.24,487.87 310.31,486.46C314.99,484.3 319.61,481.95 324.04,479.31C328.78,476.49 333.17,476.59 338.23,478.73C355.38,485.99 373.44,488.84 391.95,487.72C430.98,485.37 461.99,468.13 484.6,436.22C489.79,428.9 493.71,420.74 496.43,412.08C497.17,409.7 496.94,408 494.74,406.52C489.6,403.07 487.33,398.05 487.7,391.96C487.91,388.37 486.58,386.13 483.49,384.24C461.58,370.79 438.6,360.13 412.77,356.87C403.65,355.71 394.49,355.67 385.35,356.73C376.09,357.8 372.64,358.02 369.74,347.74C368.12,341.98 365.71,336.47 362.24,331.47C356.28,322.9 346.68,319.02 337.45,321.63C328.92,324.05 321.83,333.47 321.32,343.14C320.63,356 327.03,371.92 346.66,374.88C350.07,375.39 352.59,376.98 353.16,380.74C353.7,384.21 352.02,386.53 349.33,388.25C347.4,389.48 345.13,389.39 343,389.01C325.7,385.88 313.84,376.01 308.73,359.24C303.68,342.67 306.62,327.49 319.94,315.42C336.41,300.5 361.24,303.86 373.4,322.51C376.14,326.7 378.7,331.06 380.19,335.83C381.41,339.73 383.56,341.03 387.54,340.77C406.5,339.53 425.15,341.26 443.29,347.18C469.21,355.64 492.63,368.82 514.47,384.97C521.5,390.18 521.02,397.62 519.75,405.01C515.1,432.25 501.28,454.4 481.02,472.62C460.48,491.09 436.54,502.92 409.2,507.52C385.77,511.46 362.77,509.7 340.18,502.3C336.39,501.06 332.58,498.31 327.97,501.16z"/>
+        <path d="M414.19,335.38C405.75,335.93 397.65,334.86 389.54,335.84C387,336.15 385.78,334.06 384.8,332.07C380.73,323.83 376.21,315.95 368.77,310.17C366.48,308.38 367.23,307 369.43,305.62C379.53,299.3 389.62,299.22 399.19,306.49C408.52,313.58 414.08,323.09 414.19,335.38z"/>
+        <path d="M417.09,390.21C410.66,388.78 407.34,384.6 408.1,379.44C408.81,374.6 413.31,370.91 418.31,371.05C423.12,371.19 426.94,375.02 427.27,380C427.63,385.61 424.18,389.22 417.09,390.21z"/>
+        <path d="M430.83,418.71C429.47,419.23 428.59,420.25 427.03,419.59C426.81,417.6 428.52,416.83 429.77,416.07C441.62,408.88 453.85,402.56 467.79,400.42C469.45,400.16 471.08,399.82 472.69,400.53C474.42,401.28 475.23,402.66 475.09,404.49C474.92,406.75 473.27,407.6 471.34,407.79C465.71,408.35 460.12,409.05 454.59,410.3C446.44,412.13 438.57,414.68 430.83,418.71z"/>
+        <path d="M448.63,432.62C455.17,424.82 461.54,417.3 470.21,412.35C473.17,410.66 477.33,407.48 479.7,412.18C482.09,416.9 476.91,417.67 473.97,418.99C464.9,423.07 457.39,429.35 449.85,435.63C448.67,436.61 447.95,438.42 445.79,438.04C445.62,435.72 447.39,434.49 448.63,432.62z"/>
+    </svg>
+</div>
+
+<!-- ── Bottom Void ── -->
+<div class="bottom-void"></div>
+
+<script>
+(function() {
+    // ── Theme toggle ──
+    var themeToggle = document.getElementById('themeToggle');
+    var htmlEl = document.documentElement;
+    var savedTheme = localStorage.getItem('ratspeak-theme');
+    if (savedTheme) {
+        htmlEl.setAttribute('data-theme', savedTheme);
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        htmlEl.setAttribute('data-theme', 'dark');
+    }
+    if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+            var current = htmlEl.getAttribute('data-theme');
+            var next = current === 'dark' ? 'light' : 'dark';
+            htmlEl.setAttribute('data-theme', next);
+            localStorage.setItem('ratspeak-theme', next);
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', next === 'dark' ? '#1a1a1e' : '#EBEFEE');
+        });
+    }
+
+    // ── Navbar scroll effect ──
+    var navbar = document.getElementById('navbar');
+    if (navbar) {
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 10) navbar.classList.add('scrolled');
+            else navbar.classList.remove('scrolled');
+        }, { passive: true });
+    }
+
+    // ── Hamburger ──
+    var hamburger = document.getElementById('navHamburger');
+    var mobileMenu = document.getElementById('navMobileMenu');
+    if (hamburger && mobileMenu) {
+        hamburger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            mobileMenu.classList.toggle('open');
+        });
+        document.addEventListener('click', function(e) {
+            if (!mobileMenu.contains(e.target) && !hamburger.contains(e.target)) {
+                mobileMenu.classList.remove('open');
+            }
+        });
+    }
+
+    /* Delay body reveal until header cascade finishes */
+    setTimeout(function() {
+        var revealIndex = 0;
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.style.transitionDelay = (revealIndex * 100) + 'ms';
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                    revealIndex++;
+                }
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+        document.querySelectorAll('.letter-p, .letter-aside, .letter-cta, .letter-signoff').forEach(function(el) {
+            observer.observe(el);
+        });
+    }, 1000);
+})();
+</script>
+</body>
+</html>

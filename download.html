@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#1c2333">
+    <meta name="theme-color" content="#EBEFEE">
     <title>Download — Ratspeak</title>
     <meta name="description" content="Download Ratspeak — Available on every device.">
     <link rel="canonical" href="https://ratspeak.org/download.html">
@@ -34,59 +34,79 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>!function(){var t=localStorage.getItem('ratspeak-theme');if(t)document.documentElement.setAttribute('data-theme',t);else if(window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.setAttribute('data-theme','dark')}()</script>
     <style>
         :root {
-            --bg-primary:    #1c2333;
-            --bg-secondary:  #242d3f;
-            --bg-tertiary:   #2d3748;
-            --border:        #3a4759;
-            --border-light:  #4a5a6e;
-            --text-primary:  #e2e8f0;
-            --text-secondary:#9eadbf;
-            --text-muted:    #7e8fa2;
-            --green:         #00D4AA;
-            --green-dim:     #00A080;
-            --red:           #FF6B6B;
-            --blue:          #38BDF8;
-            --purple:        #C084FC;
-            --orange:        #F59E0B;
+            --bg-primary:    #EBEFEE;
+            --bg-secondary:  #E3E5E3;
+            --bg-tertiary:   #DAD9D5;
+            --bg-dark:       #4A413C;
+            --bg-dark-alt:   #564C46;
+            --border:        #CCB499;
+            --border-subtle: #DACCBA;
+            --text-primary:  #4A413C;
+            --text-secondary:#6D6259;
+            --text-muted:    #8A7E74;
+            --accent:        #BB6C43;
+            --accent-light:  #F5EBE3;
+            --accent-dark:   #9A5432;
+            --blue:          #3A76F0;
+            --blue-light:    #ebf2fe;
+            --red:           #CF222E;
+            --orange:        #D4A72C;
+            --purple:        #8B5CF6;
+            --purple-light:  #f3effe;
+            --success:       #2D8A56;
+            --success-light: #E8F5EE;
+            --success-dark:  #1E6B3E;
             --font-mono:     'JetBrains Mono', 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
             --font-sans:     'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-            --glass-bg:      rgba(36, 45, 63, 0.75);
-            --glass-border:  rgba(58, 71, 89, 0.55);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary:    #1a1a1e;
+            --bg-secondary:  #222226;
+            --bg-tertiary:   #2a2a2e;
+            --bg-dark:       #e8e4e0;
+            --bg-dark-alt:   #d4cfc9;
+            --border:        #3d3832;
+            --border-subtle: #2e2a26;
+            --text-primary:  #e8e4e0;
+            --text-secondary:#a89f96;
+            --text-muted:    #7a7068;
+            --accent:        #d4884f;
+            --accent-light:  #2a2218;
+            --accent-dark:   #e8a06a;
+            --blue:          #5b93f5;
+            --blue-light:    #1a2236;
+            --red:           #e5534b;
+            --orange:        #e0b83e;
+            --purple:        #a78bfa;
+            --purple-light:  #1f1a2e;
+            --success:       #3da56a;
+            --success-light: #1a2e22;
+            --success-dark:  #4ec282;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
+
+        html {
+            scroll-behavior: smooth;
+        }
 
         body {
             background: var(--bg-primary);
             color: var(--text-primary);
             font-family: var(--font-sans);
-            font-size: 14px;
-            line-height: 1.5;
+            font-size: 16px;
+            line-height: 1.6;
+            position: relative;
             overflow-x: hidden;
-            min-height: 100vh;
-        }
-
-        /* Noise texture overlay */
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 99999;
-            opacity: 0.015;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-            background-repeat: repeat;
-            background-size: 256px 256px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         /* ── Animations ─────────────────────────────── */
-        @keyframes glowPulse {
-            0%, 100% { box-shadow: 0 0 8px var(--green), 0 0 16px rgba(0, 212, 170, 0.2); }
-            50%      { box-shadow: 0 0 12px var(--green), 0 0 24px rgba(0, 212, 170, 0.35); }
-        }
         @keyframes fadeSlideUp {
             from { opacity: 0; transform: translateY(24px); }
             to   { opacity: 1; transform: translateY(0); }
@@ -99,40 +119,24 @@
             0%   { background-position: -200% 0; }
             100% { background-position: 200% 0; }
         }
-        @keyframes dotPulseGreen {
-            0%, 100% { box-shadow: 0 0 4px var(--green), 0 0 8px rgba(0, 212, 170, 0.3); }
-            50%      { box-shadow: 0 0 8px var(--green), 0 0 16px rgba(0, 212, 170, 0.5); }
-        }
-        @keyframes dotPulseRed {
-            0%, 100% { box-shadow: 0 0 4px var(--red), 0 0 8px rgba(255, 107, 107, 0.3); }
-            50%      { box-shadow: 0 0 8px var(--red), 0 0 16px rgba(255, 107, 107, 0.5); }
-        }
         @keyframes spinSlow {
             from { transform: rotate(0deg); }
             to   { transform: rotate(360deg); }
-        }
-        @keyframes progressGlow {
-            0%, 100% { box-shadow: 0 0 8px rgba(0, 212, 170, 0.4), 0 0 20px rgba(0, 212, 170, 0.15); }
-            50%      { box-shadow: 0 0 14px rgba(0, 212, 170, 0.6), 0 0 32px rgba(0, 212, 170, 0.25); }
         }
         @keyframes checkDraw {
             from { stroke-dashoffset: 24; }
             to   { stroke-dashoffset: 0; }
         }
         @keyframes dropZonePulse {
-            0%, 100% { border-color: var(--border-light); }
+            0%, 100% { border-color: var(--border); }
             50%      { border-color: var(--purple); }
-        }
-        @keyframes cardFloat {
-            0%, 100% { transform: translateY(0); }
-            50%      { transform: translateY(-4px); }
         }
 
         .fade-in {
             opacity: 0;
-            transform: translateY(24px);
-            transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-                        transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateY(16px);
+            transition: opacity 0.5s cubic-bezier(0.25, 0.1, 0.25, 1),
+                        transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
         .fade-in.visible {
             opacity: 1;
@@ -143,69 +147,102 @@
 
         .navbar {
             position: fixed;
-            top: 0; left: 0; right: 0;
+            top: 0;
+            left: 0;
+            right: 0;
             z-index: 100;
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 44px;
-            height: 70px;
-            background: linear-gradient(180deg, rgba(28, 35, 51, 0.95) 0%, rgba(28, 35, 51, 0.9) 100%);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border);
-            box-shadow: 0 1px 0 rgba(0, 212, 170, 0.05), 0 4px 24px rgba(0, 0, 0, 0.3);
+            height: 64px;
+            background: rgba(235, 239, 238, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid transparent;
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .navbar.scrolled {
-            border-bottom-color: var(--border-light);
-            box-shadow: 0 1px 0 rgba(0, 212, 170, 0.08), 0 8px 32px rgba(0, 0, 0, 0.5);
+            border-bottom-color: var(--border-subtle);
+            box-shadow: 0 1px 3px rgba(74, 65, 60, 0.04), 0 8px 24px rgba(74, 65, 60, 0.03);
         }
 
         .navbar-left {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
         }
 
         .navbar-left a {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
             text-decoration: none;
         }
 
         .navbar-logo {
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             flex-shrink: 0;
-            filter: drop-shadow(0 0 6px rgba(0, 212, 170, 0.4));
         }
 
         .navbar-title {
-            font-size: 21px;
+            font-size: 18px;
             font-weight: 700;
             color: var(--text-primary);
-            letter-spacing: 1px;
-            text-transform: uppercase;
+            letter-spacing: -0.01em;
+        }
+
+        .navbar-center {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .navbar-center a {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.15s ease;
+            position: relative;
+            padding: 4px 0;
+        }
+
+        .navbar-center a:hover {
+            color: var(--text-primary);
+        }
+
+        .navbar-center a::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent);
+            border-radius: 1px;
+            transform: scaleX(0);
+            transition: transform 0.2s ease;
+        }
+
+        .navbar-center a:hover::after {
+            transform: scaleX(1);
+        }
+
+        .navbar-center a.nav-active {
+            color: var(--text-primary);
+        }
+
+        .navbar-center a.nav-active::after {
+            transform: scaleX(1);
         }
 
         .navbar-right {
             display: flex;
             align-items: center;
-            gap: 17px;
-        }
-
-        .navbar-hamburger svg, .navbar-gh svg {
-            width: 28px;
-            height: 28px;
-        }
-
-        .navbar-sep {
-            width: 1px;
-            height: 26px;
-            background: var(--border);
-            opacity: 0.6;
+            gap: 16px;
         }
 
         .navbar-gh {
@@ -220,10 +257,62 @@
             color: var(--text-primary);
         }
 
-        /* ── Hamburger Menu ───────────────────────────────── */
+        .navbar-gh svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .navbar-theme {
+            display: flex;
+            align-items: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: color 0.2s;
+            padding: 4px;
+        }
+        .navbar-theme:hover { color: var(--text-primary); }
+        .navbar-theme svg { width: 20px; height: 20px; }
+        .theme-icon-sun { display: none; }
+        .theme-icon-moon { display: block; }
+        [data-theme="dark"] .theme-icon-sun { display: block; }
+        [data-theme="dark"] .theme-icon-moon { display: none; }
+
+        .nr-btn {
+            background: var(--accent);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--font-sans);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nr-btn:hover {
+            background: #9A5432;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(187, 108, 67, 0.25);
+        }
+
+        .nr-btn-sm {
+            padding: 6px 14px;
+            font-size: 13px;
+            border-radius: 6px;
+        }
+
+        /* ── Hamburger (mobile only) ─────────────────── */
 
         .navbar-hamburger {
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             background: none;
@@ -237,24 +326,28 @@
 
         .navbar-hamburger:hover {
             color: var(--text-primary);
-            background: rgba(255, 255, 255, 0.04);
+            background: var(--bg-secondary);
+        }
+
+        .navbar-hamburger svg {
+            width: 24px;
+            height: 24px;
         }
 
         .navbar-menu {
-            display: flex;
+            display: none;
             position: fixed;
-            top: 70px;
+            top: 64px;
             right: 16px;
-            min-width: 160px;
-            background: linear-gradient(180deg, rgba(28, 35, 51, 0.98) 0%, rgba(36, 45, 63, 0.98) 100%);
-            backdrop-filter: blur(20px);
+            min-width: 180px;
+            background: var(--bg-primary);
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 8px;
             flex-direction: column;
             gap: 2px;
             z-index: 99;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 8px 32px rgba(74, 65, 60, 0.12);
             opacity: 0;
             transform: translateY(-8px);
             transition: opacity 0.2s ease, transform 0.2s ease;
@@ -274,76 +367,58 @@
             padding: 10px 14px;
             color: var(--text-secondary);
             text-decoration: none;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 500;
             border-radius: 8px;
             transition: background 0.15s, color 0.15s;
         }
 
         .navbar-menu a:hover {
-            background: rgba(255, 255, 255, 0.06);
+            background: var(--bg-secondary);
             color: var(--text-primary);
         }
 
         .navbar-menu a.menu-active {
-            color: var(--green);
-        }
-
-        .nr-btn {
-            background: rgba(0, 160, 128, 0.1);
-            color: var(--green);
-            border: 1px solid rgba(0, 212, 170, 0.3);
-            border-radius: 8px;
-            padding: 8px 18px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: var(--font-sans);
-            transition: all 0.25s ease;
-            white-space: nowrap;
-            letter-spacing: 0.3px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .nr-btn:hover {
-            background: rgba(0, 160, 128, 0.2);
-            border-color: rgba(0, 212, 170, 0.5);
-            color: var(--green);
-            box-shadow: 0 0 20px rgba(0, 212, 170, 0.15);
+            color: var(--accent);
         }
 
         /* ── Hero ──────────────────────────────────────── */
 
         .flash-hero {
-            padding: 120px 32px 28px;
-            text-align: center;
+            padding: 110px 32px 16px;
+            text-align: left;
             position: relative;
+            max-width: 1000px;
+            margin: 0 auto;
         }
 
-        .flash-hero::before {
-            content: '';
-            position: absolute;
-            top: 56px; left: 50%;
-            transform: translateX(-50%);
-            width: 600px; height: 300px;
-            background: radial-gradient(ellipse, rgba(0, 212, 170, 0.06) 0%, transparent 70%);
-            pointer-events: none;
+        .flash-hero__eyebrow {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            margin-bottom: 16px;
+            display: block;
         }
 
         .flash-hero__title {
             font-family: var(--font-sans);
             font-weight: 700;
-            font-size: clamp(30px, 4.5vw, 44px);
+            font-size: clamp(32px, 4.5vw, 48px);
             line-height: 1.1;
-            letter-spacing: -1.5px;
-            margin-bottom: 8px;
-            background: linear-gradient(180deg, var(--text-primary) 40%, var(--text-muted) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .flash-hero__sub {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            max-width: 520px;
+            line-height: 1.6;
         }
 
         /* ── Browser Warning ───────────────────────────── */
@@ -352,8 +427,8 @@
             max-width: 600px;
             margin: 0 0 24px;
             padding: 14px 20px;
-            background: rgba(245, 158, 11, 0.08);
-            border: 1px solid rgba(245, 158, 11, 0.25);
+            background: rgba(212, 167, 44, 0.08);
+            border: 1px solid rgba(212, 167, 44, 0.25);
             border-radius: 10px;
             display: none;
             align-items: center;
@@ -398,20 +473,25 @@
             gap: 20px;
         }
 
+        .device-grid--two {
+            grid-template-columns: repeat(2, 1fr);
+            max-width: 680px;
+        }
+
         /* ── Device Card ───────────────────────────────── */
 
         .device-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
             border-radius: 16px;
-            padding: 32px 28px 28px;
+            padding: 0 24px 24px;
             position: relative;
             overflow: hidden;
             cursor: pointer;
-            backdrop-filter: blur(8px);
-            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-                        border-color 0.3s ease,
-                        box-shadow 0.4s ease;
+            box-shadow: 0 1px 3px rgba(74, 65, 60, 0.03);
+            transition: border-color 0.2s ease,
+                        box-shadow 0.2s ease,
+                        transform 0.2s ease;
             animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
 
@@ -419,85 +499,58 @@
         .device-card:nth-child(2) { animation-delay: 0.2s; }
         .device-card:nth-child(3) { animation-delay: 0.3s; }
 
-        /* Top accent border */
+        /* Top accent bar */
         .device-card::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            border-radius: 16px 16px 0 0;
-            opacity: 0.7;
+            top: 0;
+            left: 24px;
+            right: 24px;
+            height: 2px;
+            border-radius: 0 0 2px 2px;
             transition: opacity 0.3s;
         }
 
-        .device-card:hover::before { opacity: 1; }
-
-        .device-card--green::before {
-            background: linear-gradient(90deg, transparent, var(--green), transparent);
-            box-shadow: 0 0 12px rgba(0, 212, 170, 0.3);
-        }
-        .device-card--blue::before {
-            background: linear-gradient(90deg, transparent, var(--blue), transparent);
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
-        }
-        .device-card--purple::before {
-            background: linear-gradient(90deg, transparent, var(--purple), transparent);
-            box-shadow: 0 0 12px rgba(192, 132, 252, 0.3);
-        }
+        .device-card--green::before { background: var(--accent); }
+        .device-card--blue::before { background: var(--blue); }
+        .device-card--purple::before { background: var(--purple); }
+        .device-card--orange::before { background: var(--orange); }
 
         .device-card:hover {
-            transform: translateY(-6px) scale(1.02);
-        }
-
-        .device-card--green:hover {
-            border-color: rgba(0, 212, 170, 0.3);
-            box-shadow: 0 8px 40px rgba(0, 212, 170, 0.1), 0 0 0 1px rgba(0, 212, 170, 0.08);
-        }
-        .device-card--blue:hover {
-            border-color: rgba(56, 189, 248, 0.3);
-            box-shadow: 0 8px 40px rgba(56, 189, 248, 0.1), 0 0 0 1px rgba(56, 189, 248, 0.08);
-        }
-        .device-card--purple:hover {
-            border-color: rgba(192, 132, 252, 0.3);
-            box-shadow: 0 8px 40px rgba(192, 132, 252, 0.1), 0 0 0 1px rgba(192, 132, 252, 0.08);
+            transform: translateY(-3px);
+            border-color: var(--border);
+            box-shadow: 0 8px 24px rgba(74, 65, 60, 0.08), 0 2px 6px rgba(74, 65, 60, 0.04);
         }
 
         .device-card__visual {
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 160px;
-            margin-bottom: 20px;
+            height: 180px;
+            margin: 0 -24px 20px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 16px 16px 0 0;
             position: relative;
         }
 
-        /* Ambient glow behind illustration */
-        .device-card__visual::before {
-            content: '';
-            position: absolute;
-            width: 100px; height: 100px;
-            border-radius: 50%;
-            filter: blur(50px);
-            opacity: 0.1;
-            transition: opacity 0.3s;
-        }
-        .device-card:hover .device-card__visual::before { opacity: 0.18; }
-
-        .device-card--green .device-card__visual::before { background: var(--green); }
-        .device-card--blue .device-card__visual::before  { background: var(--blue); }
-        .device-card--purple .device-card__visual::before { background: var(--purple); }
-
         .device-card__visual svg {
             width: 100%;
-            max-width: 200px;
+            max-width: 180px;
             height: auto;
             position: relative;
             z-index: 1;
         }
 
-        .device-card--green .device-card__visual svg  { color: var(--green); }
+        .device-card--green .device-card__visual svg  { color: var(--accent); }
         .device-card--blue .device-card__visual svg   { color: var(--blue); }
         .device-card--purple .device-card__visual svg  { color: var(--purple); }
+        .device-card--orange .device-card__visual svg  { color: var(--orange); }
+
+        .device-card--green .device-card__visual  { background: radial-gradient(circle at center, rgba(187, 108, 67, 0.05) 0%, var(--bg-secondary) 70%); }
+        .device-card--blue .device-card__visual   { background: radial-gradient(circle at center, rgba(58, 118, 240, 0.04) 0%, var(--bg-secondary) 70%); }
+        .device-card--purple .device-card__visual  { background: radial-gradient(circle at center, rgba(139, 92, 246, 0.04) 0%, var(--bg-secondary) 70%); }
+        .device-card--orange .device-card__visual  { background: radial-gradient(circle at center, rgba(212, 167, 44, 0.04) 0%, var(--bg-secondary) 70%); }
 
         .device-card__name {
             font-family: var(--font-sans);
@@ -507,26 +560,11 @@
             margin-bottom: 12px;
         }
 
-        .device-card__specs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-
-        .device-card__spec {
-            font-family: var(--font-mono);
-            font-size: 11px;
-            font-weight: 500;
-            padding: 4px 10px;
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.06);
+        .device-card__desc {
+            font-size: 13px;
             color: var(--text-muted);
+            line-height: 1.4;
         }
-
-        .device-card--green .device-card__spec { color: rgba(0, 212, 170, 0.7); border-color: rgba(0, 212, 170, 0.12); background: rgba(0, 212, 170, 0.05); }
-        .device-card--blue .device-card__spec  { color: rgba(56, 189, 248, 0.7); border-color: rgba(56, 189, 248, 0.12); background: rgba(56, 189, 248, 0.05); }
-        .device-card--purple .device-card__spec { color: rgba(192, 132, 252, 0.7); border-color: rgba(192, 132, 252, 0.12); background: rgba(192, 132, 252, 0.05); }
 
         /* Select arrow */
         .device-card__arrow {
@@ -548,46 +586,54 @@
             transform: translateX(0);
         }
 
-        .device-card--green .device-card__arrow  { background: rgba(0, 212, 170, 0.12); color: var(--green); }
-        .device-card--blue .device-card__arrow   { background: rgba(56, 189, 248, 0.12); color: var(--blue); }
-        .device-card--purple .device-card__arrow  { background: rgba(192, 132, 252, 0.12); color: var(--purple); }
-        .device-card--orange .device-card__arrow  { background: rgba(245, 158, 11, 0.12); color: var(--orange); }
+        .device-card__arrow  { background: var(--accent-light); color: var(--accent); }
 
-        /* ── Orange Card Variant ──────────────────────── */
+        /* ── Link Card Reset (Coming Soon cards) ──────── */
 
-        .device-card--orange::before {
-            background: linear-gradient(90deg, transparent, var(--orange), transparent);
-            box-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
+        a.device-card {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            opacity: 0.6;
+            cursor: default;
         }
-        .device-card--orange:hover {
-            border-color: rgba(245, 158, 11, 0.3);
-            box-shadow: 0 8px 40px rgba(245, 158, 11, 0.1), 0 0 0 1px rgba(245, 158, 11, 0.08);
+
+        a.device-card:hover {
+            transform: translateY(-1px);
+            opacity: 0.75;
+            box-shadow: 0 4px 12px rgba(74, 65, 60, 0.05);
         }
-        .device-card--orange .device-card__visual::before { background: var(--orange); }
-        .device-card--orange .device-card__visual svg { color: var(--orange); }
-        .device-card--orange .device-card__spec { color: rgba(245, 158, 11, 0.7); border-color: rgba(245, 158, 11, 0.12); background: rgba(245, 158, 11, 0.05); }
 
-        /* ── Link Card Reset ─────────────────────────── */
+        a.device-card .device-card__visual::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(235, 239, 238, 0.35);
+            border-radius: 16px 16px 0 0;
+            z-index: 2;
+        }
 
-        a.device-card { text-decoration: none; color: inherit; display: block; }
+        a.device-card .device-card__arrow { display: none; }
 
         /* ── Coming Soon Badge ────────────────────────── */
 
         .device-card__badge {
             position: absolute;
-            top: 16px;
-            right: 16px;
+            top: 90px;
+            left: 50%;
+            transform: translate(-50%, -50%);
             font-family: var(--font-mono);
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 600;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
-            padding: 4px 10px;
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-muted);
-            z-index: 2;
+            padding: 6px 14px;
+            border-radius: 8px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            box-shadow: 0 2px 8px rgba(74, 65, 60, 0.08);
+            z-index: 3;
         }
 
         /* ── Download Section Headings ────────────────── */
@@ -597,37 +643,38 @@
 
         .download-section__label {
             font-family: var(--font-mono);
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 2.5px;
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
+            color: var(--accent);
+            opacity: 0.5;
         }
-        .download-section__label.--blue { color: var(--blue); }
-        .download-section__label.--green { color: var(--green); }
+        .download-section__label.--blue { color: var(--accent); }
+        .download-section__label.--green { color: var(--accent); }
 
         .download-section__title {
             font-family: var(--font-sans);
             font-weight: 700;
-            font-size: clamp(22px, 3vw, 28px);
+            font-size: clamp(26px, 3.5vw, 36px);
             color: var(--text-primary);
             margin-bottom: 12px;
         }
 
         .download-section__accent {
-            width: 48px;
-            height: 3px;
-            border-radius: 2px;
+            width: 100%;
+            height: 1px;
+            border-radius: 1px;
             margin-bottom: 28px;
+            background: var(--border-subtle);
         }
         .download-section__accent.--blue {
-            background: var(--blue);
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+            background: var(--border-subtle);
         }
         .download-section__accent.--green {
-            background: var(--green);
-            box-shadow: 0 0 12px rgba(0, 212, 170, 0.4);
+            background: var(--border-subtle);
         }
 
         /* Staggered animation for ESP section */
@@ -639,7 +686,7 @@
 
         .flash-interface {
             display: none;
-            padding: 20px 0 80px;
+            padding: 20px 0 96px;
             animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
 
@@ -668,57 +715,40 @@
         .flash-back:hover svg { transform: translateX(-3px); }
 
         .flash-panel {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
+            background: var(--bg-primary);
+            border: none;
             border-radius: 16px;
-            padding: 36px;
+            padding: 40px 36px;
             position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(8px);
+            overflow: visible;
+            box-shadow: 0 2px 8px rgba(74, 65, 60, 0.04), 0 0 0 1px var(--border-subtle);
         }
 
-        /* Top accent line on flash panel — color set by JS */
-        .flash-panel::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            border-radius: 16px 16px 0 0;
-        }
-
-        .flash-panel[data-accent="green"]::before {
-            background: linear-gradient(90deg, transparent, var(--green), transparent);
-            box-shadow: 0 0 12px rgba(0, 212, 170, 0.3);
-        }
-        .flash-panel[data-accent="blue"]::before {
-            background: linear-gradient(90deg, transparent, var(--blue), transparent);
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
-        }
-        .flash-panel[data-accent="purple"]::before {
-            background: linear-gradient(90deg, transparent, var(--purple), transparent);
-            box-shadow: 0 0 12px rgba(192, 132, 252, 0.3);
-        }
+        /* Left accent line -- hidden in redesign */
+        .flash-panel::before { display: none; }
 
         .flash-panel__header {
             display: flex;
             align-items: center;
             gap: 16px;
-            margin-bottom: 32px;
-            padding-bottom: 24px;
-            border-bottom: 1px solid rgba(58, 71, 89, 0.4);
+            background: var(--bg-secondary);
+            margin: -40px -36px 32px;
+            padding: 24px 36px;
+            border-radius: 16px 16px 0 0;
+            border-bottom: 1px solid var(--border-subtle);
         }
 
         .flash-panel__device-icon {
-            width: 48px; height: 48px;
-            border-radius: 12px;
+            width: 52px; height: 52px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .flash-panel[data-accent="green"] .flash-panel__device-icon  { background: rgba(0, 212, 170, 0.1); border: 1px solid rgba(0, 212, 170, 0.2); color: var(--green); }
-        .flash-panel[data-accent="blue"] .flash-panel__device-icon   { background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.2); color: var(--blue); }
-        .flash-panel[data-accent="purple"] .flash-panel__device-icon  { background: rgba(192, 132, 252, 0.1); border: 1px solid rgba(192, 132, 252, 0.2); color: var(--purple); }
+        .flash-panel[data-accent="green"] .flash-panel__device-icon  { background: var(--success-light); border: 1px solid rgba(45, 138, 86, 0.2); color: var(--success); }
+        .flash-panel[data-accent="blue"] .flash-panel__device-icon   { background: var(--blue-light); border: 1px solid rgba(58, 118, 240, 0.2); color: var(--blue); }
+        .flash-panel[data-accent="purple"] .flash-panel__device-icon  { background: var(--purple-light); border: 1px solid rgba(139, 92, 246, 0.2); color: var(--purple); }
 
         .flash-panel__device-name {
             font-weight: 700;
@@ -745,10 +775,11 @@
 
         .flash-step__number {
             font-family: var(--font-mono);
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             letter-spacing: 1.5px;
-            color: var(--text-muted);
+            color: var(--accent);
+            opacity: 0.7;
             text-transform: uppercase;
             margin-bottom: 12px;
         }
@@ -778,31 +809,31 @@
         }
 
         .connect-btn--idle {
-            background: rgba(0, 160, 128, 0.1);
-            color: var(--green);
-            border-color: rgba(0, 212, 170, 0.3);
+            background: var(--accent-light);
+            color: var(--accent-dark);
+            border-color: rgba(187, 108, 67, 0.25);
         }
         .connect-btn--idle:hover {
-            background: rgba(0, 160, 128, 0.2);
-            border-color: rgba(0, 212, 170, 0.5);
-            box-shadow: 0 0 20px rgba(0, 212, 170, 0.15);
+            background: rgba(187, 108, 67, 0.15);
+            border-color: rgba(187, 108, 67, 0.4);
+            box-shadow: 0 2px 8px rgba(187, 108, 67, 0.1);
         }
 
         .connect-btn--connected {
-            background: rgba(0, 212, 170, 0.08);
-            color: var(--green);
-            border-color: rgba(0, 212, 170, 0.2);
+            background: var(--success-light);
+            color: var(--success-dark);
+            border-color: rgba(45, 138, 86, 0.2);
             cursor: pointer;
         }
         .connect-btn--connected:hover {
-            background: rgba(0, 212, 170, 0.14);
-            border-color: rgba(0, 212, 170, 0.35);
+            background: rgba(45, 138, 86, 0.12);
+            border-color: rgba(45, 138, 86, 0.35);
         }
 
         .connect-btn--connecting {
-            background: rgba(245, 158, 11, 0.08);
+            background: rgba(212, 167, 44, 0.08);
             color: var(--orange);
-            border-color: rgba(245, 158, 11, 0.2);
+            border-color: rgba(212, 167, 44, 0.2);
             cursor: wait;
         }
 
@@ -826,13 +857,13 @@
         }
 
         .connect-status__dot--on {
-            background: var(--green);
-            animation: dotPulseGreen 2s ease-in-out infinite;
+            background: var(--success);
+            box-shadow: 0 0 4px var(--success);
         }
 
         .connect-status__dot--waiting {
             background: var(--orange);
-            animation: dotPulseRed 1.2s ease-in-out infinite;
+            box-shadow: 0 0 4px var(--orange);
         }
 
         .connect-status__text {
@@ -840,7 +871,7 @@
         }
 
         .connect-status__text--on {
-            color: var(--green);
+            color: var(--success-dark);
         }
 
         .connect-device-info {
@@ -849,12 +880,12 @@
             gap: 8px;
             margin-top: 14px;
             padding: 8px 12px;
-            background: rgba(0, 212, 170, 0.05);
-            border: 1px solid rgba(0, 212, 170, 0.12);
+            background: var(--success-light);
+            border: 1px solid rgba(45, 138, 86, 0.15);
             border-radius: 8px;
             font-family: var(--font-mono);
             font-size: 12px;
-            color: var(--green-dim);
+            color: var(--success-dark);
         }
 
         /* Firmware section */
@@ -863,8 +894,8 @@
             align-items: center;
             gap: 12px;
             padding: 16px;
-            background: rgba(0, 212, 170, 0.05);
-            border: 1px solid rgba(0, 212, 170, 0.15);
+            background: var(--accent-light);
+            border: 1px solid rgba(187, 108, 67, 0.15);
             border-radius: 10px;
         }
 
@@ -877,10 +908,10 @@
             flex-shrink: 0;
         }
 
-        .flash-panel[data-accent="green"] .firmware-ready  { background: rgba(0, 212, 170, 0.05); border-color: rgba(0, 212, 170, 0.15); }
-        .flash-panel[data-accent="blue"] .firmware-ready   { background: rgba(56, 189, 248, 0.05); border-color: rgba(56, 189, 248, 0.15); }
-        .flash-panel[data-accent="green"] .firmware-ready__icon { background: rgba(0, 212, 170, 0.1); color: var(--green); }
-        .flash-panel[data-accent="blue"] .firmware-ready__icon  { background: rgba(56, 189, 248, 0.1); color: var(--blue); }
+        .flash-panel[data-accent="green"] .firmware-ready  { background: var(--success-light); border-color: rgba(45, 138, 86, 0.15); }
+        .flash-panel[data-accent="blue"] .firmware-ready   { background: var(--blue-light); border-color: rgba(58, 118, 240, 0.15); }
+        .flash-panel[data-accent="green"] .firmware-ready__icon { background: rgba(45, 138, 86, 0.12); color: var(--success); }
+        .flash-panel[data-accent="blue"] .firmware-ready__icon  { background: rgba(58, 118, 240, 0.12); color: var(--blue); }
 
         .firmware-ready__name {
             font-weight: 600;
@@ -890,7 +921,7 @@
             display: inline-block;
         }
         a.firmware-ready__name:hover {
-            color: var(--green);
+            color: var(--accent);
         }
 
         .firmware-ready__size {
@@ -900,9 +931,104 @@
             margin-top: 2px;
         }
 
+        /* Version selector */
+        .firmware-ready--open {
+            border-radius: 10px 10px 0 0;
+        }
+
+        .firmware-version-btn {
+            all: unset;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+        .firmware-version-btn:hover {
+            color: var(--accent);
+        }
+
+        .firmware-version-chevron {
+            width: 12px; height: 12px;
+            opacity: 0.45;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            flex-shrink: 0;
+        }
+        .firmware-version-btn:hover .firmware-version-chevron { opacity: 0.7; }
+        .firmware-version-chevron--open { transform: rotate(180deg); }
+
+        .firmware-versions {
+            border: 1px solid rgba(187, 108, 67, 0.15);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            background: var(--accent-light);
+            overflow: hidden;
+        }
+
+        .flash-panel[data-accent="green"] .firmware-versions {
+            background: var(--success-light);
+            border-color: rgba(45, 138, 86, 0.15);
+        }
+        .flash-panel[data-accent="blue"] .firmware-versions {
+            background: var(--blue-light);
+            border-color: rgba(58, 118, 240, 0.15);
+        }
+
+        .firmware-version-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+        .firmware-version-item:hover {
+            background: rgba(0,0,0,0.04);
+        }
+
+        [data-theme="dark"] .firmware-version-item:hover {
+            background: rgba(255,255,255,0.04);
+        }
+        [data-theme="dark"] .firmware-version-item {
+            border-top-color: rgba(255,255,255,0.05);
+        }
+
+        .firmware-version-item__tag {
+            font-weight: 500;
+            font-size: 13px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .firmware-version-item__check {
+            width: 14px; height: 14px;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+        .flash-panel[data-accent="green"] .firmware-version-item__check { color: var(--success); }
+        .flash-panel[data-accent="blue"] .firmware-version-item__check { color: var(--blue); }
+
+        .firmware-version-item__size {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .firmware-version-item--active {
+            background: rgba(0,0,0,0.03);
+        }
+        [data-theme="dark"] .firmware-version-item--active {
+            background: rgba(255,255,255,0.03);
+        }
+
         /* Drop zone for custom firmware */
         .drop-zone {
-            border: 2px dashed var(--border-light);
+            border: 2px dashed var(--border);
             border-radius: 12px;
             padding: 36px 24px;
             text-align: center;
@@ -913,20 +1039,19 @@
 
         .drop-zone:hover {
             border-color: var(--purple);
-            background: rgba(192, 132, 252, 0.03);
+            background: var(--purple-light);
         }
 
         .drop-zone.drag-over {
             border-color: var(--purple);
-            background: rgba(192, 132, 252, 0.06);
-            box-shadow: 0 0 24px rgba(192, 132, 252, 0.1);
+            background: var(--purple-light);
             animation: dropZonePulse 1.5s ease-in-out infinite;
         }
 
         .drop-zone.has-file {
             border-style: solid;
-            border-color: rgba(192, 132, 252, 0.3);
-            background: rgba(192, 132, 252, 0.04);
+            border-color: rgba(139, 92, 246, 0.3);
+            background: var(--purple-light);
         }
 
         .drop-zone__icon {
@@ -992,7 +1117,7 @@
         .flash-action {
             margin-top: 28px;
             padding-top: 28px;
-            border-top: 1px solid rgba(58, 71, 89, 0.4);
+            border-top: 1px solid var(--border-subtle);
         }
 
         .flash-btn {
@@ -1005,7 +1130,7 @@
             font-size: 16px;
             font-weight: 700;
             font-family: var(--font-sans);
-            border: 1px solid rgba(0, 232, 186, 0.4);
+            border: 1px solid;
             border-radius: 12px;
             cursor: pointer;
             letter-spacing: 0.4px;
@@ -1015,15 +1140,16 @@
         }
 
         .flash-btn--ready {
-            background: linear-gradient(135deg, #00D4AA 0%, #00B894 50%, #00A87E 100%);
-            color: var(--bg-primary);
-            box-shadow: 0 0 20px rgba(0, 212, 170, 0.2), 0 2px 8px rgba(0, 0, 0, 0.3),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+            box-shadow: 0 2px 8px rgba(187, 108, 67, 0.2);
         }
 
         .flash-btn--ready:hover {
-            background: linear-gradient(135deg, #00e8ba 0%, #00D4AA 50%, #00B894 100%);
-            box-shadow: 0 0 32px rgba(0, 212, 170, 0.35), 0 4px 16px rgba(0, 0, 0, 0.3);
+            background: #9A5432;
+            border-color: #9A5432;
+            box-shadow: 0 4px 16px rgba(187, 108, 67, 0.3);
             transform: translateY(-2px);
         }
 
@@ -1035,9 +1161,9 @@
         }
 
         .flash-btn--flashing {
-            background: var(--bg-tertiary);
-            color: var(--green);
-            border-color: rgba(0, 212, 170, 0.2);
+            background: var(--bg-secondary);
+            color: var(--accent);
+            border-color: rgba(187, 108, 67, 0.2);
             cursor: wait;
         }
 
@@ -1049,15 +1175,15 @@
             gap: 12px;
             margin-bottom: 20px;
             padding: 12px 16px;
-            background: rgba(45, 55, 72, 0.4);
-            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
             border-radius: 10px;
             transition: border-color 0.2s, background 0.2s;
         }
 
         .erase-option.active {
-            border-color: rgba(255, 107, 107, 0.35);
-            background: rgba(255, 107, 107, 0.06);
+            border-color: rgba(207, 34, 46, 0.25);
+            background: rgba(207, 34, 46, 0.04);
         }
 
         .erase-toggle {
@@ -1077,7 +1203,7 @@
             position: absolute;
             inset: 0;
             background: var(--bg-tertiary);
-            border: 1px solid var(--border-light);
+            border: 1px solid var(--border);
             border-radius: 11px;
             cursor: pointer;
             transition: background 0.25s, border-color 0.25s;
@@ -1090,14 +1216,14 @@
             left: 2px;
             width: 16px;
             height: 16px;
-            background: var(--text-secondary);
+            background: var(--text-muted);
             border-radius: 50%;
             transition: transform 0.25s, background 0.25s;
         }
 
         .erase-toggle input:checked + .erase-toggle__track {
-            background: rgba(255, 107, 107, 0.15);
-            border-color: rgba(255, 107, 107, 0.4);
+            background: rgba(207, 34, 46, 0.1);
+            border-color: rgba(207, 34, 46, 0.3);
         }
 
         .erase-toggle input:checked + .erase-toggle__track::after {
@@ -1152,27 +1278,26 @@
             font-family: var(--font-mono);
             font-size: 14px;
             font-weight: 600;
-            color: var(--green);
+            color: var(--accent);
         }
 
         .progress-bar-track {
             width: 100%;
             height: 8px;
-            background: var(--bg-primary);
+            background: var(--bg-tertiary);
             border-radius: 4px;
             overflow: hidden;
             position: relative;
-            border: 1px solid rgba(58, 71, 89, 0.3);
+            border: 1px solid var(--border-subtle);
         }
 
         .progress-bar-fill {
             height: 100%;
             width: 0%;
             border-radius: 3px;
-            background: linear-gradient(90deg, var(--green-dim), var(--green));
+            background: linear-gradient(90deg, var(--success-dark), var(--success));
             transition: width 0.3s ease;
             position: relative;
-            animation: progressGlow 2s ease-in-out infinite;
         }
 
         /* Shimmer effect on progress bar */
@@ -1180,7 +1305,7 @@
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.15) 50%, transparent 100%);
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
             background-size: 200% 100%;
             animation: shimmer 1.5s linear infinite;
         }
@@ -1190,8 +1315,8 @@
             max-height: 200px;
             overflow-y: auto;
             padding: 12px 14px;
-            background: rgba(28, 35, 51, 0.6);
-            border: 1px solid rgba(58, 71, 89, 0.3);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
             border-radius: 8px;
             font-family: var(--font-mono);
             font-size: 12px;
@@ -1203,7 +1328,7 @@
             display: block;
         }
 
-        .progress-log .log-green { color: var(--green); }
+        .progress-log .log-green { color: var(--success-dark); }
         .progress-log .log-orange { color: var(--orange); }
         .progress-log .log-red { color: var(--red); }
 
@@ -1227,10 +1352,9 @@
         }
 
         .flash-result__icon--success {
-            background: rgba(0, 212, 170, 0.1);
-            border: 2px solid rgba(0, 212, 170, 0.3);
-            color: var(--green);
-            animation: dotPulseGreen 2s ease-in-out infinite;
+            background: var(--success-light);
+            border: 2px solid rgba(45, 138, 86, 0.3);
+            color: var(--success);
         }
 
         .flash-result__icon--success svg {
@@ -1240,8 +1364,8 @@
         }
 
         .flash-result__icon--error {
-            background: rgba(255, 107, 107, 0.1);
-            border: 2px solid rgba(255, 107, 107, 0.3);
+            background: rgba(207, 34, 46, 0.08);
+            border: 2px solid rgba(207, 34, 46, 0.2);
             color: var(--red);
         }
 
@@ -1266,124 +1390,90 @@
             font-size: 14px;
             font-weight: 600;
             font-family: var(--font-sans);
-            border: 1px solid rgba(0, 212, 170, 0.3);
+            border: 1px solid rgba(187, 108, 67, 0.25);
             border-radius: 10px;
-            background: rgba(0, 160, 128, 0.1);
-            color: var(--green);
+            background: var(--accent-light);
+            color: var(--accent-dark);
             cursor: pointer;
             transition: all 0.25s;
         }
 
         .flash-result__btn:hover {
-            background: rgba(0, 160, 128, 0.2);
-            border-color: rgba(0, 212, 170, 0.5);
+            background: rgba(187, 108, 67, 0.15);
+            border-color: rgba(187, 108, 67, 0.4);
         }
 
         /* ── Footer ────────────────────────────────────── */
 
         .footer {
-            padding: 24px 32px 48px;
-            text-align: center;
+            border-top: 1px solid var(--border-subtle);
+            padding: 48px 32px;
+        }
+
+        .footer-inner {
+            max-width: 1200px;
+            margin: 0 auto;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 12px;
+            justify-content: space-between;
         }
 
-        .footer-divider {
-            width: 40px;
-            height: 1px;
-            background: var(--border-light);
-            margin: 0 0 8px;
-            opacity: 0.5;
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
         }
 
-        .footer-logo {
-            display: block;
-            width: 28px;
-            height: 28px;
-            margin: 0 auto 8px;
-            opacity: 0.4;
-        }
-        .footer-logo-link {
-            display: block;
-            text-align: center;
-            padding: 12px;
-            margin: -12px auto;
-            -webkit-tap-highlight-color: transparent;
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             text-decoration: none;
         }
-        .footer-logo-link:hover .footer-logo {
+
+        .footer-brand svg {
+            width: 22px;
+            height: 22px;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+
+        .footer-brand:hover svg {
             opacity: 1;
-            filter: drop-shadow(0 0 6px rgba(0, 212, 170, 0.3));
-            transition: opacity 0.4s, filter 0.4s;
         }
 
         .footer-built {
             font-size: 13px;
             color: var(--text-muted);
         }
+
         .footer-built a {
-            color: var(--green);
+            color: var(--accent-dark);
             text-decoration: none;
-            border-bottom: 1px solid transparent;
-            transition: border-color 0.2s;
+            transition: color 0.2s;
         }
-        .footer-built a:hover { border-bottom-color: var(--green); }
+
+        .footer-built a:hover {
+            color: var(--accent);
+        }
+
         .footer-links {
-            margin-top: 16px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 12px;
-            font-size: 13px;
+            gap: 24px;
+            font-size: 14px;
         }
+
         .footer-links a {
             color: var(--text-muted);
             text-decoration: none;
             transition: color 0.2s;
         }
-        .footer-links a:hover { color: var(--text-primary); }
-        .dot-sep { color: var(--border); }
 
-        /* ── Responsive ────────────────────────────────── */
-
-        @media (max-width: 768px) {
-            .navbar { padding: 0 20px; height: 64px; }
-            .navbar-left, .navbar-left a { gap: 13px; }
-            .navbar-logo { width: 25px; height: 25px; }
-            .navbar-title { font-size: 19px; }
-            .navbar-right { gap: 15px; }
-            .navbar-hamburger svg, .navbar-gh svg { width: 25px; height: 25px; }
-            .navbar-sep { height: 24px; }
-            .navbar-menu { top: 64px; }
-
-            .flash-hero { padding: 100px 20px 24px; }
-
-            .flash-container { padding: 0 16px; }
-
-            .device-grid {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-
-            .device-card { padding: 24px 20px 24px; }
-            .device-card__visual { height: 120px; }
-
-            .flash-panel { padding: 24px 20px; }
-
-            .flash-steps {
-                grid-template-columns: 1fr;
-            }
-
-            .flash-panel__header { flex-direction: column; align-items: flex-start; gap: 12px; }
-
-            .footer { padding: 36px 20px 36px; }
+        .footer-links a:hover {
+            color: var(--text-primary);
         }
 
-        @media (max-width: 480px) {
-            .flash-hero__title { letter-spacing: -1px; }
-        }
         /* ── Coming Soon Toast ─────────────────────────── */
 
         .coming-soon-toast {
@@ -1391,10 +1481,9 @@
             bottom: 32px;
             left: 50%;
             transform: translateX(-50%) translateY(20px);
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-left: 3px solid var(--green);
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-top: 2px solid var(--accent);
             border-radius: 10px;
             padding: 12px 20px;
             display: flex;
@@ -1407,7 +1496,7 @@
             visibility: hidden;
             transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
             z-index: 10000;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 8px 32px rgba(74, 65, 60, 0.12);
             pointer-events: none;
         }
 
@@ -1415,6 +1504,72 @@
             opacity: 1;
             visibility: visible;
             transform: translateX(-50%) translateY(0);
+        }
+
+        /* ── Dark Mode Overrides ─────────────────── */
+        [data-theme="dark"] .navbar {
+            background: rgba(26, 26, 30, 0.85);
+        }
+        [data-theme="dark"] .navbar.scrolled {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+        [data-theme="dark"] .navbar-menu {
+            background: var(--bg-primary);
+            border-color: var(--border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        [data-theme="dark"] .nr-btn:hover {
+            box-shadow: 0 4px 12px rgba(212, 136, 79, 0.3);
+        }
+
+        /* ── Responsive ────────────────────────────────── */
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0 20px;
+            }
+
+            .navbar-center { display: none; }
+            .navbar-gh { display: none; }
+
+            .navbar-hamburger { display: flex; }
+
+            .navbar-menu { display: flex; }
+
+            .flash-hero { padding: 96px 20px 40px; }
+
+            .flash-container { padding: 0 16px; }
+
+            .device-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .device-card { padding: 0 20px 20px; }
+            .device-card__visual { height: 140px; margin: 0 -20px 16px; }
+            .device-card::before { left: 20px; right: 20px; }
+            .device-card__badge { top: 70px; }
+
+            .flash-panel { padding: 24px 20px; }
+            .flash-panel__header { margin: -24px -20px 24px; padding: 20px; flex-direction: column; align-items: flex-start; gap: 12px; }
+
+            .flash-steps {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-inner {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .footer-left { flex-direction: column; gap: 12px; }
+        }
+
+        @media (max-width: 480px) {
+            .flash-hero__title { font-size: 28px; }
+            .device-card__visual { height: 120px; }
+            .device-card__badge { top: 60px; }
         }
     </style>
     <script type="application/ld+json">
@@ -1440,7 +1595,7 @@
 <nav class="navbar" id="navbar">
     <div class="navbar-left">
         <a href="index.html">
-            <svg class="navbar-logo" viewBox="243 243 282 282" fill="var(--green)" width="25" height="25">
+            <svg class="navbar-logo" viewBox="243 243 282 282" fill="var(--accent)" width="26" height="26">
                 <path d="M327.97,501.16C314.61,508.03 301.57,514.72 288.56,521.48C283.91,523.91 279.2,524.61 275.05,520.98C271.05,517.49 271.26,512.87 272.63,508.05C275.23,498.93 277.46,489.7 280.08,480.58C281.03,477.27 280.4,475.51 277.14,473.92C255.84,463.53 245.61,446.29 245.66,422.66C245.75,381.16 245.55,339.66 245.75,298.16C245.86,275.62 256.63,259.57 276.93,249.98C283.68,246.79 291.07,246.01 298.4,246C355.74,245.88 413.07,245.83 470.4,245.95C495.22,246.01 516.64,265.69 519.52,290.03C520.6,299.2 520.12,308.32 520.21,317.46C520.37,333.46 520.29,349.46 520.2,365.46C520.17,371.38 518.89,372.03 513.77,369.13C498.9,360.71 498.91,360.71 498.9,343.65C498.88,328.81 498.92,313.98 498.81,299.15C498.66,279.74 486.18,267.28 466.77,267.26C410.94,267.23 355.11,267.23 299.27,267.32C279.54,267.35 267.32,279.36 267.23,299.05C267.05,340.71 267.04,382.38 267.09,424.04C267.11,441.62 277.67,453.85 295.43,456.58C310.83,458.95 307.84,458.98 304.51,471.32C303.3,475.82 302.05,480.31 300.83,484.81C300.35,486.56 299.66,488.32 300.92,490.33C304.48,490.2 307.24,487.87 310.31,486.46C314.99,484.3 319.61,481.95 324.04,479.31C328.78,476.49 333.17,476.59 338.23,478.73C355.38,485.99 373.44,488.84 391.95,487.72C430.98,485.37 461.99,468.13 484.6,436.22C489.79,428.9 493.71,420.74 496.43,412.08C497.17,409.7 496.94,408 494.74,406.52C489.6,403.07 487.33,398.05 487.7,391.96C487.91,388.37 486.58,386.13 483.49,384.24C461.58,370.79 438.6,360.13 412.77,356.87C403.65,355.71 394.49,355.67 385.35,356.73C376.09,357.8 372.64,358.02 369.74,347.74C368.12,341.98 365.71,336.47 362.24,331.47C356.28,322.9 346.68,319.02 337.45,321.63C328.92,324.05 321.83,333.47 321.32,343.14C320.63,356 327.03,371.92 346.66,374.88C350.07,375.39 352.59,376.98 353.16,380.74C353.7,384.21 352.02,386.53 349.33,388.25C347.4,389.48 345.13,389.39 343,389.01C325.7,385.88 313.84,376.01 308.73,359.24C303.68,342.67 306.62,327.49 319.94,315.42C336.41,300.5 361.24,303.86 373.4,322.51C376.14,326.7 378.7,331.06 380.19,335.83C381.41,339.73 383.56,341.03 387.54,340.77C406.5,339.53 425.15,341.26 443.29,347.18C469.21,355.64 492.63,368.82 514.47,384.97C521.5,390.18 521.02,397.62 519.75,405.01C515.1,432.25 501.28,454.4 481.02,472.62C460.48,491.09 436.54,502.92 409.2,507.52C385.77,511.46 362.77,509.7 340.18,502.3C336.39,501.06 332.58,498.31 327.97,501.16z"/>
                 <path d="M414.19,335.38C405.75,335.93 397.65,334.86 389.54,335.84C387,336.15 385.78,334.06 384.8,332.07C380.73,323.83 376.21,315.95 368.77,310.17C366.48,308.38 367.23,307 369.43,305.62C379.53,299.3 389.62,299.22 399.19,306.49C408.52,313.58 414.08,323.09 414.19,335.38z"/>
                 <path d="M417.09,390.21C410.66,388.78 407.34,384.6 408.1,379.44C408.81,374.6 413.31,370.91 418.31,371.05C423.12,371.19 426.94,375.02 427.27,380C427.63,385.61 424.18,389.22 417.09,390.21z"/>
@@ -1450,25 +1605,37 @@
             <span class="navbar-title">Ratspeak</span>
         </a>
     </div>
+    <div class="navbar-center">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="docs.html">Docs</a>
+        <a href="download.html" class="nav-active">Download</a>
+    </div>
     <div class="navbar-right">
-        <button class="navbar-hamburger" id="navHamburger" aria-label="Menu">
-            <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+        <button class="navbar-theme" id="themeToggle" aria-label="Toggle theme">
+            <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
         </button>
-        <div class="navbar-sep"></div>
         <a href="https://github.com/ratspeak" class="navbar-gh" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-            <svg width="25" height="25" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
         </a>
+        <button class="navbar-hamburger" id="navHamburger" aria-label="Menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+        </button>
     </div>
 </nav>
-<div class="navbar-menu" id="navMenu">
-    <a href="download.html" class="menu-active">Download</a>
+<div class="navbar-menu" id="navMobileMenu">
+    <a href="index.html">Home</a>
     <a href="about.html">About</a>
     <a href="docs.html">Docs</a>
+    <a href="download.html" class="menu-active">Download</a>
+    <a href="https://github.com/ratspeak" target="_blank" rel="noopener noreferrer">GitHub</a>
 </div>
 
 <!-- ── Hero ────────────────────────────────────────────── -->
 <section class="flash-hero">
-    <h1 class="flash-hero__title">Download Ratspeak</h1>
+    <span class="flash-hero__eyebrow">Download</span>
+    <p class="flash-hero__sub">Flash firmware directly from your browser, or download the app.</p>
 </section>
 
 <!-- ── Main Content ────────────────────────────────────── -->
@@ -1477,10 +1644,10 @@
     <!-- Device Selection -->
     <div class="device-selection" id="deviceSelection">
 
-        <!-- Section 1: ESP / LoRa -->
+        <!-- Section 1: MCU -->
         <div class="download-section">
             <span class="download-section__label --green">01</span>
-            <h2 class="download-section__title">ESP / LoRa</h2>
+            <h2 class="download-section__title">MCU</h2>
             <div class="download-section__accent --green"></div>
 
             <div class="browser-warning" id="browserWarning">
@@ -1505,7 +1672,7 @@
                         <circle cx="100" cy="80" r="50" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.1" stroke-dasharray="8,6">
                             <animateTransform attributeName="transform" type="rotate" values="0 100 80;360 100 80" dur="25s" repeatCount="indefinite"/>
                         </circle>
-                        <!-- Handheld body — compact portrait like a Blackberry -->
+                        <!-- Handheld body -->
                         <rect x="65" y="20" width="70" height="118" rx="10" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6">
                             <animate attributeName="opacity" values="0.5;0.7;0.5" dur="4s" repeatCount="indefinite"/>
                         </rect>
@@ -1526,26 +1693,22 @@
                         <circle cx="80" cy="34" r="1" fill="currentColor" opacity="0.25"/>
                         <circle cx="84" cy="34" r="1" fill="currentColor" opacity="0.25"/>
                         <circle cx="88" cy="34" r="1" fill="currentColor" opacity="0.2"/>
-                        <!-- Trackball / nav button -->
+                        <!-- Trackball -->
                         <circle cx="100" cy="79" r="3.5" stroke="currentColor" stroke-width="1" fill="currentColor" fill-opacity="0.06" opacity="0.4"/>
                         <circle cx="100" cy="79" r="1.3" fill="currentColor" opacity="0.3">
                             <animate attributeName="opacity" values="0.2;0.5;0.2" dur="3s" repeatCount="indefinite"/>
                         </circle>
-                        <!-- Keyboard rows — compact QWERTY grid -->
+                        <!-- Keyboard rows -->
                         <g opacity="0.35">
-                            <!-- Row 1 -->
                             <rect x="74" y="88" width="7" height="5" rx="1" fill="currentColor"/><rect x="83" y="88" width="7" height="5" rx="1" fill="currentColor"/><rect x="92" y="88" width="7" height="5" rx="1" fill="currentColor"/><rect x="101" y="88" width="7" height="5" rx="1" fill="currentColor"/><rect x="110" y="88" width="7" height="5" rx="1" fill="currentColor"/><rect x="119" y="88" width="7" height="5" rx="1" fill="currentColor"/>
-                            <!-- Row 2 -->
                             <rect x="76" y="95" width="7" height="5" rx="1" fill="currentColor"/><rect x="85" y="95" width="7" height="5" rx="1" fill="currentColor"/><rect x="94" y="95" width="7" height="5" rx="1" fill="currentColor"/><rect x="103" y="95" width="7" height="5" rx="1" fill="currentColor"/><rect x="112" y="95" width="7" height="5" rx="1" fill="currentColor"/><rect x="121" y="95" width="5" height="5" rx="1" fill="currentColor"/>
-                            <!-- Row 3 -->
                             <rect x="74" y="102" width="7" height="5" rx="1" fill="currentColor"/><rect x="83" y="102" width="7" height="5" rx="1" fill="currentColor"/><rect x="92" y="102" width="7" height="5" rx="1" fill="currentColor"/><rect x="101" y="102" width="7" height="5" rx="1" fill="currentColor"/><rect x="110" y="102" width="7" height="5" rx="1" fill="currentColor"/><rect x="119" y="102" width="7" height="5" rx="1" fill="currentColor"/>
-                            <!-- Row 4 — spacebar row -->
                             <rect x="76" y="109" width="7" height="5" rx="1" fill="currentColor"/><rect x="85" y="109" width="30" height="5" rx="1" fill="currentColor"/><rect x="117" y="109" width="7" height="5" rx="1" fill="currentColor"/>
                         </g>
-                        <!-- Antenna stub at top -->
+                        <!-- Antenna stub -->
                         <line x1="100" y1="20" x2="100" y2="12" stroke="currentColor" stroke-width="1.5" opacity="0.4" stroke-linecap="round"/>
                         <circle cx="100" cy="11" r="1.5" fill="currentColor" opacity="0.3"/>
-                        <!-- Radio waves from top -->
+                        <!-- Radio waves -->
                         <path d="M92 16 Q88 10 92 5" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.25">
                             <animate attributeName="opacity" values="0.1;0.45;0.1" dur="3s" repeatCount="indefinite"/>
                         </path>
@@ -1565,10 +1728,7 @@
                     </svg>
                 </div>
                 <h3 class="device-card__name">T-Deck Plus</h3>
-                <div class="device-card__specs">
-                    <span class="device-card__spec">ESP32-S3</span>
-                    <span class="device-card__spec">LoRa SX1262</span>
-                </div>
+                <p class="device-card__desc">A handheld all-in-one by LilyGo</p>
                 <div class="device-card__arrow">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
                 </div>
@@ -1584,46 +1744,35 @@
                                 <feComposite in="SourceGraphic" in2="blur" operator="over"/>
                             </filter>
                         </defs>
-                        <!-- Ambient -->
                         <circle cx="100" cy="80" r="55" fill="currentColor" opacity="0.03"/>
                         <circle cx="100" cy="80" r="45" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.1" stroke-dasharray="6,8">
                             <animateTransform attributeName="transform" type="rotate" values="360 100 80;0 100 80" dur="22s" repeatCount="indefinite"/>
                         </circle>
-                        <!-- Compact device body -->
                         <rect x="50" y="40" width="100" height="70" rx="10" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6">
                             <animate attributeName="opacity" values="0.5;0.7;0.5" dur="4.5s" repeatCount="indefinite"/>
                         </rect>
-                        <!-- Screen -->
                         <rect x="58" y="46" width="84" height="36" rx="4" stroke="currentColor" stroke-width="1" fill="currentColor" fill-opacity="0.04" opacity="0.5"/>
-                        <!-- Screen content — terminal style -->
                         <text x="64" y="58" font-family="monospace" font-size="6" fill="currentColor" opacity="0.4">&gt; ratspeak</text>
                         <text x="64" y="66" font-family="monospace" font-size="6" fill="currentColor" opacity="0.3">  mesh ready</text>
                         <text x="64" y="74" font-family="monospace" font-size="6" fill="currentColor" opacity="0.3">&gt; _</text>
-                        <!-- Cursor blink -->
                         <rect x="72" y="70" width="5" height="6" fill="currentColor" opacity="0.5">
                             <animate attributeName="opacity" values="0;0.5;0" dur="1.2s" repeatCount="indefinite"/>
                         </rect>
-                        <!-- Status LED -->
                         <circle cx="138" cy="49" r="2" fill="currentColor" filter="url(#glow-b)">
                             <animate attributeName="opacity" values="0.3;0.9;0.3" dur="2.2s" repeatCount="indefinite"/>
                         </circle>
-                        <!-- Mini keyboard -->
                         <g opacity="0.3">
                             <rect x="58" y="88" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="66" y="88" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="74" y="88" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="82" y="88" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="90" y="88" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="98" y="88" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="106" y="88" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="114" y="88" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="122" y="88" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="130" y="88" width="6" height="4" rx="0.8" fill="currentColor"/>
                             <rect x="61" y="94" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="69" y="94" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="77" y="94" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="85" y="94" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="93" y="94" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="101" y="94" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="109" y="94" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="117" y="94" width="6" height="4" rx="0.8" fill="currentColor"/><rect x="125" y="94" width="6" height="4" rx="0.8" fill="currentColor"/>
                             <rect x="73" y="100" width="46" height="4" rx="0.8" fill="currentColor"/>
                         </g>
-                        <!-- Scanning particle -->
                         <circle r="1.2" fill="currentColor" opacity="0.6">
                             <animateMotion dur="3.5s" repeatCount="indefinite" path="M64,58 L130,58 L130,74 L64,74 Z"/>
                         </circle>
                     </svg>
                 </div>
                 <h3 class="device-card__name">Cardputer Adv</h3>
-                <div class="device-card__specs">
-                    <span class="device-card__spec">ESP32-S3</span>
-                    <span class="device-card__spec">Compact</span>
-                </div>
+                <p class="device-card__desc">M5Stack's pocket computer</p>
                 <div class="device-card__arrow">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
                 </div>
@@ -1639,41 +1788,33 @@
                                 <feComposite in="SourceGraphic" in2="blur" operator="over"/>
                             </filter>
                         </defs>
-                        <!-- Ambient -->
                         <circle cx="100" cy="80" r="55" fill="currentColor" opacity="0.03"/>
-                        <!-- Orbiting ring -->
                         <circle cx="100" cy="80" r="48" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.12" stroke-dasharray="4,10">
                             <animateTransform attributeName="transform" type="rotate" values="0 100 80;360 100 80" dur="18s" repeatCount="indefinite"/>
                         </circle>
-                        <!-- MCU chip body -->
                         <rect x="72" y="52" width="56" height="56" rx="4" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.5">
                             <animate attributeName="opacity" values="0.4;0.65;0.4" dur="5s" repeatCount="indefinite"/>
                         </rect>
-                        <!-- Chip die -->
                         <rect x="82" y="62" width="36" height="36" rx="2" stroke="currentColor" stroke-width="0.8" fill="currentColor" fill-opacity="0.04" opacity="0.5"/>
-                        <!-- Center glow -->
                         <circle cx="100" cy="80" r="6" fill="currentColor" filter="url(#glow-p)">
                             <animate attributeName="r" values="4;8;4" dur="3s" repeatCount="indefinite"/>
                             <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3s" repeatCount="indefinite"/>
                         </circle>
-                        <!-- Pins — left -->
+                        <!-- Pins -->
                         <line x1="72" y1="62" x2="60" y2="62" stroke="currentColor" stroke-width="1" opacity="0.3"/>
                         <line x1="72" y1="72" x2="60" y2="72" stroke="currentColor" stroke-width="1" opacity="0.3"/>
                         <line x1="72" y1="82" x2="60" y2="82" stroke="currentColor" stroke-width="1" opacity="0.3"/>
                         <line x1="72" y1="92" x2="60" y2="92" stroke="currentColor" stroke-width="1" opacity="0.3"/>
                         <line x1="72" y1="98" x2="60" y2="98" stroke="currentColor" stroke-width="1" opacity="0.3"/>
-                        <!-- Pins — right -->
                         <line x1="128" y1="62" x2="140" y2="62" stroke="currentColor" stroke-width="1" opacity="0.3"/>
                         <line x1="128" y1="72" x2="140" y2="72" stroke="currentColor" stroke-width="1" opacity="0.3"/>
                         <line x1="128" y1="82" x2="140" y2="82" stroke="currentColor" stroke-width="1" opacity="0.3"/>
                         <line x1="128" y1="92" x2="140" y2="92" stroke="currentColor" stroke-width="1" opacity="0.3"/>
                         <line x1="128" y1="98" x2="140" y2="98" stroke="currentColor" stroke-width="1" opacity="0.3"/>
-                        <!-- Pins — top -->
                         <line x1="85" y1="52" x2="85" y2="40" stroke="currentColor" stroke-width="1" opacity="0.3"/>
                         <line x1="95" y1="52" x2="95" y2="40" stroke="currentColor" stroke-width="1" opacity="0.3"/>
                         <line x1="105" y1="52" x2="105" y2="40" stroke="currentColor" stroke-width="1" opacity="0.3"/>
                         <line x1="115" y1="52" x2="115" y2="40" stroke="currentColor" stroke-width="1" opacity="0.3"/>
-                        <!-- Pins — bottom -->
                         <line x1="85" y1="108" x2="85" y2="120" stroke="currentColor" stroke-width="1" opacity="0.3"/>
                         <line x1="95" y1="108" x2="95" y2="120" stroke="currentColor" stroke-width="1" opacity="0.3"/>
                         <line x1="105" y1="108" x2="105" y2="120" stroke="currentColor" stroke-width="1" opacity="0.3"/>
@@ -1700,10 +1841,7 @@
                     </svg>
                 </div>
                 <h3 class="device-card__name">Custom Firmware</h3>
-                <div class="device-card__specs">
-                    <span class="device-card__spec">ESP32 / S2 / S3 / C3</span>
-                    <span class="device-card__spec">.bin / .zip</span>
-                </div>
+                <p class="device-card__desc">Flash your own ESP32 device</p>
                 <div class="device-card__arrow">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
                 </div>
@@ -1715,68 +1853,12 @@
         <!-- Section 2: Desktop -->
         <div class="download-section">
             <span class="download-section__label --blue">02</span>
-            <h2 class="download-section__title">Desktop (Coming Soon)</h2>
+            <h2 class="download-section__title">Desktop</h2>
             <div class="download-section__accent --blue"></div>
             <div class="device-grid" id="desktopGrid">
 
-                <!-- Windows -->
-                <a href="#" onclick="showComingSoon(event)" class="device-card device-card--blue">
-                    <span class="device-card__badge">Coming Soon</span>
-                    <div class="device-card__visual">
-                        <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <filter id="glow-win" x="-50%" y="-50%" width="200%" height="200%">
-                                    <feGaussianBlur stdDeviation="3" result="blur"/>
-                                    <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-                                </filter>
-                            </defs>
-                            <!-- Ambient -->
-                            <circle cx="100" cy="80" r="60" fill="currentColor" opacity="0.03"/>
-                            <circle cx="100" cy="80" r="50" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.1" stroke-dasharray="8,6">
-                                <animateTransform attributeName="transform" type="rotate" values="0 100 80;360 100 80" dur="28s" repeatCount="indefinite"/>
-                            </circle>
-                            <!-- Monitor body -->
-                            <rect x="52" y="28" width="96" height="72" rx="6" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6">
-                                <animate attributeName="opacity" values="0.5;0.7;0.5" dur="4s" repeatCount="indefinite"/>
-                            </rect>
-                            <!-- Screen bezel -->
-                            <rect x="58" y="34" width="84" height="56" rx="3" stroke="currentColor" stroke-width="0.5" fill="currentColor" fill-opacity="0.03" opacity="0.4"/>
-                            <!-- Title bar -->
-                            <rect x="62" y="38" width="76" height="8" rx="1.5" fill="currentColor" fill-opacity="0.06" opacity="0.5"/>
-                            <circle cx="67" cy="42" r="1.5" fill="currentColor" opacity="0.3"/>
-                            <circle cx="73" cy="42" r="1.5" fill="currentColor" opacity="0.25"/>
-                            <circle cx="79" cy="42" r="1.5" fill="currentColor" opacity="0.2"/>
-                            <!-- Content lines -->
-                            <line x1="66" y1="54" x2="110" y2="54" stroke="currentColor" stroke-width="1" opacity="0.25" stroke-linecap="round"/>
-                            <line x1="66" y1="60" x2="125" y2="60" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
-                            <line x1="66" y1="66" x2="118" y2="66" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
-                            <line x1="66" y1="72" x2="98" y2="72" stroke="currentColor" stroke-width="1" opacity="0.15" stroke-linecap="round"/>
-                            <line x1="66" y1="78" x2="108" y2="78" stroke="currentColor" stroke-width="1" opacity="0.15" stroke-linecap="round"/>
-                            <!-- Mesh icon pulsing -->
-                            <circle cx="130" cy="80" r="3" fill="currentColor" filter="url(#glow-win)">
-                                <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2.5s" repeatCount="indefinite"/>
-                            </circle>
-                            <!-- Stand -->
-                            <line x1="100" y1="100" x2="100" y2="114" stroke="currentColor" stroke-width="1.5" opacity="0.35"/>
-                            <line x1="80" y1="114" x2="120" y2="114" stroke="currentColor" stroke-width="1.5" opacity="0.35" stroke-linecap="round"/>
-                            <!-- Data particle -->
-                            <circle r="1.2" fill="currentColor" opacity="0.6">
-                                <animateMotion dur="3s" repeatCount="indefinite" path="M66,54 L125,60 L118,66 L66,72 Z"/>
-                            </circle>
-                        </svg>
-                    </div>
-                    <h3 class="device-card__name">Windows</h3>
-                    <div class="device-card__specs">
-                        <span class="device-card__spec">x86_64</span>
-                        <span class="device-card__spec">Windows 10+</span>
-                    </div>
-                    <div class="device-card__arrow">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
-                    </div>
-                </a>
-
                 <!-- macOS -->
-                <a href="#" onclick="showComingSoon(event)" class="device-card device-card--purple">
+                <a href="#" onclick="showComingSoon(event)" class="device-card device-card--blue">
                     <span class="device-card__badge">Coming Soon</span>
                     <div class="device-card__visual">
                         <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1786,47 +1868,79 @@
                                     <feComposite in="SourceGraphic" in2="blur" operator="over"/>
                                 </filter>
                             </defs>
-                            <!-- Ambient -->
                             <circle cx="100" cy="80" r="58" fill="currentColor" opacity="0.03"/>
                             <circle cx="100" cy="80" r="48" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.1" stroke-dasharray="6,8">
                                 <animateTransform attributeName="transform" type="rotate" values="360 100 80;0 100 80" dur="24s" repeatCount="indefinite"/>
                             </circle>
-                            <!-- Laptop screen -->
                             <rect x="52" y="26" width="96" height="68" rx="6" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6">
                                 <animate attributeName="opacity" values="0.5;0.7;0.5" dur="4.5s" repeatCount="indefinite"/>
                             </rect>
-                            <!-- Screen inner -->
                             <rect x="58" y="32" width="84" height="54" rx="3" stroke="currentColor" stroke-width="0.5" fill="currentColor" fill-opacity="0.03" opacity="0.4"/>
-                            <!-- UI content lines -->
                             <line x1="66" y1="44" x2="105" y2="44" stroke="currentColor" stroke-width="1" opacity="0.25" stroke-linecap="round"/>
                             <line x1="66" y1="50" x2="120" y2="50" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
                             <line x1="66" y1="56" x2="112" y2="56" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
-                            <!-- Chat bubbles -->
                             <rect x="66" y="62" width="40" height="10" rx="5" fill="currentColor" fill-opacity="0.06" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
                             <rect x="90" y="74" width="36" height="10" rx="5" fill="currentColor" fill-opacity="0.08" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
-                            <!-- Command key symbol -->
                             <rect x="128" y="38" width="8" height="8" rx="2" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.3">
                                 <animate attributeName="opacity" values="0.2;0.5;0.2" dur="3s" repeatCount="indefinite"/>
                             </rect>
-                            <!-- Laptop base -->
                             <path d="M42 94 L52 94 L52 98 L148 98 L148 94 L158 94 L158 100 C158 103 155 106 152 106 L48 106 C45 106 42 103 42 100 Z" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.35"/>
-                            <!-- Trackpad line -->
                             <line x1="88" y1="100" x2="112" y2="100" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
-                            <!-- Status LED -->
                             <circle cx="100" cy="29" r="1.5" fill="currentColor" filter="url(#glow-mac)">
                                 <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2.2s" repeatCount="indefinite"/>
                             </circle>
-                            <!-- Data particle -->
                             <circle r="1.2" fill="currentColor" opacity="0.6">
                                 <animateMotion dur="3.5s" repeatCount="indefinite" path="M66,44 L120,50 L112,56 L66,62 Z"/>
                             </circle>
                         </svg>
                     </div>
                     <h3 class="device-card__name">macOS</h3>
-                    <div class="device-card__specs">
-                        <span class="device-card__spec">Apple Silicon / Intel</span>
-                        <span class="device-card__spec">macOS 12+</span>
+                    <p class="device-card__desc">Apple Silicon / Intel</p>
+                    <div class="device-card__arrow">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
                     </div>
+                </a>
+
+                <!-- Windows -->
+                <a href="#" onclick="showComingSoon(event)" class="device-card device-card--purple">
+                    <span class="device-card__badge">Coming Soon</span>
+                    <div class="device-card__visual">
+                        <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <filter id="glow-win" x="-50%" y="-50%" width="200%" height="200%">
+                                    <feGaussianBlur stdDeviation="3" result="blur"/>
+                                    <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                                </filter>
+                            </defs>
+                            <circle cx="100" cy="80" r="60" fill="currentColor" opacity="0.03"/>
+                            <circle cx="100" cy="80" r="50" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.1" stroke-dasharray="8,6">
+                                <animateTransform attributeName="transform" type="rotate" values="0 100 80;360 100 80" dur="28s" repeatCount="indefinite"/>
+                            </circle>
+                            <rect x="52" y="28" width="96" height="72" rx="6" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6">
+                                <animate attributeName="opacity" values="0.5;0.7;0.5" dur="4s" repeatCount="indefinite"/>
+                            </rect>
+                            <rect x="58" y="34" width="84" height="56" rx="3" stroke="currentColor" stroke-width="0.5" fill="currentColor" fill-opacity="0.03" opacity="0.4"/>
+                            <rect x="62" y="38" width="76" height="8" rx="1.5" fill="currentColor" fill-opacity="0.06" opacity="0.5"/>
+                            <circle cx="67" cy="42" r="1.5" fill="currentColor" opacity="0.3"/>
+                            <circle cx="73" cy="42" r="1.5" fill="currentColor" opacity="0.25"/>
+                            <circle cx="79" cy="42" r="1.5" fill="currentColor" opacity="0.2"/>
+                            <line x1="66" y1="54" x2="110" y2="54" stroke="currentColor" stroke-width="1" opacity="0.25" stroke-linecap="round"/>
+                            <line x1="66" y1="60" x2="125" y2="60" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
+                            <line x1="66" y1="66" x2="118" y2="66" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
+                            <line x1="66" y1="72" x2="98" y2="72" stroke="currentColor" stroke-width="1" opacity="0.15" stroke-linecap="round"/>
+                            <line x1="66" y1="78" x2="108" y2="78" stroke="currentColor" stroke-width="1" opacity="0.15" stroke-linecap="round"/>
+                            <circle cx="130" cy="80" r="3" fill="currentColor" filter="url(#glow-win)">
+                                <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2.5s" repeatCount="indefinite"/>
+                            </circle>
+                            <line x1="100" y1="100" x2="100" y2="114" stroke="currentColor" stroke-width="1.5" opacity="0.35"/>
+                            <line x1="80" y1="114" x2="120" y2="114" stroke="currentColor" stroke-width="1.5" opacity="0.35" stroke-linecap="round"/>
+                            <circle r="1.2" fill="currentColor" opacity="0.6">
+                                <animateMotion dur="3s" repeatCount="indefinite" path="M66,54 L125,60 L118,66 L66,72 Z"/>
+                            </circle>
+                        </svg>
+                    </div>
+                    <h3 class="device-card__name">Windows</h3>
+                    <p class="device-card__desc">Windows 10 / 11</p>
                     <div class="device-card__arrow">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
                     </div>
@@ -1843,16 +1957,13 @@
                                     <feComposite in="SourceGraphic" in2="blur" operator="over"/>
                                 </filter>
                             </defs>
-                            <!-- Ambient -->
                             <circle cx="100" cy="80" r="58" fill="currentColor" opacity="0.03"/>
                             <circle cx="100" cy="80" r="48" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.1" stroke-dasharray="5,9">
                                 <animateTransform attributeName="transform" type="rotate" values="0 100 80;360 100 80" dur="20s" repeatCount="indefinite"/>
                             </circle>
-                            <!-- Terminal window -->
                             <rect x="52" y="28" width="96" height="100" rx="6" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6">
                                 <animate attributeName="opacity" values="0.5;0.7;0.5" dur="4s" repeatCount="indefinite"/>
                             </rect>
-                            <!-- Title bar -->
                             <rect x="52" y="28" width="96" height="14" rx="6" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-width="0.5" opacity="0.25"/>
                             <rect x="52" y="36" width="96" height="6" fill="currentColor" fill-opacity="0.04" stroke="none" opacity="0.15"/>
                             <circle cx="63" cy="35" r="2" fill="currentColor" opacity="0.4">
@@ -1860,16 +1971,13 @@
                             </circle>
                             <circle cx="71" cy="35" r="2" fill="currentColor" opacity="0.2"/>
                             <circle cx="79" cy="35" r="2" fill="currentColor" opacity="0.2"/>
-                            <!-- Terminal text -->
                             <text x="62" y="56" font-family="monospace" font-size="7" fill="currentColor" opacity="0.45">&gt; ratspeak</text>
                             <text x="62" y="68" font-family="monospace" font-size="7" fill="currentColor" opacity="0.3">  mesh: active</text>
                             <text x="62" y="80" font-family="monospace" font-size="7" fill="currentColor" opacity="0.3">  peers: 3</text>
                             <text x="62" y="92" font-family="monospace" font-size="7" fill="currentColor" opacity="0.35">&gt; _</text>
-                            <!-- Blinking cursor -->
                             <rect x="72" y="86" width="5" height="7" fill="currentColor" opacity="0.5">
                                 <animate attributeName="opacity" values="0;0.5;0" dur="1.2s" repeatCount="indefinite"/>
                             </rect>
-                            <!-- Connection lines radiating from corners -->
                             <line x1="52" y1="28" x2="38" y2="16" stroke="currentColor" stroke-width="0.8" opacity="0.15">
                                 <animate attributeName="opacity" values="0.1;0.3;0.1" dur="3s" repeatCount="indefinite"/>
                             </line>
@@ -1882,24 +1990,144 @@
                             <line x1="148" y1="128" x2="162" y2="140" stroke="currentColor" stroke-width="0.8" opacity="0.15">
                                 <animate attributeName="opacity" values="0.1;0.3;0.1" dur="3s" repeatCount="indefinite" begin="1.5s"/>
                             </line>
-                            <!-- Node dots at line ends -->
                             <circle cx="38" cy="16" r="2" fill="currentColor" filter="url(#glow-lin)" opacity="0.3">
                                 <animate attributeName="opacity" values="0.2;0.5;0.2" dur="3s" repeatCount="indefinite"/>
                             </circle>
                             <circle cx="162" cy="16" r="2" fill="currentColor" opacity="0.2">
                                 <animate attributeName="opacity" values="0.15;0.4;0.15" dur="3s" repeatCount="indefinite" begin="0.5s"/>
                             </circle>
-                            <!-- Data particle along text -->
                             <circle r="1.2" fill="currentColor" opacity="0.6">
                                 <animateMotion dur="3s" repeatCount="indefinite" path="M62,56 L130,56 L130,80 L62,80 Z"/>
                             </circle>
                         </svg>
                     </div>
                     <h3 class="device-card__name">Linux</h3>
-                    <div class="device-card__specs">
-                        <span class="device-card__spec">x86_64 / ARM64</span>
-                        <span class="device-card__spec">AppImage / .deb</span>
+                    <p class="device-card__desc">Ubuntu / Debian</p>
+                    <div class="device-card__arrow">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
                     </div>
+                </a>
+
+            </div>
+        </div>
+
+        <!-- Section 3: Mobile -->
+        <div class="download-section">
+            <span class="download-section__label --green">03</span>
+            <h2 class="download-section__title">Mobile</h2>
+            <div class="download-section__accent --green"></div>
+
+            <div class="device-grid device-grid--two" id="mobileGrid">
+
+                <!-- iOS -->
+                <a href="#" onclick="showComingSoon(event)" class="device-card device-card--blue">
+                    <span class="device-card__badge">Coming Soon</span>
+                    <div class="device-card__visual">
+                        <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <filter id="glow-ios" x="-50%" y="-50%" width="200%" height="200%">
+                                    <feGaussianBlur stdDeviation="3" result="blur"/>
+                                    <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                                </filter>
+                            </defs>
+                            <!-- Ambient -->
+                            <circle cx="100" cy="80" r="58" fill="currentColor" opacity="0.03"/>
+                            <circle cx="100" cy="80" r="48" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.1" stroke-dasharray="6,8">
+                                <animateTransform attributeName="transform" type="rotate" values="0 100 80;360 100 80" dur="22s" repeatCount="indefinite"/>
+                            </circle>
+                            <!-- Phone body -->
+                            <rect x="72" y="16" width="56" height="128" rx="12" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6">
+                                <animate attributeName="opacity" values="0.5;0.7;0.5" dur="4s" repeatCount="indefinite"/>
+                            </rect>
+                            <!-- Inner bezel -->
+                            <rect x="76" y="24" width="48" height="112" rx="8" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.15"/>
+                            <!-- Screen -->
+                            <rect x="78" y="30" width="44" height="100" rx="6" stroke="currentColor" stroke-width="0.5" fill="currentColor" fill-opacity="0.03" opacity="0.4"/>
+                            <!-- Status bar -->
+                            <line x1="84" y1="36" x2="96" y2="36" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
+                            <line x1="108" y1="36" x2="116" y2="36" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
+                            <!-- Notch / Dynamic Island -->
+                            <rect x="93" y="26" width="14" height="4" rx="2" fill="currentColor" opacity="0.15"/>
+                            <!-- Content lines -->
+                            <line x1="84" y1="50" x2="108" y2="50" stroke="currentColor" stroke-width="1" opacity="0.3" stroke-linecap="round"/>
+                            <line x1="84" y1="58" x2="116" y2="58" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
+                            <line x1="84" y1="66" x2="112" y2="66" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
+                            <line x1="84" y1="74" x2="100" y2="74" stroke="currentColor" stroke-width="1" opacity="0.15" stroke-linecap="round"/>
+                            <!-- Chat bubbles -->
+                            <rect x="84" y="84" width="28" height="12" rx="6" fill="currentColor" fill-opacity="0.06" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
+                            <rect x="96" y="100" width="22" height="12" rx="6" fill="currentColor" fill-opacity="0.08" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
+                            <!-- Signal indicator -->
+                            <circle cx="100" cy="32" r="1.5" fill="currentColor" filter="url(#glow-ios)">
+                                <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2s" repeatCount="indefinite"/>
+                            </circle>
+                            <!-- Home indicator -->
+                            <line x1="92" y1="126" x2="108" y2="126" stroke="currentColor" stroke-width="2" opacity="0.15" stroke-linecap="round"/>
+                            <!-- Data flow -->
+                            <circle r="1.2" fill="currentColor" opacity="0.6">
+                                <animateMotion dur="3s" repeatCount="indefinite" path="M84,50 L116,58 L112,66 L84,74 Z"/>
+                            </circle>
+                        </svg>
+                    </div>
+                    <h3 class="device-card__name">iOS</h3>
+                    <p class="device-card__desc">iOS 13 or newer</p>
+                    <div class="device-card__arrow">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
+                    </div>
+                </a>
+
+                <!-- Android -->
+                <a href="#" onclick="showComingSoon(event)" class="device-card device-card--green">
+                    <span class="device-card__badge">Coming Soon</span>
+                    <div class="device-card__visual">
+                        <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <filter id="glow-android" x="-50%" y="-50%" width="200%" height="200%">
+                                    <feGaussianBlur stdDeviation="3" result="blur"/>
+                                    <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                                </filter>
+                            </defs>
+                            <!-- Ambient -->
+                            <circle cx="100" cy="80" r="58" fill="currentColor" opacity="0.03"/>
+                            <circle cx="100" cy="80" r="48" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.1" stroke-dasharray="7,5">
+                                <animateTransform attributeName="transform" type="rotate" values="360 100 80;0 100 80" dur="20s" repeatCount="indefinite"/>
+                            </circle>
+                            <!-- Phone body -->
+                            <rect x="72" y="16" width="56" height="128" rx="10" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6">
+                                <animate attributeName="opacity" values="0.5;0.7;0.5" dur="4.2s" repeatCount="indefinite"/>
+                            </rect>
+                            <!-- Inner bezel -->
+                            <rect x="76" y="22" width="48" height="116" rx="7" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.15"/>
+                            <!-- Screen -->
+                            <rect x="78" y="28" width="44" height="104" rx="5" stroke="currentColor" stroke-width="0.5" fill="currentColor" fill-opacity="0.03" opacity="0.4"/>
+                            <!-- Status bar -->
+                            <line x1="84" y1="34" x2="100" y2="34" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
+                            <line x1="110" y1="34" x2="118" y2="34" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
+                            <!-- Camera punch-hole -->
+                            <circle cx="100" cy="24" r="2" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.15"/>
+                            <!-- Content lines -->
+                            <line x1="84" y1="48" x2="112" y2="48" stroke="currentColor" stroke-width="1" opacity="0.3" stroke-linecap="round"/>
+                            <line x1="84" y1="56" x2="118" y2="56" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
+                            <line x1="84" y1="64" x2="108" y2="64" stroke="currentColor" stroke-width="1" opacity="0.2" stroke-linecap="round"/>
+                            <line x1="84" y1="72" x2="100" y2="72" stroke="currentColor" stroke-width="1" opacity="0.15" stroke-linecap="round"/>
+                            <!-- App cards -->
+                            <rect x="84" y="82" width="32" height="14" rx="4" fill="currentColor" fill-opacity="0.06" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
+                            <rect x="84" y="100" width="26" height="14" rx="4" fill="currentColor" fill-opacity="0.08" stroke="currentColor" stroke-width="0.5" opacity="0.3"/>
+                            <!-- Navigation bar -->
+                            <line x1="88" y1="126" x2="96" y2="126" stroke="currentColor" stroke-width="1.5" opacity="0.15" stroke-linecap="round"/>
+                            <circle cx="100" cy="126" r="2" stroke="currentColor" stroke-width="1" fill="none" opacity="0.15"/>
+                            <rect x="106" y="124.5" width="6" height="3" rx="1" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.15"/>
+                            <!-- Signal indicator -->
+                            <circle cx="84" cy="24" r="1.5" fill="currentColor" filter="url(#glow-android)">
+                                <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2.4s" repeatCount="indefinite"/>
+                            </circle>
+                            <!-- Data flow -->
+                            <circle r="1.2" fill="currentColor" opacity="0.6">
+                                <animateMotion dur="3.2s" repeatCount="indefinite" path="M84,48 L118,56 L108,64 L84,72 Z"/>
+                            </circle>
+                        </svg>
+                    </div>
+                    <h3 class="device-card__name">Android</h3>
+                    <p class="device-card__desc">Android 10 or newer</p>
                     <div class="device-card__arrow">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
                     </div>
@@ -1950,15 +2178,19 @@
 
                     <!-- Pre-configured firmware (for tdeck/cardputer) -->
                     <div id="firmwarePreset" style="display: none;">
-                        <div class="firmware-ready">
+                        <div class="firmware-ready" id="firmwareReadyBox">
                             <div class="firmware-ready__icon">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                             </div>
                             <div>
-                                <a class="firmware-ready__name" id="presetName" href="#" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: inherit;">Loading... <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; opacity: 0.5;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+                                <button class="firmware-version-btn" id="versionBtn" type="button">
+                                    <span id="presetName">Loading...</span>
+                                    <svg class="firmware-version-chevron" id="versionChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                                </button>
                                 <div class="firmware-ready__size" id="presetSize">Bundled &middot; Ready to flash</div>
                             </div>
                         </div>
+                        <div class="firmware-versions" id="versionDropdown" style="display: none;"></div>
                     </div>
 
                     <!-- Custom file upload -->
@@ -2027,30 +2259,58 @@
 
 <!-- ── Footer ──────────────────────────────────────────── -->
 <footer class="footer">
-    <div class="footer-divider"></div>
-    <a href="letter.html" class="footer-logo-link" aria-label="A letter">
-        <svg class="footer-logo" viewBox="243 243 282 282" fill="var(--text-muted)">
-            <path d="M327.97,501.16C314.61,508.03 301.57,514.72 288.56,521.48C283.91,523.91 279.2,524.61 275.05,520.98C271.05,517.49 271.26,512.87 272.63,508.05C275.23,498.93 277.46,489.7 280.08,480.58C281.03,477.27 280.4,475.51 277.14,473.92C255.84,463.53 245.61,446.29 245.66,422.66C245.75,381.16 245.55,339.66 245.75,298.16C245.86,275.62 256.63,259.57 276.93,249.98C283.68,246.79 291.07,246.01 298.4,246C355.74,245.88 413.07,245.83 470.4,245.95C495.22,246.01 516.64,265.69 519.52,290.03C520.6,299.2 520.12,308.32 520.21,317.46C520.37,333.46 520.29,349.46 520.2,365.46C520.17,371.38 518.89,372.03 513.77,369.13C498.9,360.71 498.91,360.71 498.9,343.65C498.88,328.81 498.92,313.98 498.81,299.15C498.66,279.74 486.18,267.28 466.77,267.26C410.94,267.23 355.11,267.23 299.27,267.32C279.54,267.35 267.32,279.36 267.23,299.05C267.05,340.71 267.04,382.38 267.09,424.04C267.11,441.62 277.67,453.85 295.43,456.58C310.83,458.95 307.84,458.98 304.51,471.32C303.3,475.82 302.05,480.31 300.83,484.81C300.35,486.56 299.66,488.32 300.92,490.33C304.48,490.2 307.24,487.87 310.31,486.46C314.99,484.3 319.61,481.95 324.04,479.31C328.78,476.49 333.17,476.59 338.23,478.73C355.38,485.99 373.44,488.84 391.95,487.72C430.98,485.37 461.99,468.13 484.6,436.22C489.79,428.9 493.71,420.74 496.43,412.08C497.17,409.7 496.94,408 494.74,406.52C489.6,403.07 487.33,398.05 487.7,391.96C487.91,388.37 486.58,386.13 483.49,384.24C461.58,370.79 438.6,360.13 412.77,356.87C403.65,355.71 394.49,355.67 385.35,356.73C376.09,357.8 372.64,358.02 369.74,347.74C368.12,341.98 365.71,336.47 362.24,331.47C356.28,322.9 346.68,319.02 337.45,321.63C328.92,324.05 321.83,333.47 321.32,343.14C320.63,356 327.03,371.92 346.66,374.88C350.07,375.39 352.59,376.98 353.16,380.74C353.7,384.21 352.02,386.53 349.33,388.25C347.4,389.48 345.13,389.39 343,389.01C325.7,385.88 313.84,376.01 308.73,359.24C303.68,342.67 306.62,327.49 319.94,315.42C336.41,300.5 361.24,303.86 373.4,322.51C376.14,326.7 378.7,331.06 380.19,335.83C381.41,339.73 383.56,341.03 387.54,340.77C406.5,339.53 425.15,341.26 443.29,347.18C469.21,355.64 492.63,368.82 514.47,384.97C521.5,390.18 521.02,397.62 519.75,405.01C515.1,432.25 501.28,454.4 481.02,472.62C460.48,491.09 436.54,502.92 409.2,507.52C385.77,511.46 362.77,509.7 340.18,502.3C336.39,501.06 332.58,498.31 327.97,501.16z"/>
-            <path d="M414.19,335.38C405.75,335.93 397.65,334.86 389.54,335.84C387,336.15 385.78,334.06 384.8,332.07C380.73,323.83 376.21,315.95 368.77,310.17C366.48,308.38 367.23,307 369.43,305.62C379.53,299.3 389.62,299.22 399.19,306.49C408.52,313.58 414.08,323.09 414.19,335.38z"/>
-            <path d="M417.09,390.21C410.66,388.78 407.34,384.6 408.1,379.44C408.81,374.6 413.31,370.91 418.31,371.05C423.12,371.19 426.94,375.02 427.27,380C427.63,385.61 424.18,389.22 417.09,390.21z"/>
-            <path d="M430.83,418.71C429.47,419.23 428.59,420.25 427.03,419.59C426.81,417.6 428.52,416.83 429.77,416.07C441.62,408.88 453.85,402.56 467.79,400.42C469.45,400.16 471.08,399.82 472.69,400.53C474.42,401.28 475.23,402.66 475.09,404.49C474.92,406.75 473.27,407.6 471.34,407.79C465.71,408.35 460.12,409.05 454.59,410.3C446.44,412.13 438.57,414.68 430.83,418.71z"/>
-            <path d="M448.63,432.62C455.17,424.82 461.54,417.3 470.21,412.35C473.17,410.66 477.33,407.48 479.7,412.18C482.09,416.9 476.91,417.67 473.97,418.99C464.9,423.07 457.39,429.35 449.85,435.63C448.67,436.61 447.95,438.42 445.79,438.04C445.62,435.72 447.39,434.49 448.63,432.62z"/>
-        </svg>
-    </a>
-    <span class="footer-built">Built with <a href="https://reticulum.network" target="_blank" rel="noopener noreferrer">Reticulum</a></span>
-    <div class="footer-links">
-        <a href="download.html">Download</a>
-        <span class="dot-sep">&middot;</span>
-        <a href="https://github.com/ratspeak" target="_blank" rel="noopener noreferrer">GitHub</a>
-        <span class="dot-sep">&middot;</span>
-        <a href="docs.html">Documentation</a>
+    <div class="footer-inner">
+        <div class="footer-left">
+            <a href="letter.html" class="footer-brand" aria-label="A letter">
+                <svg viewBox="243 243 282 282" fill="var(--text-muted)">
+                    <path d="M327.97,501.16C314.61,508.03 301.57,514.72 288.56,521.48C283.91,523.91 279.2,524.61 275.05,520.98C271.05,517.49 271.26,512.87 272.63,508.05C275.23,498.93 277.46,489.7 280.08,480.58C281.03,477.27 280.4,475.51 277.14,473.92C255.84,463.53 245.61,446.29 245.66,422.66C245.75,381.16 245.55,339.66 245.75,298.16C245.86,275.62 256.63,259.57 276.93,249.98C283.68,246.79 291.07,246.01 298.4,246C355.74,245.88 413.07,245.83 470.4,245.95C495.22,246.01 516.64,265.69 519.52,290.03C520.6,299.2 520.12,308.32 520.21,317.46C520.37,333.46 520.29,349.46 520.2,365.46C520.17,371.38 518.89,372.03 513.77,369.13C498.9,360.71 498.91,360.71 498.9,343.65C498.88,328.81 498.92,313.98 498.81,299.15C498.66,279.74 486.18,267.28 466.77,267.26C410.94,267.23 355.11,267.23 299.27,267.32C279.54,267.35 267.32,279.36 267.23,299.05C267.05,340.71 267.04,382.38 267.09,424.04C267.11,441.62 277.67,453.85 295.43,456.58C310.83,458.95 307.84,458.98 304.51,471.32C303.3,475.82 302.05,480.31 300.83,484.81C300.35,486.56 299.66,488.32 300.92,490.33C304.48,490.2 307.24,487.87 310.31,486.46C314.99,484.3 319.61,481.95 324.04,479.31C328.78,476.49 333.17,476.59 338.23,478.73C355.38,485.99 373.44,488.84 391.95,487.72C430.98,485.37 461.99,468.13 484.6,436.22C489.79,428.9 493.71,420.74 496.43,412.08C497.17,409.7 496.94,408 494.74,406.52C489.6,403.07 487.33,398.05 487.7,391.96C487.91,388.37 486.58,386.13 483.49,384.24C461.58,370.79 438.6,360.13 412.77,356.87C403.65,355.71 394.49,355.67 385.35,356.73C376.09,357.8 372.64,358.02 369.74,347.74C368.12,341.98 365.71,336.47 362.24,331.47C356.28,322.9 346.68,319.02 337.45,321.63C328.92,324.05 321.83,333.47 321.32,343.14C320.63,356 327.03,371.92 346.66,374.88C350.07,375.39 352.59,376.98 353.16,380.74C353.7,384.21 352.02,386.53 349.33,388.25C347.4,389.48 345.13,389.39 343,389.01C325.7,385.88 313.84,376.01 308.73,359.24C303.68,342.67 306.62,327.49 319.94,315.42C336.41,300.5 361.24,303.86 373.4,322.51C376.14,326.7 378.7,331.06 380.19,335.83C381.41,339.73 383.56,341.03 387.54,340.77C406.5,339.53 425.15,341.26 443.29,347.18C469.21,355.64 492.63,368.82 514.47,384.97C521.5,390.18 521.02,397.62 519.75,405.01C515.1,432.25 501.28,454.4 481.02,472.62C460.48,491.09 436.54,502.92 409.2,507.52C385.77,511.46 362.77,509.7 340.18,502.3C336.39,501.06 332.58,498.31 327.97,501.16z"/>
+                    <path d="M414.19,335.38C405.75,335.93 397.65,334.86 389.54,335.84C387,336.15 385.78,334.06 384.8,332.07C380.73,323.83 376.21,315.95 368.77,310.17C366.48,308.38 367.23,307 369.43,305.62C379.53,299.3 389.62,299.22 399.19,306.49C408.52,313.58 414.08,323.09 414.19,335.38z"/>
+                    <path d="M417.09,390.21C410.66,388.78 407.34,384.6 408.1,379.44C408.81,374.6 413.31,370.91 418.31,371.05C423.12,371.19 426.94,375.02 427.27,380C427.63,385.61 424.18,389.22 417.09,390.21z"/>
+                    <path d="M430.83,418.71C429.47,419.23 428.59,420.25 427.03,419.59C426.81,417.6 428.52,416.83 429.77,416.07C441.62,408.88 453.85,402.56 467.79,400.42C469.45,400.16 471.08,399.82 472.69,400.53C474.42,401.28 475.23,402.66 475.09,404.49C474.92,406.75 473.27,407.6 471.34,407.79C465.71,408.35 460.12,409.05 454.59,410.3C446.44,412.13 438.57,414.68 430.83,418.71z"/>
+                    <path d="M448.63,432.62C455.17,424.82 461.54,417.3 470.21,412.35C473.17,410.66 477.33,407.48 479.7,412.18C482.09,416.9 476.91,417.67 473.97,418.99C464.9,423.07 457.39,429.35 449.85,435.63C448.67,436.61 447.95,438.42 445.79,438.04C445.62,435.72 447.39,434.49 448.63,432.62z"/>
+                </svg>
+            </a>
+            <span class="footer-built">Built with <a href="https://reticulum.network" target="_blank" rel="noopener noreferrer">Reticulum</a></span>
+        </div>
+        <div class="footer-links">
+            <a href="about.html">About</a>
+            <a href="docs.html">Docs</a>
+            <a href="download.html">Download</a>
+            <a href="https://github.com/ratspeak" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </div>
     </div>
 </footer>
+
+<!-- ── Coming Soon Toast ──────────────────────────────── -->
+<div class="coming-soon-toast" id="comingSoonToast">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Coming Soon
+</div>
 
 <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
 <script type="module">
 (function() {
     'use strict';
+
+    // ── Theme toggle ──
+    var themeToggle = document.getElementById('themeToggle');
+    var htmlEl = document.documentElement;
+    var savedTheme = localStorage.getItem('ratspeak-theme');
+    if (savedTheme) {
+        htmlEl.setAttribute('data-theme', savedTheme);
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        htmlEl.setAttribute('data-theme', 'dark');
+    }
+    if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+            var current = htmlEl.getAttribute('data-theme');
+            var next = current === 'dark' ? 'light' : 'dark';
+            htmlEl.setAttribute('data-theme', next);
+            localStorage.setItem('ratspeak-theme', next);
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', next === 'dark' ? '#1a1a1e' : '#EBEFEE');
+        });
+    }
 
     // ── esptool-js lazy loader ─────────────────────────
     var esptoolModule = null;
@@ -2078,6 +2338,9 @@
         connected: false,
         firmwareReady: false,
         firmwareZip: null,  // ArrayBuffer of ZIP from GitHub release
+        selectedVersion: null,
+        releases: [],
+        repoPath: '',
         customFile: null,
         flashing: false,
         eraseAll: false,
@@ -2182,9 +2445,7 @@
         } else {
             presetEl.style.display = 'block';
             customEl.style.display = 'none';
-            var nameLink = document.getElementById('presetName');
-            nameLink.textContent = 'Loading...';
-            nameLink.href = '#';
+            document.getElementById('presetName').textContent = 'Loading...';
             document.getElementById('presetSize').textContent = 'Loading from GitHub...';
             state.firmwareReady = false;
             fetchFirmwareFromRelease(dev);
@@ -2210,28 +2471,26 @@
     };
 
     // ── Firmware Download from GitHub Releases ────────
-    var extLinkIcon = ' <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; opacity: 0.5;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+    var checkIcon = '<svg class="firmware-version-item__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
     function fetchFirmwareFromRelease(dev) {
         var nameEl = document.getElementById('presetName');
         nameEl.textContent = 'Loading...';
-        nameEl.href = '#';
         document.getElementById('presetSize').textContent = 'Fetching release info...';
+        closeVersionDropdown();
 
         var repoMap = { ratdeck: 'ratspeak/ratdeck', ratcom: 'ratspeak/ratcom' };
         var repoPath = repoMap[dev.apiDevice] || '';
 
-        // First get version info, then download the binary
+        // Fetch latest info and download binary
         fetch('/api/firmware?device=' + dev.apiDevice + '&info=true')
             .then(function(resp) {
                 if (!resp.ok) throw new Error('Release not found');
                 return resp.json();
             })
             .then(function(info) {
-                nameEl.innerHTML = 'Ratspeak ' + info.version + extLinkIcon;
-                if (repoPath) {
-                    nameEl.href = 'https://github.com/' + repoPath + '/releases/tag/' + info.version;
-                }
+                state.selectedVersion = info.version;
+                nameEl.textContent = info.version;
                 document.getElementById('presetSize').textContent = 'Downloading ' + formatBytes(info.size) + '...';
                 return fetch('/api/firmware?device=' + dev.apiDevice);
             })
@@ -2246,13 +2505,122 @@
                 updateFlashBtn();
             })
             .catch(function(err) {
-                nameEl.innerHTML = dev.firmware;
-                nameEl.href = '#';
+                nameEl.textContent = dev.firmware;
+                document.getElementById('presetSize').textContent = 'Download failed: ' + err.message;
+                state.firmwareReady = false;
+                updateFlashBtn();
+            });
+
+        // Fetch release list in parallel for the dropdown
+        fetch('/api/firmware?device=' + dev.apiDevice + '&releases=true')
+            .then(function(resp) { return resp.ok ? resp.json() : []; })
+            .then(function(releases) {
+                state.releases = releases;
+                state.repoPath = repoPath;
+                buildVersionDropdown(dev);
+            })
+            .catch(function() { state.releases = []; });
+    }
+
+    function selectVersion(dev, version) {
+        var nameEl = document.getElementById('presetName');
+        nameEl.textContent = version;
+        document.getElementById('presetSize').textContent = 'Downloading...';
+        state.firmwareReady = false;
+        state.firmwareZip = null;
+        state.selectedVersion = version;
+        updateFlashBtn();
+        closeVersionDropdown();
+        buildVersionDropdown(dev);
+
+        fetch('/api/firmware?device=' + dev.apiDevice + '&version=' + version + '&info=true')
+            .then(function(resp) {
+                if (!resp.ok) throw new Error('Release not found');
+                return resp.json();
+            })
+            .then(function(info) {
+                document.getElementById('presetSize').textContent = 'Downloading ' + formatBytes(info.size) + '...';
+                return fetch('/api/firmware?device=' + dev.apiDevice + '&version=' + version);
+            })
+            .then(function(resp) {
+                if (!resp.ok) throw new Error('Download failed');
+                return resp.arrayBuffer();
+            })
+            .then(function(buffer) {
+                state.firmwareZip = buffer;
+                state.firmwareReady = true;
+                document.getElementById('presetSize').textContent = formatBytes(buffer.byteLength) + ' \u00b7 Ready to flash';
+                updateFlashBtn();
+            })
+            .catch(function(err) {
                 document.getElementById('presetSize').textContent = 'Download failed: ' + err.message;
                 state.firmwareReady = false;
                 updateFlashBtn();
             });
     }
+
+    function buildVersionDropdown(dev) {
+        var dropdown = document.getElementById('versionDropdown');
+        dropdown.innerHTML = '';
+        if (!state.releases || state.releases.length < 2) return;
+
+        var repoPath = state.repoPath || '';
+        state.releases.forEach(function(rel) {
+            var item = document.createElement('div');
+            item.className = 'firmware-version-item';
+            if (rel.version === state.selectedVersion) {
+                item.classList.add('firmware-version-item--active');
+            }
+            var label = '<span class="firmware-version-item__tag">';
+            if (rel.version === state.selectedVersion) label += checkIcon;
+            label += rel.version + '</span>';
+            var size = '<span class="firmware-version-item__size">' + formatBytes(rel.size) + '</span>';
+            item.innerHTML = label + size;
+            if (rel.version !== state.selectedVersion) {
+                item.addEventListener('click', function() { selectVersion(dev, rel.version); });
+            } else {
+                item.style.cursor = 'default';
+            }
+            dropdown.appendChild(item);
+        });
+    }
+
+    function toggleVersionDropdown() {
+        var dropdown = document.getElementById('versionDropdown');
+        var box = document.getElementById('firmwareReadyBox');
+        var chevron = document.getElementById('versionChevron');
+        if (!state.releases || state.releases.length < 2) return;
+
+        if (dropdown.style.display === 'none') {
+            dropdown.style.display = 'block';
+            box.classList.add('firmware-ready--open');
+            chevron.classList.add('firmware-version-chevron--open');
+        } else {
+            closeVersionDropdown();
+        }
+    }
+
+    function closeVersionDropdown() {
+        var dropdown = document.getElementById('versionDropdown');
+        var box = document.getElementById('firmwareReadyBox');
+        var chevron = document.getElementById('versionChevron');
+        dropdown.style.display = 'none';
+        box.classList.remove('firmware-ready--open');
+        chevron.classList.remove('firmware-version-chevron--open');
+    }
+
+    document.getElementById('versionBtn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleVersionDropdown();
+    });
+
+    document.addEventListener('click', function(e) {
+        var dropdown = document.getElementById('versionDropdown');
+        if (dropdown.style.display !== 'none') {
+            var preset = document.getElementById('firmwarePreset');
+            if (!preset.contains(e.target)) closeVersionDropdown();
+        }
+    });
 
     window.goBack = function() {
         var sel = document.getElementById('deviceSelection');
@@ -2692,34 +3060,20 @@
 
 <script>
 (function() {
-    var btn = document.getElementById('navHamburger');
-    var menu = document.getElementById('navMenu');
-    if (!btn || !menu) return;
-    var iconOpen = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>';
-    var iconClosed = '<svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>';
-    function close() {
-        menu.classList.remove('open');
-        btn.innerHTML = iconClosed;
-    }
-    btn.addEventListener('click', function(e) {
+    var hamburger = document.getElementById('navHamburger');
+    var mobileMenu = document.getElementById('navMobileMenu');
+    if (!hamburger || !mobileMenu) return;
+    hamburger.addEventListener('click', function(e) {
         e.stopPropagation();
-        var isOpen = menu.classList.toggle('open');
-        btn.innerHTML = isOpen ? iconOpen : iconClosed;
-    });
-    menu.addEventListener('click', function(e) {
-        if (e.target.closest('a')) close();
+        mobileMenu.classList.toggle('open');
     });
     document.addEventListener('click', function(e) {
-        if (!btn.contains(e.target) && !menu.contains(e.target)) close();
+        if (!mobileMenu.contains(e.target) && !hamburger.contains(e.target)) {
+            mobileMenu.classList.remove('open');
+        }
     });
 })();
 </script>
-
-<!-- Coming Soon Toast -->
-<div class="coming-soon-toast" id="comingSoonToast">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    Coming Soon
-</div>
 
 <script>
 (function() {

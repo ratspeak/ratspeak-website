@@ -3,6 +3,7 @@ export const config = { runtime: 'edge' };
 export default async function handler(req) {
   const { searchParams } = new URL(req.url);
   const device = searchParams.get('device');
+  const version = searchParams.get('version');
 
   const repos = {
     ratdeck: { repo: 'ratspeak/ratdeck', file: 'ratdeck-firmware.zip' },
@@ -17,11 +18,38 @@ export default async function handler(req) {
     });
   }
 
-  // Fetch latest release metadata from GitHub API
-  const releaseResp = await fetch(
-    `https://api.github.com/repos/${cfg.repo}/releases/latest`,
-    { headers: { 'Accept': 'application/vnd.github+json', 'User-Agent': 'ratspeak-flasher' } }
-  );
+  const ghHeaders = { 'Accept': 'application/vnd.github+json', 'User-Agent': 'ratspeak-flasher' };
+
+  // List available releases (last 5)
+  if (searchParams.get('releases') === 'true') {
+    const resp = await fetch(
+      `https://api.github.com/repos/${cfg.repo}/releases?per_page=5`,
+      { headers: ghHeaders }
+    );
+    if (!resp.ok) {
+      return new Response(JSON.stringify({ error: 'Could not fetch releases' }), {
+        status: 502, headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    const releases = await resp.json();
+    const result = releases
+      .filter(r => !r.draft && !r.prerelease)
+      .map(r => {
+        const asset = r.assets.find(a => a.name === cfg.file);
+        return { version: r.tag_name, size: asset ? asset.size : null };
+      })
+      .filter(r => r.size !== null);
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=300' }
+    });
+  }
+
+  // Fetch a specific release by tag, or latest
+  const releaseUrl = version
+    ? `https://api.github.com/repos/${cfg.repo}/releases/tags/${version}`
+    : `https://api.github.com/repos/${cfg.repo}/releases/latest`;
+
+  const releaseResp = await fetch(releaseUrl, { headers: ghHeaders });
 
   if (!releaseResp.ok) {
     return new Response(JSON.stringify({ error: 'Release not found', status: releaseResp.status }), {

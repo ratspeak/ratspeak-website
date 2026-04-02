@@ -1,5 +1,14 @@
 .DS_Store
-CLAUDE.md
-DESIGNER_HANDOFF.md
-DOCS_PLAN.md
-branding/
+
+# Generated branding assets (rebuild with: cd ratspeak-branding && python3 generate_icons.py)
+ratspeak-branding/android-dark/
+ratspeak-branding/android-light/
+ratspeak-branding/app-dark/
+ratspeak-branding/app-dark-square/
+ratspeak-branding/app-light/
+ratspeak-branding/app-light-square/
+ratspeak-branding/ios-dark/
+ratspeak-branding/ios-light/
+ratspeak-branding/transparent/
+ratspeak-branding/white-bg/
+ratspeak-branding/BRAND_GUIDE.md
