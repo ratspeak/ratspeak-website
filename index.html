@@ -1117,6 +1117,10 @@
                 grid-template-columns: 1fr;
             }
 
+            .why-card--extra {
+                display: none;
+            }
+
             .features {
                 padding: 64px 20px;
             }
@@ -1276,24 +1280,24 @@
 <section class="trust-strip">
     <div class="trust-strip-inner">
         <div class="trust-item fade-in">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-            <span class="trust-label">End-to-End Encrypted</span>
-            <span class="trust-desc">Every message, every packet</span>
-        </div>
-        <div class="trust-item fade-in">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5h-3a1.5 1.5 0 000 3h1a1.5 1.5 0 010 3h-3"/><path d="M12 6.5v1"/><path d="M12 16.5v1"/></svg>
-            <span class="trust-label">Zero Tokens</span>
-            <span class="trust-desc">Sorry, this isn't blockchain</span>
-        </div>
-        <div class="trust-item fade-in">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/></svg>
             <span class="trust-label">No Account Required</span>
-            <span class="trust-desc">No email, no phone number</span>
+            <span class="trust-desc">No email, no phone</span>
         </div>
         <div class="trust-item fade-in">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             <span class="trust-label">Fully Open Source</span>
             <span class="trust-desc">Don't trust, verify</span>
+        </div>
+        <div class="trust-item fade-in">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            <span class="trust-label">End-to-End Encrypted</span>
+            <span class="trust-desc">Every packet</span>
+        </div>
+        <div class="trust-item fade-in">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5h-3a1.5 1.5 0 000 3h1a1.5 1.5 0 010 3h-3"/><path d="M12 6.5v1"/><path d="M12 16.5v1"/></svg>
+            <span class="trust-label">Zero Tokens</span>
+            <span class="trust-desc">This isn't crypto</span>
         </div>
     </div>
 </section>
@@ -1335,14 +1339,14 @@
             <h3 class="why-card__title">Built Resilient</h3>
             <p class="why-card__desc">No servers. No database. No single point of control. The mesh routes around failures on its own.</p>
         </div>
-        <div class="why-card fade-in">
+        <div class="why-card why-card--extra fade-in">
             <div class="why-card__icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
             </div>
             <h3 class="why-card__title">Multi-Platform</h3>
             <p class="why-card__desc">Desktop, mobile, MCU, SBC. One protocol shared across all form factors.</p>
         </div>
-        <div class="why-card fade-in">
+        <div class="why-card why-card--extra fade-in">
             <div class="why-card__icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
             </div>
@@ -1368,7 +1372,7 @@
             </div>
             <div class="how-step__card">
                 <h3 class="how-step__title"><span class="how-step__num">1.</span> Download</h3>
-                <p class="how-step__desc">Grab the app or flash your device. A couple clicks, that's it.</p>
+                <p class="how-step__desc">Grab the app or flash your device. Just a few clicks.</p>
             </div>
         </div>
 
