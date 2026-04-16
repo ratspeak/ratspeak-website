@@ -53,7 +53,7 @@ If you have an [RNode](../hardware/rnode-overview):
 1. Plug it in via USB
 2. Navigate to the **Network** section
 3. Click **Add LoRa Radio**
-4. Select the serial port and a preset (Balanced is a good start)
+4. Select the serial port and a preset (Long Fast is the Ratspeak default and a good start; Medium Fast if you want more throughput and can accept less range)
 5. Click **Connect**
 
 You now have off-grid radio capability alongside your internet connections.

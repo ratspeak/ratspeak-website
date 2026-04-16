@@ -60,11 +60,18 @@ Device configuration:
 
 ### Presets
 
-| Preset | Best for |
-|--------|----------|
-| **Long Range** | Maximum distance — rural, emergencies, mountain lines of sight |
-| **Balanced** | Everyday use — good range with reasonable speed |
-| **Fast** | Short range — same building or close outdoor proximity |
+RatCom uses the same eight canonical presets as RatDeck. **Long Fast** is the factory default:
+
+| Preset | Bitrate | Best for |
+|--------|--------:|----------|
+| Short Turbo | 21.99 kbps | Very short range, highest throughput |
+| Short Fast | 10.84 kbps | Short range, fast — same building or close outdoor |
+| Short Slow | 6.25 kbps | Short range with better resilience |
+| Medium Fast | 3.52 kbps | Neighborhood / urban |
+| Medium Slow | 1.95 kbps | Urban with some obstructions |
+| Long Turbo | 1.34 kbps | Long range, wider bandwidth |
+| **Long Fast** *(default)* | **1.07 kbps** | **Long range general use** |
+| Long Moderate | 0.34 kbps | Maximum range — rural, emergencies, mountain links |
 
 Change presets in **Setup → Radio**. Settings apply immediately.
 
@@ -118,7 +125,7 @@ RatCom has a built-in 1750 mAh battery. To maximize runtime:
 
 - Use **WiFi OFF** when you don't need bridging
 - Lower TX power for nearby nodes
-- Use the **Fast** preset for short-range links
+- Use a **Short** preset for short-range links
 - Disable transport mode when mobile
 - The screen dims and turns off automatically based on your timeout settings
 
@@ -148,7 +155,7 @@ RatCom has 1.9 MB of flash storage — smaller than RatDeck's 7.8 MB. This means
 
 - Verify antenna is attached to the LoRa module
 - Check radio parameters match other nodes
-- Try the **Long Range** preset
+- Try the **Long Moderate** preset (all nodes must match)
 - Use **Ctrl+A** to force an announce
 
 ### Messages not delivering

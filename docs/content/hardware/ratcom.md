@@ -36,7 +36,7 @@ RatCom is a compact, standalone mesh communicator running on the M5Stack Cardput
 ### Core Capabilities
 - **LXMF encrypted messaging** with Ed25519 signatures
 - **Automatic node discovery** via Reticulum announces
-- **Configurable LoRa radio** — same three presets as RatDeck (Long Range, Balanced, Fast)
+- **Configurable LoRa radio** — same eight presets as RatDeck (Short Turbo/Fast/Slow, Medium Fast/Slow, Long Turbo/Fast/Moderate), default Long Fast
 - **Transport node mode** — relay packets for other mesh nodes
 - **Dual storage** — flash + SD card with atomic writes
 

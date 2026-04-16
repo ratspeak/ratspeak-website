@@ -74,10 +74,10 @@ TX power is set in dBm (decibels relative to 1 milliwatt):
 | 2 | 1.6 mW | Very short range, battery saving |
 | 7 | 5 mW | Short range, low power |
 | 10 | 10 mW | Moderate range |
-| 14 | 25 mW | Fast preset |
-| 17 | 50 mW | Balanced preset |
+| 14 | 25 mW | Short / Short Fast / Short Slow presets; also the EU 868 cap |
+| 17 | 50 mW | Medium Fast / Medium Slow presets |
 | 20 | 100 mW | Near maximum |
-| 22 | 160 mW | Maximum for most boards |
+| 22 | 160 mW | Long Turbo / Long Fast / Long Moderate presets; maximum for most boards |
 
 > **Note**: Doubling TX power only adds ~3 dB (marginally more range). Improving your antenna or raising its height is almost always more effective than increasing power.
 
@@ -106,18 +106,18 @@ Reticulum enforces these limits automatically when configured.
 
 ### For Maximum Range
 - Use a **collinear or Yagi antenna** mounted as high as possible
-- Set **SF12, 62.5 kHz bandwidth, coding rate 4/8** (Long Range preset)
+- Select the **Long Moderate** preset (SF11, 125 kHz, CR 4/8, 22 dBm) for the longest link budget in the canonical set
 - Set **TX power to maximum legal limit**
 - Ensure clear line-of-sight to target
 
 ### For Best Throughput
-- Use **SF7, 250 kHz bandwidth, coding rate 4/5** (Fast preset)
-- Accept shorter range in exchange for ~11 Kbps
+- Select the **Short Turbo** preset (SF7, 500 kHz, CR 4/5, 14 dBm) for the highest bitrate
+- Accept much shorter range in exchange for ~22 kbps
 - Good for local networks where range isn't critical
 
 ### For Battery Life
 - Use **lowest TX power that maintains connection**
-- Consider **SF9 Balanced preset** as a compromise
+- Consider the **Medium Fast** preset (SF9, 250 kHz, 17 dBm) as a compromise between range and airtime
 - Enable WiFi OFF mode on RatDeck/RatCom when not needed
 
 ## What's Next

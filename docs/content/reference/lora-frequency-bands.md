@@ -17,48 +17,38 @@ Regional frequency allocations for LoRa — which frequencies to use where, powe
 
 > **Warning**: These are summaries. Always verify current regulations for your specific jurisdiction before transmitting.
 
-## Ratspeak Frequency Presets
+## Ratspeak LoRa Presets
 
-Ratspeak includes built-in frequency presets for common regions:
+Ratspeak ships with a single canonical set of eight LoRa presets that apply regardless of frequency band. You pick the frequency for your region separately from the modulation preset. **Long Fast** is the factory default.
 
-### US 915 MHz
+| Preset | Bitrate | SF | Bandwidth | Coding Rate | TX Power | Link Budget |
+|--------|--------:|:--:|:---------:|:-----------:|:--------:|:-----------:|
+| Short Turbo | 21.99 kbps | 7 | 500 kHz | 4/5 | 14 dBm | 140 dB |
+| Short Fast | 10.84 kbps | 7 | 250 kHz | 4/5 | 14 dBm | 143 dB |
+| Short Slow | 6.25 kbps | 8 | 250 kHz | 4/5 | 14 dBm | 145.5 dB |
+| Medium Fast | 3.52 kbps | 9 | 250 kHz | 4/5 | 17 dBm | 148 dB |
+| Medium Slow | 1.95 kbps | 10 | 250 kHz | 4/5 | 17 dBm | 150.5 dB |
+| Long Turbo | 1.34 kbps | 11 | 500 kHz | 4/8 | 22 dBm | 150 dB |
+| **Long Fast** *(default)* | **1.07 kbps** | **11** | **250 kHz** | **4/5** | **22 dBm** | **153 dB** |
+| Long Moderate | 0.34 kbps | 11 | 125 kHz | 4/8 | 22 dBm | 156 dB |
 
-| Parameter | Long Range | Balanced | Fast |
-|-----------|-----------|----------|------|
-| Frequency | 915 MHz | 915 MHz | 915 MHz |
-| Bandwidth | 62.5 kHz | 125 kHz | 250 kHz |
-| Spreading Factor | 12 | 9 | 7 |
-| Coding Rate | 4/8 | 4/5 | 4/5 |
-| TX Power | 22 dBm | 17 dBm | 14 dBm |
-| Data Rate | ~293 bps | ~3,515 bps | ~21,875 bps |
-| Range (est.) | 15-50 km | 5-20 km | 2-10 km |
+### Recommended Frequencies by Region
 
-### EU 868 MHz
+| Region | Suggested Frequency | Regional TX Power Cap |
+|--------|--------------------|----------------------|
+| US 915 MHz | 915 MHz | 30 dBm EIRP (FCC) |
+| EU 868 MHz | 867.2 MHz (g sub-band) | 14 dBm (25 mW) |
+| EU 868 MHz (high-power sub-band) | 869.525 MHz (g3 sub-band) | 27 dBm at 10% duty cycle |
+| UK 868 MHz | 867.2 MHz | 14 dBm |
+| AU 915 MHz | 920 MHz | 30 dBm EIRP |
+| JP 920 MHz | 923 MHz | 13 dBm |
+| KR 920 MHz | 921 MHz | 10 dBm |
+| IN 865 MHz | 866 MHz | 14 dBm |
+| CN 470 MHz | 470 MHz | 17 dBm |
 
-| Parameter | Long Range | Balanced | Fast |
-|-----------|-----------|----------|------|
-| Frequency | 867.2 MHz | 867.2 MHz | 867.2 MHz |
-| Bandwidth | 62.5 kHz | 125 kHz | 250 kHz |
-| Spreading Factor | 12 | 9 | 7 |
-| Coding Rate | 4/8 | 4/5 | 4/5 |
-| TX Power | 14 dBm | 14 dBm | 14 dBm |
-| Data Rate | ~293 bps | ~3,515 bps | ~21,875 bps |
+> **Note**: Ratspeak presets use TX power 14–22 dBm at the preset defaults. You may need to **lower TX power below the preset default** to stay within your regional cap (EU 868 is the most common case — you'll want 14 dBm even when using a Long preset). All preset parameters are individually tunable.
 
-> **Note**: EU 868 MHz has a **1% duty cycle** limit on most sub-bands. At SF12/125kHz, this means approximately 36 seconds of transmission per hour. Use balanced or fast presets for higher throughput.
-
-### AU 915 MHz
-
-Same as US 915 MHz presets. Australia allows up to 30 dBm (1 W) EIRP.
-
-### JP 920 MHz
-
-| Parameter | Long Range | Balanced | Fast |
-|-----------|-----------|----------|------|
-| Frequency | 923 MHz | 923 MHz | 923 MHz |
-| Bandwidth | 62.5 kHz | 125 kHz | 250 kHz |
-| Spreading Factor | 12 | 9 | 7 |
-| Coding Rate | 4/8 | 4/5 | 4/5 |
-| TX Power | 13 dBm | 13 dBm | 13 dBm |
+> **EU 868 duty cycle**: Most sub-bands limit you to a **1% duty cycle** (~36 seconds of TX per hour). The slower presets (Long Moderate in particular) reach this limit quickly — favor **Short Fast** or **Medium Fast** for higher-traffic EU use, or use the g3 sub-band (869.525 MHz) which allows 10% duty cycle.
 
 ## LoRa Parameters Explained
 
@@ -87,7 +77,7 @@ Controls the trade-off between range and speed:
 | 250 kHz | Shorter range, faster |
 | 500 kHz | Shortest range, fastest |
 
-**Wider bandwidth = faster data rate but shorter range.** Most Reticulum deployments use 125 kHz.
+**Wider bandwidth = faster data rate but shorter range.** Ratspeak's canonical presets use 250 kHz for most presets (125 kHz for Long Moderate, 500 kHz for the Turbo presets).
 
 ### Coding Rate
 
@@ -104,41 +94,41 @@ Higher coding rate = more error correction but slower effective throughput.
 
 ## Choosing Settings
 
-### For Urban Environments
+### For Urban Environments — Short Fast preset
 
 ```ini
 frequency = 915000000
 bandwidth = 250000
 spreadingfactor = 7
 codingrate = 5
-txpower = 17
+txpower = 14
 ```
 
 Short range but fast — good for city mesh networks where nodes are close together.
 
-### For Rural / Long Range
+### For Maximum Range — Long Moderate preset
 
 ```ini
 frequency = 915000000
 bandwidth = 125000
-spreadingfactor = 12
+spreadingfactor = 11
 codingrate = 8
 txpower = 22
 ```
 
-Maximum range — suitable for mountain-to-valley links or rural areas with clear line of sight.
+Maximum range in Ratspeak's canonical set — suitable for mountain-to-valley links or rural areas with clear line of sight. Note that this has the longest time on air; under EU duty-cycle limits you will hit the cap quickly.
 
-### For Balanced Use
+### Default — Long Fast preset
 
 ```ini
 frequency = 915000000
-bandwidth = 125000
-spreadingfactor = 9
+bandwidth = 250000
+spreadingfactor = 11
 codingrate = 5
-txpower = 17
+txpower = 22
 ```
 
-Good all-around settings. This is the "Balanced" preset in Ratspeak.
+Ratspeak's factory default. Good all-around long-range settings at higher bandwidth than Long Moderate.
 
 ## EU Duty Cycle Sub-bands
 

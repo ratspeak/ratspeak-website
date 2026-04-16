@@ -64,13 +64,18 @@ All device configuration, organized into sub-menus:
 
 ### Quick Presets
 
-For most users, presets are the easiest way to configure the radio:
+For most users, presets are the easiest way to configure the radio. RatDeck ships with eight canonical presets. **Long Fast** is the factory default:
 
-| Preset | When to use it |
-|--------|---------------|
-| **Long Range** | Maximum distance, slow speed — rural, mountain-to-mountain, emergencies |
-| **Balanced** | Good range with usable speed — general daily use |
-| **Fast** | Short range, fast transfers — same building or nearby outdoor |
+| Preset | Bitrate | When to use it |
+|--------|--------:|---------------|
+| Short Turbo | 21.99 kbps | Very short range, highest throughput (same-room / desk-to-desk) |
+| Short Fast | 10.84 kbps | Short range, fast — nearby outdoor or same building |
+| Short Slow | 6.25 kbps | Short range with better error resilience |
+| Medium Fast | 3.52 kbps | Neighborhood / urban line-of-sight |
+| Medium Slow | 1.95 kbps | Urban with some obstructions |
+| Long Turbo | 1.34 kbps | Long range with wider bandwidth — semi-rural |
+| **Long Fast** *(default)* | **1.07 kbps** | **Long range general use — Ratspeak default** |
+| Long Moderate | 0.34 kbps | Maximum range — rural, mountain-to-mountain, emergencies |
 
 Select a preset in **Setup → Radio → Preset**. Changes apply immediately.
 
@@ -141,7 +146,7 @@ Wake the screen by pressing any key or moving the trackball.
 
 - Use **WiFi OFF** mode when you don't need bridging
 - Lower TX power if communicating with nearby nodes
-- Use the **Fast** radio preset for short-range links (less airtime = less power)
+- Use a **Short** radio preset for short-range links (less airtime = less power)
 - Disable transport mode when mobile
 
 ## Keyboard Reference
@@ -165,7 +170,7 @@ Wake the screen by pressing any key or moving the trackball.
 
 - Confirm your antenna is attached
 - Check that your radio frequency and parameters match other nodes
-- Try the **Long Range** preset to maximize discovery range
+- Try the **Long Moderate** preset to maximize discovery range (all nodes must match)
 - Use **Ctrl+T** to send a test packet and **Ctrl+R** to monitor for responses
 
 ### Messages not delivering

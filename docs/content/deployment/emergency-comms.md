@@ -81,7 +81,7 @@ When infrastructure fails, Reticulum keeps working because:
   (RatDecks, laptops)                (RatDecks, laptops)
 ```
 
-Use **Long Range preset** (SF12, 62.5 kHz, 22 dBm) for maximum distance between relay nodes. Client devices can use Balanced preset for better throughput on shorter links.
+Use the **Long Moderate** preset (SF11, 125 kHz, CR 4/8, 22 dBm) for maximum distance between relay nodes. Client devices on shorter links can use **Medium Fast** (SF9, 250 kHz, 17 dBm) for better throughput.
 
 ## Power Considerations
 

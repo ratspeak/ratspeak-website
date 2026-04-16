@@ -406,10 +406,16 @@ Get RNode LoRa presets and frequency regions.
 ```json
 {
   "presets": {
-    "long_range": { "bandwidth": 62500, "sf": 12, "cr": 8 },
-    "balanced": { "bandwidth": 125000, "sf": 9, "cr": 5 },
-    "fast": { "bandwidth": 250000, "sf": 7, "cr": 5 }
+    "short_turbo":   { "sf": 7,  "bandwidth": 500000, "cr": 5, "txp": 14 },
+    "short_fast":    { "sf": 7,  "bandwidth": 250000, "cr": 5, "txp": 14 },
+    "short_slow":    { "sf": 8,  "bandwidth": 250000, "cr": 5, "txp": 14 },
+    "medium_fast":   { "sf": 9,  "bandwidth": 250000, "cr": 5, "txp": 17 },
+    "medium_slow":   { "sf": 10, "bandwidth": 250000, "cr": 5, "txp": 17 },
+    "long_turbo":    { "sf": 11, "bandwidth": 500000, "cr": 8, "txp": 22 },
+    "long_fast":     { "sf": 11, "bandwidth": 250000, "cr": 5, "txp": 22 },
+    "long_moderate": { "sf": 11, "bandwidth": 125000, "cr": 8, "txp": 22 }
   },
+  "default_preset": "long_fast",
   "regions": {
     "us_915": { "min": 902000000, "max": 928000000 },
     "eu_868": { "min": 863000000, "max": 870000000 }

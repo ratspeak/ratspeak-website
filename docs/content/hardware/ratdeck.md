@@ -28,15 +28,20 @@ Full LXMF messaging with Ed25519 signatures. Send and receive encrypted messages
 Automatic mesh peer discovery via Reticulum announces. See who's online, save contacts as friends, and track node status in real time.
 
 ### LoRa Radio Presets
-Three built-in presets with full manual configuration:
+Eight built-in presets with full manual configuration. **Long Fast** (SF11/BW250k/CR4/5/22 dBm) is the default:
 
-| Preset | Speed | Range | Settings |
-|--------|-------|-------|----------|
-| **Long Range** | ~37 bps | Maximum | SF12, 62.5 kHz, CR 4/8, 22 dBm |
-| **Balanced** | ~1.8 Kbps | Good | SF9, 125 kHz, CR 4/5, 17 dBm |
-| **Fast** | ~11 Kbps | Short | SF7, 250 kHz, CR 4/5, 14 dBm |
+| Preset | Bitrate | Settings |
+|--------|--------:|----------|
+| Short Turbo | 21.99 kbps | SF7, 500 kHz, CR 4/5, 14 dBm |
+| Short Fast | 10.84 kbps | SF7, 250 kHz, CR 4/5, 14 dBm |
+| Short Slow | 6.25 kbps | SF8, 250 kHz, CR 4/5, 14 dBm |
+| Medium Fast | 3.52 kbps | SF9, 250 kHz, CR 4/5, 17 dBm |
+| Medium Slow | 1.95 kbps | SF10, 250 kHz, CR 4/5, 17 dBm |
+| Long Turbo | 1.34 kbps | SF11, 500 kHz, CR 4/8, 22 dBm |
+| **Long Fast** *(default)* | **1.07 kbps** | **SF11, 250 kHz, CR 4/5, 22 dBm** |
+| Long Moderate | 0.34 kbps | SF11, 125 kHz, CR 4/8, 22 dBm |
 
-Radio changes apply immediately — no reboot needed.
+Radio changes apply immediately — no reboot needed. Every parameter is also individually tunable.
 
 ### WiFi Bridging
 - **AP Mode**: Creates `ratdeck-XXXX` hotspot (password: `ratspeak`), TCP server on port 4242. Connect your laptop to bridge its Reticulum instance to the LoRa mesh.

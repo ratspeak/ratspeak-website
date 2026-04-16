@@ -18,13 +18,20 @@ This utility detects your hardware and flashes the appropriate firmware.
 
 ## LoRa Presets
 
-Ratspeak offers three presets that balance range and speed:
+Ratspeak ships with eight presets covering the full speed/range trade-off curve. **Long Fast** is the default:
 
-| Preset | Speed | SF | Bandwidth | Coding Rate | TX Power | Best For |
-|--------|-------|:--:|:---------:|:-----------:|:--------:|----------|
-| **Long Range** | ~37 bps | 12 | 62.5 kHz | 4/8 | 22 dBm | Maximum distance, very low data rate |
-| **Balanced** | ~1.8 Kbps | 9 | 125 kHz | 4/5 | 17 dBm | Good range/speed trade-off |
-| **Fast** | ~11 Kbps | 7 | 250 kHz | 4/5 | 14 dBm | Shorter range, higher throughput |
+| Preset | Bitrate | SF | Bandwidth | Coding Rate | TX Power | Link Budget | Best For |
+|--------|--------:|:--:|:---------:|:-----------:|:--------:|:-----------:|----------|
+| Short Turbo | 21.99 kbps | 7 | 500 kHz | 4/5 | 14 dBm | 140 dB | Very short range, highest throughput |
+| Short Fast | 10.84 kbps | 7 | 250 kHz | 4/5 | 14 dBm | 143 dB | Short range, fast |
+| Short Slow | 6.25 kbps | 8 | 250 kHz | 4/5 | 14 dBm | 145.5 dB | Short range, more resilience |
+| Medium Fast | 3.52 kbps | 9 | 250 kHz | 4/5 | 17 dBm | 148 dB | Balanced range and speed |
+| Medium Slow | 1.95 kbps | 10 | 250 kHz | 4/5 | 17 dBm | 150.5 dB | Longer reach than Medium Fast |
+| Long Turbo | 1.34 kbps | 11 | 500 kHz | 4/8 | 22 dBm | 150 dB | Long range with wide bandwidth |
+| **Long Fast** *(default)* | **1.07 kbps** | **11** | **250 kHz** | **4/5** | **22 dBm** | **153 dB** | **Long range, Ratspeak default** |
+| Long Moderate | 0.34 kbps | 11 | 125 kHz | 4/8 | 22 dBm | 156 dB | Maximum range, very slow |
+
+> **Note**: TX power shown is the preset default. You may need to cap TX power for regional compliance (e.g. 14 dBm in EU 868). All parameters are individually tunable beyond the preset defaults.
 
 ## Frequency Regions
 

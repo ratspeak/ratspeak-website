@@ -507,7 +507,7 @@
     "title": "LoRa Frequency Bands",
     "section": "Reference",
     "path": "reference/lora-frequency-bands",
-    "headings": "Quick Reference, Ratspeak Frequency Presets, US 915 MHz, EU 868 MHz, AU 915 MHz, JP 920 MHz, LoRa Parameters Explained, Spreading Factor (SF), Bandwidth, Coding Rate, Choosing Settings, For Urban Environments, For Rural / Long Range, For Balanced Use, EU Duty Cycle Sub-bands, Regulatory Notes, What's Next",
+    "headings": "Quick Reference, Ratspeak LoRa Presets, Recommended Frequencies by Region, LoRa Parameters Explained, Spreading Factor (SF), Bandwidth, Coding Rate, Choosing Settings, For Urban Environments — Short Fast preset, For Maximum Range — Long Moderate preset, Default — Long Fast preset, EU Duty Cycle Sub-bands, Regulatory Notes, What's Next",
     "content": "LoRa Frequency Bands Regional frequency allocations for LoRa — which frequencies to use where, power limits, duty cycle regulations, and recommended RNode settings. Quick Reference Region Band Frequency Range Max TX Power Duty Cycle -------- ------ ----------------- ------------- ------------ US / C"
   },
   {
