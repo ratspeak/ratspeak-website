@@ -35,9 +35,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script>!function(){var t=localStorage.getItem('ratspeak-theme');if(t)document.documentElement.setAttribute('data-theme',t);else if(window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.setAttribute('data-theme','dark')}()</script>
+    <script>!function(){try{if(localStorage.getItem('ratspeak-docs-notice')==='dismissed:v1')document.documentElement.classList.add('notice-dismissed')}catch(e){}}()</script>
     <link rel="stylesheet" href="docs/css/docs.css">
 </head>
 <body>
+
+<div class="docs-notice" id="docsNotice" role="status" aria-label="Site notice">
+    <div class="docs-notice__inner">
+        <span class="docs-notice__text">Our docs are being improved and may contain outdated or unintentionally misleading information in places. A full refresh is coming soon.</span>
+        <time class="docs-notice__date" datetime="2026-04-18">April&nbsp;18,&nbsp;2026</time>
+        <button class="docs-notice__close" id="docsNoticeClose" type="button" aria-label="Dismiss notice">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+        </button>
+    </div>
+</div>
 
 <nav class="navbar" id="navbar">
     <div class="navbar-left">
@@ -208,6 +219,32 @@
     });
     document.addEventListener('click', function(e) {
         if (!btn.contains(e.target) && !menu.contains(e.target)) close();
+    });
+})();
+</script>
+
+<script>
+(function () {
+    var notice = document.getElementById('docsNotice');
+    if (!notice) return;
+    var root = document.documentElement;
+    if (root.classList.contains('notice-dismissed')) return;
+    function measure() {
+        root.style.setProperty('--banner-h', notice.offsetHeight + 'px');
+    }
+    measure();
+    window.addEventListener('resize', measure, { passive: true });
+    var closeBtn = document.getElementById('docsNoticeClose');
+    if (!closeBtn) return;
+    closeBtn.addEventListener('click', function () {
+        try { localStorage.setItem('ratspeak-docs-notice', 'dismissed:v1'); } catch (e) {}
+        root.classList.add('notice-dismissed');
+        root.style.setProperty('--banner-h', '0px');
+        window.removeEventListener('resize', measure);
+        notice.addEventListener('transitionend', function handler() {
+            notice.removeEventListener('transitionend', handler);
+            notice.remove();
+        });
     });
 })();
 </script>
