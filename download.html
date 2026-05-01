@@ -3,54 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#EBEFEE">
+    <meta name="theme-color" content="#FAF7F3">
     <title>Download — Ratspeak</title>
-    <meta name="description" content="Download Ratspeak — Available on every device.">
+    <meta name="description" content="Download Ratspeak for desktop, mobile, and supported mesh hardware. Private communication across every form factor.">
     <link rel="canonical" href="https://ratspeak.org/download.html">
     <!-- Favicons -->
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
-    <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="mask-icon" href="/favicon.svg" color="#D2693B">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
+    <meta name="application-name" content="Ratspeak">
+    <meta name="apple-mobile-web-app-title" content="Ratspeak">
+    <meta name="msapplication-TileColor" content="#FAF7F3">
+    <meta name="msapplication-TileImage" content="/assets/icons/windows/ratspeak-windows-light-150.png">
+    <meta name="color-scheme" content="light dark">
     <!-- Open Graph -->
     <meta property="og:type" content="website">
+    <meta property="og:locale" content="en_US">
     <meta property="og:site_name" content="Ratspeak">
     <meta property="og:title" content="Download — Ratspeak">
-    <meta property="og:description" content="Download Ratspeak — Available on every device.">
+    <meta property="og:description" content="Download Ratspeak for desktop, mobile, and supported mesh hardware. Private communication across every form factor.">
     <meta property="og:url" content="https://ratspeak.org/download.html">
-    <meta property="og:image" content="https://ratspeak.org/og-image.png">
+    <meta property="og:image" content="https://ratspeak.org/assets/seo/og-download.png">
+    <meta property="og:image:secure_url" content="https://ratspeak.org/assets/seo/og-download.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Ratspeak — A new network.">
+    <meta property="og:image:alt" content="Download Ratspeak — Private communication across every form factor.">
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@ratspeakorg">
     <meta name="twitter:title" content="Download — Ratspeak">
-    <meta name="twitter:description" content="Download Ratspeak — Available on every device.">
-    <meta name="twitter:image" content="https://ratspeak.org/og-image.png">
-    <meta name="twitter:image:alt" content="Ratspeak — A new network.">
+    <meta name="twitter:description" content="Download Ratspeak for desktop, mobile, and supported mesh hardware. Private communication across every form factor.">
+    <meta name="twitter:image" content="https://ratspeak.org/assets/seo/og-download.png">
+    <meta name="twitter:image:alt" content="Download Ratspeak — Private communication across every form factor.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/wp/walrus-party.css">
+    <link rel="stylesheet" href="assets/walrus-party.css">
     <script>!function(){var t=localStorage.getItem('ratspeak-theme');if(t)document.documentElement.setAttribute('data-theme',t);else if(window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.setAttribute('data-theme','dark')}()</script>
     <style>
         :root {
-            --bg-primary:    #EBEFEE;
-            --bg-secondary:  #E3E5E3;
-            --bg-tertiary:   #DAD9D5;
-            --bg-dark:       #4A413C;
-            --bg-dark-alt:   #564C46;
-            --border:        #CCB499;
-            --border-subtle: #DACCBA;
-            --text-primary:  #4A413C;
-            --text-secondary:#6D6259;
-            --text-muted:    #8A7E74;
-            --accent:        #BB6C43;
-            --accent-light:  #F5EBE3;
-            --accent-dark:   #9A5432;
+            --bg-primary:    #FAF7F3;
+            --bg-secondary:  #F3EFEA;
+            --bg-tertiary:   #ECE6DE;
+            --bg-card:       #FFFFFF;
+            --bg-dark:       #2A2522;
+            --border:        #DED4C8;
+            --border-subtle: #E6DDD2;
+            --border-card:   #E1D5C6;
+            --text-primary:  #2A2522;
+            --text-secondary:#6F675F;
+            --text-muted:    #9A9086;
+            --accent:        #D2693B;
+            --accent-light:  #FBEFE6;
+            --accent-dark:   #B85829;
+            --accent-a05:    rgba(210, 105, 59, 0.05);
+            --accent-a12:    rgba(210, 105, 59, 0.12);
+            --accent-a15:    rgba(210, 105, 59, 0.15);
+            --accent-a18:    rgba(210, 105, 59, 0.18);
+            --accent-a20:    rgba(210, 105, 59, 0.20);
+            --accent-a25:    rgba(210, 105, 59, 0.25);
+            --accent-a40:    rgba(210, 105, 59, 0.40);
+            --accent-a45:    rgba(210, 105, 59, 0.45);
+            /* Per-device card variants — re-tuned to harmonize with the warm
+               palette while remaining distinct hues. Used by .device-card--*
+               accents, flash-panel data-accent="…" theming, and admonitions. */
             --blue:          #3A76F0;
             --blue-light:    #ebf2fe;
             --red:           #CF222E;
@@ -62,22 +81,33 @@
             --success-dark:  #1E6B3E;
             --font-mono:     'JetBrains Mono', 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
             --font-sans:     'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            --shadow-card:   0 1px 2px rgba(42, 37, 34, 0.04), 0 4px 12px rgba(42, 37, 34, 0.04);
+            --shadow-card-hover: 0 2px 4px rgba(42, 37, 34, 0.05), 0 12px 32px rgba(42, 37, 34, 0.08);
         }
 
         [data-theme="dark"] {
-            --bg-primary:    #1a1a1e;
-            --bg-secondary:  #222226;
-            --bg-tertiary:   #2a2a2e;
+            --bg-primary:    #18171a;
+            --bg-secondary:  #1f1d20;
+            --bg-tertiary:   #26242a;
+            --bg-card:       #1d1b1e;
             --bg-dark:       #e8e4e0;
-            --bg-dark-alt:   #d4cfc9;
-            --border:        #3d3832;
-            --border-subtle: #2e2a26;
+            --border:        #322e30;
+            --border-subtle: #2a2629;
+            --border-card:   #2a2629;
             --text-primary:  #e8e4e0;
             --text-secondary:#a89f96;
             --text-muted:    #7a7068;
-            --accent:        #d4884f;
-            --accent-light:  #2a2218;
-            --accent-dark:   #e8a06a;
+            --accent:        #e08355;
+            --accent-light:  #2a1f18;
+            --accent-dark:   #f0986a;
+            --accent-a05:    rgba(224, 131, 85, 0.05);
+            --accent-a12:    rgba(224, 131, 85, 0.12);
+            --accent-a15:    rgba(224, 131, 85, 0.15);
+            --accent-a18:    rgba(224, 131, 85, 0.18);
+            --accent-a20:    rgba(224, 131, 85, 0.20);
+            --accent-a25:    rgba(224, 131, 85, 0.25);
+            --accent-a40:    rgba(224, 131, 85, 0.40);
+            --accent-a45:    rgba(224, 131, 85, 0.45);
             --blue:          #5b93f5;
             --blue-light:    #1a2236;
             --red:           #e5534b;
@@ -87,6 +117,8 @@
             --success:       #3da56a;
             --success-light: #1a2e22;
             --success-dark:  #4ec282;
+            --shadow-card:   0 1px 2px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);
+            --shadow-card-hover: 0 2px 4px rgba(0,0,0,0.35), 0 12px 32px rgba(0,0,0,0.3);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -145,240 +177,152 @@
         }
 
         /* ── Navbar ────────────────────────────────────── */
-
         .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 44px;
-            height: 64px;
-            background: rgba(235, 239, 238, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 44px; height: 64px;
+            background: rgba(250, 247, 243, 0.86);
+            backdrop-filter: blur(14px) saturate(1.2);
+            -webkit-backdrop-filter: blur(14px) saturate(1.2);
             border-bottom: 1px solid transparent;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+            transform: translateZ(0);
         }
-
+        [data-theme="dark"] .navbar { background: rgba(24, 23, 26, 0.78); }
         .navbar.scrolled {
+            background: rgba(250, 247, 243, 0.94);
             border-bottom-color: var(--border-subtle);
-            box-shadow: 0 1px 3px rgba(74, 65, 60, 0.04), 0 8px 24px rgba(74, 65, 60, 0.03);
+            box-shadow: 0 1px 0 rgba(42, 37, 34, 0.03);
         }
-
-        .navbar-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .navbar-left a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-        }
-
+        [data-theme="dark"] .navbar.scrolled { background: rgba(24, 23, 26, 0.88); }
+        .navbar-left { display: flex; align-items: center; gap: 12px; }
+        .navbar-left a { display: flex; align-items: center; gap: 10px; text-decoration: none; }
         .navbar-logo {
-            width: 26px;
-            height: 26px;
-            flex-shrink: 0;
+            width: 28px; height: 28px; flex-shrink: 0;
+            color: var(--accent);
         }
-
         .navbar-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text-primary);
+            font-size: 17px; font-weight: 700; color: var(--text-primary);
             letter-spacing: -0.01em;
         }
-
-        .navbar-center {
-            display: flex;
-            align-items: center;
-            gap: 32px;
-        }
-
+        .navbar-center { display: flex; align-items: center; gap: 36px; }
         .navbar-center a {
-            font-size: 15px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: color 0.15s ease;
-            position: relative;
-            padding: 4px 0;
+            font-size: 14.5px; font-weight: 500; color: var(--text-secondary);
+            text-decoration: none; transition: color 0.15s ease;
+            position: relative; padding: 4px 0;
         }
-
-        .navbar-center a:hover {
-            color: var(--text-primary);
-        }
-
+        .navbar-center a:hover { color: var(--text-primary); }
         .navbar-center a::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: var(--accent);
-            border-radius: 1px;
-            transform: scaleX(0);
-            transition: transform 0.2s ease;
+            content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
+            height: 2px; background: var(--accent); border-radius: 2px;
+            transform: scaleX(0); transition: transform 0.2s ease;
         }
+        .navbar-center a.nav-active::after,
+        .navbar-center a:hover::after { transform: scaleX(0.6); }
+        .navbar-center a.nav-active { color: var(--text-primary); }
 
-        .navbar-center a:hover::after {
-            transform: scaleX(1);
+        .navbar-right { display: flex; align-items: center; gap: 14px; }
+        .navbar-icon-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px;
+            background: transparent; border: none; cursor: pointer;
+            color: var(--text-muted); border-radius: 8px;
+            transition: color 0.2s, background 0.2s;
+            text-decoration: none;
         }
+        .navbar-icon-btn:hover { color: var(--text-primary); background: rgba(42, 37, 34, 0.045); }
+        [data-theme="dark"] .navbar-icon-btn:hover { background: var(--bg-secondary); }
+        .navbar-icon-btn svg { width: 18px; height: 18px; }
+        .navbar-hamburger { display: none; }
 
-        .navbar-center a.nav-active {
-            color: var(--text-primary);
-        }
-
-        .navbar-center a.nav-active::after {
-            transform: scaleX(1);
-        }
-
-        .navbar-right {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .navbar-gh {
-            display: flex;
-            align-items: center;
-            color: var(--text-muted);
-            transition: color 0.2s;
-            padding: 4px;
-        }
-
-        .navbar-gh:hover {
-            color: var(--text-primary);
-        }
-
-        .navbar-gh svg {
-            width: 22px;
-            height: 22px;
-        }
-
-        .navbar-theme {
-            display: flex;
-            align-items: center;
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-muted);
-            transition: color 0.2s;
-            padding: 4px;
-        }
-        .navbar-theme:hover { color: var(--text-primary); }
-        .navbar-theme svg { width: 20px; height: 20px; }
         .theme-icon-sun { display: none; }
-        .theme-icon-moon { display: block; }
         [data-theme="dark"] .theme-icon-sun { display: block; }
         [data-theme="dark"] .theme-icon-moon { display: none; }
 
+        /* ── Buttons ─────────────────────────────────── */
         .nr-btn {
-            background: var(--accent);
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            padding: 8px 20px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--accent); color: #ffffff;
+            border: none; border-radius: 10px;
+            padding: 12px 22px;
+            font-size: 15px; font-weight: 600;
             font-family: var(--font-sans);
-            transition: all 0.2s ease;
+            cursor: pointer; text-decoration: none;
             white-space: nowrap;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            box-shadow: 0 1px 2px var(--accent-a20), 0 4px 12px var(--accent-a18);
+            transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
         }
-
         .nr-btn:hover {
-            background: #9A5432;
+            background: var(--accent-dark);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(187, 108, 67, 0.25);
+            box-shadow: 0 2px 4px var(--accent-a25), 0 8px 20px var(--accent-a25);
+        }
+        .nr-btn-lg { padding: 14px 28px; font-size: 15.5px; border-radius: 11px; }
+        .nr-btn-sm { padding: 8px 14px; font-size: 13px; border-radius: 8px; }
+        .nr-btn-secondary {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--bg-card); color: var(--text-primary);
+            border: 1px solid var(--border-card); border-radius: 10px;
+            padding: 12px 22px;
+            font-size: 15px; font-weight: 600;
+            font-family: var(--font-sans);
+            cursor: pointer; text-decoration: none;
+            white-space: nowrap;
+            box-shadow: var(--shadow-card);
+            transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .nr-btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-card-hover);
+        }
+        .nr-btn:disabled,
+        .nr-btn[disabled] {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 1px 2px var(--accent-a12);
         }
 
-        .nr-btn-sm {
-            padding: 6px 14px;
-            font-size: 13px;
-            border-radius: 6px;
-        }
-
-        /* ── Hamburger (mobile only) ─────────────────── */
-
-        .navbar-hamburger {
-            display: none;
-            align-items: center;
-            justify-content: center;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 6px;
-            color: var(--text-secondary);
-            transition: color 0.2s;
-            border-radius: 6px;
-        }
-
-        .navbar-hamburger:hover {
-            color: var(--text-primary);
-            background: var(--bg-secondary);
-        }
-
-        .navbar-hamburger svg {
-            width: 24px;
-            height: 24px;
-        }
-
+        /* ── Mobile drawer ──────────────────────────── */
         .navbar-menu {
             display: none;
             position: fixed;
-            top: 64px;
-            right: 16px;
+            top: 64px; right: 16px;
             min-width: 180px;
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
             border-radius: 12px;
             padding: 8px;
             flex-direction: column;
             gap: 2px;
             z-index: 99;
-            box-shadow: 0 8px 32px rgba(74, 65, 60, 0.12);
+            box-shadow: var(--shadow-card-hover);
             opacity: 0;
             transform: translateY(-8px);
             transition: opacity 0.2s ease, transform 0.2s ease;
             pointer-events: none;
         }
-
         .navbar-menu.open {
             opacity: 1;
             transform: translateY(0);
             pointer-events: auto;
         }
-
         .navbar-menu a {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            display: flex; align-items: center; gap: 8px;
             padding: 10px 14px;
             color: var(--text-secondary);
             text-decoration: none;
-            font-size: 15px;
-            font-weight: 500;
+            font-size: 14.5px; font-weight: 500;
             border-radius: 8px;
             transition: background 0.15s, color 0.15s;
         }
-
         .navbar-menu a:hover {
-            background: var(--bg-secondary);
+            background: rgba(42, 37, 34, 0.045);
             color: var(--text-primary);
         }
-
+        [data-theme="dark"] .navbar-menu a:hover { background: var(--bg-secondary); }
         .navbar-menu a.menu-active {
             color: var(--accent);
         }
@@ -482,14 +426,14 @@
         /* ── Device Card ───────────────────────────────── */
 
         .device-card {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-subtle);
-            border-radius: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 14px;
             padding: 0 24px 24px;
             position: relative;
             overflow: hidden;
             cursor: pointer;
-            box-shadow: 0 1px 3px rgba(74, 65, 60, 0.03);
+            box-shadow: var(--shadow-card);
             transition: border-color 0.2s ease,
                         box-shadow 0.2s ease,
                         transform 0.2s ease;
@@ -520,7 +464,7 @@
         .device-card:hover {
             transform: translateY(-3px);
             border-color: var(--border);
-            box-shadow: 0 8px 24px rgba(74, 65, 60, 0.08), 0 2px 6px rgba(74, 65, 60, 0.04);
+            box-shadow: var(--shadow-card-hover);
         }
 
         .device-card__visual {
@@ -531,7 +475,7 @@
             margin: 0 -24px 20px;
             padding: 20px;
             background: var(--bg-secondary);
-            border-radius: 16px 16px 0 0;
+            border-radius: 14px 14px 0 0;
             position: relative;
         }
 
@@ -548,7 +492,7 @@
         .device-card--purple .device-card__visual svg  { color: var(--purple); }
         .device-card--orange .device-card__visual svg  { color: var(--orange); }
 
-        .device-card--green .device-card__visual  { background: radial-gradient(circle at center, rgba(187, 108, 67, 0.05) 0%, var(--bg-secondary) 70%); }
+        .device-card--green .device-card__visual  { background: radial-gradient(circle at center, rgba(210, 105, 59, 0.05) 0%, var(--bg-secondary) 70%); }
         .device-card--blue .device-card__visual   { background: radial-gradient(circle at center, rgba(58, 118, 240, 0.04) 0%, var(--bg-secondary) 70%); }
         .device-card--purple .device-card__visual  { background: radial-gradient(circle at center, rgba(139, 92, 246, 0.04) 0%, var(--bg-secondary) 70%); }
         .device-card--orange .device-card__visual  { background: radial-gradient(circle at center, rgba(212, 167, 44, 0.04) 0%, var(--bg-secondary) 70%); }
@@ -602,15 +546,15 @@
         a.device-card:hover {
             transform: translateY(-1px);
             opacity: 0.75;
-            box-shadow: 0 4px 12px rgba(74, 65, 60, 0.05);
+            box-shadow: var(--shadow-card-hover);
         }
 
         a.device-card .device-card__visual::after {
             content: '';
             position: absolute;
             inset: 0;
-            background: rgba(235, 239, 238, 0.35);
-            border-radius: 16px 16px 0 0;
+            background: rgba(250, 247, 243, 0.35);
+            border-radius: 14px 14px 0 0;
             z-index: 2;
         }
 
@@ -625,15 +569,15 @@
             transform: translate(-50%, -50%);
             font-family: var(--font-mono);
             font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 1.5px;
+            font-weight: 500;
+            letter-spacing: 0.18em;
             text-transform: uppercase;
             padding: 6px 14px;
-            border-radius: 8px;
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
-            box-shadow: 0 2px 8px rgba(74, 65, 60, 0.08);
+            border-radius: 999px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            color: var(--text-muted);
+            box-shadow: var(--shadow-card);
             z-index: 3;
         }
 
@@ -716,13 +660,13 @@
         .flash-back:hover svg { transform: translateX(-3px); }
 
         .flash-panel {
-            background: var(--bg-primary);
-            border: none;
-            border-radius: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 14px;
             padding: 40px 36px;
             position: relative;
             overflow: visible;
-            box-shadow: 0 2px 8px rgba(74, 65, 60, 0.04), 0 0 0 1px var(--border-subtle);
+            box-shadow: var(--shadow-card);
         }
 
         /* Left accent line -- hidden in redesign */
@@ -735,7 +679,7 @@
             background: var(--bg-secondary);
             margin: -40px -36px 32px;
             padding: 24px 36px;
-            border-radius: 16px 16px 0 0;
+            border-radius: 14px 14px 0 0;
             border-bottom: 1px solid var(--border-subtle);
         }
 
@@ -812,12 +756,12 @@
         .connect-btn--idle {
             background: var(--accent-light);
             color: var(--accent-dark);
-            border-color: rgba(187, 108, 67, 0.25);
+            border-color: rgba(210, 105, 59, 0.25);
         }
         .connect-btn--idle:hover {
-            background: rgba(187, 108, 67, 0.15);
-            border-color: rgba(187, 108, 67, 0.4);
-            box-shadow: 0 2px 8px rgba(187, 108, 67, 0.1);
+            background: rgba(210, 105, 59, 0.15);
+            border-color: rgba(210, 105, 59, 0.4);
+            box-shadow: 0 2px 8px rgba(210, 105, 59, 0.1);
         }
 
         .connect-btn--connected {
@@ -896,7 +840,7 @@
             gap: 12px;
             padding: 16px;
             background: var(--accent-light);
-            border: 1px solid rgba(187, 108, 67, 0.15);
+            border: 1px solid rgba(210, 105, 59, 0.15);
             border-radius: 10px;
         }
 
@@ -961,7 +905,7 @@
         .firmware-version-chevron--open { transform: rotate(180deg); }
 
         .firmware-versions {
-            border: 1px solid rgba(187, 108, 67, 0.15);
+            border: 1px solid rgba(210, 105, 59, 0.15);
             border-top: none;
             border-radius: 0 0 10px 10px;
             background: var(--accent-light);
@@ -1144,13 +1088,13 @@
             background: var(--accent);
             color: #ffffff;
             border-color: var(--accent);
-            box-shadow: 0 2px 8px rgba(187, 108, 67, 0.2);
+            box-shadow: 0 2px 8px rgba(210, 105, 59, 0.2);
         }
 
         .flash-btn--ready:hover {
-            background: #9A5432;
-            border-color: #9A5432;
-            box-shadow: 0 4px 16px rgba(187, 108, 67, 0.3);
+            background: var(--accent-dark);
+            border-color: var(--accent-dark);
+            box-shadow: 0 4px 16px rgba(210, 105, 59, 0.3);
             transform: translateY(-2px);
         }
 
@@ -1164,7 +1108,7 @@
         .flash-btn--flashing {
             background: var(--bg-secondary);
             color: var(--accent);
-            border-color: rgba(187, 108, 67, 0.2);
+            border-color: rgba(210, 105, 59, 0.2);
             cursor: wait;
         }
 
@@ -1391,7 +1335,7 @@
             font-size: 14px;
             font-weight: 600;
             font-family: var(--font-sans);
-            border: 1px solid rgba(187, 108, 67, 0.25);
+            border: 1px solid rgba(210, 105, 59, 0.25);
             border-radius: 10px;
             background: var(--accent-light);
             color: var(--accent-dark);
@@ -1400,127 +1344,102 @@
         }
 
         .flash-result__btn:hover {
-            background: rgba(187, 108, 67, 0.15);
-            border-color: rgba(187, 108, 67, 0.4);
+            background: rgba(210, 105, 59, 0.15);
+            border-color: rgba(210, 105, 59, 0.4);
         }
 
         /* ── Footer ────────────────────────────────────── */
 
+        /* ── Footer ──────────────────────────────────── */
         .footer {
-            border-top: 1px solid var(--border-subtle);
-            padding: 48px 32px;
+            background: var(--bg-primary);
+            padding: 28px 32px 36px;
         }
-
         .footer-inner {
-            max-width: 1200px;
+            max-width: 1180px;
             margin: 0 auto;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            font-size: 13px;
         }
-
         .footer-left {
             display: flex;
             align-items: center;
-            gap: 24px;
+            gap: 8px;
+            color: var(--text-muted);
         }
-
         .footer-brand {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 10px;
             text-decoration: none;
+            color: var(--text-muted);
+            transition: color 0.2s ease;
         }
-
         .footer-brand svg {
-            width: 22px;
-            height: 22px;
-            opacity: 0.5;
-            transition: opacity 0.3s;
+            width: 20px;
+            height: 20px;
+            opacity: 0.75;
+            transition: opacity 0.2s ease;
         }
-
+        .footer-brand:hover {
+            color: var(--accent);
+        }
         .footer-brand:hover svg {
             opacity: 1;
         }
-
         .footer-built {
-            font-size: 13px;
             color: var(--text-muted);
         }
-
         .footer-built a {
-            color: var(--accent-dark);
+            color: var(--accent);
             text-decoration: none;
             transition: color 0.2s;
         }
-
         .footer-built a:hover {
-            color: var(--accent);
+            color: var(--accent-dark);
         }
-
         .footer-links {
             display: flex;
             align-items: center;
-            gap: 24px;
-            font-size: 14px;
+            gap: 22px;
         }
-
         .footer-links a {
             color: var(--text-muted);
             text-decoration: none;
             transition: color 0.2s;
         }
-
         .footer-links a:hover {
             color: var(--text-primary);
         }
 
-        /* ── Coming Soon Toast ─────────────────────────── */
-
+        /* ── Coming Soon Toast ─────────────────────── */
         .coming-soon-toast {
             position: fixed;
-            bottom: 32px;
-            left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-top: 2px solid var(--accent);
-            border-radius: 10px;
+            bottom: 32px; left: 50%;
+            transform: translate(-50%, 20px);
+            display: flex; align-items: center; gap: 10px;
             padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px;
-            font-weight: 500;
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-left: 3px solid var(--accent);
+            border-radius: 10px;
+            box-shadow: var(--shadow-card-hover);
             color: var(--text-primary);
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+            font-size: 14px; font-weight: 500;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
             z-index: 10000;
-            box-shadow: 0 8px 32px rgba(74, 65, 60, 0.12);
             pointer-events: none;
         }
-
         .coming-soon-toast.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(-50%) translateY(0);
+            opacity: 1; visibility: visible;
+            transform: translate(-50%, 0);
         }
-
-        /* ── Dark Mode Overrides ─────────────────── */
-        [data-theme="dark"] .navbar {
-            background: rgba(26, 26, 30, 0.85);
-        }
-        [data-theme="dark"] .navbar.scrolled {
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1);
-        }
-        [data-theme="dark"] .navbar-menu {
-            background: var(--bg-primary);
-            border-color: var(--border);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-        [data-theme="dark"] .nr-btn:hover {
-            box-shadow: 0 4px 12px rgba(212, 136, 79, 0.3);
+        .coming-soon-toast svg {
+            width: 16px; height: 16px;
+            color: var(--accent);
+            flex-shrink: 0;
         }
 
         /* ── Responsive ────────────────────────────────── */
@@ -1574,13 +1493,13 @@
         }
     </style>
     <script type="application/ld+json">
-    {
+{
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "Ratspeak",
       "applicationCategory": "CommunicationApplication",
-      "operatingSystem": "ESP32",
-      "description": "Download Ratspeak — Available on every device.",
+      "operatingSystem": "macOS, Windows, Linux, iOS, Android, ESP32",
+      "description": "Download Ratspeak for desktop, mobile, and supported mesh hardware. Private communication across every form factor.",
       "url": "https://ratspeak.org/download.html",
       "offers": {
         "@type": "Offer",
@@ -1596,7 +1515,7 @@
 <nav class="navbar" id="navbar">
     <div class="navbar-left">
         <a href="index.html">
-            <svg class="navbar-logo" viewBox="243 243 282 282" fill="var(--accent)" width="26" height="26">
+            <svg class="navbar-logo" viewBox="243 243 282 282" fill="currentColor" aria-hidden="true">
                 <path d="M327.97,501.16C314.61,508.03 301.57,514.72 288.56,521.48C283.91,523.91 279.2,524.61 275.05,520.98C271.05,517.49 271.26,512.87 272.63,508.05C275.23,498.93 277.46,489.7 280.08,480.58C281.03,477.27 280.4,475.51 277.14,473.92C255.84,463.53 245.61,446.29 245.66,422.66C245.75,381.16 245.55,339.66 245.75,298.16C245.86,275.62 256.63,259.57 276.93,249.98C283.68,246.79 291.07,246.01 298.4,246C355.74,245.88 413.07,245.83 470.4,245.95C495.22,246.01 516.64,265.69 519.52,290.03C520.6,299.2 520.12,308.32 520.21,317.46C520.37,333.46 520.29,349.46 520.2,365.46C520.17,371.38 518.89,372.03 513.77,369.13C498.9,360.71 498.91,360.71 498.9,343.65C498.88,328.81 498.92,313.98 498.81,299.15C498.66,279.74 486.18,267.28 466.77,267.26C410.94,267.23 355.11,267.23 299.27,267.32C279.54,267.35 267.32,279.36 267.23,299.05C267.05,340.71 267.04,382.38 267.09,424.04C267.11,441.62 277.67,453.85 295.43,456.58C310.83,458.95 307.84,458.98 304.51,471.32C303.3,475.82 302.05,480.31 300.83,484.81C300.35,486.56 299.66,488.32 300.92,490.33C304.48,490.2 307.24,487.87 310.31,486.46C314.99,484.3 319.61,481.95 324.04,479.31C328.78,476.49 333.17,476.59 338.23,478.73C355.38,485.99 373.44,488.84 391.95,487.72C430.98,485.37 461.99,468.13 484.6,436.22C489.79,428.9 493.71,420.74 496.43,412.08C497.17,409.7 496.94,408 494.74,406.52C489.6,403.07 487.33,398.05 487.7,391.96C487.91,388.37 486.58,386.13 483.49,384.24C461.58,370.79 438.6,360.13 412.77,356.87C403.65,355.71 394.49,355.67 385.35,356.73C376.09,357.8 372.64,358.02 369.74,347.74C368.12,341.98 365.71,336.47 362.24,331.47C356.28,322.9 346.68,319.02 337.45,321.63C328.92,324.05 321.83,333.47 321.32,343.14C320.63,356 327.03,371.92 346.66,374.88C350.07,375.39 352.59,376.98 353.16,380.74C353.7,384.21 352.02,386.53 349.33,388.25C347.4,389.48 345.13,389.39 343,389.01C325.7,385.88 313.84,376.01 308.73,359.24C303.68,342.67 306.62,327.49 319.94,315.42C336.41,300.5 361.24,303.86 373.4,322.51C376.14,326.7 378.7,331.06 380.19,335.83C381.41,339.73 383.56,341.03 387.54,340.77C406.5,339.53 425.15,341.26 443.29,347.18C469.21,355.64 492.63,368.82 514.47,384.97C521.5,390.18 521.02,397.62 519.75,405.01C515.1,432.25 501.28,454.4 481.02,472.62C460.48,491.09 436.54,502.92 409.2,507.52C385.77,511.46 362.77,509.7 340.18,502.3C336.39,501.06 332.58,498.31 327.97,501.16z"/>
                 <path d="M414.19,335.38C405.75,335.93 397.65,334.86 389.54,335.84C387,336.15 385.78,334.06 384.8,332.07C380.73,323.83 376.21,315.95 368.77,310.17C366.48,308.38 367.23,307 369.43,305.62C379.53,299.3 389.62,299.22 399.19,306.49C408.52,313.58 414.08,323.09 414.19,335.38z"/>
                 <path d="M417.09,390.21C410.66,388.78 407.34,384.6 408.1,379.44C408.81,374.6 413.31,370.91 418.31,371.05C423.12,371.19 426.94,375.02 427.27,380C427.63,385.61 424.18,389.22 417.09,390.21z"/>
@@ -1613,14 +1532,14 @@
         <a href="download.html" class="nav-active">Download</a>
     </div>
     <div class="navbar-right">
-        <button class="navbar-theme" id="themeToggle" aria-label="Toggle theme">
+        <button class="navbar-icon-btn" id="themeToggle" aria-label="Toggle theme">
             <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
             <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
         </button>
-        <a href="https://github.com/ratspeak" class="navbar-gh" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+        <a href="https://github.com/ratspeak" class="navbar-icon-btn navbar-gh" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
         </a>
-        <button class="navbar-hamburger" id="navHamburger" aria-label="Menu">
+        <button class="navbar-icon-btn navbar-hamburger" id="navHamburger" aria-label="Menu">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
         </button>
     </div>
@@ -2284,8 +2203,8 @@
 
 <!-- ── Coming Soon Toast ──────────────────────────────── -->
 <div class="coming-soon-toast" id="comingSoonToast">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    Coming Soon
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <span>Coming soon</span>
 </div>
 
 <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -2294,24 +2213,24 @@
     'use strict';
 
     // ── Theme toggle ──
-    var themeToggle = document.getElementById('themeToggle');
     var htmlEl = document.documentElement;
-    var savedTheme = localStorage.getItem('ratspeak-theme');
-    if (savedTheme) {
-        htmlEl.setAttribute('data-theme', savedTheme);
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        htmlEl.setAttribute('data-theme', 'dark');
+    var themeMeta = document.querySelector('meta[name="theme-color"]');
+    function syncThemeColor() {
+        if (!themeMeta) return;
+        var c = getComputedStyle(htmlEl).getPropertyValue('--bg-primary').trim();
+        if (c) themeMeta.setAttribute('content', c);
     }
+    var themeToggle = document.getElementById('themeToggle');
     if (themeToggle) {
         themeToggle.addEventListener('click', function() {
             var current = htmlEl.getAttribute('data-theme');
             var next = current === 'dark' ? 'light' : 'dark';
             htmlEl.setAttribute('data-theme', next);
             localStorage.setItem('ratspeak-theme', next);
-            var meta = document.querySelector('meta[name="theme-color"]');
-            if (meta) meta.setAttribute('content', next === 'dark' ? '#1a1a1e' : '#EBEFEE');
+            syncThemeColor();
         });
     }
+    syncThemeColor();
 
     // ── esptool-js lazy loader ─────────────────────────
     var esptoolModule = null;
@@ -2403,8 +2322,13 @@
 
     // ── Navbar scroll effect ───────────────────────────
     var navbar = document.getElementById('navbar');
+    var wasScrolled = false;
     window.addEventListener('scroll', function() {
-        navbar.classList.toggle('scrolled', window.scrollY > 50);
+        var s = window.scrollY > 10;
+        if (s !== wasScrolled) {
+            navbar.classList.toggle('scrolled', s);
+            wasScrolled = s;
+        }
     }, { passive: true });
 
     // ── Browser check ──────────────────────────────────
@@ -3078,17 +3002,22 @@
 
 <script>
 (function() {
-    var toastTimer = null;
-    window.showComingSoon = function(e) {
-        e.preventDefault();
+    var csTimer = null;
+    window.showComingSoon = function(e, msg) {
+        if (e && e.preventDefault) e.preventDefault();
         var toast = document.getElementById('comingSoonToast');
-        if (toastTimer) clearTimeout(toastTimer);
+        if (!toast) return;
+        if (msg) {
+            var span = toast.querySelector('span');
+            if (span) span.textContent = msg;
+        }
+        if (csTimer) clearTimeout(csTimer);
         toast.classList.remove('show');
         void toast.offsetWidth;
         toast.classList.add('show');
-        toastTimer = setTimeout(function() {
+        csTimer = setTimeout(function() {
             toast.classList.remove('show');
-            toastTimer = null;
+            csTimer = null;
         }, 2500);
     };
 })();
@@ -3099,7 +3028,7 @@
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
-<script src="/wp/walrus-party.js" defer></script>
+<script src="assets/walrus-party.js" defer></script>
 
 </body>
 </html>

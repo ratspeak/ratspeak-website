@@ -1,312 +1,95 @@
 # Troubleshooting
 
-Common issues with Ratspeak and Reticulum — symptoms, causes, and solutions.
+## macOS says "unidentified developer" on first launch
 
-## Installation Issues
+Builds aren't notarized yet. Right-click the app and choose **Open**, then confirm. macOS remembers the choice for future launches.
 
-### pip install fails with dependency errors
+## Linux AppImage won't run
 
-**Symptom:** `pip install -r requirements.txt` fails with compilation errors.
+Make it executable first:
 
-**Solution:**
 ```bash
-# Ensure you have build tools
-# macOS:
-xcode-select --install
-
-# Debian/Ubuntu:
-sudo apt install build-essential python3-dev libffi-dev
-
-# Then retry in a fresh venv
-python3 -m venv .venv --clear
-source .venv/bin/activate
-pip install -r requirements.txt
+chmod +x Ratspeak-*.AppImage
+./Ratspeak-*.AppImage
 ```
 
-### "No module named rns" or "No module named lxmf"
+If it still won't start, install FUSE (`sudo apt install libfuse2` on Debian/Ubuntu).
 
-**Symptom:** Dashboard crashes on startup with import errors.
+## Windows SmartScreen blocks the installer
 
-**Solution:** Make sure you're in the virtual environment:
-```bash
-source .venv/bin/activate
-pip install rns lxmf
-```
+SmartScreen warns on unsigned executables. Click **More info**, then **Run anyway**. Code signing is on the roadmap.
 
-### Rust build fails
+## App is slow to start the first time
 
-**Symptom:** `cargo build` errors.
+First launch initializes the SQLite database, builds the FTS index, and generates an identity. Subsequent launches are quick. Wait it out — it's not stuck.
 
-**Common fixes:**
-```bash
-# Update Rust toolchain
-rustup update
+## I can't see any peers
 
-# Clean and rebuild
-cargo clean && cargo build --release
+Walk through these in order:
 
-# If serial features cause issues (no USB):
-cargo build --release --no-default-features
-```
+1. Open **Network** and confirm at least one interface is enabled and shows a green status.
+2. **AutoInterface**: both ends must be on the same LAN. Many corporate WiFi networks and guest SSIDs block multicast — try a wired connection or a different network.
+3. **TCP**: confirm you can reach the host and port (`nc -zv host port`). Check the remote side has a TCPServer interface listening on that port.
+4. **LoRa**: frequency, spreading factor, bandwidth, and coding rate must match exactly on both ends. One mismatched parameter and you hear nothing.
 
----
+## My RNode doesn't show up in "Add LoRa Device"
 
-## Startup Issues
+- **macOS / Linux**: serial devices need user permissions. On Linux, add yourself to the `dialout` group (`sudo usermod -aG dialout $USER`), then log out and back in. On macOS, the device should appear as `/dev/tty.usbserial-*` automatically.
+- **Windows**: install the CP210x or CH340 driver matching your RNode's USB chip. Check Device Manager for an unknown COM device.
+- **iOS**: USB radios are not supported. Use a BLE-equipped RNode and pair it from **Settings → Bluetooth**.
+- Bad cables look identical to good ones. If nothing else works, try a different USB cable — many shipped with devices are charge-only.
 
-### Dashboard shows "Starting..." indefinitely
+## Messages aren't delivering
 
-**Symptom:** Browser shows loading screen, never reaches "ready".
+A few things to check:
 
-**Causes & Solutions:**
+- **Length matters**. Opportunistic single-packet delivery caps at 295 bytes. Anything longer needs either a Direct Link to the recipient (both online at once) or a propagation node that both sides have peered with.
+- **Recipient announce is stale**. Open the contact and tap **Request Path** or **Fetch from Propagation Node**. If their announce is older than the network's path expiry, packets have nowhere to go.
+- **No transport coverage**. If you and the recipient share no interface and no hub between you, there's no route. Add a TCP hub or run a transport node.
 
-| Cause | Solution |
-|-------|----------|
-| rnsd not running | Start it: `rnsd --config nodes/node_1 -vv` |
-| Port 5050 in use | Change port in `ratspeak.conf` or kill the other process |
-| RNS shared instance conflict | Check for other Reticulum instances: `ps aux \| grep rnsd` |
-| Database locked | Remove stale lock: check for other Ratspeak processes |
+## I lost my identity
 
-### "Address already in use" on port 5050
+The identity file lives inside Ratspeak's per-OS data directory — `~/Library/Application Support/com.ratspeak.app/.ratspeak/identities/<hash>/identity` on macOS, `~/.local/share/com.ratspeak.app/.ratspeak/identities/<hash>/identity` on Linux, `%APPDATA%\com.ratspeak.app\.ratspeak\identities\<hash>\identity` on Windows. If you have a backup of that file, copy it back into place and restart the app.
 
-**Solution:**
-```bash
-# Find what's using the port
-lsof -i :5050
+If you don't have a backup, the identity is **unrecoverable** — keys are generated client-side and never escrowed anywhere. Generate a new identity, then tell your contacts your new hash so they can update their address book.
 
-# Kill it, or change the port
-# In ratspeak.conf:
-# [server]
-# port = 8080
-```
+## Auto-Announce isn't broadcasting
 
-### "Could not connect to shared instance"
+1. **Settings → Network → Auto-Announce** must not be set to **Off**.
+2. At least one interface must be enabled and connected. If all interfaces are red, there's nothing to announce on.
+3. Manual announces (long-press the bottom bar, or **Network → Announce**) are independent of the setting and always available — use them to confirm announce works at all before debugging the schedule.
 
-**Symptom:** Dashboard starts but can't reach the RNS daemon.
+## BLE peer mesh sees nothing
 
-**Solution:**
-```bash
-# Make sure rnsd is running
-rnsd --config nodes/node_1 -vv
+- Both devices need the **BLE** feature enabled in **Settings → Network**.
+- Both devices need OS-level Bluetooth permission. On iOS and recent Android, the OS prompts on first scan; if you denied, grant it under system settings.
+- BLE range is roughly 10 metres through walls, less with metal or concrete in the way. Move closer.
+- On Linux, the `bluetooth` service must be running (`systemctl status bluetooth`).
 
-# Check if shared instance port is available
-lsof -i :38005
+## I can't reach `rns.ratspeak.org:4242`
 
-# If another instance is running, stop it first
-./stop.sh
-```
+That hub is best-effort community infrastructure with no uptime guarantee. If it's unreachable:
 
----
+- Try a different community hub from the directory.
+- Run your own TCPServer on a small VPS — it's a single interface block in the config.
+- Connect peer-to-peer over a different transport (LoRa, BLE, AutoInterface on a shared LAN).
 
-## Messaging Issues
+## Path not found for a contact you've messaged before
 
-### Messages stuck on "pending"
+Reticulum forgets stale paths. Open the contact and tap **Request Path**, or wait for the next announce from the recipient. If the recipient went offline, requesting their announce from a propagation node will revive the path.
 
-**Symptom:** Sent messages never progress to "sent" or "delivered".
+## "Database is locked"
 
-**Causes:**
+Only one instance of Ratspeak should run against a given data directory at a time. Quit any other copies (check the system tray and any leftover processes), then relaunch. If the error persists after a clean restart, the WAL files may be stuck — quit the app and delete `ratspeak.db-wal` and `ratspeak.db-shm` in your data directory. The main `.db` file is safe to leave alone.
 
-| Cause | Solution |
-|-------|----------|
-| No path to recipient | Wait for their announce, or request path manually |
-| Recipient offline | Use propagation node for store-and-forward delivery |
-| Interface down | Check Network Monitoring → Interface cards |
-| RNS routing broken | Clear paths: Settings → Clear Path Table |
+## Network graph is laggy with many nodes
 
-### Messages show "failed"
+Open the graph filters and untick **Discovered** to hide one-hop announces you've never spoken to. Large meshes are inherently expensive to lay out — narrow what's drawn rather than what's stored.
 
-**Symptom:** Messages fail after timeout (3 minutes).
+## High latency on LoRa
 
-**Solutions:**
-- Verify the contact's destination hash is correct
-- Check that at least one shared interface connects you
-- Try sending via propagation node instead of direct
-- If on LoRa: ensure you're within radio range or have transport nodes
+This is normal, not a bug. At SF12 / 125 kHz, a single packet takes around 1.5 seconds on the air, and end-to-end delivery over multiple hops with retries can take 30 to 120 seconds. To trade range for speed, drop to SF7–SF9 and (if regulations allow) widen to 250 kHz.
 
-### Not receiving messages
+## Still stuck
 
-**Symptom:** Other users say they sent messages, but nothing appears.
-
-**Solutions:**
-- Force an announce: Settings → Trigger Announce
-- Check that your identity is active and LXMF destination is registered
-- Verify the sender has your correct destination hash
-- Check for identity mismatch (switched identities recently?)
-
-### Full-text search returns no results
-
-**Symptom:** Search bar finds nothing, even for known messages.
-
-**Solution:** The FTS5 index may be out of sync. Restart the dashboard — it will rebuild the index on startup.
-
----
-
-## Connection Issues
-
-### AutoInterface not discovering peers
-
-**Symptom:** LAN peers don't appear in topology.
-
-**Solutions:**
-- Ensure both devices are on the same subnet
-- Check firewall: AutoInterface uses multicast (UDP)
-- Some WiFi routers block multicast — try a direct TCP connection instead
-- On Linux, check that the correct network interface is active:
-  ```ini
-  [[WiFi]]
-      type = AutoInterface
-      allowed_interfaces = wlan0
-  ```
-
-### TCP connection refused
-
-**Symptom:** Can't connect to a remote hub.
-
-**Solutions:**
-- Verify the host and port are correct
-- Check that the remote server's firewall allows the port
-- Ensure the remote is running `TCPServerInterface` on that port
-- Try `telnet host port` or `nc -zv host port` to test connectivity
-
-### RNode not detected
-
-**Symptom:** Serial port dropdown is empty, or RNode interface fails to start.
-
-**Solutions:**
-
-| OS | Fix |
-|----|-----|
-| Linux | Add user to `dialout` group: `sudo usermod -a -G dialout $USER` (then log out/in) |
-| macOS | Install CP2102 driver if needed |
-| All | Check cable — some USB cables are charge-only (no data) |
-| All | Verify with `ls /dev/tty*` that the device appears |
-
-### BLE scan finds nothing
-
-**Symptom:** BLE scanning returns no devices.
-
-**Solutions:**
-- Ensure `bleak` is installed: `pip install bleak`
-- On Linux: `sudo apt install bluez` and ensure bluetooth service is running
-- BLE range is limited (~10m) — move devices closer
-- Some systems require running as root for BLE scanning
-
----
-
-## Network Issues
-
-### Announces not propagating
-
-**Symptom:** Nodes can't see each other despite being connected.
-
-**Solutions:**
-- Ensure at least one node has `enable_transport = Yes`
-- Check that transport nodes have multiple interfaces
-- On LoRa: announce propagation is rate-limited to 2% of bandwidth — be patient
-- Verify with `rnstatus` that interfaces are active
-
-### High latency on LoRa
-
-**Symptom:** Messages take minutes to deliver over LoRa.
-
-**This is normal for LoRa.** At SF12/125kHz, a single packet takes ~1.5 seconds to transmit. With retries, path discovery, and multi-hop routing, delivery times of 30-120 seconds are typical.
-
-**Optimization tips:**
-- Use lower spreading factor (SF7-SF9) for shorter range but faster speeds
-- Use wider bandwidth (250kHz) if regulatory limits allow
-- Minimize hop count — place transport nodes strategically
-- Use `boundary` mode on TCP interfaces to prevent internet traffic flooding LoRa
-
-### "Path not found" for known contacts
-
-**Solutions:**
-- Request path: click the contact → Request Path
-- Force announce on both sides
-- Clear path table and wait for fresh announces
-- Check that transport nodes are running between you
-
----
-
-## Identity Issues
-
-### Identity file won't import
-
-**Symptom:** Import fails with "invalid identity" error.
-
-**Solutions:**
-- Identity files must be exactly 64 bytes (Ed25519 + X25519 private keys)
-- Check that the file isn't corrupted (compare sizes)
-- For base64 import, ensure the string is valid base64 encoding of 64 bytes
-
-### "Clone detected" warning
-
-**Symptom:** Dashboard warns about identity cloning.
-
-**Cause:** The same identity file is running on a different machine (different hostname, MAC, or CPU architecture).
-
-**Solution:** Each identity should only run on one machine at a time. Either stop the other instance, or create a new identity on this machine.
-
----
-
-## Database Issues
-
-### "database is locked"
-
-**Symptom:** Operations fail with SQLite lock errors.
-
-**Solutions:**
-- Ensure only one Ratspeak instance is running
-- Check for zombie processes: `ps aux | grep ratspeak`
-- Restart the dashboard
-- If persistent, the WAL file may be corrupted — stop all processes and delete `ratspeak.db-wal` and `ratspeak.db-shm` (the database itself is safe)
-
-### Database corruption
-
-**Symptom:** Crashes on startup with SQLite errors.
-
-**Nuclear option (last resort):**
-```bash
-# Back up the database first!
-cp ~/.ratspeak/ratspeak.db ~/.ratspeak/ratspeak.db.bak
-
-# Try SQLite recovery
-sqlite3 ~/.ratspeak/ratspeak.db ".recover" | sqlite3 ~/.ratspeak/ratspeak_recovered.db
-
-# Or start fresh (loses message history, keeps identities):
-rm ~/.ratspeak/ratspeak.db
-# Restart dashboard — it will create a new database
-```
-
----
-
-## Performance Issues
-
-### Dashboard is slow / high CPU
-
-**Solutions:**
-- Reduce polling interval in `ratspeak.conf`: `poll_interval = 3.0`
-- Close extra browser tabs connected to the dashboard
-- On Raspberry Pi: use Ratspeak-rs (Rust) for lower resource usage
-- Reduce `max_log_entries` if the event log is large
-
-### Network graph is laggy
-
-**Solutions:**
-- Filter node types (uncheck "Discovered" nodes in graph controls)
-- Reduce `max_nodes` in config
-- The graph uses D3.js force simulation — complex topologies are inherently expensive
-
----
-
-## Getting Help
-
-If none of the above solves your issue:
-
-1. Check the [FAQ](../reference/faq) for common questions
-2. Check the Ratspeak GitHub Issues for known bugs
-3. Include in your bug report: OS, Python/Rust version, `ratspeak.conf`, and relevant error output
-
-## What's Next
-
-- [FAQ](../reference/faq) — frequently asked questions
-- [Configuration Reference](../reference/configuration-reference) — all config options
-- [Platform Notes](../getting-started/platform-notes) — OS-specific setup
+Open **Settings → About** and check the version. Then ask in the community channels with: your OS, the version string, what you tried, and what you saw. Logs from **Settings → Diagnostics** help — they don't contain message contents.

@@ -1,292 +1,118 @@
 # Configuration Reference
 
-Complete reference for all Ratspeak and Reticulum configuration options.
+Reference for the configuration files relevant to Ratspeak users and operators: the Reticulum daemon config, the LXMF propagation node config, and where Ratspeak app settings live.
 
-## Ratspeak Configuration
+## Reticulum config (`~/.reticulum/config`)
 
-Ratspeak reads its dashboard config from `ratspeak.conf` (located in the dashboard directory). All values can be overridden with environment variables using the pattern `RATSPEAK_SECTION_KEY`.
+INI format. Same file is read by upstream Python `rnsd` and the Rust `rnsd` — they are interchangeable.
 
-### [server] Section
+Three top-level sections:
 
-| Option | Default | Env Override | Description |
-|--------|---------|-------------|-------------|
-| `port` | `5050` | `RATSPEAK_SERVER_PORT` | HTTP port for the dashboard |
-| `host` | `127.0.0.1` | `RATSPEAK_SERVER_HOST` | Bind address (`0.0.0.0` for all interfaces) |
-| `api_token` | (none) | `RATSPEAK_SERVER_API_TOKEN` | Bearer token for API authentication |
+| Section | Purpose |
+|---|---|
+| `[reticulum]` | Daemon-wide flags: transport role, shared instance, RPC. |
+| `[logging]` | `loglevel` 1-7 (1 = critical, 7 = extreme). |
+| `[interfaces]` | One sub-block per interface (TCP, RNode, Auto, etc.). |
 
-### [nodes] Section
+The file is created with sensible defaults on first run. Edit, then restart the daemon.
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `directory` | `nodes` | Directory containing RNS node configs |
-| `hub_node` | `node_1` | Primary node name |
+## `[reticulum]` block
 
-### [dashboard] Section
+| Key | Default | Description |
+|---|---|---|
+| `enable_transport` | `No` | Make this node a transport router. Forwards traffic and announces for other nodes. Required for hubs and gateways. |
+| `share_instance` | `Yes` | Run as a shared instance so other tools on this host can attach to this daemon over a local socket instead of opening their own interfaces. |
+| `instance_name` | `default` | Name of the shared-instance socket. Multiple daemons on one host need distinct names. |
+| `shared_instance_port` | `37428` | Local control port for the shared instance. |
+| `enable_remote_management` | `No` | Allow remote RPC management from listed identities. |
+| `remote_management_allowed` | *(none)* | Comma-separated identity hashes permitted to manage this node. |
+| `respond_to_probes` | `No` | Reply to network probes used by `rnprobe` for diagnostics. |
+| `panic_on_interface_error` | `No` | Halt the daemon if an interface raises a fatal error (otherwise log and continue). |
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `poll_interval` | `1.5` | RNS stats polling interval (seconds) |
-| `max_log_entries` | `200` | Maximum event log entries in memory |
-| `status_summary_interval` | `300` | Status broadcast interval (seconds) |
-| `max_nodes` | `99` | Maximum nodes in topology graph |
-| `path_age_reachable` | `1800` | Path freshness threshold (seconds, 30 min) |
-| `path_age_stale` | `3600` | Path staleness threshold (seconds, 60 min) |
+## `[interfaces]` block
 
-### Example ratspeak.conf
+Each interface is declared as a sub-block. The block name is a label; `type` selects the driver.
 
-```ini
-[server]
-port = 5050
-host = 127.0.0.1
-# api_token = your-secret-token-here
-
-[nodes]
-directory = nodes
-hub_node = node_1
-
-[dashboard]
-poll_interval = 1.5
-max_log_entries = 200
-status_summary_interval = 300
 ```
-
----
-
-## Reticulum Configuration
-
-Reticulum reads its config from `~/.reticulum/config` (or the path specified by `RATSPEAK_RNS_CONFIG_DIR`). The file uses INI format.
-
-### [reticulum] Section
-
-| Option | Default | Description |
-|--------|---------|-------------|
-| `enable_transport` | `No` | Enable packet forwarding for other nodes |
-| `share_instance` | `Yes` | Run as shared instance (owns interfaces, serves RPC) |
-| `shared_instance_port` | `38005` | RPC server port for client connections |
-| `instance_control_port` | `38006` | Control port |
-| `panic_on_interface_error` | `No` | Halt on interface failure |
-| `respond_to_probes` | `No` | Respond to network probe requests |
-| `use_implicit_proof` | `Yes` | Automatically send delivery proofs |
-| `enable_remote_management` | `No` | Allow remote node management |
-| `remote_management_allowed` | (none) | Comma-separated identity hashes for remote management |
-| `link_mtu_discovery` | `Yes` | Enable MTU discovery on links |
-
-### [logging] Section
-
-| Option | Default | Description |
-|--------|---------|-------------|
-| `loglevel` | `4` | Log verbosity: 1 (ERROR) through 7 (TRACE) |
-
-### [interfaces] Section
-
-Each interface is defined as a subsection with double brackets:
-
-```ini
-[[Interface Name]]
-    type = InterfaceType
-    enabled = Yes
-    # Type-specific options...
-```
-
-#### Common Interface Options
-
-| Option | Applies To | Description |
-|--------|-----------|-------------|
-| `enabled` | All | Enable/disable the interface |
-| `mode` | All | Interface mode (see below) |
-| `network_name` | All | IFAC network name (interface access code) |
-| `passphrase` | All | IFAC passphrase |
-| `announce_cap` | All | Max % of bandwidth for announces (default: 2) |
-| `bitrate` | All | Interface bitrate in bps (for rate calculations) |
-
-#### Interface Modes
-
-| Mode | Description |
-|------|-------------|
-| `full` | Bidirectional routing, rebroadcasts announces (default) |
-| `gateway` | Connects distinct segments, routes between them |
-| `access_point` | Serves clients, suppresses rebroadcasts, short path expiry |
-| `roaming` | Mobile client mode |
-| `boundary` | Edge of segment, limited rebroadcasting |
-
----
-
-### TCPClientInterface
-
-Connect to a remote TCP server.
-
-```ini
-[[Remote Hub]]
+[[Hub Uplink]]
     type = TCPClientInterface
-    target_host = hub.example.com
+    target_host = hub.example.org
     target_port = 4242
-    enabled = Yes
+    interface_enabled = True
 ```
 
-| Option | Required | Description |
-|--------|----------|-------------|
-| `target_host` | Yes | Hostname or IP to connect to |
-| `target_port` | Yes | TCP port |
-| `kiss_framing` | No | Use KISS framing (default: No) |
+### Common keys (any interface type)
 
-### TCPServerInterface
+| Key | Description |
+|---|---|
+| `type` | `TCPClientInterface`, `TCPServerInterface`, `UDPInterface`, `AutoInterface`, `RNodeInterface`, `RNodeMultiInterface`, `SerialInterface`, `KISSInterface`, `I2PInterface`, etc. |
+| `interface_enabled` | `True` / `False`. Toggle without removing the block. |
+| `mode` | `full` (default), `access_point`, `roaming`, `boundary`, `gateway`. Controls how announces are rebroadcast. |
+| `network_name` | IFAC network name. Interfaces with different names cannot exchange traffic on this link. |
+| `passphrase` | IFAC passphrase. Combined with `network_name` to authenticate frames. |
+| `ifac_size` | IFAC HMAC tag size in bytes (range `1`-`64`, default `16`). |
+| `announce_cap` | Max share of bandwidth used for announces. Default `2` (percent). |
+| `announce_rate_target` | Target seconds between announces from any one destination on this interface. |
+| `bitrate` | Link bitrate in bps. Used for airtime accounting on lossy or rate-limited links. |
 
-Accept incoming TCP connections.
+### TCP keys (`TCPClientInterface`, `TCPServerInterface`)
 
-```ini
-[[TCP Server]]
-    type = TCPServerInterface
-    listen_ip = 0.0.0.0
-    listen_port = 4242
-    enabled = Yes
-```
+| Key | Used by | Description |
+|---|---|---|
+| `target_host` | Client | Hostname or IP of the remote peer. |
+| `target_port` | Client | TCP port on the remote peer. |
+| `listen_ip` | Server | Local bind address. `0.0.0.0` for all interfaces. |
+| `listen_port` | Server | Local bind port. |
 
-| Option | Required | Description |
-|--------|----------|-------------|
-| `listen_ip` | Yes | Bind address |
-| `listen_port` | Yes | Listen port |
+### RNode keys (`RNodeInterface`, LoRa radios)
 
-### UDPInterface
+| Key | Description |
+|---|---|
+| `port` | Serial device, e.g. `/dev/ttyUSB0` or `COM3`. |
+| `frequency` | Centre frequency in Hz. Must match other nodes on the link and local regulations. |
+| `bandwidth` | LoRa bandwidth in Hz (e.g. `125000`, `250000`). |
+| `txpower` | Transmit power in dBm. |
+| `spreadingfactor` | LoRa SF, `5`-`12`. Higher = longer range, lower throughput. |
+| `codingrate` | LoRa coding rate, `5`-`8` (means 4/5 to 4/8). |
+| `airtime_limit_short` | Percent airtime cap over a short window. Enforces duty-cycle compliance. |
+| `airtime_limit_long` | Percent airtime cap over a long (hourly) window. |
 
-UDP broadcast for LAN discovery.
+### AutoInterface keys
 
-```ini
-[[UDP LAN]]
-    type = UDPInterface
-    listen_ip = 0.0.0.0
-    listen_port = 4242
-    forward_ip = 255.255.255.255
-    forward_port = 4242
-    enabled = Yes
-```
+`AutoInterface` discovers peers on the local LAN over IPv6 multicast. Useful keys: `group_id` (separate logical groups on the same LAN), `discovery_scope` (`link`, `admin`, `site`, `organisation`, `global`), `devices` (whitelist of OS interface names), `ignored_devices` (blacklist).
 
-| Option | Required | Description |
-|--------|----------|-------------|
-| `listen_ip` | Yes | Bind address |
-| `listen_port` | Yes | Listen port |
-| `forward_ip` | Yes | Broadcast address |
-| `forward_port` | Yes | Forward port |
+## LXMF / `lxmd` config (`~/.reticulum/lxmd.conf`)
 
-### AutoInterface
+INI format. Read by `lxmd`, the LXMF propagation node daemon. Only operators running a propagation node need this file; client apps do not.
 
-Zero-configuration LAN/WiFi discovery using multicast.
+| Key | Description |
+|---|---|
+| `enable_node` | Enable propagation node duties (store-and-forward for offline peers). |
+| `node_name` | Display name announced to peers. |
+| `announce_interval` | Minutes between propagation-node announces. |
+| `message_storage_limit` | Maximum disk used for stored messages, in megabytes. |
+| `propagation_transfer_max_accepted_size` | Largest single message accepted from peers, in kilobytes. |
+| `prioritise_destinations` | Comma-separated destination hashes whose messages are kept first when storage fills. |
+| `static_peers` | Comma-separated peer destination hashes to sync with on a fixed schedule. |
+| `peer_announce_interval` | Minutes between sync attempts to static peers. |
+| `min_stamp_cost` | Minimum LXMF stamp cost accepted. Raises the cost of spamming this node. |
 
-```ini
-[[WiFi Discovery]]
-    type = AutoInterface
-    enabled = Yes
-```
+## Ratspeak app settings
 
-| Option | Required | Description |
-|--------|----------|-------------|
-| `group_id` | No | Multicast group (default: Reticulum default) |
-| `discovery_scope` | No | `link` (LAN only) or `admin` (wider) |
-| `discovery_port` | No | Multicast port |
-| `data_port` | No | Data transfer port |
-| `allowed_interfaces` | No | Comma-separated OS interface names |
-| `ignored_interfaces` | No | Comma-separated OS interface names to skip |
+Ratspeak does **not** use a hand-edited config file. All app settings — display name, theme, auto-announce interval, propagation node, notification preferences, interface enables — live in the SQLite database next to the app data and are managed through the Settings view in the app.
 
-### RNodeInterface
+To reset, quit Ratspeak and remove the app data directory, then relaunch. The database will be recreated with defaults and a fresh identity.
 
-Connect to an RNode LoRa radio.
+The Reticulum stack inside Ratspeak uses its own embedded config under the app data directory, separate from any system-wide `~/.reticulum/config`. Two daemons can coexist on one host without conflict as long as their interface ports differ.
 
-```ini
-[[LoRa Radio]]
-    type = RNodeInterface
-    port = /dev/ttyUSB0
-    frequency = 915000000
-    bandwidth = 125000
-    spreadingfactor = 9
-    codingrate = 5
-    txpower = 17
-    enabled = Yes
-```
+## Identity files
 
-| Option | Required | Description |
-|--------|----------|-------------|
-| `port` | Yes | Serial port path |
-| `frequency` | Yes | Center frequency in Hz |
-| `bandwidth` | Yes | Bandwidth in Hz (7800-500000) |
-| `spreadingfactor` | Yes | LoRa spreading factor (5-12) |
-| `codingrate` | Yes | LoRa coding rate (5-8, meaning 4/5 to 4/8) |
-| `txpower` | No | Transmit power in dBm |
-| `flow_control` | No | Hardware flow control (default: No) |
+Identities are not configuration — they are 64-byte binary keys (32-byte X25519 private + 32-byte Ed25519 private). They cannot be edited in a text editor and must never be committed to source control or shared.
 
-### SerialInterface
+| Tool | Path |
+|---|---|
+| Ratspeak app | `<OS data dir>/com.ratspeak.app/.ratspeak/identities/<hash>/identity` (see [Install & Platform Setup](../getting-started/install-and-platform-setup) for the per-OS data directory) |
+| `rnsd` (Python or Rust) | `~/.reticulum/storage/<file>` |
+| `lxmd` | `~/.reticulum/storage/lxmd/identity` |
 
-Direct serial connection.
-
-```ini
-[[Serial Link]]
-    type = SerialInterface
-    port = /dev/ttyUSB0
-    speed = 115200
-    databits = 8
-    parity = none
-    stopbits = 1
-    enabled = Yes
-```
-
-### KISSInterface
-
-KISS-framed serial connection (for TNCs).
-
-```ini
-[[Packet TNC]]
-    type = KISSInterface
-    port = /dev/ttyUSB0
-    speed = 9600
-    kissframing = True
-    enabled = Yes
-```
-
-### I2PInterface
-
-Anonymous networking via I2P.
-
-```ini
-[[I2P Tunnel]]
-    type = I2PInterface
-    peers = i2p-destination-hash.b32.i2p
-    enabled = Yes
-```
-
-| Option | Required | Description |
-|--------|----------|-------------|
-| `peers` | No | Comma-separated I2P destination addresses |
-| `connectable` | No | Accept inbound connections (default: No) |
-
----
-
-## Rate Limiting Options
-
-These options control announce and traffic rate limiting on any interface:
-
-| Option | Default | Description |
-|--------|---------|-------------|
-| `announce_cap` | `2` | Max % of bandwidth for announces |
-| `announce_rate_target` | (none) | Target announce interval in seconds |
-| `announce_rate_grace` | (none) | Grace announcements before rate limiting |
-| `announce_rate_penalty` | (none) | Penalty interval for rate limit violators |
-| `airtime_limit_short` | (none) | Max % transmit time over ~15 seconds |
-| `airtime_limit_long` | (none) | Max % transmit time over ~60 minutes |
-
-## IFAC (Interface Access Codes)
-
-Restrict which traffic can use an interface:
-
-```ini
-[[Private LoRa]]
-    type = RNodeInterface
-    network_name = MyNetwork
-    passphrase = secret-passphrase
-    # ... other options
-```
-
-Only nodes with the same `network_name` + `passphrase` can communicate on this interface. Traffic is HMAC-verified and rejected if the IFAC doesn't match.
-
-## What's Next
-
-- [Troubleshooting](../reference/troubleshooting) — common issues and solutions
-- [Ratspeak-py Backend](../developer/ratspeak-py) — Python config handling
-- [Interface Types Overview](../connecting/interface-types-overview) — interface setup guides
+Back up the raw 64-byte file to preserve an identity across machines. Restoring is a file copy — no import step.

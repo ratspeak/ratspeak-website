@@ -1,11 +1,49 @@
 {
   "name": "Ratspeak",
   "short_name": "Ratspeak",
-  "icons": [
-    { "src": "/favicon-32x32.png", "sizes": "32x32", "type": "image/png" },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  "description": "Private communication without accounts, servers, or surveillance. Built on Reticulum for resilient messaging across any transport.",
+  "id": "/",
+  "lang": "en-US",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "browser",
+  "display_override": [
+    "browser"
   ],
-  "theme_color": "#4A413C",
-  "background_color": "#4A413C",
-  "display": "browser"
+  "categories": [
+    "communication",
+    "social",
+    "utilities"
+  ],
+  "theme_color": "#FAF7F3",
+  "background_color": "#FAF7F3",
+  "icons": [
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/seo/web-app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/seo/web-app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/seo/maskable-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
 }

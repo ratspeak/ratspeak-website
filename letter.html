@@ -3,55 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#EBEFEE">
+    <meta name="theme-color" content="#FAF7F3">
     <title>Letter — Ratspeak</title>
     <meta name="robots" content="noindex, nofollow">
     <!-- Favicons -->
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
-    <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="mask-icon" href="/favicon.svg" color="#D2693B">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="application-name" content="Ratspeak">
+    <meta name="apple-mobile-web-app-title" content="Ratspeak">
+    <meta name="msapplication-TileColor" content="#FAF7F3">
+    <meta name="msapplication-TileImage" content="/assets/icons/windows/ratspeak-windows-light-150.png">
+    <meta name="color-scheme" content="light dark">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script>!function(){var t=localStorage.getItem('ratspeak-theme');if(t)document.documentElement.setAttribute('data-theme',t);else if(window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.setAttribute('data-theme','dark')}()</script>
     <style>
         :root {
-            --bg-primary:    #EBEFEE;
-            --bg-secondary:  #E3E5E3;
-            --bg-tertiary:   #DAD9D5;
-            --border:        #CCB499;
-            --border-subtle: #DACCBA;
-            --text-primary:  #4A413C;
-            --text-secondary:#6D6259;
-            --text-muted:    #8A7E74;
-            --accent:        #BB6C43;
-            --accent-dark:   #9A5432;
+            --bg-primary:    #FAF7F3;
+            --bg-secondary:  #F3EFEA;
+            --bg-tertiary:   #ECE6DE;
+            --bg-card:       #FFFFFF;
+            --bg-dark:       #2A2522;
+            --border:        #DED4C8;
+            --border-subtle: #E6DDD2;
+            --border-card:   #E1D5C6;
+            --text-primary:  #2A2522;
+            --text-secondary:#6F675F;
+            --text-muted:    #9A9086;
+            --accent:        #D2693B;
+            --accent-light:  #FBEFE6;
+            --accent-dark:   #B85829;
+            --accent-a12:    rgba(210, 105, 59, 0.12);
+            --accent-a25:    rgba(210, 105, 59, 0.25);
             --font-mono:     'JetBrains Mono', 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
             --font-sans:     'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
         }
 
         [data-theme="dark"] {
-            --bg-primary:    #1a1a1e;
-            --bg-secondary:  #222226;
-            --bg-tertiary:   #2a2a2e;
+            --bg-primary:    #18171a;
+            --bg-secondary:  #1f1d20;
+            --bg-tertiary:   #26242a;
+            --bg-card:       #1d1b1e;
             --bg-dark:       #e8e4e0;
-            --bg-dark-alt:   #d4cfc9;
-            --border:        #3d3832;
-            --border-subtle: #2e2a26;
+            --border:        #322e30;
+            --border-subtle: #2a2629;
+            --border-card:   #2a2629;
             --text-primary:  #e8e4e0;
             --text-secondary:#a89f96;
             --text-muted:    #7a7068;
-            --accent:        #d4884f;
-            --accent-light:  #2a2218;
-            --accent-dark:   #e8a06a;
-            --blue:          #5b93f5;
-            --blue-light:    #1a2236;
-            --red:           #e5534b;
-            --orange:        #e0b83e;
-            --purple:        #a78bfa;
-            --purple-light:  #1f1a2e;
+            --accent:        #e08355;
+            --accent-light:  #2a1f18;
+            --accent-dark:   #f0986a;
+            --accent-a12:    rgba(224, 131, 85, 0.12);
+            --accent-a25:    rgba(224, 131, 85, 0.25);
         }
 
         /* ── Navbar ── */
@@ -64,23 +73,25 @@
             justify-content: space-between;
             padding: 0 44px;
             height: 64px;
-            background: rgba(235, 239, 238, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(250, 247, 243, 0.86);
+            backdrop-filter: blur(14px) saturate(1.2);
+            -webkit-backdrop-filter: blur(14px) saturate(1.2);
             border-bottom: 1px solid transparent;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+            transform: translateZ(0);
         }
         .navbar.scrolled {
+            background: rgba(250, 247, 243, 0.94);
             border-bottom-color: var(--border-subtle);
-            box-shadow: 0 1px 3px rgba(74, 65, 60, 0.04), 0 8px 24px rgba(74, 65, 60, 0.03);
+            box-shadow: 0 1px 0 rgba(42, 37, 34, 0.03);
         }
         .navbar-left { display: flex; align-items: center; gap: 12px; }
         .navbar-left a { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-        .navbar-logo { width: 26px; height: 26px; flex-shrink: 0; }
-        .navbar-title { font-size: 18px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.01em; }
-        .navbar-center { display: flex; align-items: center; gap: 32px; }
+        .navbar-logo { width: 28px; height: 28px; flex-shrink: 0; }
+        .navbar-title { font-size: 17px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.01em; }
+        .navbar-center { display: flex; align-items: center; gap: 36px; }
         .navbar-center a {
-            font-size: 15px; font-weight: 500; color: var(--text-secondary);
+            font-size: 14.5px; font-weight: 500; color: var(--text-secondary);
             text-decoration: none; transition: color 0.15s ease;
             position: relative; padding: 4px 0;
         }
@@ -92,21 +103,26 @@
         }
         .navbar-center a:hover::after { transform: scaleX(1); }
         .navbar-right { display: flex; align-items: center; gap: 16px; }
-        .navbar-gh { display: flex; align-items: center; color: var(--text-muted); transition: color 0.2s; padding: 4px; }
-        .navbar-gh:hover { color: var(--text-primary); }
-        .navbar-gh svg { width: 22px; height: 22px; }
+        .navbar-gh { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; color: var(--text-muted); transition: color 0.2s, background 0.2s; border-radius: 8px; text-decoration: none; }
+        .navbar-gh:hover { color: var(--text-primary); background: rgba(42, 37, 34, 0.045); }
+        [data-theme="dark"] .navbar-gh:hover { background: var(--bg-secondary); }
+        .navbar-gh svg { width: 18px; height: 18px; }
         .navbar-theme {
             display: flex;
             align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
             background: none;
             border: none;
             cursor: pointer;
             color: var(--text-muted);
-            transition: color 0.2s;
-            padding: 4px;
+            transition: color 0.2s, background 0.2s;
+            border-radius: 8px;
         }
-        .navbar-theme:hover { color: var(--text-primary); }
-        .navbar-theme svg { width: 20px; height: 20px; }
+        .navbar-theme:hover { color: var(--text-primary); background: rgba(42, 37, 34, 0.045); }
+        [data-theme="dark"] .navbar-theme:hover { background: var(--bg-secondary); }
+        .navbar-theme svg { width: 18px; height: 18px; }
         .theme-icon-sun { display: none; }
         .theme-icon-moon { display: block; }
         [data-theme="dark"] .theme-icon-sun { display: block; }
@@ -117,30 +133,33 @@
             font-family: var(--font-sans); transition: all 0.2s ease;
             white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
         }
-        .nr-btn:hover { background: #9A5432; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(187, 108, 67, 0.25); }
+        .nr-btn:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 4px 12px var(--accent-a25); }
         .nr-btn-sm { padding: 6px 14px; font-size: 13px; border-radius: 6px; }
         .navbar-hamburger {
             display: none; align-items: center; justify-content: center;
-            background: none; border: none; cursor: pointer; padding: 6px;
-            color: var(--text-secondary); transition: color 0.2s; border-radius: 6px;
+            width: 32px; height: 32px;
+            background: none; border: none; cursor: pointer;
+            color: var(--text-muted); transition: color 0.2s, background 0.2s; border-radius: 8px;
         }
-        .navbar-hamburger:hover { color: var(--text-primary); background: var(--bg-secondary); }
-        .navbar-hamburger svg { width: 24px; height: 24px; }
+        .navbar-hamburger:hover { color: var(--text-primary); background: rgba(42, 37, 34, 0.045); }
+        [data-theme="dark"] .navbar-hamburger:hover { background: var(--bg-secondary); }
+        .navbar-hamburger svg { width: 18px; height: 18px; }
         .navbar-menu {
             display: none; position: fixed; top: 64px; right: 16px; min-width: 180px;
-            background: var(--bg-primary); border: 1px solid var(--border); border-radius: 12px;
+            background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 12px;
             padding: 8px; flex-direction: column; gap: 2px; z-index: 99;
-            box-shadow: 0 8px 32px rgba(74, 65, 60, 0.12);
+            box-shadow: 0 2px 4px rgba(42, 37, 34, 0.05), 0 12px 32px rgba(42, 37, 34, 0.08);
             opacity: 0; transform: translateY(-8px);
             transition: opacity 0.2s ease, transform 0.2s ease; pointer-events: none;
         }
         .navbar-menu.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
         .navbar-menu a {
             display: flex; align-items: center; gap: 8px; padding: 10px 14px;
-            color: var(--text-secondary); text-decoration: none; font-size: 15px;
+            color: var(--text-secondary); text-decoration: none; font-size: 14.5px;
             font-weight: 500; border-radius: 8px; transition: background 0.15s, color 0.15s;
         }
-        .navbar-menu a:hover { background: var(--bg-secondary); color: var(--text-primary); }
+        .navbar-menu a:hover { background: rgba(42, 37, 34, 0.045); color: var(--text-primary); }
+        [data-theme="dark"] .navbar-menu a:hover { background: var(--bg-secondary); }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -374,23 +393,21 @@
 
         /* ── Bottom Void ── */
         .bottom-void {
-            height: clamp(120px, 20vh, 200px);
+            height: clamp(56px, 10vh, 96px);
         }
 
         /* ── Dark Mode Overrides ─────────────────── */
         [data-theme="dark"] .navbar {
-            background: rgba(26, 26, 30, 0.85);
+            background: rgba(24, 23, 26, 0.78);
         }
         [data-theme="dark"] .navbar.scrolled {
+            background: rgba(24, 23, 26, 0.88);
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1);
         }
         [data-theme="dark"] .navbar-menu {
-            background: var(--bg-primary);
-            border-color: var(--border);
+            background: var(--bg-card);
+            border-color: var(--border-card);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-        [data-theme="dark"] .nr-btn:hover {
-            box-shadow: 0 4px 12px rgba(212, 136, 79, 0.3);
         }
 
         /* ── Responsive ── */
@@ -412,6 +429,10 @@
 
             .letter-aside {
                 font-size: 18px;
+            }
+
+            .bottom-void {
+                height: clamp(40px, 7vh, 72px);
             }
 
             .margin-line {
@@ -526,7 +547,7 @@
 </div>
 
 <!-- ── Label ── -->
-<p class="letter-label">A letter to our community:</p>
+<p class="letter-label">A letter to the community:</p>
 
 <!-- ── Title ── -->
 <h1 class="letter-title">
@@ -628,6 +649,12 @@
     // ── Theme toggle ──
     var themeToggle = document.getElementById('themeToggle');
     var htmlEl = document.documentElement;
+    var themeMeta = document.querySelector('meta[name="theme-color"]');
+    function syncThemeColor() {
+        if (!themeMeta) return;
+        var c = getComputedStyle(htmlEl).getPropertyValue('--bg-primary').trim();
+        if (c) themeMeta.setAttribute('content', c);
+    }
     var savedTheme = localStorage.getItem('ratspeak-theme');
     if (savedTheme) {
         htmlEl.setAttribute('data-theme', savedTheme);
@@ -640,10 +667,10 @@
             var next = current === 'dark' ? 'light' : 'dark';
             htmlEl.setAttribute('data-theme', next);
             localStorage.setItem('ratspeak-theme', next);
-            var meta = document.querySelector('meta[name="theme-color"]');
-            if (meta) meta.setAttribute('content', next === 'dark' ? '#1a1a1e' : '#EBEFEE');
+            syncThemeColor();
         });
     }
+    syncThemeColor();
 
     // ── Navbar scroll effect ──
     var navbar = document.getElementById('navbar');

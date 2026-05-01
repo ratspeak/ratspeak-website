@@ -94,8 +94,14 @@
             if (parts.length >= 2) {
                 href = '#/' + parts[parts.length - 2] + '/' + parts[parts.length - 1];
             } else if (parts.length === 1) {
-                href = '#/' + parts[0];
+                // Singleton (./page) — same section as the page being rendered.
+                var sec = (currentPath || '').split('/')[0] || 'introduction';
+                href = '#/' + sec + '/' + parts[0];
             }
+        } else if (href && /\.md$/.test(href) && !/^[a-z]+:/i.test(href) && href.charAt(0) !== '#' && href.charAt(0) !== '/') {
+            // Bare same-section link (e.g. "rslxmf.md") — resolve to current section.
+            var sec2 = (currentPath || '').split('/')[0] || 'introduction';
+            href = '#/' + sec2 + '/' + href.replace(/\.md$/, '');
         }
         var titleAttr = title ? ' title="' + title + '"' : '';
         var target = href && href.indexOf('http') === 0 ? ' target="_blank" rel="noopener noreferrer"' : '';

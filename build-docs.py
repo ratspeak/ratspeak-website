@@ -186,15 +186,17 @@ def main():
 
         # Replace inline NAV_DATA
         html = re.sub(
-            r"var NAV_DATA = .+?;",
-            f"var NAV_DATA = {nav_inline};",
+            r"^(\s*)var NAV_DATA = .*$",
+            rf"\1var NAV_DATA = {nav_inline};",
             html,
+            flags=re.MULTILINE,
         )
         # Replace inline SEARCH_INDEX
         html = re.sub(
-            r"var SEARCH_INDEX = .+?;",
-            f"var SEARCH_INDEX = {search_inline};",
+            r"^(\s*)var SEARCH_INDEX = .*$",
+            rf"\1var SEARCH_INDEX = {search_inline};",
             html,
+            flags=re.MULTILINE,
         )
 
         with open(docs_html_path, "w", encoding="utf-8") as f:

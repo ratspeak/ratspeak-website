@@ -1,102 +1,89 @@
-# Community Mesh Network
+# Community Mesh
 
-Build a neighborhood-scale mesh network mixing LoRa radios, WiFi, and internet connections — resilient communication that works even when infrastructure fails.
+A community mesh is what you build when the radius of the network outgrows one operator. A neighborhood, a campus, a town. Several people running their own LoRa nodes, one or two of them also running an IP gateway so the radio segment doesn't live alone, and a shared agreement on radio settings so everyone can hear each other. Public or semi-public — anyone with a matching radio can join.
 
-## What You'll Build
+This page covers the deployment pattern. For radio hardware itself see the RNode pages; for daemon mechanics see Infrastructure and Ops.
 
-A multi-node mesh network covering a neighborhood or community:
+## What this looks like
 
-- **Transport nodes** on rooftops or elevated positions with LoRa radios
-- **Internet backbone** via TCP connections between fixed nodes
-- **Client devices** — phones, laptops, RatDecks connecting to the mesh
-- **Propagation nodes** storing messages for offline participants
+A community mesh is a mix of node types:
 
-## Network Architecture
+- **Edge nodes.** Operator-run RNodes, Ratdecks, Ratcoms, laptops with a LoRa stick. They speak only over the air and rely on the rest of the mesh to reach anyone past their radio horizon.
+- **Transport routers.** Always-on nodes — usually a Raspberry Pi or small SBC with an RNode bolted on — that forward packets between LoRa neighbors and announce paths on behalf of edge devices that come and go.
+- **IP gateways.** A subset of transport routers that also have an IP uplink. They bridge the local LoRa segment to wider Reticulum over TCP, AutoInterface, or Backbone. Without at least one gateway, the mesh is isolated to its radio footprint.
 
-A community mesh uses multiple interconnected Transport Nodes to cover a geographic area. Each Transport Node relays traffic for the whole network. Typical node roles include:
+A healthy community mesh has more than one gateway and more than one operator. That's the point — no single person owns the network.
 
-- **Backbone nodes** — high-power LoRa stations on rooftops or towers, connected to each other via TCP or long-range radio links
-- **Gateway nodes** — bridge between LoRa radio and TCP/internet, allowing remote participants to join
-- **Edge nodes** — end-user devices (phones, laptops, RatDecks) that connect to the nearest backbone or gateway node
-- **Propagation nodes** — store and forward LXMF messages for offline users, ensuring delivery even when recipients are temporarily unreachable
+## Coordinating on radio settings
 
-## Planning Your Network
+LoRa is unforgiving about parameter mismatch. Two RNodes on the same frequency but different spreading factors will not see each other at all. Before anyone deploys, the operators have to agree on five numbers and write them down somewhere everyone can find:
 
-### Choose Transport Node Locations
+- **Frequency.** Region-dependent. 915 MHz in the Americas, 868 MHz in Europe. Pick a clear band and stick to it.
+- **Bandwidth.** 125 kHz or 250 kHz are the common choices. Wider is faster but shorter range.
+- **Spreading factor.** SF7 through SF12. Higher is slower and longer range. SF11 is the community sweet spot.
+- **Coding rate.** 5 through 8. Higher is more robust but uses more airtime. 5 is the default.
+- **Preset.** The Reticulum presets (Long Slow, Long Fast, Mid, Short, etc.) bundle these into a single label. Long Fast (SF11, BW250) is the most-common community baseline — solid range, usable throughput, decent battery life.
 
-Transport nodes should be:
+Pick a preset, document it, and make every operator match. A mesh that drifts on parameters is a mesh that quietly stops working.
 
-- **Elevated** — rooftops, towers, tall buildings
-- **Always-on** — reliable power, persistent internet (if using TCP backbone)
-- **Well-connected** — line-of-sight to other transport nodes and the area they serve
+## Setting up a gateway node
 
-### Hardware Per Transport Node
+A gateway is a transport router with two interfaces: one LoRa, one IP. It runs `rnsd` with `enable_transport = yes` so it forwards on behalf of others. Minimal config:
 
-| Component | Purpose | Cost |
-|-----------|---------|------|
-| Raspberry Pi (or similar SBC) | Runs rnsd + Reticulum | ~$35–60 |
-| LoRa RNode (e.g., T-Beam Supreme) | Radio coverage | ~$35–50 |
-| High-gain antenna (collinear) | Maximize coverage area | ~$20–40 |
-| Weatherproof enclosure | Outdoor protection | ~$15–25 |
-| PoE splitter or battery + solar | Power | Varies |
-
-### Transport Node Configuration
-
-```ini
+```
 [reticulum]
   enable_transport = yes
   share_instance = yes
 
 [interfaces]
-  [[LoRa Coverage]]
+  [[Local LoRa]]
     type = RNodeInterface
-    port = /dev/ttyUSB0
+    port = /dev/ttyACM0
     frequency = 915000000
-    bandwidth = 125000
-    spreadingfactor = 9
+    bandwidth = 250000
+    txpower = 22
+    spreadingfactor = 11
     codingrate = 5
-    txpower = 17
-    mode = gateway
-    enabled = yes
-
-  [[Backbone TCP]]
-    type = TCPClientInterface
-    target_host = central-hub.local
-    target_port = 4242
     mode = boundary
-    enabled = yes
+
+  [[Backhaul]]
+    type = TCPClientInterface
+    target_host = backhaul.example.org
+    target_port = 4242
+    mode = gateway
 ```
 
-Key settings:
-- **LoRa interface**: `mode = gateway` — discovers paths for client devices
-- **TCP backbone**: `mode = boundary` — prevents flooding LoRa from TCP traffic
-- **transport enabled** — relays packets for the network
+Match the LoRa parameters to whatever the operator group agreed on. Point the backhaul at any reachable Reticulum TCP server — another operator's VPS, a public hub, whatever the group standardized on. Run it as a service with systemd or Docker; see Infrastructure and Ops for unit files.
 
-### Private Networks with IFAC
+## Boundary vs gateway mode
 
-To keep your community mesh isolated from other Reticulum traffic on the same frequency:
+Interface modes shape how Reticulum treats traffic crossing between segments. Two modes matter here:
 
-```ini
-  [[LoRa Coverage]]
-    type = RNodeInterface
-    network_name = our-neighborhood-mesh
-    passphrase = shared-secret-phrase
-    # ... other params
-```
+- **`mode = boundary`** on the LoRa side. Boundary interfaces police traffic crossing them: announces from beyond the boundary are filtered more aggressively, and routing decisions treat the segment as a distinct region of the mesh. This stops a chatty IP-side network from drowning the radio segment in announces it doesn't need.
+- **`mode = gateway`** on the IP side. Gateway interfaces advertise the node as a known crossing point to a wider mesh. Use this when the backhaul connects to a network you trust — another operator, a public hub — and you want Reticulum to prefer it for transit.
 
-All nodes must use the same `network_name` and `passphrase`.
+The pairing matters. Boundary on the radio, gateway on the uplink. That combination keeps the LoRa segment efficient while still letting the gateway pull its weight in the wider routing table.
 
-## Growth Path
+## IFAC or open mesh
 
-1. **Start with 2 nodes** on the same WiFi (AutoInterface)
-2. **Add TCP** — connect a VPS or remote friend
-3. **Add LoRa** — plug in an RNode for radio coverage
-4. **Add transport nodes** — deploy elevated Raspberry Pi + RNode combos
-5. **Enable propagation** — store messages for offline participants
+IFAC lets you wrap an interface in a pre-shared key. Only nodes that know the key can join. Use it on the LoRa interface if you want a closed mesh — invite-only, no random scanners showing up. The cost is coordination: every operator has to load the same key, and rotating it means rotating it everywhere.
 
-## What's Next
+For a public community mesh, skip IFAC. Anyone with a matching radio configuration can join — that's the point. Authentication happens at the application layer (LXMF identity hashes), not radio access.
 
-- [Emergency Communications](../deployment/emergency-comms) — infrastructure-independent setup
-- [Raspberry Pi Gateway](../deployment/raspberry-pi-gateway) — detailed Pi setup
-- [Building Networks](../connecting/building-networks) — topology patterns
-- [Interface Modes](../connecting/interface-modes) — gateway, boundary, and roaming
+A common middle ground: open LoRa, IFAC on a private TCP segment used by operators for management.
+
+## Multiple gateways
+
+Reticulum handles redundant paths automatically. Two gateways on the same LoRa segment, both backhauling to wider Reticulum, will both announce — and edge nodes will reach the wider mesh through whichever path the routing table prefers. If one gateway drops, the other takes over without manual reconfiguration.
+
+Operational notes:
+
+- **Announce caps.** Each interface limits how much bandwidth announces are allowed to use. Default is 2% of the interface's airtime. Tune `announce_cap` per interface if your mesh has unusual traffic patterns, but the default is the right answer for almost everyone.
+- **Don't synchronize gateways.** Two gateways announcing the same paths at the same instant waste airtime. Reticulum naturally jitters announces, but if you're tuning intervals manually, stagger them.
+- **Plan for partition.** If the IP backhaul cuts, the LoRa segment keeps working — that's the whole point of a mesh. Make sure operators know this and don't panic-reboot gateways when the internet flickers.
+
+## Monitoring
+
+Run `rnstatus` on each gateway to see which interfaces are up, how much traffic each is carrying, and how many paths are known. `rnpath <destination_hash>` shows the route Reticulum would use to reach a given node — useful when an edge user reports they can't reach someone and you want to know whether the path is even known. `rnprobe <destination>` sends a probe and prints round-trip time.
+
+For the community as a whole, the simplest health check is whether operators can reach each other's destinations. Designate a propagation node (any gateway can run one) and have operators set it as their LXMF propagation node. If messages flow through it, the mesh is alive.
