@@ -917,22 +917,15 @@
             opacity: var(--topo-default);
             stroke-dasharray: 900 200;
         }
-        /* topo-flow gated to .topo-strong only — stroke-dashoffset is uncomposited and tanked Firefox/Chrome on Windows when it ran on every path. */
+        /* Keep contour paths static. Animating stroke-dashoffset on SVG paths
+           forces repeated geometry repainting, especially in Firefox. The
+           visible motion lives on the SVG containers below via transform and
+           opacity, which preserves the ambient topo feel with far less CPU. */
         .topo-bg path.topo-strong {
             opacity: var(--topo-strong);
             stroke-width: var(--topo-strong-stroke-width, 0.9);
-            animation: topo-flow 24s linear infinite;
         }
         .topo-bg path.topo-faint  { opacity: var(--topo-faint); }
-        /* Stagger the flow per ring system so adjacent rings ripple outward in
-           sequence — reads as a signal propagating through the mesh. */
-        .topo-bg path.topo-p0 { animation-duration: 22s; animation-delay: 0s; }
-        .topo-bg path.topo-p1 { animation-duration: 26s; animation-delay: -3s; }
-        .topo-bg path.topo-p2 { animation-duration: 30s; animation-delay: -6s; }
-        @keyframes topo-flow {
-            from { stroke-dashoffset: 0; }
-            to   { stroke-dashoffset: -1100; }
-        }
         /* SVG-container opacity pulse — slow ambient breathing on the contour
            system. Lives on the SVG (not each path) so there's exactly one
            opacity source per visual element; left and right are phase-shifted
@@ -963,12 +956,11 @@
         .topo-bg svg.topo-right { animation: topo-drift-r 41s ease-in-out infinite,
                                               topo-svg-pulse 9s ease-in-out -3s infinite; }
         @media (prefers-reduced-motion: reduce) {
-            .topo-bg svg.topo-left, .topo-bg svg.topo-right,
-            .topo-bg path { animation: none; }
+            .topo-bg svg.topo-left, .topo-bg svg.topo-right { animation: none; }
         }
         /* Pause topo animations when offscreen or tab is hidden — wired by the inline IO/visibilitychange script at the bottom of the page. */
-        .topo-bg.topo-paused svg, .topo-bg.topo-paused path,
-        .page-hidden .topo-bg svg, .page-hidden .topo-bg path {
+        .topo-bg.topo-paused svg,
+        .page-hidden .topo-bg svg {
             animation-play-state: paused !important;
         }
 
