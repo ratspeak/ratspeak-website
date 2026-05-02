@@ -195,6 +195,13 @@
             box-shadow: 0 1px 0 rgba(42, 37, 34, 0.03);
         }
         [data-theme="dark"] .navbar.scrolled { background: rgba(24, 23, 26, 0.88); }
+        /* Firefox: skip backdrop-filter on the always-fixed navbar — Gecko recomputes the blur every scroll frame. Other engines keep the glass effect. */
+        @-moz-document url-prefix() {
+            .navbar { background: rgba(250, 247, 243, 0.96); backdrop-filter: none; -webkit-backdrop-filter: none; }
+            [data-theme="dark"] .navbar { background: rgba(24, 23, 26, 0.92); }
+            .navbar.scrolled { background: rgba(250, 247, 243, 0.98); }
+            [data-theme="dark"] .navbar.scrolled { background: rgba(24, 23, 26, 0.96); }
+        }
         .navbar-left { display: flex; align-items: center; gap: 12px; }
         .navbar-left a { display: flex; align-items: center; gap: 10px; text-decoration: none; }
         .navbar-logo {

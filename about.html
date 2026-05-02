@@ -171,6 +171,13 @@
             box-shadow: 0 1px 0 rgba(42, 37, 34, 0.03);
         }
         [data-theme="dark"] .navbar.scrolled { background: rgba(24, 23, 26, 0.88); }
+        /* Firefox: skip backdrop-filter on the always-fixed navbar — Gecko recomputes the blur every scroll frame. Other engines keep the glass effect. */
+        @-moz-document url-prefix() {
+            .navbar { background: rgba(250, 247, 243, 0.96); backdrop-filter: none; -webkit-backdrop-filter: none; }
+            [data-theme="dark"] .navbar { background: rgba(24, 23, 26, 0.92); }
+            .navbar.scrolled { background: rgba(250, 247, 243, 0.98); }
+            [data-theme="dark"] .navbar.scrolled { background: rgba(24, 23, 26, 0.96); }
+        }
         .navbar-left { display: flex; align-items: center; gap: 12px; }
         .navbar-left a { display: flex; align-items: center; gap: 10px; text-decoration: none; }
         .navbar-logo {
@@ -908,13 +915,14 @@
             stroke-width: var(--topo-stroke-width, 0.7);
             stroke-linecap: round;
             opacity: var(--topo-default);
-            /* Dashoffset flow — energy tracing along the contour. Per-path length
-               isn't precise, but a long dasharray with a very long animation gives
-               a slow, ambient propagation that reads correctly at any scale. */
             stroke-dasharray: 900 200;
+        }
+        /* topo-flow gated to .topo-strong only — stroke-dashoffset is uncomposited and tanked Firefox/Chrome on Windows when it ran on every path. */
+        .topo-bg path.topo-strong {
+            opacity: var(--topo-strong);
+            stroke-width: var(--topo-strong-stroke-width, 0.9);
             animation: topo-flow 24s linear infinite;
         }
-        .topo-bg path.topo-strong { opacity: var(--topo-strong); stroke-width: var(--topo-strong-stroke-width, 0.9); }
         .topo-bg path.topo-faint  { opacity: var(--topo-faint); }
         /* Stagger the flow per ring system so adjacent rings ripple outward in
            sequence — reads as a signal propagating through the mesh. */
@@ -957,6 +965,11 @@
         @media (prefers-reduced-motion: reduce) {
             .topo-bg svg.topo-left, .topo-bg svg.topo-right,
             .topo-bg path { animation: none; }
+        }
+        /* Pause topo animations when offscreen or tab is hidden — wired by the inline IO/visibilitychange script at the bottom of the page. */
+        .topo-bg.topo-paused svg, .topo-bg.topo-paused path,
+        .page-hidden .topo-bg svg, .page-hidden .topo-bg path {
+            animation-play-state: paused !important;
         }
 
         /* ── Community CTA ───────────────────────────── */
@@ -1712,9 +1725,14 @@
     var running = false;
     var rafId = 0;
 
-    function draw() {
+    // 120fps cap — uncapped rAF was painting ~400 fps on high-refresh monitors.
+    var lastFrameT = 0;
+    var MIN_FRAME_MS = 1000 / 120;
+    function draw(t) {
         if (!running) return;
         if (document.hidden) { rafId = requestAnimationFrame(draw); return; }
+        if (t - lastFrameT < MIN_FRAME_MS) { rafId = requestAnimationFrame(draw); return; }
+        lastFrameT = t;
         ctx.clearRect(0, 0, w, h);
         time++;
 
@@ -1803,6 +1821,21 @@
             resize();
             if (Math.abs(w - lastW) > 10) { initNodes(); lastW = w; }
         }, 150);
+    });
+})();
+</script>
+
+<script>
+// Pause topo SVG animations when offscreen and when the tab is hidden — pairs with the .topo-paused / .page-hidden CSS rules above.
+(function(){
+    if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function(entries){
+            entries.forEach(function(e){ e.target.classList.toggle('topo-paused', !e.isIntersecting); });
+        }, { threshold: 0 });
+        document.querySelectorAll('.topo-bg').forEach(function(el){ io.observe(el); });
+    }
+    document.addEventListener('visibilitychange', function(){
+        document.body.classList.toggle('page-hidden', document.hidden);
     });
 })();
 </script>
