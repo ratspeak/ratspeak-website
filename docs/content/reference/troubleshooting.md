@@ -23,6 +23,10 @@ SmartScreen warns on unsigned executables. Click **More info**, then **Run anywa
 
 First launch initializes the SQLite database, builds the FTS index, and generates an identity. Subsequent launches are quick. Wait it out — it's not stuck.
 
+## Messaging says service unavailable or not initialized
+
+On cold start, the Reticulum runtime comes up before LXMF. Messaging calls made during that window can return `service_unavailable`, `database_unavailable`, or `lxmf_not_initialized`. Wait until setup finishes and the app is responsive, then retry. If it persists after a restart, collect logs as described in [Still stuck](#/reference/troubleshooting::still-stuck).
+
 ## I can't see any peers
 
 Walk through these in order:
@@ -36,20 +40,20 @@ Walk through these in order:
 
 - **macOS / Linux**: serial devices need user permissions. On Linux, add yourself to the `dialout` group (`sudo usermod -aG dialout $USER`), then log out and back in. On macOS, the device should appear as `/dev/tty.usbserial-*` automatically.
 - **Windows**: install the CP210x or CH340 driver matching your RNode's USB chip. Check Device Manager for an unknown COM device.
-- **iOS**: USB radios are not supported. Use a BLE-equipped RNode and pair it from **Settings → Bluetooth**.
+- **iOS**: USB radios are not supported. Use a BLE-equipped RNode from **Network → Add LoRa Device → Bluetooth** and accept the OS pairing prompt when it appears.
 - Bad cables look identical to good ones. If nothing else works, try a different USB cable — many shipped with devices are charge-only.
 
 ## Messages aren't delivering
 
 A few things to check:
 
-- **Length matters**. Opportunistic single-packet delivery caps at 295 bytes. Anything longer needs either a Direct Link to the recipient (both online at once) or a propagation node that both sides have peered with.
-- **Recipient announce is stale**. Open the contact and tap **Request Path** or **Fetch from Propagation Node**. If their announce is older than the network's path expiry, packets have nowhere to go.
+- **Length matters**. Opportunistic single-packet delivery caps at 295 bytes. Anything longer needs either Direct delivery to a recipient that is reachable at send time or an Offline Inbox/propagation node that both sides can reach.
+- **Recipient announce is stale**. Open the contact and tap **Request Path** or use Offline Inbox if one is reachable. If their announce is older than the network's path expiry, packets have nowhere to go.
 - **No transport coverage**. If you and the recipient share no interface and no hub between you, there's no route. Add a TCP hub or run a transport node.
 
 ## I lost my identity
 
-The identity file lives inside Ratspeak's per-OS data directory — `~/Library/Application Support/com.ratspeak.app/.ratspeak/identities/<hash>/identity` on macOS, `~/.local/share/com.ratspeak.app/.ratspeak/identities/<hash>/identity` on Linux, `%APPDATA%\com.ratspeak.app\.ratspeak\identities\<hash>\identity` on Windows. If you have a backup of that file, copy it back into place and restart the app.
+The identity file lives inside Ratspeak's per-OS data directory — `~/Library/Application Support/org.ratspeak.desktop/.ratspeak/identities/<hash>/identity` on macOS, `~/.local/share/org.ratspeak.desktop/.ratspeak/identities/<hash>/identity` on Linux, `%APPDATA%\org.ratspeak.desktop\.ratspeak\identities\<hash>\identity` on Windows. If you have a backup of that file, copy it back into place and restart the app.
 
 If you don't have a backup, the identity is **unrecoverable** — keys are generated client-side and never escrowed anywhere. Generate a new identity, then tell your contacts your new hash so they can update their address book.
 
@@ -59,32 +63,33 @@ If you don't have a backup, the identity is **unrecoverable** — keys are gener
 2. At least one interface must be enabled and connected. If all interfaces are red, there's nothing to announce on.
 3. Manual announces (long-press the bottom bar, or **Network → Announce**) are independent of the setting and always available — use them to confirm announce works at all before debugging the schedule.
 
-## BLE peer mesh sees nothing
+## Bluetooth Peer sees nothing
 
-- Both devices need the **BLE** feature enabled in **Settings → Network**.
+- Both devices need **Bluetooth Peer** enabled in **Settings → Network**.
 - Both devices need OS-level Bluetooth permission. On iOS and recent Android, the OS prompts on first scan; if you denied, grant it under system settings.
 - BLE range is roughly 10 metres through walls, less with metal or concrete in the way. Move closer.
-- On Linux, the `bluetooth` service must be running (`systemctl status bluetooth`).
+- On Windows, use the MSIX build if this machine needs to advertise for Bluetooth Peer. The plain `.exe` / MSI builds do not provide the advertiser/peripheral role.
+- On Linux, the `bluetooth` service must be running (`systemctl status bluetooth`), the user must have BlueZ permissions, the adapter must support LE advertising, and some distros need `Experimental = true` in `/etc/bluetooth/main.conf` followed by `sudo systemctl restart bluetooth`.
 
 ## I can't reach `rns.ratspeak.org:4242`
 
 That hub is best-effort community infrastructure with no uptime guarantee. If it's unreachable:
 
-- Try a different community hub from the directory.
+- Try a different community hub from [Reticulum's current connect/backbone information](https://reticulum.network/connect.html) or from a community directory you trust.
 - Run your own TCPServer on a small VPS — it's a single interface block in the config.
 - Connect peer-to-peer over a different transport (LoRa, BLE, AutoInterface on a shared LAN).
 
 ## Path not found for a contact you've messaged before
 
-Reticulum forgets stale paths. Open the contact and tap **Request Path**, or wait for the next announce from the recipient. If the recipient went offline, requesting their announce from a propagation node will revive the path.
+Reticulum forgets stale paths. Open the contact and tap **Request Path**, or wait for the next announce from the recipient. If the recipient went offline, a reachable Offline Inbox/propagation node can still hold encrypted mail for later pickup.
 
 ## "Database is locked"
 
 Only one instance of Ratspeak should run against a given data directory at a time. Quit any other copies (check the system tray and any leftover processes), then relaunch. If the error persists after a clean restart, the WAL files may be stuck — quit the app and delete `ratspeak.db-wal` and `ratspeak.db-shm` in your data directory. The main `.db` file is safe to leave alone.
 
-## Network graph is laggy with many nodes
+## Peers or Network views are laggy with many nodes
 
-Open the graph filters and untick **Discovered** to hide one-hop announces you've never spoken to. Large meshes are inherently expensive to lay out — narrow what's drawn rather than what's stored.
+Filter out **Discovered** peers you have never spoken to, or narrow the interface/status filters while diagnosing a large mesh. Large announce tables are normal on busy networks; narrow what is shown rather than deleting what the router has learned.
 
 ## High latency on LoRa
 
@@ -92,4 +97,12 @@ This is normal, not a bug. At SF12 / 125 kHz, a single packet takes around 1.5 s
 
 ## Still stuck
 
-Open **Settings → About** and check the version. Then ask in the community channels with: your OS, the version string, what you tried, and what you saw. Logs from **Settings → Diagnostics** help — they don't contain message contents.
+Open **Settings → About** and check the version. Then ask in the community channels with: your OS, the version string, what you tried, and what you saw.
+
+Useful logs are platform-specific:
+
+- **Desktop**: `Ratspeak/logs/ratspeak.log` under the app data directory.
+- **Android**: `adb logcat -s RatspeakRust`.
+- **iOS**: Console logs under the `org.ratspeak.ios` process.
+
+Message bodies are not intentionally logged, but hashes, filenames, interface names, paths, and errors can appear. Redact anything you do not want to share.

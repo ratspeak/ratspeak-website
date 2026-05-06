@@ -1,90 +1,112 @@
 # Key Concepts & Glossary
 
-A reference for terms you will encounter throughout the rest of these docs. Skim it on first read; come back when you hit a word you don't recognise.
+A reference for the terms used throughout the Ratspeak and Reticulum docs. Read [What is Reticulum?](../understanding/what-is-reticulum) first if you want the short conceptual overview; use this page when a word needs a precise meaning.
 
 ---
 
 ## Identity & Addressing
 
-**Identity.** The cryptographic root of every participant on a Reticulum network. An identity is 64 bytes in total: a 32-byte X25519 private key for encryption and a 32-byte Ed25519 seed for signing. The matching public keys derive every destination hash you announce. Lose this file and you lose the ability to receive messages sent to those destinations; share it and someone else can impersonate you, so back it up the same way you would back up an SSH key.
+**Identity.** The cryptographic root of a Reticulum participant, service, device, or application endpoint. A Reticulum identity is a 64-byte private keyset: 32 bytes for X25519 key agreement and 32 bytes for an Ed25519 signing seed. Back it up like an SSH key. Anyone with the private key can act as that identity.
 
-**Destination.** An endpoint addressable on the network. Each destination is built from an identity plus an application name and aspect path (for example, `lxmf.delivery`). Four flavours exist — Single, Group, Plain, and Link — but Single is the one most user-facing software, including Ratspeak, presents to you.
+**Ratspeak Identity.** A normal Reticulum identity created and stored by Ratspeak. There is nothing protocol-special about it; it interoperates with other Reticulum implementations.
 
-**Address / Destination Hash.** The 16-byte truncated SHA-256 of a destination's identifying material. This is the 32-character hex string you copy when you share a contact (for example, `4faf1b2e0a077e6a9d92fa051f256038`). It is the only address Reticulum routes on — there are no IPs, no domains, no hostnames.
+**Destination.** An addressable endpoint created by an application. A destination combines an identity, an application name, and one or more aspects such as `lxmf.delivery`. Reticulum has four destination types: Single, Group, Plain, and Link. Ratspeak messaging primarily uses Single destinations and Links.
 
-**Ratchet.** A forward-secrecy mechanism that rotates the encryption key advertised in a destination's announces. Defaults retain the last 512 ratchets and rotate every 1800 seconds (30 minutes). Messages encrypted with a recent ratchet can still be decrypted within the retention window, while traffic from earlier ratchets stays protected even if the long-term identity later leaks.
+**Address / Destination Hash.** The 16-byte truncated SHA-256 value Reticulum routes toward. In user interfaces it is displayed as 32 hex characters, for example `4faf1b2e0a077e6a9d92fa051f256038`. Reticulum does not route on IP addresses, domain names, usernames, or phone numbers.
 
-**Ratspeak Identity.** The same kind of Reticulum identity described above, simply created and stored by the Ratspeak app on your behalf. There is nothing special about a Ratspeak-generated identity at the protocol level — it is fully interoperable with every other Reticulum implementation.
+**Name Hash.** The 10-byte hash of an application destination name such as `lxmf.delivery`. For Single destinations, the final destination hash also includes the identity hash, which is why two users can both have an `lxmf.delivery` destination without sharing the same address.
 
----
-
-## Routing
-
-**Announce.** A packet broadcasting an identity (and its current ratchet key) to the mesh. Transport nodes that hear an announce learn a path back to the sender and re-broadcast it onward, subject to hop limits and per-interface rate caps. Announces are how Reticulum's routing tables get populated — there is no central directory.
-
-**Path.** The route from one identity to another, expressed as a hop count plus the next-hop interface and neighbour. Paths are learned passively from announces and refreshed on use; unused paths eventually expire from the table and are re-learned the next time the destination announces.
-
-**Hop.** One step along a path — one transport node passing a packet to the next. Reticulum permits up to 128 hops (the `PATHFINDER_M` constant), which is more than any realistic mesh will ever need. Each hop decrements a counter on the packet, so loops are bounded.
-
-**Transport Node.** A Reticulum instance configured with `enable_transport = yes`. It forwards packets on behalf of other nodes and is the building block of any multi-hop network. Run one on every always-on, well-connected machine you control; the more transport nodes a region has, the more resilient routing becomes.
-
-**AutoInterface.** Zero-configuration LAN discovery using link-local IPv6 multicast on UDP ports 29716 and 42671. Enable it and any other Reticulum instance on the same broadcast domain finds you automatically — no addresses to type, no firewall rules to edit.
-
-**Backbone.** An HDLC-over-TCP interface optimised for high-throughput WAN links between transport nodes. It is the right choice when you are wiring two sites together over the public internet and want every byte of available bandwidth.
-
-**RNode.** A class of LoRa boards (ESP32- or nRF52-based) that speak Reticulum natively over USB or Bluetooth LE. RNodes are how Reticulum reaches off-grid: kilometres of range, sub-watt power consumption, no internet, no cell service, no infrastructure required.
-
-**KISS.** A simple framing protocol originally designed for amateur-radio TNCs. Reticulum's KISS interface lets the stack drive any radio that speaks KISS over a serial link, broadening the range of supported hardware well beyond purpose-built RNodes.
-
-**IFAC.** Interface Authentication Codes. A per-interface shared secret that gates which peers may exchange traffic across that link. Two nodes whose IFAC values do not match simply cannot see each other on that interface — useful for carving private segments out of a shared medium such as a public TCP transport.
-
-**Interface.** Any concrete way Reticulum sends and receives bytes: TCP, UDP, AutoInterface, RNode (over LoRa), serial, KISS over a TNC, I2P, Backbone, Bluetooth LE — each is a driver that turns the abstract notion of "send this packet" into something a physical or virtual link will accept. A node can run as many interfaces concurrently as its hardware allows, and Reticulum routes between them transparently.
-
-**Mesh.** The set of nodes reachable from a given starting point through one or more hops. Reticulum meshes can span any combination of media — a phone on Wi-Fi, a laptop on a LoRa radio, and a server on the public internet can all share a single mesh as long as transport nodes bridge them.
-
-**Bandwidth Cost.** The shared overhead cap that Reticulum imposes on announces (and similar maintenance traffic) per interface, expressed as a percentage of the link's available bandwidth. The default keeps housekeeping below a small fraction of total throughput, so a chatty mesh cannot starve real payload traffic.
+**Ratchet.** A rotating X25519 key advertised in announces by destinations that enable ratchets. It provides forward secrecy for link-less Single destination packets. Default parameters retain 512 generated ratchets, rotate no more often than every 1800 seconds, and expire received ratchets after about 30 days.
 
 ---
 
-## Encryption & Sessions
+## Nodes & Routing
 
-**Link.** An encrypted point-to-point session between two destinations, established by a three-packet handshake. Links provide forward secrecy and a reliable bidirectional channel suitable for request/response RPC, file transfers, and interactive sessions. Once the handshake completes, neither side's long-term keys are needed for the duration of the link.
+**Reticulum Instance.** A running Reticulum stack on a device or process. It owns interfaces, keeps local path state, and sends or receives traffic for local applications.
 
-**Resource.** A file-sized payload transferred over a link with reliability, segmentation, and progress reporting. Resources are how anything larger than a single packet moves between two endpoints — they handle chunking, retransmission, and reassembly transparently.
+**Transport Node.** A Reticulum instance with `enable_transport = Yes`. It forwards packets for other nodes and is what makes multi-hop reachability possible. Always-on machines, gateways, and infrastructure nodes are good transport-node candidates.
 
-**MTU / MDU / ENCRYPTED_MDU.** Reticulum's three packet-size constants: 500 bytes total on the wire (MTU), 464 bytes available to the framework after the wire header (MDU), and 383 bytes available to encrypted payloads after the per-packet encryption overhead (ENCRYPTED_MDU). Anything larger than the relevant limit must travel as a Resource transfer.
+**Announce.** A signed packet that tells the mesh a destination exists and how to start reaching it. Announces carry the public key material for a destination, optional application data, and an optional ratchet key. Transport nodes use announces to populate path tables.
 
-**Forward Secrecy.** The property that compromising a long-term key today does not retroactively expose past traffic. Reticulum gets it from ephemeral key exchange on every link and from the announce ratchet on Single destinations.
+**Path.** A route toward a destination, stored locally as a next hop, interface, and hop count. Reticulum nodes do not need a complete map of the mesh; each transport node only needs the next step that moves a packet closer.
 
-**End-to-End Encryption.** Encryption that happens on the originating node and is undone only on the receiving node. Transport nodes in between forward sealed bytes and cannot read the contents — this is the default for every LXMF message and every link.
+**Path Request.** A request for the network to find or refresh a route to a destination hash. Ratspeak exposes this as **Request Path** when a contact is known but not currently reachable.
+
+**Hop.** One forwarding step through a transport node. The default maximum announce depth is 128 hops, which is far beyond normal real-world deployments.
+
+**Mesh.** The set of Reticulum nodes reachable through one or more compatible interfaces and transport nodes. A mesh can span mixed media: LoRa, LAN, TCP, I2P, BLE, serial, and other carriers.
+
+---
+
+## Interfaces & Carriers
+
+**Interface.** A driver that lets Reticulum send and receive bytes over a particular medium. Examples include TCP, UDP, AutoInterface, RNode LoRa, serial, KISS, AX.25 KISS, I2P, Backbone, Bluetooth LE, and custom modules.
+
+**AutoInterface.** Zero-configuration LAN discovery over IPv6 multicast. By default, discovery uses UDP port `29716` and data uses UDP port `42671`. It works only where the local network allows multicast and matching `group_id` values.
+
+**RNode.** A class of LoRa transceivers that speak Reticulum-friendly framing over USB, Bluetooth LE, or related links. RNodes are how Reticulum reaches off-grid radio networks without depending on cell service or the internet.
+
+**KISS.** A simple framing protocol from packet radio. Reticulum's KISS interfaces can use TNCs, modems, and compatible radio devices that expose KISS over serial or TCP.
+
+**Backbone.** A high-throughput TCP-based interface intended for efficient WAN links between Reticulum nodes. It is useful for infrastructure and server roles; ordinary TCP client/server interfaces are still valid and widely used.
+
+**IFAC.** Interface Access Codes. IFAC signs packets with material derived from an interface name or pre-shared passphrase. Receivers without matching IFAC settings drop those packets before they enter the local Reticulum stack. IFAC segments a carrier; it does not replace end-to-end encryption.
+
+**Bandwidth Cost / Announce Cap.** The share of an interface's bandwidth that can be spent on announces and related maintenance traffic. The default announce cap is 2%, so routing updates cannot permanently starve payload traffic on slow links.
+
+---
+
+## Encryption, Links & Transfer
+
+**Single Destination.** The most common destination type. It is bound to an identity and can be reached over multiple hops. Packets to a Single destination are encrypted for the holder of that identity's private key, or for its current ratchet key when one is known.
+
+**Plain Destination.** A direct-only, unencrypted destination type for local public broadcast or discovery. Plain destinations are not transported over multiple hops.
+
+**Group Destination.** A direct-only destination encrypted with a pre-shared symmetric key. Anyone with the group key can read packets for that destination.
+
+**Link.** An encrypted point-to-point session between two destinations. A link can cross multiple hops, uses ephemeral key exchange, and provides a better substrate for reliable channels, request/response workflows, and larger transfers.
+
+**Resource.** A reliable transfer over a link for payloads larger than a single packet. Resources handle chunking, sequencing, verification, retransmission, and reassembly.
+
+**MTU / MDU.** Reticulum's default network MTU is 500 bytes. The plain packet MDU is 464 bytes, the encrypted Single packet payload limit is 383 bytes, and the default link packet MDU is 431 bytes. LXMF's usable message content limits are smaller because LXMF adds its own headers and signature.
+
+**Forward Secrecy.** The property that compromising a long-term identity key later does not retroactively decrypt old traffic. Reticulum gets this from ephemeral link key exchange and, for link-less Single destination packets, from destination ratchets when enabled.
+
+**End-to-End Encryption.** Encryption applied by the originator and removed only by the intended recipient. Transport nodes forward sealed bytes; they are not message relays with plaintext access.
 
 ---
 
 ## Messaging
 
-**LXMF.** The Lightweight Extensible Message Format — Reticulum's standard messaging layer. It defines how messages are serialised, signed, and delivered, and is the format every Reticulum messenger speaks. Ratspeak, Sideband, and NomadNet all interoperate because they all speak LXMF.
+**LXMF.** The Lightweight Extensible Message Format. It is the messaging layer used by Ratspeak, Sideband, NomadNet, and other Reticulum applications. LXMF defines message serialization, sender signatures, delivery methods, propagation, stamps, and tickets.
 
-**Direct / Opportunistic / Propagated.** The three LXMF delivery modes. *Direct* opens a link to the recipient and hands the message over within that session, getting an explicit delivery confirmation. *Opportunistic* fires the message as a single packet without setting up a link, which is suitable for short notes when the recipient is currently reachable. *Propagated* hands the message to a propagation node, which holds it until the recipient comes online and requests it.
+**Direct Delivery.** LXMF opens a Reticulum link to the recipient and delivers the message over that encrypted session. This is preferred when the recipient is reachable and the message needs reliable delivery.
 
-**Stamp.** A small proof-of-work attached to an LXMF message, used as a spam-control signal. The recipient publishes a difficulty value; senders without a ticket pay the CPU cost to compute a valid stamp on every message before it will be accepted.
+**Opportunistic Delivery.** LXMF sends a small message as one encrypted Reticulum packet without establishing a link. With default parameters, the practical LXMF content limit is about 295 bytes. It is fast and cheap, but it has no link-level acknowledgement.
 
-**Ticket.** A per-pair token issued by a recipient that lets a known sender bypass the stamp requirement. Tickets are the mechanism by which conversations between trusted parties stay frictionless after the first exchange — once you have a peer's ticket, your messages skip the proof-of-work.
+**Propagated Delivery.** LXMF gives the encrypted message blob to a propagation node, which stores it until the recipient connects and requests waiting mail.
 
-**Propagation Node.** A daemon running `lxmd` that stores LXMF messages on behalf of offline peers and delivers them on reconnect. Without at least one reachable propagation node, messages sent to an offline recipient have nowhere to wait and will fail to deliver.
+**Offline Inbox.** Ratspeak's user-facing name for LXMF propagated delivery and propagation-node sync. In Auto mode, Ratspeak chooses a reachable inbox node; in Manual mode, you pin a specific propagation-node hash.
 
-**Sideband / NomadNet.** Two of the most widely used LXMF clients besides Ratspeak. Sideband is a graphical messenger; NomadNet is a terminal-based client that also exposes a small page-and-form server (the "Nomad Network") for distributed micro-sites. Anything one of them can send, the others can receive.
+**Propagation Node.** An LXMF daemon, such as `lxmd-rs`, that stores messages for offline recipients. It is a delivery aid, not a trust anchor; message contents remain encrypted to the recipient.
+
+**Stamp.** A proof-of-work value attached to an LXMF message as spam resistance. Unknown senders may need to spend CPU to produce a stamp that meets the recipient's advertised cost.
+
+**Ticket.** A per-sender token that lets a trusted correspondent bypass stamp work for future messages. Tickets keep ongoing conversations lightweight after first contact.
+
+**Sideband / NomadNet.** Widely used Reticulum applications. Sideband is a graphical LXMF messenger. NomadNet is a terminal client and page system. Ratspeak interoperates with them through Reticulum and LXMF.
 
 ---
 
 ## Tools
 
-The Reticulum command-line toolkit ships six binaries; both the Python upstream and the Rust port (`rsReticulum`) provide the same set:
+The core Reticulum tools most Ratspeak operators will encounter are:
 
-- **rnsd** — the network stack daemon. Runs in the background, owns the interfaces and routing tables, and exposes a local RPC socket that other tools and applications connect to.
-- **rnstatus** — prints the current state of every configured interface and recently seen destinations.
-- **rnpath** — queries and inspects path table entries; useful for confirming that an announce arrived and for tracing how a packet would be routed.
-- **rnid** — generates and inspects identity files; the standard way to create a new keypair from the command line.
-- **rncp** — copies files between two Reticulum endpoints over a Resource transfer, like `scp` for the mesh.
-- **rnprobe** — sends a test packet to a destination and reports the round trip, the Reticulum equivalent of `ping`.
+- **rnsd-rs** - the Reticulum daemon. It owns interfaces and routing state for local clients.
+- **rnstatus-rs** - shows interface and path status.
+- **rnpath-rs** - inspects, requests, and manages paths.
+- **rnid-rs** - creates and inspects Reticulum identities.
+- **rncp-rs** - copies files over Reticulum resources.
+- **rnprobe-rs** - probes a destination, similar in spirit to `ping`.
 
-**rnsh.** A separate Python utility that provides remote shell sessions over Reticulum links — roughly the Reticulum equivalent of `ssh`. It is shipped independently of the core tool set above and is not part of the Ratspeak Rust stack; install it from the Python `rnsh` package if you want it.
+Most Ratspeak operators only need the tools above. Additional utility parity and deferred command-line surfaces are tracked in the rsReticulum release notes.

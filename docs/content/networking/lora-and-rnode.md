@@ -1,4 +1,4 @@
-# LoRa & RNode
+# LoRa Radio Interfaces
 
 An RNode is a LoRa transceiver running open firmware that speaks the KISS protocol over USB or BLE. Any board in that family — RNode Mk2, LilyGO T-Beam / T-Echo, Heltec, RAK4631, homebuilt builds on a supported Semtech radio — works. The radio handles modulation; Reticulum handles addressing, encryption, and routing on top of it.
 
@@ -16,7 +16,7 @@ After pairing, set a name, region, and preset. Ratspeak writes the interface con
 
 ## The 8 firmware presets
 
-These are RNode firmware presets exposed directly in the desktop / mobile dashboard. They are not the simplified 3-preset menu shipped on Ratdeck and Ratcom firmware — those map down to a subset of these for hardware without a screen.
+These are the RNode/Ratspeak preset family exposed in the desktop and mobile dashboard and mirrored by current Ratdeck/Ratcom firmware. Smaller screens may present them differently, but the radio parameters are the same.
 
 | Preset           | SF  | BW (kHz) | CR  | TX (dBm) | Use it for                                                           |
 |------------------|-----|----------|-----|----------|----------------------------------------------------------------------|

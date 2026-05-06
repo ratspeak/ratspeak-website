@@ -1,129 +1,91 @@
 # Links & LXMF
 
-When you send a message, two things happen underneath. Reticulum sets up
-an encrypted **link** between your node and the recipient's, and **LXMF**
-(the Lightweight eXtensible Message Format) packages the message so it
-can travel over that link, through a propagation node, or as a single
-bare packet.
+Reticulum and LXMF solve different layers of the same problem. Reticulum finds destinations and moves encrypted packets across the mesh. LXMF defines the message format and delivery behavior that Ratspeak, Sideband, NomadNet, and other messengers use on top of Reticulum.
 
-## What a Reticulum link is
+The important split:
 
-A link is an encrypted, ephemeral, point-to-point session between two
-destinations. Once established, both peers share a symmetric key derived
-fresh for that session — old link keys can't be recovered even if a
-node's long-term identity is later compromised.
+- **Reticulum Link** - an encrypted session between two destinations.
+- **Reticulum Resource** - a reliable larger transfer over a link.
+- **LXMF Message** - the signed message envelope that may be delivered directly, opportunistically, or through propagation.
 
-Links are the substrate for everything stateful in Reticulum: reliable
-channels, large file transfers, and the link-mode delivery LXMF prefers
-when both parties are online. Either side can tear a link down at any
-time, and nothing about a link persists once it ends.
+## What a Reticulum Link Is
 
-## The 3-packet handshake
+A link is an encrypted, ephemeral, point-to-point session between two Reticulum destinations. It can be direct or multi-hop. The link is not the physical radio or TCP connection; it is an abstract encrypted channel across whatever path Reticulum has found.
 
-Establishing a link takes three packets:
+Links provide forward secrecy through ephemeral X25519 key exchange. Once a link ends, its session keys are not reused. A later compromise of a long-term identity should not decrypt old link traffic.
 
-1. **Link request.** The initiator sends an ephemeral X25519 public key to
-   the destination, along with a link ID derived from the request hash.
-2. **Proof.** The receiver replies with its own ephemeral X25519 key plus
-   a signed proof. Both sides now derive the same shared secret via a
-   Diffie-Hellman exchange and HKDF.
-3. **Identification.** The initiator sends an encrypted identification
-   packet signed with its long-term identity key, proving who it is on
-   the now-encrypted link.
+Links are used for stateful work: request/response APIs, reliable channels, large transfers, and LXMF Direct delivery when both parties are reachable.
 
-After the third packet the link is **active**. See the
-[Reticulum manual](https://reticulum.network/manual/understanding.html#link-establishment)
-for the full cryptographic detail.
+## Link Establishment
 
-## Link timers
+At a high level, link establishment works like this:
 
-Three timers govern a link's lifetime:
+1. **Link request.** The initiator creates fresh ephemeral key material and sends a Link Request packet to the destination hash.
+2. **Path marking.** Transport nodes that forward the request remember the link ID, which is derived from the request packet.
+3. **Proof.** The destination accepts the request, creates its own ephemeral key material, signs proof material with its destination identity, and sends a proof packet back to the link ID.
+4. **Active link.** Once the proof is verified, both ends can derive the same symmetric key and exchange encrypted packets addressed to the link ID.
 
-- **Establishment timeout — ~6 seconds per hop.** If the proof or
-  identification packet doesn't arrive within ~6 s per network hop, the
-  attempt is abandoned. A 4-hop link waits ~24 s.
-- **Keepalive — 360 seconds.** When a link goes idle, each side sends a
-  small keepalive packet every 6 minutes so intermediate nodes don't drop
-  their path entries.
-- **Stale-after — 720 seconds.** If no traffic or keepalive arrives in 12
-  minutes, the link is torn down. The next message triggers a fresh
-  handshake.
+The initiator does not have to reveal a long-term identity just to open a link. If an application wants the remote side to know who opened the session, it can identify over the encrypted link afterward with a signed identity packet. That identification step is optional and application-driven.
 
-These defaults are tuned for slow, lossy networks; on a healthy LAN they
-are rarely reached.
+## Link Timers
 
-## What rides on a link
+The defaults are tuned for slow, lossy networks:
 
-A bare link is just an encrypted tunnel. Two higher-level constructs sit
-on top of it:
+| Timer | Default behavior |
+|-------|------------------|
+| Establishment timeout | Based on roughly 6 seconds per expected hop |
+| Keepalive | Adaptive, between 5 and 360 seconds, based on observed RTT |
+| Stale handling | A quiet link is marked stale after about two keepalive intervals, then closed if no response arrives |
 
-- **Channels.** Reliable, ordered, multiplexed message streams. A channel
-  retransmits lost packets and delivers messages in order, the way TCP
-  does over IP. LXMF's link-mode delivery uses a channel internally.
-- **Resource transfer.** Built for payloads too large for a single packet
-  — files, images, attachments. Resources chunk the payload, hash each
-  chunk, and let the receiver verify and reassemble. Transfers can be
-  paused, resumed, and cancelled.
+On a healthy LAN these values are rarely noticeable. On LoRa, packet radio, and long multi-hop paths, the extra patience keeps links from failing just because the medium is slow.
 
-Either construct can run alongside others on the same link.
+## What Rides on a Link
 
-## LXMF: the message format
+**Channels** provide reliable, ordered message streams over a link. They are the right abstraction for request/response protocols and application data that must arrive in sequence.
 
-LXMF is the message format itself, independent of transport. Each
-message contains:
+**Resources** move payloads that are too large for a single packet. A resource transfer chunks the data, verifies pieces, retransmits what is missing, and reassembles the payload on the receiving side. Files, images, and larger LXMF payloads use this pattern.
 
-- A timestamp and a destination identity hash.
-- A title and content body (both optional, both arbitrary bytes).
-- A **fields** dictionary for structured data: telemetry, app-specific
-  payloads, game protocol frames, anything an application wants to
-  attach.
-- A signature from the sender's identity key, so the recipient can
-  verify origin even if the message arrived through an untrusted relay.
+Multiple higher-level operations can share the same link while it remains active.
 
-The format is deliberately small and extensible: chat clients and sensor
-networks both fit comfortably inside it.
+## What LXMF Adds
 
-## Three delivery modes
+LXMF is the message layer used by Ratspeak. It defines a compact signed envelope containing:
 
-When you hand LXMF a message, it picks one of three delivery modes:
+- Source and destination information.
+- Timestamp.
+- Optional title and content body.
+- Structured fields for application-specific data.
+- Sender signature for origin verification.
+- Delivery metadata such as stamps, tickets, and propagation state.
 
-- **Direct.** The recipient is online and reachable, so LXMF opens a
-  Reticulum link and sends the message over a reliable channel.
-  Compression is negotiated when the link is set up. This is the
-  default for back-and-forth conversation.
-- **Opportunistic.** If the message fits in a single packet (≤ 295 bytes
-  of payload), LXMF skips the handshake entirely and fires a single
-  encrypted packet at the destination. No link, no acknowledgement —
-  the packet either arrives because a path exists, or it doesn't. Cheap
-  and useful for short bursts and beacons.
-- **Propagated.** If the recipient is offline, LXMF hands the message to
-  a **propagation node**, which holds it as an encrypted blob until the
-  recipient comes back online and asks for their mail.
+LXMF is deliberately small enough for constrained links but flexible enough for chat, mail-like workflows, telemetry, game moves, and app-specific payloads.
 
-The sender doesn't usually choose — the local LXMF router picks based on
-size, reachability, and recipient preferences.
+## Delivery Modes
 
-## Propagation nodes
+LXMF can deliver a message three ways.
 
-A propagation node is a Reticulum node running the `lxmd` daemon. It
-accepts encrypted LXMF blobs addressed to identities it holds mail for,
-syncs those blobs with peer propagation nodes for redundancy, and replies
-to "give me my mail" queries from clients — deleting the local copy once
-delivery is confirmed. Propagation nodes never see plaintext: every blob
-is end-to-end encrypted to the recipient's identity. They are a delivery
-convenience, not a trust anchor.
+| Mode | How it works | Best for |
+|------|--------------|----------|
+| **Direct** | Open a Reticulum link to the recipient and send over that encrypted session | Normal conversations, reliable delivery, larger messages |
+| **Opportunistic** | Send a small encrypted message as one Reticulum packet with no link setup | Tiny notes, alerts, and low-latency fire-and-forget traffic |
+| **Propagated / Offline Inbox** | Store the encrypted message on a propagation node until the recipient asks for it | Offline recipients and delay-tolerant messaging |
 
-## Stamps and tickets
+With default parameters, opportunistic LXMF content is about 295 bytes. Messages larger than that fall back to Direct delivery, and messages larger than a single link packet are transferred as resources over the link.
 
-LXMF's anti-spam mechanism is a **proof-of-work stamp** attached to
-outbound messages. The sender burns a small, configurable amount of CPU
-to compute a hash that meets a difficulty target; the recipient checks
-it before accepting the message. Strangers pay the cost; the network
-gets a natural rate limit without any central authority.
+## Propagation Nodes
 
-**Tickets** let frequent correspondents skip the stamp. A ticket is a
-small per-pair token issued by the recipient — once you hold a valid
-ticket for someone, your messages to them are accepted without a stamp.
-Tickets rotate and expire on their own schedule, so a leaked ticket is
-short-lived. The result: first contact is gated by proof-of-work, and
-real conversations run unimpeded.
+A propagation node is a Reticulum node running LXMF propagation software such as `lxmd-rs`. It stores encrypted LXMF blobs for recipients who are offline or not currently reachable. When the recipient comes online, their client asks the propagation node for waiting mail.
+
+Ratspeak's app UI calls this feature **Offline Inbox**. The technical LXMF term is still **propagation node**, so you will see that name in Reticulum tools, `lxmd-rs`, and protocol documentation.
+
+Propagation nodes do not need plaintext access to the messages they store. They are useful because they provide availability, not because they are trusted with content.
+
+Propagation is also how messaging can feel reliable on a mesh that is not always fully connected. Your recipient does not have to be online at the exact moment you press send, as long as both of you can eventually reach a suitable propagation node.
+
+## Stamps and Tickets
+
+LXMF uses **stamps** as proof-of-work against unsolicited traffic. A recipient can publish a stamp cost, and unknown senders must attach enough work for the message to be accepted.
+
+**Tickets** are the fast path for known correspondents. A recipient can issue a ticket to a sender, letting future messages bypass proof-of-work until the ticket expires or is rotated.
+
+The result is a practical split: first contact can cost a small amount of CPU, while established conversations stay lightweight.

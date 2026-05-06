@@ -20,7 +20,7 @@ You can hide a thread you're done with — it disappears from the list but the m
 
 ## Attachments
 
-Use the paperclip icon in the composer to attach a file. Ratspeak supports any file type, but **attachments are capped at 500 KB**. The cap is intentional: messages travel over a mesh network where bandwidth is precious, and oversized files can take a long time — or fail outright — over slow links like LoRa radios. If you try to attach a file over the limit, Ratspeak will tell you the file size and ask you to pick something smaller.
+Use the paperclip icon in the composer to attach a file. Ratspeak supports any file type and asks the backend for the current protocol limit before sending. If a file is too large, the app shows the file size and asks you to pick something smaller. Large attachments may take a long time, and Offline Inbox delivery can be limited by the propagation node you use, so keep files small when the path might include LoRa or another slow link.
 
 For images specifically, Ratspeak shows an inline preview in the message bubble. Other attachments appear as a download chip with the filename and size.
 
@@ -31,15 +31,18 @@ Every outgoing message gets a small status indicator that tells you what happene
 - **Sending** — the message is in flight. Ratspeak is actively trying to reach the recipient.
 - **Delivered** — Ratspeak has positive proof the recipient received it. This is the strongest state.
 - **Sent** — the message left your node, but no delivery confirmation has come back yet. This is normal for some delivery modes (see below).
+- **Stored in Offline Inbox** — the message was accepted by an LXMF propagation node for later pickup. This proves the inbox node received the encrypted message; it is not the same as end-to-end recipient delivery.
 - **Failed** — delivery did not succeed. The most common cause is that the destination is currently unreachable. You can resend.
 
-Ratspeak picks one of three delivery modes automatically, based on what it knows about the recipient and the network:
+Ratspeak sends in Auto mode by default. Auto prefers Direct for normal messages because it gives delivery proof. If Offline Inbox is enabled and the recipient has not been seen recently, Auto can store the message on a reachable inbox node instead. If no inbox node is reachable yet, Ratspeak asks the mesh for a path and tells you it is still looking instead of silently sending into a dead store.
+
+The underlying LXMF delivery modes are:
 
 - **Direct** uses an encrypted live link to the recipient — fastest, with end-to-end delivery confirmation. Best when both sides are online.
 - **Opportunistic** sends the message as a single packet without setting up a link. It's lightweight and works well over slow radios, but only fits messages up to **295 bytes** of content, and there's no delivery proof — just confirmation that the packet was transmitted.
-- **Propagated** hands the message to a propagation node, which holds it and forwards it to the recipient when they next come online. This is the store-and-forward mode for offline contacts.
+- **Offline Inbox** is Ratspeak's name for LXMF propagated delivery. It hands the encrypted message to a propagation node, which holds it until the recipient asks for waiting mail.
 
-You don't have to choose; Ratspeak picks the right mode for the situation. The state icon on each message reflects which mode was used.
+Most users do not have to choose a mode by hand. The state icon on each message reflects which path was used.
 
 ## Searching your messages
 

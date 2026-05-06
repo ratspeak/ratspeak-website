@@ -1,6 +1,6 @@
 # Network & Peers
 
-Ratspeak gives you two views into the mesh: **Peers**, which lists the people and nodes you can reach, and **Network**, which shows the radios, links, and propagation nodes carrying your traffic. Together they answer the two questions that matter most on a mesh: *who can I talk to right now?* and *how is this device actually connected?*
+Ratspeak gives you two views into the mesh: **Peers**, which lists the people and nodes you can reach, and **Network**, which shows the radios, links, and Offline Inbox nodes available for store-and-forward messaging. Together they answer the two questions that matter most on a mesh: *who can I talk to right now?* and *how is this device actually connected?*
 
 ## The Peers view
 
@@ -34,9 +34,21 @@ There is no graph or map visualization. Mesh topology changes faster than a pict
 
 Each interface row expands to show its configuration, lifetime byte counters, current send and receive rates, and an action menu for removing or restarting it. Alerts (a radio that hasn't seen traffic in a while, a TCP hub that keeps disconnecting) surface inline next to the row that produced them.
 
-Below the interfaces, you'll find **Transport stats** — paths in your routing table, total bytes in and out, announces seen — and the **Propagation nodes** section listing the LXMF stores Ratspeak is syncing offline messages with.
+Below the interfaces, you'll find **Transport stats** — paths in your routing table, total bytes in and out, announces seen — and the **Offline Inbox** section listing the LXMF propagation nodes Ratspeak can use for offline messages.
 
 Pressing the announce button in the Network view, or long-pressing the bottom bar on mobile, broadcasts your identity to the mesh right now. See *Announcing yourself* below.
+
+## Transport Mode
+
+**Settings → Network → Transport Mode** controls whether this Ratspeak device relays Reticulum traffic for other peers. It does not change your identity, Offline Inbox setting, or which interfaces you personally can use. It only changes whether your running Reticulum instance participates in forwarding, announce rebroadcasting, and path replies for others.
+
+The modes are:
+
+- **OFF** — default. Ratspeak behaves as a normal client. It can send, receive, announce itself, and use routes learned from the mesh, but it does not intentionally relay traffic for other peers.
+- **ON** — Ratspeak enables Reticulum transport forwarding whenever the local runtime is allowed to do so. Shared-instance clients leave this work to the shared instance they are attached to.
+- **AUTO** — Ratspeak enables Transport Mode only when the current setup looks suitable: the network is Wi-Fi, Ethernet, or an unknown desktop network type; at least one enabled non-LoRa interface exists, such as Local Network, TCP, or Backbone; and no enabled LoRa/RNode interface is configured. On Android and iOS, `unknown`, cellular, and no-network states keep AUTO disabled.
+
+AUTO is intentionally conservative. It is meant to avoid turning phones, cellular links, and LoRa radios into accidental relays while still allowing a desktop or fixed machine with a non-LoRa interface to help the mesh. Ratspeak re-evaluates AUTO whenever the app learns about a network-type change or an interface is added, removed, or updated, so changing your Local Network, TCP, Backbone, or LoRa setup does not require a restart. If you are deliberately running infrastructure, use **ON** and make sure the device is stable, powered, and connected through interfaces that can handle the extra traffic.
 
 ## Adding an interface
 
@@ -46,19 +58,27 @@ Open Network and tap **Add Interface**. Ratspeak supports five interface types, 
 - **AutoInterface** — discovers peers on your local network (LAN, mesh Wi-Fi, hotspot) using IPv6 link-local multicast. No configuration needed; if another Reticulum node is on the same subnet, you'll find it.
 - **RNode (USB / Serial)** — a LoRa radio plugged in over USB. On desktop, Ratspeak enumerates serial ports for you. On Android, USB-OTG cables let you drive an RNode directly from a phone.
 - **RNode over BLE** — an RNode connected over Bluetooth Low Energy. The RNode must be in pairing mode the first time, after which Ratspeak remembers the bond and reconnects automatically.
-- **BLE peer mesh** — phone-to-phone (and desktop-to-phone) Reticulum over Bluetooth, with no infrastructure needed. Anyone running Ratspeak in BLE range will appear; messages, announces, and file transfers flow over the link directly. Toggle it from Network → Bluetooth, or in Settings → Network → BLE Mesh.
+- **Bluetooth Peer** — phone-to-phone (and desktop-to-phone) Reticulum over Bluetooth, with no infrastructure needed. Nearby Ratspeak clients with Bluetooth Peer active appear as peers; messages, announces, and file transfers flow over the link directly. Toggle it from Network → Bluetooth Peer, or in Settings → Network → Bluetooth Peer.
 
 Adding a radio interface while another is already serving the same physical RNode (USB while BLE is up, or vice versa) will tear down the older one automatically so the radio is never driven from two places at once.
 
-## Propagation nodes
+## Offline Inbox
 
-Propagation nodes are LXMF stores that hold your messages while you're offline and deliver them when you come back.
+Offline Inbox is Ratspeak's user-facing name for LXMF propagation nodes. A propagation node is an encrypted store-and-forward inbox: it can hold messages for offline recipients and hand them over when the recipient comes back online. The node stores sealed LXMF blobs; it does not get plaintext access to the message contents.
 
-Ratspeak ships with sensible defaults — including the public hub at `rns.ratspeak.org:4242` — and you can add or remove nodes from the **Propagation nodes** section of the Network view. Each node row shows its address, sync status, and how many messages it currently holds for you. Tap the row to sync immediately, or remove the node if you no longer want to use it.
+In **Settings → Network → Offline Inbox**, choose one of three modes:
 
-You don't need a propagation node to message a peer who's online right now; their device receives directly. Propagation only matters for store-and-forward — leaving a message for someone whose radio is off, or picking up messages that arrived while yours was off.
+- **Off** — stops active Offline Inbox client checks, blocks new inbox syncs, and prevents new automatic Offline Inbox sends. Messages already accepted by a remote inbox node remain there for the recipient, but switching Off does not keep a local sync running just to drain it.
+- **Auto** — Ratspeak chooses a reachable inbox node. If **Favor Ratspeak nodes** is enabled, bundled Ratspeak inbox nodes win only after Ratspeak has current path evidence for them. If none are reachable, Auto can fall back to another reachable propagation node discovered from the mesh.
+- **Manual** — you pin a specific 32-character propagation-node destination hash. Ratspeak will use that node when it has a live path to it, and will ask the mesh for a path if it is missing.
 
-If you run your own LXMF propagation node on a server or always-on device, add it here and it will sync alongside the public defaults.
+The available-node list shows discovered inbox nodes, hop count when known, and whether a bundled Ratspeak node is still only a bootstrap candidate. A static node from Ratspeak's bundled list is not selected just because it exists in the app; it must have a current announce, path, or successful inbox interaction.
+
+You don't need Offline Inbox to message a peer who's online right now; their device receives directly. Offline Inbox only matters for store-and-forward — leaving a message for someone whose radio is off, or picking up messages that arrived while yours was off.
+
+The **Hosted Offline Inbox** option is separate. Turning it on makes this device serve as a propagation node for other people's offline messages. Turning it off stops accepting new hosted inbox requests immediately; messages already stored by the node remain in local storage for later use if hosting is enabled again. Use it deliberately: desktop and always-on devices are better hosts than phones, because mobile operating systems may stop background service.
+
+If you run your own LXMF propagation node on a server or always-on device, set its published hash manually or let Auto discover it. Ratspeak will use it for store-and-forward delivery when it is reachable.
 
 ## Live stats
 

@@ -10,6 +10,15 @@
     // Custom marked renderer
     var renderer = new marked.Renderer();
 
+    function escapeAttr(str) {
+        return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function slugifyHeading(text) {
+        return String(text || '').replace(/<[^>]+>/g, '').toLowerCase()
+            .replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
+    }
+
     // Headings with anchor links and IDs
     // marked v12+ passes an object { text, depth, raw } instead of positional args
     renderer.heading = function(textOrObj, level, raw) {
@@ -25,10 +34,11 @@
         }
         // Strip HTML from raw for ID generation
         var plainText = raw.replace(/<[^>]+>/g, '');
-        var id = plainText.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
+        var id = slugifyHeading(raw);
+        var route = currentPath ? '#/' + currentPath + '::' + id : '#' + id;
         if (depth >= 2 && depth <= 4) {
             return '<h' + depth + ' id="' + id + '">' + text +
-                '<a class="heading-anchor" href="#' + id + '" aria-hidden="true">#</a>' +
+                '<a class="heading-anchor" href="' + route + '" aria-label="Link to ' + escapeAttr(plainText) + '">#</a>' +
                 '</h' + depth + '>';
         }
         return '<h' + depth + ' id="' + id + '">' + text + '</h' + depth + '>';
@@ -87,6 +97,13 @@
         } else {
             href = hrefOrObj;
         }
+        var linkAnchor = '';
+        if (href && href.indexOf('#') !== -1 && !href.match(/^[a-z]+:/i) && href.charAt(0) !== '#') {
+            var hrefParts = href.split('#');
+            href = hrefParts.shift();
+            linkAnchor = hrefParts.join('#');
+        }
+
         if (href && href.match(/^\.\.?\//)) {
             // Relative path — convert to hash route
             href = href.replace(/\.md$/, '');
@@ -98,12 +115,14 @@
                 var sec = (currentPath || '').split('/')[0] || 'introduction';
                 href = '#/' + sec + '/' + parts[0];
             }
+            if (linkAnchor) href += '::' + linkAnchor;
         } else if (href && /\.md$/.test(href) && !/^[a-z]+:/i.test(href) && href.charAt(0) !== '#' && href.charAt(0) !== '/') {
             // Bare same-section link (e.g. "rslxmf.md") — resolve to current section.
             var sec2 = (currentPath || '').split('/')[0] || 'introduction';
             href = '#/' + sec2 + '/' + href.replace(/\.md$/, '');
+            if (linkAnchor) href += '::' + linkAnchor;
         }
-        var titleAttr = title ? ' title="' + title + '"' : '';
+        var titleAttr = title ? ' title="' + escapeAttr(title) + '"' : '';
         var target = href && href.indexOf('http') === 0 ? ' target="_blank" rel="noopener noreferrer"' : '';
         return '<a href="' + href + '"' + titleAttr + target + '>' + text + '</a>';
     };
@@ -127,9 +146,17 @@
             return { section: 'introduction', page: 'what-is-ratspeak' };
         }
         var cleaned = hash.replace(/^#\/?/, '');
-        var anchorSplit = cleaned.split('::');
-        var path = anchorSplit[0];
-        var anchor = anchorSplit[1] || null;
+        var path = cleaned;
+        var anchor = null;
+        if (cleaned.indexOf('::') !== -1) {
+            var anchorSplit = cleaned.split('::');
+            path = anchorSplit[0];
+            anchor = anchorSplit[1] || null;
+        } else if (cleaned.indexOf('#') !== -1) {
+            var hashSplit = cleaned.split('#');
+            path = hashSplit[0];
+            anchor = hashSplit[1] || null;
+        }
         var parts = path.split('/').filter(Boolean);
 
         if (parts.length >= 2) {
@@ -144,7 +171,14 @@
     // Load and render a page from embedded content (no fetch)
     function loadPage(section, page, anchor) {
         var path = section + '/' + page;
-        if (path === currentPath && !anchor) return;
+        if (path === currentPath && !anchor) {
+            window.scrollTo(0, 0);
+            return;
+        }
+        if (path === currentPath && anchor) {
+            scrollToAnchor(anchor);
+            return;
+        }
         currentPath = path;
 
         var article = document.getElementById('docsArticle');
@@ -169,13 +203,10 @@
             if (window.DocsCode) window.DocsCode.highlight();
             if (window.DocsToc) window.DocsToc.rebuild();
             if (window.DocsNav) window.DocsNav.update(section, page);
-            if (path === 'reference/glossary') initGlossarySearch();
 
             // Scroll to anchor or top
             if (anchor) {
-                var el = document.getElementById(anchor);
-                if (el) {
-                    setTimeout(function() { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+                if (scrollToAnchor(anchor)) {
                     return;
                 }
             }
@@ -190,116 +221,11 @@
         }
     }
 
-    // Glossary inline search — filter terms by keystroke
-    function initGlossarySearch() {
-        var input = document.getElementById('glossarySearchInput');
-        if (!input) return;
-
-        input.addEventListener('input', function() {
-            filterGlossary(input.value.trim().toLowerCase());
-        });
-
-        input.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                input.value = '';
-                filterGlossary('');
-                input.blur();
-            }
-        });
-    }
-
-    var glossaryEmptyEl = null;
-
-    function filterGlossary(query) {
-        var article = document.getElementById('docsArticle');
-        if (!article) return;
-
-        var h2s = article.querySelectorAll('h2');
-        var h3s = article.querySelectorAll('h3');
-
-        // Show everything when query is empty
-        if (!query) {
-            for (var i = 0; i < h2s.length; i++) h2s[i].style.display = '';
-            for (var j = 0; j < h3s.length; j++) {
-                h3s[j].style.display = '';
-                // Show siblings until next h2 or h3
-                var sib = h3s[j].nextElementSibling;
-                while (sib && sib.tagName !== 'H2' && sib.tagName !== 'H3') {
-                    sib.style.display = '';
-                    sib = sib.nextElementSibling;
-                }
-            }
-            if (glossaryEmptyEl) glossaryEmptyEl.style.display = 'none';
-            return;
-        }
-
-        // Track which h2 letter headers have visible children
-        var h2Visible = {};
-        for (var k = 0; k < h2s.length; k++) {
-            h2Visible[h2s[k].id] = false;
-        }
-
-        var visibleCount = 0;
-
-        // Find the parent h2 for each h3
-        for (var m = 0; m < h3s.length; m++) {
-            var term = h3s[m];
-            // Gather term text + description text
-            var text = term.textContent.toLowerCase();
-            var descSib = term.nextElementSibling;
-            while (descSib && descSib.tagName !== 'H2' && descSib.tagName !== 'H3') {
-                text += ' ' + descSib.textContent.toLowerCase();
-                descSib = descSib.nextElementSibling;
-            }
-
-            var matches = text.indexOf(query) !== -1;
-            if (matches) visibleCount++;
-            term.style.display = matches ? '' : 'none';
-
-            // Show/hide description siblings
-            var sib2 = term.nextElementSibling;
-            while (sib2 && sib2.tagName !== 'H2' && sib2.tagName !== 'H3') {
-                sib2.style.display = matches ? '' : 'none';
-                sib2 = sib2.nextElementSibling;
-            }
-
-            // Find parent h2
-            if (matches) {
-                var prev = term.previousElementSibling;
-                while (prev) {
-                    if (prev.tagName === 'H2') {
-                        h2Visible[prev.id] = true;
-                        break;
-                    }
-                    prev = prev.previousElementSibling;
-                }
-            }
-        }
-
-        // Show/hide h2 letter headers
-        for (var n = 0; n < h2s.length; n++) {
-            h2s[n].style.display = h2Visible[h2s[n].id] ? '' : 'none';
-        }
-
-        // Show empty state when no terms match
-        if (visibleCount === 0) {
-            if (!glossaryEmptyEl) {
-                glossaryEmptyEl = document.createElement('div');
-                glossaryEmptyEl.className = 'glossary-empty';
-                glossaryEmptyEl.textContent = 'No matching terms.';
-            }
-            if (!glossaryEmptyEl.parentNode) {
-                var searchBox = article.querySelector('.glossary-search');
-                if (searchBox) {
-                    searchBox.parentNode.insertBefore(glossaryEmptyEl, searchBox.nextSibling);
-                } else {
-                    article.appendChild(glossaryEmptyEl);
-                }
-            }
-            glossaryEmptyEl.style.display = '';
-        } else if (glossaryEmptyEl) {
-            glossaryEmptyEl.style.display = 'none';
-        }
+    function scrollToAnchor(anchor) {
+        var el = document.getElementById(anchor);
+        if (!el) return false;
+        setTimeout(function() { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+        return true;
     }
 
     // Route handler
@@ -337,6 +263,7 @@
     window.DocsRouter = {
         init: init,
         getNav: function() { return navData; },
+        getCurrentPath: function() { return currentPath; },
         parseHash: parseHash
     };
 })();

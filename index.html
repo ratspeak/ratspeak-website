@@ -40,7 +40,7 @@
     <meta name="twitter:image:alt" content="Ratspeak — Private communication without accounts, servers, or surveillance.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Familjen+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
     <script>!function(){var t=localStorage.getItem('ratspeak-theme');if(t)document.documentElement.setAttribute('data-theme',t);else if(window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.setAttribute('data-theme','dark')}()</script>
     <script type="application/ld+json">
 {
@@ -81,7 +81,8 @@
             --accent-a25:    rgba(210, 105, 59, 0.25);
             --accent-a40:    rgba(210, 105, 59, 0.40);
             --accent-a45:    rgba(210, 105, 59, 0.45);
-            --font-mono:     'JetBrains Mono', 'SF Mono', 'Menlo', monospace;
+            --font-mono:     'Familjen Grotesk', system-ui, -apple-system, sans-serif;
+            --font-code:     'JetBrains Mono', 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
             --font-sans:     'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
             --shadow-card:   0 1px 2px rgba(42, 37, 34, 0.04), 0 4px 12px rgba(42, 37, 34, 0.04);
             --shadow-card-hover: 0 2px 4px rgba(42, 37, 34, 0.05), 0 12px 32px rgba(42, 37, 34, 0.08);
@@ -108,17 +109,17 @@
             --text-primary:  #e8e4e0;
             --text-secondary:#a89f96;
             --text-muted:    #7a7068;
-            --accent:        #e08355;
+            --accent:        #D2693B;
             --accent-light:  #2a1f18;
-            --accent-dark:   #f0986a;
-            --accent-a05:    rgba(224, 131, 85, 0.05);
-            --accent-a12:    rgba(224, 131, 85, 0.12);
-            --accent-a15:    rgba(224, 131, 85, 0.15);
-            --accent-a18:    rgba(224, 131, 85, 0.18);
-            --accent-a20:    rgba(224, 131, 85, 0.20);
-            --accent-a25:    rgba(224, 131, 85, 0.25);
-            --accent-a40:    rgba(224, 131, 85, 0.40);
-            --accent-a45:    rgba(224, 131, 85, 0.45);
+            --accent-dark:   #B85829;
+            --accent-a05:    rgba(210, 105, 59, 0.05);
+            --accent-a12:    rgba(210, 105, 59, 0.12);
+            --accent-a15:    rgba(210, 105, 59, 0.15);
+            --accent-a18:    rgba(210, 105, 59, 0.18);
+            --accent-a20:    rgba(210, 105, 59, 0.20);
+            --accent-a25:    rgba(210, 105, 59, 0.25);
+            --accent-a40:    rgba(210, 105, 59, 0.40);
+            --accent-a45:    rgba(210, 105, 59, 0.45);
             --shadow-card:   0 1px 2px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);
             --shadow-card-hover: 0 2px 4px rgba(0,0,0,0.35), 0 12px 32px rgba(0,0,0,0.3);
             /* Dark-mode topo opacities — the original tuned values. */
@@ -275,6 +276,7 @@
         }
         .nr-btn:hover {
             background: var(--accent-dark);
+            color: #ffffff;
             transform: translateY(-1px);
             box-shadow: 0 2px 4px var(--accent-a25), 0 8px 20px var(--accent-a25);
         }
@@ -1232,7 +1234,7 @@
             <span class="trust-desc">No email, no phone</span>
         </div>
         <div class="trust-item fade-in">
-            <span class="trust-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+            <span class="trust-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2.4"/><circle cx="6" cy="19" r="2.4"/><circle cx="18" cy="12" r="2.4"/><path d="M6 7.4v9.2"/><path d="M8.1 6.3c4.4.6 7 2.6 8.2 4"/></svg></span>
             <span class="trust-label">Fully Open Source</span>
             <span class="trust-desc">Don't trust, verify</span>
         </div>
@@ -1297,7 +1299,7 @@
                 <span class="why-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>
                 <h3 class="why-card__title">Open Source</h3>
             </div>
-            <p class="why-card__desc">Every line of code is public. Read it, audit it, fork it. Trust through transparency.</p>
+            <p class="why-card__desc">Every line of code is public. Read it, review it, fork it. Trust through transparency.</p>
         </div>
     </div>
 </section>
@@ -1358,40 +1360,26 @@
             <!-- Mobile -->
             <div class="form-card fade-in">
                 <div class="form-card__visual">
-                    <svg class="device" viewBox="0 0 86 120" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <g transform="translate(43,0) scale(1.13,1) translate(-43,0)">
-                        <rect x="18" y="6" width="50" height="108" rx="9" fill="var(--bg-secondary)" stroke="currentColor"/>
-                        <rect x="23" y="15" width="40" height="88" rx="4" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="0.75"/>
-
-                        <!-- speaker / island -->
-                        <rect x="35" y="11" width="16" height="4" rx="2" fill="var(--bg-tertiary)" stroke="none"/>
-
-                        <!-- chat header -->
-                        <circle cx="31" cy="25" r="3.7" fill="var(--bg-card)" stroke="currentColor" stroke-width="0.75"/>
-                        <line x1="39" y1="23" x2="55" y2="23" stroke="currentColor" stroke-width="0.55" opacity="0.5"/>
-                        <line x1="39" y1="28" x2="51" y2="28" stroke="currentColor" stroke-width="0.45" opacity="0.35"/>
-
-                        <!-- message bubbles -->
-                        <rect x="30" y="39" width="25" height="7" rx="3.5" fill="var(--bg-card)" stroke="currentColor" stroke-width="0.72" opacity="0.86"/>
-                        <rect x="34" y="52" width="22" height="6.5" rx="3.25" fill="var(--bg-card)" stroke="currentColor" stroke-width="0.72" opacity="0.78"/>
-                        <rect x="28" y="65" width="27" height="7" rx="3.5" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="0.78"/>
-                        <rect x="34" y="78" width="18" height="6.5" rx="3.25" fill="var(--bg-card)" stroke="currentColor" stroke-width="0.72" opacity="0.72"/>
-
-                        <!-- tiny sealed packet path -->
-                        <path d="M55 42 C61 48, 61 59, 55 65" stroke="var(--accent)" stroke-width="0.5" opacity="0.34"/>
-                        <path d="M31 47 L33.2 49.2 L30.8 51.6 L28.6 49.4 Z" fill="var(--bg-secondary)" stroke="var(--accent)" stroke-width="0.55" opacity="0.86"/>
-                        <circle cx="55" cy="42" r="1.2" fill="var(--accent)" opacity="0.68"/>
-                        <circle cx="55" cy="65" r="1.2" fill="var(--accent)" opacity="0.58"/>
-
-                        <!-- composer -->
-                        <rect x="29" y="91" width="21" height="4.5" rx="2.25" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.34"/>
-                        <circle cx="56" cy="93.2" r="5.7" fill="var(--accent)" fill-opacity="0.78" stroke="currentColor" stroke-width="0.75"/>
-                        <line x1="56" y1="90.1" x2="56" y2="96.3" stroke="#fff" stroke-width="1.2"/>
-                        <line x1="52.9" y1="93.2" x2="59.1" y2="93.2" stroke="#fff" stroke-width="1.2"/>
-
-                        <!-- bottom handle -->
-                        <line x1="35" y1="109" x2="51" y2="109" stroke="currentColor" stroke-width="1.15" opacity="0.5"/>
-                        </g>
+                    <svg class="device" viewBox="0 0 86 120" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="14" y="6" width="58" height="108" rx="9" fill="var(--bg-secondary)" stroke="currentColor"/>
+                        <rect x="18" y="14" width="50" height="92" rx="3" fill="var(--bg-card)" stroke="currentColor" stroke-width="0.7"/>
+                        <rect x="36" y="10" width="14" height="3" rx="1.5" fill="currentColor" opacity="0.7"/>
+                        <line x1="22" y1="20" x2="32" y2="20" stroke="currentColor" stroke-width="0.5" opacity="0.5"/>
+                        <line x1="58" y1="20" x2="64" y2="20" stroke="currentColor" stroke-width="0.5" opacity="0.5"/>
+                        <rect x="22" y="26" width="42" height="9" rx="2" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="0.6"/>
+                        <line x1="26" y1="30.5" x2="50" y2="30.5" stroke="var(--accent)" stroke-width="0.6"/>
+                        <rect x="22" y="38" width="42" height="9" rx="2" fill="var(--bg-secondary)" stroke="currentColor" stroke-width="0.5" opacity="0.55"/>
+                        <line x1="26" y1="42.5" x2="44" y2="42.5" stroke="currentColor" stroke-width="0.5" opacity="0.5"/>
+                        <rect x="22" y="50" width="42" height="9" rx="2" fill="var(--bg-secondary)" stroke="currentColor" stroke-width="0.5" opacity="0.55"/>
+                        <line x1="26" y1="54.5" x2="48" y2="54.5" stroke="currentColor" stroke-width="0.5" opacity="0.5"/>
+                        <rect x="22" y="62" width="42" height="9" rx="2" fill="var(--bg-secondary)" stroke="currentColor" stroke-width="0.5" opacity="0.55"/>
+                        <line x1="26" y1="66.5" x2="40" y2="66.5" stroke="currentColor" stroke-width="0.5" opacity="0.5"/>
+                        <line x1="22" y1="92" x2="64" y2="92" stroke="currentColor" stroke-width="0.4" opacity="0.4"/>
+                        <circle cx="29" cy="99" r="1.6" fill="currentColor" opacity="0.65"/>
+                        <circle cx="38" cy="99" r="1.6" fill="currentColor" opacity="0.4"/>
+                        <circle cx="47" cy="99" r="1.6" fill="currentColor" opacity="0.4"/>
+                        <circle cx="56" cy="99" r="1.6" fill="currentColor" opacity="0.4"/>
+                        <line x1="35" y1="110" x2="51" y2="110" stroke="currentColor" stroke-width="1" opacity="0.45"/>
                     </svg>
                 </div>
                 <div class="form-card__name">Mobile</div>
@@ -2166,7 +2154,7 @@
         function drawHashFragments(phase) {
             if (!scene.hashes.length) return;
             ctx.save();
-            ctx.font = '10px ' + getComputedStyle(document.documentElement).getPropertyValue('--font-mono');
+            ctx.font = '10px ' + getComputedStyle(document.documentElement).getPropertyValue('--font-code');
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             for (var i = 0; i < scene.hashes.length; i++) {

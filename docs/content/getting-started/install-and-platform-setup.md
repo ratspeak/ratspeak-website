@@ -1,21 +1,21 @@
 # Install & Platform Setup
 
-Ratspeak is a single application — one binary per platform, no separate daemon, no web server, no Python. Pick your platform below, install it, and you're done.
+Ratspeak is a single application: no separate daemon, no web server, no Python runtime. Pick your platform below, install it, and you're done.
 
 ## Download
 
-Grab the installer for your OS from [ratspeak.org/download.html](https://ratspeak.org/download.html). Mobile builds will land on the App Store and Play Store soon; until then, download from the GitHub releases page linked from the same download page.
+Ratspeak v1.0.0 is published as a normal public release. Start at [ratspeak.org/download.html](https://ratspeak.org/download.html), or use the [GitHub releases page](https://github.com/ratspeak/Ratspeak/releases) directly. If you want to inspect or package the code yourself, use [Building from Source](../getting-started/building-from-source).
 
 ## macOS
 
-1. Download the `.dmg` (Apple Silicon or Intel — match your Mac).
+1. Download the `.dmg` from the download page or GitHub release (Apple Silicon or Intel — match your Mac).
 2. Open the `.dmg`. Drag **Ratspeak.app** onto the **Applications** folder shortcut.
 3. Eject the disk image.
 4. Launch Ratspeak from Applications or Spotlight.
 
 ## Linux
 
-Three formats are published — pick whichever fits your distro:
+Pick whichever Linux release format fits your distro:
 
 - **`.AppImage`** — most portable, works on essentially any modern distro. After downloading, make it executable and run it:
   ```bash
@@ -35,22 +35,21 @@ Once installed via `.deb` or `.rpm`, Ratspeak shows up in your application menu.
 
 ## Windows
 
-Two installers are available: `.msi` (Windows Installer) and a NSIS `.exe`. Either one works — pick whichever you prefer. Double-click to install. Ratspeak appears in the Start Menu when it's done.
+Use the Windows installer from the download page or GitHub release. If multiple Windows package types are available, use the MSIX build when this machine needs the Bluetooth Peer advertiser/peripheral role; Windows only exposes the Bluetooth capability Ratspeak uses from the packaged app. The `.msi` and `.exe` builds are fine for normal desktop use, TCP, I2P, serial radios, and RNode work, but they do not provide the Bluetooth Peer advertiser/peripheral role.
 
 ## iOS
 
-The App Store build is in review. In the meantime:
+There is no public iOS download yet. iOS testing is currently source builds on macOS with Xcode and developer provisioning for `org.ratspeak.ios`; TestFlight and App Store distribution will come later. See [Building from Source](../getting-started/building-from-source).
 
-- **TestFlight** — join the public beta from the link on [ratspeak.org/download.html](https://ratspeak.org/download.html).
-- **Sideload** — clone the source and build to your device with Xcode if you have a developer account.
+iOS does not support general USB serial from third-party apps, so LoRa on iPhone and iPad uses Bluetooth RNode hardware. Local Network and multicast discovery depend on Apple permissions and provisioning, notifications require user permission, and background execution remains subject to iOS lifecycle limits.
 
 ## Android
 
-- Download the `.apk` from the GitHub releases page.
+- Download the `.apk` from [ratspeak.org/download.html](https://ratspeak.org/download.html) or the GitHub release.
 - Open the file. Android will ask permission to install from an unknown source — grant it for your browser or file manager.
 - Tap **Install**.
 
-The Play Store build will replace this step once it lands.
+Public Play Store distribution will replace this for most users once the listing is ready.
 
 ## First launch (security warnings)
 
@@ -67,16 +66,23 @@ Ratspeak stores its identity keys, message database, and config in the OS-standa
 
 | Platform | Path |
 |---|---|
-| macOS | `~/Library/Application Support/com.ratspeak.app/.ratspeak/` |
-| Linux | `~/.local/share/com.ratspeak.app/.ratspeak/` |
-| Windows | `%APPDATA%\com.ratspeak.app\.ratspeak\` |
+| macOS | `~/Library/Application Support/org.ratspeak.desktop/.ratspeak/` |
+| Linux | `~/.local/share/org.ratspeak.desktop/.ratspeak/` |
+| Windows | `%APPDATA%\org.ratspeak.desktop\.ratspeak\` |
+
+The app-private Reticulum config is inside that folder at `reticulum/config`
+and defaults to shared-instance ports `37430`/`37431`. It is separate from a
+system Reticulum install using ports `37428`/`37429`, such as Python
+Reticulum's `~/.reticulum/config` or rsReticulum's `~/.rsReticulum/config`.
 
 Back this folder up to preserve your identity and messages. Deleting it resets Ratspeak to a fresh install.
 
 ## Updating
 
-Future versions of Ratspeak will check for updates in-app. For now, download the new installer from [ratspeak.org/download.html](https://ratspeak.org/download.html) and install it over the top — your data folder is left untouched.
+Future versions of Ratspeak will check for updates in-app. Until that lands, install the newer public release artifact from the download page or GitHub releases over the top — your data folder is left untouched.
 
-## Building from source
+## Next
 
-If you'd rather build it yourself, install Rust 1.85+ and the [Tauri prerequisites](https://tauri.app/start/prerequisites/) for your OS, clone the [Ratspeak repository](https://github.com/ratspeak/Ratspeak), and run `cargo tauri build`. The output binaries land in `src-tauri/target/release/bundle/`.
+Once Ratspeak launches, continue to [Your First Session](../getting-started/your-first-session).
+
+If you want to review the code, package the current tree yourself, or build for a platform without a public artifact, use [Building from Source](../getting-started/building-from-source). It covers the sibling repo layout, Rust and Tauri prerequisites, desktop bundles, Android APKs, iOS builds, and the standalone `rnsd-rs` / `lxmd-rs` daemons.

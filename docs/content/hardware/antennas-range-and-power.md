@@ -55,7 +55,7 @@ Most RNode-compatible boards use **SMA** or **U.FL/IPEX** connectors:
 - Indoor placement
 - Antenna mismatched to frequency
 
-For spreading factor and bandwidth trade-offs, see [LoRa & RNode](../networking/lora-and-rnode).
+For spreading factor and bandwidth trade-offs, see [LoRa Radio Interfaces](../networking/lora-and-rnode).
 
 ## Transmit Power
 
@@ -79,24 +79,24 @@ LoRa operates on **ISM bands** (Industrial, Scientific, Medical) - unlicensed bu
 
 | Region | Band | Key Rules |
 |--------|------|-----------|
-| **US (FCC)** | 915 MHz | No duty cycle limit, max 1W EIRP |
-| **EU (ETSI)** | 868 MHz | Duty cycle: 1.5% long-term, 33% short-term |
+| **US (FCC)** | 915 MHz | Power/channel rules apply; duty-cycle limits are not the usual constraint |
+| **EU (ETSI)** | 868 MHz | Sub-band duty-cycle limits apply; configure conservative airtime caps |
 | **EU** | 433 MHz | Duty cycle limits apply |
 
-For EU 868 MHz, configure airtime limits in the RNode config:
+For EU 868 MHz, Ratspeak's default region metadata uses conservative airtime caps:
 
 ```ini
 airtime_limit_long = 1.5
 airtime_limit_short = 33
 ```
 
-Reticulum enforces these limits automatically when configured.
+When configured, Reticulum rate-limits transmissions against those caps. That helps, but it does not replace checking the exact sub-band, antenna gain, and power rules for your country.
 
 > **Warning**: Verify the legal frequency band and power limits for your country before transmitting. ISM bands are unlicensed but usage rules vary by jurisdiction.
 
 ## Optimizing Your Setup
 
-**For maximum range:** mount a collinear or Yagi antenna as high as possible, set TX power to the maximum legal limit, and ensure clear line-of-sight. Use a long-range LoRa preset. See [LoRa & RNode](../networking/lora-and-rnode) for preset details.
+**For maximum range:** mount a collinear or Yagi antenna as high as possible, set TX power to the maximum legal limit, and ensure clear line-of-sight. Use a long-range LoRa preset. See [LoRa Radio Interfaces](../networking/lora-and-rnode) for preset details.
 
 **For best throughput:** use a fast LoRa preset and accept shorter range in exchange for ~11 Kbps. Good for local networks where range is not the priority.
 

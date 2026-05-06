@@ -18,23 +18,23 @@ Reticulum is the underlying networking stack — it handles routing, encryption,
 
 ## How is it encrypted? Who can read my messages?
 
-Every message is end-to-end encrypted to the recipient's public key using X25519 key exchange and AES-256. Transport nodes between you and your contact forward packets without being able to decrypt them. Reticulum packets do not even carry a source address, so a relay cannot see who sent what — only where it is heading. The only people who can read a message are the sender and the intended recipient.
+Every private message is end-to-end encrypted to the recipient's public key using X25519 key exchange and AES-256. Transport nodes between you and your contact forward packets without being able to decrypt them. Reticulum packets do not carry a source address, so relays get much less routing metadata than they would on IP networks. They can still observe interface activity, timing, packet size, and where they forwarded a packet next. The only people who can read the message contents are the sender and the intended recipient.
 
 ## Is Ratspeak anonymous?
 
-Pseudonymous, more accurately. Your identity is a cryptographic hash, not your real name, and Reticulum's design hides who you are talking to from the network. But your display name is visible to your contacts, and any TCP peer you connect to sees your IP address. If IP-level anonymity matters to you, run your TCP interfaces over Tor or I2P. On LoRa, your radio signal can be direction-found with the right equipment, so anonymity from a determined adversary is not absolute.
+Pseudonymous, more accurately. Your identity is a cryptographic hash, not your real name, and Reticulum minimizes routing metadata by omitting source addresses. That is not the same thing as total anonymity. Your display name is visible to your contacts, TCP peers can see the IP address you connect from, timing can still be correlated, and LoRa transmissions can be direction-found with the right equipment. If IP-level anonymity matters to you, run your TCP interfaces over I2P or another anonymity layer and read the threat model carefully.
 
 ## What is my identity, exactly?
 
-A Ratspeak identity is 64 bytes: a 32-byte X25519 key for encryption and a 32-byte Ed25519 key for signatures. It is stored locally at `~/.ratspeak/identities/<hash>/identity`. There is no account, no email, no phone number tied to it. The identity file is the entire thing — back it up, and you can restore yourself anywhere.
+A Ratspeak identity is 64 bytes: a 32-byte X25519 private key for encryption and a 32-byte Ed25519 signing seed. It is stored locally under Ratspeak's per-OS data directory; see [Install & Platform Setup](../getting-started/install-and-platform-setup) for the exact path. There is no account, no email, no phone number tied to it. The identity file is the entire thing — back it up, and you can restore yourself anywhere.
 
 ## How do I move my identity to a new device?
 
-Copy the identity file from `~/.ratspeak/identities/<hash>/` on the old device to the same path on the new one. Launch Ratspeak and it will pick it up. Treat that file like a private key, because it is one — anyone who has it can impersonate you.
+Copy the identity folder from `.ratspeak/identities/<hash>/` in Ratspeak's data directory on the old device to the same place on the new one. Launch Ratspeak and it will pick it up. Treat that file like a private key, because it is one — anyone who has it can impersonate you.
 
 ## What is the maximum attachment size?
 
-500 KB per attachment. That is intentional: Ratspeak is designed to work over LoRa radio, where bandwidth is measured in single-digit kilobits per second. A half-megabyte image already takes a noticeable amount of time to transmit on a slow link. Text messages themselves are much smaller and arrive almost instantly on internet links.
+The protocol ceiling is much larger than most mesh links should use: Ratspeak reads the current limit from the backend and rejects files only when they exceed that protocol resource limit. In practice, keep attachments small. The app warns once a file is above the efficient single-resource size, and Offline Inbox nodes can advertise smaller transfer limits. A half-megabyte image is already noticeable on LoRa; text messages are tiny and arrive quickly on internet links.
 
 ## Where are my settings stored?
 
@@ -42,19 +42,19 @@ Inside the app's local SQLite database, not in a config file. You change them th
 
 ## What is auto-announce, and what is the default?
 
-An announce is how Ratspeak tells the network "I exist and here is my public key." Auto-announce sends one periodically so contacts can find you and propagation nodes know to hold mail for you. The default interval is 30 minutes. You can change it under Settings, or disable it entirely and announce manually when you need to.
+An announce is how Ratspeak tells the network "I exist and here is my public key." Auto-announce sends one periodically so contacts can find you and Offline Inbox nodes can learn where to send waiting mail. The default interval is 30 minutes. You can change it under Settings, or disable it entirely and announce manually when you need to.
 
 ## Can I run Ratspeak on a server or headless?
 
-Not the Ratspeak app itself — it is a desktop and mobile client with a graphical interface. If you want a headless Reticulum presence (a transport node, a propagation node, or both), run `rnsd` and `lxmd` from the Reticulum and LXMF reference toolkits. They work fine on a Raspberry Pi or a VPS and will route traffic for Ratspeak users on your network.
+Not the Ratspeak app itself — it is a desktop and mobile client with a graphical interface. If you want a headless Reticulum presence, run `rnsd-rs` as a transport node and `lxmd-rs` as an Offline Inbox/propagation node from [rsReticulum](../products/rsreticulum) and [rsLXMF](../products/rslxmf). They work fine on a Raspberry Pi or a VPS and will route traffic or hold offline mail for Ratspeak users on your network.
 
-## Can I run my own propagation node?
+## Can I run my own Offline Inbox node?
 
-Yes. Propagation nodes are part of the LXMF spec, not specific to any one client. Run `lxmd` with propagation enabled on an always-on machine, and Ratspeak users (and any other LXMF clients) can request mail through it. Useful for groups where members are not always online at the same time.
+Yes. Offline Inbox is Ratspeak's name for an LXMF propagation node, and propagation nodes are part of the LXMF spec, not specific to any one client. Run `lxmd-rs` with propagation enabled on an always-on machine, publish its 32-character destination hash, and Ratspeak users can use it in Auto or Manual mode. It is useful for groups where members are not always online at the same time.
 
 ## What happens if the recipient is offline when I send a message?
 
-Three possibilities. If you send opportunistically and they never come online, the message expires unsent. If you have a path to them through a propagation node, the node holds the message and delivers it the next time they connect — store-and-forward, in classic mesh fashion. And Ratspeak retries delivery automatically when it sees a fresh announce from the contact, so an offline send is not necessarily a lost send.
+Three possibilities. If you send opportunistically and they never come online, the message expires unsent. If you use Direct, Ratspeak needs a live path and delivery proof from the recipient. If Offline Inbox is enabled and a suitable inbox node is reachable, Ratspeak can store the encrypted message there for later pickup. If no inbox node is reachable yet, the app tells you it is looking and requests paths instead of pretending the message was stored.
 
 ## Why is the public hub a TCP address?
 
@@ -66,7 +66,7 @@ On macOS especially, you may see a Gatekeeper warning the first time you open Ra
 
 ## How do I get the mobile app?
 
-Mobile builds are not yet on the App Store or the main Play Store listing. iOS goes through TestFlight; Android is available as a sideload APK or Play Store internal testing track. Check the website for current invite links. Public store releases will follow once the apps stabilize.
+Mobile builds are not yet on public App Store or Play Store listings. Android is available as a sideload APK from [ratspeak.org/download.html](https://ratspeak.org/download.html) or the GitHub release. iOS still goes through TestFlight or developer provisioning. Public store releases will follow once signing, review, and release packaging are ready.
 
 ## What games are there?
 
@@ -78,11 +78,11 @@ Not interactively. LRGP-aware moves only render correctly inside Ratspeak. Other
 
 ## Is my YubiKey or Nitrokey supported?
 
-Hardware-key support is being built (the underlying library is called Ratkey) but is not yet wired into the Ratspeak app. When it lands, you will be able to keep your private keys on a PIV-capable hardware token instead of on disk. For now, identities live in the file system — protect them accordingly.
+Hardware-key support is being built in a library called Ratkey, but it is not yet wired into the Ratspeak app and the real-token backend is still experimental. The goal is to keep private identity operations on a PIV-capable hardware token instead of on disk. For now, identities live in the file system — protect them accordingly.
 
 ## Is Ratspeak free and open source?
 
-Yes. Ratspeak and its supporting libraries are open source, as is the Reticulum stack underneath it. There are no paid tiers, no telemetry, and no plan to introduce either. The radio hardware itself (RNodes and similar) is also open source — you can build one from parts if you want.
+Yes. Ratspeak, rsReticulum, rsLXMF, Ratdeck, Ratcom, Ratkey, and the website code are AGPL-3.0-or-later open source. LRGP and LXMFace are standalone MIT-licensed libraries. There are no paid tiers, no telemetry, and no plan to introduce either. The radio hardware itself (RNodes and similar) is also open source — you can build one from parts if you want.
 
 If you want to contribute, patches and bug reports through the project's repositories are the most useful place to start.
 

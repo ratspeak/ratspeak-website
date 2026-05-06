@@ -1,198 +1,170 @@
 # Protocol Architecture
 
-How Reticulum addresses, routes, and transports data at the wire level.
+This page explains how Reticulum addresses, discovers, and forwards traffic. It is the technical follow-up to **What is Reticulum?**, but it still focuses on the concepts operators and advanced users need rather than implementation internals.
 
 ## Destination-Based Addressing
 
-Reticulum replaces IP addresses with **destination hashes** — 16-byte (128-bit) truncated SHA-256 hashes derived from a cryptographic identity and an application name.
+Reticulum does not route to hosts, subnets, ports, or DNS names. It routes to **destination hashes**.
 
+A destination is created from an application name, optional aspects, and, for Single destinations, an identity. Reticulum hashes that material down to a 16-byte address:
+
+```text
+name_hash        = SHA-256("lxmf.delivery")[:10]
+identity_hash    = SHA-256(identity_public_keys)[:16]
+destination_hash = SHA-256(name_hash + identity_hash)[:16]
 ```
-Destination Hash = SHA-256(app_name.aspects + Ed25519_pubkey + X25519_pubkey)[:16]
-```
 
-Two instances running the same application get different hashes because each has a different cryptographic identity.
+That final 16-byte value is displayed as 32 hex characters. It is the address you share when you share a Reticulum destination.
 
-### Naming Convention
+Two people can both run an `lxmf.delivery` destination without colliding because each identity produces a different identity hash. Plain and Group destinations are different: they are not identity-bound, so every node using the same application name and aspects shares the same destination hash.
 
-Destinations use dotted aspect notation (`app_name.aspect1.aspect2`):
+## Destination Types
+
+| Type | Encryption | Multi-hop | Typical use |
+|------|------------|-----------|-------------|
+| **Single** | Asymmetric, per-packet ECDH | Yes | Private application endpoints, including LXMF inboxes |
+| **Link** | Ephemeral ECDH session | Yes | Reliable channels, requests, responses, resources |
+| **Group** | Symmetric pre-shared key | No | Direct local group traffic with a shared key |
+| **Plain** | None | No | Direct local public broadcast or discovery |
+
+Only Single and Link destinations are transported across multiple hops. Plain destinations are intentionally local/direct, and Group destinations are currently direct-only.
+
+## Destination Names
+
+Destinations use dotted names. The top-level name should identify the application, and later aspects should describe the purpose of the destination.
 
 | Name | Purpose |
 |------|---------|
-| `lxmf.delivery` | LXMF message delivery |
-| `lxmf.propagation` | LXMF propagation node |
-| `nomadnetwork.node` | NomadNet node presence |
-| `ratspeak.dashboard` | Ratspeak dashboard endpoint |
+| `lxmf.delivery` | LXMF message delivery destination |
+| `lxmf.propagation` | LXMF propagation node endpoint |
+| `nomadnetwork.node` | NomadNet node endpoint |
 
-### Destination Types
+Long names do not make packets larger because only hashes are placed on the wire.
 
-| Type | Encryption | Routing | Use Case |
-|------|-----------|---------|----------|
-| **Single** | Asymmetric (per-packet ECDH) | Multi-hop | Private communication — the most common type |
-| **Group** | Symmetric (pre-shared key) | Direct only | Group messaging with shared secret |
-| **Plain** | None | Direct only | Public broadcasts, service discovery |
-| **Link** | Ephemeral ECDH with forward secrecy | Multi-hop | Encrypted channels for larger data |
+## Announces
 
-Only Single and Link destinations route across multiple hops. Plain and Group destinations are direct-only because Reticulum uses per-packet encryption entropy as part of its routing mechanism.
+An announce is how a destination becomes reachable. A Single destination announce includes:
 
-For Plain and Group destinations, the hash input uses only the application name and aspects — no public key. All nodes running the same app share the same Plain/Group address, enabling broadcast behavior.
+| Field | Purpose |
+|-------|---------|
+| Destination hash | The 16-byte address being announced |
+| Public key material | X25519 and Ed25519 public keys for the identity |
+| Name hash | The compact hash of the application destination name |
+| Random hash | Freshness material used in announce validation |
+| Ratchet key | Optional current ratchet public key |
+| Signature | Ed25519 signature proving the announce belongs to the identity |
+| Application data | Optional metadata such as display hints or capabilities |
 
-```
-Plain/Group Hash = SHA-256(app_name.aspects)[:16]
-```
+Transport nodes that hear an announce record where it came from, increment the hop count, and may re-broadcast it. This is how paths form without a central registry.
 
-Destination hashes display as 32 hex characters: `4faf1b2e0a077e6a9d92fa051f256038`. This is the address you share with contacts.
+## Announce Propagation
 
-## The Announce Mechanism
+Reticulum's announce behavior is designed to keep slow networks useful instead of letting routing chatter consume the link.
 
-Announces distribute public keys so other nodes can send encrypted traffic. An announce contains:
-
-1. **Destination hash** (16 bytes)
-2. **Full public key** (Ed25519 + X25519)
-3. **Application data** (optional) — display name, capabilities
-4. **Ed25519 signature** — proof the announcer holds the private key
-
-Each transport node that receives an announce records the path back and re-broadcasts. All reachable nodes eventually learn a route without any central directory.
-
-### Propagation Rules
-
-| Rule | Detail |
+| Rule | Effect |
 |------|--------|
-| Duplicate detection | Same destination hash with same or higher hop count is dropped |
-| Hop limit | Maximum 128 hops |
-| Rate limiting | Max 2% of interface bandwidth for announce traffic |
-| Randomized delays | Re-broadcasts delayed randomly to prevent synchronization |
-| Priority | Low hop count (nearby) announces re-transmitted before distant ones |
-| Path recording | Transport nodes record which neighbor sent the announce |
+| Duplicate filtering | Already-seen announces are ignored |
+| Hop limit | Announces stop after the configured maximum, 128 by default |
+| Bandwidth cap | Announces use at most the configured announce share, 2% by default |
+| Randomized delay | Re-broadcasts are delayed to avoid synchronized floods |
+| Locality priority | Lower-hop announces are sent before distant ones when bandwidth is scarce |
+| Replacement | Newer application data can replace a queued older announce |
 
-Rate control parameters are configurable per interface. See [Interfaces Overview & Design](../networking/interfaces-overview-and-design) for announce rate tuning.
+Slow segments do not need perfect global convergence to be useful. If a destination is needed and a wider segment knows a path, path requests can pull the relevant reachability information across the constrained link.
 
 ## Routing
 
-Routing is based on announce propagation — no background routing protocol. Nodes learn paths by observing announces.
+Reticulum routing is next-hop routing built from announces.
 
-### Walkthrough
+1. Node A announces its destination on its interfaces.
+2. A transport node hears the announce and records "A is reachable through this neighbor on this interface."
+3. The transport node re-broadcasts the announce with an incremented hop count.
+4. Other transport nodes repeat that process until the announce has reached the reachable mesh.
 
-1. **Node A announces** its destination on all interfaces (hop count 0).
-2. **Transport Node T1** receives the announce, records "A is reachable through interface X," increments hop count to 1, re-broadcasts.
-3. **Transport Node T2** receives it, records "A is reachable through T1," increments to 2, re-broadcasts.
-4. This continues until all reachable transport nodes have a path entry.
+When Node B sends to Node A, it looks up A's destination hash. If a path exists, B sends the packet to the next hop. Each transport node repeats the lookup locally until the packet reaches the destination.
 
-When **Node B** sends a packet to **Node A**:
+If no path exists, the sender can request a path or wait for the destination to announce again.
 
-1. Check the path table for A's destination hash.
-2. If found, send to the recorded next-hop neighbor. Each transport node forwards using its own path table.
-3. If not found, broadcast a path request or wait for A's next announce.
+## Transport Nodes and Metadata
 
-### Path Table
+Transport nodes forward packets without plaintext access. For encrypted Reticulum and LXMF traffic, they do not receive message bodies or application payloads.
 
-Each node maintains a local path table:
-
-| Destination Hash | Next Hop | Hop Count | Interface |
-|-----------------|----------|-----------|-----------|
-| `4faf1b2e...` | Neighbor X | 2 | LoRa |
-| `a3c7e901...` | Neighbor Y | 1 | TCP |
-
-Entries update when announces arrive with lower hop counts (better paths).
-
-### Transport Nodes vs. Instances
-
-| Type | Config | Role |
-|------|--------|------|
-| **Instance** | `enable_transport = No` (default) | Endpoint only — sends and receives its own traffic |
-| **Transport Node** | `enable_transport = Yes` | Active router — forwards packets for other nodes |
-
-Transport nodes forward packets **blindly**: they see only the destination hash, cannot identify the sender, cannot read encrypted payloads, and cannot build communication graphs.
-
-### Convergence
-
-Networks converge without central coordination. New nodes announce and become discoverable immediately. Adding or removing links triggers automatic path adjustment — no subnet planning, no address allocation, no DNS.
+They do still see transport metadata needed for forwarding: interface activity, timing, packet sizes, hop counts, and destination hashes. Reticulum packets do not carry source addresses, which improves initiator privacy, but it does not make traffic analysis impossible. Treat routing privacy as strong minimization, not magic invisibility.
 
 ## Network Identities
 
-A **Network Identity** is a standard Reticulum identity (512-bit keyset) representing a logical group — a community mesh, an organization, or a set of trusted transport nodes. Generate one with `rnid`:
+A Network Identity is a normal Reticulum identity used to represent a logical network, organization, or group of transport nodes.
 
-```bash
-rnid -g ~/.reticulum/storage/identities/my_network
-```
+Today, its main user-facing role is interface discovery. A transport node can sign discoverable interface announces with a Network Identity. Peers can then accept only discovery data signed by identities they trust. If encrypted discovery announces are enabled, peers need the Network Identity key material to decrypt the interface information.
 
-### Interface Discovery with Network Identities
-
-Transport nodes sign discovery announces with the Network Identity. Listening instances verify the signature before auto-connecting:
+Example:
 
 ```ini
 [reticulum]
-  network_identity = ~/.reticulum/storage/identities/my_network
+  network_identity = <reticulum-config-dir>/storage/identities/community_mesh
   discover_interfaces = yes
   interface_discovery_sources = 521c87a83afb8f29e4455e77930b973b
 ```
 
-Discovery announces can be encrypted so only member nodes can see them. The identity file contains private keys — distribute securely. Revoking access requires generating a new identity and redistributing.
+The identity file is sensitive. If you share the full keyset, the recipient can act as that Network Identity.
 
-## Packet Structure
+## Wire Format
 
-Every Reticulum packet follows this binary format:
+Every Reticulum packet starts with a compact fixed structure:
 
+```text
+[HEADER: 2 bytes] [ADDRESSES: 16 or 32 bytes] [CONTEXT: 1 byte] [DATA]
 ```
-[HEADER: 2 bytes] [ADDRESSES: 16 or 32 bytes] [CONTEXT: 1 byte] [DATA: 0-465 bytes]
-```
 
-**Total maximum size: 500 bytes** (network-wide MTU, fixed).
+The default network MTU is 500 bytes.
 
-### Header Byte 1 (Flags)
+### Header Byte 1
 
 | Bit | Field | Values |
 |-----|-------|--------|
-| 7 | IFAC Flag | `0` = no IFAC, `1` = IFAC signature present |
-| 6 | Header Type | `0` = Type 1 (1 address, 16 bytes), `1` = Type 2 (2 addresses, 32 bytes) |
-| 5 | Context Flag | Interpretation varies by packet type |
-| 4 | Propagation Type | `0` = Broadcast, `1` = Transport |
-| 3-2 | Destination Type | `00` = Single, `01` = Group, `10` = Plain, `11` = Link |
-| 1-0 | Packet Type | `00` = Data, `01` = Announce, `10` = Link Request, `11` = Proof |
+| 7 | IFAC flag | `0` open, `1` interface authentication present |
+| 6 | Header type | `0` one address, `1` two addresses |
+| 5 | Context flag | Meaning depends on packet context |
+| 4 | Propagation type | `0` broadcast, `1` transport |
+| 3-2 | Destination type | `00` Single, `01` Group, `10` Plain, `11` Link |
+| 1-0 | Packet type | `00` Data, `01` Announce, `10` Link Request, `11` Proof |
 
 ### Header Byte 2
 
-Hop count. Incremented at each transport node. Range: 0-255 (announce max: 128).
+The second byte is the hop count. It is incremented by transport nodes as the packet moves through the network.
 
 ### Address Field
 
-| Header Type | Size | Contents |
+| Header type | Size | Contents |
 |-------------|------|----------|
-| Type 1 | 16 bytes | Destination hash only |
-| Type 2 | 32 bytes | Destination hash (16) + Transport ID hash (16) |
+| Type 1 | 16 bytes | Destination hash |
+| Type 2 | 32 bytes | Transport ID hash, then destination hash |
 
-Type 2 headers are used when a packet is forwarded by a specific transport node.
+Type 2 headers are used for transported packets that need an explicit transport identifier.
 
-### Maximum Data Units
+## Packet Size Limits
 
-| Type | Size | Description |
-|------|------|-------------|
-| MTU | **500 bytes** | Maximum total packet size |
-| Encrypted MDU | **383 bytes** | Maximum payload for Single destinations |
-| Plain MDU | **464 bytes** | Maximum payload for Plain destinations |
+| Limit | Size | Meaning |
+|-------|------|---------|
+| MTU | 500 bytes | Maximum on-wire Reticulum packet size |
+| Plain packet MDU | 464 bytes | Maximum protocol payload for direct Plain packets |
+| Encrypted Single packet payload | 383 bytes | Maximum encrypted Single destination packet payload |
+| Link packet MDU | 431 bytes | Default payload size for encrypted Link packets |
 
-The difference accounts for encryption overhead (ephemeral key, HMAC, padding). For data larger than the MDU, use [Resources over Links](../understanding/links-and-lxmf).
+LXMF messages have smaller content limits because LXMF adds destination fields, timestamps, signatures, and structured-message overhead. With default parameters, opportunistic LXMF content is about 295 bytes; larger messages use Direct link delivery or resources.
 
-### IFAC (Interface Access Codes)
+## Interface Access Codes
 
-When IFAC is active, an Ed25519 signing identity is derived from the IFAC passphrase. Per-packet signatures are generated and inserted before transmission, truncated to a configurable length (`ifac_size`, range 8-512 bits). Receiving interfaces verify the signature and silently drop invalid packets.
+When IFAC is enabled, an interface derives signing material from the interface name or passphrase. Outbound packets receive an interface authentication code, which may be a full or truncated Ed25519 signature depending on interface configuration.
 
-## Packet Receipt Verification
+Receivers verify that code before passing the packet to Reticulum. Invalid packets are dropped silently. IFAC is useful for private segments over shared carriers, but it is not a substitute for Reticulum identity encryption.
 
-Delivery confirmations are unforgeable:
+## Receipt Proofs
 
-1. Destination calculates `SHA-256(received_packet)`.
-2. Signs the hash with its Ed25519 signing key.
-3. Transport nodes relay the proof back along the reverse path.
-4. Sender verifies the signature against the known public key.
+Packet receipt proofs are cryptographic. A destination can prove receipt by signing the hash of the received packet with its Ed25519 signing key. The proof can travel back through the network, and the sender verifies it against the destination's known public key.
 
-Only the holder of the private key can produce a valid proof.
+Only the destination identity can produce a valid proof.
 
-## Packet Prioritization
+## Traffic Handling
 
-| Priority | Traffic Type |
-|----------|-------------|
-| 1 (highest) | Link keepalives and transport management |
-| 2 | Link establishment |
-| 3 | Proofs and receipts |
-| 4 | Data packets |
-| 5 (lowest) | Announces (rate-limited) |
+Reticulum is priority-agnostic for general traffic: packets are handled first-come, first-served. Announce re-transmission and maintenance traffic are the exception; they are governed by announce timing, bandwidth caps, and the locality priority described above.

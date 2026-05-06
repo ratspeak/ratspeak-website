@@ -1,4 +1,4 @@
-# Interfaces Overview & Design
+# Network Interfaces
 
 An interface is a transport. Ratspeak doesn't care whether your packets ride
 TCP, BLE, or LoRa — every link looks the same to the routing layer above it.
@@ -26,7 +26,7 @@ internet or LAN, UDP for low-overhead local broadcasts, AutoInterface for
 zero-config LAN discovery (it speaks link-local IPv6 multicast and
 auto-discovers peers on the same subnet using UDP ports 29716 for discovery
 and 42671 for data), Backbone for high-throughput hub roles, and I2P for
-anonymized routing through the I2P overlay. AutoInterface is the right
+IP-hiding transport through the I2P overlay. AutoInterface is the right
 default for "two laptops on the same wifi"; TCP is the right default for
 crossing the internet.
 
@@ -41,13 +41,19 @@ USB or BLE — long-range LoRa links for low-bandwidth resilient meshes.
 RNodeMulti exposes multiple sub-interfaces from one physical board.
 
 **Bluetooth.** BLE-RNode is the BLE bridge for BLE-equipped RNode hardware.
-BLE-peer is a peer-to-peer mesh layer between phones and laptops without
-needing a radio at all — useful when two devices are nearby and you don't
+Bluetooth Peer is the phone-to-phone and laptop-to-phone transport that works
+without a radio at all — useful when two devices are nearby and you don't
 want to share a wifi network.
 
 **Specialty.** LocalInterface for IPC between processes on the same machine
 (e.g. an app and a local rnsd), AndroidUSB for hardware attached over the
 Android USB host stack, and Weave for an experimental layered transport.
+
+For concrete setup details, use the interface-family pages:
+[IP, LAN & I2P](../networking/ip-internet-and-i2p),
+[LoRa Radio Interfaces](../networking/lora-and-rnode),
+[Bluetooth Interfaces](../networking/bluetooth-interfaces), and
+[Serial & Packet Radio](../networking/serial-and-packet-radio).
 
 ## Interface modes
 
@@ -59,15 +65,17 @@ to peers on it.
 - **access_point** — exposes this node to client peers. Used for hub roles
   where downstream clients connect in.
 - **roaming** — for mobile peers whose network presence is intermittent.
-- **boundary** — controls and accounts for traffic that crosses between
-  networks. Use on the seam between two segments you want to keep distinct.
-- **gateway** — bridges two networks. The interface participates in path
-  discovery for both sides.
+- **gateway** — helps clients on this interface discover paths through the
+  rest of the node's active interfaces. Use it on the client-facing side of
+  a transport gateway.
+- **boundary** — controls and accounts for traffic crossing a network edge.
+  Use it on the side facing a wider or higher-throughput network when you
+  want to keep segments distinct.
 
 Picking the wrong mode mostly hurts efficiency, not correctness — but a
-pair of `gateway` interfaces is what turns a single node into a router
-between two otherwise-disconnected segments, and `boundary` is what stops a
-high-bandwidth network from flooding announces into a low-bandwidth one.
+transport node should put `gateway` where downstream clients ask for paths,
+and `boundary` where a wider network should not flood a constrained segment
+with unnecessary announces.
 
 ## IFAC and announce caps
 
@@ -89,7 +97,7 @@ A few patterns cover most real deployments.
 
 **Laptop with LoRa dongle.** AutoInterface on the LAN for fast local
 traffic, an RNode interface on the USB-attached LoRa board for long-range,
-and optionally BLE-peer so a nearby phone can talk to the laptop without
+and optionally Bluetooth Peer so a nearby phone can talk to the laptop without
 joining the wifi. The router decides per-destination which interface to
 use; you don't manage that by hand.
 
@@ -97,14 +105,14 @@ use; you don't manage that by hand.
 plus a Backbone interface to peer hubs. Set IFAC on the access_point if the
 hub is private. Hubs talk to each other over the backbone.
 
-**Two-network bridge.** One interface per network on a single node, both in
-`gateway` mode — typically a TCP gateway facing the internet plus a
-LoRa/RNode gateway facing the local mesh. Use `boundary` instead of
-`gateway` to meter or restrict traffic between segments rather than route
-freely.
+**Two-network bridge.** One interface per network on a single transport
+node. In a LoRa-plus-IP gateway, put the local LoRa/RNode interface in
+`gateway` mode so nearby radios can resolve paths through the node. Put the
+wider IP/backhaul interface in `boundary` mode when you want to keep the
+radio segment from being flooded by the larger network.
 
 **Mobile node.** AutoInterface for whichever LAN it's on right now, plus
-BLE-peer for ad-hoc nearby connections. `roaming` mode tells upstream
+Bluetooth Peer for ad-hoc nearby connections. `roaming` mode tells upstream
 routers this node's reachability is intermittent.
 
 Every interface a node runs is just another path the router can use. Add

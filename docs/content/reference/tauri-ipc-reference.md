@@ -1,16 +1,16 @@
 # Tauri IPC Reference
 
-Ratspeak's desktop and mobile app is a Tauri v2 shell. The Rust core exposes a typed command surface that the WebView frontend calls; the core pushes asynchronous updates back as named events. This page documents the shape of that surface so you can build tools, alternate frontends, automation, or test harnesses against it.
+Ratspeak's desktop and mobile app is a Tauri v2 shell. The Rust core exposes a typed command surface that the WebView frontend calls; the core pushes asynchronous updates back as named events. This page documents the shape of that surface for app contributors, alternate frontends, automation, and test harnesses.
 
 For the canonical, version-correct command list, browse the source on GitHub: <https://github.com/ratspeak/Ratspeak>.
 
 ## How IPC works in Ratspeak
 
-The Rust core registers about 116 functions tagged `#[tauri::command]`, grouped into nine domain modules. Each command is async, takes typed arguments, and returns `Result<Value, AppError>`. The WebView calls them via Tauri's `invoke` bridge.
+The Rust core registers just over 120 functions tagged `#[tauri::command]`, grouped into nine domain modules. Each command is async, takes typed arguments, and returns an `AppResult<T>` where `T` is JSON-serializable. The WebView calls them via Tauri's `invoke` bridge.
 
 In the other direction, the core stashes the Tauri `AppHandle` at startup and uses `AppHandle::emit(name, payload)` to broadcast events to every open window. There is no embedded HTTP server, no WebSocket, and no localhost port — all traffic is Tauri's process-internal IPC.
 
-Because everything runs in-process, integrations must either embed in the app's WebView (custom HTML/JS loaded by Tauri) or be a sibling Rust crate calling the core directly. There is no remote IPC surface.
+Because everything runs in-process, integrations must either live in the app's WebView or be Rust code calling the core directly. There is no remote IPC surface.
 
 ## Calling a command
 
@@ -18,7 +18,7 @@ Because everything runs in-process, integrations must either embed in the app's 
 const { invoke } = window.__TAURI__.core;
 
 try {
-  const conversations = await invoke("list_conversations", { limit: 50 });
+  const conversations = await invoke("api_lxmf_conversations");
   console.log(conversations);
 } catch (err) {
   // err is { code, message }
@@ -26,7 +26,7 @@ try {
 }
 ```
 
-Argument names use camelCase on the JS side and are mapped to the Rust parameter names by Tauri. Returned `Value` is plain JSON — `serde_json::Value` on the Rust side, deserialized by Tauri.
+For direct command parameters, use the Tauri argument names registered by Rust. Many Ratspeak commands take a single nested `args` struct; those nested fields intentionally mirror the Rust struct and may be snake_case, for example `dest_hash`, `delivery_method`, and `client_msg_id` in `send_lxmf_message`. Treat the source and dashboard callers as canonical when wiring a new integration.
 
 ## Listening for events
 
@@ -46,21 +46,21 @@ Events fire on a single global channel — every listener for a given name recei
 
 ## Command domains
 
-Commands live under nine domain modules. Counts shift between releases; the current truth is the source on GitHub.
+Commands live under nine domain modules. Counts shift between releases; the current truth is the registered `generate_handler!` list and the command modules in source.
 
 | Domain       | Approx. count | Covers                                                                  |
 |--------------|---------------|-------------------------------------------------------------------------|
-| `interfaces` | ~25           | Add/remove/list TCP, UDP, Serial, KISS, RNode, AX.25, I2P, Pipe, Auto.  |
-| `system`     | ~18           | Lifecycle, status, restart, log level, transport mode, app metadata.    |
-| `network`    | ~18           | Announces, paths, link probes, propagation nodes, blackhole, hubs.      |
+| `interfaces` | ~30           | AutoInterface, LoRa/RNode, BLE RNode scan, serial discovery, TCP client/server, Backbone client/server, notifications, transport mode, connection history. |
+| `system`     | ~18           | Lifecycle, status, restart, app metadata, reset/clear actions.          |
+| `network`    | ~20           | Announces, paths, Offline Inbox/propagation nodes, blackholes, hub interfaces, network log state and level. |
 | `messaging`  | ~14           | Send, list, mark-read, attachments, conversation CRUD.                  |
-| `identity`   | ~12           | Identity load/reset/switch, hashes, display name, ratchet keys.         |
-| `ble`        | ~10           | BLE peer mesh and BLE RNode discovery, pairing, link diagnostics.       |
+| `identity`   | ~12           | Identity create/import/export/activate/switch, hashes, display name.    |
+| `ble`        | ~10           | Bluetooth Peer, BLE RNode discovery, pairing prompts, cancellation, disconnects. |
 | `contacts`   | ~9            | Address book, trust state, custom names, hash lookup.                   |
 | `games`      | ~8            | LRGP game sessions, action submission, session deletion.                |
 | `peers`      | ~1            | Live peer roster snapshot (mostly event-driven).                        |
 
-For the full per-command signature and argument schema, grep the source: `grep -rn '#\[tauri::command\]' crates/ratspeak-dashboard/src/commands/` in the [Ratspeak repo](https://github.com/ratspeak/Ratspeak).
+For the full per-command signature and argument schema, inspect the source with `rg -n '#\[tauri::command\]|generate_handler!' crates/ratspeak-tauri/src/commands src-tauri/src/lib.rs` in the [Ratspeak repo](https://github.com/ratspeak/Ratspeak).
 
 ## Event vocabulary
 
@@ -68,22 +68,24 @@ Names the core broadcasts; subscribe to whichever your integration cares about.
 
 | Event                  | Payload                                                                  |
 |------------------------|--------------------------------------------------------------------------|
-| `system_status`        | Runtime health: RNS up, LXMF up, interface counts, identity ready.       |
+| `system_status`        | Coarse lifecycle marker, for example ready, stopping, or stopped.        |
 | `lxmf_identity`        | Active identity hash and display name when loaded or switched.           |
 | `contacts_update`      | Full contact list snapshot after any contact mutation.                   |
 | `conversations_update` | Conversation roster — last message, unread, peer hash.                   |
 | `lxmf_message`         | A single inbound or outbound LXMF message in canonical form.             |
-| `lxmf_step`            | Per-message delivery progress (queued, sending, sent, delivered, failed).|
+| `lxmf_step`            | Per-message send or attachment progress, including validation errors.    |
 | `unread_total`         | Aggregate unread count across all conversations.                         |
 | `stats_update`         | Transport, link, and traffic counters; see Notes for cadence.            |
 | `peers_updated`        | Live peer mesh roster snapshot.                                          |
 | `all_game_sessions`    | LRGP session list after any session-state change.                        |
+| `node_operation_status`| Interface add/remove/update progress for long-running network operations.|
+| `propagation_sync_result` | Propagation-node sync completion or failure.                          |
 
-Other narrower events exist (`identity_reset`, `identity_switched`, `auto_announce_updated`, `propagation_update`, `ble_diag`, `hub_interfaces_update`, `transport_mode_updated`, etc.). Treat them as live; check the source if you depend on one.
+Other narrower events exist (`identity_reset`, `identity_switched`, `auto_announce_updated`, `propagation_update`, `ble_peer_status_update`, `hub_interfaces_update`, `transport_mode_updated`, etc.). Treat them as live; check the source if you depend on one.
 
 ## Error model
 
-Every command returns `Result<Value, AppError>`. Tauri serializes the error variant directly, so on the JS side a rejected `invoke` Promise yields:
+Every command returns `AppResult<T>`. Tauri serializes the error variant directly, so on the JS side a rejected `invoke` Promise yields:
 
 ```json
 { "code": "not_found", "message": "no contact for hash a1b2c3d4" }
@@ -106,13 +108,13 @@ Treat unknown codes as fatal for that call but not for the session.
 
 **Subscribe, don't poll.** Every domain that matters emits when state changes. Polling commands in a loop wastes IPC bandwidth and races the broadcast.
 
-**Stats are the exception.** The bundled dashboard pulls `get_stats` on a 2.5-second cadence because the counter is cheap and steady. The core also emits `stats_update`; you can pick whichever fits your UX.
+**Stats are the exception.** The core emits `stats_update` on a 2.5-second cadence. Listen for that event instead of inventing a polling command.
 
-**Wait for readiness.** On cold start, RNS comes up before LXMF. Calls into the messaging or identity domain before LXMF is ready return `lxmf_not_initialized` or `service_unavailable`. Listen for `system_status` and gate calls on its `lxmf` flag, or retry with backoff.
+**Wait for readiness.** On cold start, RNS comes up before LXMF. Calls into the messaging or identity domain before LXMF is ready return `lxmf_not_initialized` or `service_unavailable`. Wait for `system_status` to report `ready`, or retry with backoff after setup.
 
 **Identity is implicit.** Commands operate against the currently loaded identity — there is no per-call identity argument. Listen for `identity_switched` to know when that context changes underneath you.
 
-**Attachments.** LXMF caps a single message at 1000 bytes for the title-and-content path and ~500 KB for the field path used by attachments. Larger payloads must be chunked at the application layer; the core does not split for you.
+**Attachments.** The app exposes its current message, attachment, efficient-resource, and Offline Inbox/propagation-node transfer limits through `api_lxmf_limits`. Do not hard-code UI limits; they depend on the protocol resource ceiling and, for Offline Inbox delivery, the selected propagation node's advertised transfer limit.
 
 **Threading.** Commands are async on a Tokio runtime; long work does not block the WebView. Events are emitted from whatever task produced them, so handlers must be reentrant.
 

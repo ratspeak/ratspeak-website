@@ -2,6 +2,8 @@
 
 This guide walks you through getting firmware onto a Ratdeck, Ratcom, or RNode-class board. The web flasher is the fastest path for Ratdeck and Ratcom; PlatformIO is the path you want when you're hacking on the firmware itself. RNode boards use Mark Qvist's `rnodeconf` toolchain.
 
+> **Warning**: Attach an antenna matched to your frequency band before powering or testing a LoRa radio. Transmitting without an antenna can damage the radio module.
+
 ## Web Flasher (Easiest)
 
 For Ratdeck and Ratcom, you don't need to install anything. Plug the board into a USB-C port and visit:
@@ -10,7 +12,7 @@ For Ratdeck and Ratcom, you don't need to install anything. Plug the board into 
 
 The page uses WebSerial (Chrome, Edge, or Opera on desktop) to detect the board, pick the right image, and flash it directly from your browser. Pick your board, click Flash, and wait for the progress bar to hit 100%. The same image covers all regions — the LoRa band is a runtime setting you choose later from the device UI.
 
-If the browser can't see the board, jump to the [Recovery](#recovery-download-mode) section below.
+If the browser can't see the board, jump to the [Recovery](#/hardware/flashing-firmware::recovery-download-mode) section below.
 
 ## Ratdeck (PlatformIO Build & Flash)
 
@@ -103,7 +105,8 @@ A successful flash shows the same signs across all three platforms:
 1. The device boots into its splash/animation screen within a few seconds of reset.
 2. The serial monitor (`platformio device monitor` for Ratdeck/Ratcom, `rnodeconf -i` for RNode) prints the firmware version and a healthy hardware report.
 3. The LoRa radio initializes without errors — look for a `RADIO_INIT_OK` line or equivalent.
-4. For Ratdeck and Ratcom, a WiFi access point named `ratdeck-XXXX` or `ratcom-XXXX` appears within ~10 seconds of boot.
-5. An identity is generated on first boot (Ed25519 keypair) and persisted to flash. Subsequent reflashes preserve it.
+4. For Ratdeck and Ratcom, the first-boot/setup flow appears and lets you set the device name, timezone or region defaults, and network mode.
+5. If you enable Hotspot/AP mode later, a Wi-Fi access point named `ratdeck-XXXX` or `ratcom-XXXX` appears and exposes the configured TCP bridge.
+6. A Reticulum identity is generated on first boot (X25519 encryption key + Ed25519 signing key) and persisted to flash. Subsequent reflashes preserve it.
 
 If any of those steps stall, power-cycle the board and check the serial monitor for the failure point before re-flashing.

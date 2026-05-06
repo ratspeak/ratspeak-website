@@ -20,8 +20,10 @@ video link. Don't plan on streaming anything. Plan on sending sentences.
 
 Minimum viable off-grid kit:
 
-- **One handheld per person.** Either a Ratdeck (clamshell with keyboard, screen,
-  RNode) or a Ratcom (radio-only, paired to a phone over USB-C/BLE). Either works.
+- **One handheld per person.** Either a Ratdeck or Ratcom for standalone LoRa
+  messaging, or a phone/laptop running Ratspeak paired to a separate RNode.
+  Ratdeck has BLE bridge support; Ratcom is standalone/Wi-Fi in current firmware,
+  not a phone-tethered BLE radio.
 - **Optional always-on transport node.** A Raspberry Pi + RNode + battery + small
   solar panel, sited high. One transport node can stitch together handhelds that
   can't directly hear each other.
@@ -29,7 +31,8 @@ Minimum viable off-grid kit:
 You don't need IP, you don't need Wi-Fi, you don't need a backbone. The only
 exception: if you want to bridge a single laptop into the mesh in the field, a
 Ratdeck can run as a Wi-Fi access point and the laptop joins it. That's local-only,
-no upstream internet involved.
+no upstream internet involved. Treat that AP bridge as experimental and test it
+before the deployment.
 
 ## Power budget
 
@@ -76,7 +79,7 @@ each leg before you leave.
 
 ## Setting up a transport node
 
-A transport node is a node that relays for others. On the always-on Pi, add this to `~/.reticulum/config`:
+A transport node is a node that relays for others. On the always-on Pi, add this to the rsReticulum config at `~/.rsReticulum/config`.
 
 ```
 [reticulum]
@@ -97,7 +100,7 @@ the transport node, you're set.
 Use IFAC even in emergencies. **Especially** in emergencies. IFAC stops random
 unrelated mesh nodes — somebody's hobby gateway in the next valley — from
 polluting your routing tables. Every node in your group sets the same
-`network_name` and `passphrase` on the LoRa interface in `~/.reticulum/config`:
+`network_name` and `passphrase` on the LoRa interface in the node's Reticulum config:
 
 ```
 [interfaces]
@@ -106,7 +109,6 @@ polluting your routing tables. Every node in your group sets the same
     port = /dev/ttyUSB0
     network_name = your-group-name
     passphrase = use-a-strong-shared-secret-here
-    ifac_size = 16
 ```
 
 Both fields must match exactly across every node. Treat the passphrase like a

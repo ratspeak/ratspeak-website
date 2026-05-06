@@ -2,7 +2,7 @@
 
 A community mesh is what you build when the radius of the network outgrows one operator. A neighborhood, a campus, a town. Several people running their own LoRa nodes, one or two of them also running an IP gateway so the radio segment doesn't live alone, and a shared agreement on radio settings so everyone can hear each other. Public or semi-public — anyone with a matching radio can join.
 
-This page covers the deployment pattern. For radio hardware itself see the RNode pages; for daemon mechanics see Infrastructure and Ops.
+This page covers the deployment pattern. For radio hardware itself see [RNode & Supported Boards](../hardware/rnode-and-supported-boards) and [LoRa Radio Interfaces](../networking/lora-and-rnode); for daemon mechanics see [Infrastructure & Ops](../deployment/infrastructure-and-ops).
 
 ## What this looks like
 
@@ -22,13 +22,13 @@ LoRa is unforgiving about parameter mismatch. Two RNodes on the same frequency b
 - **Bandwidth.** 125 kHz or 250 kHz are the common choices. Wider is faster but shorter range.
 - **Spreading factor.** SF7 through SF12. Higher is slower and longer range. SF11 is the community sweet spot.
 - **Coding rate.** 5 through 8. Higher is more robust but uses more airtime. 5 is the default.
-- **Preset.** The Reticulum presets (Long Slow, Long Fast, Mid, Short, etc.) bundle these into a single label. Long Fast (SF11, BW250) is the most-common community baseline — solid range, usable throughput, decent battery life.
+- **Preset.** The Ratspeak/RNode presets bundle these into a single label: Short, Medium, Long Turbo, Long Fast, Long Moderate. Long Fast (SF11, BW250) is the most-common community baseline — solid range, usable throughput, decent battery life.
 
 Pick a preset, document it, and make every operator match. A mesh that drifts on parameters is a mesh that quietly stops working.
 
 ## Setting up a gateway node
 
-A gateway is a transport router with two interfaces: one LoRa, one IP. It runs `rnsd` with `enable_transport = yes` so it forwards on behalf of others. Minimal config:
+A gateway is a transport router with two interfaces: one LoRa, one IP. It runs `rnsd-rs` with `enable_transport = yes` so it forwards on behalf of others. Minimal config:
 
 ```
 [reticulum]
@@ -44,25 +44,25 @@ A gateway is a transport router with two interfaces: one LoRa, one IP. It runs `
     txpower = 22
     spreadingfactor = 11
     codingrate = 5
-    mode = boundary
+    mode = gateway
 
   [[Backhaul]]
     type = TCPClientInterface
     target_host = backhaul.example.org
     target_port = 4242
-    mode = gateway
+    mode = boundary
 ```
 
-Match the LoRa parameters to whatever the operator group agreed on. Point the backhaul at any reachable Reticulum TCP server — another operator's VPS, a public hub, whatever the group standardized on. Run it as a service with systemd or Docker; see Infrastructure and Ops for unit files.
+Match the LoRa parameters to whatever the operator group agreed on. Point the backhaul at any reachable Reticulum TCP server — another operator's VPS, a public hub, whatever the group standardized on. Run it as a service with systemd or Docker; see [Infrastructure & Ops](../deployment/infrastructure-and-ops) for unit files.
 
 ## Boundary vs gateway mode
 
 Interface modes shape how Reticulum treats traffic crossing between segments. Two modes matter here:
 
-- **`mode = boundary`** on the LoRa side. Boundary interfaces police traffic crossing them: announces from beyond the boundary are filtered more aggressively, and routing decisions treat the segment as a distinct region of the mesh. This stops a chatty IP-side network from drowning the radio segment in announces it doesn't need.
-- **`mode = gateway`** on the IP side. Gateway interfaces advertise the node as a known crossing point to a wider mesh. Use this when the backhaul connects to a network you trust — another operator, a public hub — and you want Reticulum to prefer it for transit.
+- **`mode = gateway`** on the LoRa side. Gateway mode belongs on the interface facing the clients that need help resolving paths beyond their own segment. In a community mesh, those clients are the edge radios on the local LoRa network.
+- **`mode = boundary`** on the IP side. Boundary mode is useful on the interface facing the wider or higher-throughput network. It keeps the backhaul from dumping unnecessary announce traffic into the radio segment while still allowing useful paths to cross.
 
-The pairing matters. Boundary on the radio, gateway on the uplink. That combination keeps the LoRa segment efficient while still letting the gateway pull its weight in the wider routing table.
+The pairing matters. Gateway faces the local radio clients; boundary faces the uplink. That combination keeps the LoRa segment efficient while still letting the gateway pull its weight in the wider routing table.
 
 ## IFAC or open mesh
 
@@ -84,6 +84,6 @@ Operational notes:
 
 ## Monitoring
 
-Run `rnstatus` on each gateway to see which interfaces are up, how much traffic each is carrying, and how many paths are known. `rnpath <destination_hash>` shows the route Reticulum would use to reach a given node — useful when an edge user reports they can't reach someone and you want to know whether the path is even known. `rnprobe <destination>` sends a probe and prints round-trip time.
+Run `rnstatus-rs` on each gateway to see which interfaces are up, how much traffic each is carrying, and how many paths are known. `rnpath-rs <destination_hash>` shows the route Reticulum would use to reach a given node — useful when an edge user reports they can't reach someone and you want to know whether the path is even known. `rnprobe-rs <destination>` sends a probe and prints round-trip time.
 
-For the community as a whole, the simplest health check is whether operators can reach each other's destinations. Designate a propagation node (any gateway can run one) and have operators set it as their LXMF propagation node. If messages flow through it, the mesh is alive.
+For the community as a whole, the simplest health check is whether operators can reach each other's destinations. Designate an Offline Inbox/propagation node (any gateway can run one) and have operators set it as their Manual Offline Inbox node in Ratspeak. If messages flow through it, the mesh is alive.

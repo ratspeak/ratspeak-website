@@ -22,7 +22,7 @@ You can keep several identities side by side and switch between them in **Settin
 
 - destination hash and LXMF address
 - contact list and conversation history
-- propagation node selection
+- Offline Inbox mode and any manually pinned propagation-node hash
 - announce schedule
 
 Common reasons to run more than one: a public identity for community channels and a private one for close contacts; separate identities for separate roles (operator, club call sign, personal); a throwaway identity for testing.
@@ -47,19 +47,20 @@ A manual announce is always available from the bottom bar (long-press) and from 
 
 **Settings → Network** controls which interfaces are allowed to carry your traffic and on what terms.
 
-- **Per-interface enable/disable** — toggle TCP, Wi-Fi/Auto, LoRa radio (BLE or USB-OTG), or BLE peer mesh without removing them. Useful for going dark on a specific link.
+- **Transport Mode** — OFF by default. OFF keeps this device as a normal client, ON relays Reticulum traffic for other peers when the local runtime can do so, and AUTO enables only on suitable non-LoRa setups. AUTO requires an enabled non-LoRa interface such as Local Network, TCP, or Backbone; it stays disabled on cellular, no-network, mobile `unknown` network states, and whenever an enabled LoRa/RNode interface is configured.
+- **Per-interface enable/disable** — toggle TCP, Wi-Fi/Auto, LoRa radio (BLE or USB-OTG), or Bluetooth Peer without removing them. Useful for going dark on a specific link.
 - **IFAC pre-shared key** — an optional shared secret that scopes an interface to a private group. Devices without the key see your packets as noise and drop them.
 - **Announce caps** — limits on how many announces an interface will accept and forward, to keep a chatty network from drowning out a slow one.
 
 Changes apply on the next packet — there's no need to restart.
 
-## BLE mesh toggle
+## Bluetooth Peer toggle
 
-The BLE peer mesh is a phone-to-phone (and laptop) Bluetooth GATT mesh that runs alongside your other interfaces. Any nearby Ratspeak user shows up as a peer and can exchange announces, messages, files, and games with you over Bluetooth — no router, no LoRa, no internet.
+Bluetooth Peer is a phone-to-phone (and laptop) Bluetooth GATT transport that runs alongside your other interfaces. Any nearby Ratspeak user with Bluetooth Peer active shows up as a peer and can exchange announces, messages, files, and games with you over Bluetooth — no router, no LoRa, no internet.
 
-Toggle it in **Settings → Network → BLE Mesh**. The mesh is unbonded by design: Reticulum already encrypts everything end-to-end, so there's no pairing dialog to dismiss. Range is whatever your radios can manage, typically 10-30 meters indoors.
+Toggle it in **Settings → Network → Bluetooth Peer**. It is unbonded by design: Ratspeak's Reticulum traffic is already encrypted end-to-end, so there's no pairing dialog to dismiss. Range is whatever your radios can manage, typically 10-30 meters indoors.
 
-On Windows, outbound BLE peer connections work but advertising as a peer requires a packaged build; the desktop falls back to discovery-only and surfaces a notice.
+On Windows, the Bluetooth Peer advertiser/peripheral role requires the MSIX build. The plain `.exe` / MSI builds do not provide that role. On Linux, advertising requires a working BlueZ GATT server and LE advertising setup; if BlueZ cannot advertise, Ratspeak will show the interface as central-only.
 
 ## Theme
 
@@ -67,7 +68,7 @@ On Windows, outbound BLE peer connections work but advertising as a peer require
 
 ## Hardware keys (roadmap)
 
-Hardware-token support — keeping your identity key on a YubiKey or Nitrokey via the Ratkey project — is on the roadmap but not yet wired into Ratspeak. Today, identities live as files on disk. When hardware support lands, this page will document how to enroll a token and migrate an existing identity onto it.
+Hardware-token support via the Ratkey project is on the roadmap but not yet wired into Ratspeak. Today, identities live as files on disk. Ratkey's real-device backend is still experimental, so this page will document enrollment and migration only after the app integration and token validation are ready.
 
 ## Backing up and migrating
 

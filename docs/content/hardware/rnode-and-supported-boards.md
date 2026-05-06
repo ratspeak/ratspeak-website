@@ -2,7 +2,7 @@
 
 ## What Is an RNode?
 
-RNode is firmware that turns LoRa-capable microcontroller boards into Reticulum-native radio interfaces. It uses a custom MAC layer optimized for mesh networking - no gateways, no network servers, no cloud infrastructure. An RNode connects to your computer via USB, Bluetooth LE, or WiFi and provides a radio interface that Reticulum uses like any other network connection. Reticulum handles all encryption end-to-end before packets reach the radio.
+RNode is firmware that turns LoRa-capable microcontroller boards into Reticulum-native radio interfaces. It uses a custom MAC layer optimized for mesh networking - no gateways, no network servers, no cloud infrastructure. Depending on the board and firmware profile, an RNode connects to your computer via USB, Bluetooth LE, or WiFi and provides a radio interface that Reticulum uses like any other network connection. Reticulum handles private-message encryption end-to-end before packets reach the radio.
 
 | Property | Value |
 |----------|-------|
@@ -10,7 +10,7 @@ RNode is firmware that turns LoRa-capable microcontroller boards into Reticulum-
 | **Speed** | ~37 bps to ~11 Kbps (depends on preset) |
 | **Protocol** | Custom MAC layer (not LoRaWAN) |
 | **Encryption** | Handled by Reticulum (end-to-end) |
-| **Connection** | USB serial, Bluetooth LE, or WiFi TCP |
+| **Connection** | USB serial, Bluetooth LE, or WiFi TCP, depending on board/firmware |
 | **Power** | Low - solar/battery capable |
 | **Cost** | ~$25-100 USD depending on board |
 
@@ -26,9 +26,18 @@ RNode is firmware that turns LoRa-capable microcontroller boards into Reticulum-
 
 ## How to Get an RNode
 
+Before buying or flashing, check the practical kit:
+
+1. **A supported board** from the tables below
+2. **An antenna** matched to your frequency band (SMA connector, usually included). See [Antennas, Range & Power](../hardware/antennas-range-and-power).
+3. **A USB cable** - USB-C or micro-USB depending on board
+4. **A computer** to flash firmware and run Reticulum
+
+> **Warning**: Never power on a LoRa radio without an antenna connected. Transmitting without an antenna can damage the radio module.
+
 1. **Flash your own** - buy a supported board (see below) and run `rnodeconf --autoinstall` to flash RNode firmware. See [Flashing Firmware](../hardware/flashing-firmware).
 2. **Buy pre-made** - purchase from [unsigned.io](https://unsigned.io) or community vendors.
-3. **Use Ratspeak hardware** - [Ratdeck](../products/ratdeck) and [Ratcom](../products/ratcom) include integrated LoRa radios.
+3. **Use Ratspeak hardware** - [Ratdeck](../products/ratdeck) includes an integrated LoRa radio, and [Ratcom](../products/ratcom) attaches one through the Cap LoRa add-on.
 
 ## Connection Methods
 
@@ -127,11 +136,6 @@ For new purchases, choose boards with **SX1262** - the most modern, power-effici
 
 A complete RNode setup (board + antenna + USB cable) typically costs **$25-100 USD**.
 
-## What You Need
+## Next
 
-1. **A supported board** from the tables above
-2. **An antenna** matched to your frequency band (SMA connector, usually included). See [Antennas, Range & Power](../hardware/antennas-range-and-power).
-3. **A USB cable** - USB-C or micro-USB depending on board
-4. **A computer** to flash firmware and run Reticulum
-
-> **Warning**: Never power on a LoRa radio without an antenna connected. Transmitting without an antenna can damage the radio module.
+After choosing a board, read [Antennas, Range & Power](../hardware/antennas-range-and-power), then [Flashing Firmware](../hardware/flashing-firmware).

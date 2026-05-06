@@ -6,7 +6,7 @@ A private mesh for a household, a few friends, or a small organization. Two to t
 
 You want chat that does not depend on Discord, Signal, or any company's servers. You want it to keep working when your home internet hiccups. You want everyone you trust to be reachable, and nobody you don't.
 
-A single always-on transport node solves the hard part: it stays online so the rest of you can come and go. Your laptops and phones connect to it when they're on, and your messages to offline friends sit in propagation until they boot up. Lock the network with IFAC and the whole thing is invisible to outsiders, even ones who happen to be running Reticulum on the same wire.
+A single always-on transport node solves the hard part: it stays online so the rest of you can come and go. Your laptops and phones connect to it when they're on, and it gives everyone a stable route through the group. Messages to offline friends sit in an Offline Inbox only if you also run or choose an LXMF propagation node; the transport node by itself forwards packets, not mailbox storage. Lock the network with IFAC and the whole thing is invisible to outsiders, even ones who happen to be running Reticulum on the same wire.
 
 ## Hardware you need
 
@@ -23,14 +23,9 @@ Optional handhelds: a Ratdeck or Ratcom unit for anyone who wants off-grid LoRa 
 
 ## Step 1 - set up the always-on node
 
-The transport node runs `rnsd`, the Reticulum daemon. You have two builds to choose from:
+The transport node runs `rnsd-rs`, the rsReticulum daemon. It is a single executable, light on memory, and a good fit for Raspberry Pi-class boards.
 
-- The Rust binary that ships with rsReticulum. Single executable, no Python, light on memory. Good for Raspberry Pi-class boards.
-- The upstream Python `rnsd`, installed with `pip install rns`. Mature, widely tested, fine on a VPS or any machine with Python already on it.
-
-Pick whichever fits the hardware. Both read the same config file and speak the same wire format - your friends won't be able to tell which one you're running.
-
-Drop the daemon's config at `~/.reticulum/config` on the node. Start with this minimum:
+Drop the daemon's config at `~/.rsReticulum/config` unless you pass a different directory with `--config`. Start with this minimum:
 
 ```
 [reticulum]
@@ -61,12 +56,11 @@ Pick a network name and a strong shared secret. Write them down somewhere your g
     listen_port = 4242
     network_name = our-friends
     passphrase = a-strong-shared-secret
-    ifac_size = 16
 ```
 
-`network_name` and `passphrase` together form the lock. `ifac_size = 16` sets the authentication tag length in bytes - 16 is a sensible default. Anyone who tries to connect without the matching pair gets ignored. No announces, no path discovery, nothing leaks.
+`network_name` and `passphrase` together form the lock. Leave `ifac_size` unset unless you have a specific reason to tune it; Reticulum picks an interface-appropriate default. Anyone who tries to connect without the matching pair gets ignored. No announces, no path discovery, nothing leaks.
 
-Restart `rnsd` on the node. If it's a VPS, open port 4242 in your firewall (or whichever port you chose). If it's a home Pi reachable from outside, forward that port on your router.
+Restart `rnsd-rs` on the node. If it's a VPS, open port 4242 in your firewall (or whichever port you chose). If it's a home Pi reachable from outside, forward that port on your router.
 
 ## Step 3 - add it to each Ratspeak client
 
@@ -80,10 +74,9 @@ Open Ratspeak, head to Settings, then Network, then Interfaces. Add a new TCP cl
     target_port = 4242
     network_name = our-friends
     passphrase = a-strong-shared-secret
-    ifac_size = 16
 ```
 
-The three IFAC fields must match the server side exactly, character for character. A typo gets you silence, not an error message. That's by design.
+The IFAC name and passphrase must match the server side exactly, character for character. A typo gets you silence, not an error message. That's by design.
 
 Save, restart the interface, and watch the connection come up. Send an announce. Within a few seconds your friends should see you in their contacts list, and you should see theirs. You're done.
 
@@ -93,7 +86,7 @@ For people on your home Wi-Fi who don't need the VPS, you can also add an `AutoI
 
 If anyone wants LoRa coverage for hikes, festivals, or just walking around the neighbourhood, hand them a Ratdeck or Ratcom. These are portable nodes with a LoRa radio onboard. Configure the same `network_name` and `passphrase` on the LoRa interface and they'll join the same locked mesh, just over radio instead of TCP.
 
-Pair the handheld with their Ratspeak client over BLE or USB and they get one identity that follows them between connectivity worlds. When they're at home, traffic flows through the VPS. When they're out of range, it flows over LoRa to whichever group member is closest. Same contacts, same threads, same identity, regardless of how the bytes are travelling.
+These handhelds are standalone Reticulum endpoints with their own identity unless you deliberately import or migrate an identity. Ratdeck can also expose an RNode-compatible BLE bridge when that mode is enabled. Ratcom's current bridge path is Wi-Fi, not mobile BLE. When someone is at home, traffic can flow through the VPS. When they're out of range, it can flow over LoRa to whichever group member is closest.
 
 ## Maintenance
 
@@ -103,6 +96,6 @@ Rotate the IFAC passphrase if someone leaves the group. Pick a new one, push it 
 
 Watch the always-on node's logs for the first week. You're looking for stable links and announce traffic. If links keep dropping, your network is the suspect, not Reticulum.
 
-Back up `~/.reticulum/storage/` on the always-on node from time to time. It holds path tables and propagated messages - losing it isn't fatal, but a fresh node takes a while to relearn the topology.
+Back up `~/.rsReticulum/storage/` on the always-on node from time to time. It holds path tables and propagated messages - losing it isn't fatal, but a fresh node takes a while to relearn the topology.
 
 That's the whole deployment. One always-on box, an IFAC lock, and a TCP client on each device. The rest of the network you build on top of this is just contacts and conversations.

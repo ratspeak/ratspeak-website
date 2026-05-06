@@ -20,16 +20,17 @@
         var html = '';
         for (var i = 0; i < data.sections.length; i++) {
             var section = data.sections[i];
+            var itemsId = 'sidebar-section-items-' + section.slug;
             html += '<div class="sidebar-section collapsed" data-section="' + section.slug + '">';
-            html += '<div class="sidebar-section__header" data-section-toggle="' + section.slug + '">';
-            html += section.title;
+            html += '<button class="sidebar-section__header" type="button" data-section-toggle="' + section.slug + '" aria-expanded="false" aria-controls="' + itemsId + '">';
+            html += escapeHtml(section.title);
             html += '<svg class="sidebar-section__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>';
-            html += '</div>';
-            html += '<div class="sidebar-section__items">';
+            html += '</button>';
+            html += '<div class="sidebar-section__items" id="' + itemsId + '">';
             for (var j = 0; j < section.pages.length; j++) {
                 var page = section.pages[j];
                 html += '<a class="sidebar-link" href="#/' + section.slug + '/' + page.slug + '" data-page="' + section.slug + '/' + page.slug + '">';
-                html += page.title;
+                html += escapeHtml(page.title);
                 html += '</a>';
             }
             html += '</div></div>';
@@ -41,13 +42,7 @@
         for (var k = 0; k < headers.length; k++) {
             headers[k].addEventListener('click', function() {
                 var sect = this.parentElement;
-                sect.classList.toggle('collapsed');
-                var items = sect.querySelector('.sidebar-section__items');
-                if (!sect.classList.contains('collapsed')) {
-                    items.style.maxHeight = items.scrollHeight + 'px';
-                } else {
-                    items.style.maxHeight = '0';
-                }
+                setSectionOpen(sect, sect.classList.contains('collapsed'));
             });
         }
 
@@ -75,13 +70,10 @@
         var sections = sidebarNav.querySelectorAll('.sidebar-section');
         for (var j = 0; j < sections.length; j++) {
             var sect = sections[j];
-            var items = sect.querySelector('.sidebar-section__items');
             if (sect.dataset.section === sectionSlug) {
-                sect.classList.remove('collapsed');
-                items.style.maxHeight = items.scrollHeight + 'px';
+                setSectionOpen(sect, true);
             } else {
-                sect.classList.add('collapsed');
-                items.style.maxHeight = '0';
+                setSectionOpen(sect, false);
             }
         }
     }
@@ -89,23 +81,45 @@
     function bindMobile() {
         if (toggle) {
             toggle.addEventListener('click', function() {
-                sidebar.classList.toggle('open');
-                overlay.classList.toggle('active');
+                setMobileOpen(!sidebar.classList.contains('open'));
             });
         }
         if (overlay) {
             overlay.addEventListener('click', closeMobile);
         }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+                closeMobile();
+            }
+        });
+    }
+
+    function setSectionOpen(sect, open) {
+        var items = sect.querySelector('.sidebar-section__items');
+        var header = sect.querySelector('.sidebar-section__header');
+        sect.classList.toggle('collapsed', !open);
+        if (items) items.style.maxHeight = open ? items.scrollHeight + 'px' : '0';
+        if (header) header.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
+    function setMobileOpen(open) {
+        sidebar.classList.toggle('open', open);
+        overlay.classList.toggle('active', open);
+        if (toggle) toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     }
 
     function closeMobile() {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('active');
+        setMobileOpen(false);
     }
 
     function openMobile() {
-        sidebar.classList.add('open');
-        overlay.classList.add('active');
+        setMobileOpen(true);
+    }
+
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
     }
 
     window.DocsSidebar = {

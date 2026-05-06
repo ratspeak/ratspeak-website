@@ -1,9 +1,9 @@
 # Deployment Overview
 
 Deployment in Reticulum means running infrastructure beyond a single client. A
-lone Ratspeak install talking over the public TCP testnet is a *user*, not a
+lone Ratspeak install talking over a public TCP hub is a *user*, not a
 deployment. Once you put up a transport node so your friends can reach each
-other, run a propagation node so messages survive while peers are offline,
+other, run an Offline Inbox/propagation node so messages survive while peers are offline,
 gateway a LoRa segment to the internet, or hand out IFAC keys to lock a private
 mesh — you are deploying.
 
@@ -27,15 +27,15 @@ operators each running their own node. Uses Boundary or Gateway interface
 modes and stitches local AutoInterface segments together over TCP. Pick this
 when you want coverage and the operator pool is bigger than one person.
 
-**[Off-grid and Emergency](../deployment/off-grid-emergency)** — RNode
+**[Off-grid & Emergency](../deployment/off-grid-emergency)** — RNode
 plus handheld only, no internet, LoRa for everything, batteries and solar for
 power. Designed to keep working when the grid does not. Pick this for field
 exercises, disaster preparedness kits, or remote sites with no backhaul.
 
-**[Infrastructure and Ops](../deployment/infrastructure-and-ops)** — The
-operator's reference for running a propagation node or transport router as a
-service: Docker and systemd deployments, monitoring with `rnstatus`, `rnpath`,
-and `rnprobe`, and remote management. Read this once you've picked one of the
+**[Infrastructure & Ops](../deployment/infrastructure-and-ops)** — The
+operator's reference for running an Offline Inbox/propagation node or transport router as a
+service: Docker and systemd deployments, monitoring with `rnstatus-rs`, `rnpath-rs`,
+and `rnprobe-rs`, and remote management. Read this once you've picked one of the
 above and need to run it reliably.
 
 ## Common building blocks
@@ -46,7 +46,7 @@ page; what changes is how they are combined.
 - **Transport nodes** forward packets between interfaces and announce paths
   on behalf of the network. One always-on transport per region of the mesh
   is usually enough.
-- **Propagation nodes** store-and-forward LXMF messages so a recipient who
+- **Offline Inbox / propagation nodes** store-and-forward LXMF messages so a recipient who
   is offline still receives them when they next come online. Without one,
   delivery is best-effort and synchronous.
 - **IFAC pre-shared key** authenticates an interface so only nodes that
@@ -55,8 +55,6 @@ page; what changes is how they are combined.
 - **RNode and LoRa** provide the radio layer for off-grid and community
   meshes. Any RNode-compatible hardware works; firmware is loaded with
   `rnodeconf`.
-- **The `rnsd` daemon** runs the Reticulum stack as a background service.
-  The Rust `rnsd` shipped with Ratspeak and the Python `rnsd` from the
-  upstream Reticulum project are wire-compatible — pick whichever fits
-  the host. Rust is leaner on small Linux boxes and Windows; Python is
-  the reference and has the longest field history.
+- **The `rnsd-rs` daemon** runs the Reticulum stack as a background service.
+  It owns interfaces, routing state, and the local control surface used by
+  the other rsReticulum tools.

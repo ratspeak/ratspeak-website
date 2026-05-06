@@ -49,6 +49,7 @@
         fuse = new Fuse(data, {
             keys: [
                 { name: 'title', weight: 0.5 },
+                { name: 'heading', weight: 0.35 },
                 { name: 'headings', weight: 0.3 },
                 { name: 'content', weight: 0.15 },
                 { name: 'section', weight: 0.05 }
@@ -69,13 +70,6 @@
         }
 
         var results = fuse.search(query);
-
-        // Sort glossary results after all others
-        results.sort(function(a, b) {
-            var aGloss = a.item.path === 'reference/glossary' ? 1 : 0;
-            var bGloss = b.item.path === 'reference/glossary' ? 1 : 0;
-            return aGloss - bGloss;
-        });
 
         focusedIndex = -1;
 

@@ -1,6 +1,6 @@
-# IP, Internet & I2P
+# IP, LAN & I2P
 
-The fastest way to put two Reticulum nodes in contact is over an IP link. TCP and UDP carry frames between hosts that already have a route to each other; AutoInterface finds peers on the same LAN with no configuration; Backbone scales to thousands of concurrent transport peers; I2P hides the IP addresses on either end. All five run over the same socket layer and can be active on a node at once.
+The fastest way to put two Reticulum nodes in contact is over an IP link. TCP and UDP carry frames between hosts that already have a route to each other; AutoInterface finds peers on the same LAN with no configuration; Backbone scales to thousands of concurrent transport peers; I2P can hide the IP addresses on either end from each other. All five run over the same socket layer and can be active on a node at once.
 
 For protocol-level detail (header formats, IFAC, mode semantics) see the [Reticulum manual](https://reticulum.network/manual/).
 
@@ -31,7 +31,7 @@ Accepts inbound TCP connections. Run this on a host with a routable address (or 
   mode = gateway
 ```
 
-`listen_ip` defaults to `0.0.0.0`; use `::` for IPv6 dual-stack. `prefer_ipv6 = yes` prefers AAAA over A on outbound resolution. Pair with `mode = gateway` if this node bridges a local segment (LoRa, serial, AutoInterface) onto the internet, or `mode = boundary` for an edge between two distinct topologies.
+`listen_ip` defaults to `0.0.0.0`; use `::` for IPv6 dual-stack. `prefer_ipv6 = yes` prefers AAAA over A on outbound resolution. Use `mode = gateway` when this listener is the client-facing entrypoint for other nodes. If the same machine also bridges a local LoRa or serial segment to a wider IP network, put `gateway` on the local/client-facing side and use `boundary` on the wider-network side when you need to constrain announce flow.
 
 ## AutoInterface — zero-config LAN
 
@@ -79,9 +79,9 @@ Plain UDP, unicast or multicast. Useful for a known peer on a network where TCP 
 
 For a multicast group, point both `listen_ip` and `forward_ip` at the same multicast address. Most operators reach for AutoInterface (LAN) or TCP (WAN) first — UDP shines when topology is static and overhead matters.
 
-## I2PInterface — anonymous transport
+## I2PInterface — IP-hiding transport
 
-Reticulum carried over an I2P SAM tunnel. Reticulum already encrypts payloads end-to-end; I2P adds **transport anonymity** — neither end sees the other's IP. Bring up `i2pd` first (the SAM API must be reachable locally, default `127.0.0.1:7656`).
+Reticulum carried over an I2P SAM tunnel. Private Reticulum and LXMF payloads are already encrypted above the transport; I2P adds **transport anonymity at the IP layer** — neither end sees the other's clearnet IP. Bring up `i2pd` first (the SAM API must be reachable locally, default `127.0.0.1:7656`).
 
 ```ini
 [[I2P]]
@@ -93,7 +93,7 @@ Reticulum carried over an I2P SAM tunnel. Reticulum already encrypts payloads en
 
 `connectable = yes` accepts inbound — the interface prints its own `.b32.i2p` address on first run, which is what you share with peers. `peers` is a comma-separated list of `.b32.i2p` addresses to dial. Set `i2p_tunneled = yes` on a local TCP interface that is being tunneled by I2P, so its timeouts adjust for tunnel latency.
 
-First start is slow — tunnel construction takes minutes. Steady-state latency is 1–5 seconds per hop and throughput is well below direct TCP, but the link survives CGNAT, dynamic IPs, and most restrictive firewalls. Pair I2P with a propagation node and the latency cost largely disappears for messaging.
+First start is slow — tunnel construction takes minutes. Steady-state latency is 1–5 seconds per hop and throughput is well below direct TCP, but the link survives CGNAT, dynamic IPs, and most restrictive firewalls. Pair I2P with a reachable Offline Inbox/propagation node and the latency cost largely disappears for delay-tolerant messaging.
 
 ## IFAC — per-interface authentication
 
@@ -106,17 +106,15 @@ Any interface above can be locked to peers that share a passphrase. Set `network
   listen_port = 4242
   network_name = our-mesh
   passphrase = correct horse battery staple
-  ifac_size = 16
 ```
 
-`ifac_size` is the signature length in bytes (8–32, default 16). IFAC is an authentication boundary, not a confidentiality boundary — payloads are already encrypted regardless. See the [Reticulum manual](https://reticulum.network/manual/interfaces.html) for the full mode/IFAC matrix.
+Leave `ifac_size` unset unless you are deliberately tuning IFAC overhead; the default is chosen per interface. The upstream Reticulum manual defines explicit `ifac_size` values in bits, and normal users should not need to override it. IFAC is an authentication boundary, not a confidentiality boundary — private payloads are already encrypted above it. See the [Reticulum manual](https://reticulum.network/manual/interfaces.html) for the full mode/IFAC matrix.
 
 ## Public hubs
 
-Adding any of these gives you immediate reach across the existing Reticulum network:
+Adding a public hub gives you immediate reach across the existing Reticulum network:
 
 - `rns.ratspeak.org:4242` — operated by Ratspeak.
-- `dublin.connect.reticulum.network:4965` — operated by the Reticulum project.
-- `amsterdam.connect.reticulum.network:4965` — operated by the Reticulum project.
+- For wider Reticulum connectivity, use the current Reticulum connect/backbone information at [reticulum.network/connect.html](https://reticulum.network/connect.html) or a community directory you trust.
 
 Hubs are convenient, not load-bearing. If you intend to be reachable long-term, run your own `TCPServerInterface` (or `BackboneInterface` on a desktop OS for higher peer counts) and announce yourself — the network gets healthier with every node that does.

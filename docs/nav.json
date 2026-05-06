@@ -9,6 +9,10 @@
           "slug": "what-is-ratspeak"
         },
         {
+          "title": "Ratspeak Ecosystem",
+          "slug": "ratspeak-ecosystem"
+        },
+        {
           "title": "Frequently Asked Questions",
           "slug": "faq"
         }
@@ -29,6 +33,10 @@
         {
           "title": "Your First Session",
           "slug": "your-first-session"
+        },
+        {
+          "title": "Building from Source",
+          "slug": "building-from-source"
         }
       ]
     },
@@ -45,50 +53,38 @@
           "slug": "network-and-peers"
         },
         {
-          "title": "Games",
-          "slug": "games"
-        },
-        {
           "title": "Settings & Identity",
           "slug": "settings-and-identity"
+        },
+        {
+          "title": "Games",
+          "slug": "games"
         }
       ]
     },
     {
-      "title": "Products",
-      "slug": "products",
+      "title": "Reticulum",
+      "slug": "understanding",
       "pages": [
         {
-          "title": "Ratspeak",
-          "slug": "ratspeak"
+          "title": "What is Reticulum?",
+          "slug": "what-is-reticulum"
         },
         {
-          "title": "rsReticulum",
-          "slug": "rsreticulum"
+          "title": "Key Concepts & Glossary",
+          "slug": "key-concepts-and-glossary"
         },
         {
-          "title": "rsLXMF",
-          "slug": "rslxmf"
+          "title": "Links & LXMF",
+          "slug": "links-and-lxmf"
         },
         {
-          "title": "Ratdeck",
-          "slug": "ratdeck"
+          "title": "Cryptography & Protection",
+          "slug": "cryptography-and-protection"
         },
         {
-          "title": "Ratcom",
-          "slug": "ratcom"
-        },
-        {
-          "title": "LXMFace",
-          "slug": "lxmface"
-        },
-        {
-          "title": "LRGP",
-          "slug": "lrgp"
-        },
-        {
-          "title": "Ratkey",
-          "slug": "ratkey"
+          "title": "Protocol Architecture",
+          "slug": "protocol-architecture"
         }
       ]
     },
@@ -101,12 +97,12 @@
           "slug": "rnode-and-supported-boards"
         },
         {
-          "title": "Flashing Firmware",
-          "slug": "flashing-firmware"
-        },
-        {
           "title": "Antennas, Range & Power",
           "slug": "antennas-range-and-power"
+        },
+        {
+          "title": "Flashing Firmware",
+          "slug": "flashing-firmware"
         }
       ]
     },
@@ -115,24 +111,24 @@
       "slug": "networking",
       "pages": [
         {
-          "title": "Interfaces Overview & Design",
+          "title": "Network Interfaces",
           "slug": "interfaces-overview-and-design"
         },
         {
-          "title": "LoRa & RNode",
-          "slug": "lora-and-rnode"
-        },
-        {
-          "title": "IP, Internet & I2P",
+          "title": "IP, LAN & I2P",
           "slug": "ip-internet-and-i2p"
         },
         {
-          "title": "Serial & Packet Radio",
-          "slug": "serial-and-packet-radio"
+          "title": "LoRa Radio Interfaces",
+          "slug": "lora-and-rnode"
         },
         {
           "title": "Bluetooth Interfaces",
           "slug": "bluetooth-interfaces"
+        },
+        {
+          "title": "Serial & Packet Radio",
+          "slug": "serial-and-packet-radio"
         }
       ]
     },
@@ -141,7 +137,7 @@
       "slug": "deployment",
       "pages": [
         {
-          "title": "Overview",
+          "title": "Deployment Overview",
           "slug": "overview"
         },
         {
@@ -163,24 +159,40 @@
       ]
     },
     {
-      "title": "Understanding Reticulum",
-      "slug": "understanding",
+      "title": "Products",
+      "slug": "products",
       "pages": [
         {
-          "title": "Key Concepts & Glossary",
-          "slug": "key-concepts-and-glossary"
+          "title": "Ratspeak App",
+          "slug": "ratspeak"
         },
         {
-          "title": "Protocol Architecture",
-          "slug": "protocol-architecture"
+          "title": "Ratdeck",
+          "slug": "ratdeck"
         },
         {
-          "title": "Links & LXMF",
-          "slug": "links-and-lxmf"
+          "title": "Ratcom",
+          "slug": "ratcom"
         },
         {
-          "title": "Cryptography & Protection",
-          "slug": "cryptography-and-protection"
+          "title": "rsReticulum",
+          "slug": "rsreticulum"
+        },
+        {
+          "title": "rsLXMF",
+          "slug": "rslxmf"
+        },
+        {
+          "title": "LRGP Games",
+          "slug": "lrgp"
+        },
+        {
+          "title": "LXMFace Avatars",
+          "slug": "lxmface"
+        },
+        {
+          "title": "Ratkey Hardware Identity",
+          "slug": "ratkey"
         }
       ]
     },
