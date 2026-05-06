@@ -1053,11 +1053,7 @@
 
             .hero-fold {
                 min-height: 100vh;
-                /* Real mobile browsers shrink 100svh around browser chrome,
-                   which lets the trust card pull the hero upward. Use the
-                   large viewport so the landing block keeps its intended
-                   breathing room on iOS/Android. */
-                min-height: 100lvh;
+                min-height: 100svh;
             }
             .hero {
                 flex-direction: column;
@@ -1146,6 +1142,21 @@
                 }
             }
             .footer-inner { flex-direction: column; gap: 14px; }
+        }
+        @media (max-width: 768px) and (pointer: coarse) {
+            .hero-fold {
+                display: block;
+                min-height: 0;
+            }
+            .hero {
+                flex: none;
+                min-height: 100vh;
+                min-height: 100lvh;
+                padding-bottom: 56px;
+            }
+            .trust-strip {
+                padding-top: 24px;
+            }
         }
     </style>
 </head>
