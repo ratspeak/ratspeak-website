@@ -719,31 +719,18 @@
             white-space: nowrap;
             text-decoration: none;
         }
-        a.form-status--ready {
+        a.form-status--download {
             cursor: pointer;
             transition: background 0.15s ease, border-color 0.15s ease;
         }
-        a.form-status--ready:hover {
+        a.form-status--download:hover {
             background: var(--accent-a20);
             border-color: var(--accent);
         }
-        .form-status--ready {
+        .form-status--download {
             background: var(--accent-light);
             color: var(--accent-dark);
             border: 1px solid var(--accent-a20);
-        }
-        .form-status--soon {
-            background: transparent;
-            color: var(--text-muted);
-            border: 1px solid var(--border-subtle);
-        }
-        .form-status .dot {
-            width: 6px; height: 6px; border-radius: 50%;
-            background: currentColor;
-        }
-        .form-status--ready .dot {
-            background: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-a15);
         }
 
         .forms-note {
@@ -1354,7 +1341,7 @@
                 </div>
                 <div class="form-card__name">Desktop</div>
                 <div class="form-card__sub">macOS, Windows, Linux</div>
-                <span class="form-status form-status--soon"><span class="dot"></span>Coming Soon</span>
+                <a href="download.html#desktop" class="form-status form-status--download">Download</a>
             </div>
 
             <!-- Mobile -->
@@ -1384,7 +1371,7 @@
                 </div>
                 <div class="form-card__name">Mobile</div>
                 <div class="form-card__sub">iOS, Android</div>
-                <span class="form-status form-status--soon"><span class="dot"></span>Coming Soon</span>
+                <a href="download.html#mobile" class="form-status form-status--download">Download</a>
             </div>
 
             <!-- T-Deck Plus — squarish handheld with screen on top half,
@@ -1461,7 +1448,7 @@
                 </div>
                 <div class="form-card__name">T-Deck Plus</div>
                 <div class="form-card__sub">Handheld LoRa device / MCU</div>
-                <a href="download.html" class="form-status form-status--ready"><span class="dot"></span>Ready Now</a>
+                <a href="download.html#tdeck" class="form-status form-status--download">Flash</a>
             </div>
 
             <!-- Cardputer Adv — landscape body, small screen TOP-LEFT (not
@@ -1580,7 +1567,7 @@
                 </div>
                 <div class="form-card__name">Cardputer Adv</div>
                 <div class="form-card__sub">Compact portable device / MCU</div>
-                <a href="download.html" class="form-status form-status--ready"><span class="dot"></span>Ready Now</a>
+                <a href="download.html#cardputer" class="form-status form-status--download">Flash</a>
             </div>
         </div>
 
