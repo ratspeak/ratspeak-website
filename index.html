@@ -1053,7 +1053,11 @@
 
             .hero-fold {
                 min-height: 100vh;
-                min-height: 100svh;
+                /* Real mobile browsers shrink 100svh around browser chrome,
+                   which lets the trust card pull the hero upward. Use the
+                   large viewport so the landing block keeps its intended
+                   breathing room on iOS/Android. */
+                min-height: 100lvh;
             }
             .hero {
                 flex-direction: column;
