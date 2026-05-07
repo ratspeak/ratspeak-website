@@ -8,7 +8,7 @@ This page assumes you are comfortable following terminal commands but not that y
 
 Ratspeak is the app. It embeds the protocol and support repos below:
 
-- **[Ratspeak](https://github.com/ratspeak/Ratspeak)** - the desktop and mobile app. The current app release is v1.0.0, published as a normal public GitHub release on the [Ratspeak releases page](https://github.com/ratspeak/Ratspeak/releases).
+- **[Ratspeak](https://github.com/ratspeak/Ratspeak)** - the desktop and mobile app. The current app release is v1.0.6, published as a normal public GitHub release on the [Ratspeak releases page](https://github.com/ratspeak/Ratspeak/releases).
 - **[rsReticulum](https://github.com/ratspeak/rsReticulum)** - the Reticulum network stack and `*-rs` command-line tools. The current public release is the [v0.9.0 pre-release](https://github.com/ratspeak/rsReticulum/releases/tag/v0.9.0).
 - **[rsLXMF](https://github.com/ratspeak/rsLXMF)** - the LXMF messaging layer and `lxmd-rs` propagation daemon. The current public release is the [v0.9.0 pre-release](https://github.com/ratspeak/rsLXMF/releases/tag/v0.9.0).
 - **[lrgp-rs](https://github.com/ratspeak/lrgp-rs)** - the lightweight game protocol used by the Ratspeak app.

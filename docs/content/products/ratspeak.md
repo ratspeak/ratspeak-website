@@ -6,11 +6,11 @@ It's the same app on every platform: macOS, Linux, Windows, iOS, Android. The pr
 
 ## Platforms
 
-Ratspeak is built as a single Tauri v2 app from one Rust codebase. Desktop packaging targets `.dmg` for macOS, `.deb` / `.rpm` / `.AppImage` for Linux, and MSI / NSIS for Windows. Mobile uses the same crate with platform-conditional dependencies — Android via JNI, iOS via Objective-C bindings. Desktop supports USB serial radios; Android supports USB host and BLE; iOS is BLE-only for radios because Apple does not expose USB serial to third-party apps.
+Ratspeak is built as a single Tauri v2 app from one Rust codebase. Desktop packaging targets `.dmg` for macOS, amd64/arm64 `.deb` plus amd64 `.rpm` / `.AppImage` for Linux, and MSI / NSIS for Windows. Mobile uses the same crate with platform-conditional dependencies — Android via JNI, iOS via Objective-C bindings. Desktop supports USB serial radios; Android supports USB host and BLE; iOS is BLE-only for radios because Apple does not expose USB serial to third-party apps.
 
 ## Get the app
 
-Ratspeak v1.0.0 is the current public release, published as a normal GitHub release rather than a prerelease. Download desktop and Android artifacts from [ratspeak.org/download.html](https://ratspeak.org/download.html) or the [Ratspeak GitHub releases page](https://github.com/ratspeak/Ratspeak/releases). Source is AGPL-3.0-or-later at [github.com/ratspeak/Ratspeak](https://github.com/ratspeak/Ratspeak).
+Ratspeak v1.0.6 is the current public release, published as a normal GitHub release rather than a prerelease. Download desktop and Android artifacts from [ratspeak.org/download.html](https://ratspeak.org/download.html) or the [Ratspeak GitHub releases page](https://github.com/ratspeak/Ratspeak/releases). Source is AGPL-3.0-or-later at [github.com/ratspeak/Ratspeak](https://github.com/ratspeak/Ratspeak).
 
 If you'd rather build from source, see [Building from Source](../getting-started/building-from-source). Ratspeak must be checked out next to `rsReticulum`, `rsLXMF`, and `lrgp-rs` so Cargo can resolve the local development crates.
 

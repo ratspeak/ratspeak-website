@@ -20,7 +20,7 @@ The common thread is Reticulum/LXMF, not a central service. Some pieces are netw
 
 | Component | Role | Who needs it | Current status |
 |---|---|---|---|
-| [Ratspeak](../products/ratspeak) | Desktop and mobile LXMF client | Normal users | v1.0.0 public release; desktop and Android artifacts are on the download page and GitHub releases |
+| [Ratspeak](../products/ratspeak) | Desktop and mobile LXMF client | Normal users | v1.0.6 public release; desktop and Android artifacts are on the download page and GitHub releases |
 | [rsReticulum](../products/rsreticulum) | Rust Reticulum stack, daemon, tools | Operators and Rust developers | v0.9.0 public pre-release; pre-1.0, wire-compatible where implemented, with documented gaps |
 | [rsLXMF](../products/rslxmf) | Rust LXMF library and `lxmd-rs` propagation daemon | App developers and propagation-node operators | v0.9.0 public pre-release; pre-1.0, targets LXMF interop where implemented |
 | [Ratdeck](../products/ratdeck) | LilyGO T-Deck Plus handheld firmware | Off-grid users who want a standalone LoRa device | Active firmware; Wi-Fi bridge mode is still experimental |
