@@ -4778,6 +4778,17 @@
         return esptoolModule;
     }
 
+    // esptool-js 0.5.x expects writeFlash file data as a binary string.
+    // Keep raw Uint8Array values separately for firmware hashing/provisioning.
+    function uint8ToBstr(u8) {
+        var chunks = [];
+        var CHUNK = 8192;
+        for (var i = 0; i < u8.length; i += CHUNK) {
+            chunks.push(String.fromCharCode.apply(null, u8.subarray(i, i + CHUNK)));
+        }
+        return chunks.join('');
+    }
+
     // ── State ──────────────────────────────────────────
     var state = {
         device: null,       // 'tdeck' | 'cardputer' | 'custom'
@@ -6092,6 +6103,8 @@
     function rnodeSpec(flashSize, bootloaderOffset) {
         return { flashSize: flashSize, bootloaderOffset: bootloaderOffset };
     }
+    // Flash sizes and bootloader offsets mirror Reticulum's rnodeconf.py
+    // get_flasher_call() table for ESP32-family RNode firmware packages.
     var RNODE_ESP32_FLASH_SPECS = {
         'rnode_firmware_esp32_generic.zip':      rnodeSpec('4MB',  0x1000),
         'rnode_firmware_featheresp32.zip':       rnodeSpec('4MB',  0x1000),
@@ -6103,7 +6116,7 @@
         'rnode_firmware_lora32v21.zip':          rnodeSpec('4MB',  0x1000),
         'rnode_firmware_lora32v21_extled.zip':   rnodeSpec('4MB',  0x1000),
         'rnode_firmware_lora32v21_tcxo.zip':     rnodeSpec('4MB',  0x1000),
-        'rnode_firmware_heltec32v2.zip':         rnodeSpec('4MB',  0x1000),
+        'rnode_firmware_heltec32v2.zip':         rnodeSpec('8MB',  0x1000),
         'rnode_firmware_ng20.zip':               rnodeSpec('4MB',  0x1000),
         'rnode_firmware_ng21.zip':               rnodeSpec('4MB',  0x1000),
         'rnode_firmware_t3s3.zip':               rnodeSpec('4MB',  0x0),
@@ -6209,13 +6222,12 @@
         if (!file) throw new Error('ZIP missing file: ' + path);
         var data = await file.async('uint8array');
         var address = parseFlashOffset(offset);
-        fileArray.push({ data: data, address: address });
+        fileArray.push({ data: uint8ToBstr(data), address: address });
         rawParts.push({ addr: address, bytes: data });
         logMessage('  ' + normalizeZipPath(path) + ' @ 0x' + address.toString(16) + ' (' + formatBytes(data.length) + ')', '');
         return data.length;
     }
-    function detectRnodeAssetName(zip) {
-        if (state.rnodeAssetName) return state.rnodeAssetName;
+    function detectRnodeZipStem(zip) {
         var stem = null;
         zip.forEach(function (entryPath, file) {
             if (file.dir || stem) return;
@@ -6224,6 +6236,11 @@
                 stem = base.replace(/\.bootloader$/i, '');
             }
         });
+        return stem;
+    }
+    function detectRnodeAssetName(zip) {
+        if (state.rnodeAssetName) return state.rnodeAssetName;
+        var stem = detectRnodeZipStem(zip);
         return stem ? stem + '.zip' : null;
     }
     async function tryRnodeZipPlan(zip, rawParts, logMessage) {
@@ -6233,7 +6250,9 @@
         if (!spec) {
             throw new Error('This RNode firmware package is not supported by the ESP32 web flasher: ' + assetName);
         }
-        var stem = assetName.replace(/\.zip$/i, '');
+        // Some release assets, such as *_extled.zip, contain canonical
+        // internal filenames without the asset suffix. Plan from the ZIP stem.
+        var stem = detectRnodeZipStem(zip) || assetName.replace(/\.zip$/i, '');
         var layout = [
             { path: stem + '.boot_app0',   addr: 0xe000 },
             { path: stem + '.bootloader',  addr: spec.bootloaderOffset },
@@ -6252,7 +6271,7 @@
                 throw new Error('RNode ZIP missing file: ' + entry.path);
             }
             var data = await file.async('uint8array');
-            fileArray.push({ data: data, address: entry.addr });
+            fileArray.push({ data: uint8ToBstr(data), address: entry.addr });
             rawParts.push({ addr: entry.addr, bytes: data });
             totalSize += data.length;
             logMessage('  ' + entry.path + ' @ 0x' + entry.addr.toString(16) + ' (' + formatBytes(data.length) + ')', '');
@@ -6296,7 +6315,7 @@
                        ' (' + formatBytes(buf.byteLength) + ')', '');
             state.firmwareAppBytes = u8;
             return {
-                fileArray: [{ data: u8, address: addr }],
+                fileArray: [{ data: uint8ToBstr(u8), address: addr }],
                 flashOptions: CUSTOM_FLASH_DEFAULTS
             };
         }
@@ -6368,7 +6387,7 @@
         if (bins.length === 1) {
             logMessage('No manifest found; flashing single binary as merged image at 0x0', '');
             var data = await bins[0].file.async('uint8array');
-            fileArray.push({ data: data, address: 0x0 });
+            fileArray.push({ data: uint8ToBstr(data), address: 0x0 });
             rawParts.push({ addr: 0x0, bytes: data });
             totalSize = data.length;
             logMessage('  ' + bins[0].path + ' @ 0x0 (' + formatBytes(data.length) + ')', '');
@@ -6394,7 +6413,7 @@
             for (var li = 0; li < layout.length; li++) {
                 var entry = layout[li];
                 var dat = await entry.bin.file.async('uint8array');
-                fileArray.push({ data: dat, address: entry.addr });
+                fileArray.push({ data: uint8ToBstr(dat), address: entry.addr });
                 rawParts.push({ addr: entry.addr, bytes: dat });
                 totalSize += dat.length;
                 logMessage('  ' + entry.bin.path + ' @ 0x' + entry.addr.toString(16) + ' (' + formatBytes(dat.length) + ')', '');
@@ -6413,7 +6432,7 @@
                     throw new Error('Manual offset missing for ' + b.path);
                 }
                 var d = await b.file.async('uint8array');
-                fileArray.push({ data: d, address: state.customOffsets[b.path] });
+                fileArray.push({ data: uint8ToBstr(d), address: state.customOffsets[b.path] });
                 rawParts.push({ addr: state.customOffsets[b.path], bytes: d });
                 totalSize += d.length;
                 logMessage('  ' + b.path + ' @ 0x' + state.customOffsets[b.path].toString(16) + ' (' + formatBytes(d.length) + ')', '');
@@ -6492,8 +6511,7 @@
                 baudrate: 115200,
                 terminal: terminal,
                 romBaudrate: 115200,
-                enableTracing: false,
-                noStub: true
+                enableTracing: false
             });
             state.esploader = esploader;
 
