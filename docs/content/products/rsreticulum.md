@@ -1,6 +1,6 @@
 # rsReticulum
 
-rsReticulum v0.9.0 is a public pre-release of the pure-Rust [Reticulum](https://reticulum.network/) network stack — wire-compatible where implemented, with no Python runtime. It ships as a library and as Rust CLI tools for daemon, status, path, identity, probe, copy, shell, and RNode configuration work.
+rsReticulum v0.9.0 is a public pre-release of the pure-Rust [Reticulum](https://reticulum.network/) network stack — wire-compatible where implemented, with no Python runtime. The current target is Reticulum 1.2.4 for the implemented and tested release surface. It ships as a library and as Rust CLI tools for daemon, status, path, identity, probe, copy, shell, and RNode configuration work.
 
 If you already run a Reticulum network, an rsReticulum node can join it on the implemented protocol paths. If you don't, this is the core stack in one repo.
 
@@ -11,13 +11,47 @@ The `rns-tools` crate currently produces eight Rust-namespaced `*-rs` binaries s
 - **`rnsd-rs`** — the Reticulum daemon. Run this first; everything else attaches to it over a local shared-instance socket. `rnsd-rs --exampleconfig` prints a starter config.
 - **`rnstatus-rs`** — inspect interfaces, announces, discovered peers, live links, totals, and JSON status on a local or remote daemon. Pass `-R <hash> -i <identity>` to query a remote node over MessagePack RPC.
 - **`rnpath-rs`** — view and manage the path table; locally you can edit rates and blackholes, while remote mode is read-only for table/rate and blackhole-list queries.
-- **`rnid-rs`** — create, inspect, encrypt, decrypt, sign with, and verify Reticulum identity files.
+- **`rnid-rs`** — create and inspect Reticulum identities, import/export public or private identity data, calculate destination hashes, encrypt/decrypt files, and sign/verify 1.2.4-style `.rsg` signatures.
 - **`rnprobe-rs`** — send PROBE packets to a destination and report RTT and packet loss. The Reticulum equivalent of `ping`.
 - **`rncp-rs`** — copy a file over Reticulum. Send mode (`rncp-rs <file> <hash>`), listen mode (`rncp-rs -l -b <seconds> -s <dir> -a <allowed_hash>` or `--no-auth`), and fetch mode (`rncp-rs -f <hash> <path>`). `-P/--phy-rates` is an explicit gap until physical transfer-rate accounting exists.
 - **`rnsh-rs`** — remote shell utility for Rust-side remote command work.
 - **`rnodeconf-rs`** — RNode inspection and safe configuration utility. Safe device inspection/configuration, EEPROM dump/backup, and trusted-key storage exist, but flashing, ROM bootstrap, firmware-hash writes, destructive EEPROM wipe, and signing-key management parity are disabled or incomplete.
 
 Deferred surfaces include `rnx`, `rnir`, `rnpkg`, `rngit`, `git-remote-rns`, full `rnodeconf-rs` flashing/signing parity, and the Weave runtime.
+
+## rnid-rs quick reference
+
+Most identity work starts with a file you control:
+
+```bash
+rnid-rs -g ~/.rsReticulum/identities/mgmt
+rnid-rs -i ~/.rsReticulum/identities/mgmt -p
+rnid-rs -i ~/.rsReticulum/identities/mgmt -H lxmf.delivery
+```
+
+Public and private import/export are deliberately split. `-m` and `-x` are public. `-M` and `-X` are private. When you use `-w`, rnid writes a public `.pub` file unless `-X` is present:
+
+```bash
+rnid-rs -i ~/.rsReticulum/identities/mgmt -w mgmt.pub
+rnid-rs -i ~/.rsReticulum/identities/mgmt -X -w mgmt.rid
+rnid-rs -m <public_identity_data> -w peer.pub
+rnid-rs -M <private_identity_data> -X -w restored_identity
+```
+
+Signing uses Reticulum 1.2.4 `.rsg` envelopes by default. The signature can validate with its embedded signer, or against a required signer hash:
+
+```bash
+rnid-rs -i ~/.rsReticulum/identities/mgmt -s message.txt
+rnid-rs -V message.txt.rsg
+rnid-rs -i <signer_hash> -N -V message.txt.rsg
+```
+
+For file encryption, use the recipient's public identity to encrypt and the matching private identity to decrypt:
+
+```bash
+rnid-rs -i mgmt.pub -e message.txt
+rnid-rs -i ~/.rsReticulum/identities/mgmt -d message.txt.rfe
+```
 
 ## The library
 
@@ -49,7 +83,7 @@ The two modes are not exclusive. You can run `rnsd-rs` on the same host as your 
 
 ## Status and Gaps
 
-- **Wire-compatible where implemented.** Identity files, configs, pathing, link/resource behavior, and packet captures are exercised against Reticulum 1.2.2.
+- **Wire-compatible where implemented.** Identity files, configs, pathing, link/resource behavior, utility vectors, and packet captures are exercised against Python Reticulum, with `rnid-rs` retargeted to Reticulum 1.2.4.
 - **Native runtime.** Single Rust binaries, no interpreter at runtime. Useful on Pi-class transport routers and battery-powered devices.
 - **Protocol invariants.** MTU, MDU, hop ceiling, ratchet windows, and link timers follow Reticulum behavior.
 - **Mobile throttling.** A `mobile-throttle` feature lets a host app slow long-lived loops while backgrounded, no-op on always-on machines.

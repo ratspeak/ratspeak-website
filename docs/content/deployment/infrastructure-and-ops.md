@@ -112,7 +112,7 @@ Generate a management identity on your local machine:
 ```bash
 mkdir -p ~/.rsReticulum/identities
 rnid-rs -g ~/.rsReticulum/identities/mgmt
-rnid-rs -i ~/.rsReticulum/identities/mgmt -p   # prints the hash
+rnid-rs -i ~/.rsReticulum/identities/mgmt -p   # prints the identity hash
 ```
 
 Add that hash to the remote node's `remote_management_allowed`, restart the daemon, and you're authenticated. All management traffic is end-to-end encrypted and identity-authenticated; there are no passwords to leak.

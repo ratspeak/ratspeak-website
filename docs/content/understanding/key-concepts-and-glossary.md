@@ -105,7 +105,7 @@ The core Reticulum tools most Ratspeak operators will encounter are:
 - **rnsd-rs** - the Reticulum daemon. It owns interfaces and routing state for local clients.
 - **rnstatus-rs** - shows interface and path status.
 - **rnpath-rs** - inspects, requests, and manages paths.
-- **rnid-rs** - creates and inspects Reticulum identities.
+- **rnid-rs** - creates, inspects, imports, exports, hashes, signs, verifies, encrypts, and decrypts Reticulum identities and identity-bound files.
 - **rncp-rs** - copies files over Reticulum resources.
 - **rnprobe-rs** - probes a destination, similar in spirit to `ping`.
 
