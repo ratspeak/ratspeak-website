@@ -4,6 +4,11 @@ rsLXST is the experimental Rust implementation of LXST telephony for Reticulum.
 The first public target is Opus voice calling for Ratspeak and other Rust apps,
 not complete parity with Python LXST.
 
+The [Ratspeak app](../products/ratspeak) is the first public consumer of rsLXST,
+and uses it for peer-to-peer voice calls between contacts. Voice in Ratspeak is
+itself experimental; see [Messaging & Contacts](../using-ratspeak/messaging-and-contacts)
+for how the call surface behaves in the app.
+
 Python LXST remains the source of truth. rsLXST targets wire compatibility for
 the implemented telephony surface and uses live interop tests against a pinned
 Python LXST reference to keep that behavior honest.

@@ -1,6 +1,6 @@
 # Building from Source
 
-Use this path when you want to test the current tree, package Ratspeak yourself, review the code before running it, or work on Ratspeak, rsReticulum, or rsLXMF directly.
+Use this path when you want to test the current tree, package Ratspeak yourself, review the code before running it, or work on Ratspeak, rsReticulum, rsLXMF, or rsLXST directly.
 
 This page assumes you are comfortable following terminal commands but not that you already know Rust, Tauri, Android Studio, or Xcode.
 
@@ -12,6 +12,7 @@ Ratspeak is the app. It embeds the protocol and support repos below:
 - **[rsReticulum](https://github.com/ratspeak/rsReticulum)** - the Reticulum network stack and `*-rs` command-line tools. The current public release is the [v0.9.0 pre-release](https://github.com/ratspeak/rsReticulum/releases/tag/v0.9.0).
 - **[rsLXMF](https://github.com/ratspeak/rsLXMF)** - the LXMF messaging layer and `lxmd-rs` propagation daemon. The current public release is the [v0.9.0 pre-release](https://github.com/ratspeak/rsLXMF/releases/tag/v0.9.0).
 - **[lrgp-rs](https://github.com/ratspeak/lrgp-rs)** - the lightweight game protocol used by the Ratspeak app.
+- **[rsLXST](https://github.com/ratspeak/rsLXST)** - the experimental LXST telephony layer used for Ratspeak's voice calls. Required for the default Ratspeak build; skip with `--no-default-features` if you want to build without voice.
 
 During development these repos resolve each other by relative path. Git is the easiest way to fetch them, but GitHub ZIP downloads also work if you extract and rename the folders to match this layout:
 
@@ -22,6 +23,7 @@ cd ratspeak-src
 git clone https://github.com/ratspeak/rsReticulum
 git clone https://github.com/ratspeak/rsLXMF
 git clone https://github.com/ratspeak/lrgp-rs
+git clone https://github.com/ratspeak/rsLXST
 git clone https://github.com/ratspeak/Ratspeak
 ```
 
@@ -32,10 +34,11 @@ ratspeak-src/
 |-- rsReticulum/
 |-- rsLXMF/
 |-- lrgp-rs/
+|-- rsLXST/
 `-- Ratspeak/
 ```
 
-If you clone only `Ratspeak`, Cargo will fail because it cannot find the sibling protocol crates.
+If you clone only `Ratspeak`, Cargo will fail because it cannot find the sibling protocol crates. The `rsLXST` sibling is only strictly required for the default build, which enables the experimental `lxst-voice` Cargo feature; pass `--no-default-features` to `cargo tauri dev` / `cargo tauri build` to build Ratspeak without voice and skip that clone.
 
 ## Common prerequisites
 
@@ -241,6 +244,12 @@ cd src-tauri
 cargo tauri dev
 ```
 
+To build Ratspeak without the experimental voice stack (and without needing the `rsLXST` sibling checkout), add `--no-default-features`:
+
+```bash
+cargo tauri dev --no-default-features
+```
+
 Build release bundles:
 
 ```bash
@@ -327,7 +336,7 @@ If you are debugging protocol code for mobile, make the change in `rsReticulum` 
 
 ## Common build problems
 
-**Cargo cannot find `../rsReticulum`, `../rsLXMF`, or `../lrgp-rs`.** The repos are not checked out as siblings. Move them into the layout shown at the top of this page.
+**Cargo cannot find `../rsReticulum`, `../rsLXMF`, `../lrgp-rs`, or `../rsLXST`.** The repos are not checked out as siblings. Move them into the layout shown at the top of this page. If you only see the error for `../rsLXST`, either clone that sibling too or pass `--no-default-features` to `cargo tauri dev` / `cargo tauri build` to build Ratspeak without the experimental voice stack.
 
 **`cargo tauri` is not found.** Install the Tauri CLI with `cargo install tauri-cli --version "^2.0.0" --locked`, then open a new terminal.
 

@@ -68,6 +68,14 @@ On macOS especially, you may see a Gatekeeper warning the first time you open Ra
 
 Mobile builds are not yet on public App Store or Play Store listings. Android is available as a sideload APK from [ratspeak.org/download.html](https://ratspeak.org/download.html) or the GitHub release. iOS still goes through TestFlight or developer provisioning. Public store releases will follow once signing, review, and release packaging are ready.
 
+## Can I make voice calls with Ratspeak?
+
+Yes, in an experimental capacity. Public builds include a peer-to-peer voice surface built on [rsLXST](../products/rslxst), the Rust LXST telephony stack. Calls run as a direct Reticulum link between the two devices — no servers, no media gateway, no offline fallback. Audio uses Opus and starts at the Medium Quality profile.
+
+The call button lives in the conversation header on Messages and only appears when the other side is a saved contact and no other call is in progress. Inbound calls are gated to contacts or callers reachable on a direct zero-hop path; everyone else gets a polite "only accepting calls from contacts" notice and never rings the device. Persistently rejected non-contact callers are automatically blackholed after ten attempts.
+
+Treat the surface as a beta — codec quality, ringtones, platform audio routing, and feature scope are all subject to change while rsLXST stabilizes. See [Messaging & Contacts](../using-ratspeak/messaging-and-contacts) for the full usage walkthrough.
+
 ## What games are there?
 
 Ratspeak ships with two: Chess and Tic-Tac-Toe. Both run over LRGP, a tiny game protocol that piggybacks on LXMF messages. Moves are roughly the size of a normal text message, so a chess game is perfectly playable even over LoRa with minutes between turns. More games will come; the protocol is built to be extended.

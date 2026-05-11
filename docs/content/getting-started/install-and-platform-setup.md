@@ -51,6 +51,18 @@ iOS does not support general USB serial from third-party apps, so LoRa on iPhone
 
 Public Play Store distribution will replace this for most users once the listing is ready.
 
+## Microphone permission (voice calls)
+
+Public Ratspeak builds include an experimental voice call surface on top of [rsLXST](../products/rslxst). The first time you place or answer a call, the OS prompts for microphone access:
+
+- **macOS** — Ratspeak appears under System Settings → Privacy & Security → Microphone.
+- **Windows** — Ratspeak appears under Settings → Privacy & Security → Microphone.
+- **Linux** — most distros do not gate microphone access per app; Ratspeak uses the default PulseAudio or PipeWire input device.
+- **Android** — Ratspeak requests `RECORD_AUDIO` (plus `MODIFY_AUDIO_SETTINGS` for routing) the first time you place or answer a call.
+- **iOS** — Ratspeak appears under Settings → Privacy & Security → Microphone. The first call also requires the `NSMicrophoneUsageDescription` prompt to be accepted.
+
+Granting permission once is enough. If you deny it on the first prompt and the OS never asks again, toggle the permission manually in system settings, then place a fresh call. See [Messaging & Contacts](../using-ratspeak/messaging-and-contacts) for how the call surface behaves in the app, and [Troubleshooting](../reference/troubleshooting) for the common voice issues.
+
 ## First launch (security warnings)
 
 Ratspeak's installers aren't yet code-signed and notarized, so each OS will ask you to confirm the first time you run it. This is a one-time prompt.

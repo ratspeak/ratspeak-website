@@ -91,6 +91,45 @@ Only one instance of Ratspeak should run against a given data directory at a tim
 
 Filter out **Discovered** peers you have never spoken to, or narrow the interface/status filters while diagnosing a large mesh. Large announce tables are normal on busy networks; narrow what is shown rather than deleting what the router has learned.
 
+## Voice call button never appears
+
+The call button only appears when:
+
+- the binary you are running was built with the `lxst-voice` Cargo feature (the default for public builds — source builds invoked with `--no-default-features` compile it out entirely);
+- the active conversation is with a **saved contact** (peers and unknown addresses cannot be dialed);
+- no other call is already in progress.
+
+If you built from source and the button is missing, rebuild without `--no-default-features` and make sure you have the `rsLXST` sibling checkout next to `Ratspeak`. See [Building from Source](../getting-started/building-from-source) for the layout.
+
+## Microphone permission was denied
+
+Voice calls need OS-level microphone access. The first call triggers the prompt; later calls reuse the granted permission.
+
+- **macOS** — System Settings → Privacy & Security → Microphone → enable Ratspeak.
+- **Windows** — Settings → Privacy & Security → Microphone → toggle on for Ratspeak.
+- **Linux** — most distros do not gate microphone access per-app at the OS level. If audio capture still fails, check your PulseAudio / PipeWire input device and that no other app holds an exclusive handle on it.
+- **Android** — Settings → Apps → Ratspeak → Permissions → enable Microphone.
+- **iOS** — Settings → Privacy & Security → Microphone → enable Ratspeak.
+
+If permission was denied on the very first prompt some OSes never prompt again. Toggle the permission off and back on in system settings, then place a fresh call.
+
+## Incoming call surface never opens
+
+A few things to check:
+
+- **You are not a contact yet.** Ratspeak only rings for inbound calls from saved contacts or for callers reachable on a direct zero-hop Reticulum path. Ask the caller to save you (or save them) and try again.
+- **You have rejected this caller many times.** After ten consecutive rejections a non-contact caller is automatically blackholed. Open **Network → Blackholes** and remove the entry if it was a mistake.
+- **You blocked the contact.** Blocked contacts are blackholed at the network layer; their calls never reach the call surface. Unblock the contact under **Contacts** and remove the corresponding network blackhole entry.
+- **The voice stack is not running.** Reopen the app — the call surface comes online once the LXST service has started.
+
+## Call connects but there is no audio
+
+- Confirm both sides granted microphone permission (see above).
+- Check your OS default audio input and output. Ratspeak uses the OS default device and does not yet expose an in-app picker.
+- On Linux, confirm PulseAudio or PipeWire actually exposes the device you expect (`pactl info`, `pactl list short sinks/sources`).
+- On Android, leave the app foregrounded during the first call. Background audio routing while the OS is still confirming foreground service state can drop the capture stream.
+- If the audio strip in the app shows a yellow warning text, that is the runtime telling you which side of the pipeline failed to start (microphone vs speaker) — copy that string when filing a bug.
+
 ## High latency on LoRa
 
 This is normal, not a bug. At SF12 / 125 kHz, a single packet takes around 1.5 seconds on the air, and end-to-end delivery over multiple hops with retries can take 30 to 120 seconds. To trade range for speed, drop to SF7–SF9 and (if regulations allow) widen to 250 kHz.

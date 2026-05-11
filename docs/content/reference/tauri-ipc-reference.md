@@ -46,7 +46,7 @@ Events fire on a single global channel — every listener for a given name recei
 
 ## Command domains
 
-Commands live under nine domain modules. Counts shift between releases; the current truth is the registered `generate_handler!` list and the command modules in source.
+Commands live under ten domain modules. Counts shift between releases; the current truth is the registered `generate_handler!` list and the command modules in source.
 
 | Domain       | Approx. count | Covers                                                                  |
 |--------------|---------------|-------------------------------------------------------------------------|
@@ -58,6 +58,7 @@ Commands live under nine domain modules. Counts shift between releases; the curr
 | `ble`        | ~10           | Bluetooth Peer, BLE RNode discovery, pairing prompts, cancellation, disconnects. |
 | `contacts`   | ~9            | Address book, trust state, custom names, hash lookup.                   |
 | `games`      | ~8            | LRGP game sessions, action submission, session deletion.                |
+| `voice`      | 7             | Experimental LXST voice surface — service start/stop, status, call/answer/reject/hangup. Only compiled in when the `lxst-voice` Cargo feature is on; see [rsLXST](../products/rslxst). |
 | `peers`      | ~1            | Live peer roster snapshot (mostly event-driven).                        |
 
 For the full per-command signature and argument schema, inspect the source with `rg -n '#\[tauri::command\]|generate_handler!' crates/ratspeak-tauri/src/commands src-tauri/src/lib.rs` in the [Ratspeak repo](https://github.com/ratspeak/Ratspeak).
@@ -80,6 +81,8 @@ Names the core broadcasts; subscribe to whichever your integration cares about.
 | `all_game_sessions`    | LRGP session list after any session-state change.                        |
 | `node_operation_status`| Interface add/remove/update progress for long-running network operations.|
 | `propagation_sync_result` | Propagation-node sync completion or failure.                          |
+| `voice_call_update`    | Active LXST call lifecycle: status changes, profile, audio side state. Only emitted when the `lxst-voice` Cargo feature is on. |
+| `voice_incoming_call`  | A new incoming LXST call that passed the contacts-only/zero-hop policy gate.                |
 
 Other narrower events exist (`identity_reset`, `identity_switched`, `auto_announce_updated`, `propagation_update`, `ble_peer_status_update`, `hub_interfaces_update`, `transport_mode_updated`, etc.). Treat them as live; check the source if you depend on one.
 

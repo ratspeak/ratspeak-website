@@ -1,12 +1,12 @@
 # What is Ratspeak?
 
-Ratspeak is a small family of communication tools that run on [Reticulum](https://reticulum.network/) — an encrypted mesh networking stack that does not depend on the public internet. You can use it to message a friend across the room over Bluetooth, across town over a LoRa radio link, or across the world over a TCP tunnel — without an account, without a phone number, and without a server in the middle.
+Ratspeak is a small family of communication tools that run on [Reticulum](https://reticulum.network/) — an encrypted mesh networking stack that does not depend on the public internet. You can use it to message a friend across the room over Bluetooth, across town over a LoRa radio link, or across the world over a TCP tunnel — without an account, without a phone number, and without a server in the middle. The flagship app also ships experimental peer-to-peer voice calls on top of the same Reticulum links.
 
 The umbrella name is **Ratspeak**. It is also the name of the flagship app. The wider ecosystem includes Rust protocol crates, handheld firmware, turn-based game payloads, avatar tooling, and experimental hardware-identity work. They share Reticulum/LXMF where that makes sense, but not every component is a network endpoint.
 
 ## What's in the box
 
-The short version: [Ratspeak](../products/ratspeak) is the app, [Ratdeck](../products/ratdeck) and [Ratcom](../products/ratcom) are standalone LoRa handhelds, [rsReticulum](../products/rsreticulum) and [rsLXMF](../products/rslxmf) are the Rust protocol stack underneath the desktop/server software, and smaller projects like [LRGP](../products/lrgp), [LXMFace](../products/lxmface), and [Ratkey](../products/ratkey) handle games, identity avatars, and experimental hardware keys.
+The short version: [Ratspeak](../products/ratspeak) is the app, [Ratdeck](../products/ratdeck) and [Ratcom](../products/ratcom) are standalone LoRa handhelds, [rsReticulum](../products/rsreticulum) and [rsLXMF](../products/rslxmf) are the Rust protocol stack underneath the desktop/server software, [rsLXST](../products/rslxst) is the experimental Rust telephony stack the app uses for voice calls, and smaller projects like [LRGP](../products/lrgp), [LXMFace](../products/lxmface), and [Ratkey](../products/ratkey) handle games, identity avatars, and experimental hardware keys.
 
 For the full map, see [Ratspeak Ecosystem](../introduction/ratspeak-ecosystem). The flagship app has its own [Ratspeak App](../products/ratspeak) product page.
 

@@ -8,7 +8,8 @@ Most people should start with the [Ratspeak app](../products/ratspeak), [Ratdeck
 
 - **rsReticulum** is the Reticulum networking layer: packets, identities, announces, paths, links, resources, interfaces, daemon, and command-line tools.
 - **rsLXMF** is the message layer above Reticulum: conversations, attachments, delivery modes, Offline Inbox/propagation nodes, stamps, and tickets.
-- **Ratspeak** is the user-facing desktop and mobile app that embeds rsReticulum, rsLXMF, and LRGP.
+- **rsLXST** is the experimental Rust telephony layer above Reticulum: call signalling, link teardown, and Opus voice profiles. Ratspeak embeds it for peer-to-peer voice calls.
+- **Ratspeak** is the user-facing desktop and mobile app that embeds rsReticulum, rsLXMF, LRGP, and rsLXST.
 - **Ratdeck** and **Ratcom** are standalone handheld firmware projects that run microReticulum plus native LXMF on ESP32-S3 LoRa hardware.
 - **LRGP** rides inside LXMF custom fields to support turn-based games such as Chess and Tic-Tac-Toe.
 - **LXMFace** turns Reticulum identity hashes into deterministic avatars. It is a standalone identity-visualization library, not a network transport.
@@ -23,6 +24,7 @@ The common thread is Reticulum/LXMF, not a central service. Some pieces are netw
 | [Ratspeak](../products/ratspeak) | Desktop and mobile LXMF client | Normal users | v1.0.6 public release; desktop and Android artifacts are on the download page and GitHub releases |
 | [rsReticulum](../products/rsreticulum) | Rust Reticulum stack, daemon, tools | Operators and Rust developers | v0.9.0 public pre-release; pre-1.0, wire-compatible where implemented, with documented gaps |
 | [rsLXMF](../products/rslxmf) | Rust LXMF library and `lxmd-rs` propagation daemon | App developers and propagation-node operators | v0.9.0 public pre-release; pre-1.0, targets LXMF interop where implemented |
+| [rsLXST](../products/rslxst) | Rust LXST telephony library (Opus voice over Reticulum) | App developers building voice features on Reticulum | Experimental; first public target is Ratspeak voice calls, not full Python LXST parity |
 | [Ratdeck](../products/ratdeck) | LilyGO T-Deck Plus handheld firmware | Off-grid users who want a standalone LoRa device | Active firmware; Wi-Fi bridge mode is still experimental |
 | [Ratcom](../products/ratcom) | M5Stack Cardputer Adv + Cap LoRa firmware | Users who want a smaller standalone LoRa device | Active firmware; AP bridge mode is alpha |
 | [LRGP](../products/lrgp) | Game protocol over LXMF | Ratspeak users and game developers | Integrated for Chess and Tic-Tac-Toe; standalone Rust and Python packages exist |
@@ -41,4 +43,4 @@ Run `rnsd-rs` when you want a Reticulum node that stays online and routes traffi
 
 ## For developers
 
-Use rsReticulum when you need Reticulum networking in Rust, rsLXMF when you need LXMF messaging, LRGP when you want compact turn-based game messages, and LXMFace when you want the same deterministic avatar output across languages. Ratkey is available as an experimental integration target for hardware identity work, but app-level support is intentionally not promised yet.
+Use rsReticulum when you need Reticulum networking in Rust, rsLXMF when you need LXMF messaging, rsLXST when you want LXST telephony plumbing (call setup, profile switching, Opus media) and intend to provide your own platform audio layer, LRGP when you want compact turn-based game messages, and LXMFace when you want the same deterministic avatar output across languages. Ratkey is available as an experimental integration target for hardware identity work, but app-level support is intentionally not promised yet.
