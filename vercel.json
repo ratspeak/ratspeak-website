@@ -6,6 +6,9 @@
   "functions": {
     "api/firmware.js": {
       "maxDuration": 30
+    },
+    "api/tasks.js": {
+      "maxDuration": 10
     }
   },
   "headers": [

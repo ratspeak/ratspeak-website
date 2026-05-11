@@ -1,0 +1,196 @@
+{
+  "ios": {
+    "shape": "No-alpha square source icons for iOS asset catalogs, plus squircle preview exports showing the system-applied mask.",
+    "source_light": [
+      "/assets/icons/ios/ratspeak-ios-source-light-20.png",
+      "/assets/icons/ios/ratspeak-ios-source-light-29.png",
+      "/assets/icons/ios/ratspeak-ios-source-light-40.png",
+      "/assets/icons/ios/ratspeak-ios-source-light-58.png",
+      "/assets/icons/ios/ratspeak-ios-source-light-60.png",
+      "/assets/icons/ios/ratspeak-ios-source-light-76.png",
+      "/assets/icons/ios/ratspeak-ios-source-light-80.png",
+      "/assets/icons/ios/ratspeak-ios-source-light-87.png",
+      "/assets/icons/ios/ratspeak-ios-source-light-120.png",
+      "/assets/icons/ios/ratspeak-ios-source-light-152.png",
+      "/assets/icons/ios/ratspeak-ios-source-light-167.png",
+      "/assets/icons/ios/ratspeak-ios-source-light-180.png",
+      "/assets/icons/ios/ratspeak-ios-source-light-1024.png"
+    ],
+    "source_dark": [
+      "/assets/icons/ios/ratspeak-ios-source-dark-20.png",
+      "/assets/icons/ios/ratspeak-ios-source-dark-29.png",
+      "/assets/icons/ios/ratspeak-ios-source-dark-40.png",
+      "/assets/icons/ios/ratspeak-ios-source-dark-58.png",
+      "/assets/icons/ios/ratspeak-ios-source-dark-60.png",
+      "/assets/icons/ios/ratspeak-ios-source-dark-76.png",
+      "/assets/icons/ios/ratspeak-ios-source-dark-80.png",
+      "/assets/icons/ios/ratspeak-ios-source-dark-87.png",
+      "/assets/icons/ios/ratspeak-ios-source-dark-120.png",
+      "/assets/icons/ios/ratspeak-ios-source-dark-152.png",
+      "/assets/icons/ios/ratspeak-ios-source-dark-167.png",
+      "/assets/icons/ios/ratspeak-ios-source-dark-180.png",
+      "/assets/icons/ios/ratspeak-ios-source-dark-1024.png"
+    ],
+    "light": [
+      "/assets/icons/ios/ratspeak-ios-light-20.png",
+      "/assets/icons/ios/ratspeak-ios-light-29.png",
+      "/assets/icons/ios/ratspeak-ios-light-40.png",
+      "/assets/icons/ios/ratspeak-ios-light-58.png",
+      "/assets/icons/ios/ratspeak-ios-light-60.png",
+      "/assets/icons/ios/ratspeak-ios-light-76.png",
+      "/assets/icons/ios/ratspeak-ios-light-80.png",
+      "/assets/icons/ios/ratspeak-ios-light-87.png",
+      "/assets/icons/ios/ratspeak-ios-light-120.png",
+      "/assets/icons/ios/ratspeak-ios-light-152.png",
+      "/assets/icons/ios/ratspeak-ios-light-167.png",
+      "/assets/icons/ios/ratspeak-ios-light-180.png",
+      "/assets/icons/ios/ratspeak-ios-light-1024.png"
+    ],
+    "dark": [
+      "/assets/icons/ios/ratspeak-ios-dark-20.png",
+      "/assets/icons/ios/ratspeak-ios-dark-29.png",
+      "/assets/icons/ios/ratspeak-ios-dark-40.png",
+      "/assets/icons/ios/ratspeak-ios-dark-58.png",
+      "/assets/icons/ios/ratspeak-ios-dark-60.png",
+      "/assets/icons/ios/ratspeak-ios-dark-76.png",
+      "/assets/icons/ios/ratspeak-ios-dark-80.png",
+      "/assets/icons/ios/ratspeak-ios-dark-87.png",
+      "/assets/icons/ios/ratspeak-ios-dark-120.png",
+      "/assets/icons/ios/ratspeak-ios-dark-152.png",
+      "/assets/icons/ios/ratspeak-ios-dark-167.png",
+      "/assets/icons/ios/ratspeak-ios-dark-180.png",
+      "/assets/icons/ios/ratspeak-ios-dark-1024.png"
+    ],
+    "sizes": [
+      20,
+      29,
+      40,
+      58,
+      60,
+      76,
+      80,
+      87,
+      120,
+      152,
+      167,
+      180,
+      1024
+    ]
+  },
+  "android": {
+    "shape": "Adaptive foreground/background layers for launcher masks, plus circle composites for review and legacy launcher use.",
+    "light_circle": [
+      "/assets/icons/android/ratspeak-android-light-circle-48.png",
+      "/assets/icons/android/ratspeak-android-light-circle-72.png",
+      "/assets/icons/android/ratspeak-android-light-circle-96.png",
+      "/assets/icons/android/ratspeak-android-light-circle-144.png",
+      "/assets/icons/android/ratspeak-android-light-circle-192.png",
+      "/assets/icons/android/ratspeak-android-light-circle-512.png"
+    ],
+    "dark_circle": [
+      "/assets/icons/android/ratspeak-android-dark-circle-48.png",
+      "/assets/icons/android/ratspeak-android-dark-circle-72.png",
+      "/assets/icons/android/ratspeak-android-dark-circle-96.png",
+      "/assets/icons/android/ratspeak-android-dark-circle-144.png",
+      "/assets/icons/android/ratspeak-android-dark-circle-192.png",
+      "/assets/icons/android/ratspeak-android-dark-circle-512.png"
+    ],
+    "adaptive_foreground_sizes": [
+      108,
+      162,
+      216,
+      324,
+      432
+    ],
+    "adaptive_background_sizes": [
+      108,
+      162,
+      216,
+      324,
+      432
+    ]
+  },
+  "macos": {
+    "shape": "Rounded macOS app icon PNGs with optional ICNS export when supported.",
+    "light": [
+      "/assets/icons/macos/ratspeak-macos-light-16.png",
+      "/assets/icons/macos/ratspeak-macos-light-32.png",
+      "/assets/icons/macos/ratspeak-macos-light-64.png",
+      "/assets/icons/macos/ratspeak-macos-light-128.png",
+      "/assets/icons/macos/ratspeak-macos-light-256.png",
+      "/assets/icons/macos/ratspeak-macos-light-512.png",
+      "/assets/icons/macos/ratspeak-macos-light-1024.png"
+    ],
+    "dark": [
+      "/assets/icons/macos/ratspeak-macos-dark-16.png",
+      "/assets/icons/macos/ratspeak-macos-dark-32.png",
+      "/assets/icons/macos/ratspeak-macos-dark-64.png",
+      "/assets/icons/macos/ratspeak-macos-dark-128.png",
+      "/assets/icons/macos/ratspeak-macos-dark-256.png",
+      "/assets/icons/macos/ratspeak-macos-dark-512.png",
+      "/assets/icons/macos/ratspeak-macos-dark-1024.png"
+    ],
+    "sizes": [
+      16,
+      32,
+      64,
+      128,
+      256,
+      512,
+      1024
+    ]
+  },
+  "windows": {
+    "shape": "Transparent rounded app icons for ICO and Start/menu tile surfaces.",
+    "ico_sizes": [
+      16,
+      24,
+      32,
+      48,
+      64,
+      128,
+      256
+    ],
+    "tile_sizes": [
+      44,
+      71,
+      150,
+      310
+    ],
+    "light_ico": "/assets/icons/windows/ratspeak-windows-light.ico",
+    "dark_ico": "/assets/icons/windows/ratspeak-windows-dark.ico"
+  },
+  "linux": {
+    "shape": "Transparent rounded PNGs for hicolor-style icon themes.",
+    "light": [
+      "/assets/icons/linux/ratspeak-linux-light-16.png",
+      "/assets/icons/linux/ratspeak-linux-light-24.png",
+      "/assets/icons/linux/ratspeak-linux-light-32.png",
+      "/assets/icons/linux/ratspeak-linux-light-48.png",
+      "/assets/icons/linux/ratspeak-linux-light-64.png",
+      "/assets/icons/linux/ratspeak-linux-light-128.png",
+      "/assets/icons/linux/ratspeak-linux-light-256.png",
+      "/assets/icons/linux/ratspeak-linux-light-512.png"
+    ],
+    "dark": [
+      "/assets/icons/linux/ratspeak-linux-dark-16.png",
+      "/assets/icons/linux/ratspeak-linux-dark-24.png",
+      "/assets/icons/linux/ratspeak-linux-dark-32.png",
+      "/assets/icons/linux/ratspeak-linux-dark-48.png",
+      "/assets/icons/linux/ratspeak-linux-dark-64.png",
+      "/assets/icons/linux/ratspeak-linux-dark-128.png",
+      "/assets/icons/linux/ratspeak-linux-dark-256.png",
+      "/assets/icons/linux/ratspeak-linux-dark-512.png"
+    ],
+    "sizes": [
+      16,
+      24,
+      32,
+      48,
+      64,
+      128,
+      256,
+      512
+    ]
+  }
+}
