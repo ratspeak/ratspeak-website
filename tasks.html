@@ -1369,11 +1369,23 @@
                     showAuthModal('Session expired — sign in again to save.');
                     throw new Error('unauthorized');
                 }
-                if (!resp.ok) throw new Error('http ' + resp.status);
+                if (resp.ok) return null;
+                return resp.text().then(function(body) {
+                    var msg = 'Save failed (' + resp.status + ')';
+                    try {
+                        var j = JSON.parse(body);
+                        if (j.detail) msg += ': ' + String(j.detail).slice(0, 200);
+                        else if (j.error) msg += ': ' + j.error;
+                    } catch (e) {
+                        if (body) msg += ': ' + body.slice(0, 200);
+                    }
+                    throw new Error(msg);
+                });
             })
             .catch(function(err) {
                 if (err && err.message === 'unauthorized') return;
-                toast('Save failed — change held locally, will retry on next edit');
+                var msg = (err && err.message) ? err.message : 'Save failed';
+                toast(msg + ' — change held locally, will retry on next edit');
             })
             .then(function() {
                 saveInFlight = false;

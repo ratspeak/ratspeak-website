@@ -133,7 +133,9 @@ async function putState(req, blobToken) {
     }
   );
   if (!putResp.ok) {
-    return jsonResponse({ error: 'Storage write failed', status: putResp.status }, 502);
+    const detail = await putResp.text().catch(() => '');
+    console.error('Blob PUT failed', putResp.status, detail.slice(0, 500));
+    return jsonResponse({ error: 'Storage write failed', status: putResp.status, detail: detail.slice(0, 500) }, 502);
   }
   return jsonResponse({ ok: true });
 }
