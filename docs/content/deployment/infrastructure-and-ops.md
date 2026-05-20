@@ -39,7 +39,7 @@ docker run -d --name rnsd-rs \
 
 Use `--network host` if you want AutoInterface to discover peers via IPv6 multicast on the LAN — bridged networking sees only other containers on the same Docker network. For a TCP-only public node, drop `--network host` and use `-p 4242:4242` instead.
 
-Mount `~/.rsReticulum` so identity and routing state survive container rebuilds. For a USB-attached RNode or other serial radio, pass it through with `--device=/dev/ttyUSB0` (or, more reliably, a `/dev/serial/by-id/...` path that doesn't shuffle on reboot).
+Mount `~/.rsReticulum` so identity and routing state survive container rebuilds. For a USB-attached RNode or other serial radio, pass it through with `--device=/dev/ttyUSB0` (or, more reliably, a `/dev/serial/by-id/...` path that doesn't shuffle on reboot). For an RNode TCP bridge, no device passthrough is needed; set the RNode interface `port` to `tcp://host:7633` and make sure the container can reach that host.
 
 ---
 

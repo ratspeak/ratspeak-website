@@ -65,13 +65,13 @@ A broad set of interface modules ship in `rns-interface`. They group into:
 
 - **IP**: `TCPInterface` (client and server, IPv4 and IPv6), `UDPInterface` (unicast and multicast), `AutoInterface` for zero-config LAN discovery over link-local IPv6, and `BackboneInterface` (HDLC-over-TCP with per-peer keepalive) for high-throughput WAN links. `I2PInterface` (SAM v3.1) lives here too.
 - **Serial and packet radio**: `SerialInterface`, `KISSInterface`, `AX25KISSInterface` (callsign framing for amateur radio), and `PipeInterface` (subprocess stdio). The serial radio paths are gated behind the `serial` feature flag.
-- **RNode (LoRa)**: `RNodeInterface` for single-radio RNode 1.x and 2.x boards over USB serial KISS, and `RNodeMultiInterface` for the multi-sub-interface 2.x boards.
+- **RNode (LoRa)**: `RNodeInterface` for single-radio RNode 1.x and 2.x boards over USB serial KISS or a TCP-exposed RNode/KISS stream, and `RNodeMultiInterface` for the multi-sub-interface 2.x boards.
 - **Bluetooth**: `BLERNodeInterface` bridges a LoRa RNode over BLE so a phone can drive it without a cable; `BLEPeerInterface` backs Bluetooth Peer, the phone-to-phone and laptop-to-phone link used by Ratspeak. Gated behind the `ble` feature flag, with native peripheral backends per platform. Windows needs the MSIX app capability for the Bluetooth Peer advertiser/peripheral role; Linux needs BlueZ local GATT and LE advertising support for the same role.
 - **Misc**: `LocalInterface` (Unix-socket loopback used by `rnsd-rs` shared-instance mode), `AndroidUSBInterface` (JNI host-mode serial, target-gated to Android), and `WeaveInterface` (wire constants only — runtime not yet implemented).
 
 `BackboneInterface` is worth a brief callout. It's HDLC framed over TCP with per-peer keepalive and large socket buffers, and it scales to thousands of concurrent connections per process — the right pick for a transport node fanning out to many clients. The Rust port runs on Linux, macOS, and Windows desktop: Tokio drives the underlying TCP loop and picks the right OS primitive (`epoll`, `kqueue`, or IOCP), with `TCP_USER_TIMEOUT` added on Linux for fast detection of stuck connections. Mobile builds gate Backbone out of the Ratspeak UI for now, so on iOS and Android the equivalent is `TCPServerInterface` / `TCPClientInterface`.
 
-All interface flags are off by default at the workspace level; `rns-tools` builds with `serial` so a stock `cargo build --release` produces an `rnsd-rs` that can drive a serial radio out of the box.
+All interface flags are off by default at the workspace level; `rns-tools` builds with `serial` so a stock `cargo build --release` produces an `rnsd-rs` that can drive a serial radio out of the box. Embedded apps can enable `rnode-tcp` when they need RNode over TCP without pulling in desktop serial support.
 
 ## Standalone vs embedded
 
@@ -87,7 +87,7 @@ The two modes are not exclusive. You can run `rnsd-rs` on the same host as your 
 - **Native runtime.** Single Rust binaries, no interpreter at runtime. Useful on Pi-class transport routers and battery-powered devices.
 - **Protocol invariants.** MTU, MDU, hop ceiling, ratchet windows, and link timers follow Reticulum behavior.
 - **Mobile throttling.** A `mobile-throttle` feature lets a host app slow long-lived loops while backgrounded, no-op on always-on machines.
-- **Adds:** Bluetooth Peer transport, BLE-bridged RNode, Android USB-OTG, cross-platform BackboneInterface, and experimental PIV hardware-identity work via [Ratkey](../products/ratkey).
+- **Adds:** Bluetooth Peer transport, BLE-bridged RNode, RNode over TCP, Android USB-OTG, cross-platform BackboneInterface, and experimental PIV hardware-identity work via [Ratkey](../products/ratkey).
 - **Missing or partial:** `rnx`, `rnir`, `rnpkg`, `rngit`, `git-remote-rns`, full `rnodeconf-rs` flashing/ROM/signing parity, `rnpath-rs` active path request and remote mutation parity, custom external interface loading, live I2P/hardware gates for release-grade interface claims, and a runtime for the Weave interface.
 
 ## Build

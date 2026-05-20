@@ -79,8 +79,8 @@ PipeInterface trusts the wrapped command. If the subprocess dies, the interface 
 
 ## Platform support
 
-Serial framers (Serial, KISS, AX.25 KISS, HDLC, RNode) are gated behind a build feature on desktop. Default desktop builds ship with serial enabled. Custom builds that strip the feature lose all serial-based interfaces — including USB-attached LoRa modems.
+Serial framers (Serial, KISS, AX.25 KISS, HDLC, and USB-attached RNode) are gated behind a build feature on desktop. Default desktop builds ship with serial enabled. Custom builds that strip the feature lose all serial-based interfaces — including USB-attached LoRa modems. RNode over TCP is separate: it uses the RNode radio driver but reaches the radio through a TCP-exposed KISS stream instead of a local serial port.
 
-iOS does not expose USB serial to third-party applications. Apple's policy prevents accessory apps from opening arbitrary USB devices, so serial framers are unavailable on iOS regardless of which cable you plug in. iPad and iPhone users wanting LoRa or radio connectivity should use Bluetooth-attached hardware (BLE RNode) instead.
+iOS does not expose USB serial to third-party applications. Apple's policy prevents accessory apps from opening arbitrary USB devices, so serial framers are unavailable on iOS regardless of which cable you plug in. iPad and iPhone users wanting LoRa or radio connectivity should use Bluetooth-attached hardware (BLE RNode) or an RNode TCP bridge on a reachable local network.
 
-Android exposes USB serial through the host APIs and can run the full set of serial framers. macOS, Linux, and Windows desktop builds all support every framer documented above.
+Android exposes USB serial through the host APIs and can run the full set of serial framers through USB-OTG. Android can also use BLE RNode and RNode TCP. macOS, Linux, and Windows desktop builds support every framer documented above when built with the relevant features.

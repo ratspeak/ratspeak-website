@@ -1,18 +1,27 @@
 # LoRa Radio Interfaces
 
-An RNode is a LoRa transceiver running open firmware that speaks the KISS protocol over USB or BLE. Any board in that family — RNode Mk2, LilyGO T-Beam / T-Echo, Heltec, RAK4631, homebuilt builds on a supported Semtech radio — works. The radio handles modulation; Reticulum handles addressing, encryption, and routing on top of it.
+An RNode is a LoRa transceiver running open firmware that speaks the KISS protocol over USB serial, Bluetooth LE, or a TCP bridge. Any board in that family — RNode Mk2, LilyGO T-Beam / T-Echo, Heltec, RAK4631, homebuilt builds on a supported Semtech radio — works. The radio handles modulation; Reticulum handles addressing, encryption, and routing on top of it.
 
 LoRa is the slow lane of the network. Throughput is measured in hundreds of bytes per second, not kilobits, and a frame may take seconds to a minute on the air. In return you get kilometers of range from a battery-sized radio and the freedom to operate without infrastructure.
 
 ## Connecting an RNode in Ratspeak
 
-Open the Network view and tap **Add LoRa Device**. Three transports are available depending on platform:
+Open the Network view and tap **Add LoRa Device**. Four transports are available depending on platform:
 
 - **USB / Serial** — desktop (Linux, macOS, Windows). The radio enumerates as a serial port; pick it from the dropdown.
 - **USB-OTG** — Android phones with USB host mode, using a USB-C OTG cable. Grant the per-device permission prompt the first time you plug in.
 - **Bluetooth** — desktop and mobile. Put the RNode into pairing mode first (hold the left button until the OLED prompts), then scan. The 6-digit passkey on the OLED is entered on the phone. Bonding only happens once; subsequent connects are silent.
+- **TCP** — desktop and mobile. Use this when the RNode's KISS stream is exposed over a local TCP bridge, for example by firmware with TCP support or by a nearby always-on host attached to the radio.
 
-After pairing, set a name, region, and preset. Ratspeak writes the interface config and brings it up immediately — no manual config file editing. Adding a USB radio while a BLE radio is live (or vice versa) automatically tears down the other side, so the same physical RNode is never driven from two transports at once.
+After choosing a transport, set a name, region, and preset. Ratspeak writes the interface config and brings it up immediately — no manual config file editing. Adding another transport for the same physical RNode automatically tears down the older side, so the radio is never driven from two places at once.
+
+## RNode over TCP
+
+RNode TCP is still a LoRa radio interface. It is not the same thing as a normal **TCP Client** interface. A TCP Client connects Ratspeak to another Reticulum node or hub; RNode TCP connects Ratspeak to the radio's RNode/KISS control stream, then packets still go over LoRa on the air.
+
+In the TCP tab, enter an endpoint as `host`, `host:port`, `tcp://host`, or `tcp://host:port`. If you omit the port, Ratspeak uses the RNode TCP default port `7633`. IPv6 literals should use brackets when a port is present, for example `tcp://[fd00::10]:7633`.
+
+Keep RNode TCP on a trusted LAN, hotspot, or VPN unless the bridge itself adds authentication. Anyone who can open the raw radio control stream can spend your airtime and change how the attached radio behaves.
 
 ## The 8 firmware presets
 

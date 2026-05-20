@@ -21,7 +21,7 @@ in turn shapes how the router treats traffic that crosses it.
 Ratspeak ships interfaces in five rough families. You'll typically use one
 or two from each, not all of them.
 
-**IP-based.** TCP client/server for stable point-to-point links over the
+**IP-based.** TCP client/server for stable point-to-point Reticulum links over the
 internet or LAN, UDP for low-overhead local broadcasts, AutoInterface for
 zero-config LAN discovery (it speaks link-local IPv6 multicast and
 auto-discovers peers on the same subnet using UDP ports 29716 for discovery
@@ -36,9 +36,12 @@ HDLC-framed serial, and Pipe for pumping bytes through any subprocess that
 exposes stdin/stdout. These are how you bolt Reticulum onto existing radio
 hardware that wasn't designed for it.
 
-**RNode and LoRa.** RNode and RNodeMulti drive RNode hardware directly over
-USB or BLE — long-range LoRa links for low-bandwidth resilient meshes.
-RNodeMulti exposes multiple sub-interfaces from one physical board.
+**RNode and LoRa.** RNode drives radio hardware directly over USB serial,
+Android USB-OTG, Bluetooth LE, or a TCP-exposed RNode stream — long-range LoRa
+links for low-bandwidth resilient meshes. RNodeMulti exposes multiple
+sub-interfaces from one physical board.
+RNode over TCP belongs in this family, not in the normal TCP Client family:
+the TCP socket reaches the radio, while the Reticulum traffic still rides LoRa.
 
 **Bluetooth.** BLE-RNode is the BLE bridge for BLE-equipped RNode hardware.
 Bluetooth Peer is the phone-to-phone and laptop-to-phone transport that works
@@ -96,7 +99,7 @@ leave it alone on fast ones.
 A few patterns cover most real deployments.
 
 **Laptop with LoRa dongle.** AutoInterface on the LAN for fast local
-traffic, an RNode interface on the USB-attached LoRa board for long-range,
+traffic, an RNode interface attached over USB, BLE, or TCP for long-range,
 and optionally Bluetooth Peer so a nearby phone can talk to the laptop without
 joining the wifi. The router decides per-destination which interface to
 use; you don't manage that by hand.

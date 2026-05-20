@@ -6,13 +6,13 @@ For protocol-level detail (header formats, IFAC, mode semantics) see the [Reticu
 
 ## TCPClientInterface
 
-A simple outbound TCP socket — what you use to dial a public hub or a friend's transport node.
+A simple outbound TCP socket — what you use to dial a public Ratspeak server, another public hub, or a friend's transport node.
 
 ```ini
-[[Ratspeak Hub]]
+[[Emerald]]
   type = TCPClientInterface
   enabled = yes
-  target_host = rns.ratspeak.org
+  target_host = 2.ratspeak.org
   target_port = 4242
 ```
 
@@ -110,11 +110,20 @@ Any interface above can be locked to peers that share a passphrase. Set `network
 
 Leave `ifac_size` unset unless you are deliberately tuning IFAC overhead; the default is chosen per interface. The upstream Reticulum manual defines explicit `ifac_size` values in bits, and normal users should not need to override it. IFAC is an authentication boundary, not a confidentiality boundary — private payloads are already encrypted above it. See the [Reticulum manual](https://reticulum.network/manual/interfaces.html) for the full mode/IFAC matrix.
 
-## Public hubs
+## Public Ratspeak TCP servers
 
-Adding a public hub gives you immediate reach across the existing Reticulum network:
+Adding a public Ratspeak TCP server gives you immediate reach across the existing Reticulum network. In the app, the public Ratspeak servers are labelled by friendly names:
 
-- `rns.ratspeak.org:4242` — operated by Ratspeak.
+| Name | Endpoint |
+|---|---|
+| Ruby | `1.ratspeak.org:4141` |
+| Emerald | `2.ratspeak.org:4242` |
+| Diamond | `3.ratspeak.org:4343` |
+
+The legacy endpoint `rns.ratspeak.org:4242` is an alias for Emerald.
+
+Other public Reticulum hubs are independent of Ratspeak:
+
 - For wider Reticulum connectivity, use the current Reticulum connect/backbone information at [reticulum.network/connect.html](https://reticulum.network/connect.html) or a community directory you trust.
 
 Hubs are convenient, not load-bearing. If you intend to be reachable long-term, run your own `TCPServerInterface` (or `BackboneInterface` on a desktop OS for higher peer counts) and announce yourself — the network gets healthier with every node that does.

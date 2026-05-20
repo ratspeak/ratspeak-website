@@ -57,7 +57,7 @@ LoRa wins on range; BLE wins on throughput and latency. If everyone is in the sa
 
 ## iOS support
 
-Apple platforms do not expose USB serial to apps, so iPhones and iPads cannot drive an RNode over a Lightning or USB-C cable. **Bluetooth is the only path to LoRa hardware on iOS.** The BLE RNode bridge is therefore a hard requirement for iOS users who want to participate in a LoRa mesh; the same flow described above applies. The Network view on iOS hides the USB radio option entirely — there is no platform path for it.
+Apple platforms do not expose USB serial to apps, so iPhones and iPads cannot drive an RNode over a Lightning or USB-C cable. For a directly attached radio on iOS, use the BLE RNode bridge. If the radio's RNode/KISS stream is exposed on a reachable local network, iOS can also use the RNode TCP option from the Add LoRa Device sheet. The Network view on iOS hides the USB radio option entirely — there is no platform path for it.
 
 Bluetooth Peer works on iOS as well, but Core Bluetooth applies stricter background-execution limits than Android — extended advertising while the app is fully suspended is not guaranteed. Keep Ratspeak in the foreground or in the recents tray during active sessions for reliable peer discovery. Granting the *Bluetooth* permission at first launch is required; without it both the bridge and Bluetooth Peer will silently find nothing.
 

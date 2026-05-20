@@ -1,7 +1,7 @@
 # Deployment Overview
 
 Deployment in Reticulum means running infrastructure beyond a single client. A
-lone Ratspeak install talking over a public TCP hub is a *user*, not a
+lone Ratspeak install talking over a public TCP transport server is a *user*, not a
 deployment. Once you put up a transport node so your friends can reach each
 other, run an Offline Inbox/propagation node so messages survive while peers are offline,
 gateway a LoRa segment to the internet, or hand out IFAC keys to lock a private
@@ -53,8 +53,8 @@ page; what changes is how they are combined.
   know the key can join. This is what turns a public-by-default protocol
   into a private mesh.
 - **RNode and LoRa** provide the radio layer for off-grid and community
-  meshes. Any RNode-compatible hardware works; firmware is loaded with
-  `rnodeconf`.
+  meshes. Any RNode-compatible hardware works over USB, BLE, or a TCP bridge;
+  firmware is loaded with `rnodeconf`.
 - **The `rnsd-rs` daemon** runs the Reticulum stack as a background service.
   It owns interfaces, routing state, and the local control surface used by
   the other rsReticulum tools.

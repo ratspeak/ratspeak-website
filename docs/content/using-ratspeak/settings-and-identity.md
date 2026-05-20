@@ -48,7 +48,7 @@ A manual announce is always available from the bottom bar (long-press) and from 
 **Settings → Network** controls which interfaces are allowed to carry your traffic and on what terms.
 
 - **Transport Mode** — OFF by default. OFF keeps this device as a normal client, ON relays Reticulum traffic for other peers when the local runtime can do so, and AUTO enables only on suitable non-LoRa setups. AUTO requires an enabled non-LoRa interface such as Local Network, TCP, or Backbone; it stays disabled on cellular, no-network, mobile `unknown` network states, and whenever an enabled LoRa/RNode interface is configured.
-- **Per-interface enable/disable** — toggle TCP, Wi-Fi/Auto, LoRa radio (BLE or USB-OTG), or Bluetooth Peer without removing them. Useful for going dark on a specific link.
+- **Per-interface enable/disable** — toggle TCP, Wi-Fi/Auto, LoRa radio (USB, USB-OTG, BLE, or TCP), or Bluetooth Peer without removing them. Useful for going dark on a specific link.
 - **IFAC pre-shared key** — an optional shared secret that scopes an interface to a private group. Devices without the key see your packets as noise and drop them.
 - **Announce caps** — limits on how many announces an interface will accept and forward, to keep a chatty network from drowning out a slow one.
 

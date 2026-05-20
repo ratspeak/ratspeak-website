@@ -53,7 +53,9 @@ A gateway is a transport router with two interfaces: one LoRa, one IP. It runs `
     mode = boundary
 ```
 
-Match the LoRa parameters to whatever the operator group agreed on. Point the backhaul at any reachable Reticulum TCP server — another operator's VPS, a public hub, whatever the group standardized on. Run it as a service with systemd or Docker; see [Infrastructure & Ops](../deployment/infrastructure-and-ops) for unit files.
+Match the LoRa parameters to whatever the operator group agreed on. Point the backhaul at any reachable Reticulum TCP server — another operator's VPS, a public TCP server, whatever the group standardized on. Run it as a service with systemd or Docker; see [Infrastructure & Ops](../deployment/infrastructure-and-ops) for unit files.
+
+If the gateway reaches the radio through an RNode TCP bridge instead of a local USB cable, keep `type = RNodeInterface` and replace the serial `port` with the TCP endpoint, for example `port = tcp://radio-lan-host:7633`. The TCP socket only reaches the radio; this is still the LoRa side of the gateway, not the IP backhaul.
 
 ## Boundary vs gateway mode
 

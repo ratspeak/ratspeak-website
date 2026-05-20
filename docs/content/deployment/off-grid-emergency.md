@@ -21,7 +21,9 @@ video link. Don't plan on streaming anything. Plan on sending sentences.
 Minimum viable off-grid kit:
 
 - **One handheld per person.** Either a Ratdeck or Ratcom for standalone LoRa
-  messaging, or a phone/laptop running Ratspeak paired to a separate RNode.
+  messaging, or a phone/laptop running Ratspeak connected to a separate RNode
+  over BLE, USB where the platform allows it, or a local RNode TCP bridge if
+  your field kit supplies its own LAN.
   Ratdeck has BLE bridge support; Ratcom is standalone/Wi-Fi in current firmware,
   not a phone-tethered BLE radio.
 - **Optional always-on transport node.** A Raspberry Pi + RNode + battery + small

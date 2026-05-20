@@ -50,7 +50,7 @@ Commands live under ten domain modules. Counts shift between releases; the curre
 
 | Domain       | Approx. count | Covers                                                                  |
 |--------------|---------------|-------------------------------------------------------------------------|
-| `interfaces` | ~30           | AutoInterface, LoRa/RNode, BLE RNode scan, serial discovery, TCP client/server, Backbone client/server, notifications, transport mode, connection history. |
+| `interfaces` | ~30           | AutoInterface, LoRa/RNode, RNode TCP endpoint setup, BLE RNode scan, serial discovery, TCP client/server, Backbone client/server, notifications, transport mode, connection history. |
 | `system`     | ~18           | Lifecycle, status, restart, app metadata, reset/clear actions.          |
 | `network`    | ~20           | Announces, paths, Offline Inbox/propagation nodes, blackholes, hub interfaces, network log state and level. |
 | `messaging`  | ~14           | Send, list, mark-read, attachments, conversation CRUD.                  |

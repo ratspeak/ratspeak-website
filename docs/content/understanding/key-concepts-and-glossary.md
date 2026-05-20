@@ -44,7 +44,7 @@ A reference for the terms used throughout the Ratspeak and Reticulum docs. Read 
 
 **AutoInterface.** Zero-configuration LAN discovery over IPv6 multicast. By default, discovery uses UDP port `29716` and data uses UDP port `42671`. It works only where the local network allows multicast and matching `group_id` values.
 
-**RNode.** A class of LoRa transceivers that speak Reticulum-friendly framing over USB, Bluetooth LE, or related links. RNodes are how Reticulum reaches off-grid radio networks without depending on cell service or the internet.
+**RNode.** A class of LoRa transceivers that speak Reticulum-friendly framing over USB serial, Android USB-OTG, Bluetooth LE, or a TCP bridge. RNodes are how Reticulum reaches off-grid radio networks without depending on cell service or the internet.
 
 **KISS.** A simple framing protocol from packet radio. Reticulum's KISS interfaces can use TNCs, modems, and compatible radio devices that expose KISS over serial or TCP.
 

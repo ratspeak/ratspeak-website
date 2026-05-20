@@ -52,15 +52,16 @@ AUTO is intentionally conservative. It is meant to avoid turning phones, cellula
 
 ## Adding an interface
 
-Open Network and tap **Add Interface**. Ratspeak supports five interface types, each suited to a different transport:
+Open Network and tap **Add Interface**. Ratspeak supports these common interface types, each suited to a different transport:
 
 - **TCPClientInterface** — connect to a public or private Reticulum hub over the internet. You provide a host and port, and Ratspeak keeps the link alive. Good for joining the wider Reticulum network when you have connectivity.
 - **AutoInterface** — discovers peers on your local network (LAN, mesh Wi-Fi, hotspot) using IPv6 link-local multicast. No configuration needed; if another Reticulum node is on the same subnet, you'll find it.
 - **RNode (USB / Serial)** — a LoRa radio plugged in over USB. On desktop, Ratspeak enumerates serial ports for you. On Android, USB-OTG cables let you drive an RNode directly from a phone.
 - **RNode over BLE** — an RNode connected over Bluetooth Low Energy. The RNode must be in pairing mode the first time, after which Ratspeak remembers the bond and reconnects automatically.
+- **RNode over TCP** — a LoRa radio whose RNode/KISS stream is exposed on a local TCP endpoint. Enter `host`, `host:port`, `tcp://host`, or `tcp://host:port`; if the port is omitted, Ratspeak uses `7633`. This is a radio interface, not a normal TCP Client hub link.
 - **Bluetooth Peer** — phone-to-phone (and desktop-to-phone) Reticulum over Bluetooth, with no infrastructure needed. Nearby Ratspeak clients with Bluetooth Peer active appear as peers; messages, announces, and file transfers flow over the link directly. Toggle it from Network → Bluetooth Peer, or in Settings → Network → Bluetooth Peer.
 
-Adding a radio interface while another is already serving the same physical RNode (USB while BLE is up, or vice versa) will tear down the older one automatically so the radio is never driven from two places at once.
+Adding a radio interface while another is already serving the same physical RNode (USB, BLE, or TCP) will tear down the older one automatically so the radio is never driven from two places at once.
 
 ## Offline Inbox
 

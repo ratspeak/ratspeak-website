@@ -2,7 +2,7 @@
 
 ## What Is an RNode?
 
-RNode is firmware that turns LoRa-capable microcontroller boards into Reticulum-native radio interfaces. It uses a custom MAC layer optimized for mesh networking - no gateways, no network servers, no cloud infrastructure. Depending on the board and firmware profile, an RNode connects to your computer via USB, Bluetooth LE, or WiFi and provides a radio interface that Reticulum uses like any other network connection. Reticulum handles private-message encryption end-to-end before packets reach the radio.
+RNode is firmware that turns LoRa-capable microcontroller boards into Reticulum-native radio interfaces. It uses a custom MAC layer optimized for mesh networking - no gateways, no network servers, no cloud infrastructure. Depending on the board and firmware profile, an RNode connects to your computer or phone via USB serial, Android USB-OTG, Bluetooth LE, or a TCP bridge and provides a radio interface that Reticulum uses like any other network connection. Reticulum handles private-message encryption end-to-end before packets reach the radio.
 
 | Property | Value |
 |----------|-------|
@@ -10,7 +10,7 @@ RNode is firmware that turns LoRa-capable microcontroller boards into Reticulum-
 | **Speed** | ~37 bps to ~11 Kbps (depends on preset) |
 | **Protocol** | Custom MAC layer (not LoRaWAN) |
 | **Encryption** | Handled by Reticulum (end-to-end) |
-| **Connection** | USB serial, Bluetooth LE, or WiFi TCP, depending on board/firmware |
+| **Connection** | USB serial, Android USB-OTG, Bluetooth LE, or TCP bridge, depending on board/firmware |
 | **Power** | Low - solar/battery capable |
 | **Cost** | ~$25-100 USD depending on board |
 
@@ -55,12 +55,14 @@ Before buying or flashing, check the practical kit:
   port = ble://RNode 3B87
 ```
 
-**WiFi TCP** - connect over local network:
+**TCP bridge** - connect to an RNode KISS stream exposed on a local network:
 ```ini
 [[LoRa Radio]]
   type = RNodeInterface
-  port = tcp://10.0.0.1
+  port = tcp://10.0.0.1:7633
 ```
+
+In Ratspeak's Add LoRa Device sheet, the TCP field accepts `host`, `host:port`, `tcp://host`, or `tcp://host:port`. If you omit the port, Ratspeak uses `7633`.
 
 ## Supported Boards
 

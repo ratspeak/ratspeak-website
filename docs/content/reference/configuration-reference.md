@@ -70,7 +70,7 @@ Each interface is declared as a sub-block. The block name is a label; `type` sel
 
 | Key | Description |
 |---|---|
-| `port` | Serial device, e.g. `/dev/ttyUSB0` or `COM3`. |
+| `port` | Serial device, e.g. `/dev/ttyUSB0` or `COM3`, or a TCP-backed RNode stream such as `tcp://192.168.1.50:7633`. |
 | `frequency` | Centre frequency in Hz. Must match other nodes on the link and local regulations. |
 | `bandwidth` | LoRa bandwidth in Hz (e.g. `125000`, `250000`). |
 | `txpower` | Transmit power in dBm. |
@@ -78,6 +78,21 @@ Each interface is declared as a sub-block. The block name is a label; `type` sel
 | `codingrate` | LoRa coding rate, `5`-`8` (means 4/5 to 4/8). |
 | `airtime_limit_short` | Percent airtime cap over a short window. Used by RNodeMulti subinterfaces in the current Rust implementation. |
 | `airtime_limit_long` | Percent airtime cap over a long window. Used by RNodeMulti subinterfaces in the current Rust implementation. |
+
+For RNode over TCP, keep `type = RNodeInterface` and set `port` to the radio endpoint:
+
+```ini
+[[Field TCP RNode]]
+    type = RNodeInterface
+    port = tcp://192.168.1.50:7633
+    frequency = 915000000
+    bandwidth = 250000
+    txpower = 22
+    spreadingfactor = 11
+    codingrate = 5
+```
+
+This is different from `TCPClientInterface`. A TCP client connects to another Reticulum node or hub; an RNode TCP endpoint connects to the radio control stream and still transmits over LoRa.
 
 ### AutoInterface keys
 

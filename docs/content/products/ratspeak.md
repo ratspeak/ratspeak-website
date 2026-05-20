@@ -6,7 +6,7 @@ It's the same app on every platform: macOS, Linux, Windows, iOS, Android. The pr
 
 ## Platforms
 
-Ratspeak is built as a single Tauri v2 app from one Rust codebase. Desktop packaging targets `.dmg` for macOS, amd64/arm64 `.deb` plus amd64 `.rpm` / `.AppImage` for Linux, and MSI / NSIS for Windows. Mobile uses the same crate with platform-conditional dependencies — Android via JNI, iOS via Objective-C bindings. Desktop supports USB serial radios; Android supports USB host and BLE; iOS is BLE-only for radios because Apple does not expose USB serial to third-party apps.
+Ratspeak is built as a single Tauri v2 app from one Rust codebase. Desktop packaging targets `.dmg` for macOS, amd64/arm64 `.deb` plus amd64 `.rpm` / `.AppImage` for Linux, and MSI / NSIS for Windows. Mobile uses the same crate with platform-conditional dependencies — Android via JNI, iOS via Objective-C bindings. Desktop supports USB serial radios, BLE radios, and RNode TCP bridges; Android supports USB host, BLE, and RNode TCP; iOS supports BLE and RNode TCP for radios because Apple does not expose USB serial to third-party apps.
 
 ## Get the app
 
@@ -60,7 +60,7 @@ If you copy the `.ratspeak/` directory to another machine and launch Ratspeak th
 
 ## Hardware it talks to
 
-Ratspeak speaks to anything that speaks Reticulum. Out of the box that means [Ratdeck](../products/ratdeck) and [Ratcom](../products/ratcom) handhelds on any reachable Reticulum path, [RNode-class boards](../hardware/rnode-and-supported-boards) over USB or BLE, and other Ratspeak / Sideband / NomadNet / MeshChat clients reachable over TCP, UDP, I2P, or Bluetooth Peer. iOS only supports radios over BLE — Apple doesn't expose USB serial to third-party apps.
+Ratspeak speaks to anything that speaks Reticulum. Out of the box that means [Ratdeck](../products/ratdeck) and [Ratcom](../products/ratcom) handhelds on any reachable Reticulum path, [RNode-class boards](../hardware/rnode-and-supported-boards) over USB, BLE, or RNode TCP, and other Ratspeak / Sideband / NomadNet / MeshChat clients reachable over TCP, UDP, I2P, or Bluetooth Peer. iOS cannot use USB serial radios, but it can use BLE RNode hardware or an RNode TCP bridge.
 
 ## What it isn't
 

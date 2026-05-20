@@ -44,7 +44,7 @@ For the full preset table and tuning guidance, see [LoRa Radio Interfaces](../ne
 
 ## Bridging to the wider network
 
-Ratcom can join your home WiFi (STA mode) and reach a hosted Reticulum node such as `rns.ratspeak.org:4242` so messages flow off the LoRa mesh and onto the wider Reticulum network. It can also run as an access point (`ratcom-XXXX`, password `ratspeak`) so a laptop can attach a `TCPClientInterface` at `192.168.4.1:4242`. AP mode is still alpha in the current firmware, so test it before relying on it in the field.
+Ratcom can join your home WiFi (STA mode) and reach a hosted Reticulum node such as Emerald (`2.ratspeak.org:4242`) so messages flow off the LoRa mesh and onto the wider Reticulum network. The other public Ratspeak TCP servers are Ruby (`1.ratspeak.org:4141`) and Diamond (`3.ratspeak.org:4343`); `rns.ratspeak.org:4242` remains an alias for Emerald. Ratcom can also run as an access point (`ratcom-XXXX`, password `ratspeak`) so a laptop can attach a `TCPClientInterface` at `192.168.4.1:4242`. AP mode is still alpha in the current firmware, so test it before relying on it in the field.
 
 ## Build from source
 

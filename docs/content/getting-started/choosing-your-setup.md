@@ -22,21 +22,21 @@ The simplest start. You install the desktop app on macOS, Linux, or Windows and 
 
 ## Ratspeak Desktop + a TCP Hub
 
-Same client, but you bring your own backhaul. Point it at the public hub `rns.ratspeak.org:4242` to join the wider Ratspeak network, or run your own VPS to host a private one. Useful when you're behind restrictive NAT, want a stable rendezvous point, or want to bridge two LANs together.
+Same client, but you bring your own backhaul. Point it at a public Ratspeak TCP server - Ruby (`1.ratspeak.org:4141`), Emerald (`2.ratspeak.org:4242`), or Diamond (`3.ratspeak.org:4343`) - to join the wider Ratspeak network, or run your own VPS to host a private one. The legacy `rns.ratspeak.org:4242` endpoint is an alias for Emerald. Useful when you're behind restrictive NAT, want a stable rendezvous point, or want to bridge two LANs together.
 
 - See: [IP, LAN & I2P](../networking/ip-internet-and-i2p)
 - See: [Self-Hosted Transport](#/getting-started/choosing-your-setup::self-hosted-transport-node) below
 
 ## Ratspeak Mobile
 
-iOS and Android builds of the same client. The main difference is how you talk to LoRa hardware: iOS does not expose USB to apps, so radios connect over Bluetooth LE. Android supports BLE and USB-OTG. If you want a phone to drive a LoRa radio, use a BLE-capable RNode or Ratdeck's bridge profile where supported.
+iOS and Android builds of the same client. The main difference is how you talk to LoRa hardware: iOS does not expose USB to apps, so radios connect over Bluetooth LE or an RNode TCP bridge. Android supports BLE, USB-OTG, and RNode TCP. If you want a phone to drive a LoRa radio, use a BLE-capable RNode, a TCP-backed RNode bridge, or Ratdeck's bridge profile where supported.
 
 - See: [Install and Platform Setup](../getting-started/install-and-platform-setup)
 - See: [Bluetooth Interfaces](../networking/bluetooth-interfaces)
 
 ## Ratspeak + an RNode or Ratdeck Bridge
 
-Add a portable LoRa node to your phone or laptop. The radio carries the long-range link; Ratspeak on your main device handles the long sessions and the screen real estate. A normal RNode connects over USB, USB-OTG on Android, or BLE where the firmware supports it. Ratdeck can expose a BLE bridge profile when enabled. Ratcom is standalone first and bridges over Wi-Fi today; it is not a mobile BLE radio tether yet.
+Add a portable LoRa node to your phone or laptop. The radio carries the long-range link; Ratspeak on your main device handles the long sessions and the screen real estate. A normal RNode connects over USB, USB-OTG on Android, BLE where the firmware supports it, or TCP when the radio's KISS stream is exposed on the local network. Ratdeck can expose a BLE bridge profile when enabled. Ratcom is standalone first and bridges over Wi-Fi today; it is not a mobile BLE radio tether yet.
 
 - See: [Ratdeck](../products/ratdeck)
 - See: [Ratcom](../products/ratcom)

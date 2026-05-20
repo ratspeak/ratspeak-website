@@ -40,7 +40,7 @@ Walk through these in order:
 
 - **macOS / Linux**: serial devices need user permissions. On Linux, add yourself to the `dialout` group (`sudo usermod -aG dialout $USER`), then log out and back in. On macOS, the device should appear as `/dev/tty.usbserial-*` automatically.
 - **Windows**: install the CP210x or CH340 driver matching your RNode's USB chip. Check Device Manager for an unknown COM device.
-- **iOS**: USB radios are not supported. Use a BLE-equipped RNode from **Network → Add LoRa Device → Bluetooth** and accept the OS pairing prompt when it appears.
+- **iOS**: USB radios are not supported. Use a BLE-equipped RNode from **Network → Add LoRa Device → Bluetooth**, or use the TCP tab if your RNode stream is exposed on a reachable local endpoint. Accept the OS pairing prompt for BLE when it appears.
 - Bad cables look identical to good ones. If nothing else works, try a different USB cable — many shipped with devices are charge-only.
 
 ## Messages aren't delivering
@@ -71,11 +71,11 @@ If you don't have a backup, the identity is **unrecoverable** — keys are gener
 - On Windows, use the MSIX build if this machine needs to advertise for Bluetooth Peer. The plain `.exe` / MSI builds do not provide the advertiser/peripheral role.
 - On Linux, the `bluetooth` service must be running (`systemctl status bluetooth`), the user must have BlueZ permissions, the adapter must support LE advertising, and some distros need `Experimental = true` in `/etc/bluetooth/main.conf` followed by `sudo systemctl restart bluetooth`.
 
-## I can't reach `rns.ratspeak.org:4242`
+## I can't reach a public Ratspeak TCP server
 
-That hub is best-effort community infrastructure with no uptime guarantee. If it's unreachable:
+Ruby (`1.ratspeak.org:4141`), Emerald (`2.ratspeak.org:4242`), and Diamond (`3.ratspeak.org:4343`) are best-effort public Ratspeak infrastructure with no uptime guarantee. The legacy endpoint `rns.ratspeak.org:4242` is an alias for Emerald. If one is unreachable:
 
-- Try a different community hub from [Reticulum's current connect/backbone information](https://reticulum.network/connect.html) or from a community directory you trust.
+- Try another public Ratspeak server, or a different community hub from [Reticulum's current connect/backbone information](https://reticulum.network/connect.html) or from a community directory you trust.
 - Run your own TCPServer on a small VPS — it's a single interface block in the config.
 - Connect peer-to-peer over a different transport (LoRa, BLE, AutoInterface on a shared LAN).
 

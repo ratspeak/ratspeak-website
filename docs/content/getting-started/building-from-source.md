@@ -324,7 +324,7 @@ If a production iOS build opens to a blank page or tries to load a local dev ser
 iOS platform notes:
 
 - Local Network access is required for LAN peers. UDP multicast discovery also needs Apple's multicast networking entitlement in the signed provisioning profile; without it, local discovery can be limited.
-- iOS apps cannot use general USB serial devices. Use Bluetooth RNode hardware for LoRa on iPhone and iPad.
+- iOS apps cannot use general USB serial devices. Use Bluetooth RNode hardware or an RNode TCP bridge for LoRa on iPhone and iPad.
 - Bluetooth, notifications, and camera/photo access all require the normal iOS permission prompts.
 - Background execution is controlled by iOS. Ratspeak can use declared Bluetooth background modes, but it should not be treated as a headless always-on daemon.
 

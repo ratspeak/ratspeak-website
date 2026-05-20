@@ -32,15 +32,17 @@ You have three easy starting points. Pick whichever matches your situation; you 
 
 **AutoInterface (zero config).** If anyone else on your local WiFi or LAN is running Reticulum, AutoInterface finds them automatically. It uses UDP ports 29716 and 42671 to discover peers on the same network segment. No setup required — it's already running. If your network allows multicast, you're done.
 
-**TCP Client to the public hub.** The fastest way to reach the wider Reticulum network is over the internet. From the Network tab, add a TCP Client interface pointing at:
+**TCP Client to a public Ratspeak server.** The fastest way to reach the wider Reticulum network is over the internet. From the Network tab, add a TCP Client interface pointing at one of the public Ratspeak TCP servers:
 
-```
-rns.ratspeak.org:4242
-```
+| Name | Endpoint |
+|---|---|
+| Ruby | `1.ratspeak.org:4141` |
+| Emerald | `2.ratspeak.org:4242` |
+| Diamond | `3.ratspeak.org:4343` |
 
-This is the public Ratspeak hub. It connects you to the broader Reticulum network so you can hear announces from anyone reachable over the internet.
+These are public Ratspeak transport servers. They connect you to the broader Reticulum network so you can hear announces from anyone reachable over the internet. Older configs that use `rns.ratspeak.org:4242` still reach Emerald.
 
-**LoRa device.** If you have an [RNode](../hardware/rnode-and-supported-boards), plug it into USB or pair it over BLE, then tap **Add LoRa Device** in the Network tab. The modal lists detected serial ports or nearby BLE radios and a **Preset** dropdown. Pick the preset that matches the devices around you — `medium_fast` is a sensible all-rounder; `long_fast` and `long_moderate` reach further at the cost of speed; `short_turbo` and `short_fast` are higher-throughput at shorter range. Tap **Add Radio**. Ratspeak opens the radio and starts listening. Ratdeck and Ratcom are standalone handhelds; use their own screens unless you have explicitly enabled a bridge mode such as Ratdeck's BLE bridge.
+**LoRa device.** If you have an [RNode](../hardware/rnode-and-supported-boards), plug it into USB, pair it over BLE, or point Ratspeak at an RNode TCP bridge, then tap **Add LoRa Device** in the Network tab. The modal lists detected serial ports, nearby BLE radios, and a TCP tab for endpoints such as `192.168.1.50:7633`. If no TCP port is supplied, Ratspeak uses `7633`. Pick the preset that matches the devices around you — `medium_fast` is a sensible all-rounder; `long_fast` and `long_moderate` reach further at the cost of speed; `short_turbo` and `short_fast` are higher-throughput at shorter range. Tap **Add Radio**. Ratspeak opens the radio and starts listening. Ratdeck and Ratcom are standalone handhelds; use their own screens unless you have explicitly enabled a bridge mode such as Ratdeck's BLE bridge.
 
 You can run all three at once. Traffic routes transparently across whatever interfaces are up — a message can travel over LoRa to a transport node, hop over TCP, and land on someone's WiFi.
 
@@ -52,7 +54,7 @@ When a Reticulum node comes online, it broadcasts an **announce** — a signed p
 
 Each row shows the peer's display name (or just their hash if they didn't set one), the destination hash itself, and the **hop count** — how many relays the announce travelled through to reach you. Lower hop counts mean closer peers.
 
-If nothing shows up after a couple of minutes, check the Network tab — your interface should be marked as connected. Public WiFi, hotel networks, and corporate firewalls often block multicast, which breaks AutoInterface; the TCP Client to `rns.ratspeak.org:4242` works through almost any firewall.
+If nothing shows up after a couple of minutes, check the Network tab — your interface should be marked as connected. Public WiFi, hotel networks, and corporate firewalls often block multicast, which breaks AutoInterface; a TCP Client to Ruby, Emerald, or Diamond works through most firewalls.
 
 ## Send your first message
 
