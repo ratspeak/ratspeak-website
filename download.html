@@ -4036,7 +4036,7 @@
                             </span>
                         </a>
                         <div class="dl-cta-secondary-row">
-                            <a href="https://github.com/ratspeak/Ratspeak/releases/latest/download/Ratspeak-x64.msi" class="nr-btn nr-btn-secondary dl-cta-secondary">
+                            <a href="https://github.com/ratspeak/Ratspeak/releases/latest" class="nr-btn nr-btn-secondary dl-cta-secondary" target="_blank" rel="noopener noreferrer" data-ratspeak-release-asset="windows-msi">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
                                 Windows<span class="dl-cta-meta">.msi</span>
                             </a>
@@ -7364,6 +7364,37 @@
             }
         });
     });
+
+    function resolveRatspeakReleaseAssets() {
+        var links = Array.prototype.slice.call(document.querySelectorAll('[data-ratspeak-release-asset]'));
+        if (!links.length || typeof fetch !== 'function') return;
+
+        fetch('https://api.github.com/repos/ratspeak/Ratspeak/releases/latest', {
+            headers: { Accept: 'application/vnd.github+json' }
+        }).then(function (response) {
+            if (!response.ok) throw new Error('Release lookup failed');
+            return response.json();
+        }).then(function (release) {
+            var assets = Array.isArray(release.assets) ? release.assets : [];
+            links.forEach(function (link) {
+                var kind = link.dataset.ratspeakReleaseAsset;
+                var asset = assets.find(function (candidate) {
+                    var name = String(candidate.name || '').toLowerCase();
+                    if (kind === 'windows-msi') {
+                        return name.indexOf('ratspeak-') === 0 && name.slice(-16) === '-windows-x64.msi';
+                    }
+                    return false;
+                });
+                if (!asset || !asset.browser_download_url) return;
+                link.href = asset.browser_download_url;
+                link.dataset.ratspeakReleaseResolved = 'true';
+            });
+        }).catch(function () {
+            // Keep the release-page fallback when GitHub metadata is unavailable.
+        });
+    }
+
+    resolveRatspeakReleaseAssets();
 
     initMediaViewers();
     renderAllPanelFeatures();
