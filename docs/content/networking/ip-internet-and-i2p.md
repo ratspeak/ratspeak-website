@@ -122,6 +122,8 @@ Adding a public Ratspeak TCP server gives you immediate reach across the existin
 
 The legacy endpoint `rns.ratspeak.org:4242` is an alias for Emerald.
 
+In the app, "Official" means the server is managed by Ratspeak; "Unofficial" means it is operated by a third party.
+
 Other public Reticulum hubs are independent of Ratspeak:
 
 - For wider Reticulum connectivity, use the current Reticulum connect/backbone information at [reticulum.network/connect.html](https://reticulum.network/connect.html) or a community directory you trust.

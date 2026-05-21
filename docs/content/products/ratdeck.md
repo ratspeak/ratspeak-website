@@ -42,7 +42,7 @@ One firmware image covers all four ISM bands: Americas (915 MHz), Europe (868 MH
 
 Ratdeck has two Wi-Fi modes, mutually exclusive, both toggled in Setup -> Interfaces.
 
-**STA mode** joins your home Wi-Fi. Once you configure a TCP peer or server, internet access can extend the mesh well beyond what LoRa alone can cover. The firmware does not join Ruby, Emerald, Diamond, or any other public TCP server automatically.
+**STA mode** joins your home Wi-Fi. Once you configure a TCP peer or server, internet access can extend the mesh well beyond what LoRa alone can cover. The firmware does not join Ruby, Emerald, Diamond, or any other public TCP server automatically. In the app, "Official" means the server is managed by Ratspeak; "Unofficial" means it is operated by a third party.
 
 **AP mode** turns the Ratdeck itself into a hotspot — SSID `ratdeck-XXXX`, password `ratspeak` — and exposes a TCP server on port 4242. Connect a laptop to that network and add a `TCPClientInterface` pointed at `192.168.4.1:4242` in your desktop Reticulum config, and your laptop can talk to the wider LoRa mesh through the handheld. AP mode is still experimental in the handheld firmware and is being reworked alongside the desktop client release, so test it before relying on it in the field.
 

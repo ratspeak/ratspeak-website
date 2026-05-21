@@ -73,7 +73,7 @@ If you don't have a backup, the identity is **unrecoverable** — keys are gener
 
 ## I can't reach a public Ratspeak TCP server
 
-Ruby (`1.ratspeak.org:4141`), Emerald (`2.ratspeak.org:4242`), and Diamond (`3.ratspeak.org:4343`) are best-effort public Ratspeak infrastructure with no uptime guarantee. The legacy endpoint `rns.ratspeak.org:4242` is an alias for Emerald. If one is unreachable:
+Ruby (`1.ratspeak.org:4141`), Emerald (`2.ratspeak.org:4242`), and Diamond (`3.ratspeak.org:4343`) are best-effort public Ratspeak infrastructure with no uptime guarantee. The legacy endpoint `rns.ratspeak.org:4242` is an alias for Emerald. In the app, "Official" means the server is managed by Ratspeak; "Unofficial" means it is operated by a third party. If one is unreachable:
 
 - Try another public Ratspeak server, or a different community hub from [Reticulum's current connect/backbone information](https://reticulum.network/connect.html) or from a community directory you trust.
 - Run your own TCPServer on a small VPS — it's a single interface block in the config.

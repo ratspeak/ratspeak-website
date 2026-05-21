@@ -22,7 +22,7 @@ The simplest start. You install the desktop app on macOS, Linux, or Windows and 
 
 ## Ratspeak Desktop + a TCP Hub
 
-Same client, but you bring your own backhaul. Point it at a public Ratspeak TCP server - Ruby (`1.ratspeak.org:4141`), Emerald (`2.ratspeak.org:4242`), or Diamond (`3.ratspeak.org:4343`) - to join the wider Ratspeak network, or run your own VPS to host a private one. The legacy `rns.ratspeak.org:4242` endpoint is an alias for Emerald. Useful when you're behind restrictive NAT, want a stable rendezvous point, or want to bridge two LANs together.
+Same client, but you bring your own backhaul. Point it at a public Ratspeak TCP server - Ruby (`1.ratspeak.org:4141`), Emerald (`2.ratspeak.org:4242`), or Diamond (`3.ratspeak.org:4343`) - to join the wider Ratspeak network, or run your own VPS to host a private one. The legacy `rns.ratspeak.org:4242` endpoint is an alias for Emerald. In the app, "Official" means the server is managed by Ratspeak; "Unofficial" means it is operated by a third party. Useful when you're behind restrictive NAT, want a stable rendezvous point, or want to bridge two LANs together.
 
 - See: [IP, LAN & I2P](../networking/ip-internet-and-i2p)
 - See: [Self-Hosted Transport](#/getting-started/choosing-your-setup::self-hosted-transport-node) below

@@ -40,7 +40,7 @@ You have three easy starting points. Pick whichever matches your situation; you 
 | Emerald | `2.ratspeak.org:4242` |
 | Diamond | `3.ratspeak.org:4343` |
 
-These are public Ratspeak transport servers. They connect you to the broader Reticulum network so you can hear announces from anyone reachable over the internet. Older configs that use `rns.ratspeak.org:4242` still reach Emerald.
+These are public Ratspeak transport servers. They connect you to the broader Reticulum network so you can hear announces from anyone reachable over the internet. Older configs that use `rns.ratspeak.org:4242` still reach Emerald. In the app, "Official" means the server is managed by Ratspeak; "Unofficial" means it is operated by a third party.
 
 **LoRa device.** If you have an [RNode](../hardware/rnode-and-supported-boards), plug it into USB, pair it over BLE, or point Ratspeak at an RNode TCP bridge, then tap **Add LoRa Device** in the Network tab. The modal lists detected serial ports, nearby BLE radios, and a TCP tab for endpoints such as `192.168.1.50:7633`. If no TCP port is supplied, Ratspeak uses `7633`. Pick the preset that matches the devices around you — `medium_fast` is a sensible all-rounder; `long_fast` and `long_moderate` reach further at the cost of speed; `short_turbo` and `short_fast` are higher-throughput at shorter range. Tap **Add Radio**. Ratspeak opens the radio and starts listening. Ratdeck and Ratcom are standalone handhelds; use their own screens unless you have explicitly enabled a bridge mode such as Ratdeck's BLE bridge.
 

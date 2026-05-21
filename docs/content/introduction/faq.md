@@ -10,7 +10,7 @@ No. Ratspeak runs over any Reticulum interface, including LoRa radio, which need
 
 ## What hardware do I need?
 
-For internet-only use: nothing special. Install Ratspeak, point it at a public Ratspeak TCP server such as Emerald (`2.ratspeak.org:4242`), and you are on the network. Ruby (`1.ratspeak.org:4141`) and Diamond (`3.ratspeak.org:4343`) are public options too; the legacy `rns.ratspeak.org:4242` endpoint is an alias for Emerald. For off-grid radio use you need an RNode — a small LoRa device that handles the radio side over USB, BLE, or an RNode TCP bridge. There are commercial RNodes, DIY builds, and several Reticulum-aware handhelds. Any of them work.
+For internet-only use: nothing special. Install Ratspeak, point it at a public Ratspeak TCP server such as Emerald (`2.ratspeak.org:4242`), and you are on the network. Ruby (`1.ratspeak.org:4141`) and Diamond (`3.ratspeak.org:4343`) are public options too; the legacy `rns.ratspeak.org:4242` endpoint is an alias for Emerald. In the app, "Official" means the server is managed by Ratspeak; "Unofficial" means it is operated by a third party. For off-grid radio use you need an RNode — a small LoRa device that handles the radio side over USB, BLE, or an RNode TCP bridge. There are commercial RNodes, DIY builds, and several Reticulum-aware handhelds. Any of them work.
 
 ## What is Reticulum, and what is LXMF?
 
@@ -58,7 +58,7 @@ Three possibilities. If you send opportunistically and they never come online, t
 
 ## Why are the public Ratspeak servers TCP addresses?
 
-Convenience. Ruby (`1.ratspeak.org:4141`), Emerald (`2.ratspeak.org:4242`), and Diamond (`3.ratspeak.org:4343`) are easy-to-find Reticulum transport nodes that anyone with internet access can reach. They are not servers you have accounts on, and they cannot read your traffic. You can join Reticulum through any other transport node, your own included. The public Ratspeak servers are just defaults that work out of the box; `rns.ratspeak.org:4242` remains as an alias for Emerald for older configs.
+Convenience. Ruby (`1.ratspeak.org:4141`), Emerald (`2.ratspeak.org:4242`), and Diamond (`3.ratspeak.org:4343`) are easy-to-find Reticulum transport nodes that anyone with internet access can reach. They are not servers you have accounts on, and they cannot read your traffic. In the app, "Official" means the server is managed by Ratspeak; "Unofficial" means it is operated by a third party. You can join Reticulum through any other transport node, your own included. The public Ratspeak servers are just defaults that work out of the box; `rns.ratspeak.org:4242` remains as an alias for Emerald for older configs.
 
 ## Why does my first launch warn about an unidentified developer?
 
