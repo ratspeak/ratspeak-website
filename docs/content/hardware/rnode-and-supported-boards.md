@@ -37,7 +37,7 @@ Before buying or flashing, check the practical kit:
 
 1. **Flash your own** - buy a supported board (see below) and run `rnodeconf --autoinstall` to flash RNode firmware. See [Flashing Firmware](../hardware/flashing-firmware).
 2. **Buy pre-made** - purchase from [unsigned.io](https://unsigned.io) or community vendors.
-3. **Use Ratspeak hardware** - [Ratdeck](../products/ratdeck) includes an integrated LoRa radio, and [Ratcom](../products/ratcom) attaches one through the Cap LoRa add-on.
+3. **Use Ratspeak hardware** - [Ratdeck](../products/ratdeck) includes an integrated LoRa radio, and [rsCardputer](../products/rscardputer) attaches one through the Cap LoRa add-on.
 
 ## Connection Methods
 
@@ -123,7 +123,7 @@ For new purchases, choose boards with **SX1262** - the most modern, power-effici
 | **Budget** | Heltec LoRa32 v3.0 | ~$18-25 | Compact, USB-C, OLED, SX1262 |
 | **Portable** | LilyGO T-Echo | ~$30-40 | nRF52, e-ink display, extremely low power |
 | **Dual-band** | OpenCom XL | Varies | SX1262 + SX1280, run two links with `RNodeMultiInterface` |
-| **Standalone** | [Ratdeck](../products/ratdeck) or [Ratcom](../products/ratcom) | ~$30-70 | Complete mesh communicator with display, keyboard, and LoRa |
+| **Standalone** | [Ratdeck](../products/ratdeck) or [rsCardputer](../products/rscardputer) | ~$30-70 | Complete mesh communicator with display, keyboard, and LoRa |
 
 ## Where to Buy
 

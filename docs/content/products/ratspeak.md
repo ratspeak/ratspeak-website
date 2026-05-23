@@ -60,7 +60,7 @@ If you copy the `.ratspeak/` directory to another machine and launch Ratspeak th
 
 ## Hardware it talks to
 
-Ratspeak speaks to anything that speaks Reticulum. Out of the box that means [Ratdeck](../products/ratdeck) and [Ratcom](../products/ratcom) handhelds on any reachable Reticulum path, [RNode-class boards](../hardware/rnode-and-supported-boards) over USB, BLE, or RNode TCP, and other Ratspeak / Sideband / NomadNet / MeshChat clients reachable over TCP, UDP, I2P, or Bluetooth Peer. iOS cannot use USB serial radios, but it can use BLE RNode hardware or an RNode TCP bridge.
+Ratspeak speaks to anything that speaks Reticulum. Out of the box that means [Ratdeck](../products/ratdeck) and [rsCardputer](../products/rscardputer) handhelds on any reachable Reticulum path, [RNode-class boards](../hardware/rnode-and-supported-boards) over USB, BLE, or RNode TCP, and other Ratspeak / Sideband / NomadNet / MeshChat clients reachable over TCP, UDP, I2P, or Bluetooth Peer. iOS cannot use USB serial radios, but it can use BLE RNode hardware or an RNode TCP bridge.
 
 ## What it isn't
 

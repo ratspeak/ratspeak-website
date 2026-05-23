@@ -19,7 +19,7 @@ One always-on machine. Any of these work:
 
 Two to ten Ratspeak clients, one per person. These are just the desktop or mobile app.
 
-Optional handhelds: a Ratdeck or Ratcom unit for anyone who wants off-grid LoRa coverage when they're away from Wi-Fi.
+Optional handhelds: a Ratdeck or rsCardputer unit for anyone who wants off-grid LoRa coverage when they're away from Wi-Fi.
 
 ## Step 1 - set up the always-on node
 
@@ -82,11 +82,11 @@ Save, restart the interface, and watch the connection come up. Send an announce.
 
 For people on your home Wi-Fi who don't need the VPS, you can also add an `AutoInterface` block for LAN discovery - it'll find the always-on node automatically with no config beyond `network_name` and `passphrase`.
 
-## Bringing in handhelds (Ratdeck/Ratcom)
+## Bringing in handhelds (Ratdeck/rsCardputer)
 
-If anyone wants LoRa coverage for hikes, festivals, or just walking around the neighbourhood, hand them a Ratdeck or Ratcom. These are portable nodes with a LoRa radio onboard. Configure the same `network_name` and `passphrase` on the LoRa interface and they'll join the same locked mesh, just over radio instead of TCP.
+If anyone wants LoRa coverage for hikes, festivals, or just walking around the neighbourhood, hand them a Ratdeck or rsCardputer. These are portable nodes with a LoRa radio onboard. Configure the same `network_name` and `passphrase` on the LoRa interface and they'll join the same locked mesh, just over radio instead of TCP.
 
-These handhelds are standalone Reticulum endpoints with their own identity unless you deliberately import or migrate an identity. Ratdeck can also expose an RNode-compatible BLE bridge when that mode is enabled. Ratcom's current bridge path is Wi-Fi, not mobile BLE. When someone is at home, traffic can flow through the VPS. When they're out of range, it can flow over LoRa to whichever group member is closest.
+These handhelds are standalone Reticulum endpoints with their own identity unless you deliberately import or migrate an identity. Ratdeck can also expose an RNode-compatible BLE bridge when that mode is enabled. rsCardputer can boot into RNode mode when you want it to act as the radio for a phone or laptop instead of as its own endpoint. When someone is at home, traffic can flow through the VPS. When they're out of range, it can flow over LoRa to whichever group member is closest.
 
 ## Maintenance
 

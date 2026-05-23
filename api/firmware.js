@@ -80,7 +80,9 @@ export default async function handler(req) {
   // ── Source: Ratspeak firmware (Ratdeck / rsCardputer) ─────────────
   const repos = {
     ratdeck: { repo: 'ratspeak/ratdeck', file: 'ratdeck-firmware.zip' },
-    ratcom:  { repo: 'ratspeak/rsCardputer', file: 'rscardputer-full.zip' }
+    rscardputer: { repo: 'ratspeak/rsCardputer', file: 'rscardputer-full.zip' },
+    // Keep the old device key working for bookmarked flasher URLs.
+    ratcom: { repo: 'ratspeak/rsCardputer', file: 'rscardputer-full.zip' }
   };
 
   const cfg = repos[device];

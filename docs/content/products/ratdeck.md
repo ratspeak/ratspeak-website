@@ -2,7 +2,7 @@
 
 Ratdeck is the firmware that turns a LilyGO T-Deck Plus into a self-contained handheld Reticulum mesh node. Battery-powered, with a real QWERTY keyboard, a colour screen, and an integrated LoRa radio — no laptop, no phone tether, no separate RNode dongle. It speaks LXMF natively, so the device you hold in your hand is the node.
 
-For the smaller Cardputer-based handheld, see [Ratcom](../products/ratcom). Both devices speak the same Reticulum/LXMF protocols and can see each other when their radio settings and reachable paths match.
+For the smaller Cardputer-based handheld, see [rsCardputer](../products/rscardputer). Both devices speak the same Reticulum/LXMF protocols and can see each other when their radio settings and reachable paths match.
 
 ## Hardware
 

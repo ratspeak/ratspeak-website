@@ -6,7 +6,7 @@ The umbrella name is **Ratspeak**. It is also the name of the flagship app. The 
 
 ## What's in the box
 
-The short version: [Ratspeak](../products/ratspeak) is the app, [Ratdeck](../products/ratdeck) and [Ratcom](../products/ratcom) are standalone LoRa handhelds, [rsReticulum](../products/rsreticulum) and [rsLXMF](../products/rslxmf) are the Rust protocol stack underneath the desktop/server software, [rsLXST](../products/rslxst) is the experimental Rust telephony stack the app uses for voice calls, and smaller projects like [LRGP](../products/lrgp), [LXMFace](../products/lxmface), and [Ratkey](../products/ratkey) handle games, identity avatars, and experimental hardware keys.
+The short version: [Ratspeak](../products/ratspeak) is the app, [Ratdeck](../products/ratdeck) and [rsCardputer](../products/rscardputer) are LoRa handheld firmware projects, [rsReticulum](../products/rsreticulum) and [rsLXMF](../products/rslxmf) are the Rust protocol stack underneath the desktop/server software, [rsLXST](../products/rslxst) is the experimental Rust telephony stack the app uses for voice calls, and smaller projects like [LRGP](../products/lrgp), [LXMFace](../products/lxmface), and [Ratkey](../products/ratkey) handle games, identity avatars, and experimental hardware keys.
 
 For the full map, see [Ratspeak Ecosystem](../introduction/ratspeak-ecosystem). The flagship app has its own [Ratspeak App](../products/ratspeak) product page.
 

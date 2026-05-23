@@ -1,12 +1,12 @@
 # Flashing Firmware
 
-This guide walks you through getting firmware onto a Ratdeck, Ratcom, or RNode-class board. The web flasher is the fastest path for Ratdeck and Ratcom; PlatformIO is the path you want when you're hacking on the firmware itself. RNode boards use Mark Qvist's `rnodeconf` toolchain.
+This guide walks you through getting firmware onto a Ratdeck, rsCardputer, or RNode-class board. The web flasher is the fastest path for Ratdeck and rsCardputer; PlatformIO is the path you want when you're hacking on the firmware itself. RNode boards use Mark Qvist's `rnodeconf` toolchain.
 
 > **Warning**: Attach an antenna matched to your frequency band before powering or testing a LoRa radio. Transmitting without an antenna can damage the radio module.
 
 ## Web Flasher (Easiest)
 
-For Ratdeck and Ratcom, you don't need to install anything. Plug the board into a USB-C port and visit:
+For Ratdeck and rsCardputer, you don't need to install anything. Plug the board into a USB-C port and visit:
 
 **[ratspeak.org/download.html](https://ratspeak.org/download.html)**
 
@@ -42,7 +42,7 @@ python3 -m platformio device monitor -b 115200
 
 ## rsCardputer (Build & Flash)
 
-The Cardputer Adv firmware now lives in the rsCardputer repo. It builds the launcher, Ratcom mode, and RNode mode together, with split artifacts available for recovery and debugging.
+The Cardputer Adv firmware now lives in the rsCardputer repo. It builds the launcher, Standalone mode, and RNode mode together, with split artifacts available for recovery and debugging.
 
 1. Clone and install PlatformIO (skip if you already did this for Ratdeck):
 
@@ -93,7 +93,7 @@ Note: `airtime_limit_long` and `airtime_limit_short` are *runtime* configuration
 If a flash fails partway through and the board no longer enumerates, force the ESP32-S3 into download mode:
 
 - **Ratdeck**: hold the **trackball button** while plugging in USB (or while pressing reset). Release once the board is connected.
-- **Ratcom**: hold the **boot button** while plugging in USB. Release once the host detects the device.
+- **rsCardputer**: hold the **boot button** while plugging in USB. Release once the host detects the device.
 
 Then re-run the web flasher or your PlatformIO upload command. Download mode bypasses whatever state the previous flash left behind.
 
@@ -104,10 +104,10 @@ For RNode boards, hold the BOOT button (and tap RESET if the board has a reset b
 A successful flash shows the same signs across all three platforms:
 
 1. The device boots into its splash/animation screen within a few seconds of reset.
-2. The serial monitor (`platformio device monitor` for Ratdeck/Ratcom, `rnodeconf -i` for RNode) prints the firmware version and a healthy hardware report.
+2. The serial monitor (`platformio device monitor` for Ratdeck/rsCardputer, `rnodeconf -i` for RNode) prints the firmware version and a healthy hardware report.
 3. The LoRa radio initializes without errors — look for a `RADIO_INIT_OK` line or equivalent.
-4. For Ratdeck and Ratcom, the first-boot/setup flow appears and lets you set the device name, timezone or region defaults, and network mode.
-5. If you enable Hotspot/AP mode later, a Wi-Fi access point named `ratdeck-XXXX` or `ratcom-XXXX` appears and exposes the configured TCP bridge.
+4. For Ratdeck and rsCardputer, the first-boot/setup flow appears and lets you set the device name, timezone or region defaults, and network mode.
+5. If you enable Hotspot/AP mode later, a Wi-Fi access point named `ratdeck-XXXX` or `rscardputer-XXXX` appears and exposes the configured TCP bridge.
 6. A Reticulum identity is generated on first boot (X25519 encryption key + Ed25519 signing key) and persisted to flash. Subsequent reflashes preserve it.
 
 If any of those steps stall, power-cycle the board and check the serial monitor for the failure point before re-flashing.

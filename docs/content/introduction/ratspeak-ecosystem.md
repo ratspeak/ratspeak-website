@@ -2,7 +2,7 @@
 
 Ratspeak is both the flagship app and the umbrella for a small Reticulum/LXMF ecosystem: desktop and mobile software, Rust protocol crates, LoRa handheld firmware, turn-based games, avatar tooling, and experimental hardware-backed identity work.
 
-Most people should start with the [Ratspeak app](../products/ratspeak), [Ratdeck](../products/ratdeck), or [Ratcom](../products/ratcom). Operators who want always-on transport or store-and-forward messaging should look at [rsReticulum](../products/rsreticulum) and [rsLXMF](../products/rslxmf). Developers can build directly on the Rust crates and standalone support libraries.
+Most people should start with the [Ratspeak app](../products/ratspeak), [Ratdeck](../products/ratdeck), or [rsCardputer](../products/rscardputer). Operators who want always-on transport or store-and-forward messaging should look at [rsReticulum](../products/rsreticulum) and [rsLXMF](../products/rslxmf). Developers can build directly on the Rust crates and standalone support libraries.
 
 ## How the pieces stack
 
@@ -10,7 +10,7 @@ Most people should start with the [Ratspeak app](../products/ratspeak), [Ratdeck
 - **rsLXMF** is the message layer above Reticulum: conversations, attachments, delivery modes, Offline Inbox/propagation nodes, stamps, and tickets.
 - **rsLXST** is the experimental Rust telephony layer above Reticulum: call signalling, link teardown, and Opus voice profiles. Ratspeak embeds it for peer-to-peer voice calls.
 - **Ratspeak** is the user-facing desktop and mobile app that embeds rsReticulum, rsLXMF, LRGP, and rsLXST.
-- **Ratdeck** and **Ratcom** are standalone handheld firmware projects that run microReticulum plus native LXMF on ESP32-S3 LoRa hardware.
+- **Ratdeck** and **rsCardputer** are ESP32-S3 LoRa handheld firmware projects. Ratdeck is standalone-first; rsCardputer includes Standalone and RNode modes behind a launcher.
 - **LRGP** rides inside LXMF custom fields to support turn-based games such as Chess and Tic-Tac-Toe.
 - **LXMFace** turns Reticulum identity hashes into deterministic avatars. It is a standalone identity-visualization library, not a network transport.
 - **Ratkey** is experimental hardware-backed identity work for YubiKey and Nitrokey-style PIV devices. It is not wired into the Ratspeak app yet.
@@ -26,7 +26,7 @@ The common thread is Reticulum/LXMF, not a central service. Some pieces are netw
 | [rsLXMF](../products/rslxmf) | Rust LXMF library and `lxmd-rs` propagation daemon | App developers and propagation-node operators | v0.9.0 public pre-release; pre-1.0, targets LXMF interop where implemented |
 | [rsLXST](../products/rslxst) | Rust LXST telephony library (Opus voice over Reticulum) | App developers building voice features on Reticulum | Experimental; first public target is Ratspeak voice calls, not full Python LXST parity |
 | [Ratdeck](../products/ratdeck) | LilyGO T-Deck Plus handheld firmware | Off-grid users who want a standalone LoRa device | Active firmware; Wi-Fi bridge mode is still experimental |
-| [Ratcom](../products/ratcom) | M5Stack Cardputer Adv + Cap LoRa firmware | Users who want a smaller standalone LoRa device | Active firmware; AP bridge mode is alpha |
+| [rsCardputer](../products/rscardputer) | M5Stack Cardputer Adv + Cap LoRa firmware | Users who want a smaller handheld or host-controlled RNode radio | Active dual-mode firmware; Standalone and RNode modes |
 | [LRGP](../products/lrgp) | Game protocol over LXMF | Ratspeak users and game developers | Integrated for Chess and Tic-Tac-Toe; standalone Rust and Python packages exist |
 | [LXMFace](../products/lxmface) | Deterministic identity avatars | App and library developers | Stable standalone API; Ratspeak has not migrated to it yet |
 | [Ratkey](../products/ratkey) | Hardware-backed Reticulum identity experiments | Advanced Rust developers | Experimental; not an end-user Ratspeak feature yet |

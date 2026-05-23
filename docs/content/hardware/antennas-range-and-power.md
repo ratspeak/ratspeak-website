@@ -100,4 +100,4 @@ When configured, Reticulum rate-limits transmissions against those caps. That he
 
 **For best throughput:** use a fast LoRa preset and accept shorter range in exchange for ~11 Kbps. Good for local networks where range is not the priority.
 
-**For battery life:** use the lowest TX power that maintains your connection, disable WiFi on Ratdeck/Ratcom when not needed, and use a balanced or fast preset to minimize airtime per packet.
+**For battery life:** use the lowest TX power that maintains your connection, disable WiFi on Ratdeck/rsCardputer when not needed, and use a balanced or fast preset to minimize airtime per packet.

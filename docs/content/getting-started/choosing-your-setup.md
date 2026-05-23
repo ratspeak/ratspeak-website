@@ -10,7 +10,7 @@ Ratspeak is a stack, not a single product. Before installing anything, decide ho
 | Same as above, but route over a TCP backhaul (public internet or your VPS) | Ratspeak desktop + TCP hub |
 | Carry Ratspeak in your pocket | Ratspeak mobile |
 | Add LoRa range to your phone or laptop | Ratspeak + an RNode, or Ratdeck as a BLE bridge where supported |
-| Carry one device that does everything, no phone or laptop required | Ratdeck or Ratcom (standalone) |
+| Carry one device that does everything, no phone or laptop required | Ratdeck or rsCardputer (standalone) |
 | Run infrastructure for a community or your own LAN | Self-hosted `rnsd-rs` and optionally `lxmd-rs` |
 
 ## Just the Ratspeak Desktop App
@@ -36,18 +36,18 @@ iOS and Android builds of the same client. The main difference is how you talk t
 
 ## Ratspeak + an RNode or Ratdeck Bridge
 
-Add a portable LoRa node to your phone or laptop. The radio carries the long-range link; Ratspeak on your main device handles the long sessions and the screen real estate. A normal RNode connects over USB, USB-OTG on Android, BLE where the firmware supports it, or TCP when the radio's KISS stream is exposed on the local network. Ratdeck can expose a BLE bridge profile when enabled. Ratcom is standalone first and bridges over Wi-Fi today; it is not a mobile BLE radio tether yet.
+Add a portable LoRa node to your phone or laptop. The radio carries the long-range link; Ratspeak on your main device handles the long sessions and the screen real estate. A normal RNode connects over USB, USB-OTG on Android, BLE where the firmware supports it, or TCP when the radio's KISS stream is exposed on the local network. Ratdeck can expose a BLE bridge profile when enabled. rsCardputer can boot into RNode mode for BLE or USB host use, or stay in Standalone mode as its own handheld endpoint.
 
 - See: [Ratdeck](../products/ratdeck)
-- See: [Ratcom](../products/ratcom)
+- See: [rsCardputer](../products/rscardputer)
 - See: [LoRa Radio Interfaces](../networking/lora-and-rnode)
 
-## Just a Ratdeck or Ratcom
+## Just a Ratdeck or rsCardputer
 
-A handheld-only deployment. Both devices run microReticulum and speak LXMF directly — no phone, no laptop, no desktop client involved. The Ratdeck has a 4-inch touchscreen and full QWERTY; the Ratcom is the smaller Cardputer form factor. Best for backpack carry, field operations, or anyone who wants the mesh to be a single self-contained object.
+A handheld-only deployment. Both devices run microReticulum and speak LXMF directly — no phone, no laptop, no desktop client involved. The Ratdeck has a 4-inch touchscreen and full QWERTY; the rsCardputer is the smaller Cardputer form factor. Best for backpack carry, field operations, or anyone who wants the mesh to be a single self-contained object.
 
 - See: [Ratdeck](../products/ratdeck)
-- See: [Ratcom](../products/ratcom)
+- See: [rsCardputer](../products/rscardputer)
 
 ## Self-Hosted Transport Node
 

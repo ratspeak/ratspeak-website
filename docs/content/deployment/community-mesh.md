@@ -8,7 +8,7 @@ This page covers the deployment pattern. For radio hardware itself see [RNode & 
 
 A community mesh is a mix of node types:
 
-- **Edge nodes.** Operator-run RNodes, Ratdecks, Ratcoms, laptops with a LoRa stick. They speak only over the air and rely on the rest of the mesh to reach anyone past their radio horizon.
+- **Edge nodes.** Operator-run RNodes, Ratdecks, rsCardputer devices, laptops with a LoRa stick. They speak only over the air and rely on the rest of the mesh to reach anyone past their radio horizon.
 - **Transport routers.** Always-on nodes — usually a Raspberry Pi or small SBC with an RNode bolted on — that forward packets between LoRa neighbors and announce paths on behalf of edge devices that come and go.
 - **IP gateways.** A subset of transport routers that also have an IP uplink. They bridge the local LoRa segment to wider Reticulum over TCP, AutoInterface, or Backbone. Without at least one gateway, the mesh is isolated to its radio footprint.
 

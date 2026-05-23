@@ -90,7 +90,7 @@ Hardware-key support is being built in a library called Ratkey, but it is not ye
 
 ## Is Ratspeak free and open source?
 
-Yes. Ratspeak, rsReticulum, rsLXMF, rsLXST, Ratdeck, Ratcom, Ratkey, and the website code are AGPL-3.0-or-later open source. LRGP and LXMFace are standalone MIT-licensed libraries. There are no paid tiers, no telemetry, and no plan to introduce either. The radio hardware itself (RNodes and similar) is also open source — you can build one from parts if you want.
+Yes. Ratspeak, rsReticulum, rsLXMF, rsLXST, Ratdeck, rsCardputer, Ratkey, and the website code are AGPL-3.0-or-later open source. LRGP and LXMFace are standalone MIT-licensed libraries. There are no paid tiers, no telemetry, and no plan to introduce either. The radio hardware itself (RNodes and similar) is also open source — you can build one from parts if you want.
 
 If you want to contribute, patches and bug reports through the project's repositories are the most useful place to start.
 

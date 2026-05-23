@@ -6,7 +6,7 @@ Both share the same underlying stack: Ratspeak uses the cross-platform `btleplug
 
 ## BLE RNode bridge
 
-The BLE RNode bridge is the wireless equivalent of plugging a radio into a USB port. The phone or laptop is the BLE central; the peripheral is a BLE-equipped RNode or a Ratspeak handheld exposing an RNode-compatible bridge profile, such as Ratdeck when that mode is enabled. Ratcom's current public firmware is standalone/Wi-Fi on the bridge side; its BLE service is not a usable radio bridge yet. KISS frames — the same byte stream that runs over USB serial — are tunneled through a GATT characteristic instead of a UART. The result is point-to-point: one phone, one radio.
+The BLE RNode bridge is the wireless equivalent of plugging a radio into a USB port. The phone or laptop is the BLE central; the peripheral is a BLE-equipped RNode or a Ratspeak handheld exposing an RNode-compatible bridge profile, such as Ratdeck when that mode is enabled. rsCardputer exposes an RNode-compatible BLE bridge when booted into RNode mode; Standalone mode remains its own handheld endpoint. KISS frames — the same byte stream that runs over USB serial — are tunneled through a GATT characteristic instead of a UART. The result is point-to-point: one phone, one radio.
 
 The radio still does the radio work. The bridge replaces nothing about LoRa modulation, presets, or regional bands; it only changes how the phone talks to the modem. Throughput, latency, and on-air behavior match a USB-tethered radio of the same model.
 

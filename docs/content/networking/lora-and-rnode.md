@@ -25,7 +25,7 @@ Keep RNode TCP on a trusted LAN, hotspot, or VPN unless the bridge itself adds a
 
 ## The 8 firmware presets
 
-These are the RNode/Ratspeak preset family exposed in the desktop and mobile dashboard and mirrored by current Ratdeck/Ratcom firmware. Smaller screens may present them differently, but the radio parameters are the same.
+These are the RNode/Ratspeak preset family exposed in the desktop and mobile dashboard and mirrored by current Ratdeck/rsCardputer firmware. Smaller screens may present them differently, but the radio parameters are the same.
 
 | Preset           | SF  | BW (kHz) | CR  | TX (dBm) | Use it for                                                           |
 |------------------|-----|----------|-----|----------|----------------------------------------------------------------------|

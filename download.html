@@ -4838,7 +4838,7 @@
             accent: 'blue',
             firmware: 'rscardputer-full.zip',
             firmwareSize: 'Loading from GitHub...',
-            apiDevice: 'ratcom'
+            apiDevice: 'rscardputer'
         },
         custom: {
             name: 'Custom Device',
@@ -4997,7 +4997,7 @@
         document.getElementById('presetSize').textContent = 'Fetching release info...';
         closeVersionDropdown();
 
-        var repoMap = { ratdeck: 'ratspeak/ratdeck', ratcom: 'ratspeak/rsCardputer' };
+        var repoMap = { ratdeck: 'ratspeak/ratdeck', rscardputer: 'ratspeak/rsCardputer' };
         var repoPath = repoMap[dev.apiDevice] || '';
 
         // Fetch latest info and download binary
@@ -6786,12 +6786,12 @@
             { l: 'LittleFS + SD storage',    d: 'Atomic .tmp/.bak journaling.' }
         ],
         cardputer: [
-            { l: 'All-in-one',               d: 'No phone, no host. Just talk.' },
+            { l: 'Dual-mode',                d: 'Standalone messenger or RNode radio.' },
             { l: 'LoRa (w/ module)',         d: 'Snap-on M5 module, 915 MHz.' },
-            { l: 'Cyberpunk theme',          d: 'Retro-future UI, neon accents.' },
-            { l: 'WiFi capable',             d: 'Connect for setup and sync.' },
+            { l: 'Standalone LXMF',          d: 'No phone, no host. Just talk.' },
+            { l: 'RNode mode',               d: 'BLE or USB radio for host clients.' },
             { l: 'M5Unified display',        d: 'Native ESP32-S3 driver.' },
-            { l: 'Atomic LittleFS + SD',     d: 'Same journaling as ratdeck.' },
+            { l: 'LittleFS + SD',            d: 'Local storage with SD expansion.' },
             { l: 'Constrained-table stack',  d: 'Tuned microReticulum for 8 MB.' }
         ]
     };
