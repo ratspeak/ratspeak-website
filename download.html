@@ -1200,6 +1200,62 @@
             margin-top: 2px;
         }
 
+        .firmware-packages {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .firmware-package-option {
+            all: unset;
+            box-sizing: border-box;
+            min-height: 58px;
+            padding: 10px 12px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            background: var(--bg-secondary);
+            cursor: pointer;
+            transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .firmware-package-option:hover,
+        .firmware-package-option:focus-visible {
+            border-color: rgba(58, 118, 240, 0.35);
+            background: var(--blue-light);
+        }
+
+        .firmware-package-option--active {
+            border-color: rgba(58, 118, 240, 0.45);
+            background: var(--blue-light);
+            box-shadow: 0 0 0 1px rgba(58, 118, 240, 0.12) inset;
+        }
+
+        .firmware-package-option__label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .firmware-package-option__desc {
+            display: block;
+            margin-top: 3px;
+            font-size: 11px;
+            line-height: 1.35;
+            color: var(--text-muted);
+        }
+
+        .firmware-package-option__check {
+            width: 13px;
+            height: 13px;
+            color: var(--blue);
+            flex-shrink: 0;
+        }
+
         /* Version selector */
         .firmware-ready--open {
             border-radius: 10px 10px 0 0;
@@ -1217,6 +1273,12 @@
         }
         .firmware-version-btn:hover {
             color: var(--accent);
+        }
+        .firmware-version-btn[aria-disabled="true"] {
+            cursor: default;
+        }
+        .firmware-version-btn[aria-disabled="true"]:hover {
+            color: var(--text-primary);
         }
 
         .firmware-version-chevron {
@@ -4479,6 +4541,7 @@
                                 <div class="firmware-ready__size" id="presetSize">Bundled &middot; Ready to flash</div>
                             </div>
                         </div>
+                        <div class="firmware-packages" id="firmwarePackagePicker" style="display: none;"></div>
                         <div class="firmware-versions" id="versionDropdown" style="display: none;"></div>
                     </div>
 
@@ -4797,8 +4860,10 @@
         firmwareReady: false,
         firmwareZip: null,  // ArrayBuffer of ZIP from GitHub release
         selectedVersion: null,
+        selectedPackage: null,
         releases: [],
         repoPath: '',
+        firmwareRequestSerial: 0,
         customFile: null,
         customOffsets: null,
         rnodeAsset: null,
@@ -4834,11 +4899,17 @@
         },
         cardputer: {
             name: 'Cardputer Adv',
-            sub: 'ESP32-S3 \u00b7 rsCardputer Firmware',
+            sub: 'ESP32-S3 \u00b7 Ratspeak Firmware',
             accent: 'blue',
             firmware: 'rscardputer-full.zip',
             firmwareSize: 'Loading from GitHub...',
-            apiDevice: 'rscardputer'
+            apiDevice: 'rscardputer',
+            defaultPackage: 'full',
+            packages: [
+                { id: 'full', label: 'Full', desc: 'Launcher + both modes' },
+                { id: 'standalone', label: 'Standalone', desc: 'On-device messenger' },
+                { id: 'rnode', label: 'RNode', desc: 'Host-controlled radio' }
+            ]
         },
         custom: {
             name: 'Custom Device',
@@ -4920,6 +4991,8 @@
         state.firmwareReady = false;
         state.flashComplete = false;
         state.firmwareZip = null;
+        state.selectedVersion = null;
+        state.releases = [];
         state.customFile = null;
         state.rnodeAsset = null;
         state.rnodeAssetName = null;
@@ -4930,6 +5003,7 @@
         if (typeof setBoardManual === 'function') setBoardManual(false);
 
         var dev = DEVICES[deviceId];
+        state.selectedPackage = dev.defaultPackage || null;
         var sel = document.getElementById('deviceSelection');
         var fi = document.getElementById('flashInterface');
         var panel = document.getElementById('flashPanel');
@@ -4948,12 +5022,14 @@
             presetEl.style.display = 'none';
             customEl.style.display = 'block';
             state.firmwareReady = false;
+            buildPackagePicker(dev);
         } else {
             presetEl.style.display = 'block';
             customEl.style.display = 'none';
             document.getElementById('presetName').textContent = 'Loading...';
             document.getElementById('presetSize').textContent = 'Loading from GitHub...';
             state.firmwareReady = false;
+            buildPackagePicker(dev);
             fetchFirmwareFromRelease(dev);
         }
 
@@ -4991,7 +5067,86 @@
     // ── Firmware Download from GitHub Releases ────────
     var checkIcon = '<svg class="firmware-version-item__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
+    function packageById(dev, id) {
+        if (!dev.packages) return null;
+        for (var i = 0; i < dev.packages.length; i++) {
+            if (dev.packages[i].id === id) return dev.packages[i];
+        }
+        return null;
+    }
+
+    function selectedPackageLabel(dev) {
+        var pkg = packageById(dev, state.selectedPackage);
+        return pkg ? pkg.label : 'Firmware';
+    }
+
+    function firmwarePackageQuery() {
+        return state.selectedPackage ? '&package=' + encodeURIComponent(state.selectedPackage) : '';
+    }
+
+    function firmwareReadyText(dev, info, bytes) {
+        var label = info && info.packageLabel ? info.packageLabel : selectedPackageLabel(dev);
+        return label + ' \u00b7 ' + formatBytes(bytes) + ' \u00b7 Ready to flash';
+    }
+
+    function firmwareRequestIsCurrent(serial, dev) {
+        return serial === state.firmwareRequestSerial && state.device && DEVICES[state.device] === dev;
+    }
+
+    function buildPackagePicker(dev) {
+        var picker = document.getElementById('firmwarePackagePicker');
+        if (!picker) return;
+        picker.innerHTML = '';
+
+        if (!dev.packages || dev.packages.length === 0) {
+            picker.style.display = 'none';
+            return;
+        }
+
+        picker.style.display = '';
+        dev.packages.forEach(function(pkg) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'firmware-package-option';
+            if (pkg.id === state.selectedPackage) {
+                btn.classList.add('firmware-package-option--active');
+            }
+
+            var label = document.createElement('span');
+            label.className = 'firmware-package-option__label';
+            label.appendChild(document.createTextNode(pkg.label));
+            if (pkg.id === state.selectedPackage) {
+                var check = document.createElement('span');
+                check.innerHTML = checkIcon.replace('firmware-version-item__check', 'firmware-package-option__check');
+                label.appendChild(check.firstChild);
+            }
+
+            var desc = document.createElement('span');
+            desc.className = 'firmware-package-option__desc';
+            desc.textContent = pkg.desc;
+
+            btn.appendChild(label);
+            btn.appendChild(desc);
+            btn.addEventListener('click', function() {
+                if (state.selectedPackage === pkg.id || state.flashing) return;
+                state.selectedPackage = pkg.id;
+                state.selectedVersion = null;
+                state.releases = [];
+                state.firmwareZip = null;
+                state.firmwareReady = false;
+                updateFlashBtn();
+                closeVersionDropdown();
+                buildPackagePicker(dev);
+                buildVersionDropdown(dev);
+                fetchFirmwareFromRelease(dev);
+            });
+            picker.appendChild(btn);
+        });
+    }
+
     function fetchFirmwareFromRelease(dev) {
+        var requestSerial = ++state.firmwareRequestSerial;
+        var packageQuery = firmwarePackageQuery();
         var nameEl = document.getElementById('presetName');
         nameEl.textContent = 'Loading...';
         document.getElementById('presetSize').textContent = 'Fetching release info...';
@@ -4999,30 +5154,36 @@
 
         var repoMap = { ratdeck: 'ratspeak/ratdeck', rscardputer: 'ratspeak/rsCardputer' };
         var repoPath = repoMap[dev.apiDevice] || '';
+        var downloadInfo = null;
 
         // Fetch latest info and download binary
-        fetch('/api/firmware?device=' + dev.apiDevice + '&info=true')
+        fetch('/api/firmware?device=' + encodeURIComponent(dev.apiDevice) + '&info=true' + packageQuery)
             .then(function(resp) {
                 if (!resp.ok) throw new Error('Release not found');
                 return resp.json();
             })
             .then(function(info) {
+                if (!firmwareRequestIsCurrent(requestSerial, dev)) throw { stale: true };
+                downloadInfo = info;
                 state.selectedVersion = info.version;
                 nameEl.textContent = info.version;
                 document.getElementById('presetSize').textContent = 'Downloading ' + formatBytes(info.size) + '...';
-                return fetch('/api/firmware?device=' + dev.apiDevice);
+                return fetch('/api/firmware?device=' + encodeURIComponent(dev.apiDevice) + packageQuery);
             })
             .then(function(resp) {
+                if (!firmwareRequestIsCurrent(requestSerial, dev)) throw { stale: true };
                 if (!resp.ok) throw new Error('Firmware download failed (HTTP ' + resp.status + ')');
                 return resp.arrayBuffer();
             })
             .then(function(buffer) {
+                if (!firmwareRequestIsCurrent(requestSerial, dev)) return;
                 state.firmwareZip = buffer;
                 state.firmwareReady = true;
-                document.getElementById('presetSize').textContent = formatBytes(buffer.byteLength) + ' \u00b7 Ready to flash';
+                document.getElementById('presetSize').textContent = firmwareReadyText(dev, downloadInfo, buffer.byteLength);
                 updateFlashBtn();
             })
             .catch(function(err) {
+                if (err && err.stale) return;
                 nameEl.textContent = dev.firmware;
                 document.getElementById('presetSize').textContent = 'Download failed: ' + err.message;
                 state.firmwareReady = false;
@@ -5030,17 +5191,24 @@
             });
 
         // Fetch release list in parallel for the dropdown
-        fetch('/api/firmware?device=' + dev.apiDevice + '&releases=true')
+        fetch('/api/firmware?device=' + encodeURIComponent(dev.apiDevice) + '&releases=true' + packageQuery)
             .then(function(resp) { return resp.ok ? resp.json() : []; })
             .then(function(releases) {
+                if (!firmwareRequestIsCurrent(requestSerial, dev)) return;
                 state.releases = releases;
                 state.repoPath = repoPath;
                 buildVersionDropdown(dev);
             })
-            .catch(function() { state.releases = []; });
+            .catch(function() {
+                if (!firmwareRequestIsCurrent(requestSerial, dev)) return;
+                state.releases = [];
+                buildVersionDropdown(dev);
+            });
     }
 
     function selectVersion(dev, version) {
+        var requestSerial = ++state.firmwareRequestSerial;
+        var packageQuery = firmwarePackageQuery();
         var nameEl = document.getElementById('presetName');
         nameEl.textContent = version;
         document.getElementById('presetSize').textContent = 'Downloading...';
@@ -5050,27 +5218,33 @@
         updateFlashBtn();
         closeVersionDropdown();
         buildVersionDropdown(dev);
+        var downloadInfo = null;
 
-        fetch('/api/firmware?device=' + dev.apiDevice + '&version=' + version + '&info=true')
+        fetch('/api/firmware?device=' + encodeURIComponent(dev.apiDevice) + '&version=' + encodeURIComponent(version) + '&info=true' + packageQuery)
             .then(function(resp) {
                 if (!resp.ok) throw new Error('Release not found');
                 return resp.json();
             })
             .then(function(info) {
+                if (!firmwareRequestIsCurrent(requestSerial, dev)) throw { stale: true };
+                downloadInfo = info;
                 document.getElementById('presetSize').textContent = 'Downloading ' + formatBytes(info.size) + '...';
-                return fetch('/api/firmware?device=' + dev.apiDevice + '&version=' + version);
+                return fetch('/api/firmware?device=' + encodeURIComponent(dev.apiDevice) + '&version=' + encodeURIComponent(version) + packageQuery);
             })
             .then(function(resp) {
+                if (!firmwareRequestIsCurrent(requestSerial, dev)) throw { stale: true };
                 if (!resp.ok) throw new Error('Download failed');
                 return resp.arrayBuffer();
             })
             .then(function(buffer) {
+                if (!firmwareRequestIsCurrent(requestSerial, dev)) return;
                 state.firmwareZip = buffer;
                 state.firmwareReady = true;
-                document.getElementById('presetSize').textContent = formatBytes(buffer.byteLength) + ' \u00b7 Ready to flash';
+                document.getElementById('presetSize').textContent = firmwareReadyText(dev, downloadInfo, buffer.byteLength);
                 updateFlashBtn();
             })
             .catch(function(err) {
+                if (err && err.stale) return;
                 document.getElementById('presetSize').textContent = 'Download failed: ' + err.message;
                 state.firmwareReady = false;
                 updateFlashBtn();
@@ -5080,9 +5254,11 @@
     function buildVersionDropdown(dev) {
         var dropdown = document.getElementById('versionDropdown');
         dropdown.innerHTML = '';
-        if (!state.releases || state.releases.length < 2) return;
+        if (!state.releases || state.releases.length < 2) {
+            syncVersionDropdownState();
+            return;
+        }
 
-        var repoPath = state.repoPath || '';
         state.releases.forEach(function(rel) {
             var item = document.createElement('div');
             item.className = 'firmware-version-item';
@@ -5092,7 +5268,8 @@
             var label = '<span class="firmware-version-item__tag">';
             if (rel.version === state.selectedVersion) label += checkIcon;
             label += rel.version + '</span>';
-            var size = '<span class="firmware-version-item__size">' + formatBytes(rel.size) + '</span>';
+            var meta = rel.packageLabel ? rel.packageLabel + ' \u00b7 ' + formatBytes(rel.size) : formatBytes(rel.size);
+            var size = '<span class="firmware-version-item__size">' + meta + '</span>';
             item.innerHTML = label + size;
             if (rel.version !== state.selectedVersion) {
                 item.addEventListener('click', function() { selectVersion(dev, rel.version); });
@@ -5101,6 +5278,17 @@
             }
             dropdown.appendChild(item);
         });
+        syncVersionDropdownState();
+    }
+
+    function syncVersionDropdownState() {
+        var dropdown = document.getElementById('versionDropdown');
+        var btn = document.getElementById('versionBtn');
+        var chevron = document.getElementById('versionChevron');
+        var hasVersions = !!(state.releases && state.releases.length > 1);
+        btn.setAttribute('aria-disabled', hasVersions ? 'false' : 'true');
+        btn.setAttribute('aria-expanded', hasVersions && dropdown.style.display !== 'none' ? 'true' : 'false');
+        chevron.style.display = hasVersions ? '' : 'none';
     }
 
     function toggleVersionDropdown() {
@@ -5113,6 +5301,7 @@
             dropdown.style.display = 'block';
             box.classList.add('firmware-ready--open');
             chevron.classList.add('firmware-version-chevron--open');
+            syncVersionDropdownState();
         } else {
             closeVersionDropdown();
         }
@@ -5125,6 +5314,7 @@
         dropdown.style.display = 'none';
         box.classList.remove('firmware-ready--open');
         chevron.classList.remove('firmware-version-chevron--open');
+        syncVersionDropdownState();
     }
 
     document.getElementById('versionBtn').addEventListener('click', function(e) {

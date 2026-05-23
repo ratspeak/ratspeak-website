@@ -3,6 +3,21 @@ export const config = { runtime: 'edge' };
 const ghHeaders = { 'Accept': 'application/vnd.github+json', 'User-Agent': 'ratspeak-flasher' };
 const RNODE_REPO = 'markqvist/RNode_Firmware';
 
+const CARDPUTER_PACKAGES = {
+  full: {
+    label: 'Full launcher',
+    files: ['rscardputer-full.zip']
+  },
+  standalone: {
+    label: 'Standalone',
+    files: ['rscardputer-standalone.zip', 'ratcom-firmware.zip']
+  },
+  rnode: {
+    label: 'RNode',
+    files: ['rscardputer-rnode.zip']
+  }
+};
+
 // Friendly variant names for RNode firmware filenames.
 // Used to render a human-readable picker; falls back to the raw filename.
 const RNODE_VARIANT_LABELS = {
@@ -71,6 +86,7 @@ export default async function handler(req) {
   const device = searchParams.get('device');
   const version = searchParams.get('version');
   const asset = searchParams.get('asset');
+  const requestedPackage = searchParams.get('package');
 
   // ── Source: RNode firmware (markqvist) ──────────────
   if (source === 'rnode') {
@@ -79,21 +95,40 @@ export default async function handler(req) {
 
   // ── Source: Ratspeak firmware (Ratdeck / rsCardputer) ─────────────
   const repos = {
-    ratdeck: { repo: 'ratspeak/ratdeck', file: 'ratdeck-firmware.zip' },
-    rscardputer: { repo: 'ratspeak/rsCardputer', file: 'rscardputer-full.zip' },
+    ratdeck: {
+      repo: 'ratspeak/ratdeck',
+      defaultPackage: 'default',
+      packages: {
+        default: { label: 'Firmware', files: ['ratdeck-firmware.zip'] }
+      }
+    },
+    rscardputer: {
+      repo: 'ratspeak/rsCardputer',
+      defaultPackage: 'full',
+      packages: CARDPUTER_PACKAGES
+    },
     // Keep the old device key working for bookmarked flasher URLs.
-    ratcom: { repo: 'ratspeak/rsCardputer', file: 'rscardputer-full.zip' }
+    ratcom: {
+      repo: 'ratspeak/rsCardputer',
+      defaultPackage: 'full',
+      packages: CARDPUTER_PACKAGES
+    }
   };
 
   const cfg = repos[device];
   if (!cfg) {
     return jsonResponse({ error: 'Unknown device' }, 400);
   }
+  const packageId = requestedPackage || cfg.defaultPackage;
+  const firmwarePackage = cfg.packages[packageId];
+  if (!firmwarePackage) {
+    return jsonResponse({ error: 'Unknown firmware package' }, 400);
+  }
 
-  // List available releases (last 5)
+  // List available releases.
   if (searchParams.get('releases') === 'true') {
     const resp = await fetch(
-      `https://api.github.com/repos/${cfg.repo}/releases?per_page=5`,
+      `https://api.github.com/repos/${cfg.repo}/releases?per_page=10`,
       { headers: ghHeaders }
     );
     if (!resp.ok) return jsonResponse({ error: 'Could not fetch releases' }, 502);
@@ -101,10 +136,11 @@ export default async function handler(req) {
     const result = releases
       .filter(r => !r.draft && !r.prerelease)
       .map(r => {
-        const a = r.assets.find(x => x.name === cfg.file);
-        return { version: r.tag_name, size: a ? a.size : null };
+        const a = findPackageAsset(r.assets, firmwarePackage);
+        if (!a) return null;
+        return packageAssetInfo(r, a, packageId, firmwarePackage);
       })
-      .filter(r => r.size !== null);
+      .filter(Boolean);
     return jsonResponse(result, 200, { 'Cache-Control': 'public, max-age=300' });
   }
 
@@ -116,18 +152,32 @@ export default async function handler(req) {
   if (!releaseResp.ok) return jsonResponse({ error: 'Release not found', status: releaseResp.status }, 404);
 
   const release = await releaseResp.json();
-  const releaseAsset = release.assets.find(a => a.name === cfg.file);
+  const releaseAsset = findPackageAsset(release.assets, firmwarePackage);
   if (!releaseAsset) return jsonResponse({ error: 'Firmware binary not in release' }, 404);
 
   if (searchParams.get('info') === 'true') {
-    return jsonResponse({
-      version: release.tag_name,
-      fileName: releaseAsset.name,
-      size: releaseAsset.size
-    });
+    return jsonResponse(packageAssetInfo(release, releaseAsset, packageId, firmwarePackage));
   }
 
   return streamAsset(releaseAsset);
+}
+
+function findPackageAsset(assets, firmwarePackage) {
+  for (const file of firmwarePackage.files) {
+    const found = assets.find(a => a.name === file);
+    if (found) return found;
+  }
+  return null;
+}
+
+function packageAssetInfo(release, asset, packageId, firmwarePackage) {
+  return {
+    version: release.tag_name,
+    fileName: asset.name,
+    size: asset.size,
+    package: packageId,
+    packageLabel: asset.name.startsWith('ratcom-') ? 'Legacy Standalone' : firmwarePackage.label
+  };
 }
 
 async function handleRnode({ searchParams, version, asset }) {
