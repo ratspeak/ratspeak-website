@@ -40,25 +40,26 @@ The `ratdeck_915` environment is the only Ratdeck target — the same image runs
 python3 -m platformio device monitor -b 115200
 ```
 
-## Ratcom (PlatformIO Build & Flash)
+## rsCardputer (Build & Flash)
 
-The Ratcom build is structured the same way, with its own repo and environment name.
+The Cardputer Adv firmware now lives in the rsCardputer repo. It builds the launcher, Ratcom mode, and RNode mode together, with split artifacts available for recovery and debugging.
 
 1. Clone and install PlatformIO (skip if you already did this for Ratdeck):
 
 ```bash
-git clone https://github.com/ratspeak/ratcom
-cd ratcom
+git clone https://github.com/ratspeak/rsCardputer
+cd rsCardputer
 pip install platformio
 ```
 
 2. Build and flash:
 
 ```bash
-python3 -m platformio run -e ratcom_915 -t upload
+make package
+make flash port=/dev/cu.usbmodem3101
 ```
 
-The environment is `ratcom_915`. If you have multiple boards plugged in, append `--upload-port /dev/cu.usbmodem*` (macOS), `/dev/ttyACM0` (Linux), or `COM3` (Windows) to target the right one.
+If you have multiple boards plugged in, use the matching serial port: `/dev/cu.usbmodem*` on macOS, `/dev/ttyACM0` on Linux, or `COM3` on Windows.
 
 ## RNode (rnodeconf)
 

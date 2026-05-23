@@ -49,14 +49,14 @@ Ratcom can join your home WiFi (STA mode) and reach a hosted Reticulum node such
 ## Build from source
 
 ```bash
-git clone https://github.com/ratspeak/ratcom
-cd ratcom
+git clone https://github.com/ratspeak/rsCardputer
+cd rsCardputer
 pip install platformio
-python3 -m platformio run -e ratcom_915           # build
-python3 -m platformio run -e ratcom_915 -t upload # flash over USB
+make package                                      # build release zips
+make flash port=/dev/cu.usbmodem3101             # flash launcher image
 ```
 
-The same `ratcom_915` build covers every region — pick your frequency in Settings → Radio after first boot.
+The same rsCardputer build covers every region — pick your frequency in Settings -> Radio after first boot.
 
 ## License
 

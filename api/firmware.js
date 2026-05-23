@@ -77,10 +77,10 @@ export default async function handler(req) {
     return handleRnode({ searchParams, version, asset });
   }
 
-  // ── Source: Ratspeak (ratdeck / ratcom) ─────────────
+  // ── Source: Ratspeak firmware (Ratdeck / rsCardputer) ─────────────
   const repos = {
     ratdeck: { repo: 'ratspeak/ratdeck', file: 'ratdeck-firmware.zip' },
-    ratcom:  { repo: 'ratspeak/ratcom',  file: 'ratcom-firmware.zip' }
+    ratcom:  { repo: 'ratspeak/rsCardputer', file: 'rscardputer-full.zip' }
   };
 
   const cfg = repos[device];
