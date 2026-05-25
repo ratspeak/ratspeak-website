@@ -1902,22 +1902,6 @@
             animation: fadeSlideUp 0.22s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
         .provision-board__manual[hidden] { display: none; }
-        .provision-radio {
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid var(--border-subtle);
-        }
-        .provision-radio__grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px 12px;
-        }
-        .provision-radio__summary {
-            margin-top: 8px;
-            font-size: 12px;
-            line-height: 1.4;
-            color: var(--text-muted);
-        }
 
         /* ── Action CTA card — primary flash + collapsed repair tools ── */
         .flash-cta {
@@ -2086,7 +2070,6 @@
         @media (max-width: 600px) {
             .flash-options { grid-template-columns: 1fr; }
             .provision-board__manual { grid-template-columns: 1fr; }
-            .provision-radio__grid { grid-template-columns: 1fr; }
             .flash-repair__list { grid-template-columns: 1fr; }
         }
 
@@ -4669,7 +4652,7 @@
 
                         <div class="flash-option-expand" id="provisionExpand" hidden>
                             <p class="flash-option-expand__desc">
-                                Writes RNode identity, startup radio profile and firmware hash after flashing. Hardware revision and serial are filled automatically.
+                                Writes RNode identity and the installed firmware hash after flashing. Hardware revision and serial are filled automatically.
                             </p>
                             <div class="provision-board" id="provisionBoard" data-mode="auto">
                                 <div class="provision-board__row">
@@ -4691,19 +4674,6 @@
                                         <span class="provision-field__label">Model</span>
                                         <select id="provisionModel"></select>
                                     </label>
-                                </div>
-                                <div class="provision-radio" id="provisionRadio">
-                                    <div class="provision-radio__grid">
-                                        <label class="provision-field">
-                                            <span class="provision-field__label">Startup region</span>
-                                            <select id="provisionRadioRegion"></select>
-                                        </label>
-                                        <label class="provision-field">
-                                            <span class="provision-field__label">Startup preset</span>
-                                            <select id="provisionRadioPreset"></select>
-                                        </label>
-                                    </div>
-                                    <div class="provision-radio__summary" id="provisionRadioSummary"></div>
                                 </div>
                             </div>
                         </div>
@@ -4766,15 +4736,6 @@
                             <span class="flash-repair__copy">
                                 <span class="flash-repair__label">Re-provision EEPROM</span>
                                 <span class="flash-repair__sub">Use this if your device reports &ldquo;Hardware Failure&rdquo;.</span>
-                            </span>
-                        </button>
-                        <button type="button" class="flash-repair__action" id="saveRadioConfigBtn">
-                            <span class="flash-repair__icon" aria-hidden="true">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M12 4v16"/><circle cx="12" cy="12" r="7"/></svg>
-                            </span>
-                            <span class="flash-repair__copy">
-                                <span class="flash-repair__label">Save startup config</span>
-                                <span class="flash-repair__sub">Use this if your device reports &ldquo;Missing Config&rdquo;.</span>
                             </span>
                         </button>
                         <button type="button" class="flash-repair__action" id="setHashBtn">
@@ -4909,9 +4870,6 @@
         rnodeAssetName: null,
         rnodeVersion: null,
         rnodeProvision: false,
-        rnodeRadioRegion: 'americas',
-        rnodeRadioPreset: 'medium_fast',
-        rnodeRadioManual: false,
         rnodeProvisionInfo: null,
         firmwareBytes: null,
         firmwareAppBytes: null,
@@ -5040,11 +4998,8 @@
         state.rnodeAsset = null;
         state.rnodeAssetName = null;
         state.rnodeVersion = null;
-        state.firmwareAppBytes = null;
         state.rnodeProvision = false;
-        state.rnodeRadioRegion = 'americas';
-        state.rnodeRadioPreset = 'medium_fast';
-        state.rnodeRadioManual = false;
+        state.firmwareAppBytes = null;
         state.port = null;
         state.transport = null;
         state.esploader = null;
@@ -5813,32 +5768,6 @@
         'rnode_firmware_opencom_xl.zip':     { product: 0x20, model: 0x21 },
         'rnode_firmware_xiao_esp32s3.zip':   { product: 0xEB, model: 0xDD }
     };
-    var RNODE_RADIO_REGIONS = [
-        { key: 'americas', label: 'Americas (915 MHz)', frequency: 915000000 },
-        { key: 'europe', label: 'Europe (868 MHz)', frequency: 868000000 },
-        { key: 'uhf_433', label: '433 MHz / UHF', frequency: 433000000 },
-        { key: 'australia', label: 'Australia (915 MHz)', frequency: 915000000 },
-        { key: 'asia', label: 'Asia (923 MHz)', frequency: 923000000 },
-        { key: 'ism_24', label: '2.4 GHz ISM', frequency: 2400000000 }
-    ];
-    var RNODE_RADIO_PRESETS = [
-        { key: 'medium_fast', label: 'Medium Fast', bandwidth: 250000, sf: 9, cr: 5, tx: 17 },
-        { key: 'short_turbo', label: 'Short Turbo', bandwidth: 500000, sf: 7, cr: 5, tx: 14 },
-        { key: 'short_fast', label: 'Short Fast', bandwidth: 250000, sf: 7, cr: 5, tx: 14 },
-        { key: 'short_slow', label: 'Short Slow', bandwidth: 250000, sf: 8, cr: 5, tx: 14 },
-        { key: 'medium_slow', label: 'Medium Slow', bandwidth: 250000, sf: 10, cr: 5, tx: 17 },
-        { key: 'long_turbo', label: 'Long Turbo', bandwidth: 500000, sf: 11, cr: 8, tx: 22 },
-        { key: 'long_fast', label: 'Long Fast', bandwidth: 250000, sf: 11, cr: 5, tx: 22 },
-        { key: 'long_moderate', label: 'Long Moderate', bandwidth: 125000, sf: 11, cr: 8, tx: 22 }
-    ];
-    var RNODE_LOW_BAND_MODELS = {
-        0xA1: true, 0xA2: true, 0xA3: true, 0xA4: true, 0xA5: true,
-        0xB3: true, 0xB4: true, 0xBA: true, 0x04: true,
-        0xC4: true, 0xC5: true, 0xC6: true,
-        0xD4: true, 0xDB: true, 0xDE: true,
-        0xE3: true, 0xE4: true, 0x11: true
-    };
-    var RNODE_24GHZ_MODELS = { 0xAC: true };
 
     var provProductSel = document.getElementById('provisionProduct');
     var provModelSel   = document.getElementById('provisionModel');
@@ -5849,12 +5778,8 @@
     var provBoardValue = document.getElementById('provisionBoardValue');
     var provBoardChange = document.getElementById('provisionBoardChange');
     var provBoardManual = document.getElementById('provisionBoardManual');
-    var provRadioRegion = document.getElementById('provisionRadioRegion');
-    var provRadioPreset = document.getElementById('provisionRadioPreset');
-    var provRadioSummary = document.getElementById('provisionRadioSummary');
     var flashRepair    = document.getElementById('flashRepair');
     var reprovisionBtn = document.getElementById('reprovisionBtn');
-    var saveRadioConfigBtn = document.getElementById('saveRadioConfigBtn');
     var setHashBtn     = document.getElementById('setHashBtn');
 
     // boardManual: user explicitly asked to override auto-detection
@@ -5881,93 +5806,11 @@
             .join('');
         provProductSel.addEventListener('change', function () {
             populateModelsFor(parseInt(provProductSel.value, 10));
-            if (provModelSel && provModelSel.value !== '') {
-                hintRadioFromModel(parseInt(provModelSel.value, 10));
-            }
             updateProvisionBoardBadge();
         });
         if (provModelSel) {
-            provModelSel.addEventListener('change', function () {
-                hintRadioFromModel(parseInt(provModelSel.value, 10));
-                updateProvisionBoardBadge();
-            });
+            provModelSel.addEventListener('change', updateProvisionBoardBadge);
         }
-    }
-    function buildRadioSelects() {
-        if (provRadioRegion && !provRadioRegion.options.length) {
-            provRadioRegion.innerHTML = RNODE_RADIO_REGIONS
-                .map(function (r) { return '<option value="' + r.key + '">' + r.label + '</option>'; })
-                .join('');
-            provRadioRegion.addEventListener('change', function () {
-                state.rnodeRadioRegion = provRadioRegion.value;
-                state.rnodeRadioManual = true;
-                updateProvisionRadioSummary();
-                updateAdvancedMeta();
-            });
-        }
-        if (provRadioPreset && !provRadioPreset.options.length) {
-            provRadioPreset.innerHTML = RNODE_RADIO_PRESETS
-                .map(function (p) { return '<option value="' + p.key + '">' + p.label + '</option>'; })
-                .join('');
-            provRadioPreset.addEventListener('change', function () {
-                state.rnodeRadioPreset = provRadioPreset.value;
-                state.rnodeRadioManual = true;
-                updateProvisionRadioSummary();
-                updateAdvancedMeta();
-            });
-        }
-        syncRadioSelects();
-    }
-    function syncRadioSelects() {
-        if (provRadioRegion) provRadioRegion.value = state.rnodeRadioRegion || 'americas';
-        if (provRadioPreset) provRadioPreset.value = state.rnodeRadioPreset || 'medium_fast';
-        updateProvisionRadioSummary();
-    }
-    function radioRegionForKey(key) {
-        return RNODE_RADIO_REGIONS.find(function (r) { return r.key === key; }) || RNODE_RADIO_REGIONS[0];
-    }
-    function radioPresetForKey(key) {
-        return RNODE_RADIO_PRESETS.find(function (p) { return p.key === key; }) || RNODE_RADIO_PRESETS[0];
-    }
-    function formatRadioMhz(hz) {
-        var mhz = hz / 1000000;
-        var fixed = mhz >= 1000 ? mhz.toFixed(1) : mhz.toFixed(3);
-        return fixed.replace(/\.?0+$/, '') + ' MHz';
-    }
-    function formatRadioKhz(hz) {
-        return (hz / 1000).toFixed(0) + ' kHz';
-    }
-    function resolveRadioProfile() {
-        var region = radioRegionForKey(state.rnodeRadioRegion);
-        var preset = radioPresetForKey(state.rnodeRadioPreset);
-        return {
-            region: region,
-            preset: preset,
-            frequency: region.frequency,
-            bandwidth: preset.bandwidth,
-            sf: preset.sf,
-            cr: preset.cr,
-            tx: preset.tx
-        };
-    }
-    function updateProvisionRadioSummary() {
-        if (!provRadioSummary) return;
-        var profile = resolveRadioProfile();
-        provRadioSummary.textContent =
-            formatRadioMhz(profile.frequency) + ' · ' +
-            formatRadioKhz(profile.bandwidth) + ' · SF' + profile.sf +
-            ' · CR' + profile.cr + ' · TX ' + profile.tx + ' dBm';
-    }
-    function defaultRegionForModel(modelByte) {
-        if (RNODE_24GHZ_MODELS[modelByte]) return 'ism_24';
-        if (RNODE_LOW_BAND_MODELS[modelByte]) return 'uhf_433';
-        return 'americas';
-    }
-    function hintRadioFromModel(modelByte) {
-        if (state.rnodeRadioManual) return;
-        state.rnodeRadioRegion = defaultRegionForModel(modelByte);
-        state.rnodeRadioPreset = state.rnodeRadioPreset || 'medium_fast';
-        syncRadioSelects();
     }
     function populateModelsFor(productByte) {
         var models = RNODE_MODELS_BY_PRODUCT[productByte] || [];
@@ -5992,7 +5835,6 @@
             populateModelsFor(hint.product);
             provModelSel.value = String(hint.model);
         }
-        hintRadioFromModel(hint.model);
         updateProvisionBoardBadge();
     }
 
@@ -6023,7 +5865,6 @@
         if (provBoardChange) provBoardChange.textContent = manual ? 'Use auto-detect' : 'Change';
         if (manual) {
             buildProductSelect();
-            buildRadioSelects();
             // If we have an auto-detect hint, seed the dropdowns from it so the
             // user starts editing from a sensible value rather than the first
             // entry in the list.
@@ -6032,9 +5873,6 @@
                 provProductSel.value = String(hint.product);
                 populateModelsFor(hint.product);
                 provModelSel.value = String(hint.model);
-            }
-            if (provModelSel && provModelSel.value !== '') {
-                hintRadioFromModel(parseInt(provModelSel.value, 10));
             }
         }
         updateProvisionBoardBadge();
@@ -6063,7 +5901,6 @@
             if (flashAdvanced && provToggle.checked) flashAdvanced.open = true;
             if (provToggle.checked) {
                 buildProductSelect();
-                buildRadioSelects();
                 updateProvisionBoardBadge();
             }
             updateAdvancedMeta();
@@ -6077,9 +5914,6 @@
     if (reprovisionBtn) {
         reprovisionBtn.addEventListener('click', function () { runReprovisionOnly(); });
     }
-    if (saveRadioConfigBtn) {
-        saveRadioConfigBtn.addEventListener('click', function () { runSaveRadioConfigOnly(); });
-    }
     if (setHashBtn) {
         setHashBtn.addEventListener('click', function () { runSetHashOnly(); });
     }
@@ -6088,25 +5922,17 @@
     // Constants transcribed from RNS/Utilities/rnodeconf.py
     var KISS = {
         FEND: 0xC0, FESC: 0xDB, TFEND: 0xDC, TFESC: 0xDD,
-        CMD_FREQUENCY: 0x01,
-        CMD_BANDWIDTH: 0x02,
-        CMD_TXPOWER:   0x03,
-        CMD_SF:        0x04,
-        CMD_CR:        0x05,
-        CMD_RADIO_STATE: 0x06,
         CMD_ROM_WRITE: 0x52,
-        CMD_CONF_SAVE: 0x53,
-        CMD_RESET:     0x55,
         CMD_FW_HASH:   0x58
     };
+    var RNODE_ROM_WRITE_DELAY_MS = 25;
+    var RNODE_POST_EEPROM_DELAY_MS = 1000;
+    var RNODE_HASH_SAVE_DELAY_MS = 3000;
     var ROM_ADDR = {
         PRODUCT: 0x00, MODEL: 0x01, HW_REV: 0x02, SERIAL: 0x03, MADE: 0x07,
-        CHKSUM: 0x0B, SIGNATURE: 0x1B, INFO_LOCK: 0x9B,
-        CONF_SF: 0x9C, CONF_CR: 0x9D, CONF_TXP: 0x9E, CONF_BW: 0x9F,
-        CONF_FREQ: 0xA3, CONF_OK: 0xA7
+        CHKSUM: 0x0B, SIGNATURE: 0x1B, INFO_LOCK: 0x9B
     };
     var INFO_LOCK_BYTE = 0x73;
-    var CONF_OK_BYTE = 0x73;
 
     function kissEscape(bytes) {
         var out = [];
@@ -6217,47 +6043,6 @@
         return await sha256(bytes);
     }
 
-    function u32beBytes(value) {
-        return [
-            Math.floor(value / 0x1000000) & 0xFF,
-            Math.floor(value / 0x10000) & 0xFF,
-            Math.floor(value / 0x100) & 0xFF,
-            value & 0xFF
-        ];
-    }
-
-    async function writeStartupRadioConfigToRom(writeRom, logMessage) {
-        var profile = resolveRadioProfile();
-        logMessage(
-            'Writing startup radio config: ' + formatRadioMhz(profile.frequency) +
-            ', ' + formatRadioKhz(profile.bandwidth) + ', SF' + profile.sf +
-            ', CR' + profile.cr + ', TX ' + profile.tx + ' dBm',
-            ''
-        );
-        await writeRom(ROM_ADDR.CONF_SF, profile.sf);
-        await writeRom(ROM_ADDR.CONF_CR, profile.cr);
-        await writeRom(ROM_ADDR.CONF_TXP, profile.tx);
-        var bw = u32beBytes(profile.bandwidth);
-        for (var i = 0; i < 4; i++) await writeRom(ROM_ADDR.CONF_BW + i, bw[i]);
-        var freq = u32beBytes(profile.frequency);
-        for (var j = 0; j < 4; j++) await writeRom(ROM_ADDR.CONF_FREQ + j, freq[j]);
-        await writeRom(ROM_ADDR.CONF_OK, CONF_OK_BYTE);
-    }
-
-    async function saveStartupRadioConfigOverKiss(send, logMessage) {
-        var profile = resolveRadioProfile();
-        logMessage('Saving startup radio config through RNode command interface…', '');
-        await send(KISS.CMD_FREQUENCY, u32beBytes(profile.frequency));
-        await send(KISS.CMD_BANDWIDTH, u32beBytes(profile.bandwidth));
-        await send(KISS.CMD_TXPOWER, [profile.tx & 0xFF]);
-        await send(KISS.CMD_SF, [profile.sf & 0xFF]);
-        await send(KISS.CMD_CR, [profile.cr & 0xFF]);
-        await send(KISS.CMD_RADIO_STATE, [0x01]);
-        await new Promise(function (r) { setTimeout(r, 300); });
-        await send(KISS.CMD_CONF_SAVE, [0x00]);
-        await new Promise(function (r) { setTimeout(r, 300); });
-    }
-
     // ── Provisioning sequencer ───────────────────────
     async function runProvisioning(logMessage, setProgress) {
         if (!state.port) throw new Error('Serial port unavailable for provisioning');
@@ -6293,14 +6078,13 @@
         });
 
         var writer = state.port.writable.getWriter();
-        async function send(cmd, payload) {
+        async function send(cmd, payload, delayMs) {
             var frame = kissFrame(cmd, payload);
             await writer.write(frame);
-            // RNode firmware needs ~6ms between EEPROM writes
-            await new Promise(function (r) { setTimeout(r, 6); });
+            await new Promise(function (r) { setTimeout(r, delayMs == null ? RNODE_ROM_WRITE_DELAY_MS : delayMs); });
         }
         async function writeRom(addr, byte) {
-            await send(KISS.CMD_ROM_WRITE, [addr & 0xFF, byte & 0xFF]);
+            await send(KISS.CMD_ROM_WRITE, [addr & 0xFF, byte & 0xFF], RNODE_ROM_WRITE_DELAY_MS);
         }
 
         try {
@@ -6317,26 +6101,20 @@
             logMessage('Writing blank signature (128 bytes)…', '');
             for (var s = 0; s < 128; s++) await writeRom(ROM_ADDR.SIGNATURE + s, signature[s]);
 
-            await writeStartupRadioConfigToRom(writeRom, logMessage);
-
             logMessage('Locking EEPROM info…', '');
             await writeRom(ROM_ADDR.INFO_LOCK, INFO_LOCK_BYTE);
 
-            // Pause a beat before computing + writing firmware hash
-            await new Promise(function (r) { setTimeout(r, 300); });
+            await new Promise(function (r) { setTimeout(r, RNODE_POST_EEPROM_DELAY_MS); });
             if (state.firmwareAppBytes && state.firmwareAppBytes.length) {
                 logMessage('Computing firmware hash…', '');
                 var fwHash = await computeFirmwareHash(state.firmwareAppBytes);
                 logMessage('Firmware SHA-256: ' + Array.from(fwHash).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('').slice(0, 16) + '…', '');
-                await send(KISS.CMD_FW_HASH, Array.from(fwHash));
+                await send(KISS.CMD_FW_HASH, Array.from(fwHash), RNODE_HASH_SAVE_DELAY_MS);
+                logMessage('Firmware hash written; device may reset itself.', 'log-green');
             } else {
                 logMessage('Firmware bytes unavailable; leaving firmware hash unchanged.', 'log-orange');
             }
 
-            await saveStartupRadioConfigOverKiss(send, logMessage);
-
-            logMessage('Hard-resetting device…', '');
-            await send(KISS.CMD_RESET, [0xF8]);
             logMessage('RNode EEPROM provisioned.', 'log-green');
         } finally {
             try { await writer.close(); } catch (e) { /* ignore */ }
@@ -6404,46 +6182,6 @@
         }
     }
 
-    async function runSaveRadioConfigOnly() {
-        if (!('serial' in navigator)) {
-            alert('This requires Web Serial (Chrome / Edge 89+).');
-            return;
-        }
-        buildRadioSelects();
-        try {
-            if (!state.port) state.port = await navigator.serial.requestPort();
-        } catch (e) { return; }
-        var ui = openProgressLog('Saving startup config…');
-        try {
-            ui.log('Reopening serial at 115200 8N1…', '');
-            try { await state.port.close(); } catch (e) { /* may already be closed */ }
-            await new Promise(function (r) { setTimeout(r, 1200); });
-            await state.port.open({
-                baudRate: 115200, dataBits: 8, parity: 'none', stopBits: 1,
-                flowControl: 'none', bufferSize: 4096
-            });
-            var writer = state.port.writable.getWriter();
-            async function send(cmd, payload) {
-                await writer.write(kissFrame(cmd, payload));
-                await new Promise(function (r) { setTimeout(r, 6); });
-            }
-            try {
-                await saveStartupRadioConfigOverKiss(send, ui.log);
-                ui.log('Hard-resetting device…', '');
-                await send(KISS.CMD_RESET, [0xF8]);
-                ui.log('Startup radio config saved.', 'log-green');
-                ui.setStatus('Startup config saved.');
-            } finally {
-                try { await writer.close(); } catch (e) { /* ignore */ }
-                try { writer.releaseLock(); } catch (e) { /* ignore */ }
-                try { await state.port.close(); } catch (e) { /* ignore */ }
-            }
-        } catch (err) {
-            ui.log('Error: ' + (err.message || err), 'log-red');
-            ui.setStatus('Save config failed.');
-        }
-    }
-
     async function runSetHashOnly() {
         if (!('serial' in navigator)) {
             alert('This requires Web Serial (Chrome / Edge 89+).');
@@ -6471,9 +6209,7 @@
                 var fwHash = await computeFirmwareHash(state.firmwareAppBytes);
                 ui.log('Firmware SHA-256: ' + Array.from(fwHash).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('').slice(0, 16) + '…', '');
                 await writer.write(kissFrame(KISS.CMD_FW_HASH, Array.from(fwHash)));
-                await new Promise(function (r) { setTimeout(r, 6); });
-                ui.log('Hard-resetting device…', '');
-                await writer.write(kissFrame(KISS.CMD_RESET, [0xF8]));
+                await new Promise(function (r) { setTimeout(r, RNODE_HASH_SAVE_DELAY_MS); });
                 ui.log('Firmware hash written.', 'log-green');
                 ui.setStatus('Firmware hash written.');
             } finally {
@@ -6502,10 +6238,7 @@
         if (!meta) return;
         var parts = [];
         if (state.eraseAll) parts.push('Full erase on');
-        if (state.rnodeProvision) {
-            var profile = resolveRadioProfile();
-            parts.push('EEPROM + ' + formatRadioMhz(profile.frequency) + ' startup config');
-        }
+        if (state.rnodeProvision) parts.push('EEPROM provisioning on');
         meta.textContent = parts.length ? parts.join(' · ') : 'Default flash';
     }
 
