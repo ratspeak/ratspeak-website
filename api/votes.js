@@ -11,7 +11,8 @@ import {
   normalizePollState,
   serializableVoteMessage,
   validateVoteAgainstPoll,
-  validateVoteMessageInput
+  validateVoteMessageInput,
+  voteStoragePollIds
 } from '../lib/vote-core.js';
 import {
   checkRateLimit,
@@ -65,7 +66,7 @@ async function getResults(url, blobToken) {
   const poll = findPoll(polls, pollId);
   if (!poll) return jsonResponse({ error: 'Unknown poll' }, 404, NO_STORE);
 
-  const votes = await loadVotesForPoll(blobToken, poll.id);
+  const votes = await loadVotesForPoll(blobToken, poll);
   return jsonResponse({ ok: true, results: buildResults(poll, votes) }, 200, NO_STORE);
 }
 
@@ -105,10 +106,10 @@ async function postVote(req, blobToken) {
   });
   if (!verified) return jsonResponse({ error: 'Signature verification failed' }, 401, NO_STORE);
 
-  const existing = await loadVoteForVoter(blobToken, poll.id, voter);
+  const existing = await loadVoteForVoter(blobToken, poll, voter);
   const existingCreatedAt = Number(existing?.message?.createdAt || 0);
   if (existing && existingCreatedAt > input.createdAt) {
-    const votes = await loadVotesForPoll(blobToken, poll.id);
+    const votes = await loadVotesForPoll(blobToken, poll);
     return jsonResponse({
       ok: true,
       ignored: true,
@@ -148,7 +149,7 @@ async function postVote(req, blobToken) {
   };
 
   await writeVote(blobToken, storedVote);
-  const votes = await loadVotesForPoll(blobToken, poll.id);
+  const votes = await loadVotesForPoll(blobToken, poll);
   return jsonResponse({
     ok: true,
     vote: publicVote(storedVote),
@@ -192,12 +193,14 @@ async function loadPolls(blobToken) {
   return normalizePollState(stored || null).polls;
 }
 
-async function loadVoteForVoter(blobToken, pollId, voter) {
-  return readBlobJson(blobToken, votePath(pollId, voter));
+async function loadVoteForVoter(blobToken, poll, voter) {
+  const votes = await Promise.all(voteStoragePollIds(poll).map(pollId => readBlobJson(blobToken, votePath(pollId, voter))));
+  return votes.filter(Boolean).sort(compareStoredVoteFreshness).pop() || null;
 }
 
-async function loadVotesForPoll(blobToken, pollId) {
-  const blobs = await listBlobs(blobToken, `${VOTES_PREFIX}/${pollId}/`);
+async function loadVotesForPoll(blobToken, poll) {
+  const listings = await Promise.all(voteStoragePollIds(poll).map(pollId => listBlobs(blobToken, `${VOTES_PREFIX}/${pollId}/`)));
+  const blobs = listings.flat();
   const votes = await Promise.all(blobs.map(blob => fetch(blob.url, { cache: 'no-store' })
     .then(resp => resp.ok ? resp.json() : null)
     .catch(() => null)));
@@ -255,6 +258,12 @@ async function listBlobs(blobToken, prefix, limit = 1000) {
 
 function votePath(pollId, voter) {
   return `${VOTES_PREFIX}/${pollId}/${String(voter).toLowerCase()}.json`;
+}
+
+function compareStoredVoteFreshness(a, b) {
+  const receivedCompare = String(a?.receivedAt || '').localeCompare(String(b?.receivedAt || ''));
+  if (receivedCompare !== 0) return receivedCompare;
+  return String(a?.signedAt || '').localeCompare(String(b?.signedAt || ''));
 }
 
 async function readJson(req) {
