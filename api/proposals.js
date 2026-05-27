@@ -1,3 +1,5 @@
+import { normalizePollState } from '../lib/vote-core.js';
+
 export const config = { runtime: 'edge' };
 
 // Proposal source of truth for poll.html.
@@ -13,7 +15,7 @@ const BLOB_API = 'https://vercel.com/api/blob';
 const PATHNAME = 'community-poll-proposals.json';
 const API_VERSION = '12';
 const MAX_BODY = 256 * 1024;
-const EMPTY_STATE = { version: 1, polls: [] };
+const EMPTY_STATE = normalizePollState(null);
 const NO_STORE = { 'Cache-Control': 'no-store' };
 
 export default async function handler(req) {
