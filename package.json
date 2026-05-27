@@ -1,0 +1,11 @@
+{
+  "name": "ratspeak-website",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check:poll": "node --check api/proposals.js && node --check api/snapshot.js && node --check api/votes.js && node --check lib/rate-limit.js && node --check lib/snapshot-rpc.js && node --check lib/vote-core.js"
+  },
+  "dependencies": {
+    "viem": "2.51.2"
+  }
+}

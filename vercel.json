@@ -9,6 +9,15 @@
     },
     "api/tasks.js": {
       "maxDuration": 10
+    },
+    "api/proposals.js": {
+      "maxDuration": 10
+    },
+    "api/snapshot.js": {
+      "maxDuration": 10
+    },
+    "api/votes.js": {
+      "maxDuration": 10
     }
   },
   "headers": [

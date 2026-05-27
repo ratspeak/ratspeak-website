@@ -1,0 +1,2951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#18171a">
+    <title>Community Poll — Ratspeak</title>
+    <meta name="description" content="Join the experimental Ratspeak community poll on Base. Eligible RATSPEAK token holders can sign a gasless vote on future community initiatives.">
+    <link rel="canonical" href="https://ratspeak.org/poll.html">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="mask-icon" href="/favicon.svg" color="#D2693B">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="application-name" content="Ratspeak">
+    <meta name="apple-mobile-web-app-title" content="Ratspeak">
+    <meta name="msapplication-TileColor" content="#FAF7F3">
+    <meta name="msapplication-TileImage" content="/assets/icons/windows/ratspeak-windows-light-150.png">
+    <meta name="color-scheme" content="light dark">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:site_name" content="Ratspeak">
+    <meta property="og:title" content="Community Poll — Ratspeak">
+    <meta property="og:description" content="Join the experimental Ratspeak community poll on Base. Eligible RATSPEAK token holders can sign a gasless vote on future community initiatives.">
+    <meta property="og:url" content="https://ratspeak.org/poll.html">
+    <meta property="og:image" content="https://ratspeak.org/assets/seo/og-home.png">
+    <meta property="og:image:secure_url" content="https://ratspeak.org/assets/seo/og-home.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Ratspeak Community Poll — Experimental community voting on Base.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@ratspeakorg">
+    <meta name="twitter:title" content="Community Poll — Ratspeak">
+    <meta name="twitter:description" content="Join the experimental Ratspeak community poll on Base. Eligible RATSPEAK token holders can sign a gasless vote on future community initiatives.">
+    <meta name="twitter:image" content="https://ratspeak.org/assets/seo/og-home.png">
+    <meta name="twitter:image:alt" content="Ratspeak Community Poll — Experimental community voting on Base.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Familjen+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>!function(){var t=localStorage.getItem('ratspeak-theme');if(t)document.documentElement.setAttribute('data-theme',t);else if(window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.setAttribute('data-theme','dark')}()</script>
+    <script type="application/ld+json">
+{
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Community Poll — Ratspeak",
+      "url": "https://ratspeak.org/poll.html",
+      "description": "Join the experimental Ratspeak community poll on Base. Eligible RATSPEAK token holders can sign a gasless vote on future community initiatives.",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "Ratspeak",
+        "url": "https://ratspeak.org"
+      }
+    }
+    </script>
+    <style>
+        :root {
+            --bg-primary: #FAF7F3;
+            --bg-secondary: #F3EFEA;
+            --bg-tertiary: #ECE6DE;
+            --bg-card: #FFFFFF;
+            --bg-elevated: var(--bg-card);
+            --bg-dark: #2A2522;
+            --border: #DED4C8;
+            --border-subtle: #E6DDD2;
+            --border-card: #E1D5C6;
+            --text-primary: #2A2522;
+            --text-secondary: #6F675F;
+            --text-muted: #9A9086;
+            --accent: #D2693B;
+            --accent-light: #FBEFE6;
+            --accent-soft: var(--accent-light);
+            --accent-dark: #B85829;
+            --accent-a05: rgba(210, 105, 59, 0.05);
+            --accent-a12: rgba(210, 105, 59, 0.12);
+            --accent-a18: rgba(210, 105, 59, 0.18);
+            --accent-a25: rgba(210, 105, 59, 0.25);
+            --green: #6B8A5E;
+            --green-soft: #E8F0E5;
+            --yellow: #B8963C;
+            --yellow-soft: #F5F0E1;
+            --blue: #3A76F0;
+            --blue-soft: #EBF2FE;
+            --red: #CF222E;
+            --shadow: 0 1px 2px rgba(42, 37, 34, 0.04), 0 10px 28px rgba(42, 37, 34, 0.08);
+            --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            --font-mono: 'Familjen Grotesk', system-ui, -apple-system, sans-serif;
+            --font-code: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, Consolas, monospace;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #18171a;
+            --bg-secondary: #1f1d20;
+            --bg-tertiary: #26242a;
+            --bg-card: #1d1b1e;
+            --bg-elevated: var(--bg-card);
+            --bg-dark: #e8e4e0;
+            --border: #322e30;
+            --border-subtle: #2a2629;
+            --border-card: #2a2629;
+            --text-primary: #e8e4e0;
+            --text-secondary: #a89f96;
+            --text-muted: #7a7068;
+            --accent: #D2693B;
+            --accent-light: #2a1f18;
+            --accent-soft: var(--accent-light);
+            --accent-dark: #B85829;
+            --accent-a05: rgba(210, 105, 59, 0.05);
+            --accent-a12: rgba(210, 105, 59, 0.12);
+            --accent-a18: rgba(210, 105, 59, 0.18);
+            --accent-a25: rgba(210, 105, 59, 0.25);
+            --green: #8AAD7A;
+            --green-soft: #1E2B1C;
+            --yellow: #D4B84E;
+            --yellow-soft: #2B2618;
+            --blue: #6FA0F8;
+            --blue-soft: #1B2538;
+            --red: #E5534B;
+            --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 10px 30px rgba(0,0,0,0.26);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            min-height: 100vh;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 16px;
+            line-height: 1.55;
+            padding-top: 64px;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        button, input, textarea { font: inherit; }
+        button { cursor: pointer; }
+        [hidden] { display: none !important; }
+        a { color: inherit; }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 44px;
+            background: rgba(250, 247, 243, 0.86);
+            border-bottom: 1px solid transparent;
+            backdrop-filter: blur(14px) saturate(1.2);
+            -webkit-backdrop-filter: blur(14px) saturate(1.2);
+            transform: translateZ(0);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+        }
+        [data-theme="dark"] .navbar { background: rgba(24, 23, 26, 0.78); }
+        .navbar.scrolled {
+            background: rgba(250, 247, 243, 0.94);
+            border-bottom-color: var(--border-subtle);
+            box-shadow: 0 1px 0 rgba(42, 37, 34, 0.03);
+        }
+        [data-theme="dark"] .navbar.scrolled { background: rgba(24, 23, 26, 0.88); }
+
+        .navbar-left,
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-left a {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .navbar-logo {
+            width: 28px;
+            height: 28px;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+        .navbar-title {
+            color: var(--text-primary);
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+
+        .navbar-center {
+            display: flex;
+            align-items: center;
+            gap: 36px;
+        }
+        .navbar-center a {
+            position: relative;
+            color: var(--text-secondary);
+            font-size: 14.5px;
+            font-weight: 500;
+            padding: 4px 0;
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+        .navbar-center a:hover,
+        .navbar-center a.nav-active {
+            color: var(--text-primary);
+        }
+        .navbar-center a::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -2px;
+            height: 2px;
+            border-radius: 2px;
+            background: var(--accent);
+            transform: scaleX(0);
+            transition: transform 0.2s ease;
+        }
+        .navbar-center a:hover::after,
+        .navbar-center a.nav-active::after {
+            transform: scaleX(0.6);
+        }
+
+        .nav-btn,
+        .navbar-icon-btn,
+        .navbar-wallet-btn,
+        .navbar-admin-btn,
+        .primary-btn,
+        .secondary-btn,
+        .proposal-card,
+        .choice-card {
+            border: 1px solid var(--border-subtle);
+            transition: border-color 0.16s, background 0.16s, color 0.16s, transform 0.16s, box-shadow 0.16s;
+        }
+
+        .navbar-icon-btn,
+        .navbar-wallet-btn,
+        .navbar-admin-btn,
+        .primary-btn,
+        .secondary-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 36px;
+            border-radius: 8px;
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            font-weight: 700;
+            padding: 8px 13px;
+        }
+
+        .navbar-wallet-btn:hover,
+        .navbar-admin-btn:hover,
+        .secondary-btn:hover {
+            border-color: var(--border);
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+        }
+
+        .navbar-icon-btn {
+            width: 32px;
+            height: 32px;
+            min-height: 32px;
+            border-color: transparent;
+            background: transparent;
+            color: var(--text-muted);
+            padding: 0;
+            text-decoration: none;
+        }
+        .navbar-icon-btn:hover {
+            color: var(--text-primary);
+            background: rgba(42, 37, 34, 0.045);
+        }
+        [data-theme="dark"] .navbar-icon-btn:hover { background: var(--bg-secondary); }
+
+        .navbar-wallet-btn,
+        .navbar-admin-btn {
+            min-height: 38px;
+            background: color-mix(in srgb, var(--bg-card) 92%, transparent);
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+        .navbar-admin-btn {
+            border-color: color-mix(in srgb, var(--accent) 42%, var(--border-subtle));
+            color: var(--accent);
+        }
+
+        .primary-btn {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: #160F0B;
+        }
+        .primary-btn:hover {
+            border-color: var(--accent-dark);
+            background: var(--accent-dark);
+            transform: translateY(-1px);
+        }
+        .navbar-wallet-btn[disabled],
+        .primary-btn[disabled],
+        .secondary-btn[disabled] {
+            cursor: not-allowed;
+            opacity: 0.55;
+            transform: none;
+        }
+        .navbar-icon-btn svg,
+        .navbar-wallet-btn svg,
+        .navbar-admin-btn svg,
+        .primary-btn svg,
+        .secondary-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+        .navbar-icon-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .navbar-menu {
+            display: none;
+            position: fixed;
+            top: 64px;
+            right: 16px;
+            z-index: 99;
+            min-width: 180px;
+            border: 1px solid var(--border-card);
+            border-radius: 12px;
+            background: var(--bg-card);
+            box-shadow: var(--shadow);
+            flex-direction: column;
+            gap: 2px;
+            padding: 8px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-8px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .navbar-menu.open {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+        .navbar-menu a {
+            display: flex;
+            align-items: center;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 14.5px;
+            font-weight: 500;
+            padding: 10px 14px;
+            text-decoration: none;
+        }
+        .navbar-menu a:hover,
+        .navbar-menu a.menu-active {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        .navbar-hamburger { display: none; }
+
+        body.public-mode .admin-only { display: none !important; }
+
+        .theme-icon-sun { display: none; }
+        .theme-icon-moon { display: block; }
+        [data-theme="dark"] .theme-icon-sun { display: block; }
+        [data-theme="dark"] .theme-icon-moon { display: none; }
+
+        .hero {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 42px 44px 22px;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 900px);
+            gap: 14px;
+            align-items: start;
+        }
+
+        .eyebrow {
+            color: var(--accent);
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .hero-title {
+            max-width: 860px;
+            color: var(--text-primary);
+            font-size: clamp(34px, 4.2vw, 58px);
+            font-weight: 700;
+            letter-spacing: 0;
+            line-height: 1.04;
+        }
+
+        .hero-sub {
+            max-width: 760px;
+            color: var(--text-secondary);
+            font-size: 17px;
+            line-height: 1.55;
+            margin-top: 14px;
+        }
+        .hero-sub a {
+            color: var(--accent);
+            font-weight: 600;
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 3px;
+        }
+        .hero-sub a:hover { color: var(--accent-dark); }
+
+        .vote-shell {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 44px 44px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 318px;
+            grid-template-areas:
+                "ballot proposals"
+                "ballot sidebar";
+            grid-template-rows: auto 1fr;
+            gap: 16px;
+            align-items: start;
+        }
+
+        .vote-main { grid-area: ballot; }
+        .proposal-panel { grid-area: proposals; }
+        .sidebar-stack { grid-area: sidebar; }
+
+        .vote-main,
+        .proposal-panel,
+        .wallet-panel,
+        .admin-panel {
+            min-width: 0;
+        }
+
+        .proposal-strip {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-top: 10px;
+            max-height: 260px;
+            overflow: auto;
+            padding-right: 2px;
+        }
+
+        .proposal-card {
+            position: relative;
+            min-height: 78px;
+            border-radius: 8px;
+            background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
+            color: inherit;
+            overflow: hidden;
+            padding: 12px;
+            text-align: left;
+        }
+        .proposal-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(130deg, rgba(225, 116, 63, 0.18), transparent 50%);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.16s;
+        }
+        .proposal-card:hover,
+        .proposal-card.active {
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+        .proposal-card.active {
+            background: color-mix(in srgb, var(--accent-soft) 72%, var(--bg-elevated));
+            box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 42%, transparent);
+        }
+        .proposal-card.active::before { opacity: 1; }
+
+        .proposal-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--green);
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        .proposal-status::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+        .proposal-card h2 {
+            position: relative;
+            color: var(--text-primary);
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0;
+            line-height: 1.22;
+        }
+        .proposal-meta {
+            position: relative;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-family: var(--font-code);
+            font-size: 10px;
+            margin-top: 9px;
+        }
+
+        .ballot {
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .ballot-head {
+            padding: 24px 26px 22px;
+            border-bottom: 1px solid var(--border-subtle);
+            background:
+                radial-gradient(circle at 8% 10%, var(--accent-a18), transparent 30%),
+                linear-gradient(135deg, color-mix(in srgb, var(--bg-secondary) 84%, transparent), var(--bg-elevated));
+        }
+
+        .poll-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .tag {
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            padding: 5px 9px;
+            text-transform: uppercase;
+        }
+        .tag-live {
+            border-color: var(--green);
+            background: var(--green-soft);
+            color: var(--green);
+        }
+
+        .ballot-title {
+            color: var(--text-primary);
+            font-size: clamp(28px, 3.1vw, 42px);
+            font-weight: 700;
+            letter-spacing: 0;
+            line-height: 1.04;
+        }
+        .ballot-desc {
+            max-width: 820px;
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.5;
+            margin-top: 12px;
+        }
+
+        .choice-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            padding: 14px;
+        }
+
+        .choice-card {
+            position: relative;
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            min-height: 122px;
+            padding: 16px;
+            text-align: left;
+            overflow: hidden;
+        }
+        .choice-card::before {
+            content: "";
+            position: absolute;
+            inset: 14px 14px auto auto;
+            width: 18px;
+            height: 18px;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            background: var(--bg-primary);
+        }
+        .choice-card::after {
+            content: "";
+            display: none;
+        }
+        .choice-card:hover,
+        .choice-card.selected {
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+        .choice-card.selected {
+            background: color-mix(in srgb, var(--accent-soft) 60%, var(--bg-secondary));
+            box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 42%, transparent);
+        }
+        .choice-card.selected::before {
+            border-color: var(--accent);
+            background:
+                radial-gradient(circle at center, var(--accent) 0 44%, transparent 47%),
+                var(--accent-soft);
+        }
+        .choice-card h3 {
+            position: relative;
+            color: var(--text-primary);
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: 0;
+            line-height: 1.22;
+            padding-right: 34px;
+        }
+        .choice-card p {
+            position: relative;
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.45;
+            margin-top: 8px;
+            padding-right: 12px;
+        }
+        .choice-selected {
+            position: absolute;
+            right: 14px;
+            bottom: 12px;
+            color: var(--accent);
+            display: none;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        .choice-card.selected .choice-selected { display: block; }
+
+        .results-panel {
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
+            box-shadow: var(--shadow);
+            margin-top: 14px;
+            padding: 18px;
+        }
+        .results-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 14px;
+        }
+        .results-title {
+            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .results-empty,
+        .results-error {
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            font-size: 13px;
+            padding: 13px;
+        }
+        .results-error {
+            color: var(--red);
+        }
+        .results-list {
+            display: grid;
+            gap: 10px;
+        }
+        .result-row {
+            display: grid;
+            grid-template-columns: minmax(140px, 1fr) minmax(120px, 0.72fr);
+            gap: 14px;
+            align-items: center;
+        }
+        .result-label {
+            min-width: 0;
+        }
+        .result-label strong {
+            color: var(--text-primary);
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.25;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .result-label span {
+            color: var(--text-muted);
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            margin-top: 2px;
+            text-transform: uppercase;
+        }
+        .result-track {
+            position: relative;
+            min-height: 34px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            overflow: hidden;
+        }
+        .result-fill {
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: var(--result-width, 0%);
+            border-radius: inherit;
+            background: color-mix(in srgb, var(--accent) 54%, transparent);
+        }
+        .result-value {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            min-height: 34px;
+            color: var(--text-primary);
+            font-family: var(--font-code);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 0 10px;
+        }
+        .result-value span:last-child {
+            color: var(--text-secondary);
+        }
+
+        .sidebar-stack {
+            position: sticky;
+            top: 84px;
+            display: grid;
+            gap: 12px;
+            align-self: start;
+        }
+
+        .proposal-panel,
+        .wallet-panel,
+        .admin-panel {
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
+            padding: 14px;
+        }
+
+        .panel-kicker {
+            color: var(--text-muted);
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        .panel-title {
+            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0;
+            line-height: 1.2;
+        }
+        .panel-copy {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: 7px;
+        }
+        .proposal-panel .panel-copy {
+            margin-bottom: 0;
+        }
+
+        .wallet-box {
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            margin-top: 12px;
+            padding: 12px;
+        }
+        .wallet-address {
+            color: var(--text-primary);
+            font-family: var(--font-code);
+            font-size: 12px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .wallet-status {
+            color: var(--text-muted);
+            font-size: 12px;
+            line-height: 1.45;
+            margin-top: 7px;
+        }
+
+        .weight-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .mini-stat {
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            padding: 10px;
+            min-width: 0;
+        }
+        .mini-stat span {
+            color: var(--text-muted);
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+        }
+        .mini-stat strong,
+        .mini-stat .token-link {
+            color: var(--text-primary);
+            display: block;
+            font-size: 19px;
+            font-weight: 700;
+            line-height: 1.15;
+            margin-top: 3px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .mini-stat .token-link {
+            width: max-content;
+            max-width: 100%;
+            text-decoration: underline;
+            text-decoration-color: color-mix(in srgb, var(--accent) 52%, transparent);
+            text-decoration-thickness: 1px;
+            text-underline-offset: 4px;
+            transition: color 0.16s, text-decoration-color 0.16s;
+        }
+        .mini-stat .token-link:hover {
+            color: var(--accent);
+            text-decoration-color: var(--accent);
+        }
+        .eligibility-value {
+            align-items: center;
+            display: inline-flex !important;
+            gap: 6px;
+            width: max-content;
+            max-width: 100%;
+        }
+        .eligibility-value svg {
+            width: 15px;
+            height: 15px;
+            flex: 0 0 auto;
+        }
+        .eligibility-value.is-eligible {
+            color: var(--green);
+        }
+        .eligibility-value.is-ineligible {
+            color: var(--red);
+        }
+
+        .snapshot-box {
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            background: color-mix(in srgb, var(--accent-soft) 48%, var(--bg-secondary));
+            margin-top: 8px;
+            padding: 10px;
+        }
+        .snapshot-box span {
+            color: var(--text-muted);
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+        }
+        .snapshot-box strong {
+            color: var(--text-primary);
+            display: block;
+            font-family: var(--font-code);
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1.25;
+            margin-top: 4px;
+            overflow-wrap: anywhere;
+        }
+
+        .selected-box {
+            border-top: 1px solid var(--border-subtle);
+            margin-top: 14px;
+            padding-top: 14px;
+        }
+        .selected-choice {
+            color: var(--text-primary);
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-top: 5px;
+        }
+
+        .button-stack {
+            display: grid;
+            gap: 8px;
+            margin-top: 14px;
+        }
+        .primary-btn,
+        .secondary-btn {
+            width: 100%;
+        }
+
+        .admin-badge {
+            display: none;
+            position: fixed;
+            top: 72px;
+            right: 16px;
+            z-index: 90;
+            border: 1px solid color-mix(in srgb, var(--accent) 46%, transparent);
+            border-radius: 999px;
+            background: var(--accent);
+            color: #160F0B;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            padding: 5px 10px;
+            text-transform: uppercase;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        body:not(.public-mode) .admin-badge { display: block; }
+
+        .admin-panel {
+            border-color: color-mix(in srgb, var(--accent) 36%, var(--border-subtle));
+            background: color-mix(in srgb, var(--accent-soft) 34%, var(--bg-elevated));
+        }
+        .admin-status {
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            line-height: 1.45;
+            margin-top: 10px;
+            overflow-wrap: anywhere;
+        }
+
+        .auth-modal,
+        .proposal-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.58);
+            padding: 18px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .auth-modal.show,
+        .proposal-modal.show {
+            display: flex;
+        }
+        .auth-modal__card,
+        .proposal-modal__card {
+            width: min(92vw, 420px);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-elevated);
+            box-shadow: var(--shadow);
+            padding: 20px;
+        }
+        .proposal-modal__card {
+            width: min(96vw, 720px);
+            max-height: min(92vh, 860px);
+            overflow: auto;
+        }
+        .auth-modal__title,
+        .proposal-modal__title {
+            color: var(--text-primary);
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0;
+            line-height: 1.2;
+        }
+        .auth-modal__sub,
+        .proposal-modal__sub {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: 7px;
+        }
+        .auth-modal__input,
+        .proposal-form input,
+        .proposal-form textarea {
+            width: 100%;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            outline: none;
+            padding: 10px 12px;
+        }
+        .auth-modal__input:focus,
+        .proposal-form input:focus,
+        .proposal-form textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+        }
+        .auth-modal__input {
+            font-family: var(--font-code);
+            font-size: 13px;
+            margin-top: 16px;
+        }
+        .auth-modal__error,
+        .proposal-form__error {
+            display: none;
+            color: var(--red);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            line-height: 1.4;
+            margin-top: 10px;
+        }
+        .auth-modal__error.show,
+        .proposal-form__error.show {
+            display: block;
+        }
+        .auth-modal__actions,
+        .proposal-form__actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .auth-modal__btn,
+        .proposal-form__btn {
+            min-height: 36px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 8px 13px;
+        }
+        .auth-modal__btn--primary,
+        .proposal-form__btn--primary {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: #160F0B;
+        }
+        .proposal-form__btn--danger {
+            border-color: color-mix(in srgb, var(--red) 70%, var(--border-subtle));
+            color: var(--red);
+        }
+        .auth-modal__btn[disabled],
+        .proposal-form__btn[disabled] {
+            cursor: not-allowed;
+            opacity: 0.55;
+        }
+        .proposal-form {
+            display: grid;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .proposal-form__grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+        .proposal-form label {
+            display: grid;
+            gap: 6px;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        .proposal-form textarea {
+            min-height: 86px;
+            resize: vertical;
+        }
+        .choice-editor {
+            display: grid;
+            gap: 9px;
+        }
+        .choice-row {
+            display: grid;
+            grid-template-columns: minmax(120px, 0.62fr) minmax(160px, 1fr) 36px;
+            gap: 8px;
+            align-items: start;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            background: color-mix(in srgb, var(--bg-primary) 74%, var(--bg-secondary));
+            padding: 9px;
+        }
+        .choice-row button {
+            width: 36px;
+            height: 36px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--red);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 16px;
+        }
+        .choice-row button svg {
+            width: 15px;
+            height: 15px;
+        }
+        .proposal-form__hint {
+            color: var(--text-muted);
+            font-size: 12px;
+            line-height: 1.4;
+            margin-top: -4px;
+        }
+
+        .footer {
+            padding: 28px 44px 36px;
+        }
+        .footer-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+        .footer-built {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+        }
+        .footer-built svg {
+            width: 16px;
+            height: 16px;
+            color: var(--text-primary);
+            flex-shrink: 0;
+        }
+        .footer-built a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        .footer-brand {
+            display: inline-flex;
+            line-height: 0;
+        }
+        .footer-brand svg {
+            opacity: 0.75;
+            transition: color 0.2s, opacity 0.2s;
+        }
+        .footer-brand:hover svg {
+            color: var(--accent);
+            opacity: 1;
+        }
+        .footer-links {
+            display: flex;
+            gap: 22px;
+        }
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .footer-links a:hover { color: var(--text-primary); }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            z-index: 200;
+            max-width: calc(100vw - 32px);
+            transform: translateX(-50%) translateY(20px);
+            border-radius: 24px;
+            background: var(--bg-dark);
+            color: var(--bg-primary);
+            font-size: 13px;
+            font-weight: 700;
+            opacity: 0;
+            padding: 10px 18px;
+            pointer-events: none;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media (max-width: 1120px) {
+            .vote-shell {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "proposals"
+                    "ballot"
+                    "sidebar";
+                max-width: 940px;
+            }
+            .sidebar-stack {
+                position: static;
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .navbar {
+                padding: 0 18px;
+            }
+            .navbar-center,
+            .navbar-gh {
+                display: none;
+            }
+            .navbar-hamburger,
+            .navbar-menu {
+                display: flex;
+            }
+            .navbar-right {
+                gap: 8px;
+            }
+            .hero {
+                padding: 30px 20px 18px;
+            }
+            .hero-title {
+                font-size: 38px;
+                line-height: 1.04;
+            }
+            .hero-sub,
+            .ballot-desc,
+            .panel-copy,
+            .wallet-status {
+                overflow-wrap: anywhere;
+            }
+            .vote-shell {
+                padding: 0 20px 42px;
+            }
+            .choice-grid {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+            .result-row {
+                grid-template-columns: 1fr;
+                gap: 7px;
+            }
+            .ballot-head {
+                padding: 18px;
+            }
+            .ballot-title {
+                font-size: 30px;
+                line-height: 1.1;
+                overflow-wrap: anywhere;
+            }
+            .sidebar-stack {
+                grid-template-columns: 1fr;
+            }
+            .proposal-form__grid {
+                grid-template-columns: 1fr;
+            }
+            .choice-row {
+                grid-template-columns: 1fr 36px;
+            }
+            .choice-row label:last-of-type {
+                grid-column: 1 / -1;
+                grid-row: 2;
+            }
+            .choice-row button {
+                grid-column: 2;
+                grid-row: 1;
+            }
+            .footer {
+                padding: 24px 20px 32px;
+            }
+            .footer-inner {
+                flex-direction: column;
+                gap: 14px;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .navbar-wallet-btn span,
+            .navbar-admin-btn span {
+                display: none;
+            }
+            .navbar-wallet-btn,
+            .navbar-admin-btn {
+                width: 40px;
+                padding-inline: 0;
+            }
+            .hero {
+                padding-top: 22px;
+                padding-bottom: 14px;
+            }
+            .eyebrow {
+                font-size: 12px;
+                margin-bottom: 8px;
+            }
+            .hero-title {
+                font-size: 32px;
+            }
+            .hero-sub {
+                font-size: 15px;
+                line-height: 1.45;
+                margin-top: 9px;
+            }
+            .vote-shell {
+                gap: 12px;
+            }
+            .proposal-panel {
+                padding: 12px;
+            }
+            .proposal-panel .panel-copy {
+                display: none;
+            }
+            .proposal-strip {
+                margin-top: 8px;
+            }
+            .proposal-card {
+                min-height: 74px;
+                padding: 10px;
+            }
+            .proposal-status {
+                font-size: 9px;
+                margin-bottom: 5px;
+            }
+            .proposal-card h2 {
+                font-size: 14px;
+            }
+            .proposal-meta {
+                flex-wrap: nowrap;
+                gap: 7px;
+                margin-top: 6px;
+                overflow: hidden;
+                white-space: nowrap;
+            }
+            .proposal-meta span:nth-child(n+3) {
+                display: none;
+            }
+            .poll-tags {
+                flex-wrap: wrap;
+                gap: 7px;
+                margin-bottom: 13px;
+            }
+            .tag {
+                flex: 0 0 auto;
+                font-size: 10px;
+                padding: 5px 8px;
+            }
+            .ballot-head {
+                padding: 16px;
+            }
+            .ballot-title {
+                font-size: 26px;
+                line-height: 1.08;
+            }
+            .ballot-desc {
+                font-size: 14px;
+                margin-top: 10px;
+            }
+            .choice-card {
+                min-height: 118px;
+                padding: 16px;
+            }
+            .results-panel {
+                padding: 14px;
+            }
+            .results-head {
+                display: grid;
+                gap: 4px;
+            }
+            .weight-grid {
+                grid-template-columns: 1fr;
+            }
+            .footer-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                row-gap: 8px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; transition: none !important; }
+        }
+    </style>
+</head>
+<body class="public-mode">
+<nav class="navbar" id="navbar">
+    <div class="navbar-left">
+        <a href="index.html">
+            <svg class="navbar-logo" viewBox="243 243 282 282" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M327.97,501.16C314.61,508.03 301.57,514.72 288.56,521.48C283.91,523.91 279.2,524.61 275.05,520.98C271.05,517.49 271.26,512.87 272.63,508.05C275.23,498.93 277.46,489.7 280.08,480.58C281.03,477.27 280.4,475.51 277.14,473.92C255.84,463.53 245.61,446.29 245.66,422.66C245.75,381.16 245.55,339.66 245.75,298.16C245.86,275.62 256.63,259.57 276.93,249.98C283.68,246.79 291.07,246.01 298.4,246C355.74,245.88 413.07,245.83 470.4,245.95C495.22,246.01 516.64,265.69 519.52,290.03C520.6,299.2 520.12,308.32 520.21,317.46C520.37,333.46 520.29,349.46 520.2,365.46C520.17,371.38 518.89,372.03 513.77,369.13C498.9,360.71 498.91,360.71 498.9,343.65C498.88,328.81 498.92,313.98 498.81,299.15C498.66,279.74 486.18,267.28 466.77,267.26C410.94,267.23 355.11,267.23 299.27,267.32C279.54,267.35 267.32,279.36 267.23,299.05C267.05,340.71 267.04,382.38 267.09,424.04C267.11,441.62 277.67,453.85 295.43,456.58C310.83,458.95 307.84,458.98 304.51,471.32C303.3,475.82 302.05,480.31 300.83,484.81C300.35,486.56 299.66,488.32 300.92,490.33C304.48,490.2 307.24,487.87 310.31,486.46C314.99,484.3 319.61,481.95 324.04,479.31C328.78,476.49 333.17,476.59 338.23,478.73C355.38,485.99 373.44,488.84 391.95,487.72C430.98,485.37 461.99,468.13 484.6,436.22C489.79,428.9 493.71,420.74 496.43,412.08C497.17,409.7 496.94,408 494.74,406.52C489.6,403.07 487.33,398.05 487.7,391.96C487.91,388.37 486.58,386.13 483.49,384.24C461.58,370.79 438.6,360.13 412.77,356.87C403.65,355.71 394.49,355.67 385.35,356.73C376.09,357.8 372.64,358.02 369.74,347.74C368.12,341.98 365.71,336.47 362.24,331.47C356.28,322.9 346.68,319.02 337.45,321.63C328.92,324.05 321.83,333.47 321.32,343.14C320.63,356 327.03,371.92 346.66,374.88C350.07,375.39 352.59,376.98 353.16,380.74C353.7,384.21 352.02,386.53 349.33,388.25C347.4,389.48 345.13,389.39 343,389.01C325.7,385.88 313.84,376.01 308.73,359.24C303.68,342.67 306.62,327.49 319.94,315.42C336.41,300.5 361.24,303.86 373.4,322.51C376.14,326.7 378.7,331.06 380.19,335.83C381.41,339.73 383.56,341.03 387.54,340.77C406.5,339.53 425.15,341.26 443.29,347.18C469.21,355.64 492.63,368.82 514.47,384.97C521.5,390.18 521.02,397.62 519.75,405.01C515.1,432.25 501.28,454.4 481.02,472.62C460.48,491.09 436.54,502.92 409.2,507.52C385.77,511.46 362.77,509.7 340.18,502.3C336.39,501.06 332.58,498.31 327.97,501.16z"/>
+                <path d="M414.19,335.38C405.75,335.93 397.65,334.86 389.54,335.84C387,336.15 385.78,334.06 384.8,332.07C380.73,323.83 376.21,315.95 368.77,310.17C366.48,308.38 367.23,307 369.43,305.62C379.53,299.3 389.62,299.22 399.19,306.49C408.52,313.58 414.08,323.09 414.19,335.38z"/>
+                <path d="M417.09,390.21C410.66,388.78 407.34,384.6 408.1,379.44C408.81,374.6 413.31,370.91 418.31,371.05C423.12,371.19 426.94,375.02 427.27,380C427.63,385.61 424.18,389.22 417.09,390.21z"/>
+                <path d="M430.83,418.71C429.47,419.23 428.59,420.25 427.03,419.59C426.81,417.6 428.52,416.83 429.77,416.07C441.62,408.88 453.85,402.56 467.79,400.42C469.45,400.16 471.08,399.82 472.69,400.53C474.42,401.28 475.23,402.66 475.09,404.49C474.92,406.75 473.27,407.6 471.34,407.79C465.71,408.35 460.12,409.05 454.59,410.3C446.44,412.13 438.57,414.68 430.83,418.71z"/>
+                <path d="M448.63,432.62C455.17,424.82 461.54,417.3 470.21,412.35C473.17,410.66 477.33,407.48 479.7,412.18C482.09,416.9 476.91,417.67 473.97,418.99C464.9,423.07 457.39,429.35 449.85,435.63C448.67,436.61 447.95,438.42 445.79,438.04C445.62,435.72 447.39,434.49 448.63,432.62z"/>
+            </svg>
+            <span class="navbar-title">Ratspeak</span>
+        </a>
+    </div>
+    <div class="navbar-center">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="docs.html">Docs</a>
+        <a href="download.html">Download</a>
+    </div>
+    <div class="navbar-right">
+        <button class="navbar-wallet-btn" id="connectBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 14h.01"/><path d="M2 10h20"/></svg>
+            <span>Connect</span>
+        </button>
+        <button class="navbar-admin-btn admin-only" id="newProposalBtn" type="button" title="Create proposal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            <span>New proposal</span>
+        </button>
+        <button class="navbar-icon-btn" id="themeToggle" type="button" aria-label="Toggle theme">
+            <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+        <a href="https://github.com/ratspeak" class="navbar-icon-btn navbar-gh" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+        <button class="navbar-icon-btn navbar-hamburger" id="navHamburger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navMobileMenu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+        </button>
+    </div>
+</nav>
+<div class="navbar-menu" id="navMobileMenu">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="docs.html">Docs</a>
+    <a href="download.html">Download</a>
+    <a href="https://github.com/ratspeak" target="_blank" rel="noopener noreferrer">GitHub</a>
+</div>
+
+<div class="admin-badge">Admin mode</div>
+
+<header class="hero">
+    <div class="hero-grid">
+        <div>
+            <span class="eyebrow">Community poll on Base</span>
+            <h1 class="hero-title">Make yourself heard.</h1>
+            <p class="hero-sub">This is an experiment to gauge community interest in voting on future Ratspeak initiatives. For more information about what this is all about, <a href="community.html">please read this</a>.</p>
+        </div>
+    </div>
+</header>
+
+<main class="vote-shell">
+    <section class="vote-main">
+        <article class="ballot" id="ballot" aria-live="polite"></article>
+        <section class="results-panel" id="resultsPanel" aria-live="polite"></section>
+    </section>
+
+    <section class="proposal-panel">
+        <span class="panel-kicker">Proposal</span>
+        <h2 class="panel-title">Active proposal</h2>
+        <p class="panel-copy">Select the proposal to vote on.</p>
+        <div class="proposal-strip" id="proposalStrip" aria-label="Active proposals"></div>
+    </section>
+
+    <aside class="sidebar-stack">
+        <section class="wallet-panel">
+            <span class="panel-kicker">Wallet</span>
+            <h2 class="panel-title">Vote</h2>
+            <p class="panel-copy">This is an experiment, and these are not real voting rights in any organization or professional form.</p>
+            <div class="wallet-box">
+                <div class="wallet-address" id="walletAddress">No wallet connected</div>
+                <p class="wallet-status" id="walletStatus">Choose a proposal and connect a wallet to check eligibility.</p>
+                <div class="weight-grid">
+                    <div class="mini-stat">
+                        <span>Token</span>
+                        <a class="token-link" id="tokenSymbol" href="https://basescan.org/token/0xf1e9baa65d418a9025e1851dd2d37f1ad208bba3" target="_blank" rel="noopener noreferrer" aria-label="RATSPEAK token on BaseScan">RATSPEAK</a>
+                    </div>
+                    <div class="mini-stat">
+                        <span>Eligibility</span>
+                        <strong class="eligibility-value" id="eligibilityStatus">-</strong>
+                    </div>
+                </div>
+                <div class="snapshot-box">
+                    <span>Snapshot block</span>
+                    <strong id="snapshotBlock">Base #46529010</strong>
+                </div>
+            </div>
+            <div class="selected-box">
+                <span class="panel-kicker">Your pick</span>
+                <div class="selected-choice" id="selectedChoice">Pick an option</div>
+            </div>
+            <div class="button-stack">
+                <button class="primary-btn" id="castVoteBtn" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                    Sign vote
+                </button>
+                <button class="secondary-btn" id="connectSideBtn" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 14h.01"/><path d="M2 10h20"/></svg>
+                    Connect wallet
+                </button>
+            </div>
+        </section>
+
+        <section class="admin-panel admin-only" id="adminPanel">
+            <span class="panel-kicker">Admin</span>
+            <h2 class="panel-title">Proposal controls</h2>
+            <p class="panel-copy">Edit or remove the selected proposal. New proposals are created from the top bar.</p>
+            <div class="button-stack">
+                <button class="primary-btn" id="editProposalBtn" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                    Edit current
+                </button>
+                <button class="secondary-btn" id="deleteProposalBtn" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 11v5"/><path d="M14 11v5"/></svg>
+                    Remove
+                </button>
+            </div>
+            <p class="admin-status" id="adminStatus">Unlocked with the shared admin token.</p>
+        </section>
+    </aside>
+</main>
+
+<footer class="footer">
+    <div class="footer-inner">
+        <div class="footer-built">
+            <a href="letter.html" class="footer-brand" aria-label="A letter">
+                <svg viewBox="243 243 282 282" fill="currentColor" aria-hidden="true">
+                    <path d="M327.97,501.16C314.61,508.03 301.57,514.72 288.56,521.48C283.91,523.91 279.2,524.61 275.05,520.98C271.05,517.49 271.26,512.87 272.63,508.05C275.23,498.93 277.46,489.7 280.08,480.58C281.03,477.27 280.4,475.51 277.14,473.92C255.84,463.53 245.61,446.29 245.66,422.66C245.75,381.16 245.55,339.66 245.75,298.16C245.86,275.62 256.63,259.57 276.93,249.98C283.68,246.79 291.07,246.01 298.4,246C355.74,245.88 413.07,245.83 470.4,245.95C495.22,246.01 516.64,265.69 519.52,290.03C520.6,299.2 520.12,308.32 520.21,317.46C520.37,333.46 520.29,349.46 520.2,365.46C520.17,371.38 518.89,372.03 513.77,369.13C498.9,360.71 498.91,360.71 498.9,343.65C498.88,328.81 498.92,313.98 498.81,299.15C498.66,279.74 486.18,267.28 466.77,267.26C410.94,267.23 355.11,267.23 299.27,267.32C279.54,267.35 267.32,279.36 267.23,299.05C267.05,340.71 267.04,382.38 267.09,424.04C267.11,441.62 277.67,453.85 295.43,456.58C310.83,458.95 307.84,458.98 304.51,471.32C303.3,475.82 302.05,480.31 300.83,484.81C300.35,486.56 299.66,488.32 300.92,490.33C304.48,490.2 307.24,487.87 310.31,486.46C314.99,484.3 319.61,481.95 324.04,479.31C328.78,476.49 333.17,476.59 338.23,478.73C355.38,485.99 373.44,488.84 391.95,487.72C430.98,485.37 461.99,468.13 484.6,436.22C489.79,428.9 493.71,420.74 496.43,412.08C497.17,409.7 496.94,408 494.74,406.52C489.6,403.07 487.33,398.05 487.7,391.96C487.91,388.37 486.58,386.13 483.49,384.24C461.58,370.79 438.6,360.13 412.77,356.87C403.65,355.71 394.49,355.67 385.35,356.73C376.09,357.8 372.64,358.02 369.74,347.74C368.12,341.98 365.71,336.47 362.24,331.47C356.28,322.9 346.68,319.02 337.45,321.63C328.92,324.05 321.83,333.47 321.32,343.14C320.63,356 327.03,371.92 346.66,374.88C350.07,375.39 352.59,376.98 353.16,380.74C353.7,384.21 352.02,386.53 349.33,388.25C347.4,389.48 345.13,389.39 343,389.01C325.7,385.88 313.84,376.01 308.73,359.24C303.68,342.67 306.62,327.49 319.94,315.42C336.41,300.5 361.24,303.86 373.4,322.51C376.14,326.7 378.7,331.06 380.19,335.83C381.41,339.73 383.56,341.03 387.54,340.77C406.5,339.53 425.15,341.26 443.29,347.18C469.21,355.64 492.63,368.82 514.47,384.97C521.5,390.18 521.02,397.62 519.75,405.01C515.1,432.25 501.28,454.4 481.02,472.62C460.48,491.09 436.54,502.92 409.2,507.52C385.77,511.46 362.77,509.7 340.18,502.3C336.39,501.06 332.58,498.31 327.97,501.16z"/>
+                    <path d="M414.19,335.38C405.75,335.93 397.65,334.86 389.54,335.84C387,336.15 385.78,334.06 384.8,332.07C380.73,323.83 376.21,315.95 368.77,310.17C366.48,308.38 367.23,307 369.43,305.62C379.53,299.3 389.62,299.22 399.19,306.49C408.52,313.58 414.08,323.09 414.19,335.38z"/>
+                    <path d="M417.09,390.21C410.66,388.78 407.34,384.6 408.1,379.44C408.81,374.6 413.31,370.91 418.31,371.05C423.12,371.19 426.94,375.02 427.27,380C427.63,385.61 424.18,389.22 417.09,390.21z"/>
+                    <path d="M430.83,418.71C429.47,419.23 428.59,420.25 427.03,419.59C426.81,417.6 428.52,416.83 429.77,416.07C441.62,408.88 453.85,402.56 467.79,400.42C469.45,400.16 471.08,399.82 472.69,400.53C474.42,401.28 475.23,402.66 475.09,404.49C474.92,406.75 473.27,407.6 471.34,407.79C465.71,408.35 460.12,409.05 454.59,410.3C446.44,412.13 438.57,414.68 430.83,418.71z"/>
+                    <path d="M448.63,432.62C455.17,424.82 461.54,417.3 470.21,412.35C473.17,410.66 477.33,407.48 479.7,412.18C482.09,416.9 476.91,417.67 473.97,418.99C464.9,423.07 457.39,429.35 449.85,435.63C448.67,436.61 447.95,438.42 445.79,438.04C445.62,435.72 447.39,434.49 448.63,432.62z"/>
+                </svg>
+            </a>
+            Built with <a href="https://reticulum.network" target="_blank" rel="noopener noreferrer">Reticulum</a>
+        </div>
+        <div class="footer-links">
+            <a href="about.html">About</a>
+            <a href="docs.html">Docs</a>
+            <a href="download.html">Download</a>
+            <a href="https://github.com/ratspeak" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </div>
+    </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<div class="auth-modal" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="auth-modal__card">
+        <h2 class="auth-modal__title" id="authTitle">Admin sign-in</h2>
+        <p class="auth-modal__sub" id="authSub">Enter the shared admin token to edit proposals.</p>
+        <input type="password" class="auth-modal__input" id="authPassword" placeholder="Admin token" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <p class="auth-modal__error" id="authError">Invalid token.</p>
+        <div class="auth-modal__actions">
+            <button type="button" class="auth-modal__btn" id="authCancel">Cancel</button>
+            <button type="button" class="auth-modal__btn auth-modal__btn--primary" id="authSubmit">Sign in</button>
+        </div>
+    </div>
+</div>
+
+<div class="proposal-modal" id="proposalModal" role="dialog" aria-modal="true" aria-labelledby="proposalModalTitle">
+    <div class="proposal-modal__card">
+        <h2 class="proposal-modal__title" id="proposalModalTitle">Proposal</h2>
+        <p class="proposal-modal__sub">The snapshot block is frozen into proposal settings and historical balance reads.</p>
+        <form class="proposal-form" id="proposalForm">
+            <div class="proposal-form__grid">
+                <label>Short title
+                    <input id="proposalDeckTitleInput" name="deckTitle" type="text" placeholder="Relay spend" autocomplete="off" required>
+                </label>
+                <label>Type
+                    <input id="proposalTypeInput" name="type" type="text" placeholder="Infrastructure" autocomplete="off" required>
+                </label>
+                <label>Closes (UTC)
+                    <input id="proposalClosesInput" name="closes" type="datetime-local" required>
+                </label>
+                <label>Snapshot block
+                    <input id="proposalSnapshotInput" name="snapshotBlock" type="number" min="1" step="1" inputmode="numeric" required>
+                </label>
+            </div>
+            <label>Question
+                <textarea id="proposalTitleInput" name="title" required></textarea>
+            </label>
+            <label>Description
+                <textarea id="proposalDescriptionInput" name="description" required></textarea>
+            </label>
+            <div>
+                <span class="panel-kicker">Choices</span>
+                <div class="choice-editor" id="proposalChoicesList"></div>
+                <button type="button" class="proposal-form__btn" id="addChoiceBtn">Add choice</button>
+            </div>
+            <p class="proposal-form__hint">Choice IDs are generated automatically from each label.</p>
+            <p class="proposal-form__error" id="proposalFormError">Proposal is invalid.</p>
+            <div class="proposal-form__actions">
+                <button type="button" class="proposal-form__btn" id="proposalCancelBtn">Cancel</button>
+                <button type="submit" class="proposal-form__btn proposal-form__btn--primary" id="proposalSaveBtn">Save proposal</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script type="module">
+import {
+  DEFAULT_POLLS as SHARED_DEFAULT_POLLS,
+  SNAPSHOT_BLOCK as DEFAULT_SNAPSHOT_BLOCK,
+  TOKEN_ADDRESS as RATSPEAK_TOKEN_ADDRESS,
+  VOTE_DOMAIN,
+  VOTE_KIND,
+  VOTE_STRATEGY,
+  VOTE_TYPES,
+  isEligibleBalance,
+  serializableVoteMessage
+} from './lib/vote-core.js';
+
+const PROJECT_ID = 'bd455db9c9bb0f7804164eb260a9fd47';
+const RATSPEAK_ORIGIN = 'https://ratspeak.org';
+const TOKEN_ADDRESS = RATSPEAK_TOKEN_ADDRESS;
+const APPKIT_CDN_URL = 'https://cdn.jsdelivr.net/npm/@reown/appkit-cdn@1.8.19/dist/appkit.js';
+const POLL_STORE_KEY = 'ratspeak-community-poll-proposals-v1';
+const ADMIN_TOKEN_KEY = 'ratspeak-community-poll-admin-token';
+const THEME_KEY = 'ratspeak-theme';
+const PROPOSAL_API_URL = '/api/proposals';
+const SNAPSHOT_API_URL = '/api/snapshot';
+const VOTE_API_URL = '/api/votes';
+const RESULTS_POLL_MS = 30000;
+const SNAPSHOT_BLOCK = DEFAULT_SNAPSHOT_BLOCK;
+const BASE_CHAIN = {
+  id: 8453,
+  name: 'Base',
+  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+  rpcUrls: { default: { http: ['https://mainnet.base.org'] } },
+  blockExplorers: { default: { name: 'BaseScan', url: 'https://basescan.org' } }
+};
+
+const DEFAULT_POLLS = SHARED_DEFAULT_POLLS;
+
+let appKitStatePromise = null;
+let appKitState = null;
+let account = null;
+let pollState = loadPollStateCache() || seedPollState();
+let polls = pollState.polls;
+let selectedPollId = polls[0].id;
+let selectedChoiceId = polls[0].choices[0].id;
+let token = {
+  symbol: 'RATSPEAK',
+  decimals: 18,
+  rawBalance: 0n,
+  displayBalance: '0',
+  snapshotBlock: polls[0].snapshotBlock,
+  loading: false,
+  error: null
+};
+let casting = false;
+let balanceRequestId = 0;
+let resultsRequestId = 0;
+let resultsState = {
+  pollId: selectedPollId,
+  loading: false,
+  error: null,
+  data: null
+};
+let ADMIN_INTENT = new URLSearchParams(window.location.search).has('admin');
+let ADMIN_MODE = false;
+let adminToken = ADMIN_INTENT ? sessionStorage.getItem(ADMIN_TOKEN_KEY) : null;
+let saveTimer = null;
+let saveInFlight = false;
+let pendingSave = false;
+let editingProposalId = null;
+
+const els = {
+  adminStatus: document.getElementById('adminStatus'),
+  authCancel: document.getElementById('authCancel'),
+  authError: document.getElementById('authError'),
+  authModal: document.getElementById('authModal'),
+  authPassword: document.getElementById('authPassword'),
+  authSubmit: document.getElementById('authSubmit'),
+  ballot: document.getElementById('ballot'),
+  addChoiceBtn: document.getElementById('addChoiceBtn'),
+  castVoteBtn: document.getElementById('castVoteBtn'),
+  connectBtn: document.getElementById('connectBtn'),
+  connectSideBtn: document.getElementById('connectSideBtn'),
+  deleteProposalBtn: document.getElementById('deleteProposalBtn'),
+  editProposalBtn: document.getElementById('editProposalBtn'),
+  eligibilityStatus: document.getElementById('eligibilityStatus'),
+  navbar: document.getElementById('navbar'),
+  navHamburger: document.getElementById('navHamburger'),
+  navMobileMenu: document.getElementById('navMobileMenu'),
+  newProposalBtn: document.getElementById('newProposalBtn'),
+  proposalCancelBtn: document.getElementById('proposalCancelBtn'),
+  proposalChoicesList: document.getElementById('proposalChoicesList'),
+  proposalClosesInput: document.getElementById('proposalClosesInput'),
+  proposalDeckTitleInput: document.getElementById('proposalDeckTitleInput'),
+  proposalDescriptionInput: document.getElementById('proposalDescriptionInput'),
+  proposalForm: document.getElementById('proposalForm'),
+  proposalFormError: document.getElementById('proposalFormError'),
+  proposalModal: document.getElementById('proposalModal'),
+  proposalModalTitle: document.getElementById('proposalModalTitle'),
+  proposalSaveBtn: document.getElementById('proposalSaveBtn'),
+  proposalSnapshotInput: document.getElementById('proposalSnapshotInput'),
+  proposalTitleInput: document.getElementById('proposalTitleInput'),
+  proposalTypeInput: document.getElementById('proposalTypeInput'),
+  proposalStrip: document.getElementById('proposalStrip'),
+  resultsPanel: document.getElementById('resultsPanel'),
+  selectedChoice: document.getElementById('selectedChoice'),
+  snapshotBlock: document.getElementById('snapshotBlock'),
+  themeToggle: document.getElementById('themeToggle'),
+  toast: document.getElementById('toast'),
+  tokenSymbol: document.getElementById('tokenSymbol'),
+  walletAddress: document.getElementById('walletAddress'),
+  walletStatus: document.getElementById('walletStatus')
+};
+
+function seedPollState() {
+  return normalizePollState({ version: 1, polls: DEFAULT_POLLS });
+}
+
+function loadPollStateCache() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(POLL_STORE_KEY));
+    return normalizePollState(parsed);
+  } catch (e) {
+    return null;
+  }
+}
+
+function writePollStateCache() {
+  try {
+    localStorage.setItem(POLL_STORE_KEY, JSON.stringify(pollState));
+  } catch (e) {}
+}
+
+function normalizePollState(value) {
+  const source = value && Array.isArray(value.polls) ? value.polls : DEFAULT_POLLS;
+  const seen = new Set();
+  const normalized = [];
+
+  source.forEach((poll, index) => {
+    const next = normalizePoll(poll, index);
+    if (!next || seen.has(next.id)) return;
+    seen.add(next.id);
+    normalized.push(next);
+  });
+
+  if (!normalized.length && source !== DEFAULT_POLLS) {
+    return seedPollState();
+  }
+
+  return { version: 1, polls: normalized };
+}
+
+function normalizePoll(poll, index) {
+  if (!poll || typeof poll !== 'object') return null;
+  const id = slugify(poll.id, `proposal-${index + 1}`);
+  const choices = Array.isArray(poll.choices)
+    ? poll.choices.map((choice, choiceIndex) => normalizeChoice(choice, choiceIndex)).filter(Boolean)
+    : [];
+  if (choices.length < 2) return null;
+
+  const snapshotBlock = Number(poll.snapshotBlock);
+  return {
+    id,
+    title: cleanText(poll.title, 'Untitled proposal', 220),
+    deckTitle: cleanText(poll.deckTitle || poll.title, 'Proposal', 80),
+    type: cleanText(poll.type, 'Proposal', 48),
+    snapshotBlock: Number.isSafeInteger(snapshotBlock) && snapshotBlock > 0 ? snapshotBlock : SNAPSHOT_BLOCK,
+    closes: normalizeCloseTime(poll.closes),
+    description: cleanText(poll.description, '', 280),
+    choices,
+    createdAt: cleanText(poll.createdAt, '', 40),
+    updatedAt: cleanText(poll.updatedAt, '', 40)
+  };
+}
+
+function normalizeChoice(choice, index) {
+  if (!choice || typeof choice !== 'object') return null;
+  const name = cleanText(choice.name, '', 120);
+  if (!name) return null;
+  return {
+    id: slugify(choice.id || name, `choice-${index + 1}`),
+    name,
+    detail: cleanText(choice.detail, '', 220)
+  };
+}
+
+function cleanText(value, fallback, maxLength) {
+  const text = String(value == null ? fallback : value).trim();
+  return text.slice(0, maxLength);
+}
+
+function normalizeCloseTime(value) {
+  const raw = String(value || '').trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return `${raw}T23:59:00Z`;
+  const parsed = new Date(raw);
+  if (!Number.isNaN(parsed.getTime())) return parsed.toISOString().replace(/\.\d{3}Z$/, 'Z');
+  return '';
+}
+
+function formatCloseTime(value) {
+  const normalized = normalizeCloseTime(value);
+  if (!normalized) return 'No close time';
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'UTC',
+    timeZoneName: 'short'
+  }).format(new Date(normalized));
+}
+
+function isPollClosed(poll) {
+  const closes = Date.parse(normalizeCloseTime(poll?.closes));
+  return Number.isFinite(closes) && Date.now() > closes;
+}
+
+function closeTimeToInput(value) {
+  const normalized = normalizeCloseTime(value);
+  return normalized ? normalized.slice(0, 16) : '';
+}
+
+function inputToCloseTime(value) {
+  const raw = String(value || '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(raw)) return '';
+  return `${raw}:00Z`;
+}
+
+function slugify(value, fallback) {
+  const slug = String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return slug || fallback;
+}
+
+function applyPollState(nextState, options = {}) {
+  pollState = normalizePollState(nextState);
+  polls = pollState.polls;
+  writePollStateCache();
+  ensureSelection();
+  if (options.resetBalance !== false) resetSnapshotBalance();
+  render();
+  if (account && options.refreshBalance !== false) refreshSnapshotBalance().catch(reportBalanceError);
+  if (options.refreshResults !== false) refreshResults().catch(reportResultsError);
+}
+
+function ensureSelection() {
+  if (!polls.length) {
+    pollState = seedPollState();
+    polls = pollState.polls;
+  }
+  let poll = polls.find(p => p.id === selectedPollId);
+  if (!poll) {
+    poll = polls[0];
+    selectedPollId = poll.id;
+  }
+  if (!poll.choices.some(choice => choice.id === selectedChoiceId)) {
+    selectedChoiceId = poll.choices[0].id;
+  }
+}
+
+function hydratePollsFromApi() {
+  return fetch(PROPOSAL_API_URL, { cache: 'no-store' })
+    .then(resp => {
+      if (!resp.ok) throw new Error('http ' + resp.status);
+      return resp.json();
+    })
+    .then(data => applyPollState(data, { refreshBalance: false, resetBalance: false }))
+    .catch(() => {
+      if (ADMIN_MODE) toast('Proposal API unavailable; showing cached proposals.');
+    });
+}
+
+function authHeaders() {
+  return adminToken ? { Authorization: 'Bearer ' + adminToken } : {};
+}
+
+function clearAdminToken() {
+  adminToken = null;
+  ADMIN_MODE = false;
+  try {
+    sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+  } catch (e) {}
+}
+
+function savePollState() {
+  pollState = normalizePollState(pollState);
+  polls = pollState.polls;
+  writePollStateCache();
+  if (!ADMIN_MODE) return;
+  scheduleProposalSave();
+}
+
+function scheduleProposalSave() {
+  if (saveInFlight) {
+    pendingSave = true;
+    return;
+  }
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(flushProposalSave, 250);
+}
+
+function flushProposalSave() {
+  saveTimer = null;
+  if (saveInFlight || !ADMIN_MODE || !adminToken) {
+    pendingSave = saveInFlight && pendingSave;
+    return;
+  }
+  saveInFlight = true;
+  const headers = { 'content-type': 'application/json', ...authHeaders() };
+  fetch(PROPOSAL_API_URL, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(pollState)
+  })
+    .then(resp => {
+      if (resp.status === 401) {
+        lockAdmin('Admin session expired. Sign in again.');
+        throw new Error('unauthorized');
+      }
+      if (resp.ok) return resp.json().catch(() => ({ ok: true }));
+      return resp.text().then(body => {
+        let detail = body;
+        try {
+          const parsed = JSON.parse(body);
+          detail = parsed.detail || parsed.error || body;
+        } catch (e) {}
+        throw new Error(`Proposal save failed (${resp.status})${detail ? ': ' + String(detail).slice(0, 160) : ''}`);
+      });
+    })
+    .then(() => {
+      if (ADMIN_MODE) toast('Proposal saved.');
+    })
+    .catch(err => {
+      if (err && err.message === 'unauthorized') return;
+      console.warn(err);
+      toast('Proposal save failed; change is cached locally.');
+    })
+    .finally(() => {
+      saveInFlight = false;
+      if (pendingSave && ADMIN_MODE) {
+        pendingSave = false;
+        scheduleProposalSave();
+      }
+    });
+}
+
+function selectedPoll() {
+  return polls.find(p => p.id === selectedPollId) || polls[0];
+}
+
+function selectedChoice() {
+  const poll = selectedPoll();
+  return poll.choices.find(c => c.id === selectedChoiceId) || poll.choices[0];
+}
+
+function shortAddress(address) {
+  if (!address) return 'No wallet connected';
+  return address.slice(0, 6) + '..' + address.slice(-4);
+}
+
+function hasSnapshotEligibility() {
+  return isEligibleBalance(token.rawBalance, token.decimals);
+}
+
+function eligibilityMarkup() {
+  if (!account) return '-';
+  if (token.loading) return 'Checking';
+  if (token.error) return 'Unavailable';
+  if (hasSnapshotEligibility()) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Eligible';
+  }
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>Ineligible';
+}
+
+function formatBlock(blockNumber) {
+  return `Base #${new Intl.NumberFormat('en-US').format(Number(blockNumber || 0))}`;
+}
+
+function formatBaseBlock(blockNumber) {
+  return `Base block #${new Intl.NumberFormat('en-US').format(Number(blockNumber || 0))}`;
+}
+
+function resetSnapshotBalance() {
+  balanceRequestId += 1;
+  token = {
+    ...token,
+    rawBalance: 0n,
+    displayBalance: '0',
+    snapshotBlock: selectedPoll().snapshotBlock,
+    loading: false,
+    error: null
+  };
+}
+
+function render() {
+  ensureSelection();
+  renderProposalStrip();
+  renderBallot();
+  renderResults();
+  renderWallet();
+  renderAdmin();
+}
+
+function renderProposalStrip() {
+  els.proposalStrip.innerHTML = polls.map(poll => {
+    return `
+      <button class="proposal-card ${poll.id === selectedPollId ? 'active' : ''}" type="button" data-poll="${poll.id}">
+        <span class="proposal-status">Live</span>
+        <h2>${escapeHtml(poll.deckTitle)}</h2>
+        <div class="proposal-meta">
+          <span>${escapeHtml(poll.type)}</span>
+          <span>Snapshot ${formatBlock(poll.snapshotBlock).replace('Base ', '')}</span>
+          <span>${escapeHtml(formatCloseTime(poll.closes))}</span>
+          <span>${poll.choices.length} options</span>
+        </div>
+      </button>
+    `;
+  }).join('');
+
+  els.proposalStrip.querySelectorAll('[data-poll]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedPollId = btn.dataset.poll;
+      selectedChoiceId = selectedPoll().choices[0].id;
+      resetSnapshotBalance();
+      render();
+      if (account) refreshSnapshotBalance().catch(reportBalanceError);
+      refreshResults().catch(reportResultsError);
+    });
+  });
+}
+
+function renderBallot() {
+  const poll = selectedPoll();
+
+  els.ballot.innerHTML = `
+    <div class="ballot-head">
+      <div class="poll-tags">
+        <span class="tag tag-live">Live</span>
+        <span class="tag">${escapeHtml(poll.type)}</span>
+        <span class="tag">Snapshot ${formatBlock(poll.snapshotBlock).replace('Base ', '')}</span>
+        <span class="tag">Closes ${escapeHtml(formatCloseTime(poll.closes))}</span>
+      </div>
+      <h2 class="ballot-title">${escapeHtml(poll.title)}</h2>
+      <p class="ballot-desc">${escapeHtml(poll.description)}</p>
+    </div>
+    <div class="choice-grid">
+      ${poll.choices.map(choice => {
+        return `
+          <button class="choice-card ${choice.id === selectedChoiceId ? 'selected' : ''}" type="button" data-choice="${choice.id}">
+            <h3>${escapeHtml(choice.name)}</h3>
+            <p>${escapeHtml(choice.detail)}</p>
+            <span class="choice-selected">Selected</span>
+          </button>
+        `;
+      }).join('')}
+    </div>
+  `;
+
+  els.ballot.querySelectorAll('[data-choice]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedChoiceId = btn.dataset.choice;
+      render();
+    });
+  });
+}
+
+function renderResults() {
+  const poll = selectedPoll();
+  const isCurrent = resultsState.pollId === poll.id;
+  const data = isCurrent ? resultsState.data : null;
+  const loading = isCurrent && resultsState.loading;
+  const error = isCurrent ? resultsState.error : null;
+  const voterCount = data?.voterCount || 0;
+
+  let body;
+  if (error && !data) {
+    body = `<div class="results-error">Current results are unavailable right now.</div>`;
+  } else if (loading && !data) {
+    body = `<div class="results-empty">Loading current results...</div>`;
+  } else if (!data || voterCount === 0) {
+    body = `<div class="results-empty">No votes have been recorded yet.</div>`;
+  } else {
+    body = `
+      <div class="results-list">
+        ${data.choices.map((choice, index) => {
+          const percent = Number(choice.percent || 0);
+          const width = Math.max(0, Math.min(100, percent));
+          const votes = choice.voters === 1 ? '1 vote' : `${choice.voters} votes`;
+          return `
+            <div class="result-row">
+              <div class="result-label">
+                <strong>${escapeHtml(choice.name)}</strong>
+                <span>Option ${index + 1}</span>
+              </div>
+              <div class="result-track" style="--result-width: ${width}%">
+                <div class="result-fill"></div>
+                <div class="result-value">
+                  <span>${votes}</span>
+                  <span>${percent.toFixed(percent >= 10 ? 1 : 2)}%</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  els.resultsPanel.innerHTML = `
+    <div class="results-head">
+      <div>
+        <span class="panel-kicker">Results</span>
+        <h2 class="results-title">Current results</h2>
+      </div>
+    </div>
+    ${body}
+  `;
+}
+
+function renderWallet() {
+  const poll = selectedPoll();
+  const choice = selectedChoice();
+  const closed = isPollClosed(poll);
+  els.walletAddress.textContent = shortAddress(account);
+  els.tokenSymbol.textContent = token.symbol || 'RATSPEAK';
+  els.eligibilityStatus.className = 'eligibility-value';
+  if (account && !token.loading && !token.error) {
+    els.eligibilityStatus.classList.add(hasSnapshotEligibility() ? 'is-eligible' : 'is-ineligible');
+  }
+  els.eligibilityStatus.innerHTML = eligibilityMarkup();
+  els.snapshotBlock.textContent = formatBlock(poll.snapshotBlock);
+  els.selectedChoice.textContent = choice ? choice.name : 'Pick an option';
+  els.castVoteBtn.disabled = casting || token.loading || !account || !selectedChoiceId || !hasSnapshotEligibility() || closed;
+  els.castVoteBtn.hidden = !account;
+  els.connectSideBtn.hidden = Boolean(account);
+
+  if (casting) {
+    els.castVoteBtn.innerHTML = 'Waiting for signature...';
+  } else if (!account) {
+    els.castVoteBtn.innerHTML = 'Sign vote';
+  } else if (token.loading) {
+    els.castVoteBtn.innerHTML = 'Reading snapshot...';
+  } else if (token.error) {
+    els.castVoteBtn.innerHTML = 'Snapshot unavailable';
+  } else if (closed) {
+    els.castVoteBtn.innerHTML = 'Poll closed';
+  } else if (!hasSnapshotEligibility()) {
+    els.castVoteBtn.innerHTML = 'Not eligible';
+  } else {
+    els.castVoteBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Sign vote';
+  }
+
+  if (account) {
+    if (token.loading) {
+      els.walletStatus.textContent = `Checking eligibility at ${formatBaseBlock(poll.snapshotBlock)}.`;
+    } else if (token.error) {
+      els.walletStatus.textContent = 'Eligibility check failed. Try again later.';
+    } else if (hasSnapshotEligibility()) {
+      els.walletStatus.textContent = `Eligible at ${formatBaseBlock(poll.snapshotBlock)}. Each eligible wallet counts as one vote.`;
+    } else {
+      els.walletStatus.textContent = `Ineligible at ${formatBaseBlock(poll.snapshotBlock)}. This poll requires at least 1 ${token.symbol || 'token'} at the snapshot block.`;
+    }
+    els.connectBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Connected</span>';
+    els.connectBtn.disabled = true;
+    els.connectBtn.setAttribute('aria-disabled', 'true');
+  } else {
+    els.walletStatus.textContent = `Connect a wallet to check eligibility at ${formatBaseBlock(poll.snapshotBlock)}.`;
+    els.connectBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 14h.01"/><path d="M2 10h20"/></svg><span>Connect</span>';
+    els.connectBtn.disabled = false;
+    els.connectBtn.removeAttribute('aria-disabled');
+    els.connectSideBtn.className = 'primary-btn';
+    els.connectSideBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 14h.01"/><path d="M2 10h20"/></svg>Connect wallet';
+  }
+
+}
+
+function renderAdmin() {
+  applyAdminMode();
+  if (!els.adminStatus) return;
+  els.adminStatus.textContent = ADMIN_MODE
+    ? 'Unlocked with the shared admin token.'
+    : 'Open this page with ?admin and sign in.';
+}
+
+function applyAdminMode() {
+  document.body.classList.toggle('public-mode', !ADMIN_MODE);
+}
+
+function appMetadataUrl() {
+  const host = window.location.hostname;
+  if (host === 'localhost' || host === '127.0.0.1') return window.location.origin;
+  return RATSPEAK_ORIGIN;
+}
+
+async function initAppKit() {
+  if (appKitStatePromise) return appKitStatePromise;
+  appKitStatePromise = createAppKitState();
+  return appKitStatePromise;
+}
+
+async function createAppKitState() {
+  const appkitMod = await import(APPKIT_CDN_URL);
+
+  const network = appkitMod.networks.base || BASE_CHAIN;
+  const networks = [network];
+  const wagmiAdapter = new appkitMod.WagmiAdapter({ projectId: PROJECT_ID, networks });
+  const modal = appkitMod.createAppKit({
+    adapters: [wagmiAdapter],
+    networks,
+    projectId: PROJECT_ID,
+    metadata: {
+      name: 'Ratspeak Community Poll',
+      description: 'Experimental Ratspeak community polling on Base.',
+      url: appMetadataUrl(),
+      icons: [new URL('favicon-32x32.png', `${appMetadataUrl()}/`).href]
+    },
+    themeMode: document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark',
+    features: { analytics: false, email: false, socials: [] }
+  });
+
+  await appkitMod.WagmiCore.reconnect?.(wagmiAdapter.wagmiConfig);
+  appKitState = {
+    modal,
+    wagmiConfig: wagmiAdapter.wagmiConfig,
+    wagmi: appkitMod.WagmiCore,
+    network
+  };
+
+  const current = appkitMod.WagmiCore.getAccount(wagmiAdapter.wagmiConfig);
+  if (isConnectedAccount(current)) {
+    account = normalizeWalletAccount(current.address || '');
+    refreshSnapshotBalance().catch(reportBalanceError);
+  }
+
+  appkitMod.WagmiCore.watchAccount(wagmiAdapter.wagmiConfig, {
+    onChange(next) {
+      account = isConnectedAccount(next) ? normalizeWalletAccount(next.address || '') : null;
+      resetSnapshotBalance();
+      if (account) refreshSnapshotBalance().catch(reportBalanceError);
+      render();
+    }
+  });
+
+  render();
+  return appKitState;
+}
+
+async function connectWallet(options = {}) {
+  const state = await initAppKit().catch(err => {
+    console.warn(err);
+    toast('Wallet connection failed to load. Check network access and try again.');
+    return null;
+  });
+  if (!state) return;
+
+  const current = state.wagmi.getAccount(state.wagmiConfig);
+  if (isConnectedAccount(current)) {
+    account = normalizeWalletAccount(current.address || '');
+    if (current.chainId !== undefined && current.chainId !== 8453) {
+      await state.wagmi.switchChain?.(state.wagmiConfig, { chainId: 8453 });
+    }
+    if (!options.skipBalance) await refreshSnapshotBalance();
+    render();
+    return;
+  }
+
+  const connected = waitForConnectedAccount(state);
+  await Promise.resolve(state.modal.open({ view: 'Connect' }));
+  const next = await connected;
+  account = normalizeWalletAccount(next.address || '');
+  if (next.chainId !== undefined && next.chainId !== 8453) {
+    await state.wagmi.switchChain?.(state.wagmiConfig, { chainId: 8453 });
+  }
+  if (!options.skipBalance) await refreshSnapshotBalance();
+  render();
+}
+
+function waitForConnectedAccount(state) {
+  return new Promise((resolve, reject) => {
+    let cleanup = function() {};
+    const timeout = window.setTimeout(() => {
+      cleanup();
+      reject(new Error('Timed out waiting for wallet connection'));
+    }, 120000);
+    cleanup = state.wagmi.watchAccount(state.wagmiConfig, {
+      onChange(next) {
+        if (!isConnectedAccount(next)) return;
+        window.clearTimeout(timeout);
+        cleanup();
+        resolve(next);
+      }
+    });
+  });
+}
+
+async function refreshSnapshotBalance() {
+  if (!account) return;
+  const poll = selectedPoll();
+  const requestId = ++balanceRequestId;
+  token = { ...token, snapshotBlock: poll.snapshotBlock, loading: true, error: null };
+  render();
+
+  try {
+    const snapshot = await fetchSnapshotBalance(poll, account);
+    if (requestId !== balanceRequestId || poll.id !== selectedPoll().id) return;
+    const decimals = Number.isInteger(snapshot.tokenDecimals) ? snapshot.tokenDecimals : 18;
+    const rawBalance = parseSnapshotRawBalance(snapshot.rawBalance);
+    token = {
+      decimals,
+      symbol: snapshot.tokenSymbol || 'RATSPEAK',
+      rawBalance,
+      displayBalance: snapshot.displayBalance || '0',
+      snapshotBlock: snapshot.snapshotBlock || poll.snapshotBlock,
+      loading: false,
+      error: null
+    };
+    render();
+  } catch (err) {
+    if (requestId !== balanceRequestId || poll.id !== selectedPoll().id) return;
+    token = {
+      ...token,
+      rawBalance: 0n,
+      displayBalance: '0',
+      snapshotBlock: poll.snapshotBlock,
+      loading: false,
+      error: err && err.message ? err.message : 'Snapshot read failed'
+    };
+    render();
+    throw err;
+  }
+}
+
+async function fetchSnapshotBalance(poll, address) {
+  const url = new URL(SNAPSHOT_API_URL, window.location.href);
+  url.searchParams.set('pollId', poll.id);
+  url.searchParams.set('address', address);
+  const resp = await fetch(url, { cache: 'no-store' });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok) throw new Error(data.error || `Snapshot read failed (${resp.status})`);
+  if (!data.snapshot) throw new Error('Snapshot read failed');
+  return data.snapshot;
+}
+
+function parseSnapshotRawBalance(value) {
+  try {
+    const raw = BigInt(String(value || '0'));
+    return raw > 0n ? raw : 0n;
+  } catch {
+    return 0n;
+  }
+}
+
+async function refreshResults(options = {}) {
+  const poll = selectedPoll();
+  const requestId = ++resultsRequestId;
+  const keepData = resultsState.pollId === poll.id ? resultsState.data : null;
+  resultsState = {
+    pollId: poll.id,
+    loading: true,
+    error: null,
+    data: keepData
+  };
+  if (!options.silent) renderResults();
+
+  try {
+    const resp = await fetch(`${VOTE_API_URL}?pollId=${encodeURIComponent(poll.id)}`, { cache: 'no-store' });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) throw new Error(data.error || `Results unavailable (${resp.status})`);
+    if (requestId !== resultsRequestId || selectedPoll().id !== poll.id) return;
+    resultsState = {
+      pollId: poll.id,
+      loading: false,
+      error: null,
+      data: data.results || null
+    };
+    renderResults();
+  } catch (err) {
+    if (requestId !== resultsRequestId || selectedPoll().id !== poll.id) return;
+    resultsState = {
+      pollId: poll.id,
+      loading: false,
+      error: err && err.message ? err.message : 'Results unavailable',
+      data: keepData
+    };
+    renderResults();
+    throw err;
+  }
+}
+
+function reportResultsError(err) {
+  console.warn(err);
+}
+
+async function signSnapshotVote() {
+  const state = await initAppKit().catch(err => {
+    console.warn(err);
+    toast('Wallet connection failed to load.');
+    return null;
+  });
+  if (!state) return;
+  if (!account) {
+    await connectWallet();
+  }
+  if (!account) return;
+  try {
+    await refreshSnapshotBalance();
+  } catch (err) {
+    console.warn(err);
+    toast('Snapshot balance read failed.');
+    return;
+  }
+  if (!hasSnapshotEligibility()) {
+    toast('This wallet is not eligible at the snapshot block.');
+    return;
+  }
+
+  const poll = selectedPoll();
+  const choice = selectedChoice();
+  if (isPollClosed(poll)) {
+    toast('This poll is closed.');
+    return;
+  }
+  const message = {
+    kind: VOTE_KIND,
+    pollId: poll.id,
+    choiceId: choice.id,
+    voter: account,
+    tokenContract: TOKEN_ADDRESS,
+    snapshotBlock: BigInt(poll.snapshotBlock),
+    strategy: VOTE_STRATEGY,
+    nonce: makeNonce(),
+    createdAt: BigInt(Date.now())
+  };
+
+  casting = true;
+  render();
+  try {
+    const current = state.wagmi.getAccount(state.wagmiConfig);
+    if (current.chainId !== undefined && current.chainId !== 8453) {
+      await state.wagmi.switchChain?.(state.wagmiConfig, { chainId: 8453 });
+    }
+    if (typeof state.wagmi.signTypedData !== 'function') {
+      throw new Error('Wallet signing is unavailable in this browser.');
+    }
+    const signature = await state.wagmi.signTypedData(state.wagmiConfig, {
+      account,
+      domain: VOTE_DOMAIN,
+      types: VOTE_TYPES,
+      primaryType: 'Vote',
+      message
+    });
+    const resp = await fetch(VOTE_API_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        message: serializableVoteMessage(message),
+        signature
+      })
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) throw new Error(data.error || `Vote failed (${resp.status})`);
+
+    if (data.results) {
+      resultsState = {
+        pollId: poll.id,
+        loading: false,
+        error: null,
+        data: data.results
+      };
+    } else {
+      await refreshResults({ silent: true }).catch(reportResultsError);
+    }
+    toast(data.ignored ? 'A newer signed vote is already recorded.' : 'Vote signed and recorded.');
+  } catch (err) {
+    console.warn(err);
+    toast(err && err.message ? err.message : 'Vote signature was not recorded.');
+  } finally {
+    casting = false;
+    render();
+  }
+}
+
+function reportBalanceError(err) {
+  console.warn(err);
+  toast('Connected, but snapshot balance read failed.');
+}
+
+function showAuthModal(message) {
+  els.authPassword.value = '';
+  els.authError.textContent = message || 'Invalid token.';
+  els.authError.classList.toggle('show', Boolean(message));
+  els.authSubmit.disabled = false;
+  els.authModal.classList.add('show');
+  setTimeout(() => els.authPassword.focus(), 0);
+}
+
+function hideAuthModal() {
+  els.authModal.classList.remove('show');
+  els.authPassword.value = '';
+  els.authError.classList.remove('show');
+}
+
+function exitAdminIntent() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete('admin');
+  window.history.replaceState({}, '', url.pathname + (url.search ? url.search : '') + url.hash);
+  ADMIN_INTENT = false;
+  clearAdminToken();
+  hideAuthModal();
+  render();
+}
+
+function verifyAdminToken(tokenValue) {
+  return fetch(PROPOSAL_API_URL + '?auth=check', {
+    method: 'GET',
+    cache: 'no-store',
+    headers: { Authorization: 'Bearer ' + tokenValue }
+  }).then(resp => {
+    if (resp.ok) return 'ok';
+    if (resp.status === 401) return 'bad';
+    if (resp.status === 503) return 'unconfigured';
+    return 'error';
+  }, () => 'error');
+}
+
+function unlockAdmin() {
+  ADMIN_MODE = true;
+  try {
+    sessionStorage.setItem(ADMIN_TOKEN_KEY, adminToken);
+  } catch (e) {}
+  hideAuthModal();
+  render();
+  toast('Admin mode unlocked.');
+}
+
+function lockAdmin(message) {
+  ADMIN_MODE = false;
+  applyAdminMode();
+  if (message) toast(message);
+  render();
+}
+
+function attemptAdminUnlock() {
+  if (!ADMIN_INTENT) return;
+  if (!adminToken) {
+    showAuthModal();
+    return;
+  }
+  verifyAdminToken(adminToken).then(result => {
+    if (result === 'ok') {
+      unlockAdmin();
+      return;
+    }
+    if (result === 'bad') {
+      clearAdminToken();
+      showAuthModal('Saved token rejected. Sign in again.');
+      return;
+    }
+    if (result === 'unconfigured') {
+      clearAdminToken();
+      showAuthModal('Server has no shared admin token configured. Set TASKS_ADMIN_TOKEN.');
+      return;
+    }
+    toast('Could not verify admin session.');
+  });
+}
+
+function submitAuth() {
+  const value = els.authPassword.value.trim();
+  if (!value) {
+    els.authError.textContent = 'Enter a token.';
+    els.authError.classList.add('show');
+    return;
+  }
+  els.authSubmit.disabled = true;
+  els.authError.classList.remove('show');
+  verifyAdminToken(value).then(result => {
+    if (result !== 'ok') {
+      els.authSubmit.disabled = false;
+      if (result === 'bad') els.authError.textContent = 'Invalid token.';
+      else if (result === 'unconfigured') els.authError.textContent = 'Server has no shared admin token configured. Set TASKS_ADMIN_TOKEN.';
+      else els.authError.textContent = 'Verification failed. Try again.';
+      els.authError.classList.add('show');
+      els.authPassword.select();
+      return;
+    }
+    adminToken = value;
+    unlockAdmin();
+  });
+}
+
+function isConnectedAccount(next) {
+  return Boolean(next && next.isConnected && next.address);
+}
+
+function normalizeWalletAccount(value) {
+  const raw = String(value || '');
+  const address = raw.includes(':') ? raw.split(':').at(-1) : raw;
+  if (!/^0x[0-9a-fA-F]{40}$/.test(address)) {
+    throw new Error('WalletConnect returned an invalid account: ' + value);
+  }
+  return address;
+}
+
+function makeNonce() {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+function escapeHtml(value) {
+  return String(value || '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[ch]));
+}
+
+function proposalDraft() {
+  const closes = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().replace(/\.\d{3}Z$/, 'Z');
+  return {
+    id: '',
+    title: '',
+    deckTitle: '',
+    type: 'Proposal',
+    snapshotBlock: SNAPSHOT_BLOCK,
+    closes,
+    description: '',
+    choices: [
+      { id: 'option-a', name: 'Option A', detail: '' },
+      { id: 'option-b', name: 'Option B', detail: '' }
+    ],
+    createdAt: '',
+    updatedAt: ''
+  };
+}
+
+function openProposalEditor(poll) {
+  if (!ADMIN_MODE) {
+    toast('Admin mode is required.');
+    return;
+  }
+  const draft = poll || proposalDraft();
+  editingProposalId = poll ? poll.id : null;
+  els.proposalModalTitle.textContent = poll ? 'Edit proposal' : 'New proposal';
+  els.proposalDeckTitleInput.value = draft.deckTitle || '';
+  els.proposalTypeInput.value = draft.type || '';
+  els.proposalClosesInput.value = closeTimeToInput(draft.closes);
+  els.proposalSnapshotInput.value = String(draft.snapshotBlock || SNAPSHOT_BLOCK);
+  els.proposalTitleInput.value = draft.title || '';
+  els.proposalDescriptionInput.value = draft.description || '';
+  renderChoiceEditor(draft.choices || []);
+  els.proposalFormError.classList.remove('show');
+  els.proposalModal.classList.add('show');
+  setTimeout(() => els.proposalDeckTitleInput.focus(), 0);
+}
+
+function closeProposalEditor() {
+  editingProposalId = null;
+  els.proposalModal.classList.remove('show');
+  els.proposalForm.reset();
+  els.proposalChoicesList.innerHTML = '';
+  els.proposalFormError.classList.remove('show');
+}
+
+function renderChoiceEditor(choices) {
+  const source = choices.length >= 2 ? choices : proposalDraft().choices;
+  els.proposalChoicesList.innerHTML = source.map(choice => choiceRowHtml(choice)).join('');
+}
+
+function choiceRowHtml(choice) {
+  return `
+    <div class="choice-row" data-choice-row>
+      <label>Label
+        <input data-choice-name type="text" maxlength="120" value="${escapeHtml(choice.name || '')}" placeholder="Choice label" required>
+      </label>
+      <label>Detail
+        <input data-choice-detail type="text" maxlength="220" value="${escapeHtml(choice.detail || '')}" placeholder="What this option means">
+      </label>
+      <button type="button" data-remove-choice aria-label="Remove choice">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+  `;
+}
+
+function addChoiceRow(choice = { name: '', detail: '' }) {
+  els.proposalChoicesList.insertAdjacentHTML('beforeend', choiceRowHtml(choice));
+  const rows = els.proposalChoicesList.querySelectorAll('[data-choice-row]');
+  const last = rows[rows.length - 1];
+  last?.querySelector('[data-choice-name]')?.focus();
+}
+
+function removeChoiceRow(button) {
+  const rows = els.proposalChoicesList.querySelectorAll('[data-choice-row]');
+  if (rows.length <= 2) {
+    toast('At least two choices are required.');
+    return;
+  }
+  button.closest('[data-choice-row]')?.remove();
+}
+
+function readChoiceRows() {
+  const seen = new Set();
+  const rows = Array.from(els.proposalChoicesList.querySelectorAll('[data-choice-row]'));
+  const choices = rows.map((row, index) => {
+    const name = cleanText(row.querySelector('[data-choice-name]')?.value, '', 120);
+    const detail = cleanText(row.querySelector('[data-choice-detail]')?.value, '', 220);
+    if (!name) throw new Error('Every choice needs a label.');
+    const id = uniqueChoiceId(name, seen, index);
+    if (seen.has(id)) throw new Error(`Duplicate choice ID: ${id}`);
+    seen.add(id);
+    return { id, name, detail };
+  });
+  if (choices.length < 2) throw new Error('Add at least two choices.');
+  return choices;
+}
+
+function uniqueChoiceId(name, seen, index) {
+  const base = slugify(name, `choice-${index + 1}`);
+  let id = base;
+  let suffix = 2;
+  while (seen.has(id)) {
+    id = `${base}-${suffix}`;
+    suffix += 1;
+  }
+  return id;
+}
+
+function uniquePollId(value) {
+  const base = slugify(value, `proposal-${Date.now().toString(36)}`);
+  let id = base;
+  let suffix = 2;
+  const existing = new Set(polls.map(poll => poll.id).filter(id => id !== editingProposalId));
+  while (existing.has(id)) {
+    id = `${base}-${suffix}`;
+    suffix += 1;
+  }
+  return id;
+}
+
+function proposalFromForm() {
+  const snapshotBlock = Number(els.proposalSnapshotInput.value);
+  if (!Number.isSafeInteger(snapshotBlock) || snapshotBlock <= 0) {
+    throw new Error('Snapshot block must be a positive whole number.');
+  }
+
+  const title = cleanText(els.proposalTitleInput.value, '', 220);
+  const deckTitle = cleanText(els.proposalDeckTitleInput.value, '', 80);
+  const type = cleanText(els.proposalTypeInput.value, '', 48);
+  const description = cleanText(els.proposalDescriptionInput.value, '', 280);
+  if (!title || !deckTitle || !type || !description) {
+    throw new Error('Title, short title, type, and description are required.');
+  }
+  const closes = inputToCloseTime(els.proposalClosesInput.value);
+  if (!closes) throw new Error('Close time must include a UTC date and time.');
+
+  const old = editingProposalId ? polls.find(poll => poll.id === editingProposalId) : null;
+  const now = new Date().toISOString();
+  return {
+    id: old?.id || uniquePollId(deckTitle || title),
+    title,
+    deckTitle,
+    type,
+    snapshotBlock,
+    closes,
+    description,
+    choices: readChoiceRows(),
+    createdAt: old?.createdAt || now,
+    updatedAt: now
+  };
+}
+
+function saveProposalFromForm(event) {
+  event.preventDefault();
+  if (!ADMIN_MODE) {
+    toast('Admin mode is required.');
+    return;
+  }
+
+  let proposal;
+  try {
+    proposal = proposalFromForm();
+  } catch (err) {
+    els.proposalFormError.textContent = err && err.message ? err.message : 'Proposal is invalid.';
+    els.proposalFormError.classList.add('show');
+    return;
+  }
+
+  const nextPolls = polls.slice();
+  const existingIndex = editingProposalId ? nextPolls.findIndex(poll => poll.id === editingProposalId) : -1;
+  if (existingIndex >= 0) nextPolls[existingIndex] = proposal;
+  else nextPolls.unshift(proposal);
+  pollState = normalizePollState({ version: 1, polls: nextPolls });
+  polls = pollState.polls;
+  selectedPollId = proposal.id;
+  selectedChoiceId = proposal.choices[0].id;
+  resetSnapshotBalance();
+  savePollState();
+  closeProposalEditor();
+  render();
+  if (account) refreshSnapshotBalance().catch(reportBalanceError);
+  refreshResults().catch(reportResultsError);
+}
+
+function deleteSelectedProposal() {
+  if (!ADMIN_MODE) {
+    toast('Admin mode is required.');
+    return;
+  }
+  const poll = selectedPoll();
+  if (!poll) return;
+  if (polls.length <= 1) {
+    toast('At least one proposal is required.');
+    return;
+  }
+  if (!window.confirm(`Remove "${poll.deckTitle}"? This deletes the proposal from the public vote list.`)) {
+    return;
+  }
+
+  const nextPolls = polls.filter(item => item.id !== poll.id);
+  pollState = normalizePollState({ version: 1, polls: nextPolls });
+  polls = pollState.polls;
+  selectedPollId = polls[0].id;
+  selectedChoiceId = polls[0].choices[0].id;
+  resetSnapshotBalance();
+  savePollState();
+  render();
+  if (account) refreshSnapshotBalance().catch(reportBalanceError);
+  refreshResults().catch(reportResultsError);
+  toast('Proposal removed.');
+}
+
+function toast(message) {
+  els.toast.textContent = message;
+  els.toast.classList.add('show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => els.toast.classList.remove('show'), 2400);
+}
+
+function syncNavbar() {
+  els.navbar.classList.toggle('scrolled', window.scrollY > 8);
+}
+
+function closeMobileMenu() {
+  els.navMobileMenu.classList.remove('open');
+  els.navHamburger.setAttribute('aria-expanded', 'false');
+}
+
+function toggleMobileMenu() {
+  const nextOpen = !els.navMobileMenu.classList.contains('open');
+  els.navMobileMenu.classList.toggle('open', nextOpen);
+  els.navHamburger.setAttribute('aria-expanded', String(nextOpen));
+}
+
+els.connectBtn.addEventListener('click', () => {
+  if (account) return;
+  connectWallet().catch(err => {
+    console.warn(err);
+    toast('Wallet connection failed.');
+  });
+});
+els.connectSideBtn.addEventListener('click', () => {
+  if (account) return;
+  connectWallet().catch(err => {
+    console.warn(err);
+    toast('Wallet connection failed.');
+  });
+});
+els.castVoteBtn.addEventListener('click', () => signSnapshotVote());
+els.newProposalBtn.addEventListener('click', () => openProposalEditor(null));
+els.editProposalBtn.addEventListener('click', () => openProposalEditor(selectedPoll()));
+els.deleteProposalBtn.addEventListener('click', deleteSelectedProposal);
+els.addChoiceBtn.addEventListener('click', () => addChoiceRow());
+els.proposalChoicesList.addEventListener('click', event => {
+  const removeButton = event.target.closest('[data-remove-choice]');
+  if (removeButton) removeChoiceRow(removeButton);
+});
+els.proposalCancelBtn.addEventListener('click', closeProposalEditor);
+els.proposalForm.addEventListener('submit', saveProposalFromForm);
+els.authSubmit.addEventListener('click', submitAuth);
+els.authCancel.addEventListener('click', exitAdminIntent);
+els.authPassword.addEventListener('keydown', event => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    submitAuth();
+  }
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    exitAdminIntent();
+  }
+});
+els.proposalModal.addEventListener('click', event => {
+  if (event.target === els.proposalModal) closeProposalEditor();
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && els.proposalModal.classList.contains('show')) closeProposalEditor();
+  if (event.key === 'Escape') closeMobileMenu();
+});
+window.addEventListener('scroll', syncNavbar, { passive: true });
+els.navHamburger.addEventListener('click', event => {
+  event.stopPropagation();
+  toggleMobileMenu();
+});
+els.navMobileMenu.addEventListener('click', event => {
+  if (event.target.closest('a')) closeMobileMenu();
+});
+document.addEventListener('click', event => {
+  if (!els.navMobileMenu.classList.contains('open')) return;
+  if (event.target.closest('#navMobileMenu') || event.target.closest('#navHamburger')) return;
+  closeMobileMenu();
+});
+els.themeToggle.addEventListener('click', () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem(THEME_KEY, next);
+});
+
+syncNavbar();
+render();
+hydratePollsFromApi();
+refreshResults().catch(reportResultsError);
+window.setInterval(() => refreshResults({ silent: true }).catch(reportResultsError), RESULTS_POLL_MS);
+attemptAdminUnlock();
+initAppKit().catch(err => console.warn('AppKit preload failed', err));
+</script>
+</body>
+</html>
