@@ -5965,6 +5965,8 @@
     var RNODE_POST_FLASH_BOOT_WAIT_MS = 6500;
     var RNODE_READ_TIMEOUT_MS = 3500;
     var RNODE_EEPROM_RESERVED = 200;
+    var RNODE_PORT_OPEN_RETRIES = 4;
+    var RNODE_PORT_OPEN_RETRY_DELAY_MS = 900;
     var ROM_ADDR = {
         PRODUCT: 0x00, MODEL: 0x01, HW_REV: 0x02, SERIAL: 0x03, MADE: 0x07,
         CHKSUM: 0x0B, SIGNATURE: 0x1B, INFO_LOCK: 0x9B
@@ -5977,6 +5979,70 @@
         return Array.from(bytes || []).map(function (b) {
             return (b & 0xFF).toString(16).padStart(2, '0');
         }).join('');
+    }
+    function serialPortLabel(port) {
+        try {
+            var info = port && port.getInfo ? port.getInfo() : {};
+            var vid = info.usbVendorId != null ? info.usbVendorId.toString(16).padStart(4, '0') : '????';
+            var pid = info.usbProductId != null ? info.usbProductId.toString(16).padStart(4, '0') : '????';
+            return 'USB ' + vid + ':' + pid;
+        } catch (e) {
+            return 'authorized serial port';
+        }
+    }
+    async function authorizedSerialPorts() {
+        if (!navigator.serial || !navigator.serial.getPorts) return [];
+        try {
+            return await navigator.serial.getPorts();
+        } catch (e) {
+            return [];
+        }
+    }
+    async function collectRnodePortCandidates() {
+        var candidates = [];
+        if (state.port) candidates.push(state.port);
+        var ports = await authorizedSerialPorts();
+        ports.forEach(function (port) {
+            if (candidates.indexOf(port) === -1) candidates.push(port);
+        });
+        return candidates;
+    }
+    async function openRnodeSerialPort(logMessage, settleMs) {
+        await sleepMs(settleMs == null ? RNODE_REPAIR_SETTLE_MS : settleMs);
+
+        var lastError = null;
+        for (var attempt = 0; attempt < RNODE_PORT_OPEN_RETRIES; attempt++) {
+            var candidates = await collectRnodePortCandidates();
+            if (!candidates.length) {
+                throw new Error('Serial port unavailable');
+            }
+            if (attempt > 0) {
+                if (logMessage) logMessage('Retrying RNode serial connection...', 'log-orange');
+                await sleepMs(RNODE_PORT_OPEN_RETRY_DELAY_MS);
+            }
+            for (var i = 0; i < candidates.length; i++) {
+                var port = candidates[i];
+                try { await port.close(); } catch (e) { /* may already be closed */ }
+                try {
+                    await port.open({
+                        baudRate: 115200, dataBits: 8, parity: 'none', stopBits: 1,
+                        flowControl: 'none', bufferSize: 4096
+                    });
+                    if (port !== state.port && logMessage) {
+                        logMessage('Reacquired RNode serial via ' + serialPortLabel(port) + '.', 'log-orange');
+                    }
+                    state.port = port;
+                    return port;
+                } catch (e) {
+                    lastError = e;
+                    if (i === 0 && candidates.length > 1 && logMessage) {
+                        logMessage('Existing serial handle could not be reopened; trying authorized ports...', 'log-orange');
+                    }
+                }
+            }
+        }
+
+        throw lastError || new Error('Could not open RNode serial port');
     }
 
     function kissEscape(bytes) {
@@ -6099,17 +6165,11 @@
     }
 
     async function withRnodeSession(logMessage, settleMs, callback) {
-        if (!state.port) throw new Error('Serial port unavailable');
         if (logMessage) logMessage('Opening RNode serial at 115200 8N1...', '');
-        try { await state.port.close(); } catch (e) { /* may already be closed */ }
-        await sleepMs(settleMs == null ? RNODE_REPAIR_SETTLE_MS : settleMs);
-        await state.port.open({
-            baudRate: 115200, dataBits: 8, parity: 'none', stopBits: 1,
-            flowControl: 'none', bufferSize: 4096
-        });
+        var port = await openRnodeSerialPort(logMessage, settleMs);
 
-        var reader = state.port.readable.getReader();
-        var writer = state.port.writable.getWriter();
+        var reader = port.readable.getReader();
+        var writer = port.writable.getWriter();
         var pump = createKissReadPump(reader);
         var session = {
             send: async function (cmd, payload) {
@@ -6125,7 +6185,7 @@
             try { await reader.cancel(); } catch (e) { /* ignore */ }
             try { reader.releaseLock(); } catch (e) { /* ignore */ }
             try { writer.releaseLock(); } catch (e) { /* ignore */ }
-            try { await state.port.close(); } catch (e) { /* ignore */ }
+            try { await port.close(); } catch (e) { /* ignore */ }
         }
     }
 
