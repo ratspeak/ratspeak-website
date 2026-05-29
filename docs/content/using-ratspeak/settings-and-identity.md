@@ -14,7 +14,7 @@ Ratspeak stores the identity as a binary file under your OS data directory:
 
 This file IS your account on the network. Anyone with a copy can impersonate you, read your inbound messages, and sign announces in your name. Back it up; never share it.
 
-The first time Ratspeak runs it generates an identity for you. The file on disk is the whole story — there's no password to set, no seed phrase, no sign-up.
+When you create a new identity, Ratspeak derives it from a **24-word recovery phrase** (BIP-39) and shows you the phrase once. Write it down — it's the only way to restore the identity if you lose the device, and it's how you bring the same identity onto another device (including mobile). You can also seal the on-disk key behind a **passcode** (see below). See *Recovery phrase* and *Passcode protection* below.
 
 ## Multiple identities
 
@@ -28,6 +28,24 @@ You can keep several identities side by side and switch between them in **Settin
 Common reasons to run more than one: a public identity for community channels and a private one for close contacts; separate identities for separate roles (operator, club call sign, personal); a throwaway identity for testing.
 
 Switching identities re-keys outbound traffic. Inbound messages addressed to the previous identity still land in that inbox — you just won't see them until you switch back.
+
+## Recovery phrase
+
+New identities are derived from a 24-word BIP-39 recovery phrase, shown once at creation. Write it down and keep it offline — Ratspeak never stores it and cannot show it again.
+
+To restore an identity on a new device (or after a reinstall), use **Settings → Identity → Import → Recovery Phrase**, or the **Import or Restore Identity** button on first setup, and enter the 24 words. This works on every platform, including mobile, and produces the exact same identity and address.
+
+One caveat: a recovery phrase restores **your identity, not your message history**. Reticulum uses forward secrecy, so messages encrypted to old, rotated keys can't be recovered from the phrase. You get your address, your ability to sign and receive new messages, and your contacts can reach you again — but past conversation history lives only in the device backup (see *Backing up and migrating*).
+
+Identities created before this feature (older installs) have random keys with no phrase; back those up by exporting the key or copying the identity file.
+
+## Passcode protection
+
+You can lock a software identity behind a **passcode**. Ratspeak encrypts the on-disk key with a key derived from your passcode (Argon2id + authenticated encryption), so a stolen or lost device can't use the identity without it. Set it in **Settings → Identity →** the identity's menu **→ Set Passcode**.
+
+When a passcode is set, Ratspeak prompts for it once each time you open the app (and again after an auto-lock timeout, if enabled). It is **not** asked per message — unlock once per session. There is **no recovery if you forget the passcode**; your 24-word phrase remains the fallback to re-create the identity, so keep it.
+
+Auto-lock timeout (how long a session stays unlocked) is configured in **Settings → Network → Hardware Key Auto-Lock**; it applies to both passcode-protected and hardware-key identities. "Off" relies on locking when you quit the app.
 
 ## Auto-announce
 
@@ -66,11 +84,15 @@ On Windows, the Bluetooth Peer advertiser/peripheral role requires the MSIX buil
 
 **Settings → Appearance → Theme** offers **Light**, **Dark**, and **OS preference** (follows your system setting and switches automatically). The theme applies instantly to every view.
 
-## Hardware keys (roadmap)
+## Hardware keys (YubiKey)
 
-Hardware-token support via the Ratkey project is on the roadmap but not yet wired into Ratspeak. Today, identities live as files on disk. Ratkey's real-device backend is still experimental, so this page will document enrollment and migration only after the app integration and token validation are ready.
+On **desktop**, you can back an identity with a YubiKey 5 (or Nitrokey 3) instead of a file: the signing and encryption keys are generated on the token and never leave it, and the app unlocks the token with your PIN once per session. Set one up from the **Hardware Key** button on first setup, or **Settings → Identity → Hardware**. Choose *recoverable* (with a 24-word phrase backup) or *hardware-only*. Hardware identities are wire-identical to software ones — peers can't tell the difference. This support is still labeled experimental.
+
+Hardware keys are **desktop-only** for now (the token transport relies on the desktop PC/SC stack). On **mobile**, use a software identity and bring it across with your recovery phrase — that's the practical mobile path until a tap-to-unlock NFC model lands. Re-provisioning a token overwrites its keys, so Ratspeak warns before it would destroy an identity already on the key.
 
 ## Backing up and migrating
+
+There are two levels of backup. To carry just your **identity** (your address and the ability to send/receive again), your 24-word recovery phrase is enough — restore it on any device via Import. To carry your **full state** — message history, contacts, settings — you copy the data directory, because forward secrecy means history can't be reconstructed from the phrase alone.
 
 Your entire Ratspeak state lives in the `.ratspeak/` directory under your OS data folder: identities, message history, contacts, settings, and the SQLite database. To back up or move to a new machine, copy that directory.
 
