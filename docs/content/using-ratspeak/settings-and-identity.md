@@ -14,7 +14,7 @@ Ratspeak stores the identity as a binary file under your OS data directory:
 
 This file IS your account on the network. Anyone with a copy can impersonate you, read your inbound messages, and sign announces in your name. Back it up; never share it.
 
-When you create a new identity, Ratspeak derives it from a **24-word recovery phrase** (BIP-39) and shows you the phrase once. Write it down — it's the only way to restore the identity if you lose the device, and it's how you bring the same identity onto another device (including mobile). You can also seal the on-disk key behind a **passcode** (see below). See *Recovery phrase* and *Passcode protection* below.
+When you create a new identity, Ratspeak derives it from a **24-word recovery phrase** (BIP-39) and shows it to you at creation. Write it down — it's the only way to restore the identity if you lose the device, and it's how you bring the same identity onto another device (including mobile). You can view it again later, and you can seal the on-disk key (and the stored phrase) behind a **passcode**. See *Recovery phrase* and *Passcode protection* below.
 
 ## Multiple identities
 
@@ -31,7 +31,9 @@ Switching identities re-keys outbound traffic. Inbound messages addressed to the
 
 ## Recovery phrase
 
-New identities are derived from a 24-word BIP-39 recovery phrase, shown once at creation. Write it down and keep it offline — Ratspeak never stores it and cannot show it again.
+New identities are derived from a 24-word BIP-39 recovery phrase, shown at creation. Write it down and keep it offline — anyone with it controls your identity.
+
+**Viewing it again.** Ratspeak keeps the phrase on this device so you can re-display it from **Settings → Identity →** the identity's menu **→ View Recovery Phrase**. Its at-rest protection matches the identity key's: for an unprotected identity it sits beside the (already-plaintext) key file, so it adds no exposure the key file doesn't already have; once you set a **passcode**, the phrase is encrypted in the same vault and re-displaying it requires the passcode (the same model wallets like MetaMask use). Re-display is for **software** identities only — a hardware (YubiKey) identity keeps its keys on the token and has no stored phrase.
 
 To restore an identity on a new device (or after a reinstall), use **Settings → Identity → Import → Recovery Phrase**, or the **Import or Restore Identity** button on first setup, and enter the 24 words. This works on every platform, including mobile, and produces the exact same identity and address.
 
