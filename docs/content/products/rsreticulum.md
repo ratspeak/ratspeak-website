@@ -1,6 +1,6 @@
 # rsReticulum
 
-rsReticulum v0.9.0 is a public pre-release of the pure-Rust [Reticulum](https://reticulum.network/) network stack — wire-compatible where implemented, with no Python runtime. The current target is Reticulum 1.2.4 for the implemented and tested release surface. It ships as a library and as Rust CLI tools for daemon, status, path, identity, probe, copy, shell, and RNode configuration work.
+rsReticulum v0.9.4 is a public pre-release of the pure-Rust [Reticulum](https://reticulum.network/) network stack — wire-compatible where implemented, with no Python runtime. The current target is Reticulum 1.2.4 for the implemented and tested release surface. It ships as a library and as Rust CLI tools for daemon, status, path, identity, probe, copy, shell, and RNode configuration work.
 
 If you already run a Reticulum network, an rsReticulum node can join it on the implemented protocol paths. If you don't, this is the core stack in one repo.
 
@@ -55,7 +55,7 @@ rnid-rs -i ~/.rsReticulum/identities/mgmt -d message.txt.rfe
 
 ## The library
 
-The same code that backs `rnsd-rs` is published as a 0.9.0 stack of `rns-*` crates you can pull into your own Rust app. The layering, bottom-up: cryptography (`rns-crypto`), the wire format (`rns-wire`), identities and announces (`rns-identity`), the actor-based routing engine (`rns-transport`), encrypted point-to-point links (`rns-link`), reliable channels and resource transfer (`rns-protocol`), the interface implementations (`rns-interface`), and a runtime (`rns-runtime`) that wires everything to an INI config and an RPC server. `rns-ratkey` is an optional experimental sidecar for PIV-capable hardware-token identity work (YubiKey, Nitrokey).
+The same code that backs `rnsd-rs` is published as a 0.9.4 stack of `rns-*` crates you can pull into your own Rust app. The layering, bottom-up: cryptography (`rns-crypto`), the wire format (`rns-wire`), identities and announces (`rns-identity`), the actor-based routing engine (`rns-transport`), encrypted point-to-point links (`rns-link`), reliable channels and resource transfer (`rns-protocol`), the interface implementations (`rns-interface`), and a runtime (`rns-runtime`) that wires everything to an INI config and an RPC server. `rns-ratkey` is an optional experimental sidecar for PIV-capable hardware-token identity work (YubiKey/PIV in Ratspeak desktop).
 
 The split is layered rather than monolithic, so lower crates such as `rns-wire` and `rns-link` can be used without pulling in the full runtime. Higher layers intentionally depend on the lower protocol, transport, interface, and runtime pieces they need. Most embedded users start at `rns-runtime`.
 
@@ -98,6 +98,6 @@ cd rsReticulum
 cargo build --release
 ```
 
-Binaries land in `target/release/` with `*-rs` command names only. Config storage is selected by the Rust default resolver or by `--config`. Edition 2024, Rust 1.85+, AGPL-3.0-or-later licensed. For a starter node, create `~/.rsReticulum/config` with `target/release/rnsd-rs --exampleconfig > ~/.rsReticulum/config`, then run `target/release/rnsd-rs --config ~/.rsReticulum`. Use `~/.reticulum` only when intentionally sharing an existing Reticulum config. Source: [github.com/ratspeak/rsReticulum](https://github.com/ratspeak/rsReticulum); release: [v0.9.0](https://github.com/ratspeak/rsReticulum/releases/tag/v0.9.0).
+Binaries land in `target/release/` with `*-rs` command names only. Config storage is selected by the Rust default resolver or by `--config`. Edition 2024, Rust 1.85+, AGPL-3.0-or-later licensed. For a starter node, create `~/.rsReticulum/config` with `target/release/rnsd-rs --exampleconfig > ~/.rsReticulum/config`, then run `target/release/rnsd-rs --config ~/.rsReticulum`. Use `~/.reticulum` only when intentionally sharing an existing Reticulum config. Source: [github.com/ratspeak/rsReticulum](https://github.com/ratspeak/rsReticulum); release: [v0.9.4](https://github.com/ratspeak/rsReticulum/releases/tag/v0.9.4).
 
 For OS-specific prerequisites and a slower step-by-step walkthrough, see [Building from Source](../getting-started/building-from-source).

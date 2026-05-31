@@ -10,7 +10,7 @@ Ratspeak is built as a single Tauri v2 app from one Rust codebase. Desktop packa
 
 ## Get the app
 
-Ratspeak v1.0.6 is the current public release, published as a normal GitHub release rather than a prerelease. Download desktop and Android artifacts from [ratspeak.org/download.html](https://ratspeak.org/download.html) or the [Ratspeak GitHub releases page](https://github.com/ratspeak/Ratspeak/releases). Source is AGPL-3.0-or-later at [github.com/ratspeak/Ratspeak](https://github.com/ratspeak/Ratspeak).
+Ratspeak v1.0.19 is the current public release, published as a normal GitHub release rather than a prerelease. Download desktop and Android artifacts from [ratspeak.org/download.html](https://ratspeak.org/download.html) or the [Ratspeak GitHub releases page](https://github.com/ratspeak/Ratspeak/releases). Source is AGPL-3.0-or-later at [github.com/ratspeak/Ratspeak](https://github.com/ratspeak/Ratspeak).
 
 If you'd rather build from source, see [Building from Source](../getting-started/building-from-source). Ratspeak must be checked out next to `rsReticulum`, `rsLXMF`, `lrgp-rs`, and (for the default build, which includes experimental voice calls) `rsLXST` so Cargo can resolve the local development crates.
 
@@ -23,9 +23,9 @@ The app has seven primary views plus first-run Setup. Desktop exposes Home, Mess
 - **Peers** — everyone the network has heard about. Tap one to start a conversation or save them as a contact.
 - **Contacts** — your saved address book, with avatars rendered from each identity's hash.
 - **Network** — interfaces, transport stats, Offline Inbox nodes, and Bluetooth Peer. This is where you add a TCP gateway, plug in an RNode, choose store-and-forward inbox behavior, or troubleshoot why a hop isn't resolving.
-- **Settings** — identity, auto-announce interval, network policy, Bluetooth Peer toggle, theme.
+- **Settings** — identity management, PIN protection, export/import, auto-announce interval, network policy, Bluetooth Peer toggle, theme.
 - **Games** — multiplayer Chess and Tic-Tac-Toe over LXMF, using the [LRGP](../products/lrgp) gaming protocol. Sessions ride as fields on normal LXMF messages, so any LRGP-aware client can join.
-- **Setup** — first-run identity creation. You won't see this view again unless you factory-reset.
+- **Setup** — first-run identity creation, 12-word recovery phrase backup, and restore/import. You won't see this view again unless you factory-reset.
 
 There is no embedded HTTP server. The frontend is vanilla HTML/CSS/JS loaded over Tauri's asset protocol; the WebView talks to the Rust core through Tauri IPC commands and events.
 
@@ -53,10 +53,13 @@ The `lxst-voice` Cargo feature gates the entire voice stack and is on by default
 Ratspeak stores app state under `.ratspeak/` in the OS data directory (`~/Library/Application Support/org.ratspeak.desktop/.ratspeak/` on macOS, `~/.local/share/org.ratspeak.desktop/.ratspeak/` on Linux, `%APPDATA%\org.ratspeak.desktop\.ratspeak\` on Windows). Reticulum interface config defaults to `.ratspeak/reticulum/config` unless `RATSPEAK_RNS_CONFIG_DIR` points somewhere else.
 
 - `ratspeak.db` — SQLite database for messages, contacts, conversations, and settings. WAL mode, single file, safe to back up while the app is closed.
-- `identities/<hash>/identity` — your private key material, one directory per identity. The `identity` file is 64 bytes: a 32-byte X25519 private key concatenated with a 32-byte Ed25519 seed.
+- `identities/<hash>/identity` — unprotected software private-key material. The file is 64 bytes: a 32-byte X25519 private key concatenated with a 32-byte Ed25519 seed.
+- `identities/<hash>/identity.enc` — PIN-encrypted software private-key material, used when you lock an identity at rest.
+- `identities/<hash>/identity.seed` — recovery-phrase sidecar for unprotected recoverable software identities. Once you set a PIN, the phrase is encrypted in the same vault as the key.
+- `identities/<hash>/identity.hwid` — hardware-key metadata for a YubiKey-backed identity. The private key itself stays on the token and cannot be exported.
 - `reticulum/config` — the app-private Reticulum interface config. Its shared-instance ports default to `37430`/`37431` so Ratspeak can coexist with system Reticulum tools using `37428`/`37429`.
 
-If you copy the `.ratspeak/` directory to another machine and launch Ratspeak there, you keep your identity, conversation history, and app-private Reticulum interface setup.
+If you copy the `.ratspeak/` directory to another machine and launch Ratspeak there, you keep your identity, conversation history, and app-private Reticulum interface setup. If you only need the identity, new software identities can be restored from a 12-word phrase or imported from a PIN-encrypted `.rsi` backup; raw Reticulum exports and Base32 keys are available for compatibility but are unencrypted private-key material.
 
 ## Hardware it talks to
 
@@ -66,4 +69,4 @@ Ratspeak speaks to anything that speaks Reticulum. Out of the box that means [Ra
 
 Ratspeak isn't a web app — there's no server you can point a browser at. It's a native binary that bundles a WebView and talks to the Rust core directly.
 
-Hardware-key support (YubiKey / Nitrokey via [Ratkey](../products/ratkey)) is on the roadmap but isn't wired into the app yet. Notarized macOS, code-signed Windows, and public mobile store distribution are still in progress, so builds may need to be allowed through your OS's gatekeeper.
+Desktop hardware-key identities use [Ratkey](../products/ratkey) with YubiKey/PIV: the private key lives on the token, unlock is PIN-gated once per session, and recoverable setup can produce a 12-word phrase backup. This path is desktop-only and still experimental. Notarized macOS, code-signed Windows, and public mobile store distribution are still in progress, so builds may need to be allowed through your OS's gatekeeper.

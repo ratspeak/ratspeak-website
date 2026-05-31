@@ -1,10 +1,10 @@
 # rsLXMF
 
-rsLXMF v0.9.0 is a public pre-release of the Rust implementation of LXMF, the message format that rides on top of Reticulum to carry chat, mail, bulletins, and machine-to-machine notifications. It ships as two crates: `lxmf-core`, the library you embed in an application, and `lxmd-rs`, a long-running propagation daemon.
+rsLXMF v0.9.2 is a public pre-release of the Rust implementation of LXMF, the message format that rides on top of Reticulum to carry chat, mail, bulletins, and machine-to-machine notifications. It ships as two crates: `lxmf-core`, the library you embed in an application, and `lxmd-rs`, a long-running propagation daemon.
 
 ## Do you actually need it?
 
-If you already have LXMF infrastructure working, rsLXMF will not make messages travel magically faster — the format is the same and the wire is the same. What 0.9.0 gets you is a single-binary deploy, a Tokio-native API, and an `lxmd-rs` that can run a propagation node without a Python runtime on the box. If your propagation node is a Raspberry Pi or an OpenWrt router, this is the reason to switch. If you're writing a Rust client and want to avoid a subprocess for messaging, that's the other reason.
+If you already have LXMF infrastructure working, rsLXMF will not make messages travel magically faster — the format is the same and the wire is the same. What 0.9.2 gets you is a single-binary deploy, a Tokio-native API, and an `lxmd-rs` that can run a propagation node without a Python runtime on the box. If your propagation node is a Raspberry Pi or an OpenWrt router, this is the reason to switch. If you're writing a Rust client and want to avoid a subprocess for messaging, that's the other reason.
 
 The compatibility target is LXMF 0.9.6 wire behavior where implemented. Interop with other LXMF implementations is covered by the cross-repo test suite.
 
@@ -89,4 +89,4 @@ cd rsLXMF
 cargo build --release
 ```
 
-The `lxmd-rs` daemon lands in `target/release/`. Source: [github.com/ratspeak/rsLXMF](https://github.com/ratspeak/rsLXMF); release: [v0.9.0](https://github.com/ratspeak/rsLXMF/releases/tag/v0.9.0). For OS-specific prerequisites, config creation, and the Ratspeak app build that embeds rsLXMF on desktop and mobile, see [Building from Source](../getting-started/building-from-source).
+The `lxmd-rs` daemon lands in `target/release/`. Source: [github.com/ratspeak/rsLXMF](https://github.com/ratspeak/rsLXMF); release: [v0.9.2](https://github.com/ratspeak/rsLXMF/releases/tag/v0.9.2). For OS-specific prerequisites, config creation, and the Ratspeak app build that embeds rsLXMF on desktop and mobile, see [Building from Source](../getting-started/building-from-source).

@@ -26,11 +26,11 @@ Pseudonymous, more accurately. Your identity is a cryptographic hash, not your r
 
 ## What is my identity, exactly?
 
-A Ratspeak identity is 64 bytes: a 32-byte X25519 private key for encryption and a 32-byte Ed25519 signing seed. It is stored locally under Ratspeak's per-OS data directory; see [Install & Platform Setup](../getting-started/install-and-platform-setup) for the exact path. There is no account, no email, no phone number tied to it. The identity file is the entire thing — back it up, and you can restore yourself anywhere.
+A Ratspeak identity is 64 bytes: a 32-byte X25519 private key for encryption and a 32-byte Ed25519 signing seed. New software identities are derived from a 12-word recovery phrase, and you can encrypt the local key and stored phrase behind a PIN. Older software identities may be raw key files with no phrase. Desktop hardware-key identities keep the private keys on a YubiKey and store only metadata locally. There is no account, no email, no phone number tied to any of these forms.
 
 ## How do I move my identity to a new device?
 
-Copy the identity folder from `.ratspeak/identities/<hash>/` in Ratspeak's data directory on the old device to the same place on the new one. Launch Ratspeak and it will pick it up. Treat that file like a private key, because it is one — anyone who has it can impersonate you.
+For a new recoverable identity, use **Import or Restore Identity** and enter the 12-word recovery phrase. For software identities you can also export a PIN-encrypted `.rsi` backup from Identity Management and import it on the other device. Raw Reticulum identity files and Base32 keys are available for compatibility, but they are unencrypted private-key material. If you need message history and settings too, copy the whole `.ratspeak/` data directory while the app is closed.
 
 ## What is the maximum attachment size?
 
@@ -86,7 +86,7 @@ Not interactively. LRGP-aware moves only render correctly inside Ratspeak. Other
 
 ## Is my YubiKey or Nitrokey supported?
 
-Hardware-key support is being built in a library called Ratkey, but it is not yet wired into the Ratspeak app and the real-token backend is still experimental. The goal is to keep private identity operations on a PIV-capable hardware token instead of on disk. For now, identities live in the file system — protect them accordingly.
+Desktop Ratspeak can use Ratkey-backed YubiKey/PIV identities. You can provision a new key, add an existing Ratspeak YubiKey identity, restore a recoverable identity from a 12-word phrase, unlock with a PIN once per session, change the YubiKey PIV PIN, and reset the YubiKey PIV app when necessary. The private key does not leave the hardware token and cannot be exported. This path is desktop-only and still labeled experimental; mobile uses software identities with 12-word recovery phrases. Nitrokey-style PIV support remains a lower-level Ratkey target, but the app flow is currently written around YubiKey/PIV behavior.
 
 ## Is Ratspeak free and open source?
 

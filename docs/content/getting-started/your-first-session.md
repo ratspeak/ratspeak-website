@@ -14,15 +14,17 @@ The first launch lands you on the **Setup** screen. You'll see the Ratspeak logo
 
 ## Create your identity
 
-Tap **Create Identity**. Ratspeak generates a fresh cryptographic identity on the spot — an Ed25519 signing key and an X25519 encryption key, stored in the app data directory until you replace or delete it. This identity is yours. It's how the network recognises you, and how messages get encrypted to you and signed by you.
+Tap **Create Identity**. Ratspeak generates a fresh recoverable cryptographic identity on the spot — an Ed25519 signing key and an X25519 encryption key derived from a 12-word recovery phrase. This identity is yours. It's how the network recognises you, and how messages get encrypted to you and signed by you.
 
-The generation animation runs for a couple of seconds, then Setup advances to the second card. You'll see your **LXMF address** — a long hexadecimal hash — and a copy button next to it. That hash is your address on the network. Save it somewhere; this is what you give to people who want to message you.
+The generation animation runs for a couple of seconds, then Setup shows the recovery phrase. Write the 12 words down in order and keep them offline. Ratspeak then asks you to confirm two random words before continuing. Anyone with the phrase can restore and use your identity, so do not share it.
+
+After backup confirmation, Setup shows your **LXMF address** — a long hexadecimal hash — and a copy button next to it. That hash is your address on the network. Save it somewhere; this is what you give to people who want to message you.
 
 Below the hash is a single field: **Display Name**. Pick anything — your real name, a handle, or a callsign. It's optional and shows up next to your address when peers discover you. Display names aren't unique; the hash is what's load-bearing.
 
 Tap **Connect**. Ratspeak finishes setup and drops you onto the dashboard.
 
-> Your identity file holds your private keys. Back it up. If you lose it, the address is gone forever; if someone else gets it, they can impersonate you. For hardware-backed keys, see [Ratkey](../products/ratkey).
+> Your recovery phrase and private key material are your account. Back them up and keep them private. If you want the identity encrypted at rest, set a PIN from Settings -> Identity after setup. For desktop hardware-backed keys, see [Ratkey](../products/ratkey).
 
 ## Add your first interface
 
