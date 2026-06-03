@@ -888,6 +888,18 @@
         .flash-flow--standalone .flash-flow__item.is-done::after {
             background: var(--success);
         }
+        .flash-flow--standalone .flash-flow__item.is-warning {
+            opacity: 1;
+        }
+        .flash-flow--standalone .flash-flow__item.is-warning .flash-flow__index {
+            border-color: var(--orange);
+            background: var(--orange);
+            color: #fff;
+            box-shadow: 0 0 0 4px color-mix(in oklab, var(--orange) 18%, transparent);
+        }
+        .flash-flow--standalone .flash-flow__item.is-warning .flash-flow__state {
+            color: var(--orange);
+        }
         .flash-flow--standalone .flash-flow__item.is-blocked {
             opacity: 0.55;
         }
@@ -944,6 +956,16 @@
         .flash-flow__item.is-done .flash-flow__index {
             border-color: var(--success);
             background: var(--success);
+            color: #fff;
+        }
+        .flash-flow__item.is-warning {
+            border-color: color-mix(in oklab, var(--orange) 40%, transparent);
+            background: color-mix(in oklab, var(--orange) 10%, var(--bg-card));
+            opacity: 1;
+        }
+        .flash-flow__item.is-warning .flash-flow__index {
+            border-color: var(--orange);
+            background: var(--orange);
             color: #fff;
         }
         .flash-flow__item.is-blocked {
@@ -2418,6 +2440,12 @@
             color: var(--red);
         }
 
+        .flash-result__icon--warning {
+            background: color-mix(in oklab, var(--orange) 12%, transparent);
+            border: 2px solid color-mix(in oklab, var(--orange) 34%, transparent);
+            color: var(--orange);
+        }
+
         .flash-result__title {
             font-weight: 700;
             font-size: 20px;
@@ -3639,9 +3667,16 @@
             }
             body.is-flasher-active .flash-interface { padding-top: 84px; }
             .flash-container {
-                width: calc(100vw - 32px);
+                width: 100%;
                 max-width: none;
-                padding: 0 0 40px;
+                padding: 0 16px 40px;
+                overflow-x: hidden;
+            }
+            .flash-panel,
+            .flash-cta {
+                width: 100%;
+                min-width: 0;
+                overflow: hidden;
             }
             .flash-panel__header {
                 align-items: flex-start;
@@ -3654,6 +3689,33 @@
             }
             .flash-flow {
                 grid-template-columns: 1fr;
+            }
+            .flash-flow--standalone {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 10px;
+                margin: 18px 0 20px;
+            }
+            .flash-flow--standalone .flash-flow__item {
+                width: 100%;
+            }
+            .flash-flow--standalone .flash-flow__item::after {
+                display: none;
+            }
+            .flash-flow--standalone .flash-flow__copy {
+                white-space: normal;
+            }
+            .flash-connect-tips,
+            .flash-primary-action__hint {
+                overflow-wrap: anywhere;
+            }
+            .custom-source-tabs {
+                min-width: 0;
+            }
+            .custom-source-tab {
+                min-width: 0;
+                padding-left: 8px;
+                padding-right: 8px;
             }
             .flash-primary-action {
                 grid-template-columns: 1fr;
@@ -4717,7 +4779,7 @@
 
                         <div class="flash-option-expand" id="provisionExpand" hidden>
                             <p class="flash-option-expand__desc">
-                                Writes RNode identity and the installed firmware hash after flashing. Optional TNC config saves radio defaults so the device can boot without &ldquo;Missing Config&rdquo;.
+                                Writes RNode identity and verifies the installed firmware hash after flashing. Standalone TNC config is optional and not required for Ratspeak.
                             </p>
                             <div class="provision-board" id="provisionBoard" data-mode="auto">
                                 <div class="provision-board__row">
@@ -4988,6 +5050,8 @@
         rnodeVersion: null,
         rnodeProvision: false,
         rnodeProvisionInfo: null,
+        rnodeSetupIssue: null,
+        rnodeSetupIssueKind: null,
         firmwareBytes: null,
         firmwareAppBytes: null,
         flashing: false,
@@ -5116,6 +5180,8 @@
         state.rnodeAssetName = null;
         state.rnodeVersion = null;
         state.rnodeProvision = false;
+        state.rnodeSetupIssue = null;
+        state.rnodeSetupIssueKind = null;
         state.firmwareAppBytes = null;
         state.port = null;
         state.transport = null;
@@ -5490,6 +5556,8 @@
         state.device = null;
         state.eraseAll = false;
         state.rnodeProvision = false;
+        state.rnodeSetupIssue = null;
+        state.rnodeSetupIssueKind = null;
         state.firmwareAppBytes = null;
         state.flashComplete = false;
         document.getElementById('eraseToggle').checked = false;
@@ -6785,7 +6853,7 @@
         });
 
         logMessage('Verifying firmware hash against running image...', '');
-        await ensureRnodeFirmwareHashMatches(logMessage, RNODE_REPAIR_SETTLE_MS);
+        await ensureRnodeFirmwareHashMatches(logMessage, RNODE_POST_FLASH_BOOT_WAIT_MS);
         logMessage('RNode identity and firmware hash are verified.', 'log-green');
     }
 
@@ -6965,7 +7033,7 @@
     function setFlowItem(id, status, stateText) {
         var item = document.getElementById(id);
         if (!item) return;
-        item.classList.remove('is-active', 'is-done', 'is-blocked');
+        item.classList.remove('is-active', 'is-done', 'is-blocked', 'is-warning');
         item.classList.add(status);
         var textEl = document.getElementById(id + 'State');
         if (textEl) textEl.textContent = stateText;
@@ -6992,8 +7060,22 @@
         if (state.flashComplete) {
             setFlowItem('flowConnect', 'is-done', 'Selected');
             setFlowItem('flowFirmware', 'is-done', 'Written');
-            setFlowItem('flowFlash', 'is-done', 'Complete');
-            if (noteEl) noteEl.textContent = 'Flash complete. Reboot the device before using it on the mesh.';
+            if (state.rnodeSetupIssue) {
+                var isTncIssue = state.rnodeSetupIssueKind === 'tnc';
+                setFlowItem('flowFlash', 'is-warning', isTncIssue ? 'TNC config' : 'Repair');
+                if (noteEl) {
+                    noteEl.textContent = isTncIssue
+                        ? 'Firmware and RNode hash are verified. Standalone TNC config still needs repair.'
+                        : 'Firmware was written, but RNode setup needs repair before the device is ready.';
+                }
+            } else {
+                setFlowItem('flowFlash', 'is-done', 'Complete');
+                if (noteEl) {
+                    noteEl.textContent = state.rnodeProvision && state.device === 'custom'
+                        ? 'Firmware flash complete. RNode identity and firmware hash are verified.'
+                        : 'Flash complete. Reboot the device before using it on the mesh.';
+                }
+            }
             updateAdvancedMeta();
             return;
         }
@@ -7401,6 +7483,8 @@
 
         state.flashing = true;
         state.flashComplete = false;
+        state.rnodeSetupIssue = null;
+        state.rnodeSetupIssueKind = null;
         var btn = document.getElementById('flashBtn');
         btn.className = 'flash-btn flash-btn--flashing';
         btn.disabled = true;
@@ -7432,6 +7516,9 @@
             barEl.style.width = pct + '%';
             if (statusText) statusEl.textContent = statusText;
         }
+        var needsRnodeSetup = state.rnodeProvision && state.device === 'custom';
+        var rnodeSetupIssue = null;
+        var rnodeSetupIssueKind = null;
 
         try {
             // 1. Load esptool-js
@@ -7518,21 +7605,41 @@
                             await saveSelectedTncConfig(logMessage, RNODE_POST_FLASH_BOOT_WAIT_MS);
                             setProgress(98, 'Radio config saved');
                         } catch (confErr) {
-                            logMessage('TNC config save failed: ' + (confErr.message || confErr), 'log-red');
-                            logMessage('Firmware was flashed and provisioned; use "Save TNC config" in Repair tools to retry.', 'log-orange');
+                            rnodeSetupIssue = 'TNC config save failed: ' + (confErr.message || confErr);
+                            rnodeSetupIssueKind = 'tnc';
+                            logMessage(rnodeSetupIssue, 'log-red');
+                            logMessage('Firmware was flashed and provisioned; use "Save TNC config" in Repair tools if you need standalone KISS mode.', 'log-orange');
                             setProgress(98, 'Provisioned');
                         }
                     } else {
                         setProgress(98, 'Provisioned');
                     }
                 } catch (provErr) {
-                    logMessage('Provisioning failed: ' + (provErr.message || provErr), 'log-red');
+                    rnodeSetupIssue = 'Provisioning failed: ' + (provErr.message || provErr);
+                    rnodeSetupIssueKind = 'provision';
+                    logMessage(rnodeSetupIssue, 'log-red');
                     logMessage('Firmware was flashed; use the Repair tools in Advanced options to retry provisioning.', 'log-orange');
                 }
             }
 
-            setProgress(100, 'Complete');
-            logMessage((state.device === 'custom' ? 'Firmware flash complete.' : 'Ratspeak flash complete.') + ' Reboot your device now.', 'log-green');
+            if (rnodeSetupIssue) {
+                state.rnodeSetupIssue = rnodeSetupIssue;
+                state.rnodeSetupIssueKind = rnodeSetupIssueKind;
+                if (rnodeSetupIssueKind === 'tnc') {
+                    setProgress(100, 'TNC config needs repair');
+                    logMessage('Firmware flash complete. RNode identity and firmware hash are verified; standalone TNC config was not saved.', 'log-orange');
+                } else {
+                    setProgress(100, 'RNode setup needs repair');
+                    logMessage('Firmware flash complete, but RNode setup needs attention before the device is ready.', 'log-orange');
+                }
+                showRnodeSetupWarning(rnodeSetupIssue, rnodeSetupIssueKind);
+            } else if (needsRnodeSetup) {
+                setProgress(100, 'Firmware hash verified');
+                logMessage('Firmware flash complete. RNode identity and firmware hash are verified.', 'log-green');
+            } else {
+                setProgress(100, 'Complete');
+                logMessage((state.device === 'custom' ? 'Firmware flash complete.' : 'Ratspeak flash complete.') + ' Reboot your device now.', 'log-green');
+            }
 
             // 11. Hide flash button, show completion
             state.flashing = false;
@@ -7593,6 +7700,23 @@
         resultEl.classList.add('active');
     }
 
+    function showRnodeSetupWarning(issue, kind) {
+        var resultEl = document.getElementById('flashResult');
+        var iconEl = document.getElementById('resultIcon');
+        var svgEl = document.getElementById('resultSvg');
+        var titleEl = document.getElementById('resultTitle');
+        var descEl = document.getElementById('resultDesc');
+        var isTncIssue = kind === 'tnc';
+
+        iconEl.className = 'flash-result__icon flash-result__icon--warning';
+        svgEl.innerHTML = '<path d="M12 8v5"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="9"/>';
+        titleEl.textContent = isTncIssue ? 'Firmware Ready, TNC Config Not Saved' : 'Firmware Flashed, Setup Needs Repair';
+        descEl.textContent = isTncIssue
+            ? 'RNode identity and firmware hash were verified. Use Save TNC config in Repair tools only if you need standalone KISS mode. Last error: ' + issue
+            : 'Firmware was written, but RNode provisioning or hash verification did not finish. Use Repair tools below before using the device. Last error: ' + issue;
+        resultEl.classList.add('active');
+    }
+
     window.resetFlash = function() {
         document.getElementById('flashProgress').classList.remove('active');
         document.getElementById('flashResult').classList.remove('active');
@@ -7601,6 +7725,8 @@
 
         state.flashing = false;
         state.flashComplete = false;
+        state.rnodeSetupIssue = null;
+        state.rnodeSetupIssueKind = null;
         state.transport = null;
         state.esploader = null;
         // Keep state.port valid for re-flash
