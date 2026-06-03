@@ -6145,6 +6145,20 @@
             return (b & 0xFF).toString(16).padStart(2, '0');
         }).join('');
     }
+    function hashesEqual(a, b) {
+        if (!a || !b || a.length !== b.length) return false;
+        for (var i = 0; i < a.length; i++) {
+            if ((a[i] & 0xFF) !== (b[i] & 0xFF)) return false;
+        }
+        return true;
+    }
+    function isZeroHash(bytes) {
+        if (!bytes || !bytes.length) return true;
+        for (var i = 0; i < bytes.length; i++) {
+            if ((bytes[i] & 0xFF) !== 0) return false;
+        }
+        return true;
+    }
     function u32ToBytes(value) {
         value = value >>> 0;
         return [
@@ -6643,12 +6657,37 @@
         var actual = await readRnodeFirmwareHash(session, KISS.HASH_TYPE_FIRMWARE);
         logMessage('Target hash: ' + bytesToHex(target), '');
         logMessage('Actual hash: ' + bytesToHex(actual), '');
-        if (bytesToHex(target) === bytesToHex(actual)) {
+        if (hashesEqual(target, actual)) {
             logMessage('Firmware hash status: target matches actual.', 'log-green');
         } else {
             logMessage('Firmware hash status: mismatch; device will report Firmware Corrupt.', 'log-red');
         }
         return { target: target, actual: actual };
+    }
+
+    async function ensureRnodeFirmwareHashMatches(logMessage, settleMs) {
+        return await withRnodeSession(logMessage, settleMs == null ? RNODE_REPAIR_SETTLE_MS : settleMs, async function (session) {
+            var status = await logRnodeHashStatus(session, logMessage);
+            if (hashesEqual(status.target, status.actual)) return status;
+            if (isZeroHash(status.actual)) {
+                throw new Error('RNode running firmware hash is not available yet');
+            }
+
+            logMessage('Target hash differs from running firmware; adopting running hash...', 'log-orange');
+            await sendRnodeFirmwareHash(session, status.actual);
+
+            try {
+                var verified = await logRnodeHashStatus(session, logMessage);
+                if (!hashesEqual(verified.target, verified.actual)) {
+                    throw new Error('target still differs from actual after adoption');
+                }
+                logMessage('Running firmware hash adopted.', 'log-green');
+                return verified;
+            } catch (verifyErr) {
+                logMessage('Running hash adoption was sent; device reset before verification completed.', 'log-orange');
+                return { target: status.actual, actual: status.actual };
+            }
+        });
     }
 
     async function logRnodeConfigStatus(session, logMessage) {
@@ -6743,9 +6782,11 @@
             }
 
             await writeLoadedFirmwareHash(session, logMessage);
-            logMessage('RNode identity and firmware hash are set.', 'log-green');
-            logMessage('Saved radio config is separate; a display that says "Missing Config" means no standalone TNC profile has been saved yet.', 'log-orange');
         });
+
+        logMessage('Verifying firmware hash against running image...', '');
+        await ensureRnodeFirmwareHashMatches(logMessage, RNODE_REPAIR_SETTLE_MS);
+        logMessage('RNode identity and firmware hash are verified.', 'log-green');
     }
 
     // Resolve which RNode product/model byte pair to write. Honors a user
@@ -6844,11 +6885,12 @@
         try {
             await withRnodeSession(ui.log, RNODE_REPAIR_SETTLE_MS, async function (session) {
                 var status = await logRnodeHashStatus(session, ui.log);
+                if (isZeroHash(status.actual)) throw new Error('RNode running firmware hash is not available yet');
                 ui.log('Writing actual hash as target...', '');
                 await sendRnodeFirmwareHash(session, status.actual);
                 try {
                     var target = await readRnodeFirmwareHash(session, KISS.HASH_TYPE_TARGET_FIRMWARE);
-                    if (bytesToHex(target) === bytesToHex(status.actual)) {
+                    if (hashesEqual(target, status.actual)) {
                         ui.log('Verified target hash now matches running firmware.', 'log-green');
                     } else {
                         ui.log('Target hash write was sent, but verification still differs.', 'log-orange');
