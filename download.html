@@ -1614,6 +1614,67 @@
             outline-offset: 1px;
             border-color: var(--accent);
         }
+        .tnc-config {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-subtle);
+        }
+        .tnc-config__toggle {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .tnc-config__toggle input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .tnc-config__check {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 7px;
+            border: 1px solid var(--border-card);
+            color: transparent;
+            background: var(--bg-card);
+            flex-shrink: 0;
+            margin-top: 2px;
+            transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+        }
+        .tnc-config__check svg { width: 14px; height: 14px; }
+        .tnc-config__toggle input:checked ~ .tnc-config__check {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+        .tnc-config__copy {
+            display: grid;
+            gap: 2px;
+            min-width: 0;
+        }
+        .tnc-config__label {
+            font-size: 13px;
+            font-weight: 650;
+            color: var(--text-primary);
+        }
+        .tnc-config__hint {
+            font-size: 12px;
+            line-height: 1.35;
+            color: var(--text-muted);
+        }
+        .tnc-config__fields {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 12px;
+        }
+        @media (max-width: 640px) {
+            .tnc-config__fields { grid-template-columns: 1fr; }
+        }
 
         /* ── Flash Action ──────────────────────────────── */
 
@@ -4656,7 +4717,7 @@
 
                         <div class="flash-option-expand" id="provisionExpand" hidden>
                             <p class="flash-option-expand__desc">
-                                Writes RNode identity and the installed firmware hash after flashing. Hardware revision and serial are filled automatically.
+                                Writes RNode identity and the installed firmware hash after flashing. Optional TNC config saves radio defaults so the device can boot without &ldquo;Missing Config&rdquo;.
                             </p>
                             <div class="provision-board" id="provisionBoard" data-mode="auto">
                                 <div class="provision-board__row">
@@ -4677,6 +4738,31 @@
                                     <label class="provision-field">
                                         <span class="provision-field__label">Model</span>
                                         <select id="provisionModel"></select>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="tnc-config" id="tncConfigPanel">
+                                <label class="tnc-config__toggle">
+                                    <input type="checkbox" id="tncConfigToggle">
+                                    <span class="tnc-config__check" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"/></svg>
+                                    </span>
+                                    <span class="tnc-config__copy">
+                                        <span class="tnc-config__label">Save standalone TNC config</span>
+                                        <span class="tnc-config__hint">Sets frequency and radio profile after provisioning.</span>
+                                    </span>
+                                </label>
+                                <div class="tnc-config__fields" id="tncConfigFields" hidden>
+                                    <label class="provision-field">
+                                        <span class="provision-field__label">Frequency</span>
+                                        <select id="tncFrequencySelect"></select>
+                                    </label>
+                                    <label class="provision-field">
+                                        <span class="provision-field__label">Profile</span>
+                                        <select id="tncProfileSelect">
+                                            <option value="balanced">Balanced · BW 250k · SF9 · CR5</option>
+                                            <option value="long">Long range · BW 250k · SF11 · CR5</option>
+                                        </select>
                                     </label>
                                 </div>
                             </div>
@@ -4765,8 +4851,17 @@
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18"/><path d="M3 12h18"/><path d="M3 19h10"/><path d="m17 16 4 4"/><circle cx="16.5" cy="15.5" r="3.5"/></svg>
                             </span>
                             <span class="flash-repair__copy">
-                                <span class="flash-repair__label">Read hash status</span>
-                                <span class="flash-repair__sub">Shows target vs actual firmware hash in the progress log.</span>
+                                <span class="flash-repair__label">Read RNode status</span>
+                                <span class="flash-repair__sub">Shows firmware hash and saved radio config state.</span>
+                            </span>
+                        </button>
+                        <button type="button" class="flash-repair__action" id="saveTncConfigBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 12h10"/><path d="M4 17h7"/><path d="M17 14v6"/><path d="M14 17h6"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label">Save TNC config</span>
+                                <span class="flash-repair__sub">Clears &ldquo;Missing Config&rdquo; for standalone KISS TNC mode.</span>
                             </span>
                         </button>
                     </div>
@@ -5805,9 +5900,15 @@
     var setHashBtn     = document.getElementById('setHashBtn');
     var adoptHashBtn   = document.getElementById('adoptHashBtn');
     var inspectHashBtn = document.getElementById('inspectHashBtn');
+    var saveTncConfigBtn = document.getElementById('saveTncConfigBtn');
+    var tncConfigToggle = document.getElementById('tncConfigToggle');
+    var tncConfigFields = document.getElementById('tncConfigFields');
+    var tncFrequencySelect = document.getElementById('tncFrequencySelect');
+    var tncProfileSelect = document.getElementById('tncProfileSelect');
 
     // boardManual: user explicitly asked to override auto-detection
     state.boardManual = false;
+    state.rnodeTncConfig = false;
 
     function productLabelFor(byte) {
         for (var i = 0; i < RNODE_PRODUCTS.length; i++) {
@@ -5831,9 +5932,13 @@
         provProductSel.addEventListener('change', function () {
             populateModelsFor(parseInt(provProductSel.value, 10));
             updateProvisionBoardBadge();
+            populateTncFrequencySelect();
         });
         if (provModelSel) {
-            provModelSel.addEventListener('change', updateProvisionBoardBadge);
+            provModelSel.addEventListener('change', function () {
+                updateProvisionBoardBadge();
+                populateTncFrequencySelect();
+            });
         }
     }
     function populateModelsFor(productByte) {
@@ -5900,6 +6005,7 @@
             }
         }
         updateProvisionBoardBadge();
+        populateTncFrequencySelect();
     }
 
     function updateProvisionVisibility() {
@@ -5914,6 +6020,8 @@
             state.rnodeProvision = false;
             if (provToggle) provToggle.checked = false;
             if (provExpand) provExpand.hidden = true;
+            if (tncConfigToggle) tncConfigToggle.checked = false;
+            updateTncConfigControls();
         }
         updateAdvancedMeta();
     }
@@ -5926,6 +6034,10 @@
             if (provToggle.checked) {
                 buildProductSelect();
                 updateProvisionBoardBadge();
+                populateTncFrequencySelect();
+            } else if (tncConfigToggle) {
+                tncConfigToggle.checked = false;
+                updateTncConfigControls();
             }
             updateAdvancedMeta();
         });
@@ -5947,14 +6059,34 @@
     if (inspectHashBtn) {
         inspectHashBtn.addEventListener('click', function () { runInspectHashesOnly(); });
     }
+    if (saveTncConfigBtn) {
+        saveTncConfigBtn.addEventListener('click', function () { runSaveTncConfigOnly(); });
+    }
+    if (tncConfigToggle) {
+        tncConfigToggle.addEventListener('change', updateTncConfigControls);
+    }
+    if (tncFrequencySelect) {
+        tncFrequencySelect.addEventListener('change', updateAdvancedMeta);
+    }
+    if (tncProfileSelect) {
+        tncProfileSelect.addEventListener('change', updateAdvancedMeta);
+    }
 
     // ── KISS framing + RNode protocol ────────────────
     // Constants transcribed from RNS/Utilities/rnodeconf.py
     var KISS = {
         FEND: 0xC0, FESC: 0xDB, TFEND: 0xDC, TFESC: 0xDD,
+        CMD_FREQUENCY:  0x01,
+        CMD_BANDWIDTH:  0x02,
+        CMD_TXPOWER:    0x03,
+        CMD_SF:         0x04,
+        CMD_CR:         0x05,
+        CMD_RADIO_STATE: 0x06,
         CMD_ERROR:     0x90,
         CMD_ROM_READ:  0x51,
         CMD_ROM_WRITE: 0x52,
+        CMD_CONF_SAVE: 0x53,
+        CMD_CONF_DELETE: 0x54,
         CMD_FW_HASH:   0x58,
         CMD_HASHES:    0x60,
         ERROR_EEPROM_LOCKED: 0x03,
@@ -5973,9 +6105,38 @@
     var RNODE_PORT_OPEN_RETRY_DELAY_MS = 900;
     var ROM_ADDR = {
         PRODUCT: 0x00, MODEL: 0x01, HW_REV: 0x02, SERIAL: 0x03, MADE: 0x07,
-        CHKSUM: 0x0B, SIGNATURE: 0x1B, INFO_LOCK: 0x9B
+        CHKSUM: 0x0B, SIGNATURE: 0x1B, INFO_LOCK: 0x9B,
+        CONF_SF: 0x9C, CONF_CR: 0x9D, CONF_TXP: 0x9E, CONF_BW: 0x9F,
+        CONF_FREQ: 0xA3, CONF_OK: 0xA7
     };
     var INFO_LOCK_BYTE = 0x73;
+    var CONF_OK_BYTE = 0x73;
+    var RNODE_TNC_FREQUENCIES = {
+        low: [
+            { value: 433000000, label: '433 MHz' }
+        ],
+        high: [
+            { value: 868000000, label: '868 MHz' },
+            { value: 915000000, label: '915 MHz' },
+            { value: 923000000, label: '923 MHz' }
+        ]
+    };
+    var RNODE_TNC_PROFILES = {
+        balanced: {
+            label: 'Balanced',
+            bandwidth: 250000,
+            spreadingFactor: 9,
+            codingRate: 5,
+            txPower: 17
+        },
+        long: {
+            label: 'Long range',
+            bandwidth: 250000,
+            spreadingFactor: 11,
+            codingRate: 5,
+            txPower: 17
+        }
+    };
     function sleepMs(ms) {
         return new Promise(function (resolve) { setTimeout(resolve, ms); });
     }
@@ -5983,6 +6144,96 @@
         return Array.from(bytes || []).map(function (b) {
             return (b & 0xFF).toString(16).padStart(2, '0');
         }).join('');
+    }
+    function u32ToBytes(value) {
+        value = value >>> 0;
+        return [
+            (value >>> 24) & 0xFF,
+            (value >>> 16) & 0xFF,
+            (value >>> 8) & 0xFF,
+            value & 0xFF
+        ];
+    }
+    function readU32BE(bytes, offset) {
+        return (((bytes[offset] & 0xFF) * 0x1000000) +
+            ((bytes[offset + 1] & 0xFF) << 16) +
+            ((bytes[offset + 2] & 0xFF) << 8) +
+            (bytes[offset + 3] & 0xFF)) >>> 0;
+    }
+    function formatHzMhz(hz) {
+        if (!hz || hz === 0xFFFFFFFF) return 'unset';
+        var mhz = hz / 1000000;
+        return (Math.round(mhz) === mhz ? mhz.toFixed(0) : mhz.toFixed(3)) + ' MHz';
+    }
+    function bandForRnodeIdentity(ident) {
+        if (!ident) return null;
+        var label = modelLabelFor(ident.product, ident.model) || '';
+        var lower = label.toLowerCase();
+        if (/(410-525|420-520|430-510)/.test(lower)) return 'low';
+        if (/(779-928|820-960|820-1020|850-950)/.test(lower)) return 'high';
+        if (/(2\.4-2\.5|sx1280)/.test(lower)) return 'unsupported';
+        return null;
+    }
+    function tncFrequencyOptionsForIdentity(ident) {
+        var band = bandForRnodeIdentity(ident);
+        if (band === 'low') return RNODE_TNC_FREQUENCIES.low;
+        if (band === 'high') return RNODE_TNC_FREQUENCIES.high;
+        return [];
+    }
+    function populateTncFrequencySelect() {
+        if (!tncFrequencySelect) return;
+        var ident = resolveBoardIdentity();
+        var options = tncFrequencyOptionsForIdentity(ident);
+        var previous = parseInt(tncFrequencySelect.value, 10);
+        tncFrequencySelect.innerHTML = options.map(function (opt) {
+            return '<option value="' + opt.value + '">' + opt.label + '</option>';
+        }).join('');
+        if (!options.length) {
+            tncFrequencySelect.innerHTML = '<option value="">Unsupported band</option>';
+            return;
+        }
+        var preferred = options.some(function (opt) { return opt.value === previous; }) ? previous :
+            (options.some(function (opt) { return opt.value === 915000000; }) ? 915000000 : options[0].value);
+        tncFrequencySelect.value = String(preferred);
+    }
+    function updateTncConfigControls() {
+        state.rnodeTncConfig = !!(tncConfigToggle && tncConfigToggle.checked);
+        if (tncConfigFields) tncConfigFields.hidden = !state.rnodeTncConfig;
+        if (state.rnodeTncConfig) populateTncFrequencySelect();
+        updateAdvancedMeta();
+    }
+    function resolveSelectedTncProfile() {
+        var ident = resolveBoardIdentity();
+        if (!ident) throw new Error('Pick an RNode firmware variant or set the board/band before saving TNC config.');
+        var label = modelLabelFor(ident.product, ident.model) || '';
+
+        var band = bandForRnodeIdentity(ident);
+        if (band === 'unsupported') {
+            throw new Error('Automatic TNC defaults are not available for 2.4 GHz RNodes.');
+        }
+        if (!band) {
+            throw new Error('Automatic TNC defaults are not available for this board/band.');
+        }
+
+        if (tncFrequencySelect && !tncFrequencySelect.options.length) populateTncFrequencySelect();
+        var frequency = parseInt(tncFrequencySelect && tncFrequencySelect.value, 10);
+        if (!frequency) {
+            var options = tncFrequencyOptionsForIdentity(ident);
+            frequency = options.some(function (opt) { return opt.value === 915000000; }) ? 915000000 : (options[0] && options[0].value);
+        }
+        if (!frequency) throw new Error('Choose a TNC frequency before saving config.');
+
+        var profileKey = tncProfileSelect && RNODE_TNC_PROFILES[tncProfileSelect.value] ? tncProfileSelect.value : 'balanced';
+        var profile = RNODE_TNC_PROFILES[profileKey];
+        return {
+            label: label || 'selected RNode',
+            profileLabel: profile.label,
+            frequency: frequency,
+            bandwidth: profile.bandwidth,
+            spreadingFactor: profile.spreadingFactor,
+            codingRate: profile.codingRate,
+            txPower: profile.txPower
+        };
     }
     function serialPortLabel(port) {
         try {
@@ -6308,9 +6559,46 @@
         return frame.payload.slice(1, 33);
     }
 
+    async function readRnodeConfigStatus(session) {
+        var rom = await readRnodeRom(session);
+        return {
+            ok: rom[ROM_ADDR.CONF_OK] === CONF_OK_BYTE,
+            okByte: rom[ROM_ADDR.CONF_OK],
+            spreadingFactor: rom[ROM_ADDR.CONF_SF],
+            codingRate: rom[ROM_ADDR.CONF_CR],
+            txPower: rom[ROM_ADDR.CONF_TXP],
+            bandwidth: readU32BE(rom, ROM_ADDR.CONF_BW),
+            frequency: readU32BE(rom, ROM_ADDR.CONF_FREQ)
+        };
+    }
+
     async function sendRnodeFirmwareHash(session, hashBytes) {
         await session.send(KISS.CMD_FW_HASH, Array.from(hashBytes));
         await sleepMs(RNODE_HASH_SAVE_DELAY_MS);
+    }
+
+    async function sendRnodeTncConfig(session, profile, logMessage) {
+        logMessage('Setting frequency ' + formatHzMhz(profile.frequency) + '...', '');
+        await session.send(KISS.CMD_FREQUENCY, u32ToBytes(profile.frequency));
+        await sleepMs(140);
+        logMessage('Setting bandwidth ' + profile.bandwidth + ' Hz...', '');
+        await session.send(KISS.CMD_BANDWIDTH, u32ToBytes(profile.bandwidth));
+        await sleepMs(140);
+        logMessage('Setting SF' + profile.spreadingFactor + ', CR' + profile.codingRate + ', TX ' + profile.txPower + ' dBm...', '');
+        await session.send(KISS.CMD_SF, [profile.spreadingFactor & 0xFF]);
+        await sleepMs(140);
+        await session.send(KISS.CMD_CR, [profile.codingRate & 0xFF]);
+        await sleepMs(140);
+        await session.send(KISS.CMD_TXPOWER, [profile.txPower & 0xFF]);
+        await sleepMs(140);
+        logMessage('Starting radio before saving config...', '');
+        await session.send(KISS.CMD_RADIO_STATE, [0x01]);
+        await sleepMs(900);
+        logMessage('Saving persistent TNC config...', '');
+        await session.send(KISS.CMD_CONF_SAVE, [0x00]);
+        await sleepMs(800);
+        await session.send(KISS.CMD_CONF_SAVE, [0x00]);
+        await sleepMs(900);
     }
 
     async function sendRomWrite(session, addr, byte) {
@@ -6361,6 +6649,31 @@
             logMessage('Firmware hash status: mismatch; device will report Firmware Corrupt.', 'log-red');
         }
         return { target: target, actual: actual };
+    }
+
+    async function logRnodeConfigStatus(session, logMessage) {
+        var status = await readRnodeConfigStatus(session);
+        if (status.ok) {
+            logMessage('Saved radio config: ' + formatHzMhz(status.frequency) +
+                ', BW ' + status.bandwidth + ', SF' + status.spreadingFactor +
+                ', CR' + status.codingRate + ', TX ' + status.txPower + ' dBm.', 'log-green');
+        } else {
+            logMessage('Saved radio config: missing (CONF_OK byte 0x' +
+                status.okByte.toString(16).padStart(2, '0') + ').', 'log-orange');
+            logMessage('This is the display "Missing Config" state, not a firmware-hash failure.', 'log-orange');
+        }
+        return status;
+    }
+
+    async function saveSelectedTncConfig(logMessage, settleMs) {
+        var profile = resolveSelectedTncProfile();
+        logMessage('TNC profile: ' + profile.profileLabel + ' for ' + profile.label + '.', '');
+        return await withRnodeSession(logMessage, settleMs == null ? RNODE_REPAIR_SETTLE_MS : settleMs, async function (session) {
+            await sendRnodeTncConfig(session, profile, logMessage);
+            var status = await logRnodeConfigStatus(session, logMessage);
+            if (!status.ok) throw new Error('Config save was sent, but CONF_OK is still not set.');
+            return { profile: profile, status: status };
+        });
     }
 
     // ── Provisioning sequencer ───────────────────────
@@ -6430,6 +6743,8 @@
             }
 
             await writeLoadedFirmwareHash(session, logMessage);
+            logMessage('RNode identity and firmware hash are set.', 'log-green');
+            logMessage('Saved radio config is separate; a display that says "Missing Config" means no standalone TNC profile has been saved yet.', 'log-orange');
         });
     }
 
@@ -6558,15 +6873,49 @@
         try {
             if (!state.port) state.port = await navigator.serial.requestPort();
         } catch (e) { return; }
-        var ui = openProgressLog('Reading RNode hashes…');
+        var ui = openProgressLog('Reading RNode status…');
         try {
             await withRnodeSession(ui.log, RNODE_REPAIR_SETTLE_MS, async function (session) {
                 await logRnodeHashStatus(session, ui.log);
+                await logRnodeConfigStatus(session, ui.log);
             });
-            ui.setStatus('Hash status read.');
+            ui.setStatus('RNode status read.');
         } catch (err) {
             ui.log('Error: ' + (err.message || err), 'log-red');
-            ui.setStatus('Read hashes failed.');
+            ui.setStatus('Read status failed.');
+        }
+    }
+
+    async function runSaveTncConfigOnly() {
+        if (!('serial' in navigator)) {
+            alert('This requires Web Serial (Chrome / Edge 89+).');
+            return;
+        }
+        var profile;
+        try {
+            profile = resolveSelectedTncProfile();
+        } catch (err) {
+            alert(err.message || err);
+            return;
+        }
+        var message = 'Save a persistent KISS TNC config for ' + profile.label + '?\n\n' +
+            'Profile: ' + profile.profileLabel + '\n' +
+            'Frequency: ' + formatHzMhz(profile.frequency) + '\n' +
+            'Bandwidth: ' + profile.bandwidth + ' Hz\n' +
+            'SF' + profile.spreadingFactor + ' / CR' + profile.codingRate + ' / TX ' + profile.txPower + ' dBm\n\n' +
+            'Use this for standalone TNC mode. Ratspeak can also configure the radio when you add it in the app.';
+        if (!window.confirm(message)) return;
+
+        try {
+            if (!state.port) state.port = await navigator.serial.requestPort();
+        } catch (e) { return; }
+        var ui = openProgressLog('Saving TNC config…');
+        try {
+            await saveSelectedTncConfig(ui.log, RNODE_REPAIR_SETTLE_MS);
+            ui.setStatus('TNC config saved.');
+        } catch (err) {
+            ui.log('Error: ' + (err.message || err), 'log-red');
+            ui.setStatus('Save TNC config failed.');
         }
     }
 
@@ -6586,6 +6935,10 @@
         var parts = [];
         if (state.eraseAll) parts.push('Full erase on');
         if (state.rnodeProvision) parts.push('EEPROM provisioning on');
+        if (state.rnodeTncConfig) {
+            var freq = parseInt(tncFrequencySelect && tncFrequencySelect.value, 10);
+            parts.push(freq ? ('TNC ' + formatHzMhz(freq)) : 'TNC config on');
+        }
         meta.textContent = parts.length ? parts.join(' · ') : 'Default flash';
     }
 
@@ -7116,7 +7469,20 @@
                 logMessage('Beginning RNode provisioning sequence...', 'log-orange');
                 try {
                     await runProvisioning(logMessage, setProgress);
-                    setProgress(98, 'Provisioned');
+                    if (state.rnodeTncConfig) {
+                        setProgress(92, 'Saving RNode radio config...');
+                        logMessage('Saving standalone TNC config after firmware-hash reset...', 'log-orange');
+                        try {
+                            await saveSelectedTncConfig(logMessage, RNODE_POST_FLASH_BOOT_WAIT_MS);
+                            setProgress(98, 'Radio config saved');
+                        } catch (confErr) {
+                            logMessage('TNC config save failed: ' + (confErr.message || confErr), 'log-red');
+                            logMessage('Firmware was flashed and provisioned; use "Save TNC config" in Repair tools to retry.', 'log-orange');
+                            setProgress(98, 'Provisioned');
+                        }
+                    } else {
+                        setProgress(98, 'Provisioned');
+                    }
                 } catch (provErr) {
                     logMessage('Provisioning failed: ' + (provErr.message || provErr), 'log-red');
                     logMessage('Firmware was flashed; use the Repair tools in Advanced options to retry provisioning.', 'log-orange');
