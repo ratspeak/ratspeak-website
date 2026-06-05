@@ -3917,7 +3917,7 @@
     <span class="flash-hero__eyebrow">Download</span>
     <h1 class="flash-hero__title dl-hero__title">Pick your entry.</h1>
     <p class="dl-hero__sub">One protocol, any form factor. Download the app or flash the firmware directly to your device in the browser.</p>
-    <p class="flash-hero__sub dl-hero__meta">v1.0.19 &middot; Built with <a href="https://reticulum.network" target="_blank" rel="noopener noreferrer">Reticulum</a></p>
+    <p class="flash-hero__sub dl-hero__meta"><span id="ratspeakReleaseTag">Latest release</span> &middot; Built with <a href="https://reticulum.network" target="_blank" rel="noopener noreferrer">Reticulum</a></p>
 </section>
 
 <!-- ── Main Content ────────────────────────────────────── -->
@@ -8452,7 +8452,8 @@
 
     function resolveRatspeakReleaseAssets() {
         var links = Array.prototype.slice.call(document.querySelectorAll('[data-ratspeak-release-asset]'));
-        if (!links.length || typeof fetch !== 'function') return;
+        var releaseTag = document.getElementById('ratspeakReleaseTag');
+        if ((!links.length && !releaseTag) || typeof fetch !== 'function') return;
 
         fetch('https://api.github.com/repos/ratspeak/Ratspeak/releases/latest', {
             headers: { Accept: 'application/vnd.github+json' }
@@ -8460,6 +8461,10 @@
             if (!response.ok) throw new Error('Release lookup failed');
             return response.json();
         }).then(function (release) {
+            if (releaseTag && release.tag_name) {
+                releaseTag.textContent = release.tag_name;
+                releaseTag.dataset.ratspeakReleaseResolved = 'true';
+            }
             var assets = Array.isArray(release.assets) ? release.assets : [];
             links.forEach(function (link) {
                 var kind = link.dataset.ratspeakReleaseAsset;
