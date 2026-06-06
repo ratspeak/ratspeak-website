@@ -5716,6 +5716,14 @@
         return (bytes / 1048576).toFixed(2) + ' MB';
     }
 
+    function escapeOptionText(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
     // ── Custom source tabs (Upload | RNode) ───────────
     var sourceTabs = document.querySelectorAll('.custom-source-tab');
     var paneUpload = document.getElementById('customSourceUpload');
@@ -5853,13 +5861,13 @@
                 resetRnodeSelection('Pick a device variant to continue.');
                 return;
             }
-            populateRnodeBandSelect(name);
             rnodeStatus.classList.remove('is-ready', 'is-error');
             rnodeStatus.textContent = 'Downloading ' + name + '…';
             state.firmwareReady = false;
             state.firmwareAppBytes = null;
             updateFlashBtn();
             try {
+                populateRnodeBandSelect(name);
                 var versionQuery = rnodeVersionQuery();
                 var infoResp = await fetch('/api/firmware?source=rnode&info=true&asset=' + encodeURIComponent(name) + versionQuery);
                 if (!infoResp.ok) throw new Error('Info fetch failed');
@@ -6143,7 +6151,7 @@
         var selected = selectedRnodeBandOption(name);
         state.rnodeBand = selected.key;
         rnodeBandSelect.innerHTML = options.map(function (opt) {
-            return '<option value="' + escapeHtml(opt.key) + '">' + escapeHtml(opt.label) + '</option>';
+            return '<option value="' + escapeOptionText(opt.key) + '">' + escapeOptionText(opt.label) + '</option>';
         }).join('');
         rnodeBandSelect.value = selected.key;
         rnodeBandSelect.disabled = options.length < 2;
