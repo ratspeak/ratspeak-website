@@ -1568,6 +1568,9 @@
             flex-direction: column;
             gap: 6px;
         }
+        .rnode-source__field + .rnode-source__field {
+            margin-top: 10px;
+        }
         .rnode-source__label {
             font-family: var(--font-mono);
             font-size: 10.5px;
@@ -1986,7 +1989,7 @@
         }
         .provision-board__manual[hidden] { display: none; }
 
-        /* ── Action CTA card — primary flash + collapsed repair tools ── */
+        /* ── Action CTA card — primary flash + collapsed RNode tools ── */
         .flash-cta {
             display: block;
             margin-top: 22px;
@@ -2018,7 +2021,7 @@
             margin-top: 14px;
         }
 
-        /* Repair tools — embedded sub-section, separated by a hairline */
+        /* RNode tools — embedded sub-section, separated by a hairline */
         .flash-cta__repair {
             margin-top: 18px;
             padding-top: 4px;
@@ -2086,7 +2089,7 @@
             .flash-cta__repair-meta { display: none; }
         }
 
-        /* Repair tools — standalone operations on a connected device */
+        /* RNode tools — standalone operations on a connected device */
         .flash-repair__list {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4729,6 +4732,12 @@
                                         <option>Loading variants&hellip;</option>
                                     </select>
                                 </label>
+                                <label class="rnode-source__field">
+                                    <span class="rnode-source__label">Radio band</span>
+                                    <select class="rnode-variant-select" id="rnodeBandSelect" disabled>
+                                        <option>Choose a device variant first</option>
+                                    </select>
+                                </label>
                                 <div class="rnode-source__status" id="rnodeStatus">No variant selected.</div>
                             </div>
                         </div>
@@ -4779,7 +4788,7 @@
 
                         <div class="flash-option-expand" id="provisionExpand" hidden>
                             <p class="flash-option-expand__desc">
-                                Writes RNode identity and verifies the installed firmware hash after flashing. Standalone TNC config is optional and not required for Ratspeak.
+                                Writes RNode identity and firmware hash after flashing. The radio band is selected in the firmware card above; Ratspeak can choose the channel preset when you add the device.
                             </p>
                             <div class="provision-board" id="provisionBoard" data-mode="auto">
                                 <div class="provision-board__row">
@@ -4811,7 +4820,7 @@
                                     </span>
                                     <span class="tnc-config__copy">
                                         <span class="tnc-config__label">Save standalone TNC config</span>
-                                        <span class="tnc-config__hint">Sets frequency and radio profile after provisioning.</span>
+                                        <span class="tnc-config__hint">Optional startup profile for non-Ratspeak KISS hosts.</span>
                                     </span>
                                 </label>
                                 <div class="tnc-config__fields" id="tncConfigFields" hidden>
@@ -4836,7 +4845,7 @@
             </div>
         </div>
 
-        <!-- ── Action CTA — primary flash + post-flash repair tools ── -->
+        <!-- ── Action CTA — primary flash + post-flash RNode tools ── -->
         <section class="flash-cta">
             <div class="flash-primary-action">
                 <div class="flash-primary-action__copy">
@@ -4874,9 +4883,9 @@
                 <summary class="flash-cta__repair-summary">
                     <span class="flash-cta__repair-label">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-2.4 2.6-2.6Z"/></svg>
-                        Repair tools
+                        RNode tools
                     </span>
-                    <span class="flash-cta__repair-meta">For after flashing &middot; no re-flash required</span>
+                    <span class="flash-cta__repair-meta">Advanced RNode actions &middot; no re-flash required</span>
                     <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
                 </summary>
                 <div class="flash-cta__repair-body">
@@ -4905,7 +4914,7 @@
                             </span>
                             <span class="flash-repair__copy">
                                 <span class="flash-repair__label">Adopt running hash</span>
-                                <span class="flash-repair__sub">Best repair for &ldquo;Firmware Corrupt&rdquo; when the board still answers USB.</span>
+                                <span class="flash-repair__sub">Use this for &ldquo;Firmware Corrupt&rdquo; when the board still answers USB.</span>
                             </span>
                         </button>
                         <button type="button" class="flash-repair__action" id="inspectHashBtn">
@@ -5047,6 +5056,8 @@
         customOffsets: null,
         rnodeAsset: null,
         rnodeAssetName: null,
+        rnodeAssetLabel: null,
+        rnodeBand: null,
         rnodeVersion: null,
         rnodeProvision: false,
         rnodeProvisionInfo: null,
@@ -5178,6 +5189,8 @@
         state.customFile = null;
         state.rnodeAsset = null;
         state.rnodeAssetName = null;
+        state.rnodeAssetLabel = null;
+        state.rnodeBand = null;
         state.rnodeVersion = null;
         state.rnodeProvision = false;
         state.rnodeSetupIssue = null;
@@ -5721,8 +5734,11 @@
             // Reset firmware state when switching back
             state.rnodeAsset = null;
             state.rnodeAssetName = null;
+            state.rnodeAssetLabel = null;
+            state.rnodeBand = null;
             state.firmwareAppBytes = null;
             state.firmwareReady = !!state.customFile;
+            populateRnodeBandSelect(null);
         } else {
             paneUpload.style.display = 'none';
             paneRnode.style.display = '';
@@ -5730,6 +5746,7 @@
             state.customFile = null;
             state.firmwareAppBytes = null;
             state.firmwareReady = !!state.rnodeAsset;
+            if (!state.rnodeAssetName) populateRnodeBandSelect(null);
             if (!rnodeLoaded) loadRnodeVariants();
         }
         updateProvisionVisibility();
@@ -5742,6 +5759,7 @@
     // ── RNode firmware picker ─────────────────────────
     var rnodeReleaseSelect = document.getElementById('rnodeReleaseSelect');
     var rnodeVariantSelect = document.getElementById('rnodeVariantSelect');
+    var rnodeBandSelect    = document.getElementById('rnodeBandSelect');
     var rnodeReleaseSub    = document.getElementById('rnodeReleaseSub');
     var rnodeStatus        = document.getElementById('rnodeStatus');
     var rnodeReleasesLoaded = false;
@@ -5753,8 +5771,11 @@
     function resetRnodeSelection(message) {
         state.rnodeAsset = null;
         state.rnodeAssetName = null;
+        state.rnodeAssetLabel = null;
+        state.rnodeBand = null;
         state.firmwareAppBytes = null;
         state.firmwareReady = false;
+        populateRnodeBandSelect(null);
         if (rnodeStatus) {
             rnodeStatus.classList.remove('is-ready', 'is-error');
             rnodeStatus.textContent = message || 'Pick a device variant to continue.';
@@ -5807,6 +5828,7 @@
             });
             rnodeVariantSelect.innerHTML = optHtml;
             rnodeVariantSelect.disabled = false;
+            populateRnodeBandSelect(null);
             rnodeStatus.classList.remove('is-error');
             rnodeStatus.textContent = 'Pick an ESP32 RNode variant to continue.';
         } catch (e) {
@@ -5831,6 +5853,7 @@
                 resetRnodeSelection('Pick a device variant to continue.');
                 return;
             }
+            populateRnodeBandSelect(name);
             rnodeStatus.classList.remove('is-ready', 'is-error');
             rnodeStatus.textContent = 'Downloading ' + name + '…';
             state.firmwareReady = false;
@@ -5848,9 +5871,9 @@
                 var buf = await binResp.arrayBuffer();
                 state.rnodeAsset = buf;
                 state.rnodeAssetName = name;
+                state.rnodeAssetLabel = meta.label;
                 state.firmwareReady = true;
-                rnodeStatus.classList.add('is-ready');
-                rnodeStatus.textContent = '✓ ' + meta.label + ' · ' + formatBytes(buf.byteLength) + ' · ready to flash';
+                updateRnodeReadyStatus();
                 // Auto-suggest the matching product/model in the provision form
                 hintProvisioningFromVariant(name);
                 // Auto-enable provisioning toggle for RNode source
@@ -5864,10 +5887,26 @@
                 rnodeStatus.textContent = 'Error: ' + (err.message || err);
                 state.rnodeAsset = null;
                 state.firmwareAppBytes = null;
+                state.rnodeAssetLabel = null;
                 state.firmwareReady = false;
             }
             updateProvisionVisibility();
             updateFlashBtn();
+        });
+    }
+
+    if (rnodeBandSelect) {
+        rnodeBandSelect.addEventListener('change', function () {
+            state.rnodeBand = rnodeBandSelect.value || null;
+            var selectedName = state.rnodeAssetName || (rnodeVariantSelect && rnodeVariantSelect.value);
+            if (!state.boardManual && selectedName) {
+                hintProvisioningFromVariant(selectedName);
+            } else {
+                updateProvisionBoardBadge();
+            }
+            populateTncFrequencySelect();
+            updateRnodeReadyStatus();
+            updateAdvancedMeta();
         });
     }
 
@@ -5953,6 +5992,33 @@
         'rnode_firmware_opencom_xl.zip':     { product: 0x20, model: 0x21 },
         'rnode_firmware_xiao_esp32s3.zip':   { product: 0xEB, model: 0xDD }
     };
+    var RNODE_VARIANT_BAND_MODELS = {
+        'rnode_firmware_t3s3.zip':             { high: 0xA6, low: 0xA1 },
+        'rnode_firmware_t3s3_sx127x.zip':      { high: 0xAA, low: 0xA5 },
+        'rnode_firmware_t3s3_sx1280_pa.zip':   { unsupported: 0xAC },
+        'rnode_firmware_ng21.zip':             { high: 0xA7, low: 0xA2 },
+        'rnode_firmware_ng20.zip':             { high: 0xA8, low: 0xA3 },
+        'rnode_firmware_lora32v10.zip':        { high: 0xBB, low: 0xBA },
+        'rnode_firmware_lora32v20.zip':        { high: 0xB8, low: 0xB3 },
+        'rnode_firmware_lora32v20_extled.zip': { high: 0xB8, low: 0xB3 },
+        'rnode_firmware_lora32v21.zip':        { high: 0xB9, low: 0xB4 },
+        'rnode_firmware_lora32v21_extled.zip': { high: 0xB9, low: 0xB4 },
+        'rnode_firmware_lora32v21_tcxo.zip':   { high: 0x09, low: 0x04 },
+        'rnode_firmware_heltec32v2.zip':       { high: 0xC9, low: 0xC4 },
+        'rnode_firmware_heltec32v3.zip':       { high: 0xCA, low: 0xC5 },
+        'rnode_firmware_heltec32v4pa.zip':     { high: 0xC8 },
+        'rnode_firmware_heltec_t114.zip':      { high: 0xC7, low: 0xC6 },
+        'rnode_firmware_tbeam.zip':            { high: 0xE9, low: 0xE4 },
+        'rnode_firmware_tbeam_sx1262.zip':     { high: 0xE8, low: 0xE3 },
+        'rnode_firmware_tbeam_supreme.zip':    { high: 0xDC, low: 0xDB },
+        'rnode_firmware_tdeck.zip':            { high: 0xD9, low: 0xD4 },
+        'rnode_firmware_techo.zip':            { high: 0x17, low: 0x16 },
+        'rnode_firmware_rak4631.zip':          { high: 0x12, low: 0x11 },
+        'rnode_firmware_rak4631_sx1280.zip':   { high: 0x14, low: 0x13 },
+        'rnode_firmware_opencom_xl.zip':       { high: 0x21 },
+        'rnode_firmware_xiao_esp32s3.zip':     { high: 0xDD, low: 0xDE }
+    };
+    var RNODE_BAND_ORDER = ['high', 'low', 'unsupported', 'unknown'];
 
     var provProductSel = document.getElementById('provisionProduct');
     var provModelSel   = document.getElementById('provisionModel');
@@ -5977,6 +6043,120 @@
     // boardManual: user explicitly asked to override auto-detection
     state.boardManual = false;
     state.rnodeTncConfig = false;
+
+    function modelRangeLabelFor(productByte, modelByte) {
+        var label = modelLabelFor(productByte, modelByte) || '';
+        var match = label.match(/(\d+(?:\.\d+)?-\d+(?:\.\d+)?)\s*(MHz|GHz)?/i);
+        if (!match) return null;
+        return match[1] + ' ' + (match[2] || 'MHz');
+    }
+
+    function rnodeBandLabelForModel(productByte, modelByte) {
+        var ident = { product: productByte, model: modelByte };
+        var band = bandForRnodeIdentity(ident);
+        var range = modelRangeLabelFor(productByte, modelByte);
+        if (band === 'low') return (range || '420-520 MHz') + ' (433 MHz boards)';
+        if (band === 'high') return (range || '850-950 MHz') + ' (868/915 MHz boards)';
+        if (band === 'unsupported') return (range || '2.4 GHz') + ' boards';
+        return modelLabelFor(productByte, modelByte) || 'Set exact board in Advanced options';
+    }
+
+    function rnodeBandShortLabel(option) {
+        if (!option) return null;
+        return option.shortLabel || option.label;
+    }
+
+    function rnodeBandShortLabelForModel(productByte, modelByte) {
+        var ident = { product: productByte, model: modelByte };
+        var band = bandForRnodeIdentity(ident);
+        var range = modelRangeLabelFor(productByte, modelByte);
+        if (band === 'low') return (range || '420-520 MHz') + ' / 433 MHz';
+        if (band === 'high') return (range || '850-950 MHz') + ' / 868/915 MHz';
+        if (band === 'unsupported') return range || '2.4 GHz';
+        return modelLabelFor(productByte, modelByte) || null;
+    }
+
+    function rnodeBandOptionsForVariant(name) {
+        var hint = VARIANT_HINTS[name];
+        if (!hint) return [];
+        var models = RNODE_VARIANT_BAND_MODELS[name];
+        var options = [];
+        if (models) {
+            RNODE_BAND_ORDER.forEach(function (key) {
+                if (models[key] == null) return;
+                options.push({
+                    key: key,
+                    product: hint.product,
+                    model: models[key],
+                    label: rnodeBandLabelForModel(hint.product, models[key]),
+                    shortLabel: rnodeBandShortLabelForModel(hint.product, models[key])
+                });
+            });
+        } else {
+            var fallbackBand = bandForRnodeIdentity(hint) || 'unknown';
+            options.push({
+                key: fallbackBand,
+                product: hint.product,
+                model: hint.model,
+                label: rnodeBandLabelForModel(hint.product, hint.model),
+                shortLabel: rnodeBandShortLabelForModel(hint.product, hint.model)
+            });
+        }
+        return options;
+    }
+
+    function selectedRnodeBandOption(name) {
+        var options = rnodeBandOptionsForVariant(name);
+        if (!options.length) return null;
+        var key = state.rnodeBand || (rnodeBandSelect && rnodeBandSelect.value);
+        for (var i = 0; i < options.length; i++) {
+            if (options[i].key === key) return options[i];
+        }
+        for (var j = 0; j < options.length; j++) {
+            if (options[j].key === 'high') return options[j];
+        }
+        return options[0];
+    }
+
+    function resolveRnodeVariantIdentity(name) {
+        var selected = selectedRnodeBandOption(name);
+        if (selected) return { product: selected.product, model: selected.model };
+        var hint = VARIANT_HINTS[name];
+        return hint ? { product: hint.product, model: hint.model } : null;
+    }
+
+    function populateRnodeBandSelect(name) {
+        if (!rnodeBandSelect) return;
+        if (!name) {
+            rnodeBandSelect.innerHTML = '<option value="">Choose a device variant first</option>';
+            rnodeBandSelect.disabled = true;
+            state.rnodeBand = null;
+            return;
+        }
+        var options = rnodeBandOptionsForVariant(name);
+        if (!options.length) {
+            rnodeBandSelect.innerHTML = '<option value="">Set exact board in Advanced options</option>';
+            rnodeBandSelect.disabled = true;
+            state.rnodeBand = null;
+            return;
+        }
+        var selected = selectedRnodeBandOption(name);
+        state.rnodeBand = selected.key;
+        rnodeBandSelect.innerHTML = options.map(function (opt) {
+            return '<option value="' + escapeHtml(opt.key) + '">' + escapeHtml(opt.label) + '</option>';
+        }).join('');
+        rnodeBandSelect.value = selected.key;
+        rnodeBandSelect.disabled = options.length < 2;
+    }
+
+    function updateRnodeReadyStatus() {
+        if (!rnodeStatus || !state.rnodeAsset || !state.rnodeAssetLabel) return;
+        var band = rnodeBandShortLabel(selectedRnodeBandOption(state.rnodeAssetName));
+        rnodeStatus.classList.add('is-ready');
+        rnodeStatus.textContent = '✓ ' + state.rnodeAssetLabel +
+            (band ? ' · ' + band : '') +
+            ' · ' + formatBytes(state.rnodeAsset.byteLength) + ' · ready to flash';
+    }
 
     function productLabelFor(byte) {
         for (var i = 0; i < RNODE_PRODUCTS.length; i++) {
@@ -6022,7 +6202,7 @@
     function hintProvisioningFromVariant(name) {
         if (!provProductSel) return;
         buildProductSelect();
-        var hint = VARIANT_HINTS[name];
+        var hint = resolveRnodeVariantIdentity(name);
         if (!hint) {
             updateProvisionBoardBadge();
             return;
@@ -6037,7 +6217,7 @@
 
     function updateProvisionBoardBadge() {
         if (!provBoard || !provBoardValue) return;
-        var hint = state.rnodeAssetName ? VARIANT_HINTS[state.rnodeAssetName] : null;
+        var hint = state.rnodeAssetName ? resolveRnodeVariantIdentity(state.rnodeAssetName) : null;
         if (state.boardManual) {
             var prodByte = parseInt(provProductSel && provProductSel.value, 10);
             var modByte  = parseInt(provModelSel && provModelSel.value, 10);
@@ -6065,8 +6245,8 @@
             // If we have an auto-detect hint, seed the dropdowns from it so the
             // user starts editing from a sensible value rather than the first
             // entry in the list.
-            var hint = state.rnodeAssetName ? VARIANT_HINTS[state.rnodeAssetName] : null;
-            if (hint && provProductSel && !provProductSel.value) {
+            var hint = state.rnodeAssetName ? resolveRnodeVariantIdentity(state.rnodeAssetName) : null;
+            if (hint && provProductSel) {
                 provProductSel.value = String(hint.product);
                 populateModelsFor(hint.product);
                 provModelSel.value = String(hint.model);
@@ -6078,7 +6258,7 @@
 
     function updateProvisionVisibility() {
         if (!provOption) return;
-        // The EEPROM pill and repair tools are only meaningful on the custom
+        // The EEPROM pill and RNode tools are only meaningful on the custom
         // path; hide on ratdeck / cardputer presets where Ratspeak firmware
         // is self-contained.
         var onCustom = state.device === 'custom';
@@ -6097,8 +6277,6 @@
         provToggle.addEventListener('change', function () {
             state.rnodeProvision = provToggle.checked;
             if (provExpand) provExpand.hidden = !provToggle.checked;
-            var flashAdvanced = document.getElementById('flashAdvanced');
-            if (flashAdvanced && provToggle.checked) flashAdvanced.open = true;
             if (provToggle.checked) {
                 buildProductSelect();
                 updateProvisionBoardBadge();
@@ -6716,7 +6894,7 @@
         }
         logMessage('Firmware SHA-256: ' + bytesToHex(fwHash).slice(0, 16) + '...', '');
         await sendRnodeFirmwareHash(session, fwHash);
-        logMessage('Firmware hash written; device may reset itself.', 'log-green');
+        logMessage('Firmware hash written; no post-reset readback will be attempted.', 'log-green');
         return true;
     }
 
@@ -6808,6 +6986,8 @@
         var checksum = md5Bytes(info);
         var signature = new Uint8Array(128); // blank — unsigned provisioning
         var settleMs = options && options.settleMs != null ? options.settleMs : RNODE_POST_FLASH_BOOT_WAIT_MS;
+        var wroteFirmwareHash = false;
+        var tncConfigSaved = false;
 
         await withRnodeSession(logMessage, settleMs, async function (session) {
             var rom = null;
@@ -6849,12 +7029,32 @@
                 }
             }
 
-            await writeLoadedFirmwareHash(session, logMessage);
+            if (state.rnodeTncConfig) {
+                if (setProgress) setProgress(96, 'Saving TNC config...');
+                var profile = resolveSelectedTncProfile();
+                logMessage('TNC profile: ' + profile.profileLabel + ' for ' + profile.label + '.', '');
+                await sendRnodeTncConfig(session, profile, logMessage);
+                tncConfigSaved = true;
+                logMessage('Standalone TNC config was sent.', 'log-green');
+            }
+
+            if (setProgress) setProgress(97, 'Writing firmware hash...');
+            wroteFirmwareHash = await writeLoadedFirmwareHash(session, logMessage);
         });
 
-        logMessage('Verifying firmware hash against running image...', '');
-        await ensureRnodeFirmwareHashMatches(logMessage, RNODE_POST_FLASH_BOOT_WAIT_MS);
-        logMessage('RNode identity and firmware hash are verified.', 'log-green');
+        if (!wroteFirmwareHash) {
+            logMessage('RNode identity is provisioned. Firmware hash was not changed because no app hash was available.', 'log-orange');
+            return {
+                firmwareHashWritten: false,
+                tncConfigSaved: tncConfigSaved
+            };
+        }
+
+        logMessage('Firmware hash written. Skipping post-setup readback; reboot the RNode before using it in Ratspeak.', 'log-green');
+        return {
+            firmwareHashWritten: true,
+            tncConfigSaved: tncConfigSaved
+        };
     }
 
     // Resolve which RNode product/model byte pair to write. Honors a user
@@ -6868,7 +7068,7 @@
                 model:   parseInt(provModelSel.value, 10)
             };
         }
-        var hint = state.rnodeAssetName ? VARIANT_HINTS[state.rnodeAssetName] : null;
+        var hint = state.rnodeAssetName ? resolveRnodeVariantIdentity(state.rnodeAssetName) : null;
         if (hint) return { product: hint.product, model: hint.model };
         return null;
     }
@@ -7044,10 +7244,10 @@
         if (!meta) return;
         var parts = [];
         if (state.eraseAll) parts.push('Full erase on');
-        if (state.rnodeProvision) parts.push('EEPROM provisioning on');
+        if (state.rnodeProvision) parts.push('RNode setup on');
         if (state.rnodeTncConfig) {
             var freq = parseInt(tncFrequencySelect && tncFrequencySelect.value, 10);
-            parts.push(freq ? ('TNC ' + formatHzMhz(freq)) : 'TNC config on');
+            parts.push(freq ? ('Standalone TNC ' + formatHzMhz(freq)) : 'Standalone TNC on');
         }
         meta.textContent = parts.length ? parts.join(' · ') : 'Default flash';
     }
@@ -7062,17 +7262,17 @@
             setFlowItem('flowFirmware', 'is-done', 'Written');
             if (state.rnodeSetupIssue) {
                 var isTncIssue = state.rnodeSetupIssueKind === 'tnc';
-                setFlowItem('flowFlash', 'is-warning', isTncIssue ? 'TNC config' : 'Repair');
+                setFlowItem('flowFlash', 'is-warning', isTncIssue ? 'TNC config' : 'RNode setup');
                 if (noteEl) {
                     noteEl.textContent = isTncIssue
-                        ? 'Firmware and RNode hash are verified. Standalone TNC config still needs repair.'
-                        : 'Firmware was written, but RNode setup needs repair before the device is ready.';
+                        ? 'Firmware was written and RNode setup was sent. Save standalone TNC config only if you need generic KISS mode.'
+                        : 'Firmware was written, but RNode setup needs attention.';
                 }
             } else {
                 setFlowItem('flowFlash', 'is-done', 'Complete');
                 if (noteEl) {
                     noteEl.textContent = state.rnodeProvision && state.device === 'custom'
-                        ? 'Firmware flash complete. RNode identity and firmware hash are verified.'
+                        ? 'Firmware flash complete. RNode setup was written; reboot the device before using it in Ratspeak.'
                         : 'Flash complete. Reboot the device before using it on the mesh.';
                 }
             }
@@ -7519,6 +7719,7 @@
         var needsRnodeSetup = state.rnodeProvision && state.device === 'custom';
         var rnodeSetupIssue = null;
         var rnodeSetupIssueKind = null;
+        var rnodeProvisionResult = null;
 
         try {
             // 1. Load esptool-js
@@ -7583,9 +7784,16 @@
                 }
             });
 
-            // 8. Hard reset to reboot into firmware
-            setProgress(state.rnodeProvision ? 80 : 95, 'Resetting device...');
-            await esploader.after('hard_reset');
+            // 8. Reboot only when RNode provisioning needs the flashed firmware
+            // running immediately. Otherwise leave reset/manual reconnect to the user.
+            if (needsRnodeSetup) {
+                setProgress(92, 'Booting RNode firmware...');
+                logMessage('Restarting into RNode firmware for setup...', 'log-orange');
+                await esploader.after('hard_reset');
+            } else {
+                setProgress(95, 'Flash written');
+                logMessage('Flash write complete; skipping automatic reboot.', 'log-green');
+            }
 
             // 9. Disconnect transport
             try { await transport.disconnect(); } catch(e) {}
@@ -7594,23 +7802,12 @@
 
             // 10. (Optional) RNode EEPROM + firmware-hash provisioning
             if (state.rnodeProvision && state.device === 'custom') {
-                setProgress(85, 'Provisioning RNode EEPROM...');
+                setProgress(94, 'Provisioning RNode EEPROM...');
                 logMessage('Beginning RNode provisioning sequence...', 'log-orange');
                 try {
-                    await runProvisioning(logMessage, setProgress);
+                    rnodeProvisionResult = await runProvisioning(logMessage, setProgress);
                     if (state.rnodeTncConfig) {
-                        setProgress(92, 'Saving RNode radio config...');
-                        logMessage('Saving standalone TNC config after firmware-hash reset...', 'log-orange');
-                        try {
-                            await saveSelectedTncConfig(logMessage, RNODE_POST_FLASH_BOOT_WAIT_MS);
-                            setProgress(98, 'Radio config saved');
-                        } catch (confErr) {
-                            rnodeSetupIssue = 'TNC config save failed: ' + (confErr.message || confErr);
-                            rnodeSetupIssueKind = 'tnc';
-                            logMessage(rnodeSetupIssue, 'log-red');
-                            logMessage('Firmware was flashed and provisioned; use "Save TNC config" in Repair tools if you need standalone KISS mode.', 'log-orange');
-                            setProgress(98, 'Provisioned');
-                        }
+                        setProgress(98, rnodeProvisionResult && rnodeProvisionResult.tncConfigSaved ? 'Provisioned + TNC config' : 'Provisioned');
                     } else {
                         setProgress(98, 'Provisioned');
                     }
@@ -7618,7 +7815,7 @@
                     rnodeSetupIssue = 'Provisioning failed: ' + (provErr.message || provErr);
                     rnodeSetupIssueKind = 'provision';
                     logMessage(rnodeSetupIssue, 'log-red');
-                    logMessage('Firmware was flashed; use the Repair tools in Advanced options to retry provisioning.', 'log-orange');
+                    logMessage('Firmware was flashed; use RNode tools in Advanced options to retry provisioning if the device does not boot cleanly.', 'log-orange');
                 }
             }
 
@@ -7626,16 +7823,16 @@
                 state.rnodeSetupIssue = rnodeSetupIssue;
                 state.rnodeSetupIssueKind = rnodeSetupIssueKind;
                 if (rnodeSetupIssueKind === 'tnc') {
-                    setProgress(100, 'TNC config needs repair');
-                    logMessage('Firmware flash complete. RNode identity and firmware hash are verified; standalone TNC config was not saved.', 'log-orange');
+                    setProgress(100, 'TNC config not saved');
+                    logMessage('Firmware flash complete. RNode setup was written; standalone TNC config was not saved.', 'log-orange');
                 } else {
-                    setProgress(100, 'RNode setup needs repair');
-                    logMessage('Firmware flash complete, but RNode setup needs attention before the device is ready.', 'log-orange');
+                    setProgress(100, 'RNode setup needs attention');
+                    logMessage('Firmware flash complete, but RNode setup needs attention.', 'log-orange');
                 }
                 showRnodeSetupWarning(rnodeSetupIssue, rnodeSetupIssueKind);
             } else if (needsRnodeSetup) {
-                setProgress(100, 'Firmware hash verified');
-                logMessage('Firmware flash complete. RNode identity and firmware hash are verified.', 'log-green');
+                setProgress(100, 'Provisioned');
+                logMessage('Firmware flash complete. RNode setup was written; reboot the device before using it in Ratspeak.', 'log-green');
             } else {
                 setProgress(100, 'Complete');
                 logMessage((state.device === 'custom' ? 'Firmware flash complete.' : 'Ratspeak flash complete.') + ' Reboot your device now.', 'log-green');
@@ -7710,10 +7907,10 @@
 
         iconEl.className = 'flash-result__icon flash-result__icon--warning';
         svgEl.innerHTML = '<path d="M12 8v5"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="9"/>';
-        titleEl.textContent = isTncIssue ? 'Firmware Ready, TNC Config Not Saved' : 'Firmware Flashed, Setup Needs Repair';
+        titleEl.textContent = isTncIssue ? 'Firmware Ready, TNC Config Not Saved' : 'Firmware Flashed, Setup Needs Attention';
         descEl.textContent = isTncIssue
-            ? 'RNode identity and firmware hash were verified. Use Save TNC config in Repair tools only if you need standalone KISS mode. Last error: ' + issue
-            : 'Firmware was written, but RNode provisioning or hash verification did not finish. Use Repair tools below before using the device. Last error: ' + issue;
+            ? 'RNode setup was written. Use Save TNC config in RNode tools only if you need standalone KISS mode. Last error: ' + issue
+            : 'Firmware was written, but RNode provisioning did not finish. Use RNode tools below if the device does not boot cleanly. Last error: ' + issue;
         resultEl.classList.add('active');
     }
 
