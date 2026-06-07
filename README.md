@@ -1,16 +1,16 @@
 # Ratspeak Website
 
-Source for [ratspeak.org](https://ratspeak.org) — the public website and documentation for the Ratspeak project.
+Source for [ratspeak.org](https://ratspeak.org) — the public website for the Ratspeak project. Live documentation is published from the separate docs portal at [docs.ratspeak.org](https://docs.ratspeak.org).
 
-## Building Docs
+## Legacy Docs Data
 
-After editing any markdown in `docs/content/` or `docs/nav.json`:
+The old custom docs content is retained under `docs/` as archival/reference material. If you need to regenerate its embedded content/search data:
 
 ```bash
 python3 build-docs.py
 ```
 
-This regenerates `docs/js/docs-content.js`, `docs/search-index.json`, and patches the inline data in `docs.html`.
+This regenerates `docs/js/docs-content.js` and `docs/search-index.json`. The public `docs.html` page is now a redirect to `https://docs.ratspeak.org/` and is not patched by this script.
 
 ## License
 

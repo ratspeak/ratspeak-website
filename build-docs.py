@@ -5,8 +5,6 @@ build-docs.py — Regenerate docs-content.js and search-index.json from markdown
 Walks docs/content/ for all .md files, generates:
   1. docs/js/docs-content.js  (PAGES object for DocsContent)
   2. docs/search-index.json   (search index for DocsSearch)
-
-Also prints NAV_DATA and SEARCH_INDEX JSON for pasting into docs.html.
 """
 
 import json
@@ -218,34 +216,6 @@ def main():
     with open(OUTPUT_SEARCH, "w", encoding="utf-8") as f:
         f.write(search_json)
     print(f"Generated {OUTPUT_SEARCH} ({len(search_index)} entries)")
-
-    # Auto-patch docs.html inline NAV_DATA and SEARCH_INDEX
-    docs_html_path = os.path.join(os.path.dirname(__file__), "docs.html")
-    nav_inline = json.dumps(nav_data, separators=(",", ":"), ensure_ascii=False)
-    search_inline = json.dumps(search_index, ensure_ascii=False)
-
-    if os.path.exists(docs_html_path):
-        with open(docs_html_path, "r", encoding="utf-8") as f:
-            html = f.read()
-
-        # Replace inline NAV_DATA
-        html = re.sub(
-            r"^(\s*)var NAV_DATA = .*$",
-            rf"\1var NAV_DATA = {nav_inline};",
-            html,
-            flags=re.MULTILINE,
-        )
-        # Replace inline SEARCH_INDEX
-        html = re.sub(
-            r"^(\s*)var SEARCH_INDEX = .*$",
-            rf"\1var SEARCH_INDEX = {search_inline};",
-            html,
-            flags=re.MULTILINE,
-        )
-
-        with open(docs_html_path, "w", encoding="utf-8") as f:
-            f.write(html)
-        print(f"Patched {docs_html_path} (inline NAV_DATA + SEARCH_INDEX)")
 
 
 if __name__ == "__main__":
