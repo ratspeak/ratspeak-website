@@ -5057,6 +5057,8 @@
         rnodeAsset: null,
         rnodeAssetName: null,
         rnodeAssetLabel: null,
+        rnodeFlashStrategy: null,
+        rnodePlatform: null,
         rnodeBand: null,
         rnodeVersion: null,
         rnodeProvision: false,
@@ -5190,6 +5192,8 @@
         state.rnodeAsset = null;
         state.rnodeAssetName = null;
         state.rnodeAssetLabel = null;
+        state.rnodeFlashStrategy = null;
+        state.rnodePlatform = null;
         state.rnodeBand = null;
         state.rnodeVersion = null;
         state.rnodeProvision = false;
@@ -5571,6 +5575,12 @@
         state.rnodeProvision = false;
         state.rnodeSetupIssue = null;
         state.rnodeSetupIssueKind = null;
+        state.rnodeAsset = null;
+        state.rnodeAssetName = null;
+        state.rnodeAssetLabel = null;
+        state.rnodeFlashStrategy = null;
+        state.rnodePlatform = null;
+        state.rnodeBand = null;
         state.firmwareAppBytes = null;
         state.flashComplete = false;
         document.getElementById('eraseToggle').checked = false;
@@ -5743,6 +5753,8 @@
             state.rnodeAsset = null;
             state.rnodeAssetName = null;
             state.rnodeAssetLabel = null;
+            state.rnodeFlashStrategy = null;
+            state.rnodePlatform = null;
             state.rnodeBand = null;
             state.firmwareAppBytes = null;
             state.firmwareReady = !!state.customFile;
@@ -5776,10 +5788,19 @@
         return state.rnodeVersion ? '&version=' + encodeURIComponent(state.rnodeVersion) : '';
     }
 
+    function selectedFlashStrategy() {
+        if (state.device === 'custom' && state.rnodeAssetName) {
+            return state.rnodeFlashStrategy || 'esp32-esptool';
+        }
+        return 'esp32-esptool';
+    }
+
     function resetRnodeSelection(message) {
         state.rnodeAsset = null;
         state.rnodeAssetName = null;
         state.rnodeAssetLabel = null;
+        state.rnodeFlashStrategy = null;
+        state.rnodePlatform = null;
         state.rnodeBand = null;
         state.firmwareAppBytes = null;
         state.firmwareReady = false;
@@ -5865,6 +5886,8 @@
             rnodeStatus.textContent = 'Downloading ' + name + '…';
             state.firmwareReady = false;
             state.firmwareAppBytes = null;
+            state.rnodeFlashStrategy = null;
+            state.rnodePlatform = null;
             updateFlashBtn();
             try {
                 populateRnodeBandSelect(name);
@@ -5873,6 +5896,8 @@
                 if (!infoResp.ok) throw new Error('Info fetch failed');
                 var meta = await infoResp.json();
                 state.rnodeVersion = meta.version || state.rnodeVersion;
+                state.rnodeFlashStrategy = meta.flashStrategy || 'esp32-esptool';
+                state.rnodePlatform = meta.platform || 'esp32';
                 rnodeStatus.textContent = 'Downloading ' + meta.label + ' (' + formatBytes(meta.size) + ')…';
                 var binResp = await fetch('/api/firmware?source=rnode&asset=' + encodeURIComponent(name) + rnodeVersionQuery());
                 if (!binResp.ok) throw new Error('Download failed');
@@ -5896,6 +5921,8 @@
                 state.rnodeAsset = null;
                 state.firmwareAppBytes = null;
                 state.rnodeAssetLabel = null;
+                state.rnodeFlashStrategy = null;
+                state.rnodePlatform = null;
                 state.firmwareReady = false;
             }
             updateProvisionVisibility();
@@ -6791,12 +6818,15 @@
         return new Uint8Array(buf);
     }
 
-    // Compute the ESP32 firmware partition hash, mirroring
-    // rnodeconf.get_partition_hash. ESP32 RNode app binaries embed
-    // SHA-256(file[0:-32]) at file[-32:]. If the embedded digest is absent
-    // or invalid, we intentionally return null instead of writing a guessed
-    // target hash that will leave the device in "Firmware Corrupt".
+    // Compute the firmware partition hash, mirroring rnodeconf.get_partition_hash.
+    // ESP32 RNode app binaries embed SHA-256(file[0:-32]) at file[-32:].
+    // nRF52 DFU app binaries do not embed the digest, so rnodeconf uses
+    // SHA-256(file). If an ESP32 embedded digest is absent or invalid, we
+    // intentionally return null instead of writing a guessed target hash.
     async function computeFirmwareHash(bytes) {
+        if (selectedFlashStrategy() === 'nrf52-dfu') {
+            return await sha256(bytes);
+        }
         if (bytes.length > 32) {
             var calc = await sha256(bytes.slice(0, -32));
             var trailing = bytes.slice(-32);
@@ -6977,7 +7007,7 @@
         if (ident == null) throw new Error('No board identified — pick an RNode firmware variant or set the exact board/band manually.');
         var product = ident.product & 0xFF;
         var model   = ident.model   & 0xFF;
-        var hwRev   = 1; // Liam's flasher uses 1 as the default; users never edited this
+        var hwRev   = 1; // Default RNode hardware revision value.
         var rnd = new Uint8Array(4);
         crypto.getRandomValues(rnd);
         var serialBytes = rnd;
@@ -7523,6 +7553,270 @@
         };
     }
 
+    // Nordic serial DFU transport for nRF52 RNode packages. Supports
+    // application-only DFU release zips.
+    function Nrf52DfuFlasher(serialPort, options) {
+        this.serialPort = serialPort;
+        this.options = options || {};
+        this.sequenceNumber = 0;
+        this.sdSize = 0;
+        this.totalSize = 0;
+        this.DFU_TOUCH_BAUD = 1200;
+        this.FLASH_BAUD = 115200;
+        this.SERIAL_PORT_OPEN_WAIT_MS = 100;
+        this.TOUCH_RESET_WAIT_MS = 1800;
+        this.HEX_TYPE_APPLICATION = 4;
+        this.DFU_INIT_PACKET = 1;
+        this.DFU_START_PACKET = 3;
+        this.DFU_DATA_PACKET = 4;
+        this.DFU_STOP_DATA_PACKET = 5;
+        this.DATA_INTEGRITY_CHECK_PRESENT = 1;
+        this.RELIABLE_PACKET = 1;
+        this.HCI_PACKET_TYPE = 14;
+        this.FLASH_PAGE_SIZE = 4096;
+        this.FLASH_PAGE_ERASE_TIME = 0.0897;
+        this.FLASH_WORD_WRITE_TIME = 0.000100;
+        this.FLASH_PAGE_WRITE_TIME = (this.FLASH_PAGE_SIZE / 4) * this.FLASH_WORD_WRITE_TIME;
+        this.DFU_PACKET_MAX_SIZE = 512;
+    }
+
+    Nrf52DfuFlasher.prototype.log = function (message, cssClass) {
+        if (this.options.log) this.options.log(message, cssClass || '');
+    };
+
+    Nrf52DfuFlasher.prototype.setProgress = function (pct, status) {
+        if (this.options.setProgress) this.options.setProgress(pct, status);
+    };
+
+    Nrf52DfuFlasher.prototype.closePort = async function () {
+        try { await this.serialPort.close(); } catch (e) { /* already closed */ }
+    };
+
+    Nrf52DfuFlasher.prototype.openPort = async function (baudRate) {
+        await this.closePort();
+        var opts = {
+            baudRate: baudRate,
+            dataBits: 8,
+            parity: 'none',
+            stopBits: 1,
+            flowControl: 'none',
+            bufferSize: 4096
+        };
+        try {
+            await this.serialPort.open(opts);
+            return;
+        } catch (firstErr) {
+            if (baudRate !== this.FLASH_BAUD) throw firstErr;
+            var lastErr = firstErr;
+            for (var attempt = 0; attempt < 12; attempt++) {
+                var ports = [this.serialPort].concat(await authorizedSerialPorts());
+                for (var i = 0; i < ports.length; i++) {
+                    var port = ports[i];
+                    if (ports.indexOf(port) !== i) continue;
+                    try { await port.close(); } catch (e) { /* already closed */ }
+                    try {
+                        await port.open(opts);
+                        this.serialPort = port;
+                        state.port = port;
+                        if (port !== ports[0]) {
+                            this.log('Reacquired serial port via ' + serialPortLabel(port) + '.', 'log-orange');
+                        }
+                        return;
+                    } catch (e2) {
+                        lastErr = e2;
+                    }
+                }
+                await sleepMs(500);
+            }
+            throw lastErr;
+        }
+    };
+
+    Nrf52DfuFlasher.prototype.write = async function (bytes) {
+        var writer = this.serialPort.writable.getWriter();
+        try {
+            await writer.write(new Uint8Array(bytes));
+        } finally {
+            writer.releaseLock();
+        }
+    };
+
+    Nrf52DfuFlasher.prototype.enterDfuMode = async function () {
+        this.log('Preparing device for firmware update...', 'log-orange');
+        await this.openPort(this.DFU_TOUCH_BAUD);
+        await sleepMs(this.SERIAL_PORT_OPEN_WAIT_MS);
+        await this.closePort();
+        await sleepMs(this.TOUCH_RESET_WAIT_MS);
+    };
+
+    Nrf52DfuFlasher.prototype.calcCrc16 = function (binaryData, crc) {
+        crc = crc == null ? 0xffff : crc;
+        for (var i = 0; i < binaryData.length; i++) {
+            crc = ((crc >> 8) & 0x00FF) | ((crc << 8) & 0xFF00);
+            crc ^= binaryData[i];
+            crc ^= (crc & 0x00FF) >> 4;
+            crc ^= (crc << 8) << 4;
+            crc ^= ((crc & 0x00FF) << 4) << 1;
+        }
+        return crc & 0xFFFF;
+    };
+
+    Nrf52DfuFlasher.prototype.int16ToBytes = function (num) {
+        return [
+            num & 0x00FF,
+            (num & 0xFF00) >> 8
+        ];
+    };
+
+    Nrf52DfuFlasher.prototype.int32ToBytes = function (num) {
+        return [
+            num & 0x000000ff,
+            (num & 0x0000ff00) >> 8,
+            (num & 0x00ff0000) >> 16,
+            (num & 0xff000000) >> 24
+        ];
+    };
+
+    Nrf52DfuFlasher.prototype.slipEncodeEscChars = function (dataIn) {
+        var result = [];
+        for (var i = 0; i < dataIn.length; i++) {
+            var chr = dataIn[i];
+            if (chr === 0xC0) {
+                result.push(0xDB, 0xDC);
+            } else if (chr === 0xDB) {
+                result.push(0xDB, 0xDD);
+            } else {
+                result.push(chr);
+            }
+        }
+        return result;
+    };
+
+    Nrf52DfuFlasher.prototype.createSlipHeader = function (seq, dip, rp, pktType, pktLen) {
+        var ints = [0, 0, 0, 0];
+        ints[0] = seq | (((seq + 1) % 8) << 3) | (dip << 6) | (rp << 7);
+        ints[1] = pktType | ((pktLen & 0x000F) << 4);
+        ints[2] = (pktLen & 0x0FF0) >> 4;
+        ints[3] = (~(ints[0] + ints[1] + ints[2]) + 1) & 0xFF;
+        return ints;
+    };
+
+    Nrf52DfuFlasher.prototype.createHciPacketFromFrame = function (frame) {
+        this.sequenceNumber = (this.sequenceNumber + 1) % 8;
+        var data = this.createSlipHeader(
+            this.sequenceNumber,
+            this.DATA_INTEGRITY_CHECK_PRESENT,
+            this.RELIABLE_PACKET,
+            this.HCI_PACKET_TYPE,
+            frame.length
+        ).concat(frame);
+        var crc = this.calcCrc16(new Uint8Array(data), 0xffff);
+        data.push(crc & 0xFF, (crc & 0xFF00) >> 8);
+        return [0xC0].concat(this.slipEncodeEscChars(data), [0xC0]);
+    };
+
+    Nrf52DfuFlasher.prototype.getEraseWaitTime = function () {
+        return Math.max(0.5, ((this.totalSize / this.FLASH_PAGE_SIZE) + 1) * this.FLASH_PAGE_ERASE_TIME);
+    };
+
+    Nrf52DfuFlasher.prototype.createImageSizePacket = function (softdeviceSize, bootloaderSize, appSize) {
+        return this.int32ToBytes(softdeviceSize || 0)
+            .concat(this.int32ToBytes(bootloaderSize || 0))
+            .concat(this.int32ToBytes(appSize || 0));
+    };
+
+    Nrf52DfuFlasher.prototype.sendStartDfu = async function (mode, softdeviceSize, bootloaderSize, appSize) {
+        var frame = this.int32ToBytes(this.DFU_START_PACKET)
+            .concat(this.int32ToBytes(mode))
+            .concat(this.createImageSizePacket(softdeviceSize, bootloaderSize, appSize));
+        await this.write(this.createHciPacketFromFrame(frame));
+        this.sdSize = softdeviceSize || 0;
+        this.totalSize = this.sdSize + (bootloaderSize || 0) + (appSize || 0);
+        await sleepMs(this.getEraseWaitTime() * 1000);
+    };
+
+    Nrf52DfuFlasher.prototype.sendInitPacket = async function (initPacket) {
+        var frame = this.int32ToBytes(this.DFU_INIT_PACKET)
+            .concat(Array.from(initPacket))
+            .concat(this.int16ToBytes(0x0000));
+        await this.write(this.createHciPacketFromFrame(frame));
+    };
+
+    Nrf52DfuFlasher.prototype.sendFirmware = async function (firmware) {
+        var packetCount = Math.ceil(firmware.length / this.DFU_PACKET_MAX_SIZE);
+        var packetsSent = 0;
+        for (var offset = 0; offset < firmware.length; offset += this.DFU_PACKET_MAX_SIZE) {
+            var chunk = firmware.slice(offset, offset + this.DFU_PACKET_MAX_SIZE);
+            var frame = this.int32ToBytes(this.DFU_DATA_PACKET).concat(Array.from(chunk));
+            await this.write(this.createHciPacketFromFrame(frame));
+            await sleepMs(this.FLASH_PAGE_WRITE_TIME * 1000);
+            packetsSent++;
+            this.setProgress(25 + (packetsSent / packetCount) * 65, 'Writing firmware packet ' + packetsSent + '/' + packetCount + '...');
+        }
+        await this.write(this.createHciPacketFromFrame(this.int32ToBytes(this.DFU_STOP_DATA_PACKET)));
+    };
+
+    Nrf52DfuFlasher.prototype.flashApplication = async function (firmware, initPacket) {
+        await this.openPort(this.FLASH_BAUD);
+        await sleepMs(this.SERIAL_PORT_OPEN_WAIT_MS);
+        this.log('Starting firmware update...', '');
+        this.setProgress(18, 'Starting firmware update...');
+        await this.sendStartDfu(this.HEX_TYPE_APPLICATION, 0, 0, firmware.length);
+        this.log('Sending init packet...', '');
+        this.setProgress(22, 'Sending init packet...');
+        await this.sendInitPacket(initPacket);
+        this.log('Writing application image (' + formatBytes(firmware.length) + ')...', '');
+        await this.sendFirmware(firmware);
+    };
+
+    async function prepareNrf52DfuPackage(zipBuffer, logMessage) {
+        var zip = await window.JSZip.loadAsync(zipBuffer);
+        var manifestEntry = findManifestFile(zip);
+        if (!manifestEntry) throw new Error('Firmware package is missing manifest.json');
+        var manifestDir = zipDirname(manifestEntry.path);
+        var manifest = JSON.parse(await manifestEntry.file.async('string'));
+        var app = manifest && manifest.manifest && manifest.manifest.application;
+        if (!app || !app.bin_file || !app.dat_file) {
+            throw new Error('Firmware package does not contain an application image');
+        }
+        var binFile = findZipFile(zip, app.bin_file, manifestDir);
+        var datFile = findZipFile(zip, app.dat_file, manifestDir);
+        if (!binFile) throw new Error('Firmware package missing ' + app.bin_file);
+        if (!datFile) throw new Error('Firmware package missing ' + app.dat_file);
+        var firmware = await binFile.async('uint8array');
+        var initPacket = await datFile.async('uint8array');
+        state.firmwareAppBytes = firmware;
+        logMessage('Firmware package: ' + app.bin_file + ' (' + formatBytes(firmware.length) + ')', '');
+        logMessage('  init packet: ' + app.dat_file + ' (' + formatBytes(initPacket.length) + ')', '');
+        return { firmware: firmware, initPacket: initPacket };
+    }
+
+    async function runNrf52DfuFlash(logMessage, setProgress) {
+        if (!state.port) throw new Error('Serial port unavailable');
+        if (!state.rnodeAsset) throw new Error('No firmware package is loaded');
+        if (state.eraseAll) {
+            logMessage('Full erase is not available for this update path; flashing application update only.', 'log-orange');
+        }
+        setProgress(5, 'Preparing firmware package...');
+        var prepared = await prepareNrf52DfuPackage(state.rnodeAsset, logMessage);
+        var flasher = new Nrf52DfuFlasher(state.port, {
+            log: logMessage,
+            setProgress: setProgress
+        });
+        try {
+            setProgress(10, 'Preparing device...');
+            await flasher.enterDfuMode();
+            setProgress(16, 'Opening serial...');
+            await flasher.flashApplication(prepared.firmware, prepared.initPacket);
+            setProgress(92, 'Waiting for RNode reboot...');
+            logMessage('Firmware transfer complete; waiting for RNode firmware to boot...', 'log-green');
+            await flasher.closePort();
+            await sleepMs(1800);
+        } finally {
+            await flasher.closePort();
+        }
+    }
+
     // ── Prepare flash file array from ZIP or single bin ─
     //
     // Layered fallback for custom .zip uploads (in priority order):
@@ -7730,83 +8024,88 @@
         var rnodeProvisionResult = null;
 
         try {
-            // 1. Load esptool-js
-            setProgress(2, 'Loading esptool...');
-            logMessage('Loading esptool-js...', 'log-orange');
-            var esptool = await loadEsptool();
-            logMessage('esptool-js loaded', 'log-green');
-
-            // 2. Prepare firmware parts from ZIP (or single bin for custom)
-            setProgress(5, 'Preparing firmware...');
-            var prepared = await prepareFileArray(logMessage);
-
-            // 3. Create Transport from the raw serial port
-            setProgress(8, 'Connecting to bootloader...');
-            logMessage('Creating serial transport...', '');
-            var transport = new esptool.Transport(state.port);
-            state.transport = transport;
-
-            // 4. Create ESPLoader
-            var terminal = createTerminal();
-            var esploader = new esptool.ESPLoader({
-                transport: transport,
-                baudrate: 115200,
-                terminal: terminal,
-                romBaudrate: 115200,
-                enableTracing: false
-            });
-            state.esploader = esploader;
-
-            // 5. Connect to bootloader (enters download mode, detects chip, uploads stub)
-            setProgress(10, 'Entering bootloader...');
-            logMessage('Connecting to ESP32 bootloader...', 'log-orange');
-            var chipName = await esploader.main();
-            logMessage('Chip detected: ' + chipName, 'log-green');
-
-            // 6. Validate chip for known devices
-            if (state.device === 'tdeck' || state.device === 'cardputer') {
-                var chipLower = chipName.toLowerCase();
-                if (!chipLower.includes('esp32-s3') && !chipLower.includes('esp32s3')) {
-                    throw new Error('Expected ESP32-S3 for ' + DEVICES[state.device].name + ', but detected ' + chipName + '. Please check your device.');
-                }
-                logMessage('Chip verified: ESP32-S3', 'log-green');
-            }
-
-            // 7. Write flash — separate parts at individual addresses
-            setProgress(15, 'Writing firmware...');
-            if (state.eraseAll) {
-                logMessage('Full erase enabled — wiping all memory...', 'log-orange');
-            }
-            logMessage('Flashing ' + prepared.fileArray.length + ' part(s)...', '');
-
-            await esploader.writeFlash({
-                fileArray: prepared.fileArray,
-                flashSize: prepared.flashOptions.flashSize,
-                flashMode: prepared.flashOptions.flashMode,
-                flashFreq: prepared.flashOptions.flashFreq,
-                eraseAll: state.eraseAll,
-                compress: true,
-                reportProgress: function(fileIndex, written, total) {
-                    var pct = 15 + (written / total) * 75;
-                    setProgress(pct, 'Writing part ' + (fileIndex + 1) + '/' + prepared.fileArray.length + '...');
-                }
-            });
-
-            // 8. Reboot only when RNode provisioning needs the flashed firmware
-            // running immediately. Otherwise leave reset/manual reconnect to the user.
-            if (needsRnodeSetup) {
-                setProgress(92, 'Booting RNode firmware...');
-                logMessage('Restarting into RNode firmware for setup...', 'log-orange');
-                await esploader.after('hard_reset');
+            var flashStrategy = selectedFlashStrategy();
+            if (flashStrategy === 'nrf52-dfu') {
+                await runNrf52DfuFlash(logMessage, setProgress);
             } else {
-                setProgress(95, 'Flash written');
-                logMessage('Flash write complete; skipping automatic reboot.', 'log-green');
-            }
+                // 1. Load esptool-js
+                setProgress(2, 'Loading esptool...');
+                logMessage('Loading esptool-js...', 'log-orange');
+                var esptool = await loadEsptool();
+                logMessage('esptool-js loaded', 'log-green');
 
-            // 9. Disconnect transport
-            try { await transport.disconnect(); } catch(e) {}
-            state.transport = null;
-            state.esploader = null;
+                // 2. Prepare firmware parts from ZIP (or single bin for custom)
+                setProgress(5, 'Preparing firmware...');
+                var prepared = await prepareFileArray(logMessage);
+
+                // 3. Create Transport from the raw serial port
+                setProgress(8, 'Connecting to bootloader...');
+                logMessage('Creating serial transport...', '');
+                var transport = new esptool.Transport(state.port);
+                state.transport = transport;
+
+                // 4. Create ESPLoader
+                var terminal = createTerminal();
+                var esploader = new esptool.ESPLoader({
+                    transport: transport,
+                    baudrate: 115200,
+                    terminal: terminal,
+                    romBaudrate: 115200,
+                    enableTracing: false
+                });
+                state.esploader = esploader;
+
+                // 5. Connect to bootloader (enters download mode, detects chip, uploads stub)
+                setProgress(10, 'Entering bootloader...');
+                logMessage('Connecting to ESP32 bootloader...', 'log-orange');
+                var chipName = await esploader.main();
+                logMessage('Chip detected: ' + chipName, 'log-green');
+
+                // 6. Validate chip for known devices
+                if (state.device === 'tdeck' || state.device === 'cardputer') {
+                    var chipLower = chipName.toLowerCase();
+                    if (!chipLower.includes('esp32-s3') && !chipLower.includes('esp32s3')) {
+                        throw new Error('Expected ESP32-S3 for ' + DEVICES[state.device].name + ', but detected ' + chipName + '. Please check your device.');
+                    }
+                    logMessage('Chip verified: ESP32-S3', 'log-green');
+                }
+
+                // 7. Write flash — separate parts at individual addresses
+                setProgress(15, 'Writing firmware...');
+                if (state.eraseAll) {
+                    logMessage('Full erase enabled — wiping all memory...', 'log-orange');
+                }
+                logMessage('Flashing ' + prepared.fileArray.length + ' part(s)...', '');
+
+                await esploader.writeFlash({
+                    fileArray: prepared.fileArray,
+                    flashSize: prepared.flashOptions.flashSize,
+                    flashMode: prepared.flashOptions.flashMode,
+                    flashFreq: prepared.flashOptions.flashFreq,
+                    eraseAll: state.eraseAll,
+                    compress: true,
+                    reportProgress: function(fileIndex, written, total) {
+                        var pct = 15 + (written / total) * 75;
+                        setProgress(pct, 'Writing part ' + (fileIndex + 1) + '/' + prepared.fileArray.length + '...');
+                    }
+                });
+
+                // 8. Reboot only when RNode provisioning needs the flashed firmware
+                // running immediately. Otherwise leave reset/manual reconnect to the user.
+                if (needsRnodeSetup) {
+                    setProgress(92, 'Booting RNode firmware...');
+                    logMessage('Restarting into RNode firmware for setup...', 'log-orange');
+                    await esploader.after('hard_reset');
+                } else {
+                    setProgress(95, 'Flash written');
+                    logMessage('Flash write complete; skipping automatic reboot.', 'log-green');
+                }
+
+                // 9. Disconnect transport
+                try { await transport.disconnect(); } catch(e) {}
+                state.transport = null;
+                state.esploader = null;
+            }
 
             // 10. (Optional) RNode EEPROM + firmware-hash provisioning
             if (state.rnodeProvision && state.device === 'custom') {
@@ -7857,6 +8156,9 @@
             if (state.transport) {
                 try { await state.transport.disconnect(); } catch(e) {}
                 state.transport = null;
+            }
+            if (selectedFlashStrategy() === 'nrf52-dfu' && state.port) {
+                try { await state.port.close(); } catch(e) {}
             }
             state.esploader = null;
 

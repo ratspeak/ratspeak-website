@@ -50,31 +50,46 @@ const RNODE_VARIANT_LABELS = {
   'rnode_firmware_xiao_esp32s3.zip':     'Seeed XIAO ESP32-S3 + Wio-SX1262'
 };
 
-// The website flasher is Web Serial + esptool-js, so only expose ESP32-family
-// RNode assets. AVR and nRF52 packages need avrdude / nrfutil-style flows.
-const RNODE_WEB_ESP_ASSETS = new Set([
-  'rnode_firmware_esp32_generic.zip',
-  'rnode_firmware_featheresp32.zip',
-  'rnode_firmware_t3s3.zip',
-  'rnode_firmware_t3s3_sx127x.zip',
-  'rnode_firmware_t3s3_sx1280_pa.zip',
-  'rnode_firmware_ng21.zip',
-  'rnode_firmware_ng20.zip',
-  'rnode_firmware_lora32v10.zip',
-  'rnode_firmware_lora32v20.zip',
-  'rnode_firmware_lora32v20_extled.zip',
-  'rnode_firmware_lora32v21.zip',
-  'rnode_firmware_lora32v21_extled.zip',
-  'rnode_firmware_lora32v21_tcxo.zip',
-  'rnode_firmware_heltec32v2.zip',
-  'rnode_firmware_heltec32v3.zip',
-  'rnode_firmware_heltec32v4pa.zip',
-  'rnode_firmware_tbeam.zip',
-  'rnode_firmware_tbeam_sx1262.zip',
-  'rnode_firmware_tbeam_supreme.zip',
-  'rnode_firmware_tdeck.zip',
-  'rnode_firmware_xiao_esp32s3.zip'
-]);
+function rnodeVariant(platform, flashStrategy) {
+  return { platform, flashStrategy };
+}
+
+const RNODE_VARIANTS = {
+  'rnode_firmware_esp32_generic.zip':      rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_featheresp32.zip':       rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_t3s3.zip':               rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_t3s3_sx127x.zip':        rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_t3s3_sx1280_pa.zip':     rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_ng21.zip':               rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_ng20.zip':               rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_lora32v10.zip':          rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_lora32v20.zip':          rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_lora32v20_extled.zip':   rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_lora32v21.zip':          rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_lora32v21_extled.zip':   rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_lora32v21_tcxo.zip':     rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_heltec32v2.zip':         rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_heltec32v3.zip':         rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_heltec32v4pa.zip':       rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_tbeam.zip':              rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_tbeam_sx1262.zip':       rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_tbeam_supreme.zip':      rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_tdeck.zip':              rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_xiao_esp32s3.zip':       rnodeVariant('esp32', 'esp32-esptool'),
+  'rnode_firmware_heltec_t114.zip':        rnodeVariant('nrf52', 'nrf52-dfu'),
+  'rnode_firmware_rak4631.zip':            rnodeVariant('nrf52', 'nrf52-dfu'),
+  'rnode_firmware_rak4631_sx1280.zip':     rnodeVariant('nrf52', 'nrf52-dfu'),
+  'rnode_firmware_techo.zip':              rnodeVariant('nrf52', 'nrf52-dfu')
+};
+
+function variantMetadata(filename) {
+  const meta = RNODE_VARIANTS[filename];
+  if (!meta) return null;
+  return {
+    platform: meta.platform,
+    flashStrategy: meta.flashStrategy
+  };
+}
 
 function variantLabel(filename) {
   return RNODE_VARIANT_LABELS[filename] || filename.replace(/^rnode_firmware_?/, '').replace(/\.zip$/, '') || filename;
@@ -190,12 +205,13 @@ async function handleRnode({ searchParams, version, asset }) {
     if (!resp.ok) return jsonResponse({ error: 'RNode release not found', status: resp.status }, 404);
     const release = await resp.json();
     const variants = release.assets
-      .filter(a => RNODE_WEB_ESP_ASSETS.has(a.name))
+      .filter(a => RNODE_VARIANTS[a.name])
       .map(a => ({
         name: a.name,
         label: variantLabel(a.name),
         size: a.size,
-        sha256: a.digest && a.digest.startsWith('sha256:') ? a.digest.slice(7) : null
+        sha256: a.digest && a.digest.startsWith('sha256:') ? a.digest.slice(7) : null,
+        ...variantMetadata(a.name)
       }))
       .sort((a, b) => a.label.localeCompare(b.label));
     return jsonResponse({
@@ -218,7 +234,7 @@ async function handleRnode({ searchParams, version, asset }) {
       .map(r => ({
         version: r.tag_name,
         published: r.published_at,
-        variants: r.assets.filter(a => RNODE_WEB_ESP_ASSETS.has(a.name)).length
+        variants: r.assets.filter(a => RNODE_VARIANTS[a.name]).length
       }))
       .filter(r => r.variants > 0);
     return jsonResponse(result, 200, { 'Cache-Control': 'public, max-age=300' });
@@ -229,8 +245,9 @@ async function handleRnode({ searchParams, version, asset }) {
   if (!/^rnode_firmware.*\.zip$/i.test(asset)) {
     return jsonResponse({ error: 'Invalid RNode asset name' }, 400);
   }
-  if (!RNODE_WEB_ESP_ASSETS.has(asset)) {
-    return jsonResponse({ error: 'This RNode asset is not supported by the ESP32 web flasher' }, 400);
+  const metadata = variantMetadata(asset);
+  if (!metadata) {
+    return jsonResponse({ error: 'This RNode asset is not supported by the web flasher' }, 400);
   }
 
   const releaseUrl = version
@@ -248,7 +265,8 @@ async function handleRnode({ searchParams, version, asset }) {
       fileName: found.name,
       size: found.size,
       label: variantLabel(found.name),
-      sha256: found.digest && found.digest.startsWith('sha256:') ? found.digest.slice(7) : null
+      sha256: found.digest && found.digest.startsWith('sha256:') ? found.digest.slice(7) : null,
+      ...metadata
     });
   }
 
