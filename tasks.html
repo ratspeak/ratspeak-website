@@ -84,8 +84,8 @@
             /* Project colors — earth-tone family. Ratspeak's own dot uses the brand accent. */
             --proj-ratspeak:        #D2693B;
             --proj-ratspeak-light:  #FBEFE6;
-            --proj-ratdeck:         #8B5A3A;
-            --proj-ratdeck-light:   #F0E8E2;
+            --proj-rsdeck:         #8B5A3A;
+            --proj-rsdeck-light:   #F0E8E2;
             --proj-rscardputer:     #B8963C;
             --proj-rscardputer-light: #F5F0E1;
             --proj-rsreticulum:     #6B8A5E;
@@ -149,8 +149,8 @@
 
             --proj-ratspeak:        #D2693B;
             --proj-ratspeak-light:  #2a1d15;
-            --proj-ratdeck:         #b87a54;
-            --proj-ratdeck-light:   #2a2220;
+            --proj-rsdeck:         #b87a54;
+            --proj-rsdeck-light:   #2a2220;
             --proj-rscardputer:     #d4b84e;
             --proj-rscardputer-light: #2a2618;
             --proj-rsreticulum:     #8aad7a;
@@ -407,7 +407,7 @@
             user-select: none;
         }
         .project-section[data-project="ratspeak"] .project-section__header     { border-bottom-color: var(--proj-ratspeak); }
-        .project-section[data-project="ratdeck"] .project-section__header      { border-bottom-color: var(--proj-ratdeck); }
+        .project-section[data-project="rsdeck"] .project-section__header      { border-bottom-color: var(--proj-rsdeck); }
         .project-section[data-project="rscardputer"] .project-section__header  { border-bottom-color: var(--proj-rscardputer); }
         .project-section[data-project="rsreticulum"] .project-section__header  { border-bottom-color: var(--proj-rsreticulum); }
         .project-section[data-project="rslxmf"] .project-section__header       { border-bottom-color: var(--proj-rslxmf); }
@@ -1206,7 +1206,7 @@
 
     var PROJECTS = [
         { id: 'ratspeak',    name: 'Ratspeak',         desc: 'Native desktop & mobile client for E2EE conversations over Reticulum.',          repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/Ratspeak' }],         color: 'var(--proj-ratspeak)' },
-        { id: 'ratdeck',     name: 'Ratdeck',          desc: 'Standalone Reticulum for the LilyGo T-Deck Plus.',                                repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/ratdeck' }],          color: 'var(--proj-ratdeck)' },
+        { id: 'rsdeck',     name: 'rsDeck',          desc: 'Dual-mode Ratspeak firmware for the LilyGo T-Deck Plus.',                        repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/rsDeck' }],          color: 'var(--proj-rsdeck)' },
         { id: 'rscardputer', name: 'rsCardputer',      desc: 'Dual-mode Ratspeak firmware for the M5Stack Cardputer Adv.',                    repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/rsCardputer' }],     color: 'var(--proj-rscardputer)' },
         { id: 'rsreticulum', name: 'rsReticulum',      desc: 'Rust implementation of the Reticulum networking stack.',                          repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/rsReticulum' }],      color: 'var(--proj-rsreticulum)' },
         { id: 'rslxmf',      name: 'rsLXMF',           desc: 'Rust implementation of LXMF for Reticulum.',                                      repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/rsLXMF' }],           color: 'var(--proj-rslxmf)' },

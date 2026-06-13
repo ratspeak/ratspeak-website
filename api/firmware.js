@@ -18,6 +18,21 @@ const CARDPUTER_PACKAGES = {
   }
 };
 
+const RSDECK_PACKAGES = {
+  full: {
+    label: 'Full launcher',
+    files: ['rsdeck-full.zip']
+  },
+  standalone: {
+    label: 'Standalone',
+    files: ['rsdeck-standalone.zip']
+  },
+  rnode: {
+    label: 'RNode only',
+    files: ['rsdeck-rnode.zip']
+  }
+};
+
 // Friendly variant names for RNode firmware filenames.
 // Used to render a human-readable picker; falls back to the raw filename.
 const RNODE_VARIANT_LABELS = {
@@ -108,14 +123,18 @@ export default async function handler(req) {
     return handleRnode({ searchParams, version, asset });
   }
 
-  // ── Source: Ratspeak firmware (Ratdeck / rsCardputer) ─────────────
+  // ── Source: Ratspeak firmware (rsDeck / rsCardputer) ─────────────
   const repos = {
+    rsdeck: {
+      repo: 'ratspeak/rsDeck',
+      defaultPackage: 'full',
+      packages: RSDECK_PACKAGES
+    },
+    // Keep the old device key working for bookmarked flasher URLs.
     ratdeck: {
-      repo: 'ratspeak/ratdeck',
-      defaultPackage: 'default',
-      packages: {
-        default: { label: 'Firmware', files: ['ratdeck-firmware.zip'] }
-      }
+      repo: 'ratspeak/rsDeck',
+      defaultPackage: 'full',
+      packages: RSDECK_PACKAGES
     },
     rscardputer: {
       repo: 'ratspeak/rsCardputer',
