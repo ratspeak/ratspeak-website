@@ -33,6 +33,21 @@ const RSDECK_PACKAGES = {
   }
 };
 
+const RSPAGER_PACKAGES = {
+  full: {
+    label: 'Full launcher',
+    files: ['rspager-full.zip']
+  },
+  standalone: {
+    label: 'Standalone',
+    files: ['rspager-standalone.zip']
+  },
+  rnode: {
+    label: 'RNode only',
+    files: ['rspager-rnode.zip']
+  }
+};
+
 // Friendly variant names for RNode firmware filenames.
 // Used to render a human-readable picker; falls back to the raw filename.
 const RNODE_VARIANT_LABELS = {
@@ -146,6 +161,11 @@ export default async function handler(req) {
       repo: 'ratspeak/rsCardputer',
       defaultPackage: 'full',
       packages: CARDPUTER_PACKAGES
+    },
+    rspager: {
+      repo: 'ratspeak/rsPager',
+      defaultPackage: 'full',
+      packages: RSPAGER_PACKAGES
     }
   };
 

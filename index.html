@@ -670,8 +670,8 @@
             position: relative; z-index: 1;
         }
         .forms-grid {
-            display: grid; grid-template-columns: repeat(4, 1fr);
-            gap: 18px;
+            display: grid; grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
             margin-top: 8px;
         }
         .form-card {
@@ -1042,7 +1042,7 @@
         /* ── Responsive ──────────────────────────────── */
         @media (max-width: 1024px) {
             .why-grid { grid-template-columns: repeat(2, 1fr); }
-            .forms-grid { grid-template-columns: repeat(2, 1fr); }
+            .forms-grid { grid-template-columns: repeat(3, 1fr); }
         }
         @media (max-width: 768px) {
             .navbar { padding: 0 18px; }
@@ -1323,7 +1323,7 @@
             <!-- Desktop -->
             <div class="form-card fade-in">
                 <div class="form-card__visual">
-                    <svg class="device" viewBox="0 0 170 120" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg class="device" viewBox="0 0 170 120" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <!-- desktop client with the same warm, device-native language as the MCU cards -->
                         <rect x="19" y="12" width="132" height="76" rx="6" fill="var(--bg-secondary)" stroke="currentColor"/>
                         <rect x="25" y="19" width="120" height="58" rx="2.5" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="0.8"/>
@@ -1398,7 +1398,7 @@
                  narrow trackball band, then 4-row QWERTY below. -->
             <div class="form-card fade-in">
                 <div class="form-card__visual">
-                    <svg class="device" viewBox="0 0 100 130" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg class="device" viewBox="0 0 100 130" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <!-- body -->
                         <rect x="6" y="6" width="88" height="118" rx="7" fill="var(--bg-secondary)" stroke="currentColor"/>
                         <!-- speaker slit at very top of bezel -->
@@ -1588,6 +1588,72 @@
                 <div class="form-card__name">Cardputer Adv</div>
                 <div class="form-card__sub">Compact portable device / MCU</div>
                 <a href="download.html#cardputer" class="form-status form-status--download">Flash</a>
+            </div>
+
+            <!-- T-Pager — landscape pager: speaker grille top-left, wide screen,
+                 side scroll-wheel + back key, 4 rows of round QWERTY keys with an
+                 orange space bar. -->
+            <div class="form-card fade-in">
+                <div class="form-card__visual">
+                    <svg class="device" viewBox="-12 0 174 122" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <!-- body -->
+                        <rect x="5" y="6" width="140" height="110" rx="9" fill="var(--bg-secondary)" stroke="currentColor"/>
+                        <!-- speaker grille, top-left -->
+                        <g fill="currentColor" stroke="none" opacity="0.4">
+                            <circle cx="12" cy="16" r="0.8"/><circle cx="16" cy="16" r="0.8"/><circle cx="20" cy="16" r="0.8"/><circle cx="24" cy="16" r="0.8"/>
+                            <circle cx="12" cy="20" r="0.8"/><circle cx="16" cy="20" r="0.8"/><circle cx="20" cy="20" r="0.8"/><circle cx="24" cy="20" r="0.8"/>
+                            <circle cx="12" cy="24" r="0.8"/><circle cx="16" cy="24" r="0.8"/><circle cx="20" cy="24" r="0.8"/><circle cx="24" cy="24" r="0.8"/>
+                            <circle cx="12" cy="28" r="0.8"/><circle cx="16" cy="28" r="0.8"/><circle cx="20" cy="28" r="0.8"/><circle cx="24" cy="28" r="0.8"/>
+                        </g>
+                        <!-- LILYGO logo bar -->
+                        <line x1="11" y1="40" x2="26" y2="40" stroke="currentColor" stroke-width="0.5" opacity="0.45"/>
+                        <!-- screen -->
+                        <rect x="30" y="10" width="96" height="44" rx="3" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="1"/>
+                        <!-- 3 app tiles -->
+                        <g fill="var(--bg-card)" stroke="var(--accent)" stroke-width="0.6">
+                            <rect x="41" y="16" width="20" height="17" rx="2"/>
+                            <rect x="67" y="16" width="20" height="17" rx="2"/>
+                            <rect x="93" y="16" width="20" height="17" rx="2"/>
+                        </g>
+                        <g fill="none" stroke="var(--accent)" stroke-width="0.6" opacity="0.7">
+                            <circle cx="51" cy="24.5" r="1.8"/>
+                            <circle cx="77" cy="24.5" r="1.8"/>
+                            <circle cx="103" cy="24.5" r="1.8"/>
+                        </g>
+                        <!-- "LoRa Chat" label pill -->
+                        <rect x="46" y="40" width="64" height="7" rx="3.5" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="0.6"/>
+                        <line x1="58" y1="43.5" x2="98" y2="43.5" stroke="var(--accent)" stroke-width="0.6" opacity="0.6"/>
+                        <!-- scroll wheel, right edge -->
+                        <rect x="131" y="18" width="6" height="20" rx="3" fill="var(--bg-tertiary)" stroke="currentColor" stroke-width="0.6"/>
+                        <g stroke="currentColor" stroke-width="0.5" opacity="0.5">
+                            <line x1="132.5" y1="25" x2="135.5" y2="25"/>
+                            <line x1="132.5" y1="28" x2="135.5" y2="28"/>
+                            <line x1="132.5" y1="31" x2="135.5" y2="31"/>
+                        </g>
+                        <!-- back key, right edge -->
+                        <rect x="130" y="44" width="9" height="8" rx="2" fill="var(--bg-tertiary)" stroke="currentColor" stroke-width="0.6"/>
+                        <path d="M136 48 l-3 0 M134.5 46.5 l-1.5 1.5 l1.5 1.5" stroke="currentColor" stroke-width="0.6" opacity="0.7"/>
+                        <!-- keyboard: rounded pager keys (BlackBerry-style) -->
+                        <g stroke="currentColor" stroke-width="0.5" fill="var(--bg-tertiary)">
+                            <rect x="11" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="24" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="37" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="50" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="63" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="76" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="89" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="102" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="115" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="128" y="61" width="9.4" height="7.5" rx="2.6"/>
+                            <rect x="11" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="24" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="37" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="50" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="63" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="76" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="89" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="102" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="115" y="73.5" width="9.4" height="7.5" rx="2.6"/>
+                            <rect x="24" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="37" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="50" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="63" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="76" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="89" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="102" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="115" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="128" y="86" width="9.4" height="7.5" rx="2.6"/>
+                            <rect x="24" y="98.5" width="9.4" height="7.5" rx="2.6"/><rect x="115" y="98.5" width="9.4" height="7.5" rx="2.6"/>
+                        </g>
+                        <!-- accent keys: enter / shift / fn / cap -->
+                        <g stroke="var(--accent)" stroke-width="0.5" fill="var(--accent-light)">
+                            <rect x="128" y="73.5" width="9.4" height="7.5" rx="2.6"/>
+                            <rect x="11" y="86" width="9.4" height="7.5" rx="2.6"/>
+                            <rect x="11" y="98.5" width="9.4" height="7.5" rx="2.6"/>
+                            <rect x="128" y="98.5" width="9.4" height="7.5" rx="2.6"/>
+                        </g>
+                        <!-- orange space bar -->
+                        <rect x="37" y="98.5" width="74.4" height="7.5" rx="3.7" fill="var(--accent)" stroke="var(--accent-dark)" stroke-width="0.5"/>
+                    </svg>
+                </div>
+                <div class="form-card__name">T-Pager</div>
+                <div class="form-card__sub">Handheld LoRa pager / MCU</div>
+                <a href="download.html#tpager" class="form-status form-status--download">Flash</a>
             </div>
         </div>
 

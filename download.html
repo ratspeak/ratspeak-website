@@ -2766,8 +2766,8 @@
         /* ── Platform picker ────────────────────────── */
         .dl-picker {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 14px;
             margin: 8px 0 18px;
         }
         .dl-picker__tile {
@@ -3220,6 +3220,7 @@
         }
         .dl-mcu-illustration--tdeck { max-width: 280px; }
         .dl-mcu-illustration--cardputer { max-width: 440px; }
+        .dl-mcu-illustration--tpager { max-width: 510px; }
 
         .dl-screen-mock {
             width: 100%;
@@ -3716,7 +3717,7 @@
 
         /* ── Responsive ─────────────────────────────── */
         @media (max-width: 1024px) {
-            .dl-picker { grid-template-columns: repeat(2, 1fr); }
+            .dl-picker { grid-template-columns: repeat(3, 1fr); }
             .dl-picker__tile.is-selected::after { display: none; }
             .dl-spotlight__case {
                 grid-template-columns: 1fr;
@@ -3810,8 +3811,8 @@
                 text-align: left;
             }
             .dl-picker {
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-                gap: 8px;
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+                gap: 6px;
                 margin: 0 0 10px;
             }
             .dl-picker__tile {
@@ -4280,6 +4281,69 @@
                 <span class="dl-picker__sub">ESP32</span>
             </button>
 
+            <!-- T-Pager -->
+            <button class="dl-picker__tile" role="tab" aria-selected="false" aria-controls="dl-case-tpager" aria-label="T-Pager" data-platform="tpager">
+                <span class="dl-picker__visual">
+                    <svg class="device" viewBox="-12 0 174 122" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <!-- body -->
+                        <rect x="5" y="6" width="140" height="110" rx="9" fill="var(--bg-secondary)" stroke="currentColor"/>
+                        <!-- speaker grille, top-left -->
+                        <g fill="currentColor" stroke="none" opacity="0.4">
+                            <circle cx="12" cy="16" r="0.8"/><circle cx="16" cy="16" r="0.8"/><circle cx="20" cy="16" r="0.8"/><circle cx="24" cy="16" r="0.8"/>
+                            <circle cx="12" cy="20" r="0.8"/><circle cx="16" cy="20" r="0.8"/><circle cx="20" cy="20" r="0.8"/><circle cx="24" cy="20" r="0.8"/>
+                            <circle cx="12" cy="24" r="0.8"/><circle cx="16" cy="24" r="0.8"/><circle cx="20" cy="24" r="0.8"/><circle cx="24" cy="24" r="0.8"/>
+                            <circle cx="12" cy="28" r="0.8"/><circle cx="16" cy="28" r="0.8"/><circle cx="20" cy="28" r="0.8"/><circle cx="24" cy="28" r="0.8"/>
+                        </g>
+                        <!-- LILYGO logo bar -->
+                        <line x1="11" y1="40" x2="26" y2="40" stroke="currentColor" stroke-width="0.5" opacity="0.45"/>
+                        <!-- screen -->
+                        <rect x="30" y="10" width="96" height="44" rx="3" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="1"/>
+                        <!-- 3 app tiles -->
+                        <g fill="var(--bg-card)" stroke="var(--accent)" stroke-width="0.6">
+                            <rect x="41" y="16" width="20" height="17" rx="2"/>
+                            <rect x="67" y="16" width="20" height="17" rx="2"/>
+                            <rect x="93" y="16" width="20" height="17" rx="2"/>
+                        </g>
+                        <g fill="none" stroke="var(--accent)" stroke-width="0.6" opacity="0.7">
+                            <circle cx="51" cy="24.5" r="1.8"/>
+                            <circle cx="77" cy="24.5" r="1.8"/>
+                            <circle cx="103" cy="24.5" r="1.8"/>
+                        </g>
+                        <!-- "LoRa Chat" label pill -->
+                        <rect x="46" y="40" width="64" height="7" rx="3.5" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="0.6"/>
+                        <line x1="58" y1="43.5" x2="98" y2="43.5" stroke="var(--accent)" stroke-width="0.6" opacity="0.6"/>
+                        <!-- scroll wheel, right edge -->
+                        <rect x="131" y="18" width="6" height="20" rx="3" fill="var(--bg-tertiary)" stroke="currentColor" stroke-width="0.6"/>
+                        <g stroke="currentColor" stroke-width="0.5" opacity="0.5">
+                            <line x1="132.5" y1="25" x2="135.5" y2="25"/>
+                            <line x1="132.5" y1="28" x2="135.5" y2="28"/>
+                            <line x1="132.5" y1="31" x2="135.5" y2="31"/>
+                        </g>
+                        <!-- back key, right edge -->
+                        <rect x="130" y="44" width="9" height="8" rx="2" fill="var(--bg-tertiary)" stroke="currentColor" stroke-width="0.6"/>
+                        <path d="M136 48 l-3 0 M134.5 46.5 l-1.5 1.5 l1.5 1.5" stroke="currentColor" stroke-width="0.6" opacity="0.7"/>
+                        <!-- keyboard: rounded pager keys (BlackBerry-style) -->
+                        <g stroke="currentColor" stroke-width="0.5" fill="var(--bg-tertiary)">
+                            <rect x="11" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="24" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="37" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="50" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="63" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="76" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="89" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="102" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="115" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="128" y="61" width="9.4" height="7.5" rx="2.6"/>
+                            <rect x="11" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="24" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="37" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="50" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="63" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="76" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="89" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="102" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="115" y="73.5" width="9.4" height="7.5" rx="2.6"/>
+                            <rect x="24" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="37" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="50" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="63" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="76" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="89" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="102" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="115" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="128" y="86" width="9.4" height="7.5" rx="2.6"/>
+                            <rect x="24" y="98.5" width="9.4" height="7.5" rx="2.6"/><rect x="115" y="98.5" width="9.4" height="7.5" rx="2.6"/>
+                        </g>
+                        <!-- accent keys: enter / shift / fn / cap -->
+                        <g stroke="var(--accent)" stroke-width="0.5" fill="var(--accent-light)">
+                            <rect x="128" y="73.5" width="9.4" height="7.5" rx="2.6"/>
+                            <rect x="11" y="86" width="9.4" height="7.5" rx="2.6"/>
+                            <rect x="11" y="98.5" width="9.4" height="7.5" rx="2.6"/>
+                            <rect x="128" y="98.5" width="9.4" height="7.5" rx="2.6"/>
+                        </g>
+                        <!-- orange space bar -->
+                        <rect x="37" y="98.5" width="74.4" height="7.5" rx="3.7" fill="var(--accent)" stroke="var(--accent-dark)" stroke-width="0.5"/>
+                    </svg>
+                </span>
+                <span class="dl-picker__name">T-Pager</span>
+                <span class="dl-picker__sub">ESP32</span>
+            </button>
+
         </div>
 
         <!-- ── Selected platform panel ───────────────── -->
@@ -4289,14 +4353,14 @@
         <section class="dl-spotlight" id="dlSpotlight" data-active-platform="desktop">
 
             <!-- Desktop case -->
-            <article class="dl-spotlight__case" id="dl-case-desktop" data-platform="desktop" role="tabpanel" aria-labelledby="">
+            <article class="dl-spotlight__case" id="dl-case-desktop" data-platform="desktop" role="tabpanel" aria-labelledby="dl-title-desktop">
                 <div class="dl-spotlight__visual" data-platform="desktop">
                     <div class="dl-screen-frame dl-screen-frame--desktop">
                         <img class="dl-screenshot-img" src="assets/devices/desktop-home-macos-light.png" data-src-light="assets/devices/desktop-home-macos-light.png" data-src-dark="assets/devices/desktop-home-macos-dark.png" alt="Ratspeak desktop home dashboard in a macOS window" width="2342" height="1592" loading="eager" decoding="async" draggable="false" />
                     </div>
                 </div>
                 <div class="dl-spotlight__panel">
-                    <h2 class="dl-spotlight__title">Ratspeak for Desktop.</h2>
+                    <h2 class="dl-spotlight__title" id="dl-title-desktop">Ratspeak for Desktop.</h2>
                     <p class="dl-spotlight__lede">A native window into the mesh.</p>
                     <ul class="dl-panel-features" data-features="desktop" role="list"></ul>
                     <div class="dl-cta-row">
@@ -4326,14 +4390,14 @@
             </article>
 
             <!-- Mobile case -->
-            <article class="dl-spotlight__case" id="dl-case-mobile" data-platform="mobile" role="tabpanel" hidden>
+            <article class="dl-spotlight__case" id="dl-case-mobile" data-platform="mobile" role="tabpanel" aria-labelledby="dl-title-mobile" hidden>
                 <div class="dl-spotlight__visual" data-platform="mobile">
                     <div class="dl-screen-frame dl-screen-frame--mobile">
                         <img class="dl-screenshot-img" src="assets/devices/mobile-peers-light.png" data-src-light="assets/devices/mobile-peers-light.png" data-src-dark="assets/devices/mobile-peers-dark.png" alt="Ratspeak mobile peer directory" width="978" height="2100" loading="lazy" decoding="async" draggable="false" />
                     </div>
                 </div>
                 <div class="dl-spotlight__panel">
-                    <h2 class="dl-spotlight__title">Ratspeak for Mobile.</h2>
+                    <h2 class="dl-spotlight__title" id="dl-title-mobile">Ratspeak for Mobile.</h2>
                     <p class="dl-spotlight__lede">Carry the mesh in your pocket.</p>
                     <ul class="dl-panel-features" data-features="mobile" role="list"></ul>
                     <div class="dl-cta-row">
@@ -4363,14 +4427,14 @@
             </article>
 
             <!-- T-Deck Plus case -->
-            <article class="dl-spotlight__case" id="dl-case-tdeck" data-platform="tdeck" role="tabpanel" hidden>
+            <article class="dl-spotlight__case" id="dl-case-tdeck" data-platform="tdeck" role="tabpanel" aria-labelledby="dl-title-tdeck" hidden>
                 <div class="dl-spotlight__visual" data-platform="tdeck">
                     <div class="dl-screen-frame dl-screen-frame--tdeck">
                         <img class="dl-photo-img" src="assets/devices/tdeck-home.webp" alt="T-Deck Plus running Ratspeak — home dashboard" width="560" height="975" loading="lazy" decoding="async" draggable="false" />
                     </div>
                 </div>
                 <div class="dl-spotlight__panel">
-                    <h2 class="dl-spotlight__title">rsDeck for T-Deck Plus.</h2>
+                    <h2 class="dl-spotlight__title" id="dl-title-tdeck">rsDeck for T-Deck Plus.</h2>
                     <p class="dl-spotlight__lede">LilyGo's pocket radio, running <span id="rsdeckReleaseTag">rsDeck v2.0.0</span>.</p>
                     <ul class="dl-panel-features" data-features="tdeck" role="list"></ul>
                     <div class="dl-cta-row">
@@ -4384,15 +4448,7 @@
                         <div class="dl-cta-secondary-row">
                             <a href="https://github.com/ratspeak/rsDeck/releases/latest/download/rsdeck-full.zip" class="nr-btn nr-btn-secondary dl-cta-secondary">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                Full<span class="dl-cta-meta">.zip</span>
-                            </a>
-                            <a href="https://github.com/ratspeak/rsDeck/releases/latest/download/rsdeck-standalone-m5launcher.bin" class="nr-btn nr-btn-secondary dl-cta-secondary">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                Standalone<span class="dl-cta-meta">.bin</span>
-                            </a>
-                            <a href="https://github.com/ratspeak/rsDeck/releases/latest/download/rsdeck-rnode-m5launcher.bin" class="nr-btn nr-btn-secondary dl-cta-secondary">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                RNode<span class="dl-cta-meta">.bin</span>
+                                Download<span class="dl-cta-meta">.zip</span>
                             </a>
                             <a href="https://github.com/ratspeak/rsDeck/releases" class="nr-btn nr-btn-secondary dl-cta-secondary" target="_blank" rel="noopener noreferrer">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
@@ -4408,7 +4464,7 @@
             </article>
 
             <!-- Cardputer case -->
-            <article class="dl-spotlight__case" id="dl-case-cardputer" data-platform="cardputer" role="tabpanel" hidden>
+            <article class="dl-spotlight__case" id="dl-case-cardputer" data-platform="cardputer" role="tabpanel" aria-labelledby="dl-title-cardputer" hidden>
                 <div class="dl-spotlight__visual" data-platform="cardputer">
                     <svg class="dl-mcu-illustration dl-mcu-illustration--cardputer" viewBox="0 0 160 100" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <rect x="4" y="6" width="152" height="88" rx="6" fill="var(--bg-secondary)" stroke="currentColor"/>
@@ -4520,7 +4576,7 @@
                     </svg>
                 </div>
                 <div class="dl-spotlight__panel">
-                    <h2 class="dl-spotlight__title">Ratspeak for Cardputer.</h2>
+                    <h2 class="dl-spotlight__title" id="dl-title-cardputer">Ratspeak for Cardputer.</h2>
                     <p class="dl-spotlight__lede">M5Stack's pocket computer, running rsCardputer.</p>
                     <ul class="dl-panel-features" data-features="cardputer" role="list"></ul>
                     <div class="dl-cta-row">
@@ -4543,6 +4599,95 @@
                         </div>
                     </div>
                     <a href="https://github.com/ratspeak/rsCardputer/releases" target="_blank" rel="noopener noreferrer" class="dl-release-link">
+                        Release notes
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </a>
+                </div>
+            </article>
+
+            <!-- T-Pager case -->
+            <article class="dl-spotlight__case" id="dl-case-tpager" data-platform="tpager" role="tabpanel" aria-labelledby="dl-title-tpager" hidden>
+                <div class="dl-spotlight__visual" data-platform="tpager">
+                    <svg class="dl-mcu-illustration dl-mcu-illustration--tpager" viewBox="-12 0 174 122" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <!-- body -->
+                        <rect x="5" y="6" width="140" height="110" rx="9" fill="var(--bg-secondary)" stroke="currentColor"/>
+                        <!-- speaker grille, top-left -->
+                        <g fill="currentColor" stroke="none" opacity="0.4">
+                            <circle cx="12" cy="16" r="0.8"/><circle cx="16" cy="16" r="0.8"/><circle cx="20" cy="16" r="0.8"/><circle cx="24" cy="16" r="0.8"/>
+                            <circle cx="12" cy="20" r="0.8"/><circle cx="16" cy="20" r="0.8"/><circle cx="20" cy="20" r="0.8"/><circle cx="24" cy="20" r="0.8"/>
+                            <circle cx="12" cy="24" r="0.8"/><circle cx="16" cy="24" r="0.8"/><circle cx="20" cy="24" r="0.8"/><circle cx="24" cy="24" r="0.8"/>
+                            <circle cx="12" cy="28" r="0.8"/><circle cx="16" cy="28" r="0.8"/><circle cx="20" cy="28" r="0.8"/><circle cx="24" cy="28" r="0.8"/>
+                        </g>
+                        <!-- LILYGO logo bar -->
+                        <line x1="11" y1="40" x2="26" y2="40" stroke="currentColor" stroke-width="0.5" opacity="0.45"/>
+                        <!-- screen -->
+                        <rect x="30" y="10" width="96" height="44" rx="3" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="1"/>
+                        <!-- 3 app tiles -->
+                        <g fill="var(--bg-card)" stroke="var(--accent)" stroke-width="0.6">
+                            <rect x="41" y="16" width="20" height="17" rx="2"/>
+                            <rect x="67" y="16" width="20" height="17" rx="2"/>
+                            <rect x="93" y="16" width="20" height="17" rx="2"/>
+                        </g>
+                        <g fill="none" stroke="var(--accent)" stroke-width="0.6" opacity="0.7">
+                            <circle cx="51" cy="24.5" r="1.8"/>
+                            <circle cx="77" cy="24.5" r="1.8"/>
+                            <circle cx="103" cy="24.5" r="1.8"/>
+                        </g>
+                        <!-- "LoRa Chat" label pill -->
+                        <rect x="46" y="40" width="64" height="7" rx="3.5" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="0.6"/>
+                        <line x1="58" y1="43.5" x2="98" y2="43.5" stroke="var(--accent)" stroke-width="0.6" opacity="0.6"/>
+                        <!-- scroll wheel, right edge -->
+                        <rect x="131" y="18" width="6" height="20" rx="3" fill="var(--bg-tertiary)" stroke="currentColor" stroke-width="0.6"/>
+                        <g stroke="currentColor" stroke-width="0.5" opacity="0.5">
+                            <line x1="132.5" y1="25" x2="135.5" y2="25"/>
+                            <line x1="132.5" y1="28" x2="135.5" y2="28"/>
+                            <line x1="132.5" y1="31" x2="135.5" y2="31"/>
+                        </g>
+                        <!-- back key, right edge -->
+                        <rect x="130" y="44" width="9" height="8" rx="2" fill="var(--bg-tertiary)" stroke="currentColor" stroke-width="0.6"/>
+                        <path d="M136 48 l-3 0 M134.5 46.5 l-1.5 1.5 l1.5 1.5" stroke="currentColor" stroke-width="0.6" opacity="0.7"/>
+                        <!-- keyboard: rounded pager keys (BlackBerry-style) -->
+                        <g stroke="currentColor" stroke-width="0.5" fill="var(--bg-tertiary)">
+                            <rect x="11" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="24" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="37" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="50" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="63" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="76" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="89" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="102" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="115" y="61" width="9.4" height="7.5" rx="2.6"/><rect x="128" y="61" width="9.4" height="7.5" rx="2.6"/>
+                            <rect x="11" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="24" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="37" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="50" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="63" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="76" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="89" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="102" y="73.5" width="9.4" height="7.5" rx="2.6"/><rect x="115" y="73.5" width="9.4" height="7.5" rx="2.6"/>
+                            <rect x="24" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="37" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="50" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="63" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="76" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="89" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="102" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="115" y="86" width="9.4" height="7.5" rx="2.6"/><rect x="128" y="86" width="9.4" height="7.5" rx="2.6"/>
+                            <rect x="24" y="98.5" width="9.4" height="7.5" rx="2.6"/><rect x="115" y="98.5" width="9.4" height="7.5" rx="2.6"/>
+                        </g>
+                        <!-- accent keys: enter / shift / fn / cap -->
+                        <g stroke="var(--accent)" stroke-width="0.5" fill="var(--accent-light)">
+                            <rect x="128" y="73.5" width="9.4" height="7.5" rx="2.6"/>
+                            <rect x="11" y="86" width="9.4" height="7.5" rx="2.6"/>
+                            <rect x="11" y="98.5" width="9.4" height="7.5" rx="2.6"/>
+                            <rect x="128" y="98.5" width="9.4" height="7.5" rx="2.6"/>
+                        </g>
+                        <!-- orange space bar -->
+                        <rect x="37" y="98.5" width="74.4" height="7.5" rx="3.7" fill="var(--accent)" stroke="var(--accent-dark)" stroke-width="0.5"/>
+                    </svg>
+                </div>
+                <div class="dl-spotlight__panel">
+                    <h2 class="dl-spotlight__title" id="dl-title-tpager">rsPager for T-Pager.</h2>
+                    <p class="dl-spotlight__lede">LilyGo's LoRa pager, running <span id="rspagerReleaseTag">rsPager v1.0.0</span>.</p>
+                    <ul class="dl-panel-features" data-features="tpager" role="list"></ul>
+                    <div class="dl-cta-row">
+                        <button type="button" class="nr-btn nr-btn-lg dl-cta-primary dl-cta-flash" data-flash="tpager">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                            <span class="dl-cta-primary__text">
+                                <span class="dl-cta-primary__line">Flash in browser</span>
+                                <span class="dl-cta-primary__meta">Web Serial &middot; Chrome / Edge 89+</span>
+                            </span>
+                        </button>
+                        <div class="dl-cta-secondary-row">
+                            <a href="https://github.com/ratspeak/rsPager/releases/latest/download/rspager-full.zip" class="nr-btn nr-btn-secondary dl-cta-secondary">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                Download<span class="dl-cta-meta">.zip</span>
+                            </a>
+                            <a href="https://github.com/ratspeak/rsPager/releases" class="nr-btn nr-btn-secondary dl-cta-secondary" target="_blank" rel="noopener noreferrer">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                                Source
+                            </a>
+                        </div>
+                    </div>
+                    <a href="https://github.com/ratspeak/rsPager/releases" target="_blank" rel="noopener noreferrer" class="dl-release-link">
                         Release notes
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                     </a>
@@ -4745,7 +4890,7 @@
                     <div class="flash-step__number">Step 02 &mdash; Firmware</div>
                     <div class="flash-step__title" id="firmwareTitle">Firmware Package</div>
 
-                    <!-- Pre-configured firmware (for tdeck/cardputer) -->
+                    <!-- Pre-configured firmware (for tdeck/cardputer/tpager) -->
                     <div id="firmwarePreset" style="display: none;">
                         <div class="firmware-ready" id="firmwareReadyBox">
                             <div class="firmware-ready__icon">
@@ -5182,6 +5327,20 @@
                 { id: 'rnode', label: 'RNode', desc: 'Host-controlled radio' }
             ]
         },
+        tpager: {
+            name: 'T-Pager',
+            sub: 'ESP32-S3 \u00b7 rsPager Firmware',
+            accent: 'green',
+            firmware: 'rspager-full.zip',
+            firmwareSize: 'Loading from GitHub...',
+            apiDevice: 'rspager',
+            defaultPackage: 'full',
+            packages: [
+                { id: 'full', label: 'Full', desc: 'Launcher + both modes' },
+                { id: 'standalone', label: 'Standalone', desc: 'On-device messenger' },
+                { id: 'rnode', label: 'RNode', desc: 'Host-controlled radio' }
+            ]
+        },
         custom: {
             name: 'Custom Device',
             sub: 'ESP32 \u00b7 User Firmware',
@@ -5433,7 +5592,7 @@
         document.getElementById('presetSize').textContent = 'Fetching release info...';
         closeVersionDropdown();
 
-        var repoMap = { rsdeck: 'ratspeak/rsDeck', rscardputer: 'ratspeak/rsCardputer' };
+        var repoMap = { rsdeck: 'ratspeak/rsDeck', rscardputer: 'ratspeak/rsCardputer', rspager: 'ratspeak/rsPager' };
         var repoPath = repoMap[dev.apiDevice] || '';
         var downloadInfo = null;
 
@@ -8190,7 +8349,7 @@
                 logMessage('Chip detected: ' + chipName, 'log-green');
 
                 // 6. Validate chip for known devices
-                if (state.device === 'tdeck' || state.device === 'cardputer') {
+                if (state.device === 'tdeck' || state.device === 'cardputer' || state.device === 'tpager') {
                     var chipLower = chipName.toLowerCase();
                     if (!chipLower.includes('esp32-s3') && !chipLower.includes('esp32s3')) {
                         throw new Error('Expected ESP32-S3 for ' + DEVICES[state.device].name + ', but detected ' + chipName + '. Please check your device.');
@@ -8543,7 +8702,7 @@
 
     var tiles = picker.querySelectorAll('.dl-picker__tile');
     var cases = spotlight.querySelectorAll('.dl-spotlight__case');
-    var validPlatforms = ['desktop', 'mobile', 'tdeck', 'cardputer'];
+    var validPlatforms = ['desktop', 'mobile', 'tdeck', 'cardputer', 'tpager'];
 
     // ── Feature data ────────────────────────────────
     // Each feature: { l: label, d: description }
@@ -8562,7 +8721,8 @@
         desktop:   'Desktop',
         mobile:    'Mobile',
         tdeck:     'T-Deck Plus',
-        cardputer: 'Cardputer Adv'
+        cardputer: 'Cardputer Adv',
+        tpager:    'T-Pager'
     };
     var PLATFORM_FEATURES = {
         desktop: [
@@ -8593,6 +8753,14 @@
             { l: 'M5Unified display',        d: 'Native ESP32-S3 driver.' },
             { l: 'LittleFS + SD',            d: 'Local storage with SD expansion.' },
             { l: 'Constrained-table stack',  d: 'Tuned microReticulum for 8 MB.' }
+        ],
+        tpager: [
+            { l: 'Dual-mode',                d: 'Standalone messenger or RNode radio.' },
+            { l: 'LoRa built-in',            d: 'SX1262, 850–950 MHz, Long Fast default.' },
+            { l: 'Standalone LXMF',          d: 'No phone, no host. Just talk.' },
+            { l: 'RNode mode',               d: 'BLE or USB radio for host clients.' },
+            { l: 'Scroll-wheel + QWERTY',    d: 'Encoder and keyboard navigation.' },
+            { l: 'WiFi bridging*',           d: 'Reach remote Reticulum nodes.' }
         ]
     };
     var MEDIA_SLIDES = {
@@ -9217,8 +9385,27 @@
         });
     }
 
+    function resolveRspagerReleaseTag() {
+        var releaseTag = document.getElementById('rspagerReleaseTag');
+        if (!releaseTag || typeof fetch !== 'function') return;
+
+        fetch('https://api.github.com/repos/ratspeak/rsPager/releases/latest', {
+            headers: { Accept: 'application/vnd.github+json' }
+        }).then(function (response) {
+            if (!response.ok) throw new Error('Release lookup failed');
+            return response.json();
+        }).then(function (release) {
+            if (!release.tag_name) return;
+            releaseTag.textContent = 'rsPager ' + release.tag_name;
+            releaseTag.dataset.rspagerReleaseResolved = 'true';
+        }).catch(function () {
+            // Keep the checked-in release label when GitHub metadata is unavailable.
+        });
+    }
+
     resolveRatspeakReleaseAssets();
     resolveRsdeckReleaseTag();
+    resolveRspagerReleaseTag();
 
     initMediaViewers();
     renderAllPanelFeatures();
