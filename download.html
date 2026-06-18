@@ -8690,7 +8690,7 @@
         var svgEl = document.getElementById('resultSvg');
         var titleEl = document.getElementById('resultTitle');
         var descEl = document.getElementById('resultDesc');
-        var needsReconnect = isRnodeReconnectSetupIssue(issue);
+        var needsReconnect = kind === 'reconnect' || isRnodeReconnectSetupIssue(issue);
 
         resetResultAction();
         resultEl.classList.remove('flash-result--continue', 'flash-result--complete');

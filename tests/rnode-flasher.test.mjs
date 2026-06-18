@@ -269,6 +269,7 @@ test('nRF52 RNode provisioning is click-driven after DFU re-enumeration', () => 
   assert.match(downloadHtml, /nRF52 rebooted after DFU; select the newly listed RNode serial port/);
   assert.match(downloadHtml, /Click Activate RNode below, then select the newly listed RNode serial port/);
   assert.match(downloadHtml, /requestFreshRnodePortFromUser/);
+  assert.match(downloadHtml, /kind === 'reconnect' \|\| isRnodeReconnectSetupIssue/);
 
   const state = {
     device: 'custom',
