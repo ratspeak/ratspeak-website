@@ -168,7 +168,8 @@ test('legacy TCXO alias EEPROM readback is rejected with a specific error', () =
 });
 
 test('unsigned browser provisioning is explicit and always uses a blank signature', () => {
-  assert.match(downloadHtml, /Browser setup uses an unsigned identity/);
+  assert.match(downloadHtml, /use rnodeconf when signed identity/);
+  assert.match(downloadHtml, /Browser RNode setup writes an unsigned identity/);
   assert.match(downloadHtml, /RNODE_UNSIGNED_PROVISIONING_NOTICE/);
 
   const { buildUnsignedRnodeSignature } = evaluateDownloadFunctions([
@@ -233,6 +234,35 @@ test('nRF52 DFU path is separate from ESP32 flashing and has a long reboot settl
   ]);
   assert.equal(extractNumberConst('RNODE_NRF52_DFU_REBOOT_WAIT_MS') >= 9000, true);
   assert.match(downloadHtml, /nRF52 DFU updates the application image/);
+  assert.match(downloadHtml, /nRF52 app DFU, bootloader and EEPROM preserved/);
+});
+
+test('verified host-controlled RNode setup explains Missing Config instead of treating it as repair-only', () => {
+  assert.match(downloadHtml, /Ratspeak keeps startup radio settings host-controlled/);
+  assert.match(downloadHtml, /Missing Config can be normal in host-controlled mode/);
+  assert.match(downloadHtml, /Missing Config on a display board is expected until Ratspeak opens it/);
+  assert.match(downloadHtml, /state\.rnodeHostControlledMode = !!rnodeProvisionResult\.normalModeSet/);
+
+  const state = {
+    device: 'custom',
+    rnodeAssetName: 'rnode_firmware_techo.zip',
+    rnodeAssetLabel: 'LilyGO T-Echo',
+    rnodeFlashStrategy: 'nrf52-dfu'
+  };
+  const {
+    isNrf52RnodeFirmwareSelected,
+    rnodeHostControlledNotice
+  } = evaluateDownloadFunctions([
+    'selectedFlashStrategy',
+    'isOfficialRnodeFirmwareSelected',
+    'isNrf52RnodeFirmwareSelected',
+    'selectedRnodeLabel',
+    'rnodeHostControlledNotice'
+  ], { state });
+
+  assert.equal(isNrf52RnodeFirmwareSelected(), true);
+  assert.match(rnodeHostControlledNotice(), /^LilyGO T-Echo may show Missing Config while idle\./);
+  assert.match(rnodeHostControlledNotice(), /startup radio settings stay host-controlled/);
 });
 
 test('post-flash reconnect prefers stable Web Serial handles and matching USB IDs', () => {
