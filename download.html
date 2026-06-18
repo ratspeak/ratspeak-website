@@ -6102,6 +6102,17 @@
         return isNrf52RnodeFirmwareSelected();
     }
 
+    function rnodeActivationPortGuidance() {
+        if (isNrf52RnodeFirmwareSelected()) {
+            return 'Select the newly listed serial port. If it clearly says DFU or bootloader, cancel, press RESET or unplug/replug the board, wait a few seconds, then click Activate RNode again. Generic Nordic/nRF labels are okay if they are the RNode app port; the flasher will verify the RNode EEPROM service.';
+        }
+        return 'Select the RNode serial port that appeared after the device rebooted.';
+    }
+
+    function rnodeActivationSettleMs() {
+        return isNrf52RnodeFirmwareSelected() ? RNODE_NRF52_ACTIVATION_SETTLE_MS : RNODE_REPAIR_SETTLE_MS;
+    }
+
     function resetRnodeSelection(message) {
         state.rnodeAsset = null;
         state.rnodeAssetName = null;
@@ -6688,6 +6699,7 @@
     var RNODE_POST_EEPROM_DELAY_MS = 1000;
     var RNODE_HASH_SAVE_DELAY_MS = 3000;
     var RNODE_REPAIR_SETTLE_MS = 1500;
+    var RNODE_NRF52_ACTIVATION_SETTLE_MS = 6000;
     var RNODE_HASH_ADOPT_BOOT_WAIT_MS = 3500;
     var RNODE_POST_FLASH_BOOT_WAIT_MS = 9000;
     var RNODE_NRF52_DFU_REBOOT_WAIT_MS = 9000;
@@ -7542,20 +7554,37 @@
             alert('No board identified yet — pick an RNode firmware variant or click Change to set the exact board/band manually.');
             return;
         }
-        try { await requestFreshRnodePortFromUser(); } catch (e) { return; }
-        var ui = openProgressLog('Activating RNode...');
+        var ui = openProgressLog('Select RNode serial...');
+        ui.log(rnodeActivationPortGuidance(), 'log-orange');
+        try {
+            await requestFreshRnodePortFromUser();
+        } catch (e) {
+            ui.setStatus('Activation cancelled.');
+            showRnodeSetupWarning('Activation cancelled; select the RNode app serial port to finish provisioning', 'reconnect');
+            return;
+        }
+        ui.setStatus('Activating RNode...');
         try {
             if (!state.firmwareAppBytes) {
                 ui.log('No firmware bytes loaded; firmware hash will be left unchanged.', 'log-orange');
             }
-            var result = await runProvisioning(ui.log, ui.setProgress, { settleMs: RNODE_REPAIR_SETTLE_MS });
+            var result = await runProvisioning(ui.log, ui.setProgress, { settleMs: rnodeActivationSettleMs() });
             state.rnodeHostControlledMode = !!(result && result.normalModeSet);
             ui.setProgress(100, 'RNode setup complete');
             if (state.rnodeHostControlledMode) ui.log(rnodeHostControlledNotice(), 'log-green');
             showRnodeSetupComplete();
         } catch (err) {
-            ui.log('Error: ' + (err.message || err), 'log-red');
-            ui.setStatus('RNode setup failed.');
+            var message = err.message || String(err);
+            ui.log('Error: ' + message, 'log-red');
+            if (isRnodeReconnectSetupIssue(message)) {
+                state.rnodeSetupIssue = message;
+                state.rnodeSetupIssueKind = 'reconnect';
+                ui.log('Selected port did not answer as RNode firmware. ' + rnodeActivationPortGuidance(), 'log-orange');
+                ui.setStatus('Select RNode app serial.');
+                showRnodeSetupWarning(message, 'reconnect');
+            } else {
+                ui.setStatus('RNode setup failed.');
+            }
         }
     }
 
@@ -7969,6 +7998,7 @@
         this.DATA_INTEGRITY_CHECK_PRESENT = 1;
         this.RELIABLE_PACKET = 1;
         this.HCI_PACKET_TYPE = 14;
+        this.ACK_PACKET_TIMEOUT_MS = 1000;
         this.FLASH_PAGE_SIZE = 4096;
         this.FLASH_PAGE_ERASE_TIME = 0.0897;
         this.FLASH_WORD_WRITE_TIME = 0.000100;
@@ -8035,6 +8065,86 @@
         } finally {
             writer.releaseLock();
         }
+    };
+
+    Nrf52DfuFlasher.prototype.readChunkWithTimeout = async function (reader, timeoutMs) {
+        var timer = null;
+        try {
+            return await Promise.race([
+                reader.read(),
+                new Promise(function (resolve) {
+                    timer = setTimeout(function () { resolve({ timedOut: true }); }, timeoutMs);
+                })
+            ]);
+        } finally {
+            if (timer) clearTimeout(timer);
+        }
+    };
+
+    Nrf52DfuFlasher.prototype.slipDecodeEscChars = function (dataIn) {
+        var result = [];
+        for (var i = 0; i < dataIn.length; i++) {
+            var chr = dataIn[i];
+            if (chr === 0xDB) {
+                i++;
+                var next = dataIn[i];
+                if (next === 0xDC) {
+                    result.push(0xC0);
+                } else if (next === 0xDD) {
+                    result.push(0xDB);
+                } else {
+                    throw new Error('Malformed nRF52 bootloader acknowledgement');
+                }
+            } else {
+                result.push(chr);
+            }
+        }
+        return result;
+    };
+
+    Nrf52DfuFlasher.prototype.readAckNumber = async function () {
+        if (!this.serialPort.readable) throw new Error('Serial port is not readable');
+        var reader = this.serialPort.readable.getReader();
+        var ackBytes = [];
+        var sawStart = false;
+        try {
+            while (ackBytes.length < 2 || ackBytes[ackBytes.length - 1] !== 0xC0) {
+                var result = await this.readChunkWithTimeout(reader, this.ACK_PACKET_TIMEOUT_MS);
+                if (result && result.timedOut) {
+                    try { await reader.cancel(); } catch (e) { /* closing after fatal timeout */ }
+                    throw new Error('Timed out waiting for nRF52 bootloader acknowledgement');
+                }
+                if (!result || result.done) {
+                    throw new Error('nRF52 bootloader closed serial before acknowledging packet');
+                }
+                var chunk = result.value || [];
+                for (var i = 0; i < chunk.length; i++) {
+                    var byte = chunk[i];
+                    if (byte === 0xC0) {
+                        if (!sawStart) {
+                            sawStart = true;
+                            ackBytes = [byte];
+                        } else {
+                            ackBytes.push(byte);
+                            break;
+                        }
+                    } else if (sawStart) {
+                        ackBytes.push(byte);
+                    }
+                }
+            }
+            var decoded = this.slipDecodeEscChars(ackBytes);
+            var data = decoded.slice(1, -1);
+            if (!data.length) throw new Error('nRF52 bootloader sent an empty acknowledgement');
+            return (data[0] >> 3) & 0x07;
+        } finally {
+            try { reader.releaseLock(); } catch (e) { /* stream already closed */ }
+        }
+    };
+
+    Nrf52DfuFlasher.prototype.sendPacket = async function (bytes) {
+        await this.write(bytes);
+        return await this.readAckNumber();
     };
 
     Nrf52DfuFlasher.prototype.enterDfuMode = async function () {
@@ -8112,7 +8222,12 @@
     };
 
     Nrf52DfuFlasher.prototype.getEraseWaitTime = function () {
-        return Math.max(0.5, ((this.totalSize / this.FLASH_PAGE_SIZE) + 1) * this.FLASH_PAGE_ERASE_TIME);
+        return Math.max(0.5, (Math.floor(this.totalSize / this.FLASH_PAGE_SIZE) + 1) * this.FLASH_PAGE_ERASE_TIME);
+    };
+
+    Nrf52DfuFlasher.prototype.getActivateWaitTimeMs = function () {
+        var writeWaitTime = (Math.floor(this.totalSize / this.FLASH_PAGE_SIZE) + 1) * this.FLASH_PAGE_WRITE_TIME;
+        return Math.ceil((this.getEraseWaitTime() + writeWaitTime) * 1000);
     };
 
     Nrf52DfuFlasher.prototype.createImageSizePacket = function (softdeviceSize, bootloaderSize, appSize) {
@@ -8125,7 +8240,7 @@
         var frame = this.int32ToBytes(this.DFU_START_PACKET)
             .concat(this.int32ToBytes(mode))
             .concat(this.createImageSizePacket(softdeviceSize, bootloaderSize, appSize));
-        await this.write(this.createHciPacketFromFrame(frame));
+        await this.sendPacket(this.createHciPacketFromFrame(frame));
         this.sdSize = softdeviceSize || 0;
         this.totalSize = this.sdSize + (bootloaderSize || 0) + (appSize || 0);
         await sleepMs(this.getEraseWaitTime() * 1000);
@@ -8135,7 +8250,7 @@
         var frame = this.int32ToBytes(this.DFU_INIT_PACKET)
             .concat(Array.from(initPacket))
             .concat(this.int16ToBytes(0x0000));
-        await this.write(this.createHciPacketFromFrame(frame));
+        await this.sendPacket(this.createHciPacketFromFrame(frame));
     };
 
     Nrf52DfuFlasher.prototype.sendFirmware = async function (firmware) {
@@ -8144,12 +8259,20 @@
         for (var offset = 0; offset < firmware.length; offset += this.DFU_PACKET_MAX_SIZE) {
             var chunk = firmware.slice(offset, offset + this.DFU_PACKET_MAX_SIZE);
             var frame = this.int32ToBytes(this.DFU_DATA_PACKET).concat(Array.from(chunk));
-            await this.write(this.createHciPacketFromFrame(frame));
+            await this.sendPacket(this.createHciPacketFromFrame(frame));
             await sleepMs(this.FLASH_PAGE_WRITE_TIME * 1000);
             packetsSent++;
-            this.setProgress(25 + (packetsSent / packetCount) * 65, 'Writing firmware packet ' + packetsSent + '/' + packetCount + '...');
+            this.setProgress(25 + (packetsSent / packetCount) * 62, 'Writing firmware packet ' + packetsSent + '/' + packetCount + '...');
         }
-        await this.write(this.createHciPacketFromFrame(this.int32ToBytes(this.DFU_STOP_DATA_PACKET)));
+        await this.sendPacket(this.createHciPacketFromFrame(this.int32ToBytes(this.DFU_STOP_DATA_PACKET)));
+    };
+
+    Nrf52DfuFlasher.prototype.sendValidateFirmware = async function () {
+        return true;
+    };
+
+    Nrf52DfuFlasher.prototype.sendActivateFirmware = async function () {
+        this.log('Activating new firmware...', '');
     };
 
     Nrf52DfuFlasher.prototype.flashApplication = async function (firmware, initPacket) {
@@ -8163,6 +8286,10 @@
         await this.sendInitPacket(initPacket);
         this.log('Writing application image (' + formatBytes(firmware.length) + ')...', '');
         await this.sendFirmware(firmware);
+        this.setProgress(88, 'Validating firmware transfer...');
+        await this.sendValidateFirmware();
+        this.setProgress(90, 'Activating firmware...');
+        await this.sendActivateFirmware();
     };
 
     async function prepareNrf52DfuPackage(zipBuffer, logMessage) {
@@ -8205,9 +8332,13 @@
             await flasher.enterDfuMode();
             setProgress(16, 'Opening serial...');
             await flasher.flashApplication(prepared.firmware, prepared.initPacket);
-            setProgress(92, 'Waiting for RNode reboot...');
-            logMessage('Firmware transfer complete; waiting for RNode firmware to boot...', 'log-green');
+            var activateWaitMs = flasher.getActivateWaitTimeMs();
+            setProgress(92, 'Waiting for nRF52 activation...');
+            logMessage('Firmware transfer complete; waiting for nRF52 bootloader activation/copy...', 'log-green');
             await flasher.closePort();
+            await sleepMs(activateWaitMs);
+            setProgress(94, 'Waiting for RNode reboot...');
+            logMessage('Waiting for RNode firmware to boot...', 'log-orange');
             await sleepMs(RNODE_NRF52_DFU_REBOOT_WAIT_MS);
             await refreshRnodePortAfterReboot(logMessage);
         } finally {
@@ -8514,6 +8645,7 @@
                 rnodeSetupIssueKind = 'reconnect';
                 logMessage('Firmware installed. ' + selectedRnodeLabel() + ' reboots into a newly enumerated serial port after DFU.', 'log-green');
                 logMessage('Click Activate RNode below, then select the newly listed RNode serial port to verify identity and firmware hash.', 'log-orange');
+                logMessage(rnodeActivationPortGuidance(), 'log-orange');
             } else if (needsRnodeSetup) {
                 setProgress(94, 'Provisioning RNode EEPROM...');
                 logMessage('Beginning RNode provisioning sequence...', 'log-orange');
@@ -8702,7 +8834,7 @@
             : '<path d="M12 8v5"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="9"/>';
         titleEl.textContent = needsReconnect ? 'Firmware Installed' : 'Firmware Flashed, Setup Needs Attention';
         descEl.textContent = needsReconnect
-            ? 'Activate RNode, then select the serial port that appeared after the device rebooted so the browser can verify identity and firmware hash.'
+            ? 'Activate RNode to verify identity and firmware hash. ' + rnodeActivationPortGuidance()
             : 'Firmware was written, but RNode setup did not finish. Use RNode tools below to retry setup if the device does not boot cleanly. Last error: ' + issue;
         if (needsReconnect) {
             resultEl.classList.add('flash-result--continue');

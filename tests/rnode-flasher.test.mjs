@@ -235,6 +235,11 @@ test('nRF52 DFU path is separate from ESP32 flashing and has a long reboot settl
   assert.equal(extractNumberConst('RNODE_NRF52_DFU_REBOOT_WAIT_MS') >= 9000, true);
   assert.match(downloadHtml, /nRF52 DFU updates the application image/);
   assert.match(downloadHtml, /nRF52 app DFU, bootloader and EEPROM preserved/);
+  assert.match(downloadHtml, /ACK_PACKET_TIMEOUT_MS\s*=\s*1000/);
+  assert.match(downloadHtml, /readAckNumber/);
+  assert.match(downloadHtml, /sendPacket\(this\.createHciPacketFromFrame\(frame\)\)/);
+  assert.match(downloadHtml, /getActivateWaitTimeMs/);
+  assert.match(downloadHtml, /waiting for nRF52 bootloader activation\/copy/);
 });
 
 test('verified host-controlled RNode setup explains Missing Config instead of treating it as repair-only', () => {
@@ -270,6 +275,10 @@ test('nRF52 RNode provisioning is click-driven after DFU re-enumeration', () => 
   assert.match(downloadHtml, /Click Activate RNode below, then select the newly listed RNode serial port/);
   assert.match(downloadHtml, /requestFreshRnodePortFromUser/);
   assert.match(downloadHtml, /kind === 'reconnect' \|\| isRnodeReconnectSetupIssue/);
+  assert.match(downloadHtml, /If it clearly says DFU or bootloader, cancel/);
+  assert.match(downloadHtml, /Generic Nordic\/nRF labels are okay/);
+  assert.match(downloadHtml, /Selected port did not answer as RNode firmware/);
+  assert.match(downloadHtml, /settleMs: rnodeActivationSettleMs\(\)/);
 
   const state = {
     device: 'custom',
@@ -278,15 +287,26 @@ test('nRF52 RNode provisioning is click-driven after DFU re-enumeration', () => 
     rnodeFlashStrategy: 'nrf52-dfu'
   };
   const {
-    shouldUseClickDrivenRnodeProvisioning
+    shouldUseClickDrivenRnodeProvisioning,
+    rnodeActivationPortGuidance,
+    rnodeActivationSettleMs
   } = evaluateDownloadFunctions([
     'selectedFlashStrategy',
     'isOfficialRnodeFirmwareSelected',
     'isNrf52RnodeFirmwareSelected',
-    'shouldUseClickDrivenRnodeProvisioning'
-  ], { state });
+    'shouldUseClickDrivenRnodeProvisioning',
+    'rnodeActivationPortGuidance',
+    'rnodeActivationSettleMs'
+  ], {
+    state,
+    RNODE_NRF52_ACTIVATION_SETTLE_MS: 6000,
+    RNODE_REPAIR_SETTLE_MS: 1500
+  });
 
   assert.equal(shouldUseClickDrivenRnodeProvisioning(), true);
+  assert.match(rnodeActivationPortGuidance(), /DFU or bootloader/);
+  assert.match(rnodeActivationPortGuidance(), /Nordic\/nRF labels are okay/);
+  assert.equal(rnodeActivationSettleMs(), 6000);
 });
 
 test('Web Serial open failures are reconnect handoffs, not provisioning failures', () => {
