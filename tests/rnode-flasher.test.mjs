@@ -170,6 +170,104 @@ test('legacy TCXO alias EEPROM readback is rejected with a specific error', () =
   );
 });
 
+test('valid unlocked RNode identities are recovered by writing only the lock byte', () => {
+  assert.match(downloadHtml, /validateUnlockedRnodeIdentityPayloadForBoard\(rom, product, model\)/);
+  assert.match(downloadHtml, /lockExistingRnodeIdentity\(session, product, model, logMessage\)/);
+  assert.match(downloadHtml, /Locking existing RNode identity/);
+  assert.match(downloadHtml, /use Full Erase and flash again/);
+  assert.doesNotMatch(downloadHtml, /RNode identity write did not read back/);
+
+  const ROM_ADDR = {
+    PRODUCT: 0x00,
+    MODEL: 0x01,
+    HW_REV: 0x02,
+    INFO_LOCK: 0x9B
+  };
+  const context = {
+    ROM_ADDR,
+    RNODE_EEPROM_RESERVED: 200,
+    INFO_LOCK_BYTE: 0x73,
+    md5EqualsStoredIdentityChecksum() {
+      return true;
+    }
+  };
+  const {
+    validateRnodeIdentityForBoard,
+    validateUnlockedRnodeIdentityPayloadForBoard
+  } = evaluateDownloadFunctions([
+    'normalizeRnodeEepromModel',
+    'validateRnodeIdentityForBoard',
+    'validateUnlockedRnodeIdentityPayloadForBoard'
+  ], context);
+  const rom = new Uint8Array(200);
+  rom[ROM_ADDR.PRODUCT] = 0x15;
+  rom[ROM_ADDR.MODEL] = 0x17;
+  rom[ROM_ADDR.HW_REV] = 1;
+  rom[ROM_ADDR.INFO_LOCK] = 0xFF;
+
+  assert.equal(validateRnodeIdentityForBoard(rom, 0x15, 0x17), 'RNode identity was not locked');
+  assert.equal(validateUnlockedRnodeIdentityPayloadForBoard(rom, 0x15, 0x17), null);
+});
+
+test('nRF52 identity writes lock before validation and wait for EEPROM flush', () => {
+  assert.equal(extractNumberConst('RNODE_NRF52_POST_IDENTITY_WRITE_DELAY_MS') >= 3000, true);
+  assert.match(
+    downloadHtml,
+    /writeRnodeIdentityPayload\(session, product, model, hwRev, serialBytes, madeBytes, checksum, signature\);[\s\S]*writeRomOrLocked\(session, ROM_ADDR\.INFO_LOCK, INFO_LOCK_BYTE\);[\s\S]*readRnodeRomWithRetry\(session, 3, logMessage\);/
+  );
+
+  const state = {
+    device: 'custom',
+    rnodeAssetName: 'rnode_firmware_techo.zip',
+    rnodeFlashStrategy: 'nrf52-dfu'
+  };
+  const { rnodePostIdentityWriteDelayMs } = evaluateDownloadFunctions([
+    'selectedFlashStrategy',
+    'isOfficialRnodeFirmwareSelected',
+    'isNrf52RnodeFirmwareSelected',
+    'rnodePostIdentityWriteDelayMs'
+  ], {
+    state,
+    RNODE_NRF52_POST_IDENTITY_WRITE_DELAY_MS: 3500,
+    RNODE_POST_EEPROM_DELAY_MS: 1000
+  });
+
+  assert.equal(rnodePostIdentityWriteDelayMs(), 3500);
+  state.rnodeFlashStrategy = 'esp32-esptool';
+  assert.equal(rnodePostIdentityWriteDelayMs(), 1000);
+});
+
+test('firmware hash verification rejects uninitialized zero hashes', async () => {
+  let targetHash = new Uint8Array(32);
+  let actualHash = new Uint8Array(32);
+  const context = {
+    RNODE_REPAIR_SETTLE_MS: 1500,
+    KISS: {
+      HASH_TYPE_TARGET_FIRMWARE: 0x01,
+      HASH_TYPE_FIRMWARE: 0x02
+    },
+    withRnodeSession: async (_logMessage, _settleMs, callback) => callback({}),
+    readRnodeFirmwareHash: async (_session, hashType) => (
+      hashType === 0x01 ? targetHash : actualHash
+    )
+  };
+  const { ensureRnodeFirmwareHashMatches } = evaluateDownloadFunctions([
+    'hashesEqual',
+    'isZeroHash',
+    'ensureRnodeFirmwareHashMatches'
+  ], context);
+
+  await assert.rejects(
+    () => ensureRnodeFirmwareHashMatches(() => {}, null, { quiet: true }),
+    /RNode firmware hashes are not initialized yet/
+  );
+
+  targetHash = Uint8Array.from({ length: 32 }, (_value, index) => index + 1);
+  actualHash = Uint8Array.from(targetHash);
+  const status = await ensureRnodeFirmwareHashMatches(() => {}, null, { quiet: true });
+  assert.deepEqual(Array.from(status.target), Array.from(targetHash));
+});
+
 test('unsigned browser provisioning is explicit and always uses a blank signature', () => {
   assert.match(downloadHtml, /use rnodeconf when signed identity/);
   assert.match(downloadHtml, /Browser RNode setup writes an unsigned identity/);

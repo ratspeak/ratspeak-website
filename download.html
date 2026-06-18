@@ -6141,6 +6141,10 @@
         return isNrf52RnodeFirmwareSelected() ? RNODE_NRF52_POST_RESET_SETTLE_MS : RNODE_REPAIR_SETTLE_MS;
     }
 
+    function rnodePostIdentityWriteDelayMs() {
+        return isNrf52RnodeFirmwareSelected() ? RNODE_NRF52_POST_IDENTITY_WRITE_DELAY_MS : RNODE_POST_EEPROM_DELAY_MS;
+    }
+
     function resetRnodeSelection(message) {
         state.rnodeAsset = null;
         state.rnodeAssetName = null;
@@ -6728,6 +6732,7 @@
     var RNODE_ROM_WRITE_DELAY_MS = 25;
     var RNODE_ROM_WRITE_ERROR_WINDOW_MS = 45;
     var RNODE_POST_EEPROM_DELAY_MS = 1000;
+    var RNODE_NRF52_POST_IDENTITY_WRITE_DELAY_MS = 3500;
     var RNODE_HASH_SAVE_DELAY_MS = 3000;
     var RNODE_REPAIR_SETTLE_MS = 1500;
     // Upstream rnodeconf gives nRF52 RNodes this long after reset because the
@@ -7341,7 +7346,12 @@
                     actual: await readRnodeFirmwareHash(session, KISS.HASH_TYPE_FIRMWARE)
                 }
                 : await logRnodeHashStatus(session, logMessage);
-            if (hashesEqual(status.target, status.actual)) return status;
+            if (hashesEqual(status.target, status.actual)) {
+                if (isZeroHash(status.target)) {
+                    throw new Error('RNode firmware hashes are not initialized yet');
+                }
+                return status;
+            }
             if (isZeroHash(status.actual)) {
                 throw new Error('RNode running firmware hash is not available yet');
             }
@@ -7429,6 +7439,20 @@
         return null;
     }
 
+    function validateUnlockedRnodeIdentityPayloadForBoard(rom, product, model) {
+        if (!rom || rom.length < RNODE_EEPROM_RESERVED) return 'EEPROM readback was too short';
+        if (rom[ROM_ADDR.PRODUCT] !== product) return 'RNode product byte was not written';
+        if (rom[ROM_ADDR.MODEL] !== model) {
+            if (normalizeRnodeEepromModel(rom[ROM_ADDR.MODEL]) === model) {
+                return 'RNode EEPROM contains a TCXO firmware-selection alias instead of the normalized model byte';
+            }
+            return 'RNode model byte was not written';
+        }
+        if (rom[ROM_ADDR.HW_REV] === 0x00 || rom[ROM_ADDR.HW_REV] === 0xFF) return 'RNode hardware revision is blank';
+        if (!md5EqualsStoredIdentityChecksum(rom)) return 'RNode identity checksum does not match';
+        return null;
+    }
+
     function identityLooksBlank(rom) {
         if (!rom || rom.length < RNODE_EEPROM_RESERVED) return true;
         return rom[ROM_ADDR.PRODUCT] === 0xFF &&
@@ -7449,21 +7473,20 @@
 
     async function writeRnodeIdentity(session, product, model, hwRev, serialBytes, madeBytes, checksum, signature, logMessage) {
         logMessage('Writing RNode identity...', '');
-        var payloadIssue = null;
-        for (var attempt = 0; attempt < 2; attempt++) {
-            await writeRnodeIdentityPayload(session, product, model, hwRev, serialBytes, madeBytes, checksum, signature);
-            await sleepMs(RNODE_POST_EEPROM_DELAY_MS);
-            var payloadRom = await readRnodeRomWithRetry(session, 3, logMessage);
-            payloadIssue = verifyRnodeIdentityPayload(payloadRom, product, model, hwRev, serialBytes, madeBytes, checksum);
-            if (!payloadIssue) break;
-            if (attempt === 0) logMessage('RNode identity write did not read back; retrying once...', 'log-orange');
-        }
-        if (payloadIssue) throw new Error(payloadIssue);
-
+        await writeRnodeIdentityPayload(session, product, model, hwRev, serialBytes, madeBytes, checksum, signature);
         await writeRomOrLocked(session, ROM_ADDR.INFO_LOCK, INFO_LOCK_BYTE);
-        await sleepMs(RNODE_POST_EEPROM_DELAY_MS);
+        await sleepMs(rnodePostIdentityWriteDelayMs());
         var lockedRom = await readRnodeRomWithRetry(session, 3, logMessage);
         var lockedIssue = verifyProvisionedEeprom(lockedRom, product, model, hwRev, serialBytes, madeBytes, checksum);
+        if (lockedIssue) throw new Error(lockedIssue);
+    }
+
+    async function lockExistingRnodeIdentity(session, product, model, logMessage) {
+        logMessage('Locking existing RNode identity...', 'log-orange');
+        await writeRomOrLocked(session, ROM_ADDR.INFO_LOCK, INFO_LOCK_BYTE);
+        await sleepMs(rnodePostIdentityWriteDelayMs());
+        var lockedRom = await readRnodeRomWithRetry(session, 3, logMessage);
+        var lockedIssue = validateRnodeIdentityForBoard(lockedRom, product, model);
         if (lockedIssue) throw new Error(lockedIssue);
     }
 
@@ -7508,12 +7531,16 @@
                 var existingIssue = validateRnodeIdentityForBoard(rom, product, model);
                 if (!existingIssue) {
                     identityVerified = true;
-                } else if (rom && rom[ROM_ADDR.INFO_LOCK] === INFO_LOCK_BYTE && !identityLooksBlank(rom)) {
-                    throw new Error(existingIssue + '; use Full Erase and flash again');
-                } else {
+                } else if (existingIssue === 'RNode identity was not locked' &&
+                    !validateUnlockedRnodeIdentityPayloadForBoard(rom, product, model)) {
+                    if (setProgress) setProgress(96, 'Locking RNode identity...');
+                    await lockExistingRnodeIdentity(session, product, model, logMessage);
+                } else if (identityLooksBlank(rom)) {
                     if (setProgress) setProgress(96, 'Writing RNode identity...');
                     logMessage(RNODE_UNSIGNED_PROVISIONING_NOTICE, 'log-orange');
                     await writeRnodeIdentity(session, product, model, hwRev, serialBytes, madeBytes, checksum, signature, logMessage);
+                } else {
+                    throw new Error(existingIssue + '; use Full Erase and flash again');
                 }
 
                 if (setProgress) setProgress(97, 'Finalizing RNode setup...');
