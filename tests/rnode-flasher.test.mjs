@@ -85,9 +85,12 @@ function evaluateObject(literal, context = {}) {
 function extractFunction(name) {
   const start = downloadHtml.indexOf(`function ${name}`);
   assert.notEqual(start, -1, `missing function ${name}`);
+  const functionStart = downloadHtml.slice(Math.max(0, start - 6), start) === 'async '
+    ? start - 6
+    : start;
   const open = downloadHtml.indexOf('{', start);
   const close = findMatchingBrace(downloadHtml, open);
-  return downloadHtml.slice(start, close + 1);
+  return downloadHtml.slice(functionStart, close + 1);
 }
 
 function evaluateDownloadFunctions(names, extraContext = {}) {
@@ -281,6 +284,10 @@ test('nRF52 RNode provisioning is click-driven after a physical reset', () => {
   assert.doesNotMatch(downloadHtml, /Activate RNode/);
   assert.match(downloadHtml, /settleMs: rnodeActivationSettleMs\(\)/);
   assert.match(downloadHtml, /rnodePostResetSettleMs\(\)/);
+  assert.match(downloadHtml, /dataTerminalReady:\s*true/);
+  assert.match(downloadHtml, /requestToSend:\s*true/);
+  assert.match(downloadHtml, /detectRnodeKissService\(session\)/);
+  assert.match(downloadHtml, /CMD_DETECT/);
 
   const state = {
     device: 'custom',
@@ -335,8 +342,34 @@ test('Web Serial open failures are reconnect handoffs, not provisioning failures
     isRnodeReconnectSetupIssue("Failed to execute 'open' on 'SerialPort': Failed to open serial port."),
     true
   );
+  assert.equal(isRnodeReconnectSetupIssue('Selected serial port did not answer as RNode'), true);
   assert.equal(isRnodeReconnectSetupIssue('NetworkError: The device has been lost.'), true);
   assert.equal(isRnodeReconnectSetupIssue('RNode model byte was not written'), false);
+});
+
+test('RNode setup tries the user-selected serial port before stale authorized ports', async () => {
+  const selected = makePort(0x239A, 0x002A);
+  const staleBootloader = makePort(0x239A, 0x0029);
+  const otherDevice = makePort(0x1A86, 0x7523);
+  const state = { port: selected };
+
+  const { collectRnodePortCandidates } = evaluateDownloadFunctions([
+    'authorizedSerialPorts',
+    'collectRnodePortCandidates'
+  ], {
+    state,
+    navigator: {
+      serial: {
+        getPorts: async () => [staleBootloader, selected, otherDevice]
+      }
+    }
+  });
+
+  const candidates = await collectRnodePortCandidates();
+  assert.equal(candidates.length, 3);
+  assert.equal(candidates[0], selected);
+  assert.equal(candidates[1], staleBootloader);
+  assert.equal(candidates[2], otherDevice);
 });
 
 test('post-flash reconnect prefers stable Web Serial handles and matching USB IDs', () => {

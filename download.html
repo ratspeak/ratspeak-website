@@ -6709,6 +6709,7 @@
     // Constants transcribed from RNS/Utilities/rnodeconf.py
     var KISS = {
         FEND: 0xC0, FESC: 0xDB, TFEND: 0xDC, TFESC: 0xDD,
+        CMD_DETECT:    0x08,
         CMD_RADIO_STATE: 0x06,
         CMD_ERROR:     0x90,
         CMD_ROM_READ:  0x51,
@@ -6718,6 +6719,8 @@
         CMD_HASHES:    0x60,
         CMD_RESET:     0x55,
         CMD_RESET_BYTE: 0xF8,
+        DETECT_REQ:    0x73,
+        DETECT_RESP:   0x46,
         ERROR_EEPROM_LOCKED: 0x03,
         HASH_TYPE_TARGET_FIRMWARE: 0x01,
         HASH_TYPE_FIRMWARE:        0x02
@@ -6737,6 +6740,7 @@
     var RNODE_POST_OPEN_SIGNAL_SETTLE_MS = 1200;
     var RNODE_EEPROM_READ_RETRY_DELAY_MS = 1200;
     var RNODE_READ_TIMEOUT_MS = 3500;
+    var RNODE_DETECT_TIMEOUT_MS = 2500;
     var RNODE_EEPROM_RESERVED = 200;
     var RNODE_PORT_OPEN_RETRIES = 4;
     var RNODE_PORT_OPEN_RETRY_DELAY_MS = 900;
@@ -6861,11 +6865,11 @@
     }
     async function collectRnodePortCandidates() {
         var candidates = [];
+        if (state.port) candidates.push(state.port);
         var ports = await authorizedSerialPorts();
         ports.forEach(function (port) {
             if (candidates.indexOf(port) === -1) candidates.push(port);
         });
-        if (state.port && candidates.indexOf(state.port) === -1) candidates.push(state.port);
         return candidates;
     }
     async function refreshRnodePortAfterReboot(logMessage) {
@@ -6880,12 +6884,15 @@
             }
         }
     }
-    async function openRnodeSerialPort(logMessage, settleMs) {
+    async function openRnodeSerialPort(logMessage, settleMs, excludedPorts) {
         await sleepMs(settleMs == null ? RNODE_REPAIR_SETTLE_MS : settleMs);
 
+        var excluded = Array.isArray(excludedPorts) ? excludedPorts : [];
         var lastError = null;
         for (var attempt = 0; attempt < RNODE_PORT_OPEN_RETRIES; attempt++) {
-            var candidates = await collectRnodePortCandidates();
+            var candidates = (await collectRnodePortCandidates()).filter(function (port) {
+                return excluded.indexOf(port) === -1;
+            });
             if (!candidates.length) {
                 throw new Error('Serial port unavailable');
             }
@@ -6903,8 +6910,8 @@
                     });
                     if (port.setSignals) {
                         await port.setSignals({
-                            dataTerminalReady: false,
-                            requestToSend: false
+                            dataTerminalReady: true,
+                            requestToSend: true
                         });
                         await sleepMs(RNODE_POST_OPEN_SIGNAL_SETTLE_MS);
                     }
@@ -7044,28 +7051,64 @@
         };
     }
 
-    async function withRnodeSession(logMessage, settleMs, callback) {
-        var port = await openRnodeSerialPort(logMessage, settleMs);
-
+    function createRnodeSession(port) {
         var reader = port.readable.getReader();
         var writer = port.writable.getWriter();
         var pump = createKissReadPump(reader);
-        var session = {
+        return {
+            port: port,
+            reader: reader,
+            writer: writer,
+            pump: pump,
             send: async function (cmd, payload) {
                 await writer.write(kissFrame(cmd, payload || []));
             },
             readFrame: pump.readFrame
         };
+    }
 
-        try {
-            return await callback(session);
-        } finally {
-            pump.stop();
-            try { await reader.cancel(); } catch (e) { /* ignore */ }
-            try { reader.releaseLock(); } catch (e) { /* ignore */ }
-            try { writer.releaseLock(); } catch (e) { /* ignore */ }
-            try { await port.close(); } catch (e) { /* ignore */ }
+    async function closeRnodeSession(session) {
+        if (!session) return;
+        session.pump.stop();
+        try { await session.reader.cancel(); } catch (e) { /* ignore */ }
+        try { session.reader.releaseLock(); } catch (e) { /* ignore */ }
+        try { session.writer.releaseLock(); } catch (e) { /* ignore */ }
+        try { await session.port.close(); } catch (e) { /* ignore */ }
+    }
+
+    async function withRnodeSession(logMessage, settleMs, callback) {
+        var rejectedPorts = [];
+        var lastError = null;
+        for (var probeAttempt = 0; probeAttempt < RNODE_PORT_OPEN_RETRIES; probeAttempt++) {
+            var port = await openRnodeSerialPort(logMessage, probeAttempt === 0 ? settleMs : 0, rejectedPorts);
+            var session = createRnodeSession(port);
+            var detected = false;
+            try {
+                detected = await detectRnodeKissService(session);
+                if (!detected) {
+                    throw new Error('Selected serial port did not answer as RNode');
+                }
+                return await callback(session);
+            } catch (e) {
+                lastError = e;
+                if (!detected && logMessage) {
+                    logMessage('Opened serial port did not answer as RNode; trying another authorized port...', 'log-orange');
+                }
+                if (detected) throw e;
+                rejectedPorts.push(port);
+            } finally {
+                await closeRnodeSession(session);
+            }
         }
+        throw lastError || new Error('Selected serial port did not answer as RNode');
+    }
+
+    async function detectRnodeKissService(session) {
+        await session.send(KISS.CMD_DETECT, [KISS.DETECT_REQ]);
+        var frame = await session.readFrame(function (candidate) {
+            return candidate.command === KISS.CMD_DETECT;
+        }, RNODE_DETECT_TIMEOUT_MS);
+        return !!(frame && frame.payload && frame.payload[0] === KISS.DETECT_RESP);
     }
 
     // ── MD5 (RFC 1321) ───────────────────────────────
@@ -8766,7 +8809,7 @@
     };
 
     function isRnodeReconnectSetupIssue(issue) {
-        return /did not return EEPROM data|serial port unavailable|could not open RNode serial|failed to execute 'open'|failed to open serial port|networkerror|device has been lost/i.test(issue || '');
+        return /did not answer as RNode|did not return EEPROM data|serial port unavailable|could not open RNode serial|failed to execute 'open'|failed to open serial port|networkerror|device has been lost/i.test(issue || '');
     }
 
     function resetResultAction() {
