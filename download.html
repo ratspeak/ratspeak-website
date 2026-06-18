@@ -2489,6 +2489,9 @@
             color: var(--text-secondary);
             margin-bottom: 20px;
         }
+        .flash-result__desc:empty {
+            display: none;
+        }
 
         .flash-result__actions {
             display: flex;
@@ -5111,7 +5114,7 @@
                             </span>
                             <span class="flash-repair__copy">
                                 <span class="flash-repair__label">Repair RNode setup</span>
-                                <span class="flash-repair__sub">Use if identity or firmware-hash setup fails. Missing Config can be normal in host-controlled mode.</span>
+                                <span class="flash-repair__sub">Use if identity or firmware-hash setup fails.</span>
                             </span>
                         </button>
                         <button type="button" class="flash-repair__action" id="setHashBtn">
@@ -6089,17 +6092,6 @@
 
     function selectedRnodeLabel() {
         return state.rnodeAssetLabel || 'RNode';
-    }
-
-    // rnodeconf reports this EEPROM state as normal host-controlled mode.
-    // Display firmware on boards such as T-Echo can label the same idle state
-    // as Missing Config until a Reticulum host opens and configures the radio.
-    function rnodeHostControlledNotice() {
-        var device = selectedRnodeLabel();
-        var prefix = isNrf52RnodeFirmwareSelected()
-            ? device + ' may show Missing Config while idle. '
-            : 'A display RNode may show Missing Config while idle. ';
-        return prefix + 'This is expected after verified Ratspeak setup because startup radio settings stay host-controlled until Ratspeak opens the device.';
     }
 
     function shouldUseClickDrivenRnodeProvisioning() {
@@ -7672,7 +7664,6 @@
             var result = await runProvisioning(ui.log, ui.setProgress, { settleMs: rnodeActivationSettleMs() });
             state.rnodeHostControlledMode = !!(result && result.normalModeSet);
             ui.setProgress(100, 'RNode setup complete');
-            if (state.rnodeHostControlledMode) ui.log(rnodeHostControlledNotice(), 'log-green');
             showRnodeSetupComplete();
         } catch (err) {
             var message = err.message || String(err);
@@ -7833,9 +7824,7 @@
             } else {
                 setFlowItem('flowFlash', 'is-done', 'Complete');
                 if (noteEl) {
-                    noteEl.textContent = state.rnodeHostControlledMode
-                        ? 'Firmware flash complete. RNode setup was verified; Missing Config on a display board is expected until Ratspeak opens it.'
-                        : shouldRunRnodeSetup()
+                    noteEl.textContent = shouldRunRnodeSetup()
                         ? 'Firmware flash complete. RNode setup was verified.'
                         : 'Flash complete. Let the device finish rebooting before using it on the mesh.';
                 }
@@ -8784,9 +8773,6 @@
             } else if (needsRnodeSetup) {
                 setProgress(100, 'RNode setup verified');
                 logMessage('Firmware flash complete. RNode setup was verified; let the device finish rebooting before use.', 'log-green');
-                if (state.rnodeHostControlledMode) {
-                    logMessage(rnodeHostControlledNotice(), 'log-green');
-                }
                 rnodeSetupCompleted = true;
             } else {
                 setProgress(100, 'Complete');
@@ -8887,9 +8873,7 @@
         iconEl.className = 'flash-result__icon flash-result__icon--success';
         svgEl.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
         titleEl.textContent = 'RNode Ready';
-        descEl.textContent = state.rnodeHostControlledMode
-            ? rnodeHostControlledNotice() + ' Add it in Ratspeak when you are ready.'
-            : 'Setup is complete. Add the device in Ratspeak when you are ready.';
+        descEl.textContent = '';
         updateFlashFlow();
     }
 

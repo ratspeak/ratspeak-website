@@ -343,10 +343,12 @@ test('nRF52 DFU path is separate from ESP32 flashing and has a long reboot settl
   assert.match(downloadHtml, /waiting for nRF52 bootloader activation\/copy/);
 });
 
-test('verified host-controlled RNode setup explains Missing Config instead of treating it as repair-only', () => {
+test('verified RNode setup does not surface Missing Config copy after completion', () => {
   assert.match(downloadHtml, /Ratspeak keeps startup radio settings host-controlled/);
-  assert.match(downloadHtml, /Missing Config can be normal in host-controlled mode/);
-  assert.match(downloadHtml, /Missing Config on a display board is expected until Ratspeak opens it/);
+  assert.doesNotMatch(downloadHtml, /Missing Config/);
+  assert.match(downloadHtml, /Use if identity or firmware-hash setup fails\./);
+  assert.match(downloadHtml, /titleEl\.textContent = 'RNode Ready'/);
+  assert.match(downloadHtml, /descEl\.textContent = ''/);
   assert.match(downloadHtml, /state\.rnodeHostControlledMode = !!rnodeProvisionResult\.normalModeSet/);
 
   const state = {
@@ -356,19 +358,14 @@ test('verified host-controlled RNode setup explains Missing Config instead of tr
     rnodeFlashStrategy: 'nrf52-dfu'
   };
   const {
-    isNrf52RnodeFirmwareSelected,
-    rnodeHostControlledNotice
+    isNrf52RnodeFirmwareSelected
   } = evaluateDownloadFunctions([
     'selectedFlashStrategy',
     'isOfficialRnodeFirmwareSelected',
-    'isNrf52RnodeFirmwareSelected',
-    'selectedRnodeLabel',
-    'rnodeHostControlledNotice'
+    'isNrf52RnodeFirmwareSelected'
   ], { state });
 
   assert.equal(isNrf52RnodeFirmwareSelected(), true);
-  assert.match(rnodeHostControlledNotice(), /^LilyGO T-Echo may show Missing Config while idle\./);
-  assert.match(rnodeHostControlledNotice(), /startup radio settings stay host-controlled/);
 });
 
 test('nRF52 RNode provisioning is click-driven after a physical reset', () => {
