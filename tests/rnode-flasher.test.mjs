@@ -270,15 +270,17 @@ test('verified host-controlled RNode setup explains Missing Config instead of tr
   assert.match(rnodeHostControlledNotice(), /startup radio settings stay host-controlled/);
 });
 
-test('nRF52 RNode provisioning is click-driven after DFU re-enumeration', () => {
-  assert.match(downloadHtml, /nRF52 rebooted after DFU; select the newly listed RNode serial port/);
-  assert.match(downloadHtml, /Click Activate RNode below, then select the newly listed RNode serial port/);
+test('nRF52 RNode provisioning is click-driven after a physical reset', () => {
+  assert.match(downloadHtml, /Reset the board once, then finish RNode setup/);
+  assert.match(downloadHtml, /Press RESET once\. When the serial port returns, click Finish Setup\./);
   assert.match(downloadHtml, /requestFreshRnodePortFromUser/);
   assert.match(downloadHtml, /kind === 'reconnect' \|\| isRnodeReconnectSetupIssue/);
-  assert.match(downloadHtml, /If it clearly says DFU or bootloader, cancel/);
-  assert.match(downloadHtml, /Generic Nordic\/nRF labels are okay/);
-  assert.match(downloadHtml, /Selected port did not answer as RNode firmware/);
+  assert.match(downloadHtml, /Select the RNode serial port\./);
+  assert.match(downloadHtml, /Selected port did not answer as RNode/);
+  assert.match(downloadHtml, /Finish Setup/);
+  assert.doesNotMatch(downloadHtml, /Activate RNode/);
   assert.match(downloadHtml, /settleMs: rnodeActivationSettleMs\(\)/);
+  assert.match(downloadHtml, /rnodePostResetSettleMs\(\)/);
 
   const state = {
     device: 'custom',
@@ -289,24 +291,39 @@ test('nRF52 RNode provisioning is click-driven after DFU re-enumeration', () => 
   const {
     shouldUseClickDrivenRnodeProvisioning,
     rnodeActivationPortGuidance,
-    rnodeActivationSettleMs
+    rnodeActivationRetryGuidance,
+    rnodePortSelectionGuidance,
+    rnodeActivationSettleMs,
+    rnodePostResetSettleMs
   } = evaluateDownloadFunctions([
     'selectedFlashStrategy',
     'isOfficialRnodeFirmwareSelected',
     'isNrf52RnodeFirmwareSelected',
+    'isTechoRnodeFirmwareSelected',
     'shouldUseClickDrivenRnodeProvisioning',
     'rnodeActivationPortGuidance',
-    'rnodeActivationSettleMs'
+    'rnodePortSelectionGuidance',
+    'rnodeActivationRetryGuidance',
+    'rnodeActivationSettleMs',
+    'rnodePostResetSettleMs'
   ], {
     state,
-    RNODE_NRF52_ACTIVATION_SETTLE_MS: 6000,
+    RNODE_NRF52_ACTIVATION_SETTLE_MS: 20000,
+    RNODE_NRF52_POST_RESET_SETTLE_MS: 20000,
     RNODE_REPAIR_SETTLE_MS: 1500
   });
 
   assert.equal(shouldUseClickDrivenRnodeProvisioning(), true);
-  assert.match(rnodeActivationPortGuidance(), /DFU or bootloader/);
-  assert.match(rnodeActivationPortGuidance(), /Nordic\/nRF labels are okay/);
-  assert.equal(rnodeActivationSettleMs(), 6000);
+  assert.equal(rnodeActivationPortGuidance(), 'Press RESET once. When the serial port returns, click Finish Setup.');
+  assert.equal(rnodePortSelectionGuidance(), 'Select the RNode serial port.');
+  assert.equal(rnodeActivationRetryGuidance(), 'Press RESET once, then try Finish Setup again.');
+  assert.equal(rnodeActivationSettleMs(), 20000);
+  assert.equal(rnodePostResetSettleMs(), 20000);
+
+  state.rnodeAssetName = 'rnode_firmware_heltec_t114.zip';
+  state.rnodeAssetLabel = 'Heltec Mesh Node T114';
+  assert.equal(rnodeActivationPortGuidance(), 'Reset or unplug/replug the board. When the serial port returns, click Finish Setup.');
+  assert.equal(rnodeActivationRetryGuidance(), 'Reset or unplug/replug the board, then try Finish Setup again.');
 });
 
 test('Web Serial open failures are reconnect handoffs, not provisioning failures', () => {

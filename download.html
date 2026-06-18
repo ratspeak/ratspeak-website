@@ -6079,6 +6079,10 @@
         return isOfficialRnodeFirmwareSelected() && selectedFlashStrategy() === 'nrf52-dfu';
     }
 
+    function isTechoRnodeFirmwareSelected() {
+        return state.rnodeAssetName === 'rnode_firmware_techo.zip';
+    }
+
     function shouldRunRnodeSetup() {
         return state.device === 'custom' && (state.rnodeProvision || isOfficialRnodeFirmwareSelected());
     }
@@ -6103,14 +6107,38 @@
     }
 
     function rnodeActivationPortGuidance() {
+        if (isTechoRnodeFirmwareSelected()) {
+            return 'Press RESET once. When the serial port returns, click Finish Setup.';
+        }
         if (isNrf52RnodeFirmwareSelected()) {
-            return 'Select the newly listed serial port. If it clearly says DFU or bootloader, cancel, press RESET or unplug/replug the board, wait a few seconds, then click Activate RNode again. Generic Nordic/nRF labels are okay if they are the RNode app port; the flasher will verify the RNode EEPROM service.';
+            return 'Reset or unplug/replug the board. When the serial port returns, click Finish Setup.';
         }
         return 'Select the RNode serial port that appeared after the device rebooted.';
     }
 
+    function rnodePortSelectionGuidance() {
+        if (isNrf52RnodeFirmwareSelected()) {
+            return 'Select the RNode serial port.';
+        }
+        return 'Select the RNode serial port that appeared after the device rebooted.';
+    }
+
+    function rnodeActivationRetryGuidance() {
+        if (isTechoRnodeFirmwareSelected()) {
+            return 'Press RESET once, then try Finish Setup again.';
+        }
+        if (isNrf52RnodeFirmwareSelected()) {
+            return 'Reset or unplug/replug the board, then try Finish Setup again.';
+        }
+        return 'Select the RNode serial port and try again.';
+    }
+
     function rnodeActivationSettleMs() {
         return isNrf52RnodeFirmwareSelected() ? RNODE_NRF52_ACTIVATION_SETTLE_MS : RNODE_REPAIR_SETTLE_MS;
+    }
+
+    function rnodePostResetSettleMs() {
+        return isNrf52RnodeFirmwareSelected() ? RNODE_NRF52_POST_RESET_SETTLE_MS : RNODE_REPAIR_SETTLE_MS;
     }
 
     function resetRnodeSelection(message) {
@@ -6699,7 +6727,10 @@
     var RNODE_POST_EEPROM_DELAY_MS = 1000;
     var RNODE_HASH_SAVE_DELAY_MS = 3000;
     var RNODE_REPAIR_SETTLE_MS = 1500;
-    var RNODE_NRF52_ACTIVATION_SETTLE_MS = 6000;
+    // Upstream rnodeconf gives nRF52 RNodes this long after reset because the
+    // USB serial connection is disrupted and display boards can take time to boot.
+    var RNODE_NRF52_ACTIVATION_SETTLE_MS = 20000;
+    var RNODE_NRF52_POST_RESET_SETTLE_MS = 20000;
     var RNODE_HASH_ADOPT_BOOT_WAIT_MS = 3500;
     var RNODE_POST_FLASH_BOOT_WAIT_MS = 9000;
     var RNODE_NRF52_DFU_REBOOT_WAIT_MS = 9000;
@@ -7448,7 +7479,7 @@
                 await resetRnodeAfterSetup(session, null);
             });
 
-            await withRnodeSession(null, RNODE_REPAIR_SETTLE_MS, async function (session) {
+            await withRnodeSession(null, rnodePostResetSettleMs(), async function (session) {
                 var verifiedRom = await readRnodeRomWithRetry(session, 3, null);
                 lastIdentityIssue = validateRnodeIdentityForBoard(verifiedRom, product, model);
                 identityVerified = !lastIdentityIssue;
@@ -7474,7 +7505,7 @@
         if (setProgress) setProgress(99, 'Verifying firmware hash...');
         logMessage('Verifying firmware hash...', '');
         try {
-            await ensureRnodeFirmwareHashMatches(logMessage, RNODE_HASH_ADOPT_BOOT_WAIT_MS, { quiet: true });
+            await ensureRnodeFirmwareHashMatches(logMessage, rnodePostResetSettleMs(), { quiet: true });
             wroteFirmwareHash = true;
             logMessage('Firmware hash verified.', 'log-green');
         } catch (hashErr) {
@@ -7554,16 +7585,16 @@
             alert('No board identified yet — pick an RNode firmware variant or click Change to set the exact board/band manually.');
             return;
         }
-        var ui = openProgressLog('Select RNode serial...');
-        ui.log(rnodeActivationPortGuidance(), 'log-orange');
+        var ui = openProgressLog('Finish RNode setup...');
+        ui.log(rnodePortSelectionGuidance(), 'log-orange');
         try {
             await requestFreshRnodePortFromUser();
         } catch (e) {
-            ui.setStatus('Activation cancelled.');
-            showRnodeSetupWarning('Activation cancelled; select the RNode app serial port to finish provisioning', 'reconnect');
+            ui.setStatus('Setup cancelled.');
+            showRnodeSetupWarning('Setup cancelled; reset the board and finish setup when it is ready.', 'reconnect');
             return;
         }
-        ui.setStatus('Activating RNode...');
+        ui.setStatus('Verifying RNode...');
         try {
             if (!state.firmwareAppBytes) {
                 ui.log('No firmware bytes loaded; firmware hash will be left unchanged.', 'log-orange');
@@ -7579,8 +7610,8 @@
             if (isRnodeReconnectSetupIssue(message)) {
                 state.rnodeSetupIssue = message;
                 state.rnodeSetupIssueKind = 'reconnect';
-                ui.log('Selected port did not answer as RNode firmware. ' + rnodeActivationPortGuidance(), 'log-orange');
-                ui.setStatus('Select RNode app serial.');
+                ui.log('Selected port did not answer as RNode. ' + rnodeActivationRetryGuidance(), 'log-orange');
+                ui.setStatus('Reset board, then try again.');
                 showRnodeSetupWarning(message, 'reconnect');
             } else {
                 ui.setStatus('RNode setup failed.');
@@ -7606,7 +7637,7 @@
                 await resetRnodeAfterSetup(session, null);
             });
             ui.log('Verifying firmware hash...', '');
-            await ensureRnodeFirmwareHashMatches(ui.log, RNODE_HASH_ADOPT_BOOT_WAIT_MS, { quiet: true });
+            await ensureRnodeFirmwareHashMatches(ui.log, rnodePostResetSettleMs(), { quiet: true });
             ui.log('Firmware hash verified.', 'log-green');
             ui.setStatus('Firmware hash verified.');
         } catch (err) {
@@ -7723,10 +7754,10 @@
             setFlowItem('flowFirmware', 'is-done', 'Written');
             if (state.rnodeSetupIssue) {
                 var reconnectSetup = state.rnodeSetupIssueKind === 'reconnect';
-                setFlowItem('flowFlash', reconnectSetup ? 'is-active' : 'is-warning', reconnectSetup ? 'Activate RNode' : 'RNode setup');
+                setFlowItem('flowFlash', reconnectSetup ? 'is-active' : 'is-warning', reconnectSetup ? 'Finish setup' : 'RNode setup');
                 if (noteEl) {
                     noteEl.textContent = reconnectSetup
-                        ? 'Firmware is installed. Activate RNode and select the serial port that appeared after reboot.'
+                        ? 'Firmware is installed. Reset the board, then finish RNode setup.'
                         : 'Firmware was written, but RNode setup needs attention.';
                 }
             } else {
@@ -8641,10 +8672,9 @@
 
             // 10. (Optional) RNode EEPROM + firmware-hash provisioning
             if (needsRnodeSetup && shouldUseClickDrivenRnodeProvisioning()) {
-                rnodeSetupIssue = 'nRF52 rebooted after DFU; select the newly listed RNode serial port to finish provisioning';
+                rnodeSetupIssue = 'Reset the board once, then finish RNode setup';
                 rnodeSetupIssueKind = 'reconnect';
                 logMessage('Firmware installed. ' + selectedRnodeLabel() + ' reboots into a newly enumerated serial port after DFU.', 'log-green');
-                logMessage('Click Activate RNode below, then select the newly listed RNode serial port to verify identity and firmware hash.', 'log-orange');
                 logMessage(rnodeActivationPortGuidance(), 'log-orange');
             } else if (needsRnodeSetup) {
                 setProgress(94, 'Provisioning RNode EEPROM...');
@@ -8661,7 +8691,7 @@
                     if (isRnodeReconnectSetupIssue(setupError)) {
                         rnodeSetupIssue = setupError;
                         rnodeSetupIssueKind = 'reconnect';
-                        logMessage('Firmware installed. Activate RNode below and select the serial port that appeared after reboot.', 'log-green');
+                        logMessage('Firmware installed. Reset the board, then click Finish Setup.', 'log-green');
                     } else {
                         rnodeSetupIssue = 'Provisioning failed: ' + setupError;
                         rnodeSetupIssueKind = 'provision';
@@ -8834,11 +8864,11 @@
             : '<path d="M12 8v5"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="9"/>';
         titleEl.textContent = needsReconnect ? 'Firmware Installed' : 'Firmware Flashed, Setup Needs Attention';
         descEl.textContent = needsReconnect
-            ? 'Activate RNode to verify identity and firmware hash. ' + rnodeActivationPortGuidance()
+            ? rnodeActivationPortGuidance()
             : 'Firmware was written, but RNode setup did not finish. Use RNode tools below to retry setup if the device does not boot cleanly. Last error: ' + issue;
         if (needsReconnect) {
             resultEl.classList.add('flash-result--continue');
-            configureResultAction('Activate RNode', runReprovisionOnly);
+            configureResultAction('Finish Setup', runReprovisionOnly);
         }
         resultEl.classList.add('active');
     }
