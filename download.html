@@ -6098,6 +6098,10 @@
         return prefix + 'This is expected after verified Ratspeak setup because startup radio settings stay host-controlled until Ratspeak opens the device.';
     }
 
+    function shouldUseClickDrivenRnodeProvisioning() {
+        return isNrf52RnodeFirmwareSelected();
+    }
+
     function resetRnodeSelection(message) {
         state.rnodeAsset = null;
         state.rnodeAssetName = null;
@@ -7693,7 +7697,7 @@
                 setFlowItem('flowFlash', reconnectSetup ? 'is-active' : 'is-warning', reconnectSetup ? 'Activate RNode' : 'RNode setup');
                 if (noteEl) {
                     noteEl.textContent = reconnectSetup
-                        ? 'Firmware is installed. Restart or reconnect the device, then activate RNode.'
+                        ? 'Firmware is installed. Activate RNode and select the serial port that appeared after reboot.'
                         : 'Firmware was written, but RNode setup needs attention.';
                 }
             } else {
@@ -8505,7 +8509,12 @@
             }
 
             // 10. (Optional) RNode EEPROM + firmware-hash provisioning
-            if (needsRnodeSetup) {
+            if (needsRnodeSetup && shouldUseClickDrivenRnodeProvisioning()) {
+                rnodeSetupIssue = 'nRF52 rebooted after DFU; select the newly listed RNode serial port to finish provisioning';
+                rnodeSetupIssueKind = 'reconnect';
+                logMessage('Firmware installed. ' + selectedRnodeLabel() + ' reboots into a newly enumerated serial port after DFU.', 'log-green');
+                logMessage('Click Activate RNode below, then select the newly listed RNode serial port to verify identity and firmware hash.', 'log-orange');
+            } else if (needsRnodeSetup) {
                 setProgress(94, 'Provisioning RNode EEPROM...');
                 logMessage('Beginning RNode provisioning sequence...', 'log-orange');
                 try {
@@ -8520,7 +8529,7 @@
                     if (isRnodeReconnectSetupIssue(setupError)) {
                         rnodeSetupIssue = setupError;
                         rnodeSetupIssueKind = 'reconnect';
-                        logMessage('Firmware installed. Restart or reconnect the device, then activate RNode below.', 'log-green');
+                        logMessage('Firmware installed. Activate RNode below and select the serial port that appeared after reboot.', 'log-green');
                     } else {
                         rnodeSetupIssue = 'Provisioning failed: ' + setupError;
                         rnodeSetupIssueKind = 'provision';
@@ -8595,7 +8604,7 @@
     };
 
     function isRnodeReconnectSetupIssue(issue) {
-        return /did not return EEPROM data|serial port unavailable|could not open RNode serial/i.test(issue || '');
+        return /did not return EEPROM data|serial port unavailable|could not open RNode serial|failed to execute 'open'|failed to open serial port|networkerror|device has been lost/i.test(issue || '');
     }
 
     function resetResultAction() {
@@ -8693,7 +8702,7 @@
             : '<path d="M12 8v5"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="9"/>';
         titleEl.textContent = needsReconnect ? 'Firmware Installed' : 'Firmware Flashed, Setup Needs Attention';
         descEl.textContent = needsReconnect
-            ? 'Restart the device or unplug and plug it back in normally, then activate RNode so the browser can verify identity and firmware hash.'
+            ? 'Activate RNode, then select the serial port that appeared after the device rebooted so the browser can verify identity and firmware hash.'
             : 'Firmware was written, but RNode setup did not finish. Use RNode tools below to retry setup if the device does not boot cleanly. Last error: ' + issue;
         if (needsReconnect) {
             resultEl.classList.add('flash-result--continue');

@@ -265,6 +265,42 @@ test('verified host-controlled RNode setup explains Missing Config instead of tr
   assert.match(rnodeHostControlledNotice(), /startup radio settings stay host-controlled/);
 });
 
+test('nRF52 RNode provisioning is click-driven after DFU re-enumeration', () => {
+  assert.match(downloadHtml, /nRF52 rebooted after DFU; select the newly listed RNode serial port/);
+  assert.match(downloadHtml, /Click Activate RNode below, then select the newly listed RNode serial port/);
+  assert.match(downloadHtml, /requestFreshRnodePortFromUser/);
+
+  const state = {
+    device: 'custom',
+    rnodeAssetName: 'rnode_firmware_techo.zip',
+    rnodeAssetLabel: 'LilyGO T-Echo',
+    rnodeFlashStrategy: 'nrf52-dfu'
+  };
+  const {
+    shouldUseClickDrivenRnodeProvisioning
+  } = evaluateDownloadFunctions([
+    'selectedFlashStrategy',
+    'isOfficialRnodeFirmwareSelected',
+    'isNrf52RnodeFirmwareSelected',
+    'shouldUseClickDrivenRnodeProvisioning'
+  ], { state });
+
+  assert.equal(shouldUseClickDrivenRnodeProvisioning(), true);
+});
+
+test('Web Serial open failures are reconnect handoffs, not provisioning failures', () => {
+  const { isRnodeReconnectSetupIssue } = evaluateDownloadFunctions([
+    'isRnodeReconnectSetupIssue'
+  ]);
+
+  assert.equal(
+    isRnodeReconnectSetupIssue("Failed to execute 'open' on 'SerialPort': Failed to open serial port."),
+    true
+  );
+  assert.equal(isRnodeReconnectSetupIssue('NetworkError: The device has been lost.'), true);
+  assert.equal(isRnodeReconnectSetupIssue('RNode model byte was not written'), false);
+});
+
 test('post-flash reconnect prefers stable Web Serial handles and matching USB IDs', () => {
   const {
     chooseRnodeReconnectPort
