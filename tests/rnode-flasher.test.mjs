@@ -1,0 +1,263 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import test from 'node:test';
+import vm from 'node:vm';
+
+const downloadHtml = readFileSync(new URL('../download.html', import.meta.url), 'utf8');
+const firmwareApi = readFileSync(new URL('../api/firmware.js', import.meta.url), 'utf8');
+
+function findMatchingBrace(source, openIndex) {
+  let depth = 0;
+  let quote = null;
+  let escaped = false;
+  let lineComment = false;
+  let blockComment = false;
+
+  for (let i = openIndex; i < source.length; i += 1) {
+    const ch = source[i];
+    const next = source[i + 1];
+
+    if (lineComment) {
+      if (ch === '\n') lineComment = false;
+      continue;
+    }
+    if (blockComment) {
+      if (ch === '*' && next === '/') {
+        blockComment = false;
+        i += 1;
+      }
+      continue;
+    }
+    if (quote) {
+      if (escaped) {
+        escaped = false;
+      } else if (ch === '\\') {
+        escaped = true;
+      } else if (ch === quote) {
+        quote = null;
+      }
+      continue;
+    }
+
+    if (ch === '/' && next === '/') {
+      lineComment = true;
+      i += 1;
+      continue;
+    }
+    if (ch === '/' && next === '*') {
+      blockComment = true;
+      i += 1;
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === '`') {
+      quote = ch;
+      continue;
+    }
+    if (ch === '{') depth += 1;
+    if (ch === '}') {
+      depth -= 1;
+      if (depth === 0) return i;
+    }
+  }
+  throw new Error('No matching brace found');
+}
+
+function extractObjectLiteral(source, declaration) {
+  const start = source.indexOf(declaration);
+  assert.notEqual(start, -1, `missing ${declaration}`);
+  const open = source.indexOf('{', start);
+  const close = findMatchingBrace(source, open);
+  return source.slice(open, close + 1);
+}
+
+function extractDownloadVar(name) {
+  return extractObjectLiteral(downloadHtml, `var ${name} =`);
+}
+
+function extractApiConst(name) {
+  return extractObjectLiteral(firmwareApi, `const ${name} =`);
+}
+
+function evaluateObject(literal, context = {}) {
+  return vm.runInNewContext(`(${literal})`, context);
+}
+
+function extractFunction(name) {
+  const start = downloadHtml.indexOf(`function ${name}`);
+  assert.notEqual(start, -1, `missing function ${name}`);
+  const open = downloadHtml.indexOf('{', start);
+  const close = findMatchingBrace(downloadHtml, open);
+  return downloadHtml.slice(start, close + 1);
+}
+
+function evaluateDownloadFunctions(names, extraContext = {}) {
+  const source = `${names.map(extractFunction).join('\n')}\n({ ${names.join(', ')} })`;
+  return vm.runInNewContext(source, { Uint8Array, ...extraContext });
+}
+
+function extractNumberConst(name) {
+  const match = downloadHtml.match(new RegExp(`var\\s+${name}\\s*=\\s*(\\d+)\\s*;`));
+  assert.ok(match, `missing numeric constant ${name}`);
+  return Number(match[1]);
+}
+
+function makePort(vendorId, productId) {
+  return {
+    getInfo() {
+      return { usbVendorId: vendorId, usbProductId: productId };
+    }
+  };
+}
+
+test('TCXO aliases select firmware but EEPROM provisioning writes normalized model bytes', () => {
+  const variantHints = evaluateObject(extractDownloadVar('VARIANT_HINTS'));
+  const bandModels = evaluateObject(extractDownloadVar('RNODE_VARIANT_BAND_MODELS'));
+  const tcxoName = 'rnode_firmware_lora32v21_tcxo.zip';
+
+  assert.equal(variantHints[tcxoName].product, 0xB1);
+  assert.equal(variantHints[tcxoName].model, 0x09);
+  assert.equal(bandModels[tcxoName].low, 0x04);
+  assert.equal(bandModels[tcxoName].high, 0x09);
+
+  const {
+    normalizeRnodeEepromModel,
+    normalizeRnodeProvisioningIdentity
+  } = evaluateDownloadFunctions([
+    'normalizeRnodeEepromModel',
+    'normalizeRnodeProvisioningIdentity'
+  ]);
+
+  assert.equal(normalizeRnodeEepromModel(0x04), 0xB4);
+  assert.equal(normalizeRnodeEepromModel(0x09), 0xB9);
+  assert.equal(normalizeRnodeEepromModel(0xA6), 0xA6);
+  const normalized = normalizeRnodeProvisioningIdentity({ product: 0xB1, model: 0x09 });
+  assert.equal(normalized.product, 0xB1);
+  assert.equal(normalized.selectedModel, 0x09);
+  assert.equal(normalized.model, 0xB9);
+});
+
+test('legacy TCXO alias EEPROM readback is rejected with a specific error', () => {
+  const ROM_ADDR = {
+    PRODUCT: 0x00,
+    MODEL: 0x01,
+    HW_REV: 0x02,
+    INFO_LOCK: 0x9B
+  };
+  const context = {
+    ROM_ADDR,
+    RNODE_EEPROM_RESERVED: 200,
+    INFO_LOCK_BYTE: 0x73,
+    md5EqualsStoredIdentityChecksum() {
+      return true;
+    }
+  };
+  const { validateRnodeIdentityForBoard } = evaluateDownloadFunctions([
+    'normalizeRnodeEepromModel',
+    'validateRnodeIdentityForBoard'
+  ], context);
+  const rom = new Uint8Array(200);
+  rom[ROM_ADDR.PRODUCT] = 0xB1;
+  rom[ROM_ADDR.MODEL] = 0x09;
+  rom[ROM_ADDR.HW_REV] = 1;
+  rom[ROM_ADDR.INFO_LOCK] = 0x73;
+
+  assert.match(
+    validateRnodeIdentityForBoard(rom, 0xB1, 0xB9),
+    /TCXO firmware-selection alias/
+  );
+});
+
+test('unsigned browser provisioning is explicit and always uses a blank signature', () => {
+  assert.match(downloadHtml, /Browser setup uses an unsigned identity/);
+  assert.match(downloadHtml, /RNODE_UNSIGNED_PROVISIONING_NOTICE/);
+
+  const { buildUnsignedRnodeSignature } = evaluateDownloadFunctions([
+    'buildUnsignedRnodeSignature'
+  ]);
+  const signature = buildUnsignedRnodeSignature();
+
+  assert.equal(signature.length, 128);
+  assert.equal(signature.every((byte) => byte === 0), true);
+});
+
+test('RNode API-supported variants have page hints and platform-specific flash paths', () => {
+  const variantHints = evaluateObject(extractDownloadVar('VARIANT_HINTS'));
+  const esp32Specs = evaluateObject(extractDownloadVar('RNODE_ESP32_FLASH_SPECS'), {
+    rnodeSpec(flashSize, bootloaderOffset) {
+      return { flashSize, bootloaderOffset };
+    }
+  });
+  const apiVariants = evaluateObject(extractApiConst('RNODE_VARIANTS'), {
+    rnodeVariant(platform, flashStrategy) {
+      return { platform, flashStrategy };
+    }
+  });
+
+  for (const name of Object.keys(apiVariants)) {
+    assert.ok(variantHints[name], `${name} is API-supported but has no page identity hint`);
+  }
+
+  for (const [name, meta] of Object.entries(apiVariants)) {
+    if (meta.platform === 'esp32') {
+      assert.equal(meta.flashStrategy, 'esp32-esptool');
+      assert.ok(esp32Specs[name], `${name} is ESP32 but has no page flash spec`);
+    } else if (meta.platform === 'nrf52') {
+      assert.equal(meta.flashStrategy, 'nrf52-dfu');
+      assert.equal(esp32Specs[name], undefined, `${name} must not use ESP32 flash specs`);
+    } else {
+      assert.fail(`unexpected platform ${meta.platform} for ${name}`);
+    }
+  }
+
+  for (const name of Object.keys(esp32Specs)) {
+    assert.equal(apiVariants[name]?.platform, 'esp32', `${name} has an ESP32 flash spec but is not API-supported as ESP32`);
+  }
+});
+
+test('nRF52 DFU path is separate from ESP32 flashing and has a long reboot settle', () => {
+  const apiVariants = evaluateObject(extractApiConst('RNODE_VARIANTS'), {
+    rnodeVariant(platform, flashStrategy) {
+      return { platform, flashStrategy };
+    }
+  });
+  const nrf52Names = Object.entries(apiVariants)
+    .filter(([, meta]) => meta.platform === 'nrf52')
+    .map(([name]) => name)
+    .sort();
+
+  assert.deepEqual(nrf52Names, [
+    'rnode_firmware_heltec_t114.zip',
+    'rnode_firmware_rak4631.zip',
+    'rnode_firmware_rak4631_sx1280.zip',
+    'rnode_firmware_techo.zip'
+  ]);
+  assert.equal(extractNumberConst('RNODE_NRF52_DFU_REBOOT_WAIT_MS') >= 9000, true);
+  assert.match(downloadHtml, /nRF52 DFU updates the application image/);
+});
+
+test('post-flash reconnect prefers stable Web Serial handles and matching USB IDs', () => {
+  const {
+    chooseRnodeReconnectPort
+  } = evaluateDownloadFunctions([
+    'portUsbInfo',
+    'sameUsbInfo',
+    'chooseRnodeReconnectPort'
+  ]);
+
+  const previous = makePort(0x303A, 0x1001);
+  const sameDevice = makePort(0x303A, 0x1001);
+  const otherDevice = makePort(0x1A86, 0x7523);
+
+  assert.equal(chooseRnodeReconnectPort([previous, otherDevice], previous), previous);
+  assert.equal(chooseRnodeReconnectPort([otherDevice, sameDevice], previous), sameDevice);
+  assert.equal(chooseRnodeReconnectPort([otherDevice, sameDevice, makePort(0x303A, 0x1001)], previous), sameDevice);
+  assert.equal(chooseRnodeReconnectPort([otherDevice], previous), otherDevice);
+  assert.equal(chooseRnodeReconnectPort([], previous), null);
+});
+
+test('RNode reconnect timings remain explicit for board-dependent boot behavior', () => {
+  assert.equal(extractNumberConst('RNODE_POST_FLASH_BOOT_WAIT_MS') >= 9000, true);
+  assert.equal(extractNumberConst('RNODE_PORT_OPEN_RETRIES') >= 4, true);
+  assert.equal(extractNumberConst('RNODE_PORT_OPEN_RETRY_DELAY_MS') >= 900, true);
+  assert.match(downloadHtml, /refreshRnodePortAfterReboot/);
+});

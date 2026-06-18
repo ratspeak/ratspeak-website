@@ -5021,7 +5021,7 @@
 
                         <div class="flash-option-expand" id="provisionExpand" hidden>
                             <p class="flash-option-expand__desc">
-                                Writes RNode identity and firmware hash after flashing so the board can boot cleanly. Ratspeak configures the radio when you add the device.
+                                Writes RNode identity and firmware hash after flashing so the board can boot cleanly. Browser setup uses an unsigned identity; use rnodeconf when signed device identity is required.
                             </p>
                             <div class="provision-board" id="provisionBoard" data-mode="auto">
                                 <div class="provision-board__row">
@@ -6101,7 +6101,7 @@
             var resp = await fetch('/api/firmware?source=rnode&releases=true');
             if (!resp.ok) throw new Error('HTTP ' + resp.status);
             var releases = await resp.json();
-            if (!releases.length) throw new Error('No ESP32 releases found');
+            if (!releases.length) throw new Error('No supported RNode releases found');
             rnodeReleaseSelect.innerHTML = releases.map(function (rel) {
                 return '<option value="' + rel.version + '">' + rel.version + ' · ' + rel.variants + ' variants</option>';
             }).join('');
@@ -6127,7 +6127,7 @@
             if (!resp.ok) throw new Error('HTTP ' + resp.status);
             var info = await resp.json();
             state.rnodeVersion = info.version;
-            rnodeReleaseSub.textContent = 'Release ' + info.version + ' · ' + info.variants.length + ' ESP32 variants';
+            rnodeReleaseSub.textContent = 'Release ' + info.version + ' · ' + info.variants.length + ' supported variants';
             await loadRnodeReleases(info.version);
             if (rnodeReleaseSelect) rnodeReleaseSelect.value = info.version;
             var optHtml = '<option value="">Select a device&hellip;</option>';
@@ -6138,7 +6138,7 @@
             rnodeVariantSelect.disabled = false;
             populateRnodeBandSelect(null);
             rnodeStatus.classList.remove('is-error');
-            rnodeStatus.textContent = 'Pick an ESP32 RNode variant to continue.';
+            rnodeStatus.textContent = 'Pick a supported RNode variant to continue.';
         } catch (e) {
             rnodeReleaseSub.textContent = 'Could not load RNode releases';
             if (rnodeVariantSelect) rnodeVariantSelect.innerHTML = '<option>Error loading variants</option>';
@@ -6658,6 +6658,7 @@
     var RNODE_REPAIR_SETTLE_MS = 1500;
     var RNODE_HASH_ADOPT_BOOT_WAIT_MS = 3500;
     var RNODE_POST_FLASH_BOOT_WAIT_MS = 9000;
+    var RNODE_NRF52_DFU_REBOOT_WAIT_MS = 9000;
     var RNODE_POST_OPEN_SIGNAL_SETTLE_MS = 1200;
     var RNODE_EEPROM_READ_RETRY_DELAY_MS = 1200;
     var RNODE_READ_TIMEOUT_MS = 3500;
@@ -6694,6 +6695,9 @@
         }
         return true;
     }
+    function hexByte(byte) {
+        return '0x' + (byte & 0xFF).toString(16).padStart(2, '0').toUpperCase();
+    }
     function readU32BE(bytes, offset) {
         return (((bytes[offset] & 0xFF) * 0x1000000) +
             ((bytes[offset + 1] & 0xFF) << 16) +
@@ -6714,15 +6718,63 @@
         if (/(2\.4-2\.5|sx1280)/.test(lower)) return 'unsupported';
         return null;
     }
-    function serialPortLabel(port) {
+    function normalizeRnodeEepromModel(modelByte) {
+        var model = modelByte & 0xFF;
+        // Reticulum rnodeconf.py treats these TCXO values as firmware
+        // selection aliases only; the EEPROM identity remains B4/B9.
+        if (model === 0x04) return 0xB4;
+        if (model === 0x09) return 0xB9;
+        return model;
+    }
+    function normalizeRnodeProvisioningIdentity(ident) {
+        if (!ident) return null;
+        return {
+            product: ident.product & 0xFF,
+            selectedModel: ident.model & 0xFF,
+            model: normalizeRnodeEepromModel(ident.model)
+        };
+    }
+    function buildUnsignedRnodeSignature() {
+        // Upstream rnodeconf signs this checksum with the local signing key.
+        // The browser does not have that private key, so web setup currently
+        // writes a blank signature and surfaces that limitation in the UI/log.
+        return new Uint8Array(128);
+    }
+    var RNODE_UNSIGNED_PROVISIONING_NOTICE = 'Browser RNode setup writes an unsigned identity; use rnodeconf when a signed device identity is required.';
+    function portUsbInfo(port) {
         try {
             var info = port && port.getInfo ? port.getInfo() : {};
-            var vid = info.usbVendorId != null ? info.usbVendorId.toString(16).padStart(4, '0') : '????';
-            var pid = info.usbProductId != null ? info.usbProductId.toString(16).padStart(4, '0') : '????';
-            return 'USB ' + vid + ':' + pid;
+            if (!info || info.usbVendorId == null || info.usbProductId == null) return null;
+            return { vendorId: info.usbVendorId, productId: info.usbProductId };
         } catch (e) {
-            return 'authorized serial port';
+            return null;
         }
+    }
+    function sameUsbInfo(a, b) {
+        return !!a && !!b && a.vendorId === b.vendorId && a.productId === b.productId;
+    }
+    function chooseRnodeReconnectPort(ports, previousPort) {
+        var candidates = Array.isArray(ports) ? ports.filter(Boolean) : [];
+        if (!candidates.length) return null;
+        if (previousPort && candidates.indexOf(previousPort) !== -1) return previousPort;
+
+        var previousInfo = portUsbInfo(previousPort);
+        if (previousInfo) {
+            var matches = candidates.filter(function (port) {
+                return sameUsbInfo(portUsbInfo(port), previousInfo);
+            });
+            if (matches.length) return matches[0];
+        }
+
+        if (candidates.length === 1) return candidates[0];
+        return candidates[0];
+    }
+    function serialPortLabel(port) {
+        var info = portUsbInfo(port);
+        if (!info) return 'authorized serial port';
+        var vid = info.vendorId.toString(16).padStart(4, '0');
+        var pid = info.productId.toString(16).padStart(4, '0');
+        return 'USB ' + vid + ':' + pid;
     }
     async function authorizedSerialPorts() {
         if (!navigator.serial || !navigator.serial.getPorts) return [];
@@ -6740,6 +6792,18 @@
         });
         if (state.port && candidates.indexOf(state.port) === -1) candidates.push(state.port);
         return candidates;
+    }
+    async function refreshRnodePortAfterReboot(logMessage) {
+        if (!navigator.serial || !navigator.serial.getPorts) return;
+        var currentPorts = await authorizedSerialPorts();
+        var previousPort = state.port;
+        var selected = chooseRnodeReconnectPort(currentPorts, previousPort);
+        if (selected) {
+            state.port = selected;
+            if (selected !== previousPort && logMessage) {
+                logMessage('Selected post-flash RNode serial port ' + serialPortLabel(selected) + '.', 'log-orange');
+            }
+        }
     }
     async function openRnodeSerialPort(logMessage, settleMs) {
         await sleepMs(settleMs == null ? RNODE_REPAIR_SETTLE_MS : settleMs);
@@ -7236,7 +7300,12 @@
         if (!rom || rom.length < RNODE_EEPROM_RESERVED) return 'EEPROM readback was too short';
         if (rom[ROM_ADDR.INFO_LOCK] !== INFO_LOCK_BYTE) return 'RNode identity was not locked';
         if (rom[ROM_ADDR.PRODUCT] !== product) return 'RNode product byte was not written';
-        if (rom[ROM_ADDR.MODEL] !== model) return 'RNode model byte was not written';
+        if (rom[ROM_ADDR.MODEL] !== model) {
+            if (normalizeRnodeEepromModel(rom[ROM_ADDR.MODEL]) === model) {
+                return 'RNode EEPROM contains a TCXO firmware-selection alias instead of the normalized model byte';
+            }
+            return 'RNode model byte was not written';
+        }
         if (rom[ROM_ADDR.HW_REV] === 0x00 || rom[ROM_ADDR.HW_REV] === 0xFF) return 'RNode hardware revision is blank';
         if (!md5EqualsStoredIdentityChecksum(rom)) return 'RNode identity checksum does not match';
         return null;
@@ -7286,9 +7355,13 @@
 
         var ident = resolveBoardIdentity();
         if (ident == null) throw new Error('No board identified — pick an RNode firmware variant or set the exact board/band manually.');
-        var product = ident.product & 0xFF;
-        var model   = ident.model   & 0xFF;
+        ident = normalizeRnodeProvisioningIdentity(ident);
+        var product = ident.product;
+        var model   = ident.model;
         var hwRev   = 1; // Default RNode hardware revision value.
+        if (ident.selectedModel !== model) {
+            logMessage('TCXO firmware selected; writing normalized EEPROM model ' + hexByte(model) + ' instead of selection alias ' + hexByte(ident.selectedModel) + '.', 'log-orange');
+        }
         var rnd = new Uint8Array(4);
         crypto.getRandomValues(rnd);
         var serialBytes = rnd;
@@ -7303,7 +7376,7 @@
         info.set(serialBytes, 3);
         info.set(madeBytes, 7);
         var checksum = md5Bytes(info);
-        var signature = new Uint8Array(128); // blank — unsigned provisioning
+        var signature = buildUnsignedRnodeSignature();
         var settleMs = options && options.settleMs != null ? options.settleMs : RNODE_POST_FLASH_BOOT_WAIT_MS;
         var wroteFirmwareHash = false;
         var normalModeSet = false;
@@ -7321,6 +7394,7 @@
                     throw new Error(existingIssue + '; use Full Erase and flash again');
                 } else {
                     if (setProgress) setProgress(96, 'Writing RNode identity...');
+                    logMessage(RNODE_UNSIGNED_PROVISIONING_NOTICE, 'log-orange');
                     await writeRnodeIdentity(session, product, model, hwRev, serialBytes, madeBytes, checksum, signature, logMessage);
                 }
 
@@ -8083,6 +8157,7 @@
         if (state.eraseAll) {
             logMessage('Full erase is not available for this update path; flashing application update only.', 'log-orange');
         }
+        logMessage('nRF52 DFU updates the application image and preserves the bootloader and EEPROM state.', 'log-orange');
         setProgress(5, 'Preparing firmware package...');
         var prepared = await prepareNrf52DfuPackage(state.rnodeAsset, logMessage);
         var flasher = new Nrf52DfuFlasher(state.port, {
@@ -8097,7 +8172,8 @@
             setProgress(92, 'Waiting for RNode reboot...');
             logMessage('Firmware transfer complete; waiting for RNode firmware to boot...', 'log-green');
             await flasher.closePort();
-            await sleepMs(1800);
+            await sleepMs(RNODE_NRF52_DFU_REBOOT_WAIT_MS);
+            await refreshRnodePortAfterReboot(logMessage);
         } finally {
             await flasher.closePort();
         }
@@ -8392,10 +8468,7 @@
                 try { await transport.disconnect(); } catch(e) {}
                 state.transport = null;
                 state.esploader = null;
-                if (needsRnodeSetup && navigator.serial && navigator.serial.getPorts) {
-                    var currentPorts = await authorizedSerialPorts();
-                    if (currentPorts && currentPorts.length) state.port = currentPorts[0];
-                }
+                if (needsRnodeSetup) await refreshRnodePortAfterReboot(logMessage);
             }
 
             // 10. (Optional) RNode EEPROM + firmware-hash provisioning
