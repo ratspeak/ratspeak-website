@@ -42,7 +42,7 @@
     <link rel="preconnect" href="https://basemaps.cartocdn.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Familjen+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <link rel="stylesheet" href="assets/maps.css?v=light-map-1">
+    <link rel="stylesheet" href="assets/maps.css?v=marker-polish-1">
     <script>!function(){var t=localStorage.getItem('ratspeak-theme');document.documentElement.setAttribute('data-theme',t||'dark')}()</script>
 </head>
 <body>
@@ -135,9 +135,9 @@
                 <section class="map-legend" aria-label="Legend">
                     <h2 class="legend-title">Legend</h2>
                     <div class="legend-grid">
-                        <span class="legend-item"><span class="legend-dot" style="--legend-color: #12a8ff"></span>Server</span>
-                        <span class="legend-item"><span class="legend-dot" style="--legend-color: #37f987"></span>Client (Auto)</span>
-                        <span class="legend-item"><span class="legend-dot" style="--legend-color: #ffd344"></span>Client (Manual)</span>
+                        <span class="legend-item"><span class="legend-dot" style="--legend-color: var(--map-blue)"></span>Server</span>
+                        <span class="legend-item"><span class="legend-dot" style="--legend-color: var(--map-green)"></span>Client (Auto)</span>
+                        <span class="legend-item"><span class="legend-dot" style="--legend-color: var(--map-yellow)"></span>Client (Manual)</span>
                         <span class="legend-item"><span class="legend-dot legend-dot--selected"></span>Selected</span>
                     </div>
                 </section>
@@ -172,7 +172,7 @@
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="assets/maps.js?v=light-map-1"></script>
+<script type="module" src="assets/maps.js?v=marker-polish-1"></script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

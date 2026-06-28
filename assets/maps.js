@@ -16,27 +16,27 @@ const KIND_META = {
     label: 'Server',
     badgeLabel: 'Server',
     shortLabel: 'Server',
-    color: '#12a8ff'
+    color: '#2aa0d5'
   },
   'client-auto': {
     label: 'Client (Auto)',
     badgeLabel: 'Client',
     shortLabel: 'Auto',
-    color: '#37f987'
+    color: '#56d884'
   },
   'client-manual': {
     label: 'Client (Manual)',
     badgeLabel: 'Client',
     shortLabel: 'Manual',
-    color: '#ffd344'
+    color: '#dfba4f'
   }
 };
 
 const MARKER_SCALE_BANDS = [
-  { maxZoom: 3, size: 7, selectedCore: 9, selected: 18, ring: 3.5, ringAlpha: 16, glow: 5.5, haloAlpha: 20, selectedRing: 3, selectedHalo: 6 },
-  { maxZoom: 5, size: 8, selectedCore: 9, selected: 20, ring: 4, ringAlpha: 16, glow: 6, haloAlpha: 18, selectedRing: 3, selectedHalo: 6 },
-  { maxZoom: 8, size: 9, selectedCore: 10, selected: 22, ring: 4, ringAlpha: 16, glow: 6.5, haloAlpha: 16, selectedRing: 3, selectedHalo: 6 },
-  { maxZoom: Infinity, size: 9, selectedCore: 10, selected: 22, ring: 4, ringAlpha: 16, glow: 6.5, haloAlpha: 14, selectedRing: 3, selectedHalo: 6 }
+  { maxZoom: 3, size: 6, selectedCore: 8, selected: 16, ring: 3, ringAlpha: 34, glow: 4.5, haloAlpha: 18, selectedRing: 3, selectedHalo: 5 },
+  { maxZoom: 5, size: 7, selectedCore: 8, selected: 18, ring: 3.25, ringAlpha: 32, glow: 5, haloAlpha: 17, selectedRing: 3, selectedHalo: 5 },
+  { maxZoom: 8, size: 8, selectedCore: 9, selected: 20, ring: 3.5, ringAlpha: 30, glow: 5.5, haloAlpha: 16, selectedRing: 3, selectedHalo: 6 },
+  { maxZoom: Infinity, size: 8.5, selectedCore: 9, selected: 20, ring: 3.5, ringAlpha: 28, glow: 5.5, haloAlpha: 15, selectedRing: 3, selectedHalo: 6 }
 ];
 
 const MARKER_ICON_SIZE = 32;
@@ -356,7 +356,6 @@ function renderMap() {
   const denseNodeIds = getDenseNodeIds(state.filteredNodes);
 
   state.filteredNodes.forEach((node) => {
-    const kind = KIND_META[node.kind] || KIND_META['client-manual'];
     const statusClass = cssToken(node.status);
     const kindClass = cssToken(node.kind);
     const isSelected = node.id === state.selectedId ? ' is-selected' : '';
@@ -365,7 +364,7 @@ function renderMap() {
       const latLng = [node.location.lat, node.location.lon + worldOffset];
       const icon = window.L.divIcon({
         className: 'ratspeak-marker-icon',
-        html: `<span class="map-pin map-pin--${kindClass} map-pin--${statusClass}${isSelected}${isDense}" style="--pin-color: ${kind.color}" aria-hidden="true"></span>`,
+        html: `<span class="map-pin map-pin--${kindClass} map-pin--${statusClass}${isSelected}${isDense}" aria-hidden="true"></span>`,
         iconSize: [MARKER_ICON_SIZE, MARKER_ICON_SIZE],
         iconAnchor: [MARKER_ICON_SIZE / 2, MARKER_ICON_SIZE / 2]
       });
