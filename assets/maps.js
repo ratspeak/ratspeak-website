@@ -16,27 +16,27 @@ const KIND_META = {
     label: 'Server',
     badgeLabel: 'Server',
     shortLabel: 'Server',
-    color: '#2aa0d5'
+    color: '#1687B8'
   },
   'client-auto': {
     label: 'Client (Auto)',
     badgeLabel: 'Client',
     shortLabel: 'Auto',
-    color: '#56d884'
+    color: '#35B875'
   },
   'client-manual': {
     label: 'Client (Manual)',
     badgeLabel: 'Client',
     shortLabel: 'Manual',
-    color: '#dfba4f'
+    color: '#C79A2B'
   }
 };
 
 const MARKER_SCALE_BANDS = [
-  { maxZoom: 3, size: 6, selectedCore: 8, selected: 16, ring: 3, ringAlpha: 34, glow: 4.5, haloAlpha: 18, selectedRing: 3, selectedHalo: 5 },
-  { maxZoom: 5, size: 7, selectedCore: 8, selected: 18, ring: 3.25, ringAlpha: 32, glow: 5, haloAlpha: 17, selectedRing: 3, selectedHalo: 5 },
-  { maxZoom: 8, size: 8, selectedCore: 9, selected: 20, ring: 3.5, ringAlpha: 30, glow: 5.5, haloAlpha: 16, selectedRing: 3, selectedHalo: 6 },
-  { maxZoom: Infinity, size: 8.5, selectedCore: 9, selected: 20, ring: 3.5, ringAlpha: 28, glow: 5.5, haloAlpha: 15, selectedRing: 3, selectedHalo: 6 }
+  { maxZoom: 3, size: 6, selectedCore: 8, selected: 18, ring: 2, ringAlpha: 18, selectedRing: 3, selectedHalo: 6 },
+  { maxZoom: 5, size: 7, selectedCore: 9, selected: 20, ring: 2, ringAlpha: 18, selectedRing: 3, selectedHalo: 6 },
+  { maxZoom: 8, size: 8, selectedCore: 10, selected: 22, ring: 2, ringAlpha: 16, selectedRing: 3, selectedHalo: 7 },
+  { maxZoom: Infinity, size: 8.5, selectedCore: 10, selected: 22, ring: 2, ringAlpha: 14, selectedRing: 3, selectedHalo: 7 }
 ];
 
 const MARKER_ICON_SIZE = 32;
@@ -423,8 +423,6 @@ function updateMarkerScale() {
   style.setProperty('--pin-selected-core-size', `${scale.selectedCore}px`);
   style.setProperty('--pin-ring', `${scale.ring}px`);
   style.setProperty('--pin-ring-alpha', `${scale.ringAlpha}%`);
-  style.setProperty('--pin-glow', `${scale.glow}px`);
-  style.setProperty('--pin-halo-alpha', `${scale.haloAlpha}%`);
   style.setProperty('--pin-selected-ring', `${scale.selectedRing}px`);
   style.setProperty('--pin-selected-halo', `${scale.selectedHalo}px`);
 }

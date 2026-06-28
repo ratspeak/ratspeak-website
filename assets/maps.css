@@ -23,11 +23,14 @@
     --map-text-muted: var(--text-muted);
     --map-accent: var(--accent);
     --map-accent-strong: var(--accent-dark);
-    --map-green: #32b672;
-    --map-blue: #238fc0;
-    --map-yellow: #c99b38;
+    --map-green: #35B875;
+    --map-blue: #1687B8;
+    --map-yellow: #C79A2B;
     --map-red: #ff6464;
     --map-violet: #b18cff;
+    --pin-stroke: rgba(255, 255, 255, 0.92);
+    --pin-hairline: rgba(42, 37, 34, 0.24);
+    --pin-shadow: rgba(42, 37, 34, 0.18);
     --map-shadow: 0 18px 48px rgba(42, 37, 34, 0.14);
     --map-canvas-bg: #EDE7DF;
     --map-canvas-bg-deep: #DCD2C7;
@@ -55,9 +58,12 @@
     --accent-soft: rgba(210, 105, 59, 0.16);
     --map-border: rgba(232, 228, 224, 0.14);
     --map-border-strong: rgba(210, 105, 59, 0.44);
-    --map-green: #5ee08c;
-    --map-blue: #31a9dd;
-    --map-yellow: #e5c45b;
+    --map-green: #63D98F;
+    --map-blue: #36B6E6;
+    --map-yellow: #E4BD4B;
+    --pin-stroke: rgba(12, 16, 18, 0.78);
+    --pin-hairline: rgba(255, 255, 255, 0.18);
+    --pin-shadow: rgba(0, 0, 0, 0.22);
     --map-shadow: 0 18px 48px rgba(0, 0, 0, 0.38);
     --map-canvas-bg: #071014;
     --map-canvas-bg-deep: #050709;
@@ -314,12 +320,10 @@ a {
     --pin-size: 6px;
     --pin-selected-size: 16px;
     --pin-selected-core-size: 7px;
-    --pin-ring: 1px;
-    --pin-ring-alpha: 34%;
-    --pin-glow: 5px;
-    --pin-halo-alpha: 16%;
-    --pin-selected-ring: 2px;
-    --pin-selected-halo: 4px;
+    --pin-ring: 2px;
+    --pin-ring-alpha: 18%;
+    --pin-selected-ring: 3px;
+    --pin-selected-halo: 6px;
 }
 
 .map-canvas::after {
@@ -735,26 +739,25 @@ a {
     white-space: nowrap;
 }
 
-.legend-dot {
-    width: 8px;
-    height: 8px;
-    flex: 0 0 auto;
-    border-radius: 999px;
-    border: 1px solid color-mix(in srgb, #ffffff 46%, var(--legend-color));
-    background:
-        radial-gradient(circle at 38% 32%,
-            color-mix(in srgb, #ffffff 52%, var(--legend-color)) 0 20%,
-            var(--legend-color) 58%,
-            color-mix(in srgb, #000000 18%, var(--legend-color)) 100%);
-    box-shadow:
-        0 0 0 3px color-mix(in srgb, var(--legend-color) 16%, transparent),
-        0 0 0 4px rgba(50, 42, 36, 0.14);
+.legend-marker {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    --pin-size: 8px;
+    --pin-ring: 2px;
+    --pin-ring-alpha: 14%;
+    --pin-selected-size: 18px;
+    --pin-selected-core-size: 8px;
+    --pin-selected-ring: 3px;
+    --pin-selected-halo: 6px;
 }
 
-.legend-dot--selected {
-    --legend-color: #ffffff;
-    outline: 2px solid var(--map-accent);
-    outline-offset: 2px;
+.legend-marker .map-pin {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .footer {
@@ -915,8 +918,6 @@ a {
     position: relative;
     width: 32px;
     height: 32px;
-    --pin-outline: rgba(50, 42, 36, 0.42);
-    --pin-shadow: rgba(50, 42, 36, 0.20);
 }
 
 .map-pin::before,
@@ -932,35 +933,18 @@ a {
 .map-pin::before {
     width: calc(var(--pin-size) + (var(--pin-ring) * 2));
     height: calc(var(--pin-size) + (var(--pin-ring) * 2));
-    background:
-        radial-gradient(circle,
-            color-mix(in srgb, var(--pin-color) var(--pin-ring-alpha), transparent) 0 44%,
-            color-mix(in srgb, var(--pin-color) 10%, transparent) 58%,
-            transparent 76%);
-    box-shadow:
-        0 0 var(--pin-glow) color-mix(in srgb, var(--pin-color) var(--pin-halo-alpha), transparent);
-    filter: none;
-    opacity: 0.92;
+    background: color-mix(in srgb, var(--pin-color) var(--pin-ring-alpha), transparent);
+    opacity: 1;
 }
 
 .map-pin::after {
     width: var(--pin-size);
     height: var(--pin-size);
-    border: 1px solid color-mix(in srgb, #ffffff 46%, var(--pin-color));
-    background:
-        radial-gradient(circle at 38% 32%,
-            color-mix(in srgb, #ffffff 52%, var(--pin-color)) 0 18%,
-            var(--pin-color) 56%,
-            color-mix(in srgb, #000000 18%, var(--pin-color)) 100%);
+    border: 1.5px solid var(--pin-stroke);
+    background: var(--pin-color);
     box-shadow:
-        0 0 0 1px var(--pin-outline),
-        0 1px 3px var(--pin-shadow),
-        0 0 calc(var(--pin-glow) * 0.6) color-mix(in srgb, var(--pin-color) 16%, transparent);
-}
-
-[data-theme="dark"] .map-pin {
-    --pin-outline: rgba(0, 0, 0, 0.68);
-    --pin-shadow: rgba(0, 0, 0, 0.36);
+        0 0 0 1px var(--pin-hairline),
+        0 1px 2px var(--pin-shadow);
 }
 
 .map-pin.is-selected {
@@ -971,34 +955,29 @@ a {
 .map-pin.is-selected::before {
     width: var(--pin-selected-size);
     height: var(--pin-selected-size);
-    background: radial-gradient(
-        circle,
-        rgba(210, 105, 59, 0.16) 0%,
-        rgba(210, 105, 59, 0.08) 48%,
-        transparent 78%
-    );
+    background: rgba(210, 105, 59, 0.16);
     opacity: 1;
 }
 
 .map-pin.is-selected::after {
     width: var(--pin-selected-core-size);
     height: var(--pin-selected-core-size);
-    border: 2px solid #fff;
+    border: 1.5px solid var(--pin-stroke);
+    background: var(--pin-color);
     box-shadow:
-        0 0 0 1px rgba(0, 0, 0, 0.78),
-        0 0 0 var(--pin-selected-ring) rgba(210, 105, 59, 0.95),
-        0 0 0 var(--pin-selected-halo) rgba(210, 105, 59, 0.13),
-        0 0 9px rgba(210, 105, 59, 0.14);
+        0 0 0 1px var(--pin-hairline),
+        0 0 0 var(--pin-selected-ring) var(--map-accent),
+        0 0 0 var(--pin-selected-halo) rgba(210, 105, 59, 0.16);
 }
 
 .map-pin.is-dense:not(.is-selected)::before {
-    opacity: 0.36;
+    opacity: 0;
 }
 
 .map-pin.is-dense:not(.is-selected)::after {
     box-shadow:
-        0 0 0 1px var(--pin-outline),
-        0 1px 2px var(--pin-shadow);
+        0 0 0 1px var(--pin-hairline),
+        0 1px 1px var(--pin-shadow);
 }
 
 .map-pin--server {
