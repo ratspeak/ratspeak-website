@@ -4,6 +4,7 @@ const API_URL = '/api/map-nodes';
 const LIVE_SNAPSHOT_URL = '/.tmp/map-live.json';
 const SNAPSHOT_URLS = [LIVE_SNAPSHOT_URL, API_URL];
 const SNAPSHOT_REFRESH_MS = 15_000;
+const LAND_MASK_URL = 'scripts/data/ne_110m_land.geojson';
 const TILE_ATTRIBUTION = '&copy; OpenStreetMap contributors &copy; CARTO';
 
 const TILE_LAYERS = {
@@ -47,6 +48,10 @@ const MARKER_SCALE_BANDS = [
 
 const MARKER_ICON_SIZE = 32;
 const DENSE_MARKER_DISTANCE_PX = 18;
+const DECLUTTER_ITERATIONS = 7;
+const DECLUTTER_NEIGHBOR_DISTANCE_PX = 32;
+const DECLUTTER_MIN_DISTANCE_PX = 15;
+const DECLUTTER_MAX_OFFSET_PX = 18;
 const WEB_MERCATOR_LAT_LIMIT = 85.05112878;
 const WRAPPED_WORLD_BOUNDS = [
   [-WEB_MERCATOR_LAT_LIMIT, -540],
@@ -66,7 +71,9 @@ const state = {
   tileLayer: null,
   markerLayer: null,
   markers: new Map(),
+  markerPlacements: new Map(),
   markerScale: MARKER_SCALE_BANDS[0],
+  landMask: null,
   nodeCursorActive: false,
   refreshTimer: null,
   suppressMapClickUntil: 0
@@ -95,7 +102,12 @@ init();
 async function init() {
   bindChrome();
   bindControls();
-  state.snapshot = await loadSnapshot();
+  const [snapshot, landMask] = await Promise.all([
+    loadSnapshot(),
+    loadLandMask()
+  ]);
+  state.snapshot = snapshot;
+  state.landMask = landMask;
   initMap();
   applyFilters();
   scheduleSnapshotRefresh();
@@ -191,6 +203,36 @@ async function loadSnapshot() {
   }
 
   return buildMapSnapshot(new Date());
+}
+
+async function loadLandMask() {
+  try {
+    const response = await fetch(LAND_MASK_URL, { cache: 'force-cache' });
+    if (!response.ok) throw new Error(`${LAND_MASK_URL} returned ${response.status}`);
+    const geojson = await response.json();
+    const polygons = [];
+
+    for (const feature of geojson.features || []) {
+      const geometry = feature.geometry;
+      if (!geometry) continue;
+
+      const polygonGroups = geometry.type === 'Polygon'
+        ? [geometry.coordinates]
+        : geometry.type === 'MultiPolygon'
+          ? geometry.coordinates
+          : [];
+
+      for (const rings of polygonGroups) {
+        if (!Array.isArray(rings) || !rings.length) continue;
+        polygons.push({ rings, bbox: bboxForRing(rings[0]) });
+      }
+    }
+
+    return polygons.length ? { polygons } : null;
+  } catch (error) {
+    console.info('Map land mask unavailable:', error.message);
+    return null;
+  }
 }
 
 function scheduleSnapshotRefresh() {
@@ -365,6 +407,7 @@ function renderMap() {
 
   state.markerLayer.clearLayers();
   state.markers.clear();
+  state.markerPlacements = getMarkerDisplayLayout(state.filteredNodes);
   const denseNodeIds = getDenseNodeIds(state.filteredNodes);
 
   state.filteredNodes.forEach((node) => {
@@ -373,10 +416,12 @@ function renderMap() {
     const isSelected = node.id === state.selectedId ? ' is-selected' : '';
     const isDense = denseNodeIds.has(node.id) ? ' is-dense' : '';
     MARKER_WORLD_OFFSETS.forEach((worldOffset) => {
+      const key = markerKey(node, worldOffset);
+      const placement = state.markerPlacements.get(key) || ZERO_PLACEMENT;
       const latLng = [node.location.lat, node.location.lon + worldOffset];
       const icon = window.L.divIcon({
         className: 'ratspeak-marker-icon',
-        html: `<span class="map-pin map-pin--${kindClass} map-pin--${statusClass}${isSelected}${isDense}" aria-hidden="true"></span>`,
+        html: `<span class="map-pin map-pin--${kindClass} map-pin--${statusClass}${isSelected}${isDense}" style="${markerSpreadStyle(placement)}" aria-hidden="true"></span>`,
         iconSize: [MARKER_ICON_SIZE, MARKER_ICON_SIZE],
         iconAnchor: [MARKER_ICON_SIZE / 2, MARKER_ICON_SIZE / 2]
       });
@@ -392,6 +437,153 @@ function renderMap() {
       state.markers.set(`${node.id}:${worldOffset}`, marker);
     });
   });
+}
+
+const ZERO_PLACEMENT = Object.freeze({ dx: 0, dy: 0, isSpread: false });
+
+function getMarkerDisplayLayout(nodes) {
+  const placements = new Map();
+  if (!state.map) return placements;
+
+  const items = [];
+  const sortedNodes = [...nodes].sort((a, b) => String(a.id).localeCompare(String(b.id)));
+
+  sortedNodes.forEach((node) => {
+    MARKER_WORLD_OFFSETS.forEach((worldOffset) => {
+      const key = markerKey(node, worldOffset);
+      const point = state.map.latLngToContainerPoint([node.location.lat, node.location.lon + worldOffset]);
+      items.push({
+        key,
+        node,
+        x: point.x,
+        y: point.y,
+        dx: 0,
+        dy: 0
+      });
+      placements.set(key, ZERO_PLACEMENT);
+    });
+  });
+
+  const strength = declutterStrength();
+  if (strength <= 0 || items.length < 2) return placements;
+
+  const neighborDistanceSq = DECLUTTER_NEIGHBOR_DISTANCE_PX * DECLUTTER_NEIGHBOR_DISTANCE_PX;
+  for (let iteration = 0; iteration < DECLUTTER_ITERATIONS; iteration++) {
+    for (let i = 0; i < items.length; i++) {
+      for (let j = i + 1; j < items.length; j++) {
+        const a = items[i];
+        const b = items[j];
+        const originalDx = a.x - b.x;
+        const originalDy = a.y - b.y;
+        if ((originalDx * originalDx) + (originalDy * originalDy) > neighborDistanceSq) continue;
+
+        const displayDx = (a.x + a.dx) - (b.x + b.dx);
+        const displayDy = (a.y + a.dy) - (b.y + b.dy);
+        const distance = Math.hypot(displayDx, displayDy);
+        if (distance >= DECLUTTER_MIN_DISTANCE_PX) continue;
+
+        const { x: ux, y: uy } = spreadDirection(a, b, displayDx, displayDy, distance);
+        const push = (DECLUTTER_MIN_DISTANCE_PX - distance) * 0.52;
+        a.dx += ux * push;
+        a.dy += uy * push;
+        b.dx -= ux * push;
+        b.dy -= uy * push;
+        clampSpread(a);
+        clampSpread(b);
+      }
+    }
+  }
+
+  items.forEach((item) => {
+    const { dx, dy } = guardSpreadOnLand(
+      item,
+      roundPixel(item.dx * strength),
+      roundPixel(item.dy * strength)
+    );
+    placements.set(item.key, {
+      dx,
+      dy,
+      isSpread: Math.hypot(dx, dy) >= 0.5
+    });
+  });
+
+  return placements;
+}
+
+function guardSpreadOnLand(item, dx, dy) {
+  if (!state.landMask || (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1)) return { dx, dy };
+
+  const realLat = item.node.location?.lat;
+  const realLon = normalizeLongitude(item.node.location?.lon);
+  if (!pointIsOnLand(realLat, realLon)) return { dx, dy };
+  if (spreadPointIsOnLand(item, dx, dy)) return { dx, dy };
+
+  for (const scale of [0.7, 0.45, 0.25]) {
+    const nextDx = roundPixel(dx * scale);
+    const nextDy = roundPixel(dy * scale);
+    if (spreadPointIsOnLand(item, nextDx, nextDy)) return { dx: nextDx, dy: nextDy };
+  }
+
+  return ZERO_PLACEMENT;
+}
+
+function spreadPointIsOnLand(item, dx, dy) {
+  if (!state.map) return true;
+  const point = window.L.point(item.x + dx, item.y + dy);
+  const latLng = state.map.containerPointToLatLng(point);
+  return pointIsOnLand(latLng.lat, normalizeLongitude(latLng.lng));
+}
+
+function declutterStrength() {
+  if (!state.map) return 0;
+  const zoom = state.map.getZoom();
+  if (zoom <= 5) return 1;
+  if (zoom >= 8) return 0;
+  return (8 - zoom) / 3;
+}
+
+function spreadDirection(a, b, dx, dy, distance) {
+  if (distance > 0.001) {
+    return { x: dx / distance, y: dy / distance };
+  }
+
+  const angle = stableAngle(`${a.key}:${b.key}`);
+  return {
+    x: Math.cos(angle),
+    y: Math.sin(angle)
+  };
+}
+
+function stableAngle(value) {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i++) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return ((hash >>> 0) / 0xffffffff) * Math.PI * 2;
+}
+
+function clampSpread(item) {
+  const distance = Math.hypot(item.dx, item.dy);
+  if (distance <= DECLUTTER_MAX_OFFSET_PX) return;
+
+  const scale = DECLUTTER_MAX_OFFSET_PX / distance;
+  item.dx *= scale;
+  item.dy *= scale;
+}
+
+function markerKey(node, worldOffset) {
+  return `${node.id}:${worldOffset}`;
+}
+
+function markerSpreadStyle(placement) {
+  const dx = placement?.dx || 0;
+  const dy = placement?.dy || 0;
+  return `--spread-x: ${dx}px; --spread-y: ${dy}px;`;
+}
+
+function roundPixel(value) {
+  return Math.round(value * 10) / 10;
 }
 
 function handleMapClick(event) {
@@ -430,18 +622,31 @@ function pickNodeAt(containerPoint) {
     const radiusSq = radius * radius;
 
     MARKER_WORLD_OFFSETS.forEach((worldOffset) => {
+      const key = markerKey(node, worldOffset);
+      const placement = state.markerPlacements.get(key) || ZERO_PLACEMENT;
       const center = state.map.latLngToContainerPoint([node.location.lat, node.location.lon + worldOffset]);
-      const dx = containerPoint.x - center.x;
-      const dy = containerPoint.y - center.y;
+      const dx = containerPoint.x - (center.x + placement.dx);
+      const dy = containerPoint.y - (center.y + placement.dy);
       const distanceSq = (dx * dx) + (dy * dy);
       if (distanceSq > radiusSq) return;
-      if (!nearest || distanceSq < nearest.distanceSq) {
-        nearest = { node, distanceSq };
+      const candidate = { node, key, distanceSq };
+      if (isBetterPick(candidate, nearest)) {
+        nearest = candidate;
       }
     });
   });
 
   return nearest;
+}
+
+function isBetterPick(candidate, current) {
+  if (!current) return true;
+  if (candidate.node.id === state.selectedId && current.node.id !== state.selectedId) return true;
+  if (candidate.node.id !== state.selectedId && current.node.id === state.selectedId) return false;
+  if (Math.abs(candidate.distanceSq - current.distanceSq) > 0.01) {
+    return candidate.distanceSq < current.distanceSq;
+  }
+  return candidate.key < current.key;
 }
 
 function markerPickRadius(node) {
@@ -536,6 +741,61 @@ function isI2PNode(node) {
   return (node.services || []).some((service) => String(service).toLowerCase().includes('i2p'));
 }
 
+function pointIsOnLand(lat, lon) {
+  if (!state.landMask || !Number.isFinite(lat) || !Number.isFinite(lon)) return false;
+
+  for (const polygon of state.landMask.polygons) {
+    if (!bboxContains(polygon.bbox, lat, lon)) continue;
+    if (pointInPolygon(lon, lat, polygon.rings)) return true;
+  }
+  return false;
+}
+
+function pointInPolygon(x, y, rings) {
+  if (!pointInRing(x, y, rings[0])) return false;
+  for (let i = 1; i < rings.length; i += 1) {
+    if (pointInRing(x, y, rings[i])) return false;
+  }
+  return true;
+}
+
+function pointInRing(x, y, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i, i += 1) {
+    const xi = Number(ring[i][0]);
+    const yi = Number(ring[i][1]);
+    const xj = Number(ring[j][0]);
+    const yj = Number(ring[j][1]);
+    const intersects = ((yi > y) !== (yj > y)) &&
+      (x < ((xj - xi) * (y - yi)) / ((yj - yi) || Number.EPSILON) + xi);
+    if (intersects) inside = !inside;
+  }
+  return inside;
+}
+
+function bboxForRing(ring) {
+  let minLat = Infinity;
+  let maxLat = -Infinity;
+  let minLon = Infinity;
+  let maxLon = -Infinity;
+
+  for (const point of ring) {
+    const lon = Number(point[0]);
+    const lat = Number(point[1]);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+    minLat = Math.min(minLat, lat);
+    maxLat = Math.max(maxLat, lat);
+    minLon = Math.min(minLon, lon);
+    maxLon = Math.max(maxLon, lon);
+  }
+
+  return { minLat, maxLat, minLon, maxLon };
+}
+
+function bboxContains(bbox, lat, lon) {
+  return lat >= bbox.minLat && lat <= bbox.maxLat && lon >= bbox.minLon && lon <= bbox.maxLon;
+}
+
 function detailField(label, value, _wide = false, code = false, html = false) {
   const valueClass = code ? ' detail-value--code' : '';
   const content = html ? value : escapeHtml(value);
@@ -627,6 +887,12 @@ function formatCoord(value, axis) {
     ? (value >= 0 ? 'N' : 'S')
     : (value >= 0 ? 'E' : 'W');
   return `${Math.abs(value).toFixed(3)} ${hemi}`;
+}
+
+function normalizeLongitude(value) {
+  const lon = Number(value);
+  if (!Number.isFinite(lon)) return null;
+  return ((((lon + 180) % 360) + 360) % 360) - 180;
 }
 
 function relativeTime(value) {

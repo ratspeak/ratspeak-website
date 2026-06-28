@@ -931,6 +931,11 @@ a {
     height: 32px;
 }
 
+.ratspeak-marker-icon .map-pin {
+    transform: translate(var(--spread-x, 0), var(--spread-y, 0));
+    transition: transform 0.16s ease-out;
+}
+
 .map-pin::before,
 .map-pin::after {
     content: "";
