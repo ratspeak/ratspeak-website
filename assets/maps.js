@@ -3,25 +3,20 @@ import { buildMapSnapshot } from './map-data.js';
 const API_URL = '/api/map-nodes';
 
 const KIND_META = {
-  'operator-relay': {
-    label: 'Operator relay',
-    shortLabel: 'Relay',
-    color: '#58a6ff'
+  server: {
+    label: 'Server',
+    shortLabel: 'Server',
+    color: '#12a8ff'
   },
-  'discovered-interface': {
-    label: 'Discovered interface',
-    shortLabel: 'Observed',
-    color: '#45d89c'
+  'client-auto': {
+    label: 'Client (Auto)',
+    shortLabel: 'Auto',
+    color: '#37f987'
   },
-  'manual-listing': {
-    label: 'Manual listing',
+  'client-manual': {
+    label: 'Client (Manual)',
     shortLabel: 'Manual',
-    color: '#f2c94c'
-  },
-  identity: {
-    label: 'Identity',
-    shortLabel: 'Identity',
-    color: '#b18cff'
+    color: '#ffd344'
   }
 };
 
@@ -48,6 +43,14 @@ const STATUS_META = {
   }
 };
 
+const MARKER_SCALE_BANDS = [
+  { maxZoom: 2.5, size: 5, selectedCore: 8, selected: 22, ring: 2, glow: 10, outerGlow: 20, selectedRing: 3, selectedHalo: 7 },
+  { maxZoom: 4.5, size: 6, selectedCore: 9, selected: 24, ring: 2, glow: 12, outerGlow: 24, selectedRing: 3, selectedHalo: 8 },
+  { maxZoom: 6.5, size: 7.5, selectedCore: 10, selected: 27, ring: 2.5, glow: 15, outerGlow: 28, selectedRing: 3, selectedHalo: 8 },
+  { maxZoom: 8.5, size: 9, selectedCore: 11.5, selected: 30, ring: 3, glow: 18, outerGlow: 34, selectedRing: 4, selectedHalo: 9 },
+  { maxZoom: Infinity, size: 10.5, selectedCore: 13, selected: 34, ring: 3, glow: 22, outerGlow: 40, selectedRing: 4, selectedHalo: 10 }
+];
+
 const state = {
   snapshot: null,
   filteredNodes: [],
@@ -55,10 +58,8 @@ const state = {
   kindFilter: 'all',
   statusFilter: 'all',
   query: '',
-  showPrecision: true,
   map: null,
   markerLayer: null,
-  precisionLayer: null,
   markers: new Map()
 };
 
@@ -68,15 +69,12 @@ const els = {
   fallback: document.getElementById('mapFallback'),
   modePill: document.getElementById('modePill'),
   generatedAt: document.getElementById('generatedAt'),
-  totalCount: document.getElementById('totalCount'),
-  observedCount: document.getElementById('observedCount'),
+  serverCount: document.getElementById('serverCount'),
+  autoCount: document.getElementById('autoCount'),
   manualCount: document.getElementById('manualCount'),
-  staleCount: document.getElementById('staleCount'),
-  visibleCount: document.getElementById('visibleCount'),
-  nodeList: document.getElementById('nodeList'),
+  reviewCount: document.getElementById('reviewCount'),
   nodeDetail: document.getElementById('nodeDetail'),
   searchInput: document.getElementById('nodeSearch'),
-  precisionToggle: document.getElementById('precisionToggle'),
   fitBtn: document.getElementById('fitBtn'),
   refreshBtn: document.getElementById('refreshBtn'),
   themeToggle: document.getElementById('themeToggle'),
@@ -146,14 +144,6 @@ function bindControls() {
     });
   }
 
-  if (els.precisionToggle) {
-    els.precisionToggle.addEventListener('click', () => {
-      state.showPrecision = !state.showPrecision;
-      els.precisionToggle.setAttribute('aria-pressed', String(state.showPrecision));
-      renderMap();
-    });
-  }
-
   if (els.fitBtn) {
     els.fitBtn.addEventListener('click', () => fitVisibleNodes());
   }
@@ -207,8 +197,9 @@ function initMap() {
     attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
   }).addTo(state.map);
 
-  state.precisionLayer = window.L.layerGroup().addTo(state.map);
   state.markerLayer = window.L.layerGroup().addTo(state.map);
+  updateMarkerScale();
+  state.map.on('zoomend', updateMarkerScale);
 }
 
 function applyFilters() {
@@ -234,56 +225,23 @@ function applyFilters() {
   }
 
   renderSummary();
-  renderList();
   renderDetail();
   renderMap();
 }
 
 function renderSummary() {
   const nodes = state.snapshot.nodes || [];
-  const observed = nodes.filter((node) => node.kind === 'discovered-interface').length;
-  const manual = nodes.filter((node) => node.kind === 'manual-listing' || node.kind === 'identity').length;
-  const stale = nodes.filter((node) => node.status === 'stale' || node.status === 'unknown').length;
+  const servers = nodes.filter((node) => node.kind === 'server').length;
+  const auto = nodes.filter((node) => node.kind === 'client-auto').length;
+  const manual = nodes.filter((node) => node.kind === 'client-manual').length;
+  const review = nodes.filter((node) => ['stale', 'unknown', 'unverified'].includes(node.status)).length;
 
   els.modePill.textContent = state.snapshot.sourceMode === 'exploratory-sample' ? 'Sample data' : 'Live preview';
   els.generatedAt.textContent = `Updated ${relativeTime(state.snapshot.generatedAt)}`;
-  els.totalCount.textContent = String(nodes.length);
-  els.observedCount.textContent = String(observed);
+  els.serverCount.textContent = String(servers);
+  els.autoCount.textContent = String(auto);
   els.manualCount.textContent = String(manual);
-  els.staleCount.textContent = String(stale);
-  els.visibleCount.textContent = `${state.filteredNodes.length} shown`;
-}
-
-function renderList() {
-  if (!state.filteredNodes.length) {
-    els.nodeList.innerHTML = '<div class="empty-list">No nodes match the current filters.</div>';
-    return;
-  }
-
-  els.nodeList.innerHTML = state.filteredNodes.map((node) => {
-    const kind = KIND_META[node.kind] || KIND_META.identity;
-    const status = STATUS_META[node.status] || STATUS_META.unknown;
-    const selected = node.id === state.selectedId ? ' is-selected' : '';
-    return `
-      <button class="node-row${selected}" type="button" data-node-id="${escapeHtml(node.id)}" style="--node-color: ${kind.color}; --status-color: ${status.color}">
-        <span class="node-swatch" aria-hidden="true"></span>
-        <span class="node-row-main">
-          <span class="node-row-top">
-            <span class="node-label">${escapeHtml(node.label)}</span>
-            <span class="node-age">${escapeHtml(lastSeenLabel(node))}</span>
-          </span>
-          <span class="node-meta">
-            <span class="tag">${escapeHtml(kind.shortLabel)}</span>
-            <span class="tag tag--status">${escapeHtml(status.label)}</span>
-          </span>
-        </span>
-      </button>
-    `;
-  }).join('');
-
-  els.nodeList.querySelectorAll('[data-node-id]').forEach((button) => {
-    button.addEventListener('click', () => selectNode(button.dataset.nodeId));
-  });
+  els.reviewCount.textContent = String(review);
 }
 
 function renderDetail() {
@@ -298,7 +256,7 @@ function renderDetail() {
     return;
   }
 
-  const kind = KIND_META[node.kind] || KIND_META.identity;
+  const kind = KIND_META[node.kind] || KIND_META['client-manual'];
   const status = STATUS_META[node.status] || STATUS_META.unknown;
   const reticulum = node.reticulum || {};
   const source = (state.snapshot.sources || []).find((item) => item.id === node.sourceId);
@@ -333,31 +291,17 @@ function renderMap() {
   if (!state.map) return;
 
   state.markerLayer.clearLayers();
-  state.precisionLayer.clearLayers();
   state.markers.clear();
 
   state.filteredNodes.forEach((node) => {
-    const kind = KIND_META[node.kind] || KIND_META.identity;
+    const kind = KIND_META[node.kind] || KIND_META['client-manual'];
     const statusClass = cssToken(node.status);
     const kindClass = cssToken(node.kind);
     const isSelected = node.id === state.selectedId ? ' is-selected' : '';
     const latLng = [node.location.lat, node.location.lon];
 
-    if (state.showPrecision && node.location.precisionKm) {
-      window.L.circle(latLng, {
-        radius: node.location.precisionKm * 1000,
-        interactive: false,
-        stroke: true,
-        color: kind.color,
-        weight: 1,
-        opacity: 0.22,
-        fillColor: kind.color,
-        fillOpacity: node.location.precisionKm > 500 ? 0.025 : 0.055
-      }).addTo(state.precisionLayer);
-    }
-
     const icon = window.L.divIcon({
-      className: '',
+      className: 'ratspeak-marker-icon',
       html: `<span class="map-pin map-pin--${kindClass} map-pin--${statusClass}${isSelected}" style="--pin-color: ${kind.color}" aria-hidden="true"></span>`,
       iconSize: [1, 1],
       iconAnchor: [0, 0]
@@ -366,7 +310,8 @@ function renderMap() {
     const marker = window.L.marker(latLng, {
       icon,
       title: node.label,
-      keyboard: true
+      keyboard: true,
+      zIndexOffset: node.id === state.selectedId ? 1000 : 0
     }).addTo(state.markerLayer);
 
     marker.on('click', () => selectNode(node.id, { pan: false }));
@@ -379,7 +324,6 @@ function renderMap() {
 
 function selectNode(id, options = {}) {
   state.selectedId = id;
-  renderList();
   renderDetail();
   renderMap();
 
@@ -403,6 +347,21 @@ function fitVisibleNodes() {
     paddingTopLeft: wide ? [410, 50] : [36, 260],
     paddingBottomRight: wide ? [390, 120] : [36, 220]
   });
+}
+
+function updateMarkerScale() {
+  if (!state.map || !els.map) return;
+  const zoom = state.map.getZoom();
+  const scale = MARKER_SCALE_BANDS.find((band) => zoom <= band.maxZoom) || MARKER_SCALE_BANDS.at(-1);
+  const style = els.map.style;
+  style.setProperty('--pin-size', `${scale.size}px`);
+  style.setProperty('--pin-selected-size', `${scale.selected}px`);
+  style.setProperty('--pin-selected-core-size', `${scale.selectedCore}px`);
+  style.setProperty('--pin-ring', `${scale.ring}px`);
+  style.setProperty('--pin-glow', `${scale.glow}px`);
+  style.setProperty('--pin-outer-glow', `${scale.outerGlow}px`);
+  style.setProperty('--pin-selected-ring', `${scale.selectedRing}px`);
+  style.setProperty('--pin-selected-halo', `${scale.selectedHalo}px`);
 }
 
 function selectedNode() {

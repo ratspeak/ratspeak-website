@@ -42,7 +42,7 @@
     <link rel="preconnect" href="https://basemaps.cartocdn.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Familjen+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <link rel="stylesheet" href="assets/maps.css">
+    <link rel="stylesheet" href="assets/maps.css?v=marker-scale-2">
     <script>!function(){var t=localStorage.getItem('ratspeak-theme');document.documentElement.setAttribute('data-theme',t||'dark')}()</script>
 </head>
 <body>
@@ -92,24 +92,24 @@
             </div>
             <div>
                 <h1 class="rail-title">Network presence</h1>
-                <p class="rail-copy">A field view for <strong>discoverable</strong>, <strong>operator</strong>, and <strong>manual opt-in</strong> Ratspeak locations.</p>
+                <p class="rail-copy">A field view for <strong>public servers</strong>, <strong>auto-discovered clients</strong>, and <strong>manual opt-in clients</strong>.</p>
             </div>
             <div class="stat-grid" aria-label="Map summary">
                 <div class="stat">
-                    <span class="stat-value" id="totalCount">0</span>
-                    <span class="stat-label">Total</span>
+                    <span class="stat-value" id="serverCount">0</span>
+                    <span class="stat-label">Servers</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-value" id="observedCount">0</span>
-                    <span class="stat-label">Observed</span>
+                    <span class="stat-value" id="autoCount">0</span>
+                    <span class="stat-label">Auto</span>
                 </div>
                 <div class="stat">
                     <span class="stat-value" id="manualCount">0</span>
                     <span class="stat-label">Manual</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-value" id="staleCount">0</span>
-                    <span class="stat-label">Stale</span>
+                    <span class="stat-value" id="reviewCount">0</span>
+                    <span class="stat-label">Review</span>
                 </div>
             </div>
         </header>
@@ -124,16 +124,16 @@
                 <span class="filter-label">Type</span>
                 <div class="segmented segmented--kind">
                     <button class="segment-btn is-active" type="button" data-kind-filter="all">All</button>
-                    <button class="segment-btn" type="button" data-kind-filter="operator-relay">Relays</button>
-                    <button class="segment-btn" type="button" data-kind-filter="discovered-interface">Observed</button>
-                    <button class="segment-btn" type="button" data-kind-filter="manual-listing">Manual</button>
+                    <button class="segment-btn" type="button" data-kind-filter="server">Server</button>
+                    <button class="segment-btn" type="button" data-kind-filter="client-auto">Client (Auto)</button>
+                    <button class="segment-btn" type="button" data-kind-filter="client-manual">Client (Manual)</button>
                 </div>
             </div>
             <div class="filter-block">
                 <span class="filter-label">Freshness</span>
                 <div class="segmented segmented--status">
                     <button class="segment-btn is-active" type="button" data-status-filter="all">All</button>
-                    <button class="segment-btn" type="button" data-status-filter="available">Avail</button>
+                    <button class="segment-btn" type="button" data-status-filter="available">Available</button>
                     <button class="segment-btn" type="button" data-status-filter="recent">Recent</button>
                     <button class="segment-btn" type="button" data-status-filter="stale">Stale</button>
                 </div>
@@ -143,24 +143,12 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M21 16v3a2 2 0 0 1-2 2h-3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/></svg>
                     <span>Fit</span>
                 </button>
-                <button class="tool-btn" id="precisionToggle" type="button" aria-pressed="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>
-                    <span>Precision</span>
-                </button>
                 <button class="tool-btn" id="refreshBtn" type="button">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12a9 9 0 0 1-14.6 7.1"/><path d="M3 12A9 9 0 0 1 17.6 4.9"/><path d="M21 4v6h-6"/><path d="M3 20v-6h6"/></svg>
                     <span>Refresh</span>
                 </button>
                 <span class="tool-btn" id="generatedAt">Updated now</span>
             </div>
-        </section>
-
-        <section class="node-list-wrap" aria-label="Nodes">
-            <div class="list-head">
-                <span class="list-title">Listings</span>
-                <span class="list-count" id="visibleCount">0 shown</span>
-            </div>
-            <div class="node-list" id="nodeList"></div>
         </section>
 
         <p class="rail-note"><strong>Privacy boundary:</strong> only public discovery, operator-published infrastructure, or manual opt-in records should reach this view. Current markers are seed data for design review.</p>
@@ -171,16 +159,16 @@
     <aside class="map-legend" aria-label="Legend">
         <h2 class="legend-title">Legend</h2>
         <div class="legend-grid">
-            <span class="legend-item"><span class="legend-dot" style="--legend-color: #58a6ff"></span>Operator relay</span>
-            <span class="legend-item"><span class="legend-dot" style="--legend-color: #45d89c"></span>Observed interface</span>
-            <span class="legend-item"><span class="legend-dot" style="--legend-color: #f2c94c"></span>Manual listing</span>
-            <span class="legend-item"><span class="legend-dot" style="--legend-color: #b18cff"></span>Identity</span>
+            <span class="legend-item"><span class="legend-dot" style="--legend-color: #12a8ff"></span>Server</span>
+            <span class="legend-item"><span class="legend-dot" style="--legend-color: #37f987"></span>Client (Auto)</span>
+            <span class="legend-item"><span class="legend-dot" style="--legend-color: #ffd344"></span>Client (Manual)</span>
+            <span class="legend-item"><span class="legend-dot legend-dot--selected"></span>Selected point</span>
         </div>
     </aside>
 </main>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="assets/maps.js"></script>
+<script type="module" src="assets/maps.js?v=marker-scale-2"></script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

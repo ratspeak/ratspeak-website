@@ -10,7 +10,7 @@ const SOURCES = [
   },
   {
     id: 'manual-preview',
-    label: 'Manual listing queue',
+    label: 'Manual client queue',
     kind: 'manual',
     trust: 'self-reported',
     description: 'Future opt-in path for people who want a regional presence without live GPS broadcast.'
@@ -27,8 +27,8 @@ const SOURCES = [
 const NODE_TEMPLATES = [
   {
     id: 'operator-ruby-preview',
-    label: 'Ruby TCP relay',
-    kind: 'operator-relay',
+    label: 'Ruby TCP server',
+    kind: 'server',
     status: 'available',
     sourceId: 'ratspeak-tcp-preview',
     sourceMode: 'sample',
@@ -40,7 +40,7 @@ const NODE_TEMPLATES = [
       precisionKm: 1800,
       label: 'North America regional placeholder'
     },
-    services: ['rns.transport', 'tcp.relay'],
+    services: ['rns.transport', 'tcp.server'],
     verification: 'operator',
     privacy: {
       consent: 'operator-published',
@@ -49,19 +49,19 @@ const NODE_TEMPLATES = [
     reticulum: {
       interfaceType: 'TCPServerInterface',
       transportId: 'ruby-preview-transport',
-      networkId: 'preview:na-relay',
+      networkId: 'preview:na-server',
       hops: 0,
       stampValue: 8,
       heardCount: 42,
-      reachableOn: 'Ruby relay label',
+      reachableOn: 'Ruby server label',
       port: null,
       heightMeters: 0
     }
   },
   {
     id: 'operator-emerald-preview',
-    label: 'Emerald TCP relay',
-    kind: 'operator-relay',
+    label: 'Emerald I2P server',
+    kind: 'server',
     status: 'recent',
     sourceId: 'ratspeak-tcp-preview',
     sourceMode: 'sample',
@@ -73,28 +73,28 @@ const NODE_TEMPLATES = [
       precisionKm: 1700,
       label: 'Europe regional placeholder'
     },
-    services: ['rns.transport', 'tcp.relay'],
+    services: ['rns.transport', 'i2p.server'],
     verification: 'operator',
     privacy: {
       consent: 'operator-published',
       precision: 'regional-placeholder'
     },
     reticulum: {
-      interfaceType: 'TCPServerInterface',
+      interfaceType: 'I2PInterface',
       transportId: 'emerald-preview-transport',
-      networkId: 'preview:eu-relay',
+      networkId: 'preview:eu-i2p',
       hops: 0,
       stampValue: 8,
       heardCount: 37,
-      reachableOn: 'Emerald relay label',
+      reachableOn: 'Emerald I2P label',
       port: null,
       heightMeters: 0
     }
   },
   {
     id: 'operator-diamond-preview',
-    label: 'Diamond TCP relay',
-    kind: 'operator-relay',
+    label: 'Diamond TCP server',
+    kind: 'server',
     status: 'unknown',
     sourceId: 'ratspeak-tcp-preview',
     sourceMode: 'sample',
@@ -106,7 +106,7 @@ const NODE_TEMPLATES = [
       precisionKm: 2200,
       label: 'Asia Pacific regional placeholder'
     },
-    services: ['rns.transport', 'tcp.relay'],
+    services: ['rns.transport', 'tcp.server'],
     verification: 'operator',
     privacy: {
       consent: 'operator-published',
@@ -115,11 +115,11 @@ const NODE_TEMPLATES = [
     reticulum: {
       interfaceType: 'TCPServerInterface',
       transportId: 'diamond-preview-transport',
-      networkId: 'preview:apac-relay',
+      networkId: 'preview:apac-server',
       hops: 0,
       stampValue: 8,
       heardCount: 29,
-      reachableOn: 'Diamond relay label',
+      reachableOn: 'Diamond server label',
       port: null,
       heightMeters: 0
     }
@@ -127,7 +127,7 @@ const NODE_TEMPLATES = [
   {
     id: 'disc-front-range-lora',
     label: 'Front Range LoRa gateway',
-    kind: 'discovered-interface',
+    kind: 'client-auto',
     status: 'available',
     sourceId: 'ratspeak-tcp-preview',
     sourceMode: 'sample',
@@ -166,7 +166,7 @@ const NODE_TEMPLATES = [
   {
     id: 'disc-puget-sound-mesh',
     label: 'Puget Sound mesh node',
-    kind: 'discovered-interface',
+    kind: 'client-auto',
     status: 'stale',
     sourceId: 'ratspeak-tcp-preview',
     sourceMode: 'sample',
@@ -199,7 +199,7 @@ const NODE_TEMPLATES = [
   {
     id: 'manual-sierra-foothills',
     label: 'Sierra foothills listing',
-    kind: 'manual-listing',
+    kind: 'client-manual',
     status: 'unverified',
     sourceId: 'manual-preview',
     sourceMode: 'sample',
@@ -220,9 +220,9 @@ const NODE_TEMPLATES = [
     reticulum: null
   },
   {
-    id: 'identity-wasatch-field-kit',
+    id: 'manual-wasatch-field-kit',
     label: 'Wasatch field kit',
-    kind: 'identity',
+    kind: 'client-manual',
     status: 'recent',
     sourceId: 'manual-preview',
     sourceMode: 'sample',
@@ -241,9 +241,9 @@ const NODE_TEMPLATES = [
       precision: 'regional'
     },
     reticulum: {
-      interfaceType: 'LXMF delivery identity',
+      interfaceType: 'Ratspeak client',
       transportId: null,
-      networkId: 'preview:wasatch-identity',
+      networkId: 'preview:wasatch-client',
       hops: null,
       stampValue: null,
       heardCount: null,
