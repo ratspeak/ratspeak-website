@@ -27,6 +27,7 @@
     --map-blue: #1687B8;
     --map-yellow: #C79A2B;
     --map-i2p: var(--accent);
+    --map-yggdrasil: #E989B1;
     --map-red: #ff6464;
     --map-violet: #b18cff;
     --pin-edge: rgba(42, 37, 34, 0.22);
@@ -64,6 +65,7 @@
     --map-blue: #36B6E6;
     --map-yellow: #E4BD4B;
     --map-i2p: #F0834D;
+    --map-yggdrasil: #FF9EC8;
     --pin-edge: rgba(232, 228, 224, 0.20);
     --pin-inner-edge: rgba(255, 255, 255, 0.14);
     --pin-shadow: rgba(0, 0, 0, 0.42);
@@ -1050,6 +1052,10 @@ a {
 
 .map-pin--i2p {
     --pin-color: var(--map-i2p);
+}
+
+.map-pin--yggdrasil {
+    --pin-color: var(--map-yggdrasil);
 }
 
 .map-pin--stale,

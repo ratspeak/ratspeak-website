@@ -1,10 +1,13 @@
 import { buildMapSnapshot } from './map-data.js';
+import { isYggdrasilAddress, textMentionsYggdrasil } from './map-network.js';
+import { buildPlaceIndex, locationLabelForNode } from './map-places.js';
 
 const API_URL = '/api/map-nodes';
 const LIVE_SNAPSHOT_URL = '/.tmp/map-live.json';
 const SNAPSHOT_URLS = [LIVE_SNAPSHOT_URL, API_URL];
 const SNAPSHOT_REFRESH_MS = 15_000;
 const LAND_MASK_URL = 'scripts/data/ne_110m_land.geojson';
+const PLACE_GAZETTEER_URL = 'scripts/data/ne_110m_populated_places_simple.geojson';
 const TILE_ATTRIBUTION = '&copy; OpenStreetMap contributors &copy; CARTO';
 
 const CARTO_TILE_BASE_URL = 'https://{s}.basemaps.cartocdn.com';
@@ -43,6 +46,12 @@ const KIND_META = {
     badgeLabel: 'I2P',
     shortLabel: 'I2P',
     color: '#D2693B'
+  },
+  yggdrasil: {
+    label: 'Yggdrasil',
+    badgeLabel: 'Yggdrasil',
+    shortLabel: 'Ygg',
+    color: '#E989B1'
   }
 };
 
@@ -100,6 +109,7 @@ const state = {
   markerPlacements: new Map(),
   markerScale: MARKER_SCALE_BANDS[0],
   landMask: null,
+  placeIndex: [],
   nodeCursorActive: false,
   refreshTimer: null,
   suppressMapClickUntil: 0
@@ -128,12 +138,14 @@ init();
 async function init() {
   bindChrome();
   bindControls();
-  const [snapshot, landMask] = await Promise.all([
+  const [snapshot, landMask, placeIndex] = await Promise.all([
     loadSnapshot(),
-    loadLandMask()
+    loadLandMask(),
+    loadPlaceIndex()
   ]);
   state.snapshot = snapshot;
   state.landMask = landMask;
+  state.placeIndex = placeIndex;
   initMap();
   applyFilters();
   scheduleSnapshotRefresh();
@@ -258,6 +270,17 @@ async function loadLandMask() {
   } catch (error) {
     console.info('Map land mask unavailable:', error.message);
     return null;
+  }
+}
+
+async function loadPlaceIndex() {
+  try {
+    const response = await fetch(PLACE_GAZETTEER_URL, { cache: 'force-cache' });
+    if (!response.ok) throw new Error(`${PLACE_GAZETTEER_URL} returned ${response.status}`);
+    return buildPlaceIndex(await response.json());
+  } catch (error) {
+    console.info('Map place gazetteer unavailable:', error.message);
+    return [];
   }
 }
 
@@ -407,6 +430,7 @@ function applyFilters() {
       nodeDisplayName(node),
       kind,
       node.status,
+      nodeLocationLabel(node),
       node.reticulum?.interfaceType,
       node.reticulum?.networkId,
       ...(node.services || [])
@@ -437,11 +461,13 @@ function renderDetail() {
   const reticulum = node.reticulum || {};
   const endpoint = nodeEndpoint(node, reticulum);
   const radio = radioSummary(reticulum);
+  const location = nodeLocationLabel(node);
   const coord = `${formatCoord(node.location?.lat, 'lat')}, ${formatCoord(node.location?.lon, 'lon')}`;
   const fields = [
     detailField('Last seen', lastSeenLabel(node)),
     endpoint.address ? detailField(endpoint.label, endpoint.address, true, true) : '',
     endpoint.port == null ? '' : detailField('Port', String(endpoint.port), false, true),
+    location ? detailField('Location', location) : '',
     detailField('Coordinates', coord, true, true),
     reticulum.interfaceType ? detailField('Interface', reticulum.interfaceType) : '',
     reticulum.heardCount == null ? '' : detailField('Heard', `${reticulum.heardCount} times`),
@@ -820,8 +846,13 @@ function nodeDisplayName(node) {
   return label || 'Unnamed node';
 }
 
+function nodeLocationLabel(node) {
+  return locationLabelForNode(node, state.placeIndex);
+}
+
 function nodeKind(node) {
   if (isI2PNode(node)) return 'i2p';
+  if (isYggdrasilNode(node)) return 'yggdrasil';
   if (KIND_META[node.kind]) return node.kind;
   return 'client-manual';
 }
@@ -830,6 +861,25 @@ function isI2PNode(node) {
   if (node.kind === 'i2p') return true;
   if (node.reticulum?.interfaceType === 'I2PInterface') return true;
   return (node.services || []).some((service) => String(service).toLowerCase().includes('i2p'));
+}
+
+function isYggdrasilNode(node) {
+  if (node.kind === 'yggdrasil') return true;
+  if (String(node.reticulum?.interfaceType || '').toLowerCase().includes('yggdrasil')) return true;
+
+  const endpoint = node.endpoint || {};
+  const address = stringValue(endpoint.ip) ||
+    stringValue(endpoint.host) ||
+    stringValue(endpoint.address) ||
+    stringValue(node.reticulum?.reachableOn);
+  if (isYggdrasilAddress(address)) return true;
+
+  return textMentionsYggdrasil(
+    node.label,
+    node.reticulum?.interfaceType,
+    address,
+    ...(node.services || [])
+  );
 }
 
 function pointIsOnLand(lat, lon) {
@@ -916,6 +966,14 @@ function nodeEndpoint(node, reticulum) {
       label: 'I2P',
       address,
       port
+    };
+  }
+
+  if (isYggdrasilNode(node)) {
+    return {
+      label: 'Yggdrasil',
+      address,
+      port: positiveIntegerValue(endpoint.port) ?? positiveIntegerValue(reticulum.port)
     };
   }
 
