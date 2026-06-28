@@ -42,7 +42,7 @@
     <link rel="preconnect" href="https://basemaps.cartocdn.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Familjen+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <link rel="stylesheet" href="assets/maps.css?v=rail-cleanup-1">
+    <link rel="stylesheet" href="assets/maps.css?v=search-first-1">
     <script>!function(){var t=localStorage.getItem('ratspeak-theme');document.documentElement.setAttribute('data-theme',t||'dark')}()</script>
 </head>
 <body>
@@ -84,41 +84,12 @@
     <div class="map-canvas" id="map" aria-hidden="true"></div>
     <div class="map-fallback" id="mapFallback" hidden>Map tiles are unavailable in this browser session.</div>
 
-    <aside class="map-rail" aria-label="Map filters and node list">
-        <header class="rail-header">
-            <div class="rail-kicker">
-                <span class="eyebrow">Ratspeak Maps</span>
-                <span class="mode-pill" id="modePill">Sample data</span>
-            </div>
-            <div>
-                <h1 class="rail-title">Network presence</h1>
-                <p class="rail-copy">A field view for <strong>public servers</strong>, <strong>auto-discovered clients</strong>, and <strong>manual opt-in clients</strong>.</p>
-            </div>
-            <div class="stat-grid" aria-label="Map summary">
-                <div class="stat">
-                    <span class="stat-value" id="serverCount">0</span>
-                    <span class="stat-label">Servers</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-value" id="autoCount">0</span>
-                    <span class="stat-label">Auto</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-value" id="manualCount">0</span>
-                    <span class="stat-label">Manual</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-value" id="reviewCount">0</span>
-                    <span class="stat-label">Review</span>
-                </div>
-            </div>
-        </header>
-
+    <aside class="map-rail" aria-label="Map filters">
         <section class="rail-controls" aria-label="Map controls">
             <label class="search-box">
                 <span hidden>Search nodes</span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-                <input class="search-input" id="nodeSearch" type="search" autocomplete="off" placeholder="Search label, service, network id">
+                <input class="search-input" id="nodeSearch" type="search" autocomplete="off" placeholder="Search label, service, location">
             </label>
             <div class="filter-block">
                 <span class="filter-label">Type</span>
@@ -155,7 +126,7 @@
 </main>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="assets/maps.js?v=rail-cleanup-1"></script>
+<script type="module" src="assets/maps.js?v=search-first-1"></script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

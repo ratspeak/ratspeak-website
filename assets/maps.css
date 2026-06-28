@@ -316,20 +316,6 @@ a {
     overflow: hidden;
 }
 
-.rail-header {
-    display: grid;
-    gap: 13px;
-    padding: 17px;
-    border-bottom: 1px solid var(--map-border);
-}
-
-.rail-kicker {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-}
-
 .eyebrow {
     color: var(--map-accent-strong);
     font-family: var(--font-code);
@@ -339,78 +325,10 @@ a {
     text-transform: uppercase;
 }
 
-.mode-pill {
-    display: inline-flex;
-    align-items: center;
-    min-height: 24px;
-    border: 1px solid rgba(242, 201, 76, 0.32);
-    border-radius: 999px;
-    background: rgba(242, 201, 76, 0.1);
-    color: #f7da78;
-    font-family: var(--font-code);
-    font-size: 11px;
-    font-weight: 700;
-    padding: 3px 8px;
-    white-space: nowrap;
-}
-
-.rail-title {
-    color: var(--map-text);
-    font-size: 27px;
-    font-weight: 700;
-    letter-spacing: 0;
-    line-height: 1;
-}
-
-.rail-copy {
-    color: var(--map-text-soft);
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.rail-copy strong {
-    color: var(--map-text);
-    font-weight: 650;
-}
-
-.stat-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 6px;
-}
-
-.stat {
-    display: grid;
-    gap: 3px;
-    min-width: 0;
-    border: 1px solid rgba(124, 153, 167, 0.16);
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.032);
-    padding: 7px;
-}
-
-.stat-value {
-    color: var(--map-text);
-    font-family: var(--font-code);
-    font-size: 17px;
-    font-weight: 700;
-    line-height: 1;
-}
-
-.stat-label {
-    color: var(--map-text-muted);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 1;
-    text-transform: uppercase;
-}
-
 .rail-controls {
     display: grid;
-    gap: 12px;
-    padding: 13px 17px;
-    border-bottom: 1px solid var(--map-border);
+    gap: 13px;
+    padding: 17px;
 }
 
 .search-box {
@@ -820,26 +738,9 @@ a {
         max-height: 46vh;
     }
 
-    .rail-header {
-        gap: 10px;
-        padding: 14px;
-    }
-
-    .rail-title {
-        font-size: 25px;
-    }
-
-    .rail-copy {
-        font-size: 13.5px;
-    }
-
     .rail-controls {
         gap: 10px;
         padding: 12px 14px;
-    }
-
-    .stat-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .node-detail {
@@ -864,11 +765,6 @@ a {
 
     .navbar-right {
         gap: 6px;
-    }
-
-    .rail-kicker {
-        align-items: flex-start;
-        flex-direction: column;
     }
 
     .segmented--kind,

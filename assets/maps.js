@@ -49,11 +49,6 @@ const els = {
   app: document.getElementById('mapsApp'),
   map: document.getElementById('map'),
   fallback: document.getElementById('mapFallback'),
-  modePill: document.getElementById('modePill'),
-  serverCount: document.getElementById('serverCount'),
-  autoCount: document.getElementById('autoCount'),
-  manualCount: document.getElementById('manualCount'),
-  reviewCount: document.getElementById('reviewCount'),
   nodeDetail: document.getElementById('nodeDetail'),
   searchInput: document.getElementById('nodeSearch'),
   themeToggle: document.getElementById('themeToggle'),
@@ -192,23 +187,8 @@ function applyFilters() {
     state.selectedId = state.filteredNodes[0]?.id || null;
   }
 
-  renderSummary();
   renderDetail();
   renderMap();
-}
-
-function renderSummary() {
-  const nodes = state.snapshot.nodes || [];
-  const servers = nodes.filter((node) => node.kind === 'server').length;
-  const auto = nodes.filter((node) => node.kind === 'client-auto').length;
-  const manual = nodes.filter((node) => node.kind === 'client-manual').length;
-  const review = nodes.filter((node) => ['stale', 'unknown', 'unverified'].includes(node.status)).length;
-
-  els.modePill.textContent = state.snapshot.sourceMode === 'exploratory-sample' ? 'Sample data' : 'Live preview';
-  els.serverCount.textContent = String(servers);
-  els.autoCount.textContent = String(auto);
-  els.manualCount.textContent = String(manual);
-  els.reviewCount.textContent = String(review);
 }
 
 function renderDetail() {
