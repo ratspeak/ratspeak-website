@@ -32,6 +32,9 @@ const MARKER_SCALE_BANDS = [
 
 const MARKER_ICON_SIZE = 32;
 const DENSE_MARKER_DISTANCE_PX = 18;
+const WEB_MERCATOR_LAT_LIMIT = 85.05112878;
+const TILE_WORLD_SIZE = 256;
+const MIN_MAP_ZOOM = 2;
 
 const state = {
   snapshot: null,
@@ -158,8 +161,17 @@ function initMap() {
   state.map = window.L.map(els.map, {
     zoomControl: false,
     attributionControl: false,
-    worldCopyJump: true
-  }).setView([29, -18], 2);
+    worldCopyJump: true,
+    maxBoundsViscosity: 1
+  });
+
+  const minZoom = viewportMinZoom();
+  state.map.setMinZoom(minZoom);
+  state.map.setMaxBounds([
+    [-WEB_MERCATOR_LAT_LIMIT, -360],
+    [WEB_MERCATOR_LAT_LIMIT, 360]
+  ]);
+  state.map.setView([29, -18], minZoom);
 
   window.L.control.zoom({ position: 'bottomleft' }).addTo(state.map);
   window.L.control.attribution({
@@ -178,6 +190,22 @@ function initMap() {
     updateMarkerScale();
     renderMap();
   });
+  window.addEventListener('resize', syncMapViewport, { passive: true });
+}
+
+function syncMapViewport() {
+  if (!state.map) return;
+  state.map.invalidateSize();
+  const minZoom = viewportMinZoom();
+  state.map.setMinZoom(minZoom);
+  if (state.map.getZoom() < minZoom) state.map.setZoom(minZoom);
+  state.map.panInsideBounds(state.map.options.maxBounds, { animate: false });
+}
+
+function viewportMinZoom() {
+  const mapHeight = Math.max(els.map?.clientHeight || 0, 1);
+  const zoomForHeight = Math.ceil(Math.log2(mapHeight / TILE_WORLD_SIZE));
+  return Math.max(MIN_MAP_ZOOM, zoomForHeight);
 }
 
 function applyFilters() {
