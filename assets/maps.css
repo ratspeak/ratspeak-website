@@ -596,33 +596,36 @@ a {
 
 .map-legend {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 9px 12px;
-    align-items: center;
+    gap: 8px;
     border-top: 1px solid color-mix(in srgb, var(--map-border) 78%, transparent);
-    padding-top: 1px;
+    padding-top: 11px;
 }
 
 .legend-title {
-    color: var(--map-text);
-    font-size: 12.5px;
+    color: var(--map-text-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
     font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    text-transform: uppercase;
 }
 
 .legend-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 7px 12px;
+    gap: 8px 16px;
 }
 
 .legend-item {
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 8px;
     min-width: 0;
     color: var(--map-text-soft);
-    font-size: 12px;
-    line-height: 1.15;
+    font-size: 12.5px;
+    line-height: 1.1;
+    white-space: nowrap;
 }
 
 .legend-dot {
