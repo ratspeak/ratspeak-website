@@ -56,6 +56,8 @@ const DECLUTTER_NEIGHBOR_DISTANCE_PX = 17;
 const DECLUTTER_MIN_DISTANCE_PX = 10;
 const DECLUTTER_MAX_OFFSET_PX = 8;
 const DECLUTTER_MAX_STRENGTH = 0.7;
+const DECLUTTER_LOCAL_COLLISION_DISTANCE_PX = 10;
+const DECLUTTER_LOCAL_MAX_STRENGTH = 0.5;
 const DECLUTTER_FULL_ZOOM = MIN_MAP_ZOOM;
 const DECLUTTER_END_ZOOM = MIN_MAP_ZOOM + 2.6;
 const WEB_MERCATOR_LAT_LIMIT = 85.05112878;
@@ -463,14 +465,15 @@ function getMarkerDisplayLayout(nodes) {
         x: point.x,
         y: point.y,
         dx: 0,
-        dy: 0
+        dy: 0,
+        nearestOriginalDistance: Infinity
       });
       placements.set(key, ZERO_PLACEMENT);
     });
   });
 
-  const strength = declutterStrength();
-  if (strength <= 0 || items.length < 2) return placements;
+  const zoomStrength = declutterStrength();
+  if (items.length < 2) return placements;
 
   const neighborDistanceSq = DECLUTTER_NEIGHBOR_DISTANCE_PX * DECLUTTER_NEIGHBOR_DISTANCE_PX;
   for (let iteration = 0; iteration < DECLUTTER_ITERATIONS; iteration++) {
@@ -480,7 +483,12 @@ function getMarkerDisplayLayout(nodes) {
         const b = items[j];
         const originalDx = a.x - b.x;
         const originalDy = a.y - b.y;
-        if ((originalDx * originalDx) + (originalDy * originalDy) > neighborDistanceSq) continue;
+        const originalDistanceSq = (originalDx * originalDx) + (originalDy * originalDy);
+        if (originalDistanceSq > neighborDistanceSq) continue;
+
+        const originalDistance = Math.sqrt(originalDistanceSq);
+        a.nearestOriginalDistance = Math.min(a.nearestOriginalDistance, originalDistance);
+        b.nearestOriginalDistance = Math.min(b.nearestOriginalDistance, originalDistance);
 
         const displayDx = (a.x + a.dx) - (b.x + b.dx);
         const displayDy = (a.y + a.dy) - (b.y + b.dy);
@@ -500,6 +508,7 @@ function getMarkerDisplayLayout(nodes) {
   }
 
   items.forEach((item) => {
+    const strength = Math.max(zoomStrength, localCollisionStrength(item));
     const { dx, dy } = guardSpreadOnLand(
       item,
       roundPixel(item.dx * strength),
@@ -513,6 +522,14 @@ function getMarkerDisplayLayout(nodes) {
   });
 
   return placements;
+}
+
+function localCollisionStrength(item) {
+  if (!Number.isFinite(item.nearestOriginalDistance)) return 0;
+  if (item.nearestOriginalDistance >= DECLUTTER_LOCAL_COLLISION_DISTANCE_PX) return 0;
+
+  const severity = 1 - (item.nearestOriginalDistance / DECLUTTER_LOCAL_COLLISION_DISTANCE_PX);
+  return DECLUTTER_LOCAL_MAX_STRENGTH * severity;
 }
 
 function guardSpreadOnLand(item, dx, dy) {
