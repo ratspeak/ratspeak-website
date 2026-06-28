@@ -42,6 +42,10 @@ const MARKER_SCALE_BANDS = [
 const MARKER_ICON_SIZE = 32;
 const DENSE_MARKER_DISTANCE_PX = 18;
 const WEB_MERCATOR_LAT_LIMIT = 85.05112878;
+const WORLD_BOUNDS = [
+  [-WEB_MERCATOR_LAT_LIMIT, -180],
+  [WEB_MERCATOR_LAT_LIMIT, 180]
+];
 const TILE_WORLD_SIZE = 256;
 const MIN_MAP_ZOOM = 2;
 
@@ -206,16 +210,13 @@ function initMap() {
   state.map = window.L.map(els.map, {
     zoomControl: false,
     attributionControl: false,
-    worldCopyJump: true,
+    worldCopyJump: false,
     maxBoundsViscosity: 1
   });
 
   const minZoom = viewportMinZoom();
   state.map.setMinZoom(minZoom);
-  state.map.setMaxBounds([
-    [-WEB_MERCATOR_LAT_LIMIT, -360],
-    [WEB_MERCATOR_LAT_LIMIT, 360]
-  ]);
+  state.map.setMaxBounds(WORLD_BOUNDS);
   state.map.setView([29, -18], minZoom);
 
   window.L.control.zoom({ position: 'bottomleft' }).addTo(state.map);
@@ -226,7 +227,9 @@ function initMap() {
 
   state.tileLayer = window.L.tileLayer(tileLayerUrl(), {
     maxZoom: 19,
-    attribution: TILE_ATTRIBUTION
+    attribution: TILE_ATTRIBUTION,
+    bounds: WORLD_BOUNDS,
+    noWrap: true
   }).addTo(state.map);
 
   state.markerLayer = window.L.layerGroup().addTo(state.map);
@@ -268,8 +271,10 @@ function syncMapViewport() {
 
 function viewportMinZoom() {
   const mapHeight = Math.max(els.map?.clientHeight || 0, 1);
+  const mapWidth = Math.max(els.map?.clientWidth || 0, 1);
   const zoomForHeight = Math.ceil(Math.log2(mapHeight / TILE_WORLD_SIZE));
-  return Math.max(MIN_MAP_ZOOM, zoomForHeight);
+  const zoomForWidth = Math.ceil(Math.log2(mapWidth / TILE_WORLD_SIZE));
+  return Math.max(MIN_MAP_ZOOM, zoomForHeight, zoomForWidth);
 }
 
 function applyFilters() {
