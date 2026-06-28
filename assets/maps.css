@@ -29,9 +29,10 @@
     --map-i2p: var(--accent);
     --map-red: #ff6464;
     --map-violet: #b18cff;
-    --pin-stroke: rgba(255, 255, 255, 0.92);
-    --pin-hairline: rgba(42, 37, 34, 0.24);
-    --pin-shadow: rgba(42, 37, 34, 0.18);
+    --pin-edge: rgba(42, 37, 34, 0.22);
+    --pin-inner-edge: rgba(255, 255, 255, 0.32);
+    --pin-shadow: rgba(42, 37, 34, 0.22);
+    --pin-glow-opacity: 11%;
     --map-shadow: 0 18px 48px rgba(42, 37, 34, 0.14);
     --map-canvas-bg: #EDE7DF;
     --map-canvas-bg-deep: #DCD2C7;
@@ -63,9 +64,10 @@
     --map-blue: #36B6E6;
     --map-yellow: #E4BD4B;
     --map-i2p: #F0834D;
-    --pin-stroke: rgba(12, 16, 18, 0.78);
-    --pin-hairline: rgba(255, 255, 255, 0.18);
-    --pin-shadow: rgba(0, 0, 0, 0.22);
+    --pin-edge: rgba(232, 228, 224, 0.20);
+    --pin-inner-edge: rgba(255, 255, 255, 0.14);
+    --pin-shadow: rgba(0, 0, 0, 0.42);
+    --pin-glow-opacity: 13%;
     --map-shadow: 0 18px 48px rgba(0, 0, 0, 0.38);
     --map-canvas-bg: #071014;
     --map-canvas-bg-deep: #050709;
@@ -982,20 +984,21 @@ a {
 }
 
 .map-pin::before {
-    width: calc(var(--pin-size) + (var(--pin-ring) * 2));
-    height: calc(var(--pin-size) + (var(--pin-ring) * 2));
-    background: color-mix(in srgb, var(--pin-color) var(--pin-ring-alpha), transparent);
+    width: calc(var(--pin-size) + (var(--pin-ring) * 3));
+    height: calc(var(--pin-size) + (var(--pin-ring) * 3));
+    background: color-mix(in srgb, var(--pin-color) var(--pin-glow-opacity), transparent);
+    filter: blur(2px);
     opacity: 1;
 }
 
 .map-pin::after {
     width: var(--pin-size);
     height: var(--pin-size);
-    border: 1.5px solid var(--pin-stroke);
+    border: 1px solid var(--pin-edge);
     background: var(--pin-color);
     box-shadow:
-        0 0 0 1px var(--pin-hairline),
-        0 1px 2px var(--pin-shadow);
+        inset 0 0 0 1px var(--pin-inner-edge),
+        0 1px 3px var(--pin-shadow);
 }
 
 .map-pin.is-selected {
@@ -1006,29 +1009,31 @@ a {
 .map-pin.is-selected::before {
     width: var(--pin-selected-size);
     height: var(--pin-selected-size);
-    background: rgba(210, 105, 59, 0.16);
+    background: color-mix(in srgb, var(--map-accent) 18%, transparent);
+    filter: blur(1.5px);
     opacity: 1;
 }
 
 .map-pin.is-selected::after {
     width: var(--pin-selected-core-size);
     height: var(--pin-selected-core-size);
-    border: 1.5px solid var(--pin-stroke);
+    border: 1px solid var(--pin-edge);
     background: var(--pin-color);
     box-shadow:
-        0 0 0 1px var(--pin-hairline),
-        0 0 0 var(--pin-selected-ring) var(--map-accent),
-        0 0 0 var(--pin-selected-halo) rgba(210, 105, 59, 0.16);
+        inset 0 0 0 1px var(--pin-inner-edge),
+        0 0 0 var(--pin-selected-ring) color-mix(in srgb, var(--map-accent) 78%, transparent),
+        0 0 0 var(--pin-selected-halo) color-mix(in srgb, var(--map-accent) 14%, transparent),
+        0 1px 4px var(--pin-shadow);
 }
 
 .map-pin.is-dense:not(.is-selected)::before {
-    opacity: 0;
+    opacity: 0.55;
 }
 
 .map-pin.is-dense:not(.is-selected)::after {
     box-shadow:
-        0 0 0 1px var(--pin-hairline),
-        0 1px 1px var(--pin-shadow);
+        inset 0 0 0 1px var(--pin-inner-edge),
+        0 1px 2px var(--pin-shadow);
 }
 
 .map-pin--server {
