@@ -51,6 +51,7 @@ const els = {
   fallback: document.getElementById('mapFallback'),
   nodeDetail: document.getElementById('nodeDetail'),
   searchInput: document.getElementById('nodeSearch'),
+  navbar: document.getElementById('navbar'),
   themeToggle: document.getElementById('themeToggle'),
   navHamburger: document.getElementById('navHamburger'),
   navMobileMenu: document.getElementById('navMobileMenu'),
@@ -90,6 +91,14 @@ function bindChrome() {
         els.navHamburger.setAttribute('aria-expanded', 'false');
       }
     });
+  }
+
+  if (els.navbar) {
+    const syncNavbar = () => {
+      els.navbar.classList.toggle('scrolled', window.scrollY > 10);
+    };
+    syncNavbar();
+    window.addEventListener('scroll', syncNavbar, { passive: true });
   }
 }
 
