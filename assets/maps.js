@@ -40,8 +40,10 @@ const KIND_META = {
 };
 
 const MARKER_SCALE_BANDS = [
-  { maxZoom: 3, size: 6, selectedCore: 8, selected: 18, ring: 2, ringAlpha: 18, selectedRing: 3, selectedHalo: 6 },
-  { maxZoom: 5, size: 7, selectedCore: 9, selected: 20, ring: 2, ringAlpha: 18, selectedRing: 3, selectedHalo: 6 },
+  { maxZoom: 2, size: 5.5, selectedCore: 7.5, selected: 17, ring: 1.75, ringAlpha: 16, selectedRing: 2.75, selectedHalo: 5.5 },
+  { maxZoom: 3, size: 6.1, selectedCore: 8, selected: 18, ring: 1.85, ringAlpha: 17, selectedRing: 3, selectedHalo: 6 },
+  { maxZoom: 4, size: 6.8, selectedCore: 8.7, selected: 19.5, ring: 2, ringAlpha: 18, selectedRing: 3, selectedHalo: 6 },
+  { maxZoom: 5, size: 7.4, selectedCore: 9.3, selected: 21, ring: 2, ringAlpha: 17, selectedRing: 3, selectedHalo: 6.5 },
   { maxZoom: 8, size: 8, selectedCore: 10, selected: 22, ring: 2, ringAlpha: 16, selectedRing: 3, selectedHalo: 7 },
   { maxZoom: Infinity, size: 8.5, selectedCore: 10, selected: 22, ring: 2, ringAlpha: 14, selectedRing: 3, selectedHalo: 7 }
 ];
@@ -54,8 +56,8 @@ const DECLUTTER_NEIGHBOR_DISTANCE_PX = 17;
 const DECLUTTER_MIN_DISTANCE_PX = 10;
 const DECLUTTER_MAX_OFFSET_PX = 8;
 const DECLUTTER_MAX_STRENGTH = 0.7;
-const DECLUTTER_FULL_ZOOM = MIN_MAP_ZOOM + 0.35;
-const DECLUTTER_END_ZOOM = MIN_MAP_ZOOM + 2.25;
+const DECLUTTER_FULL_ZOOM = MIN_MAP_ZOOM;
+const DECLUTTER_END_ZOOM = MIN_MAP_ZOOM + 2.6;
 const WEB_MERCATOR_LAT_LIMIT = 85.05112878;
 const WRAPPED_WORLD_BOUNDS = [
   [-WEB_MERCATOR_LAT_LIMIT, -540],
@@ -543,8 +545,8 @@ function declutterStrength() {
   if (zoom <= DECLUTTER_FULL_ZOOM) return DECLUTTER_MAX_STRENGTH;
   if (zoom >= DECLUTTER_END_ZOOM) return 0;
 
-  const progress = (DECLUTTER_END_ZOOM - zoom) / (DECLUTTER_END_ZOOM - DECLUTTER_FULL_ZOOM);
-  return DECLUTTER_MAX_STRENGTH * progress * progress;
+  const progress = (zoom - DECLUTTER_FULL_ZOOM) / (DECLUTTER_END_ZOOM - DECLUTTER_FULL_ZOOM);
+  return DECLUTTER_MAX_STRENGTH * Math.max(0, 1 - (progress * progress));
 }
 
 function spreadDirection(a, b, dx, dy, distance) {
