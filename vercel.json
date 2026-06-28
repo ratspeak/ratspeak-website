@@ -7,6 +7,9 @@
     "api/firmware.js": {
       "maxDuration": 30
     },
+    "api/map-nodes.js": {
+      "maxDuration": 10
+    },
     "api/tasks.js": {
       "maxDuration": 10
     },
