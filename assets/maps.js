@@ -1,6 +1,9 @@
 import { buildMapSnapshot } from './map-data.js';
 
 const API_URL = '/api/map-nodes';
+const LIVE_SNAPSHOT_URL = '/.tmp/map-live.json';
+const SNAPSHOT_URLS = [LIVE_SNAPSHOT_URL, API_URL];
+const SNAPSHOT_REFRESH_MS = 15_000;
 const TILE_ATTRIBUTION = '&copy; OpenStreetMap contributors &copy; CARTO';
 
 const TILE_LAYERS = {
@@ -52,7 +55,8 @@ const state = {
   map: null,
   tileLayer: null,
   markerLayer: null,
-  markers: new Map()
+  markers: new Map(),
+  refreshTimer: null
 };
 
 const els = {
@@ -81,6 +85,7 @@ async function init() {
   state.snapshot = await loadSnapshot();
   initMap();
   applyFilters();
+  scheduleSnapshotRefresh();
 }
 
 function bindChrome() {
@@ -160,16 +165,34 @@ function bindControls() {
 }
 
 async function loadSnapshot() {
-  try {
-    const response = await fetch(API_URL, { cache: 'no-store' });
-    if (!response.ok) throw new Error(`Map API returned ${response.status}`);
-    const payload = await response.json();
-    if (!Array.isArray(payload.nodes)) throw new Error('Map API response missing nodes');
-    return payload;
-  } catch (error) {
-    console.info('Using local Ratspeak Maps seed data:', error.message);
-    return buildMapSnapshot(new Date());
+  for (const url of SNAPSHOT_URLS) {
+    try {
+      const response = await fetch(url, { cache: 'no-store' });
+      if (!response.ok) throw new Error(`${url} returned ${response.status}`);
+      const payload = await response.json();
+      if (!Array.isArray(payload.nodes)) throw new Error(`${url} response missing nodes`);
+      return payload;
+    } catch (error) {
+      console.info('Map snapshot source unavailable:', error.message);
+    }
   }
+
+  return buildMapSnapshot(new Date());
+}
+
+function scheduleSnapshotRefresh() {
+  if (state.refreshTimer) window.clearTimeout(state.refreshTimer);
+  state.refreshTimer = window.setTimeout(refreshSnapshot, SNAPSHOT_REFRESH_MS);
+}
+
+async function refreshSnapshot() {
+  const previousSelectedId = state.selectedId;
+  state.snapshot = await loadSnapshot();
+  if (previousSelectedId && !(state.snapshot.nodes || []).some((node) => node.id === previousSelectedId)) {
+    state.selectedId = null;
+  }
+  applyFilters();
+  scheduleSnapshotRefresh();
 }
 
 function initMap() {
