@@ -594,6 +594,46 @@ a {
     gap: 10px;
 }
 
+.detail-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.detail-close {
+    display: inline-grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border: 1px solid color-mix(in srgb, var(--map-border) 86%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-primary) 52%, transparent);
+    color: var(--map-text-muted);
+    line-height: 1;
+    transition: border-color 0.16s, background 0.16s, color 0.16s, transform 0.16s;
+}
+
+.detail-close svg {
+    width: 14px;
+    height: 14px;
+}
+
+.detail-close:hover,
+.detail-close:focus {
+    border-color: color-mix(in srgb, var(--map-accent) 54%, var(--map-border));
+    background: color-mix(in srgb, var(--map-accent) 10%, var(--bg-primary));
+    color: var(--map-text);
+    outline: none;
+}
+
+.detail-close:focus-visible {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--map-accent) 42%, transparent);
+}
+
+.detail-close:active {
+    transform: scale(0.94);
+}
+
 .detail-title {
     color: var(--map-text);
     font-size: 22px;

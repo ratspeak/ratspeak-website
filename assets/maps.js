@@ -56,7 +56,8 @@ const state = {
   tileLayer: null,
   markerLayer: null,
   markers: new Map(),
-  refreshTimer: null
+  refreshTimer: null,
+  suppressMapClickUntil: 0
 };
 
 const els = {
@@ -234,6 +235,12 @@ function initMap() {
     updateMarkerScale();
     renderMap();
   });
+  state.map.on('dragstart', suppressNextMapClick);
+  state.map.on('dragend', suppressNextMapClick);
+  state.map.on('click', () => {
+    if (Date.now() < state.suppressMapClickUntil) return;
+    clearSelectedNode();
+  });
   window.addEventListener('resize', syncMapViewport, { passive: true });
 }
 
@@ -316,7 +323,15 @@ function renderDetail() {
     <div class="detail-head">
       <div class="detail-kicker">
         <span class="eyebrow">Selected node</span>
-        <span class="tag tag--type" style="--type-color: ${kind.color}">${escapeHtml(kind.badgeLabel || kind.label)}</span>
+        <span class="detail-actions">
+          <span class="tag tag--type" style="--type-color: ${kind.color}">${escapeHtml(kind.badgeLabel || kind.label)}</span>
+          <button class="detail-close" type="button" aria-label="Close selected node details" title="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+              <path d="M18 6 6 18"/>
+              <path d="m6 6 12 12"/>
+            </svg>
+          </button>
+        </span>
       </div>
       <h2 class="detail-title">${escapeHtml(nodeDisplayName(node))}</h2>
     </div>
@@ -324,6 +339,11 @@ function renderDetail() {
       ${fields}
     </dl>
   `;
+
+  els.nodeDetail.querySelector('.detail-close')?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    clearSelectedNode();
+  });
 }
 
 function renderMap() {
@@ -355,7 +375,10 @@ function renderMap() {
       zIndexOffset: node.id === state.selectedId ? 1000 : 0
     }).addTo(state.markerLayer);
 
-    marker.on('click', () => selectNode(node.id, { pan: false }));
+    marker.on('click', (event) => {
+      if (window.L?.DomEvent && event.originalEvent) window.L.DomEvent.stop(event.originalEvent);
+      selectNode(node.id, { pan: false });
+    });
     marker.on('keypress', (event) => {
       if (event.originalEvent.key === 'Enter') selectNode(node.id, { pan: false });
     });
@@ -375,6 +398,17 @@ function selectNode(id, options = {}) {
       duration: 0.4
     });
   }
+}
+
+function clearSelectedNode() {
+  if (!state.selectedId) return;
+  state.selectedId = null;
+  renderDetail();
+  renderMap();
+}
+
+function suppressNextMapClick() {
+  state.suppressMapClickUntil = Date.now() + 220;
 }
 
 function updateMarkerScale() {
