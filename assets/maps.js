@@ -53,6 +53,9 @@ const els = {
   map: document.getElementById('map'),
   fallback: document.getElementById('mapFallback'),
   nodeDetail: document.getElementById('nodeDetail'),
+  mapMenu: document.getElementById('mapMenu'),
+  mapMenuToggle: document.getElementById('mapMenuToggle'),
+  mapMenuBody: document.getElementById('mapMenuBody'),
   searchInput: document.getElementById('nodeSearch'),
   kindSelect: document.getElementById('kindFilter'),
   statusSelect: document.getElementById('statusFilter'),
@@ -115,6 +118,16 @@ function bindChrome() {
 }
 
 function bindControls() {
+  if (els.mapMenu && els.mapMenuToggle && els.mapMenuBody) {
+    els.mapMenuToggle.addEventListener('click', () => {
+      const expanded = els.mapMenuToggle.getAttribute('aria-expanded') === 'true';
+      const nextExpanded = !expanded;
+      els.mapMenuToggle.setAttribute('aria-expanded', String(nextExpanded));
+      els.mapMenuBody.hidden = !nextExpanded;
+      els.mapMenu.classList.toggle('is-collapsed', !nextExpanded);
+    });
+  }
+
   if (els.kindSelect) {
     els.kindSelect.addEventListener('change', () => {
       state.kindFilter = els.kindSelect.value;

@@ -374,6 +374,58 @@ a {
     overflow: hidden;
 }
 
+.map-menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 42px;
+    border: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--map-border) 78%, transparent);
+    background: color-mix(in srgb, var(--bg-primary) 42%, transparent);
+    color: var(--map-text);
+    padding: 0 14px;
+    text-align: left;
+    transition: background 0.16s, color 0.16s, border-color 0.16s;
+}
+
+.map-menu-toggle:hover,
+.map-menu-toggle:focus {
+    background: color-mix(in srgb, var(--map-accent) 9%, var(--bg-primary));
+    color: var(--map-text);
+    outline: none;
+}
+
+.map-menu-toggle:focus-visible {
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--map-accent) 58%, transparent);
+}
+
+.map-menu-title {
+    color: inherit;
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.map-menu-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--map-text-muted);
+    transition: transform 0.18s ease, color 0.16s;
+}
+
+.map-menu-toggle:hover .map-menu-icon,
+.map-menu-toggle:focus .map-menu-icon {
+    color: var(--map-accent-strong);
+}
+
+.map-rail.is-collapsed .map-menu-toggle {
+    border-bottom-color: transparent;
+}
+
+.map-rail.is-collapsed .map-menu-icon {
+    transform: rotate(180deg);
+}
+
 .eyebrow {
     color: var(--map-accent-strong);
     font-family: var(--font-code);

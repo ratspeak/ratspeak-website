@@ -42,7 +42,7 @@
     <link rel="preconnect" href="https://basemaps.cartocdn.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Familjen+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <link rel="stylesheet" href="assets/maps.css?v=legend-polish-1">
+    <link rel="stylesheet" href="assets/maps.css?v=menu-collapse-1">
     <script>!function(){var t=localStorage.getItem('ratspeak-theme');document.documentElement.setAttribute('data-theme',t||'dark')}()</script>
 </head>
 <body>
@@ -95,8 +95,14 @@
     <div class="map-fallback" id="mapFallback" hidden>Map tiles are unavailable in this browser session.</div>
 
     <div class="map-left-stack" role="group" aria-label="Map controls and legend">
-        <aside class="map-rail" aria-label="Map filters">
-            <section class="rail-controls" aria-label="Map controls">
+        <aside class="map-rail" id="mapMenu" aria-label="Map filters">
+            <button class="map-menu-toggle" id="mapMenuToggle" type="button" aria-expanded="true" aria-controls="mapMenuBody">
+                <span class="map-menu-title">Menu</span>
+                <svg class="map-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m6 15 6-6 6 6"/>
+                </svg>
+            </button>
+            <section class="rail-controls" id="mapMenuBody" aria-label="Map controls">
                 <label class="search-box">
                     <span hidden>Search nodes</span>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -166,7 +172,7 @@
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="assets/maps.js?v=node-title-1"></script>
+<script type="module" src="assets/maps.js?v=menu-collapse-1"></script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
