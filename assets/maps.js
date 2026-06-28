@@ -42,10 +42,11 @@ const MARKER_SCALE_BANDS = [
 const MARKER_ICON_SIZE = 32;
 const DENSE_MARKER_DISTANCE_PX = 18;
 const WEB_MERCATOR_LAT_LIMIT = 85.05112878;
-const WORLD_BOUNDS = [
-  [-WEB_MERCATOR_LAT_LIMIT, -180],
-  [WEB_MERCATOR_LAT_LIMIT, 180]
+const WRAPPED_WORLD_BOUNDS = [
+  [-WEB_MERCATOR_LAT_LIMIT, -540],
+  [WEB_MERCATOR_LAT_LIMIT, 540]
 ];
+const MARKER_WORLD_OFFSETS = [-360, 0, 360];
 const MIN_MAP_ZOOM = 2;
 
 const state = {
@@ -215,7 +216,7 @@ function initMap() {
 
   const minZoom = viewportMinZoom();
   state.map.setMinZoom(minZoom);
-  state.map.setMaxBounds(WORLD_BOUNDS);
+  state.map.setMaxBounds(WRAPPED_WORLD_BOUNDS);
   state.map.setView([29, -18], minZoom);
 
   window.L.control.zoom({ position: 'bottomleft' }).addTo(state.map);
@@ -226,9 +227,7 @@ function initMap() {
 
   state.tileLayer = window.L.tileLayer(tileLayerUrl(), {
     maxZoom: 19,
-    attribution: TILE_ATTRIBUTION,
-    bounds: WORLD_BOUNDS,
-    noWrap: true
+    attribution: TILE_ATTRIBUTION
   }).addTo(state.map);
 
   state.markerLayer = window.L.layerGroup().addTo(state.map);
@@ -359,30 +358,31 @@ function renderMap() {
     const kindClass = cssToken(node.kind);
     const isSelected = node.id === state.selectedId ? ' is-selected' : '';
     const isDense = denseNodeIds.has(node.id) ? ' is-dense' : '';
-    const latLng = [node.location.lat, node.location.lon];
+    MARKER_WORLD_OFFSETS.forEach((worldOffset) => {
+      const latLng = [node.location.lat, node.location.lon + worldOffset];
+      const icon = window.L.divIcon({
+        className: 'ratspeak-marker-icon',
+        html: `<span class="map-pin map-pin--${kindClass} map-pin--${statusClass}${isSelected}${isDense}" style="--pin-color: ${kind.color}" aria-hidden="true"></span>`,
+        iconSize: [MARKER_ICON_SIZE, MARKER_ICON_SIZE],
+        iconAnchor: [MARKER_ICON_SIZE / 2, MARKER_ICON_SIZE / 2]
+      });
 
-    const icon = window.L.divIcon({
-      className: 'ratspeak-marker-icon',
-      html: `<span class="map-pin map-pin--${kindClass} map-pin--${statusClass}${isSelected}${isDense}" style="--pin-color: ${kind.color}" aria-hidden="true"></span>`,
-      iconSize: [MARKER_ICON_SIZE, MARKER_ICON_SIZE],
-      iconAnchor: [MARKER_ICON_SIZE / 2, MARKER_ICON_SIZE / 2]
-    });
+      const marker = window.L.marker(latLng, {
+        icon,
+        title: nodeDisplayName(node),
+        keyboard: true,
+        zIndexOffset: node.id === state.selectedId ? 1000 : 0
+      }).addTo(state.markerLayer);
 
-    const marker = window.L.marker(latLng, {
-      icon,
-      title: nodeDisplayName(node),
-      keyboard: true,
-      zIndexOffset: node.id === state.selectedId ? 1000 : 0
-    }).addTo(state.markerLayer);
-
-    marker.on('click', (event) => {
-      if (window.L?.DomEvent && event.originalEvent) window.L.DomEvent.stop(event.originalEvent);
-      selectNode(node.id, { pan: false });
+      marker.on('click', (event) => {
+        if (window.L?.DomEvent && event.originalEvent) window.L.DomEvent.stop(event.originalEvent);
+        selectNode(node.id, { pan: false });
+      });
+      marker.on('keypress', (event) => {
+        if (event.originalEvent.key === 'Enter') selectNode(node.id, { pan: false });
+      });
+      state.markers.set(`${node.id}:${worldOffset}`, marker);
     });
-    marker.on('keypress', (event) => {
-      if (event.originalEvent.key === 'Enter') selectNode(node.id, { pan: false });
-    });
-    state.markers.set(node.id, marker);
   });
 }
 
