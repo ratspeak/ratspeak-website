@@ -46,7 +46,6 @@ const WORLD_BOUNDS = [
   [-WEB_MERCATOR_LAT_LIMIT, -180],
   [WEB_MERCATOR_LAT_LIMIT, 180]
 ];
-const TILE_WORLD_SIZE = 256;
 const MIN_MAP_ZOOM = 2;
 
 const state = {
@@ -270,11 +269,7 @@ function syncMapViewport() {
 }
 
 function viewportMinZoom() {
-  const mapHeight = Math.max(els.map?.clientHeight || 0, 1);
-  const mapWidth = Math.max(els.map?.clientWidth || 0, 1);
-  const zoomForHeight = Math.ceil(Math.log2(mapHeight / TILE_WORLD_SIZE));
-  const zoomForWidth = Math.ceil(Math.log2(mapWidth / TILE_WORLD_SIZE));
-  return Math.max(MIN_MAP_ZOOM, zoomForHeight, zoomForWidth);
+  return MIN_MAP_ZOOM;
 }
 
 function applyFilters() {
