@@ -42,7 +42,7 @@
     <link rel="preconnect" href="https://basemaps.cartocdn.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Familjen+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <link rel="stylesheet" href="assets/maps.css?v=viewport-chrome-1">
+    <link rel="stylesheet" href="assets/maps.css?v=compact-filters-1">
     <script>!function(){var t=localStorage.getItem('ratspeak-theme');document.documentElement.setAttribute('data-theme',t||'dark')}()</script>
 </head>
 <body>
@@ -102,35 +102,40 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
                     <input class="search-input" id="nodeSearch" type="search" autocomplete="off" placeholder="Search label, service, location">
                 </label>
-                <div class="filter-block">
-                    <span class="filter-label">Type</span>
-                    <div class="segmented segmented--kind">
-                        <button class="segment-btn is-active" type="button" data-kind-filter="all">All</button>
-                        <button class="segment-btn" type="button" data-kind-filter="server">Server</button>
-                        <button class="segment-btn" type="button" data-kind-filter="client-auto">Client (Auto)</button>
-                        <button class="segment-btn" type="button" data-kind-filter="client-manual">Client (Manual)</button>
-                    </div>
+                <div class="filter-row">
+                    <label class="filter-field">
+                        <span class="filter-label">Type</span>
+                        <span class="select-wrap">
+                            <select class="filter-select" id="kindFilter">
+                                <option value="all">All nodes</option>
+                                <option value="server">Server</option>
+                                <option value="client-auto">Client (Auto)</option>
+                                <option value="client-manual">Client (Manual)</option>
+                            </select>
+                        </span>
+                    </label>
+                    <label class="filter-field">
+                        <span class="filter-label">Freshness</span>
+                        <span class="select-wrap">
+                            <select class="filter-select" id="statusFilter">
+                                <option value="all">All states</option>
+                                <option value="available">Seen</option>
+                                <option value="recent">Recent</option>
+                                <option value="stale">Stale</option>
+                            </select>
+                        </span>
+                    </label>
                 </div>
-                <div class="filter-block">
-                    <span class="filter-label">Freshness</span>
-                    <div class="segmented segmented--status">
-                        <button class="segment-btn is-active" type="button" data-status-filter="all">All</button>
-                        <button class="segment-btn" type="button" data-status-filter="available">Seen</button>
-                        <button class="segment-btn" type="button" data-status-filter="recent">Recent</button>
-                        <button class="segment-btn" type="button" data-status-filter="stale">Stale</button>
+                <section class="map-legend" aria-label="Legend">
+                    <h2 class="legend-title">Legend</h2>
+                    <div class="legend-grid">
+                        <span class="legend-item"><span class="legend-dot" style="--legend-color: #12a8ff"></span>Server</span>
+                        <span class="legend-item"><span class="legend-dot" style="--legend-color: #37f987"></span>Client (Auto)</span>
+                        <span class="legend-item"><span class="legend-dot" style="--legend-color: #ffd344"></span>Client (Manual)</span>
+                        <span class="legend-item"><span class="legend-dot legend-dot--selected"></span>Selected point</span>
                     </div>
-                </div>
+                </section>
             </section>
-        </aside>
-
-        <aside class="map-legend" aria-label="Legend">
-            <h2 class="legend-title">Legend</h2>
-            <div class="legend-grid">
-                <span class="legend-item"><span class="legend-dot" style="--legend-color: #12a8ff"></span>Server</span>
-                <span class="legend-item"><span class="legend-dot" style="--legend-color: #37f987"></span>Client (Auto)</span>
-                <span class="legend-item"><span class="legend-dot" style="--legend-color: #ffd344"></span>Client (Manual)</span>
-                <span class="legend-item"><span class="legend-dot legend-dot--selected"></span>Selected point</span>
-            </div>
         </aside>
     </div>
 
@@ -161,7 +166,7 @@
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="assets/maps.js?v=viewport-chrome-1"></script>
+<script type="module" src="assets/maps.js?v=compact-filters-1"></script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

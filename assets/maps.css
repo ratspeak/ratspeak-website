@@ -78,7 +78,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
     font: inherit;
 }
 
@@ -351,8 +352,7 @@ a {
 }
 
 .map-rail,
-.node-detail,
-.map-legend {
+.node-detail {
     border: 1px solid var(--map-border);
     background: var(--map-bg-panel);
     box-shadow: var(--map-shadow);
@@ -364,7 +364,6 @@ a {
     top: 18px;
     left: 18px;
     display: grid;
-    gap: 8px;
     width: min(348px, calc(100vw - 36px));
 }
 
@@ -386,8 +385,8 @@ a {
 
 .rail-controls {
     display: grid;
-    gap: 13px;
-    padding: 17px;
+    gap: 12px;
+    padding: 14px;
 }
 
 .search-box {
@@ -422,9 +421,16 @@ a {
     background: color-mix(in srgb, var(--bg-primary) 68%, transparent);
 }
 
-.filter-block {
+.filter-row {
     display: grid;
-    gap: 7px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.filter-field {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
 }
 
 .filter-label {
@@ -436,41 +442,48 @@ a {
     text-transform: uppercase;
 }
 
-.segmented {
+.select-wrap {
+    position: relative;
     display: grid;
-    gap: 6px;
 }
 
-.segmented--kind {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.select-wrap::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    width: 7px;
+    height: 7px;
+    border-right: 2px solid var(--map-text-muted);
+    border-bottom: 2px solid var(--map-text-muted);
+    pointer-events: none;
+    transform: translateY(-65%) rotate(45deg);
 }
 
-.segmented--status {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.segment-btn {
-    min-height: 34px;
+.filter-select {
+    width: 100%;
+    height: 38px;
+    min-width: 0;
+    appearance: none;
+    -webkit-appearance: none;
     border: 1px solid var(--map-border);
     border-radius: 8px;
     background: color-mix(in srgb, var(--bg-primary) 54%, transparent);
-    color: var(--map-text-soft);
-    font-size: 12.5px;
+    color: var(--map-text);
+    font-size: 13px;
     font-weight: 700;
-    padding: 7px 9px;
-    transition: background 0.16s, border-color 0.16s, color 0.16s, transform 0.16s;
+    line-height: 1;
+    outline: none;
+    padding: 0 30px 0 10px;
+    text-overflow: ellipsis;
+    transition: background 0.16s, border-color 0.16s, color 0.16s;
 }
 
-.segment-btn:hover {
+.filter-select:hover,
+.filter-select:focus {
     border-color: var(--map-border-strong);
     background: color-mix(in srgb, var(--map-accent) 10%, var(--bg-primary));
     color: var(--map-text);
-}
-
-.segment-btn.is-active {
-    border-color: color-mix(in srgb, var(--map-accent) 72%, var(--map-border));
-    background: color-mix(in srgb, var(--map-accent) 18%, var(--bg-primary));
-    color: color-mix(in srgb, var(--map-accent) 70%, var(--map-text));
 }
 
 .tag {
@@ -588,35 +601,38 @@ a {
 
 .map-legend {
     display: grid;
-    gap: 10px;
-    border-radius: 8px;
-    padding: 12px 14px 13px;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 9px 12px;
+    align-items: center;
+    border-top: 1px solid color-mix(in srgb, var(--map-border) 78%, transparent);
+    padding-top: 1px;
 }
 
 .legend-title {
     color: var(--map-text);
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 700;
 }
 
 .legend-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px 12px;
+    gap: 7px 12px;
 }
 
 .legend-item {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 7px;
     min-width: 0;
     color: var(--map-text-soft);
-    font-size: 12.5px;
+    font-size: 12px;
+    line-height: 1.15;
 }
 
 .legend-dot {
-    width: 9px;
-    height: 9px;
+    width: 8px;
+    height: 8px;
     flex: 0 0 auto;
     border-radius: 999px;
     background: var(--legend-color);
@@ -878,10 +894,6 @@ a {
         padding: 14px;
     }
 
-    .map-legend {
-        display: none;
-    }
-
     .footer-inner {
         flex-direction: column;
         gap: 10px;
@@ -906,16 +918,6 @@ a {
 
     .navbar-right {
         gap: 6px;
-    }
-
-    .segmented--kind,
-    .segmented--status {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .segment-btn {
-        min-height: 32px;
-        padding: 6px;
     }
 
     .detail-row {

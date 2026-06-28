@@ -54,6 +54,8 @@ const els = {
   fallback: document.getElementById('mapFallback'),
   nodeDetail: document.getElementById('nodeDetail'),
   searchInput: document.getElementById('nodeSearch'),
+  kindSelect: document.getElementById('kindFilter'),
+  statusSelect: document.getElementById('statusFilter'),
   navbar: document.getElementById('navbar'),
   themeToggle: document.getElementById('themeToggle'),
   navHamburger: document.getElementById('navHamburger'),
@@ -113,21 +115,19 @@ function bindChrome() {
 }
 
 function bindControls() {
-  document.querySelectorAll('[data-kind-filter]').forEach((button) => {
-    button.addEventListener('click', () => {
-      state.kindFilter = button.dataset.kindFilter;
-      setActive('[data-kind-filter]', button);
+  if (els.kindSelect) {
+    els.kindSelect.addEventListener('change', () => {
+      state.kindFilter = els.kindSelect.value;
       applyFilters();
     });
-  });
+  }
 
-  document.querySelectorAll('[data-status-filter]').forEach((button) => {
-    button.addEventListener('click', () => {
-      state.statusFilter = button.dataset.statusFilter;
-      setActive('[data-status-filter]', button);
+  if (els.statusSelect) {
+    els.statusSelect.addEventListener('change', () => {
+      state.statusFilter = els.statusSelect.value;
       applyFilters();
     });
-  });
+  }
 
   if (els.searchInput) {
     els.searchInput.addEventListener('input', () => {
@@ -362,12 +362,6 @@ function getDenseNodeIds(nodes) {
 
 function selectedNode() {
   return (state.snapshot.nodes || []).find((node) => node.id === state.selectedId) || null;
-}
-
-function setActive(selector, activeButton) {
-  document.querySelectorAll(selector).forEach((button) => {
-    button.classList.toggle('is-active', button === activeButton);
-  });
 }
 
 function detailField(label, value, _wide = false, code = false, html = false) {
