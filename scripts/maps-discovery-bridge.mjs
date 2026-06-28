@@ -3,7 +3,7 @@ import { readdir, readFile, mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isYggdrasilAddress, textMentionsYggdrasil } from '../assets/map-network.js';
-import { buildPlaceIndex, nearestPlaceForCoordinates } from '../assets/map-places.js';
+import { buildCountryIndex, locationForCoordinates } from '../assets/map-places.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
@@ -11,7 +11,7 @@ const repoRoot = path.resolve(__dirname, '..');
 const DEFAULT_STORE_DIR = path.join(repoRoot, '.tmp', 'maps-soak', 'rsreticulum', 'storage', 'discovery', 'interfaces');
 const DEFAULT_OUT = path.join(repoRoot, '.tmp', 'map-live.json');
 const DEFAULT_LAND_GEOJSON = path.join(__dirname, 'data', 'ne_110m_land.geojson');
-const DEFAULT_PLACES_GEOJSON = path.join(__dirname, 'data', 'ne_110m_populated_places_simple.geojson');
+const DEFAULT_COUNTRIES_GEOJSON = path.join(__dirname, 'data', 'ne_110m_admin_0_countries.geojson');
 const THRESHOLD_UNKNOWN_SECS = 24 * 60 * 60;
 const THRESHOLD_STALE_SECS = 3 * 24 * 60 * 60;
 const THRESHOLD_REMOVE_SECS = 7 * 24 * 60 * 60;
@@ -20,7 +20,7 @@ const RNS_SOURCE_ID = 'ratspeak-discovery-store';
 
 const args = parseArgs(process.argv.slice(2));
 let landMask = null;
-let placeIndex = [];
+let countryIndex = [];
 
 async function main() {
   if (args.help) {
@@ -29,7 +29,7 @@ async function main() {
   }
 
   landMask = args.includeWater ? null : await loadLandMask(args.landGeojson);
-  placeIndex = await loadPlaceIndex(args.placesGeojson);
+  countryIndex = await loadCountryIndex(args.countriesGeojson);
 
   if (args.once) {
     await writeSnapshot();
@@ -144,7 +144,12 @@ function recordToNode(record, now) {
   if (lat == null || lon == null || Math.abs(lat) > 85.05112878 || Math.abs(lon) > 180) {
     return null;
   }
-  const place = nearestPlaceForCoordinates(placeIndex, lat, lon);
+  const location = locationForCoordinates(lat, lon, countryIndex);
+  const city = stringOrNull(record.city) || stringOrNull(record.locality) || stringOrNull(record.place);
+  const country = stringOrNull(record.country) ||
+    stringOrNull(record.countryName) ||
+    stringOrNull(record.admin0) ||
+    location?.country;
 
   return {
     id,
@@ -158,7 +163,8 @@ function recordToNode(record, now) {
     location: {
       lat,
       lon,
-      ...(place ? { city: place.city, country: place.country } : {}),
+      ...(city ? { city } : {}),
+      ...(country ? { country } : {}),
       ...(height == null ? {} : { heightMeters: height })
     },
     services,
@@ -252,9 +258,9 @@ async function loadLandMask(filePath) {
   return { polygons };
 }
 
-async function loadPlaceIndex(filePath) {
+async function loadCountryIndex(filePath) {
   const raw = await readFile(filePath, 'utf8');
-  return buildPlaceIndex(JSON.parse(raw));
+  return buildCountryIndex(JSON.parse(raw));
 }
 
 function pointIsOnLand(lat, lon) {
@@ -473,7 +479,7 @@ function parseArgs(rawArgs) {
     storeDir: DEFAULT_STORE_DIR,
     out: DEFAULT_OUT,
     landGeojson: DEFAULT_LAND_GEOJSON,
-    placesGeojson: DEFAULT_PLACES_GEOJSON,
+    countriesGeojson: DEFAULT_COUNTRIES_GEOJSON,
     interval: 5000,
     once: false,
     includeZero: false,
@@ -487,7 +493,7 @@ function parseArgs(rawArgs) {
     if (arg === '--store-dir') parsed.storeDir = path.resolve(rawArgs[++i]);
     else if (arg === '--out') parsed.out = path.resolve(rawArgs[++i]);
     else if (arg === '--land-geojson') parsed.landGeojson = path.resolve(rawArgs[++i]);
-    else if (arg === '--places-geojson') parsed.placesGeojson = path.resolve(rawArgs[++i]);
+    else if (arg === '--countries-geojson') parsed.countriesGeojson = path.resolve(rawArgs[++i]);
     else if (arg === '--interval') parsed.interval = Number(rawArgs[++i]);
     else if (arg === '--once') parsed.once = true;
     else if (arg === '--include-zero') parsed.includeZero = true;
@@ -510,7 +516,7 @@ Options:
   --store-dir <dir>   rsReticulum discovery interface store
   --out <file>        output snapshot JSON
   --land-geojson <f>  land polygon GeoJSON used to filter water points
-  --places-geojson <f> populated places GeoJSON used for nearest city labels
+  --countries-geojson <f> country polygons GeoJSON used for country fallback
   --interval <ms>     polling interval for continuous mode
   --once              write one snapshot and exit
   --include-zero      plot records at 0,0 if present
