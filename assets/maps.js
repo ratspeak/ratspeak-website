@@ -48,17 +48,20 @@ const MARKER_SCALE_BANDS = [
 
 const MARKER_ICON_SIZE = 32;
 const DENSE_MARKER_DISTANCE_PX = 18;
-const DECLUTTER_ITERATIONS = 7;
-const DECLUTTER_NEIGHBOR_DISTANCE_PX = 32;
-const DECLUTTER_MIN_DISTANCE_PX = 15;
-const DECLUTTER_MAX_OFFSET_PX = 18;
+const MIN_MAP_ZOOM = 2;
+const DECLUTTER_ITERATIONS = 3;
+const DECLUTTER_NEIGHBOR_DISTANCE_PX = 17;
+const DECLUTTER_MIN_DISTANCE_PX = 10;
+const DECLUTTER_MAX_OFFSET_PX = 8;
+const DECLUTTER_MAX_STRENGTH = 0.7;
+const DECLUTTER_FULL_ZOOM = MIN_MAP_ZOOM + 0.35;
+const DECLUTTER_END_ZOOM = MIN_MAP_ZOOM + 2.25;
 const WEB_MERCATOR_LAT_LIMIT = 85.05112878;
 const WRAPPED_WORLD_BOUNDS = [
   [-WEB_MERCATOR_LAT_LIMIT, -540],
   [WEB_MERCATOR_LAT_LIMIT, 540]
 ];
 const MARKER_WORLD_OFFSETS = [-360, 0, 360];
-const MIN_MAP_ZOOM = 2;
 
 const state = {
   snapshot: null,
@@ -483,7 +486,7 @@ function getMarkerDisplayLayout(nodes) {
         if (distance >= DECLUTTER_MIN_DISTANCE_PX) continue;
 
         const { x: ux, y: uy } = spreadDirection(a, b, displayDx, displayDy, distance);
-        const push = (DECLUTTER_MIN_DISTANCE_PX - distance) * 0.52;
+        const push = (DECLUTTER_MIN_DISTANCE_PX - distance) * 0.32;
         a.dx += ux * push;
         a.dy += uy * push;
         b.dx -= ux * push;
@@ -537,9 +540,11 @@ function spreadPointIsOnLand(item, dx, dy) {
 function declutterStrength() {
   if (!state.map) return 0;
   const zoom = state.map.getZoom();
-  if (zoom <= 5) return 1;
-  if (zoom >= 8) return 0;
-  return (8 - zoom) / 3;
+  if (zoom <= DECLUTTER_FULL_ZOOM) return DECLUTTER_MAX_STRENGTH;
+  if (zoom >= DECLUTTER_END_ZOOM) return 0;
+
+  const progress = (DECLUTTER_END_ZOOM - zoom) / (DECLUTTER_END_ZOOM - DECLUTTER_FULL_ZOOM);
+  return DECLUTTER_MAX_STRENGTH * progress * progress;
 }
 
 function spreadDirection(a, b, dx, dy, distance) {
