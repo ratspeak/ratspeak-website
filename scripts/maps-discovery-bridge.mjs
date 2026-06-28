@@ -8,6 +8,7 @@ const repoRoot = path.resolve(__dirname, '..');
 
 const DEFAULT_STORE_DIR = path.join(repoRoot, '.tmp', 'maps-soak', 'rsreticulum', 'storage', 'discovery', 'interfaces');
 const DEFAULT_OUT = path.join(repoRoot, '.tmp', 'map-live.json');
+const DEFAULT_LAND_GEOJSON = path.join(__dirname, 'data', 'ne_110m_land.geojson');
 const THRESHOLD_UNKNOWN_SECS = 24 * 60 * 60;
 const THRESHOLD_STALE_SECS = 3 * 24 * 60 * 60;
 const THRESHOLD_REMOVE_SECS = 7 * 24 * 60 * 60;
@@ -15,26 +16,31 @@ const SERVER_TYPES = new Set(['BackboneInterface', 'TCPServerInterface', 'I2PInt
 const RNS_SOURCE_ID = 'ratspeak-discovery-store';
 
 const args = parseArgs(process.argv.slice(2));
+let landMask = null;
 
-if (args.help) {
-  printHelp();
-  process.exit(0);
-}
+async function main() {
+  if (args.help) {
+    printHelp();
+    return;
+  }
 
-if (args.once) {
-  await writeSnapshot();
-} else {
-  await writeSnapshot();
-  setInterval(() => {
-    writeSnapshot().catch((error) => {
-      console.error(`[maps-bridge] ${new Date().toISOString()} ${error.stack || error.message}`);
-    });
-  }, args.interval);
+  landMask = args.includeWater ? null : await loadLandMask(args.landGeojson);
+
+  if (args.once) {
+    await writeSnapshot();
+  } else {
+    await writeSnapshot();
+    setInterval(() => {
+      writeSnapshot().catch((error) => {
+        console.error(`[maps-bridge] ${new Date().toISOString()} ${error.stack || error.message}`);
+      });
+    }, args.interval);
+  }
 }
 
 async function writeSnapshot() {
   const generatedAt = new Date();
-  const { records, skipped, errors } = await readDiscoveryRecords(args.storeDir);
+  const { records, scanned, skipped, errors } = await readDiscoveryRecords(args.storeDir);
   const nodes = records
     .map((record) => recordToNode(record, generatedAt))
     .filter(Boolean);
@@ -54,9 +60,11 @@ async function writeSnapshot() {
       }
     ],
     stats: {
-      recordsRead: records.length,
+      recordsRead: scanned,
+      recordsAccepted: records.length,
       nodesPlotted: nodes.length,
       skippedMissingLocation: skipped.missingLocation,
+      skippedWater: skipped.water,
       skippedExpired: skipped.expired,
       decodeErrors: errors.length
     },
@@ -68,22 +76,23 @@ async function writeSnapshot() {
 
   const errorSuffix = errors.length ? `, ${errors.length} decode errors` : '';
   console.log(
-    `[maps-bridge] ${snapshot.generatedAt} wrote ${nodes.length} node(s) from ${records.length} record(s)` +
-    ` (${skipped.missingLocation} missing location, ${skipped.expired} expired${errorSuffix})`
+    `[maps-bridge] ${snapshot.generatedAt} wrote ${nodes.length} node(s) from ${records.length}/${scanned} record(s)` +
+    ` (${skipped.missingLocation} missing location, ${skipped.water} water, ${skipped.expired} expired${errorSuffix})`
   );
 }
 
 async function readDiscoveryRecords(storeDir) {
-  const skipped = { missingLocation: 0, expired: 0 };
+  const skipped = { missingLocation: 0, water: 0, expired: 0 };
   const errors = [];
   const records = [];
+  let scanned = 0;
   let entries = [];
 
   try {
     entries = await readdir(storeDir, { withFileTypes: true });
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
-    return { records, skipped, errors };
+    return { records, scanned, skipped, errors };
   }
 
   for (const entry of entries) {
@@ -91,6 +100,7 @@ async function readDiscoveryRecords(storeDir) {
     const filePath = path.join(storeDir, entry.name);
     try {
       const record = decodeDiscoveryRecord(await readFile(filePath));
+      scanned += 1;
       const ageSeconds = secondsSince(record.last_heard);
       if (ageSeconds > THRESHOLD_REMOVE_SECS) {
         skipped.expired += 1;
@@ -100,14 +110,21 @@ async function readDiscoveryRecords(storeDir) {
         skipped.missingLocation += 1;
         continue;
       }
+      if (landMask && !recordIsOnLand(record)) {
+        skipped.water += 1;
+        continue;
+      }
       records.push({ ...record, fileStem: entry.name });
     } catch (error) {
       errors.push({ file: entry.name, message: error.message });
+      if (args.verbose) {
+        console.warn(`[maps-bridge] skipped ${entry.name}: ${error.message}`);
+      }
     }
   }
 
   records.sort((a, b) => Number(b.last_heard || 0) - Number(a.last_heard || 0));
-  return { records, skipped, errors };
+  return { records, scanned, skipped, errors };
 }
 
 function recordToNode(record, now) {
@@ -179,6 +196,93 @@ function hasUsableLocation(record) {
   if (lat == null || lon == null) return false;
   if (Math.abs(lat) > 85.05112878 || Math.abs(lon) > 180) return false;
   return Math.abs(lat) > 0.000001 || Math.abs(lon) > 0.000001;
+}
+
+function recordIsOnLand(record) {
+  const lat = finiteNumber(record.latitude);
+  const lon = finiteNumber(record.longitude);
+  return lat != null && lon != null && pointIsOnLand(lat, lon);
+}
+
+async function loadLandMask(filePath) {
+  const raw = await readFile(filePath, 'utf8');
+  const geojson = JSON.parse(raw);
+  const polygons = [];
+
+  for (const feature of geojson.features || []) {
+    const geometry = feature.geometry;
+    if (!geometry) continue;
+
+    const polygonGroups = geometry.type === 'Polygon'
+      ? [geometry.coordinates]
+      : geometry.type === 'MultiPolygon'
+        ? geometry.coordinates
+        : [];
+
+    for (const rings of polygonGroups) {
+      if (!Array.isArray(rings) || !rings.length) continue;
+      const bbox = bboxForRing(rings[0]);
+      polygons.push({ rings, bbox });
+    }
+  }
+
+  if (!polygons.length) {
+    throw new Error(`No land polygons loaded from ${filePath}`);
+  }
+  return { polygons };
+}
+
+function pointIsOnLand(lat, lon) {
+  for (const polygon of landMask.polygons) {
+    if (!bboxContains(polygon.bbox, lat, lon)) continue;
+    if (pointInPolygon(lon, lat, polygon.rings)) return true;
+  }
+  return false;
+}
+
+function pointInPolygon(x, y, rings) {
+  if (!pointInRing(x, y, rings[0])) return false;
+  for (let i = 1; i < rings.length; i += 1) {
+    if (pointInRing(x, y, rings[i])) return false;
+  }
+  return true;
+}
+
+function pointInRing(x, y, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i, i += 1) {
+    const xi = Number(ring[i][0]);
+    const yi = Number(ring[i][1]);
+    const xj = Number(ring[j][0]);
+    const yj = Number(ring[j][1]);
+    const intersects = ((yi > y) !== (yj > y)) &&
+      (x < ((xj - xi) * (y - yi)) / ((yj - yi) || Number.EPSILON) + xi);
+    if (intersects) inside = !inside;
+  }
+  return inside;
+}
+
+function bboxForRing(ring) {
+  let minLat = Infinity;
+  let maxLat = -Infinity;
+  let minLon = Infinity;
+  let maxLon = -Infinity;
+
+  for (const point of ring) {
+    const lon = Number(point[0]);
+    const lat = Number(point[1]);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+    minLat = Math.min(minLat, lat);
+    maxLat = Math.max(maxLat, lat);
+    minLon = Math.min(minLon, lon);
+    maxLon = Math.max(maxLon, lon);
+  }
+
+  return { minLat, maxLat, minLon, maxLon };
+}
+
+function bboxContains(bbox, lat, lon) {
+  return lat >= bbox.minLat && lat <= bbox.maxLat && lon >= bbox.minLon && lon <= bbox.maxLon;
 }
 
 function radioFor(record) {
@@ -342,9 +446,12 @@ function parseArgs(rawArgs) {
   const parsed = {
     storeDir: DEFAULT_STORE_DIR,
     out: DEFAULT_OUT,
+    landGeojson: DEFAULT_LAND_GEOJSON,
     interval: 5000,
     once: false,
     includeZero: false,
+    includeWater: false,
+    verbose: false,
     help: false
   };
 
@@ -352,9 +459,12 @@ function parseArgs(rawArgs) {
     const arg = rawArgs[i];
     if (arg === '--store-dir') parsed.storeDir = path.resolve(rawArgs[++i]);
     else if (arg === '--out') parsed.out = path.resolve(rawArgs[++i]);
+    else if (arg === '--land-geojson') parsed.landGeojson = path.resolve(rawArgs[++i]);
     else if (arg === '--interval') parsed.interval = Number(rawArgs[++i]);
     else if (arg === '--once') parsed.once = true;
     else if (arg === '--include-zero') parsed.includeZero = true;
+    else if (arg === '--include-water') parsed.includeWater = true;
+    else if (arg === '--verbose') parsed.verbose = true;
     else if (arg === '--help' || arg === '-h') parsed.help = true;
     else throw new Error(`Unknown argument: ${arg}`);
   }
@@ -371,9 +481,12 @@ function printHelp() {
 Options:
   --store-dir <dir>   rsReticulum discovery interface store
   --out <file>        output snapshot JSON
+  --land-geojson <f>  land polygon GeoJSON used to filter water points
   --interval <ms>     polling interval for continuous mode
   --once              write one snapshot and exit
   --include-zero      plot records at 0,0 if present
+  --include-water     plot valid coordinates even when they fall outside land
+  --verbose           print per-record skip/decode diagnostics
   -h, --help          show this help
 `);
 }
@@ -406,3 +519,5 @@ function hashFallback(record) {
     .toString('base64url')
     .slice(0, 24);
 }
+
+await main();
