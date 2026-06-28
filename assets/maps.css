@@ -909,6 +909,41 @@ a {
     color: var(--map-text-soft) !important;
 }
 
+.continent-label-pane {
+    pointer-events: none;
+}
+
+.continent-label-icon {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    pointer-events: none;
+}
+
+.continent-label {
+    display: block;
+    width: 170px;
+    color: rgba(42, 37, 34, 0.38);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    text-align: center;
+    text-transform: uppercase;
+    text-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.72),
+        0 0 10px rgba(255, 255, 255, 0.56);
+    white-space: nowrap;
+}
+
+[data-theme="dark"] .continent-label {
+    color: rgba(232, 228, 224, 0.24);
+    text-shadow:
+        0 1px 0 rgba(0, 0, 0, 0.72),
+        0 0 10px rgba(0, 0, 0, 0.82);
+}
+
 .ratspeak-marker-icon {
     overflow: visible;
     background: transparent;

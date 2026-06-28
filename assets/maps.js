@@ -7,9 +7,16 @@ const SNAPSHOT_REFRESH_MS = 15_000;
 const LAND_MASK_URL = 'scripts/data/ne_110m_land.geojson';
 const TILE_ATTRIBUTION = '&copy; OpenStreetMap contributors &copy; CARTO';
 
-const TILE_LAYERS = {
-  light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-  dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+const CARTO_TILE_BASE_URL = 'https://{s}.basemaps.cartocdn.com';
+const TILE_LAYER_STYLES = {
+  light: {
+    labels: 'light_all',
+    noLabels: 'light_nolabels'
+  },
+  dark: {
+    labels: 'dark_all',
+    noLabels: 'dark_nolabels'
+  }
 };
 
 const KIND_META = {
@@ -51,6 +58,16 @@ const MARKER_SCALE_BANDS = [
 const MARKER_ICON_SIZE = 32;
 const DENSE_MARKER_DISTANCE_PX = 18;
 const MIN_MAP_ZOOM = 2;
+const LOW_ZOOM_LABEL_CUTOFF = MIN_MAP_ZOOM;
+const LOW_ZOOM_LABELS = [
+  { label: 'North America', lat: 48, lon: -103 },
+  { label: 'South America', lat: -18, lon: -60 },
+  { label: 'Europe', lat: 52, lon: 17 },
+  { label: 'Africa', lat: 6, lon: 21 },
+  { label: 'Asia', lat: 47, lon: 86 },
+  { label: 'Oceania', lat: -23, lon: 136 },
+  { label: 'Antarctica', lat: -75, lon: 18 }
+];
 const DECLUTTER_ITERATIONS = 3;
 const DECLUTTER_NEIGHBOR_DISTANCE_PX = 17;
 const DECLUTTER_MIN_DISTANCE_PX = 10;
@@ -76,6 +93,8 @@ const state = {
   query: '',
   map: null,
   tileLayer: null,
+  tileLayerUrl: '',
+  lowZoomLabelLayer: null,
   markerLayer: null,
   markers: new Map(),
   markerPlacements: new Map(),
@@ -282,14 +301,17 @@ function initMap() {
     prefix: false
   }).addTo(state.map);
 
-  state.tileLayer = window.L.tileLayer(tileLayerUrl(), {
+  state.tileLayerUrl = tileLayerUrl();
+  state.tileLayer = window.L.tileLayer(state.tileLayerUrl, {
     maxZoom: 19,
     attribution: TILE_ATTRIBUTION
   }).addTo(state.map);
 
+  initLowZoomLabels();
   state.markerLayer = window.L.layerGroup().addTo(state.map);
   updateMarkerScale();
   state.map.on('zoomend', () => {
+    syncMapTheme();
     updateMarkerScale();
     renderMap();
   });
@@ -306,15 +328,59 @@ function initMap() {
 
 function syncMapTheme() {
   if (!state.tileLayer) return;
-  state.tileLayer.setUrl(tileLayerUrl());
+  const nextUrl = tileLayerUrl();
+  if (state.tileLayerUrl !== nextUrl) {
+    state.tileLayerUrl = nextUrl;
+    state.tileLayer.setUrl(nextUrl);
+  }
+  syncLowZoomLabels();
 }
 
 function tileLayerUrl() {
-  return TILE_LAYERS[currentTheme()] || TILE_LAYERS.dark;
+  const theme = currentTheme();
+  const styles = TILE_LAYER_STYLES[theme] || TILE_LAYER_STYLES.dark;
+  const style = isLowZoomLabelMode() ? styles.noLabels : styles.labels;
+  return `${CARTO_TILE_BASE_URL}/${style}/{z}/{x}/{y}{r}.png`;
 }
 
 function currentTheme() {
   return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+}
+
+function isLowZoomLabelMode() {
+  return state.map ? state.map.getZoom() <= LOW_ZOOM_LABEL_CUTOFF + 0.001 : true;
+}
+
+function initLowZoomLabels() {
+  state.map.createPane('continentLabels');
+  const pane = state.map.getPane('continentLabels');
+  pane.classList.add('continent-label-pane');
+  pane.style.zIndex = 360;
+  pane.style.pointerEvents = 'none';
+  state.lowZoomLabelLayer = window.L.layerGroup().addTo(state.map);
+  syncLowZoomLabels();
+}
+
+function syncLowZoomLabels() {
+  if (!state.lowZoomLabelLayer || !window.L) return;
+  state.lowZoomLabelLayer.clearLayers();
+  if (!isLowZoomLabelMode()) return;
+
+  LOW_ZOOM_LABELS.forEach((label) => {
+    MARKER_WORLD_OFFSETS.forEach((worldOffset) => {
+      window.L.marker([label.lat, label.lon + worldOffset], {
+        pane: 'continentLabels',
+        interactive: false,
+        keyboard: false,
+        icon: window.L.divIcon({
+          className: 'continent-label-icon',
+          html: `<span class="continent-label">${escapeHtml(label.label)}</span>`,
+          iconSize: [170, 24],
+          iconAnchor: [85, 12]
+        })
+      }).addTo(state.lowZoomLabelLayer);
+    });
+  });
 }
 
 function syncMapViewport() {
@@ -324,6 +390,7 @@ function syncMapViewport() {
   state.map.setMinZoom(minZoom);
   if (state.map.getZoom() < minZoom) state.map.setZoom(minZoom);
   state.map.panInsideBounds(state.map.options.maxBounds, { animate: false });
+  syncMapTheme();
 }
 
 function viewportMinZoom() {
