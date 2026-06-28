@@ -307,15 +307,18 @@ function renderDetail() {
   els.nodeDetail.hidden = false;
   const kind = KIND_META[node.kind] || KIND_META['client-manual'];
   const reticulum = node.reticulum || {};
-  const source = (state.snapshot.sources || []).find((item) => item.id === node.sourceId);
+  const endpoint = serverEndpoint(node, reticulum);
+  const radio = radioSummary(reticulum);
   const coord = `${formatCoord(node.location?.lat, 'lat')}, ${formatCoord(node.location?.lon, 'lon')}`;
   const fields = [
     detailField('Last seen', lastSeenLabel(node)),
-    detailField('Source', source?.label || node.sourceId || 'Unknown', true),
+    endpoint.ip ? detailField('IP', endpoint.ip, true, true) : '',
+    endpoint.port == null ? '' : detailField('Port', String(endpoint.port), false, true),
     detailField('Coordinates', coord, true, true),
     reticulum.interfaceType ? detailField('Interface', reticulum.interfaceType) : '',
     reticulum.heardCount == null ? '' : detailField('Heard', `${reticulum.heardCount} times`),
-    detailField('Services', serviceTags(node.services), true, false, true)
+    detailField('Services', serviceTags(node.services), true, false, true),
+    radio ? detailField('Radio', radio, true, true) : ''
   ].filter(Boolean).join('');
 
   els.nodeDetail.innerHTML = `
@@ -474,6 +477,55 @@ function serviceTags(services = []) {
   return `<span class="service-list">${services.map((service) => `<span class="tag">${escapeHtml(service)}</span>`).join('')}</span>`;
 }
 
+function serverEndpoint(node, reticulum) {
+  if (node.kind !== 'server') return {};
+
+  const endpoint = node.endpoint || {};
+  return {
+    ip: stringValue(endpoint.ip) || stringValue(endpoint.host) || stringValue(endpoint.address) || stringValue(reticulum.reachableOn),
+    port: integerValue(endpoint.port) ?? integerValue(reticulum.port)
+  };
+}
+
+function radioSummary(reticulum) {
+  if (reticulum.interfaceType !== 'RNodeInterface' || !reticulum.radio) return '';
+
+  const radio = reticulum.radio;
+  const parts = [];
+  const frequency = numberValue(radio.frequency);
+  const bandwidth = numberValue(radio.bandwidth);
+  const spreadingFactor = integerValue(radio.spreadingFactor ?? radio.spreading_factor ?? radio.sf);
+  const codingRate = integerValue(radio.codingRate ?? radio.coding_rate ?? radio.cr);
+  const txPower = integerValue(radio.txPowerDbm ?? radio.txPower ?? radio.tx_power);
+  const modulation = stringValue(radio.modulation);
+  const channel = integerValue(radio.channel);
+
+  if (frequency != null) parts.push(formatFrequency(frequency));
+  if (bandwidth != null) parts.push(`BW ${formatFrequency(bandwidth)}`);
+  if (spreadingFactor != null) parts.push(`SF${spreadingFactor}`);
+  if (codingRate != null) parts.push(`CR ${formatCodingRate(codingRate)}`);
+  if (txPower != null) parts.push(`TX ${txPower} dBm`);
+  if (modulation) parts.push(modulation);
+  if (channel != null) parts.push(`CH ${channel}`);
+
+  return parts.join(', ');
+}
+
+function formatFrequency(hz) {
+  if (hz >= 1_000_000_000) return `${trimNumber(hz / 1_000_000_000, 3)} GHz`;
+  if (hz >= 1_000_000) return `${trimNumber(hz / 1_000_000, 3)} MHz`;
+  if (hz >= 1_000) return `${trimNumber(hz / 1_000, 3)} kHz`;
+  return `${trimNumber(hz, 0)} Hz`;
+}
+
+function formatCodingRate(value) {
+  return value >= 5 && value <= 8 ? `4/${value}` : String(value);
+}
+
+function trimNumber(value, digits) {
+  return Number(value).toFixed(digits).replace(/\.?0+$/, '');
+}
+
 function lastSeenLabel(node) {
   if (!node.lastSeen) return 'Manual';
   return relativeTime(node.lastSeen);
@@ -505,6 +557,20 @@ function relativeTime(value) {
 
 function cssToken(value) {
   return String(value || 'unknown').replace(/[^a-z0-9_-]/gi, '-').toLowerCase();
+}
+
+function numberValue(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function integerValue(value) {
+  const number = numberValue(value);
+  return number == null ? null : Math.trunc(number);
+}
+
+function stringValue(value) {
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
 }
 
 function escapeHtml(value) {

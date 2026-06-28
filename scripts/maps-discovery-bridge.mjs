@@ -286,17 +286,18 @@ function bboxContains(bbox, lat, lon) {
 }
 
 function radioFor(record) {
-  const radio = {};
-  for (const [from, to] of [
-    ['frequency', 'frequency'],
-    ['bandwidth', 'bandwidth'],
-    ['sf', 'spreadingFactor'],
-    ['cr', 'codingRate'],
-    ['modulation', 'modulation'],
-    ['channel', 'channel']
-  ]) {
-    const value = from === 'modulation' ? stringOrNull(record[from]) : finiteInteger(record[from]);
-    if (value != null) radio[to] = value;
+  const radio = {
+    frequency: firstInteger(record.frequency, record.freq),
+    bandwidth: firstInteger(record.bandwidth),
+    spreadingFactor: firstInteger(record.spreading_factor, record.spreadingFactor, record.sf),
+    codingRate: firstInteger(record.coding_rate, record.codingRate, record.cr),
+    txPowerDbm: firstInteger(record.tx_power, record.txPower, record.txPowerDbm),
+    modulation: stringOrNull(record.modulation),
+    channel: firstInteger(record.channel)
+  };
+
+  for (const key of Object.keys(radio)) {
+    if (radio[key] == null) delete radio[key];
   }
   return Object.keys(radio).length ? radio : null;
 }
@@ -499,6 +500,14 @@ function finiteNumber(value) {
 function finiteInteger(value) {
   const number = Number(value);
   return Number.isFinite(number) ? Math.trunc(number) : null;
+}
+
+function firstInteger(...values) {
+  for (const value of values) {
+    const integer = finiteInteger(value);
+    if (integer != null) return integer;
+  }
+  return null;
 }
 
 function stringOrNull(value) {
