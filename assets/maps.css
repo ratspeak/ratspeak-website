@@ -26,6 +26,7 @@
     --map-green: #35B875;
     --map-blue: #1687B8;
     --map-yellow: #C79A2B;
+    --map-i2p: var(--accent);
     --map-red: #ff6464;
     --map-violet: #b18cff;
     --pin-stroke: rgba(255, 255, 255, 0.92);
@@ -61,6 +62,7 @@
     --map-green: #63D98F;
     --map-blue: #36B6E6;
     --map-yellow: #E4BD4B;
+    --map-i2p: #F0834D;
     --pin-stroke: rgba(12, 16, 18, 0.78);
     --pin-hairline: rgba(255, 255, 255, 0.18);
     --pin-shadow: rgba(0, 0, 0, 0.22);
@@ -999,6 +1001,10 @@ a {
 
 .map-pin--client-manual {
     --pin-color: var(--map-yellow);
+}
+
+.map-pin--i2p {
+    --pin-color: var(--map-i2p);
 }
 
 .map-pin--stale,

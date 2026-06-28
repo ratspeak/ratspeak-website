@@ -12,7 +12,7 @@ const DEFAULT_LAND_GEOJSON = path.join(__dirname, 'data', 'ne_110m_land.geojson'
 const THRESHOLD_UNKNOWN_SECS = 24 * 60 * 60;
 const THRESHOLD_STALE_SECS = 3 * 24 * 60 * 60;
 const THRESHOLD_REMOVE_SECS = 7 * 24 * 60 * 60;
-const SERVER_TYPES = new Set(['BackboneInterface', 'TCPServerInterface', 'I2PInterface']);
+const SERVER_TYPES = new Set(['BackboneInterface', 'TCPServerInterface']);
 const RNS_SOURCE_ID = 'ratspeak-discovery-store';
 
 const args = parseArgs(process.argv.slice(2));
@@ -171,6 +171,7 @@ function recordToNode(record, now) {
 }
 
 function kindForInterface(type) {
+  if (type === 'I2PInterface') return 'i2p';
   return SERVER_TYPES.has(type) ? 'server' : 'client-auto';
 }
 

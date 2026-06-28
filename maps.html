@@ -42,7 +42,7 @@
     <link rel="preconnect" href="https://basemaps.cartocdn.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Familjen+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <link rel="stylesheet" href="assets/maps.css?v=node-pick-1">
+    <link rel="stylesheet" href="assets/maps.css?v=i2p-kind-1">
     <script>!function(){var t=localStorage.getItem('ratspeak-theme');document.documentElement.setAttribute('data-theme',t||'dark')}()</script>
 </head>
 <body>
@@ -115,6 +115,7 @@
                             <select class="filter-select" id="kindFilter">
                                 <option value="all">All</option>
                                 <option value="server">Server</option>
+                                <option value="i2p">I2P</option>
                                 <option value="client-auto">Client (Auto)</option>
                                 <option value="client-manual">Client (Manual)</option>
                             </select>
@@ -138,7 +139,7 @@
                         <span class="legend-item"><span class="legend-marker"><span class="map-pin map-pin--server" aria-hidden="true"></span></span>Server</span>
                         <span class="legend-item"><span class="legend-marker"><span class="map-pin map-pin--client-auto" aria-hidden="true"></span></span>Client (Auto)</span>
                         <span class="legend-item"><span class="legend-marker"><span class="map-pin map-pin--client-manual" aria-hidden="true"></span></span>Client (Manual)</span>
-                        <span class="legend-item"><span class="legend-marker"><span class="map-pin map-pin--server is-selected" aria-hidden="true"></span></span>Selected</span>
+                        <span class="legend-item"><span class="legend-marker"><span class="map-pin map-pin--i2p" aria-hidden="true"></span></span>I2P</span>
                     </div>
                 </section>
             </section>
@@ -172,7 +173,7 @@
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="assets/maps.js?v=node-pick-1"></script>
+<script type="module" src="assets/maps.js?v=i2p-kind-1"></script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

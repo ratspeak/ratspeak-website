@@ -29,6 +29,12 @@ const KIND_META = {
     badgeLabel: 'Client',
     shortLabel: 'Manual',
     color: '#C79A2B'
+  },
+  i2p: {
+    label: 'I2P',
+    badgeLabel: 'I2P',
+    shortLabel: 'I2P',
+    color: '#D2693B'
   }
 };
 
@@ -278,11 +284,12 @@ function viewportMinZoom() {
 function applyFilters() {
   const nodes = state.snapshot.nodes || [];
   state.filteredNodes = nodes.filter((node) => {
-    const matchesKind = state.kindFilter === 'all' || node.kind === state.kindFilter;
+    const kind = nodeKind(node);
+    const matchesKind = state.kindFilter === 'all' || kind === state.kindFilter;
     const matchesStatus = state.statusFilter === 'all' || node.status === state.statusFilter;
     const queryBlob = [
       nodeDisplayName(node),
-      node.kind,
+      kind,
       node.status,
       node.reticulum?.interfaceType,
       node.reticulum?.networkId,
@@ -309,14 +316,15 @@ function renderDetail() {
   }
 
   els.nodeDetail.hidden = false;
-  const kind = KIND_META[node.kind] || KIND_META['client-manual'];
+  const kindId = nodeKind(node);
+  const kind = KIND_META[kindId] || KIND_META['client-manual'];
   const reticulum = node.reticulum || {};
-  const endpoint = serverEndpoint(node, reticulum);
+  const endpoint = nodeEndpoint(node, reticulum);
   const radio = radioSummary(reticulum);
   const coord = `${formatCoord(node.location?.lat, 'lat')}, ${formatCoord(node.location?.lon, 'lon')}`;
   const fields = [
     detailField('Last seen', lastSeenLabel(node)),
-    endpoint.ip ? detailField('IP', endpoint.ip, true, true) : '',
+    endpoint.address ? detailField(endpoint.label, endpoint.address, true, true) : '',
     endpoint.port == null ? '' : detailField('Port', String(endpoint.port), false, true),
     detailField('Coordinates', coord, true, true),
     reticulum.interfaceType ? detailField('Interface', reticulum.interfaceType) : '',
@@ -361,7 +369,7 @@ function renderMap() {
 
   state.filteredNodes.forEach((node) => {
     const statusClass = cssToken(node.status);
-    const kindClass = cssToken(node.kind);
+    const kindClass = cssToken(nodeKind(node));
     const isSelected = node.id === state.selectedId ? ' is-selected' : '';
     const isDense = denseNodeIds.has(node.id) ? ' is-dense' : '';
     MARKER_WORLD_OFFSETS.forEach((worldOffset) => {
@@ -516,6 +524,18 @@ function nodeDisplayName(node) {
   return label || 'Unnamed node';
 }
 
+function nodeKind(node) {
+  if (isI2PNode(node)) return 'i2p';
+  if (KIND_META[node.kind]) return node.kind;
+  return 'client-manual';
+}
+
+function isI2PNode(node) {
+  if (node.kind === 'i2p') return true;
+  if (node.reticulum?.interfaceType === 'I2PInterface') return true;
+  return (node.services || []).some((service) => String(service).toLowerCase().includes('i2p'));
+}
+
 function detailField(label, value, _wide = false, code = false, html = false) {
   const valueClass = code ? ' detail-value--code' : '';
   const content = html ? value : escapeHtml(value);
@@ -532,12 +552,27 @@ function serviceTags(services = []) {
   return `<span class="service-list">${services.map((service) => `<span class="tag">${escapeHtml(service)}</span>`).join('')}</span>`;
 }
 
-function serverEndpoint(node, reticulum) {
-  if (node.kind !== 'server') return {};
-
+function nodeEndpoint(node, reticulum) {
   const endpoint = node.endpoint || {};
+  const address = stringValue(endpoint.ip) ||
+    stringValue(endpoint.host) ||
+    stringValue(endpoint.address) ||
+    stringValue(reticulum.reachableOn);
+
+  if (isI2PNode(node)) {
+    const port = positiveIntegerValue(endpoint.port) ?? positiveIntegerValue(reticulum.port);
+    return {
+      label: 'I2P',
+      address,
+      port
+    };
+  }
+
+  if (nodeKind(node) !== 'server') return {};
+
   return {
-    ip: stringValue(endpoint.ip) || stringValue(endpoint.host) || stringValue(endpoint.address) || stringValue(reticulum.reachableOn),
+    label: 'IP',
+    address,
     port: integerValue(endpoint.port) ?? integerValue(reticulum.port)
   };
 }
@@ -622,6 +657,11 @@ function numberValue(value) {
 function integerValue(value) {
   const number = numberValue(value);
   return number == null ? null : Math.trunc(number);
+}
+
+function positiveIntegerValue(value) {
+  const number = integerValue(value);
+  return number != null && number > 0 ? number : null;
 }
 
 function stringValue(value) {
