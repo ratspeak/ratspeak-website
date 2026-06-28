@@ -537,11 +537,6 @@ a {
     line-height: 1.06;
 }
 
-.detail-location {
-    color: var(--map-text-soft);
-    font-size: 13.5px;
-}
-
 .detail-list {
     display: grid;
     min-width: 0;

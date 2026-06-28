@@ -214,10 +214,9 @@ function applyFilters() {
     const matchesKind = state.kindFilter === 'all' || node.kind === state.kindFilter;
     const matchesStatus = state.statusFilter === 'all' || node.status === state.statusFilter;
     const queryBlob = [
-      node.label,
+      nodeDisplayName(node),
       node.kind,
       node.status,
-      node.location?.label,
       node.reticulum?.interfaceType,
       node.reticulum?.networkId,
       ...(node.services || [])
@@ -262,8 +261,7 @@ function renderDetail() {
         <span class="eyebrow">Selected node</span>
         <span class="tag tag--type" style="--type-color: ${kind.color}">${escapeHtml(kind.badgeLabel || kind.label)}</span>
       </div>
-      <h2 class="detail-title">${escapeHtml(node.label)}</h2>
-      <p class="detail-location">${escapeHtml(node.location?.label || coord)}</p>
+      <h2 class="detail-title">${escapeHtml(nodeDisplayName(node))}</h2>
     </div>
     <dl class="detail-list">
       ${fields}
@@ -295,7 +293,7 @@ function renderMap() {
 
     const marker = window.L.marker(latLng, {
       icon,
-      title: node.label,
+      title: nodeDisplayName(node),
       keyboard: true,
       zIndexOffset: node.id === state.selectedId ? 1000 : 0
     }).addTo(state.markerLayer);
@@ -362,6 +360,11 @@ function getDenseNodeIds(nodes) {
 
 function selectedNode() {
   return (state.snapshot.nodes || []).find((node) => node.id === state.selectedId) || null;
+}
+
+function nodeDisplayName(node) {
+  const label = typeof node.label === 'string' ? node.label.trim() : '';
+  return label || 'Unnamed node';
 }
 
 function detailField(label, value, _wide = false, code = false, html = false) {

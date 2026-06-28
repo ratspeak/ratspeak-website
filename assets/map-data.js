@@ -37,8 +37,7 @@ const NODE_TEMPLATES = [
     location: {
       lat: 39.5,
       lon: -98.35,
-      precisionKm: 1800,
-      label: 'North America regional placeholder'
+      precisionKm: 1800
     },
     services: ['rns.transport', 'tcp.server'],
     verification: 'operator',
@@ -70,8 +69,7 @@ const NODE_TEMPLATES = [
     location: {
       lat: 51.0,
       lon: 10.5,
-      precisionKm: 1700,
-      label: 'Europe regional placeholder'
+      precisionKm: 1700
     },
     services: ['rns.transport', 'i2p.server'],
     verification: 'operator',
@@ -103,8 +101,7 @@ const NODE_TEMPLATES = [
     location: {
       lat: 1.3,
       lon: 103.8,
-      precisionKm: 2200,
-      label: 'Asia Pacific regional placeholder'
+      precisionKm: 2200
     },
     services: ['rns.transport', 'tcp.server'],
     verification: 'operator',
@@ -136,8 +133,7 @@ const NODE_TEMPLATES = [
     location: {
       lat: 39.73,
       lon: -105.28,
-      precisionKm: 14,
-      label: 'Regional sample location'
+      precisionKm: 14
     },
     services: ['rns.transport', 'lora.mesh'],
     verification: 'server-observed',
@@ -175,8 +171,7 @@ const NODE_TEMPLATES = [
     location: {
       lat: 47.62,
       lon: -122.33,
-      precisionKm: 32,
-      label: 'Regional sample location'
+      precisionKm: 32
     },
     services: ['rns.transport', 'lxmf.delivery'],
     verification: 'server-observed',
@@ -208,8 +203,7 @@ const NODE_TEMPLATES = [
     location: {
       lat: 38.58,
       lon: -120.72,
-      precisionKm: 46,
-      label: 'Manual regional opt-in sample'
+      precisionKm: 46
     },
     services: ['manual.presence'],
     verification: 'manual-pending',
@@ -231,8 +225,7 @@ const NODE_TEMPLATES = [
     location: {
       lat: 40.76,
       lon: -111.89,
-      precisionKm: 85,
-      label: 'Manual regional opt-in sample'
+      precisionKm: 85
     },
     services: ['ratspeak.client', 'lxmf.delivery'],
     verification: 'manual-pending',
