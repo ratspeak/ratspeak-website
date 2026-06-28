@@ -5,51 +5,33 @@ const API_URL = '/api/map-nodes';
 const KIND_META = {
   server: {
     label: 'Server',
+    badgeLabel: 'Server',
     shortLabel: 'Server',
     color: '#12a8ff'
   },
   'client-auto': {
     label: 'Client (Auto)',
+    badgeLabel: 'Client',
     shortLabel: 'Auto',
     color: '#37f987'
   },
   'client-manual': {
     label: 'Client (Manual)',
+    badgeLabel: 'Client',
     shortLabel: 'Manual',
     color: '#ffd344'
   }
 };
 
-const STATUS_META = {
-  available: {
-    label: 'Available',
-    color: '#45d89c'
-  },
-  recent: {
-    label: 'Recent',
-    color: '#58a6ff'
-  },
-  unknown: {
-    label: 'Unknown',
-    color: '#8fa4a8'
-  },
-  stale: {
-    label: 'Stale',
-    color: '#f2c94c'
-  },
-  unverified: {
-    label: 'Unverified',
-    color: '#f2c94c'
-  }
-};
-
 const MARKER_SCALE_BANDS = [
-  { maxZoom: 2.5, size: 5, selectedCore: 8, selected: 22, ring: 2, glow: 10, outerGlow: 20, selectedRing: 3, selectedHalo: 7 },
-  { maxZoom: 4.5, size: 6, selectedCore: 9, selected: 24, ring: 2, glow: 12, outerGlow: 24, selectedRing: 3, selectedHalo: 8 },
-  { maxZoom: 6.5, size: 7.5, selectedCore: 10, selected: 27, ring: 2.5, glow: 15, outerGlow: 28, selectedRing: 3, selectedHalo: 8 },
-  { maxZoom: 8.5, size: 9, selectedCore: 11.5, selected: 30, ring: 3, glow: 18, outerGlow: 34, selectedRing: 4, selectedHalo: 9 },
-  { maxZoom: Infinity, size: 10.5, selectedCore: 13, selected: 34, ring: 3, glow: 22, outerGlow: 40, selectedRing: 4, selectedHalo: 10 }
+  { maxZoom: 3, size: 5, selectedCore: 6, selected: 16, ring: 1, ringAlpha: 70, glow: 5.5, haloAlpha: 14, selectedRing: 2, selectedHalo: 4 },
+  { maxZoom: 5, size: 6, selectedCore: 7, selected: 18, ring: 1, ringAlpha: 72, glow: 6, haloAlpha: 13, selectedRing: 2, selectedHalo: 4 },
+  { maxZoom: 8, size: 7, selectedCore: 8, selected: 20, ring: 1, ringAlpha: 76, glow: 6.5, haloAlpha: 11, selectedRing: 2, selectedHalo: 4 },
+  { maxZoom: Infinity, size: 8, selectedCore: 9, selected: 22, ring: 1.25, ringAlpha: 78, glow: 6, haloAlpha: 8, selectedRing: 2, selectedHalo: 4 }
 ];
+
+const MARKER_ICON_SIZE = 32;
+const DENSE_MARKER_DISTANCE_PX = 18;
 
 const state = {
   snapshot: null,
@@ -68,15 +50,12 @@ const els = {
   map: document.getElementById('map'),
   fallback: document.getElementById('mapFallback'),
   modePill: document.getElementById('modePill'),
-  generatedAt: document.getElementById('generatedAt'),
   serverCount: document.getElementById('serverCount'),
   autoCount: document.getElementById('autoCount'),
   manualCount: document.getElementById('manualCount'),
   reviewCount: document.getElementById('reviewCount'),
   nodeDetail: document.getElementById('nodeDetail'),
   searchInput: document.getElementById('nodeSearch'),
-  fitBtn: document.getElementById('fitBtn'),
-  refreshBtn: document.getElementById('refreshBtn'),
   themeToggle: document.getElementById('themeToggle'),
   navHamburger: document.getElementById('navHamburger'),
   navMobileMenu: document.getElementById('navMobileMenu'),
@@ -144,24 +123,6 @@ function bindControls() {
     });
   }
 
-  if (els.fitBtn) {
-    els.fitBtn.addEventListener('click', () => fitVisibleNodes());
-  }
-
-  if (els.refreshBtn) {
-    els.refreshBtn.addEventListener('click', async () => {
-      els.refreshBtn.disabled = true;
-      try {
-        state.snapshot = await loadSnapshot();
-        if (!state.snapshot.nodes.some((node) => node.id === state.selectedId)) {
-          state.selectedId = state.snapshot.nodes[0]?.id || null;
-        }
-        applyFilters();
-      } finally {
-        els.refreshBtn.disabled = false;
-      }
-    });
-  }
 }
 
 async function loadSnapshot() {
@@ -186,11 +147,15 @@ function initMap() {
 
   state.map = window.L.map(els.map, {
     zoomControl: false,
-    attributionControl: true,
+    attributionControl: false,
     worldCopyJump: true
   }).setView([29, -18], 2);
 
   window.L.control.zoom({ position: 'bottomleft' }).addTo(state.map);
+  window.L.control.attribution({
+    position: 'bottomright',
+    prefix: false
+  }).addTo(state.map);
 
   window.L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     maxZoom: 19,
@@ -199,7 +164,10 @@ function initMap() {
 
   state.markerLayer = window.L.layerGroup().addTo(state.map);
   updateMarkerScale();
-  state.map.on('zoomend', updateMarkerScale);
+  state.map.on('zoomend', () => {
+    updateMarkerScale();
+    renderMap();
+  });
 }
 
 function applyFilters() {
@@ -237,7 +205,6 @@ function renderSummary() {
   const review = nodes.filter((node) => ['stale', 'unknown', 'unverified'].includes(node.status)).length;
 
   els.modePill.textContent = state.snapshot.sourceMode === 'exploratory-sample' ? 'Sample data' : 'Live preview';
-  els.generatedAt.textContent = `Updated ${relativeTime(state.snapshot.generatedAt)}`;
   els.serverCount.textContent = String(servers);
   els.autoCount.textContent = String(auto);
   els.manualCount.textContent = String(manual);
@@ -257,33 +224,31 @@ function renderDetail() {
   }
 
   const kind = KIND_META[node.kind] || KIND_META['client-manual'];
-  const status = STATUS_META[node.status] || STATUS_META.unknown;
   const reticulum = node.reticulum || {};
   const source = (state.snapshot.sources || []).find((item) => item.id === node.sourceId);
   const coord = `${formatCoord(node.location?.lat, 'lat')}, ${formatCoord(node.location?.lon, 'lon')}`;
+  const fields = [
+    detailField('Last seen', lastSeenLabel(node)),
+    detailField('Source', source?.label || node.sourceId || 'Unknown', true),
+    detailField('Verification', readableToken(node.verification)),
+    detailField('Coordinates', coord, true, true),
+    reticulum.interfaceType ? detailField('Interface', reticulum.interfaceType) : '',
+    reticulum.heardCount == null ? '' : detailField('Heard', `${reticulum.heardCount} times`),
+    detailField('Services', serviceTags(node.services), true, false, true)
+  ].filter(Boolean).join('');
 
   els.nodeDetail.innerHTML = `
     <div class="detail-head">
       <div class="detail-kicker">
-        <span class="eyebrow">${escapeHtml(kind.label)}</span>
-        <span class="tag tag--status" style="--status-color: ${status.color}">${escapeHtml(status.label)}</span>
+        <span class="eyebrow">Selected node</span>
+        <span class="tag tag--type" style="--type-color: ${kind.color}">${escapeHtml(kind.badgeLabel || kind.label)}</span>
       </div>
       <h2 class="detail-title">${escapeHtml(node.label)}</h2>
       <p class="detail-location">${escapeHtml(node.location?.label || coord)}</p>
     </div>
-    <div class="detail-grid">
-      ${detailField('Last seen', lastSeenLabel(node))}
-      ${detailField('Precision', precisionLabel(node))}
-      ${detailField('Source', source?.label || node.sourceId || 'Unknown', true)}
-      ${detailField('Verification', readableToken(node.verification))}
-      ${detailField('Consent', readableToken(node.privacy?.consent))}
-      ${detailField('Coordinates', coord, true, true)}
-      ${detailField('Network ID', reticulum.networkId || 'Not attached', true, true)}
-      ${detailField('Interface', reticulum.interfaceType || 'Not attached')}
-      ${detailField('Hops', reticulum.hops == null ? 'Unknown' : String(reticulum.hops))}
-      ${detailField('Heard', reticulum.heardCount == null ? 'Unknown' : `${reticulum.heardCount} times`)}
-      ${detailField('Services', serviceTags(node.services), true, false, true)}
-    </div>
+    <dl class="detail-list">
+      ${fields}
+    </dl>
   `;
 }
 
@@ -292,19 +257,21 @@ function renderMap() {
 
   state.markerLayer.clearLayers();
   state.markers.clear();
+  const denseNodeIds = getDenseNodeIds(state.filteredNodes);
 
   state.filteredNodes.forEach((node) => {
     const kind = KIND_META[node.kind] || KIND_META['client-manual'];
     const statusClass = cssToken(node.status);
     const kindClass = cssToken(node.kind);
     const isSelected = node.id === state.selectedId ? ' is-selected' : '';
+    const isDense = denseNodeIds.has(node.id) ? ' is-dense' : '';
     const latLng = [node.location.lat, node.location.lon];
 
     const icon = window.L.divIcon({
       className: 'ratspeak-marker-icon',
-      html: `<span class="map-pin map-pin--${kindClass} map-pin--${statusClass}${isSelected}" style="--pin-color: ${kind.color}" aria-hidden="true"></span>`,
-      iconSize: [1, 1],
-      iconAnchor: [0, 0]
+      html: `<span class="map-pin map-pin--${kindClass} map-pin--${statusClass}${isSelected}${isDense}" style="--pin-color: ${kind.color}" aria-hidden="true"></span>`,
+      iconSize: [MARKER_ICON_SIZE, MARKER_ICON_SIZE],
+      iconAnchor: [MARKER_ICON_SIZE / 2, MARKER_ICON_SIZE / 2]
     });
 
     const marker = window.L.marker(latLng, {
@@ -336,19 +303,6 @@ function selectNode(id, options = {}) {
   }
 }
 
-function fitVisibleNodes() {
-  if (!state.map || !state.filteredNodes.length) return;
-  const bounds = window.L.latLngBounds(
-    state.filteredNodes.map((node) => [node.location.lat, node.location.lon])
-  );
-  const wide = window.matchMedia('(min-width: 901px)').matches;
-  state.map.fitBounds(bounds.pad(0.18), {
-    animate: true,
-    paddingTopLeft: wide ? [410, 50] : [36, 260],
-    paddingBottomRight: wide ? [390, 120] : [36, 220]
-  });
-}
-
 function updateMarkerScale() {
   if (!state.map || !els.map) return;
   const zoom = state.map.getZoom();
@@ -358,10 +312,33 @@ function updateMarkerScale() {
   style.setProperty('--pin-selected-size', `${scale.selected}px`);
   style.setProperty('--pin-selected-core-size', `${scale.selectedCore}px`);
   style.setProperty('--pin-ring', `${scale.ring}px`);
+  style.setProperty('--pin-ring-alpha', `${scale.ringAlpha}%`);
   style.setProperty('--pin-glow', `${scale.glow}px`);
-  style.setProperty('--pin-outer-glow', `${scale.outerGlow}px`);
+  style.setProperty('--pin-halo-alpha', `${scale.haloAlpha}%`);
   style.setProperty('--pin-selected-ring', `${scale.selectedRing}px`);
   style.setProperty('--pin-selected-halo', `${scale.selectedHalo}px`);
+}
+
+function getDenseNodeIds(nodes) {
+  if (!state.map || nodes.length < 2) return new Set();
+  const dense = new Set();
+  const points = nodes.map((node) => ({
+    id: node.id,
+    point: state.map.latLngToLayerPoint([node.location.lat, node.location.lon])
+  }));
+  const thresholdSq = DENSE_MARKER_DISTANCE_PX * DENSE_MARKER_DISTANCE_PX;
+
+  for (let i = 0; i < points.length; i++) {
+    for (let j = i + 1; j < points.length; j++) {
+      const dx = points[i].point.x - points[j].point.x;
+      const dy = points[i].point.y - points[j].point.y;
+      if ((dx * dx + dy * dy) <= thresholdSq) {
+        dense.add(points[i].id);
+        dense.add(points[j].id);
+      }
+    }
+  }
+  return dense;
 }
 
 function selectedNode() {
@@ -374,33 +351,25 @@ function setActive(selector, activeButton) {
   });
 }
 
-function detailField(label, value, wide = false, code = false, html = false) {
-  const wideClass = wide ? ' detail-field--wide' : '';
+function detailField(label, value, _wide = false, code = false, html = false) {
   const valueClass = code ? ' detail-value--code' : '';
   const content = html ? value : escapeHtml(value);
   return `
-    <div class="detail-field${wideClass}">
-      <span class="detail-label">${escapeHtml(label)}</span>
-      <span class="detail-value${valueClass}">${content}</span>
+    <div class="detail-row">
+      <dt class="detail-label">${escapeHtml(label)}</dt>
+      <dd class="detail-value${valueClass}">${content}</dd>
     </div>
   `;
 }
 
 function serviceTags(services = []) {
-  if (!services.length) return '<span class="detail-value">None listed</span>';
+  if (!services.length) return '<span>None listed</span>';
   return `<span class="service-list">${services.map((service) => `<span class="tag">${escapeHtml(service)}</span>`).join('')}</span>`;
 }
 
 function lastSeenLabel(node) {
   if (!node.lastSeen) return 'Manual';
   return relativeTime(node.lastSeen);
-}
-
-function precisionLabel(node) {
-  const km = Number(node.location?.precisionKm || 0);
-  if (!km) return 'Unknown';
-  if (km >= 1000) return `${Math.round(km / 100) / 10}k km`;
-  return `${Math.round(km)} km`;
 }
 
 function formatCoord(value, axis) {

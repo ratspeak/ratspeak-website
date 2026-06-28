@@ -42,7 +42,7 @@
     <link rel="preconnect" href="https://basemaps.cartocdn.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Familjen+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <link rel="stylesheet" href="assets/maps.css?v=marker-scale-2">
+    <link rel="stylesheet" href="assets/maps.css?v=rail-cleanup-1">
     <script>!function(){var t=localStorage.getItem('ratspeak-theme');document.documentElement.setAttribute('data-theme',t||'dark')}()</script>
 </head>
 <body>
@@ -133,25 +133,12 @@
                 <span class="filter-label">Freshness</span>
                 <div class="segmented segmented--status">
                     <button class="segment-btn is-active" type="button" data-status-filter="all">All</button>
-                    <button class="segment-btn" type="button" data-status-filter="available">Available</button>
+                    <button class="segment-btn" type="button" data-status-filter="available">Seen</button>
                     <button class="segment-btn" type="button" data-status-filter="recent">Recent</button>
                     <button class="segment-btn" type="button" data-status-filter="stale">Stale</button>
                 </div>
             </div>
-            <div class="tool-row">
-                <button class="tool-btn" id="fitBtn" type="button">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M21 16v3a2 2 0 0 1-2 2h-3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/></svg>
-                    <span>Fit</span>
-                </button>
-                <button class="tool-btn" id="refreshBtn" type="button">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12a9 9 0 0 1-14.6 7.1"/><path d="M3 12A9 9 0 0 1 17.6 4.9"/><path d="M21 4v6h-6"/><path d="M3 20v-6h6"/></svg>
-                    <span>Refresh</span>
-                </button>
-                <span class="tool-btn" id="generatedAt">Updated now</span>
-            </div>
         </section>
-
-        <p class="rail-note"><strong>Privacy boundary:</strong> only public discovery, operator-published infrastructure, or manual opt-in records should reach this view. Current markers are seed data for design review.</p>
     </aside>
 
     <section class="node-detail" id="nodeDetail" aria-live="polite" aria-label="Selected node details"></section>
@@ -168,7 +155,7 @@
 </main>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="assets/maps.js?v=marker-scale-2"></script>
+<script type="module" src="assets/maps.js?v=rail-cleanup-1"></script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

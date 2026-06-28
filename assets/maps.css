@@ -246,13 +246,14 @@ a {
     z-index: 1;
     background: #071014;
     --pin-size: 6px;
-    --pin-selected-size: 24px;
-    --pin-selected-core-size: 9px;
-    --pin-ring: 2px;
-    --pin-glow: 12px;
-    --pin-outer-glow: 24px;
-    --pin-selected-ring: 3px;
-    --pin-selected-halo: 8px;
+    --pin-selected-size: 18px;
+    --pin-selected-core-size: 7px;
+    --pin-ring: 1px;
+    --pin-ring-alpha: 72%;
+    --pin-glow: 6px;
+    --pin-halo-alpha: 13%;
+    --pin-selected-ring: 2px;
+    --pin-selected-halo: 4px;
 }
 
 .map-canvas::after {
@@ -471,8 +472,7 @@ a {
     grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.segment-btn,
-.tool-btn {
+.segment-btn {
     min-height: 34px;
     border: 1px solid var(--map-border);
     border-radius: 8px;
@@ -484,8 +484,7 @@ a {
     transition: background 0.16s, border-color 0.16s, color 0.16s, transform 0.16s;
 }
 
-.segment-btn:hover,
-.tool-btn:hover {
+.segment-btn:hover {
     border-color: var(--map-border-strong);
     background: rgba(255, 255, 255, 0.07);
     color: var(--map-text);
@@ -495,28 +494,6 @@ a {
     border-color: rgba(18, 168, 255, 0.58);
     background: rgba(18, 168, 255, 0.14);
     color: #cfeeff;
-}
-
-.tool-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-}
-
-.tool-row #generatedAt {
-    grid-column: 1 / -1;
-}
-
-.tool-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-}
-
-.tool-btn svg {
-    width: 15px;
-    height: 15px;
 }
 
 .tag {
@@ -533,23 +510,10 @@ a {
     padding: 3px 7px;
 }
 
-.tag--status {
-    border-color: color-mix(in srgb, var(--status-color, var(--map-accent)) 34%, transparent);
-    color: color-mix(in srgb, var(--status-color, var(--map-accent)) 76%, white);
-}
-
-.rail-note {
-    display: grid;
-    gap: 6px;
-    border-top: 1px solid var(--map-border);
-    color: var(--map-text-muted);
-    font-size: 12.5px;
-    line-height: 1.45;
-    padding: 12px 17px 14px;
-}
-
-.rail-note strong {
-    color: var(--map-text-soft);
+.tag--type {
+    border-color: color-mix(in srgb, var(--type-color, var(--map-accent)) 42%, transparent);
+    background: color-mix(in srgb, var(--type-color, var(--map-accent)) 12%, transparent);
+    color: color-mix(in srgb, var(--type-color, var(--map-accent)) 72%, white);
 }
 
 .node-detail {
@@ -588,24 +552,29 @@ a {
     font-size: 13.5px;
 }
 
-.detail-grid {
+.detail-list {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-}
-
-.detail-field {
-    display: grid;
-    gap: 3px;
     min-width: 0;
     border: 1px solid rgba(124, 153, 167, 0.16);
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.035);
-    padding: 8px;
+    background:
+        linear-gradient(120deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.018)),
+        rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
-.detail-field--wide {
-    grid-column: 1 / -1;
+.detail-row {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
+    min-height: 46px;
+    border-top: 1px solid rgba(124, 153, 167, 0.14);
+    padding: 10px 14px;
+}
+
+.detail-row:first-child {
+    border-top: 0;
 }
 
 .detail-label {
@@ -614,11 +583,13 @@ a {
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.04em;
+    line-height: 1.15;
     text-transform: uppercase;
 }
 
 .detail-value {
     min-width: 0;
+    margin: 0;
     overflow-wrap: anywhere;
     color: var(--map-text);
     font-size: 13.5px;
@@ -635,6 +606,7 @@ a {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
+    align-items: center;
 }
 
 .map-legend {
@@ -702,36 +674,43 @@ a {
 
 .ratspeak-marker-icon {
     overflow: visible;
+    background: transparent;
+    border: 0;
 }
 
 .map-pin {
+    display: block;
     position: relative;
-    width: var(--pin-size);
-    height: var(--pin-size);
-    transform: translate(calc(var(--pin-size) / -2), calc(var(--pin-size) / -2));
+    width: 32px;
+    height: 32px;
 }
 
 .map-pin::before,
 .map-pin::after {
     content: "";
     position: absolute;
-    inset: 0;
+    left: 50%;
+    top: 50%;
     border-radius: 999px;
+    transform: translate(-50%, -50%);
 }
 
 .map-pin::before {
-    inset: calc(var(--pin-glow) * -0.45);
+    width: calc(var(--pin-size) + (var(--pin-glow) * 2));
+    height: calc(var(--pin-size) + (var(--pin-glow) * 2));
     background: radial-gradient(
         circle,
-        color-mix(in srgb, var(--pin-color) 34%, transparent) 0%,
-        color-mix(in srgb, var(--pin-color) 20%, transparent) 42%,
+        color-mix(in srgb, var(--pin-color) var(--pin-halo-alpha), transparent) 0%,
+        color-mix(in srgb, var(--pin-color) var(--pin-halo-alpha), transparent) 42%,
         transparent 74%
     );
     filter: blur(0.35px);
-    opacity: 0.9;
+    opacity: 1;
 }
 
 .map-pin::after {
+    width: var(--pin-size);
+    height: var(--pin-size);
     border: 1px solid rgba(245, 255, 248, 0.5);
     background: radial-gradient(
         circle at 45% 38%,
@@ -740,37 +719,47 @@ a {
         var(--pin-color) 76%
     );
     box-shadow:
-        0 0 0 1px rgba(0, 0, 0, 0.9),
-        0 0 0 var(--pin-ring) color-mix(in srgb, var(--pin-color) 48%, transparent),
-        0 0 var(--pin-glow) color-mix(in srgb, var(--pin-color) 44%, transparent),
-        0 0 var(--pin-outer-glow) color-mix(in srgb, var(--pin-color) 22%, transparent);
+        0 0 0 1px rgba(0, 0, 0, 0.72),
+        0 0 0 var(--pin-ring) color-mix(in srgb, var(--pin-color) var(--pin-ring-alpha), transparent),
+        0 0 var(--pin-glow) color-mix(in srgb, var(--pin-color) var(--pin-halo-alpha), transparent);
 }
 
 .map-pin.is-selected {
-    width: var(--pin-selected-size);
-    height: var(--pin-selected-size);
-    transform: translate(calc(var(--pin-selected-size) / -2), calc(var(--pin-selected-size) / -2));
+    width: 32px;
+    height: 32px;
 }
 
 .map-pin.is-selected::before {
-    inset: 0;
+    width: var(--pin-selected-size);
+    height: var(--pin-selected-size);
     background: radial-gradient(
         circle,
-        rgba(210, 105, 59, 0.34) 0%,
-        rgba(210, 105, 59, 0.2) 48%,
-        transparent 76%
+        rgba(210, 105, 59, 0.16) 0%,
+        rgba(210, 105, 59, 0.08) 48%,
+        transparent 78%
     );
     opacity: 1;
 }
 
 .map-pin.is-selected::after {
-    inset: calc((var(--pin-selected-size) - var(--pin-selected-core-size)) / 2);
+    width: var(--pin-selected-core-size);
+    height: var(--pin-selected-core-size);
     border: 2px solid #fff;
     box-shadow:
         0 0 0 1px rgba(0, 0, 0, 0.92),
-        0 0 0 var(--pin-selected-ring) rgba(210, 105, 59, 0.92),
-        0 0 0 var(--pin-selected-halo) rgba(210, 105, 59, 0.24),
-        0 0 calc(var(--pin-outer-glow) * 0.9) color-mix(in srgb, var(--pin-color) 96%, transparent);
+        0 0 0 var(--pin-selected-ring) rgba(210, 105, 59, 0.95),
+        0 0 0 var(--pin-selected-halo) rgba(210, 105, 59, 0.16),
+        0 0 10px rgba(210, 105, 59, 0.16);
+}
+
+.map-pin.is-dense:not(.is-selected)::before {
+    opacity: 0;
+}
+
+.map-pin.is-dense:not(.is-selected)::after {
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.78),
+        0 0 0 var(--pin-ring) color-mix(in srgb, var(--pin-color) 82%, transparent);
 }
 
 .map-pin--server {
@@ -853,10 +842,6 @@ a {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .rail-note {
-        display: none;
-    }
-
     .node-detail {
         top: auto;
         right: 12px;
@@ -887,18 +872,20 @@ a {
     }
 
     .segmented--kind,
-    .segmented--status,
-    .tool-row {
+    .segmented--status {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .segment-btn,
-    .tool-btn {
+    .segment-btn {
         min-height: 32px;
         padding: 6px;
     }
 
-    .detail-grid {
+    .detail-row {
         grid-template-columns: 1fr;
+        gap: 4px;
+        align-items: start;
+        min-height: 0;
+        padding: 10px 12px;
     }
 }
