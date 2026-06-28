@@ -69,15 +69,22 @@ async function init() {
 }
 
 function bindChrome() {
+  const syncThemeColor = () => {
+    if (!els.themeMeta) return;
+    const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim();
+    if (bg) els.themeMeta.setAttribute('content', bg);
+  };
+
   if (els.themeToggle) {
     els.themeToggle.addEventListener('click', () => {
       const htmlEl = document.documentElement;
       const next = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       htmlEl.setAttribute('data-theme', next);
       localStorage.setItem('ratspeak-theme', next);
-      if (els.themeMeta) els.themeMeta.setAttribute('content', '#070b0d');
+      syncThemeColor();
     });
   }
+  syncThemeColor();
 
   if (els.navHamburger && els.navMobileMenu) {
     els.navHamburger.addEventListener('click', (event) => {
