@@ -1,6 +1,12 @@
 import { buildMapSnapshot } from './map-data.js';
 
 const API_URL = '/api/map-nodes';
+const TILE_ATTRIBUTION = '&copy; OpenStreetMap contributors &copy; CARTO';
+
+const TILE_LAYERS = {
+  light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+  dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+};
 
 const KIND_META = {
   server: {
@@ -44,6 +50,7 @@ const state = {
   statusFilter: 'all',
   query: '',
   map: null,
+  tileLayer: null,
   markerLayer: null,
   markers: new Map()
 };
@@ -90,6 +97,7 @@ function bindChrome() {
       htmlEl.setAttribute('data-theme', next);
       localStorage.setItem('ratspeak-theme', next);
       syncThemeColor();
+      syncMapTheme();
     });
   }
   syncThemeColor();
@@ -192,9 +200,9 @@ function initMap() {
     prefix: false
   }).addTo(state.map);
 
-  window.L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  state.tileLayer = window.L.tileLayer(tileLayerUrl(), {
     maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+    attribution: TILE_ATTRIBUTION
   }).addTo(state.map);
 
   state.markerLayer = window.L.layerGroup().addTo(state.map);
@@ -204,6 +212,19 @@ function initMap() {
     renderMap();
   });
   window.addEventListener('resize', syncMapViewport, { passive: true });
+}
+
+function syncMapTheme() {
+  if (!state.tileLayer) return;
+  state.tileLayer.setUrl(tileLayerUrl());
+}
+
+function tileLayerUrl() {
+  return TILE_LAYERS[currentTheme()] || TILE_LAYERS.dark;
+}
+
+function currentTheme() {
+  return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
 }
 
 function syncMapViewport() {
