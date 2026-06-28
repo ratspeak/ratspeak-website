@@ -911,6 +911,15 @@ a {
     overflow: visible;
     background: transparent;
     border: 0;
+    pointer-events: none;
+}
+
+.map-canvas.is-node-hit,
+.map-canvas.is-node-hit.leaflet-grab,
+.map-canvas.is-node-hit.leaflet-drag-target,
+.map-canvas.is-node-hit .leaflet-grab,
+.map-canvas.is-node-hit .leaflet-dragging {
+    cursor: pointer;
 }
 
 .map-pin {

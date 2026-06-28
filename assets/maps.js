@@ -60,6 +60,8 @@ const state = {
   tileLayer: null,
   markerLayer: null,
   markers: new Map(),
+  markerScale: MARKER_SCALE_BANDS[0],
+  nodeCursorActive: false,
   refreshTimer: null,
   suppressMapClickUntil: 0
 };
@@ -236,12 +238,14 @@ function initMap() {
     updateMarkerScale();
     renderMap();
   });
-  state.map.on('dragstart', suppressNextMapClick);
-  state.map.on('dragend', suppressNextMapClick);
-  state.map.on('click', () => {
-    if (Date.now() < state.suppressMapClickUntil) return;
-    clearSelectedNode();
+  state.map.on('dragstart', () => {
+    suppressNextMapClick();
+    clearNodeCursor();
   });
+  state.map.on('dragend', suppressNextMapClick);
+  state.map.on('mousemove', syncNodeCursor);
+  state.map.on('mouseout', clearNodeCursor);
+  state.map.on('click', handleMapClick);
   window.addEventListener('resize', syncMapViewport, { passive: true });
 }
 
@@ -372,20 +376,73 @@ function renderMap() {
       const marker = window.L.marker(latLng, {
         icon,
         title: nodeDisplayName(node),
-        keyboard: true,
+        interactive: false,
+        keyboard: false,
         zIndexOffset: node.id === state.selectedId ? 1000 : 0
       }).addTo(state.markerLayer);
 
-      marker.on('click', (event) => {
-        if (window.L?.DomEvent && event.originalEvent) window.L.DomEvent.stop(event.originalEvent);
-        selectNode(node.id, { pan: false });
-      });
-      marker.on('keypress', (event) => {
-        if (event.originalEvent.key === 'Enter') selectNode(node.id, { pan: false });
-      });
       state.markers.set(`${node.id}:${worldOffset}`, marker);
     });
   });
+}
+
+function handleMapClick(event) {
+  if (Date.now() < state.suppressMapClickUntil) return;
+
+  const hit = pickNodeAt(event.containerPoint);
+  if (hit) {
+    selectNode(hit.node.id, { pan: false });
+    return;
+  }
+
+  clearSelectedNode();
+}
+
+function syncNodeCursor(event) {
+  const active = Boolean(pickNodeAt(event.containerPoint));
+  if (active === state.nodeCursorActive) return;
+
+  state.nodeCursorActive = active;
+  els.map.classList.toggle('is-node-hit', active);
+}
+
+function clearNodeCursor() {
+  if (!state.nodeCursorActive) return;
+
+  state.nodeCursorActive = false;
+  els.map.classList.remove('is-node-hit');
+}
+
+function pickNodeAt(containerPoint) {
+  if (!state.map || !containerPoint) return null;
+
+  let nearest = null;
+  state.filteredNodes.forEach((node) => {
+    const radius = markerPickRadius(node);
+    const radiusSq = radius * radius;
+
+    MARKER_WORLD_OFFSETS.forEach((worldOffset) => {
+      const center = state.map.latLngToContainerPoint([node.location.lat, node.location.lon + worldOffset]);
+      const dx = containerPoint.x - center.x;
+      const dy = containerPoint.y - center.y;
+      const distanceSq = (dx * dx) + (dy * dy);
+      if (distanceSq > radiusSq) return;
+      if (!nearest || distanceSq < nearest.distanceSq) {
+        nearest = { node, distanceSq };
+      }
+    });
+  });
+
+  return nearest;
+}
+
+function markerPickRadius(node) {
+  const scale = state.markerScale || MARKER_SCALE_BANDS[0];
+  if (node.id === state.selectedId) {
+    return (scale.selectedCore / 2) + scale.selectedRing + 2;
+  }
+
+  return (scale.size / 2) + 3;
 }
 
 function selectNode(id, options = {}) {
@@ -417,6 +474,7 @@ function updateMarkerScale() {
   if (!state.map || !els.map) return;
   const zoom = state.map.getZoom();
   const scale = MARKER_SCALE_BANDS.find((band) => zoom <= band.maxZoom) || MARKER_SCALE_BANDS.at(-1);
+  state.markerScale = scale;
   const style = els.map.style;
   style.setProperty('--pin-size', `${scale.size}px`);
   style.setProperty('--pin-selected-size', `${scale.selected}px`);
