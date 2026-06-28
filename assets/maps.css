@@ -754,32 +754,20 @@ a {
 }
 
 .map-pin::before {
-    width: calc(var(--pin-size) + (var(--pin-glow) * 2));
-    height: calc(var(--pin-size) + (var(--pin-glow) * 2));
-    background: radial-gradient(
-        circle,
-        color-mix(in srgb, var(--pin-color) var(--pin-halo-alpha), transparent) 0%,
-        color-mix(in srgb, var(--pin-color) var(--pin-halo-alpha), transparent) 42%,
-        transparent 74%
-    );
-    filter: blur(0.35px);
+    width: calc(var(--pin-size) + (var(--pin-ring) * 2));
+    height: calc(var(--pin-size) + (var(--pin-ring) * 2));
+    background: color-mix(in srgb, var(--pin-color) var(--pin-ring-alpha), transparent);
+    box-shadow: 0 0 var(--pin-glow) color-mix(in srgb, var(--pin-color) var(--pin-halo-alpha), transparent);
+    filter: none;
     opacity: 1;
 }
 
 .map-pin::after {
     width: var(--pin-size);
     height: var(--pin-size);
-    border: 1px solid rgba(245, 255, 248, 0.5);
-    background: radial-gradient(
-        circle at 45% 38%,
-        rgba(255, 255, 250, 0.98) 0%,
-        color-mix(in srgb, var(--pin-color) 54%, white) 34%,
-        var(--pin-color) 76%
-    );
-    box-shadow:
-        0 0 0 1px rgba(0, 0, 0, 0.72),
-        0 0 0 var(--pin-ring) color-mix(in srgb, var(--pin-color) var(--pin-ring-alpha), transparent),
-        0 0 var(--pin-glow) color-mix(in srgb, var(--pin-color) var(--pin-halo-alpha), transparent);
+    border: 1px solid color-mix(in srgb, #ffffff 22%, var(--pin-color));
+    background: var(--pin-color);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.74);
 }
 
 .map-pin.is-selected {
@@ -811,13 +799,11 @@ a {
 }
 
 .map-pin.is-dense:not(.is-selected)::before {
-    opacity: 0;
+    opacity: 0.55;
 }
 
 .map-pin.is-dense:not(.is-selected)::after {
-    box-shadow:
-        0 0 0 1px rgba(0, 0, 0, 0.78),
-        0 0 0 var(--pin-ring) color-mix(in srgb, var(--pin-color) 82%, transparent);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.78);
 }
 
 .map-pin--server {

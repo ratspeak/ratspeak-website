@@ -24,10 +24,10 @@ const KIND_META = {
 };
 
 const MARKER_SCALE_BANDS = [
-  { maxZoom: 3, size: 5, selectedCore: 6, selected: 16, ring: 1, ringAlpha: 70, glow: 5.5, haloAlpha: 14, selectedRing: 2, selectedHalo: 4 },
-  { maxZoom: 5, size: 6, selectedCore: 7, selected: 18, ring: 1, ringAlpha: 72, glow: 6, haloAlpha: 13, selectedRing: 2, selectedHalo: 4 },
-  { maxZoom: 8, size: 7, selectedCore: 8, selected: 20, ring: 1, ringAlpha: 76, glow: 6.5, haloAlpha: 11, selectedRing: 2, selectedHalo: 4 },
-  { maxZoom: Infinity, size: 8, selectedCore: 9, selected: 22, ring: 1.25, ringAlpha: 78, glow: 6, haloAlpha: 8, selectedRing: 2, selectedHalo: 4 }
+  { maxZoom: 3, size: 7, selectedCore: 9, selected: 18, ring: 3.5, ringAlpha: 16, glow: 5.5, haloAlpha: 20, selectedRing: 3, selectedHalo: 6 },
+  { maxZoom: 5, size: 8, selectedCore: 9, selected: 20, ring: 4, ringAlpha: 16, glow: 6, haloAlpha: 18, selectedRing: 3, selectedHalo: 6 },
+  { maxZoom: 8, size: 9, selectedCore: 10, selected: 22, ring: 4, ringAlpha: 16, glow: 6.5, haloAlpha: 16, selectedRing: 3, selectedHalo: 6 },
+  { maxZoom: Infinity, size: 9, selectedCore: 10, selected: 22, ring: 4, ringAlpha: 16, glow: 6.5, haloAlpha: 14, selectedRing: 3, selectedHalo: 6 }
 ];
 
 const MARKER_ICON_SIZE = 32;
@@ -250,7 +250,6 @@ function renderDetail() {
   const fields = [
     detailField('Last seen', lastSeenLabel(node)),
     detailField('Source', source?.label || node.sourceId || 'Unknown', true),
-    detailField('Verification', readableToken(node.verification)),
     detailField('Coordinates', coord, true, true),
     reticulum.interfaceType ? detailField('Interface', reticulum.interfaceType) : '',
     reticulum.heardCount == null ? '' : detailField('Heard', `${reticulum.heardCount} times`),
@@ -414,14 +413,6 @@ function relativeTime(value) {
   if (hours < 48) return `${hours}h ${suffix}`;
   const days = Math.round(hours / 24);
   return `${days}d ${suffix}`;
-}
-
-function readableToken(value) {
-  if (!value) return 'Unknown';
-  return String(value)
-    .split('-')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
 }
 
 function cssToken(value) {
