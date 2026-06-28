@@ -42,7 +42,7 @@
     <link rel="preconnect" href="https://basemaps.cartocdn.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Familjen+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <link rel="stylesheet" href="assets/maps.css?v=menu-collapse-1">
+    <link rel="stylesheet" href="assets/maps.css?v=filter-copy-1">
     <script>!function(){var t=localStorage.getItem('ratspeak-theme');document.documentElement.setAttribute('data-theme',t||'dark')}()</script>
 </head>
 <body>
@@ -113,7 +113,7 @@
                         <span class="filter-label">Type</span>
                         <span class="select-wrap">
                             <select class="filter-select" id="kindFilter">
-                                <option value="all">All nodes</option>
+                                <option value="all">All</option>
                                 <option value="server">Server</option>
                                 <option value="client-auto">Client (Auto)</option>
                                 <option value="client-manual">Client (Manual)</option>
@@ -124,7 +124,7 @@
                         <span class="filter-label">Freshness</span>
                         <span class="select-wrap">
                             <select class="filter-select" id="statusFilter">
-                                <option value="all">All states</option>
+                                <option value="all">All</option>
                                 <option value="available">Seen</option>
                                 <option value="recent">Recent</option>
                                 <option value="stale">Stale</option>
@@ -172,7 +172,7 @@
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="assets/maps.js?v=menu-collapse-1"></script>
+<script type="module" src="assets/maps.js?v=filter-copy-1"></script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
