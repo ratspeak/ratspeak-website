@@ -63,7 +63,6 @@ async function init() {
   bindChrome();
   bindControls();
   state.snapshot = await loadSnapshot();
-  state.selectedId = state.snapshot.nodes[0]?.id || null;
   initMap();
   applyFilters();
 }
@@ -184,7 +183,7 @@ function applyFilters() {
   });
 
   if (state.selectedId && !state.filteredNodes.some((node) => node.id === state.selectedId)) {
-    state.selectedId = state.filteredNodes[0]?.id || null;
+    state.selectedId = null;
   }
 
   renderDetail();
@@ -194,15 +193,12 @@ function applyFilters() {
 function renderDetail() {
   const node = selectedNode();
   if (!node) {
-    els.nodeDetail.innerHTML = `
-      <div class="detail-head">
-        <span class="eyebrow">Selection</span>
-        <h2 class="detail-title">No node selected</h2>
-      </div>
-    `;
+    els.nodeDetail.hidden = true;
+    els.nodeDetail.innerHTML = '';
     return;
   }
 
+  els.nodeDetail.hidden = false;
   const kind = KIND_META[node.kind] || KIND_META['client-manual'];
   const reticulum = node.reticulum || {};
   const source = (state.snapshot.sources || []).find((item) => item.id === node.sourceId);
