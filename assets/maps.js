@@ -479,11 +479,11 @@ function renderDetail() {
   const location = nodeLocationLabel(node);
   const coord = `${formatCoord(node.location?.lat, 'lat')}, ${formatCoord(node.location?.lon, 'lon')}`;
   const fields = [
-    detailField('Last seen', lastSeenLabel(node)),
     location ? detailField('Location', location) : '',
     detailField('Coordinates', coord, true, true),
-    reticulum.interfaceType ? detailField('Interface', reticulum.interfaceType) : '',
+    detailField('Last seen', lastSeenLabel(node)),
     reticulum.heardCount == null ? '' : detailField('Heard', `${reticulum.heardCount} times`),
+    reticulum.interfaceType ? detailField('Interface', reticulum.interfaceType) : '',
     detailField('Services', serviceTags(node.services), true, false, true),
     radio ? detailField('Radio', radio, true, true) : '',
     endpoint.address ? detailField(endpoint.label, endpoint.address, true, true) : '',
