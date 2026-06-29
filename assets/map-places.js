@@ -1,4 +1,5 @@
-export const DEFAULT_MAX_PLACE_DISTANCE_KM = 300;
+export const DEFAULT_MAX_PLACE_DISTANCE_KM = 75;
+const MISSING_COUNTRY_PLACE_DISTANCE_KM = 25;
 
 const EARTH_RADIUS_KM = 6371.0088;
 const COUNTRY_LABELS = new Map([
@@ -19,16 +20,30 @@ export function buildCountryIndex(geojson) {
 
 export function locationLabelForNode(node, placeIndex = [], countryIndex = []) {
   const explicit = explicitLocation(node?.location);
-  if (explicit.city && explicit.country) return `${explicit.city}, ${explicit.country}`;
+  const lat = Number(node?.location?.lat);
+  const lon = Number(node?.location?.lon);
 
   const location = locationForCoordinates(
-    Number(node?.location?.lat),
-    Number(node?.location?.lon),
+    lat,
+    lon,
     placeIndex,
     countryIndex
   );
-  const city = explicit.city || location?.city || '';
-  const country = explicit.country || location?.country || '';
+
+  if (
+    explicit.city &&
+    explicit.country &&
+    explicitLocationMatchesCoordinates(explicit, location, lat, lon, placeIndex)
+  ) {
+    return `${explicit.city}, ${explicit.country}`;
+  }
+
+  const city = explicitCityMatchesCoordinates(explicit, location, lat, lon, placeIndex)
+    ? explicit.city
+    : location?.city || '';
+  const country = explicitCountryMatchesCoordinates(explicit, location, lat, lon, placeIndex)
+    ? explicit.country
+    : location?.country || '';
   if (city && country) return `${city}, ${country}`;
   return city || country;
 }
@@ -36,7 +51,10 @@ export function locationLabelForNode(node, placeIndex = [], countryIndex = []) {
 export function locationForCoordinates(lat, lon, placeIndex = [], countryIndex = []) {
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
 
-  const place = nearestPlaceForCoordinates(placeIndex, lat, lon);
+  const country = countryForCoordinates(countryIndex, lat, lon);
+  const place = nearestPlaceForCoordinates(placeIndex, lat, lon, DEFAULT_MAX_PLACE_DISTANCE_KM, {
+    country
+  });
   if (place) {
     return {
       city: place.city,
@@ -45,7 +63,15 @@ export function locationForCoordinates(lat, lon, placeIndex = [], countryIndex =
     };
   }
 
-  const country = countryForCoordinates(countryIndex, lat, lon);
+  const nearest = nearestPlaceForCoordinates(placeIndex, lat, lon);
+  if (nearest && (!country || shouldTrustCrossCountryPlace(nearest, countryIndex))) {
+    return {
+      city: nearest.city,
+      country: nearest.country,
+      distanceKm: nearest.distanceKm
+    };
+  }
+
   return country ? { country } : null;
 }
 
@@ -53,12 +79,15 @@ export function nearestPlaceForCoordinates(
   placeIndex,
   lat,
   lon,
-  maxDistanceKm = DEFAULT_MAX_PLACE_DISTANCE_KM
+  maxDistanceKm = DEFAULT_MAX_PLACE_DISTANCE_KM,
+  options = {}
 ) {
   if (!Array.isArray(placeIndex) || !Number.isFinite(lat) || !Number.isFinite(lon)) return null;
 
+  const country = countryLabel(stringValue(options.country));
   let nearest = null;
   for (const place of placeIndex) {
+    if (country && !countriesMatch(place.country, country)) continue;
     const distanceKm = distanceBetweenKm(lat, lon, place.lat, place.lon);
     if (distanceKm > maxDistanceKm) continue;
     if (
@@ -146,8 +175,53 @@ function explicitLocation(location) {
   return { city, country };
 }
 
+function explicitLocationMatchesCoordinates(explicit, location, lat, lon, placeIndex) {
+  if (!explicit.city && !explicit.country) return false;
+  if (!location?.country) return true;
+  if (explicit.country && countriesMatch(explicit.country, location.country)) return true;
+  return explicitPlaceIsNearby(explicit, lat, lon, placeIndex);
+}
+
+function explicitCityMatchesCoordinates(explicit, location, lat, lon, placeIndex) {
+  if (!explicit.city) return false;
+  if (!explicit.country || !location?.country) return true;
+  if (countriesMatch(explicit.country, location.country)) return true;
+  return explicitPlaceIsNearby(explicit, lat, lon, placeIndex);
+}
+
+function explicitCountryMatchesCoordinates(explicit, location, lat, lon, placeIndex) {
+  if (!explicit.country) return false;
+  if (!location?.country) return true;
+  if (countriesMatch(explicit.country, location.country)) return true;
+  return explicitPlaceIsNearby(explicit, lat, lon, placeIndex);
+}
+
+function explicitPlaceIsNearby(explicit, lat, lon, placeIndex) {
+  if (!explicit.city || !explicit.country) return false;
+  const place = nearestPlaceForCoordinates(placeIndex, lat, lon, MISSING_COUNTRY_PLACE_DISTANCE_KM);
+  return Boolean(place &&
+    countriesMatch(place.country, explicit.country) &&
+    normalizedLabel(place.city) === normalizedLabel(explicit.city));
+}
+
+function shouldTrustCrossCountryPlace(place, countryIndex) {
+  if (!place || place.distanceKm > MISSING_COUNTRY_PLACE_DISTANCE_KM) return false;
+  return !countryIndex.some((country) => countriesMatch(country.name, place.country));
+}
+
 function countryLabel(value) {
   return COUNTRY_LABELS.get(value) || value;
+}
+
+function countriesMatch(left, right) {
+  return normalizedLabel(countryLabel(left)) === normalizedLabel(countryLabel(right));
+}
+
+function normalizedLabel(value) {
+  return stringValue(value)
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
 }
 
 function distanceBetweenKm(latA, lonA, latB, lonB) {
