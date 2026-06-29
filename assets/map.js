@@ -3,8 +3,6 @@ import { isIpv6Address, isYggdrasilAddress, textMentionsYggdrasil } from './map-
 import { buildCountryIndex, buildPlaceIndex, locationLabelForNode } from './map-places.js';
 
 const API_URL = '/api/map-nodes';
-const LIVE_SNAPSHOT_URL = '/.tmp/map-live.json';
-const SNAPSHOT_URLS = [LIVE_SNAPSHOT_URL, API_URL];
 const SNAPSHOT_REFRESH_MS = 15_000;
 const LAND_MASK_URL = 'scripts/data/ne_110m_land.geojson';
 const PLACE_GAZETTEER_URL = 'scripts/data/ne_110m_populated_places_simple.geojson';
@@ -250,16 +248,14 @@ function setMapMenuExpanded(expanded) {
 }
 
 async function loadSnapshot() {
-  for (const url of SNAPSHOT_URLS) {
-    try {
-      const response = await fetch(url, { cache: 'no-store' });
-      if (!response.ok) throw new Error(`${url} returned ${response.status}`);
-      const payload = await response.json();
-      if (!Array.isArray(payload.nodes)) throw new Error(`${url} response missing nodes`);
-      return payload;
-    } catch (error) {
-      console.info('Map snapshot source unavailable:', error.message);
-    }
+  try {
+    const response = await fetch(API_URL, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`${API_URL} returned ${response.status}`);
+    const payload = await response.json();
+    if (!Array.isArray(payload.nodes)) throw new Error(`${API_URL} response missing nodes`);
+    return payload;
+  } catch (error) {
+    console.info('Map snapshot unavailable:', error.message);
   }
 
   return buildMapSnapshot(new Date());
