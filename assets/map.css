@@ -1,6 +1,5 @@
 :root {
     --nav-height: 64px;
-    --footer-height: 72px;
     --bg-primary: #FAF7F3;
     --bg-secondary: #F3EFEA;
     --bg-card: #FFFFFF;
@@ -321,7 +320,7 @@ a {
 
 .map-app {
     position: fixed;
-    inset: var(--nav-height) 0 var(--footer-height) 0;
+    inset: var(--nav-height) 0 0 0;
     overflow: hidden;
     background:
         radial-gradient(circle at 55% 35%, var(--map-ambient-glow), transparent 28%),
@@ -808,90 +807,6 @@ a {
     transform: translate(-50%, -50%);
 }
 
-.footer {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 500;
-    display: flex;
-    align-items: center;
-    height: var(--footer-height);
-    border-top: 1px solid var(--border-subtle);
-    background: color-mix(in srgb, var(--bg-primary) 96%, transparent);
-    padding: 0 32px;
-}
-
-.footer-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    max-width: 1180px;
-    margin: 0 auto;
-    color: var(--map-text-muted);
-    font-size: 13px;
-}
-
-.footer-left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.footer-brand {
-    display: inline-flex;
-    align-items: center;
-    color: var(--map-text-muted);
-    text-decoration: none;
-    transition: color 0.2s ease;
-}
-
-.footer-brand svg {
-    width: 20px;
-    height: 20px;
-    opacity: 0.75;
-    transition: opacity 0.2s ease;
-}
-
-.footer-brand:hover {
-    color: var(--map-accent);
-}
-
-.footer-brand:hover svg {
-    opacity: 1;
-}
-
-.footer-built {
-    color: var(--map-text-muted);
-}
-
-.footer-built a {
-    color: var(--map-accent);
-    text-decoration: none;
-    transition: color 0.2s;
-}
-
-.footer-built a:hover {
-    color: var(--map-accent-strong);
-}
-
-.footer-links {
-    display: flex;
-    align-items: center;
-    gap: 22px;
-}
-
-.footer-links a {
-    color: var(--map-text-muted);
-    text-decoration: none;
-    transition: color 0.2s;
-}
-
-.footer-links a:hover {
-    color: var(--map-text);
-}
-
 .leaflet-container {
     background: var(--map-canvas-bg);
     color: var(--map-text);
@@ -1146,10 +1061,6 @@ a {
 }
 
 @media (max-width: 900px) {
-    :root {
-        --footer-height: 112px;
-    }
-
     .navbar {
         padding: 0 18px;
     }
@@ -1176,9 +1087,35 @@ a {
     }
 
     .leaflet-bottom.leaflet-left .map-legend {
-        width: min(290px, calc(100vw - 96px));
+        width: min(248px, calc(100vw - 118px));
         margin-left: 12px !important;
         margin-bottom: 12px !important;
+    }
+
+    .map-legend {
+        gap: 6px;
+        padding: 10px 11px 11px;
+    }
+
+    .legend-title {
+        font-size: 10px;
+    }
+
+    .legend-grid {
+        gap: 6px 12px;
+    }
+
+    .legend-item {
+        gap: 7px;
+        font-size: 11px;
+    }
+
+    .legend-marker {
+        width: 14px;
+        height: 14px;
+        flex-basis: 14px;
+        --pin-size: 6.5px;
+        --pin-ring: 1.75px;
     }
 
     .rail-controls {
@@ -1196,21 +1133,6 @@ a {
         padding: 14px;
     }
 
-    .footer-inner {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
-    }
-
-    .footer-left {
-        gap: 8px;
-    }
-
-    .footer-links {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px 18px;
-    }
 }
 
 @media (max-width: 620px) {
