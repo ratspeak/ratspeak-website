@@ -37,9 +37,9 @@ const KIND_META = {
     color: '#1F4E95'
   },
   'client-auto': {
-    label: 'Client (Auto)',
-    badgeLabel: 'Client',
-    shortLabel: 'Auto',
+    label: 'Radio',
+    badgeLabel: 'Radio',
+    shortLabel: 'Radio',
     color: '#35B875'
   },
   'client-manual': {
