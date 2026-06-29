@@ -120,7 +120,7 @@ const state = {
 };
 
 const els = {
-  app: document.getElementById('mapsApp'),
+  app: document.getElementById('mapApp'),
   map: document.getElementById('map'),
   fallback: document.getElementById('mapFallback'),
   nodeDetail: document.getElementById('nodeDetail'),

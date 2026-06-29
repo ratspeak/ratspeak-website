@@ -8,7 +8,7 @@ import { buildCountryIndex, buildPlaceIndex, locationForCoordinates } from '../a
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
 
-const DEFAULT_STORE_DIR = path.join(repoRoot, '.tmp', 'maps-soak', 'rsreticulum', 'storage', 'discovery', 'interfaces');
+const DEFAULT_STORE_DIR = path.join(repoRoot, '.tmp', 'map-soak', 'rsreticulum', 'storage', 'discovery', 'interfaces');
 const DEFAULT_OUT = path.join(repoRoot, '.tmp', 'map-live.json');
 const DEFAULT_LAND_GEOJSON = path.join(__dirname, 'data', 'ne_110m_land.geojson');
 const DEFAULT_PLACES_GEOJSON = path.join(__dirname, 'data', 'ne_110m_populated_places_simple.geojson');
@@ -40,7 +40,7 @@ async function main() {
     await writeSnapshot();
     setInterval(() => {
       writeSnapshot().catch((error) => {
-        console.error(`[maps-bridge] ${new Date().toISOString()} ${error.stack || error.message}`);
+        console.error(`[map-bridge] ${new Date().toISOString()} ${error.stack || error.message}`);
       });
     }, args.interval);
   }
@@ -84,7 +84,7 @@ async function writeSnapshot() {
 
   const errorSuffix = errors.length ? `, ${errors.length} decode errors` : '';
   console.log(
-    `[maps-bridge] ${snapshot.generatedAt} wrote ${nodes.length} node(s) from ${records.length}/${scanned} record(s)` +
+    `[map-bridge] ${snapshot.generatedAt} wrote ${nodes.length} node(s) from ${records.length}/${scanned} record(s)` +
     ` (${skipped.missingLocation} missing location, ${skipped.water} water, ${skipped.expired} expired${errorSuffix})`
   );
 }
@@ -126,7 +126,7 @@ async function readDiscoveryRecords(storeDir) {
     } catch (error) {
       errors.push({ file: entry.name, message: error.message });
       if (args.verbose) {
-        console.warn(`[maps-bridge] skipped ${entry.name}: ${error.message}`);
+        console.warn(`[map-bridge] skipped ${entry.name}: ${error.message}`);
       }
     }
   }
@@ -523,7 +523,7 @@ function parseArgs(rawArgs) {
 }
 
 function printHelp() {
-  console.log(`Usage: node scripts/maps-discovery-bridge.mjs [options]
+  console.log(`Usage: node scripts/map-discovery-bridge.mjs [options]
 
 Options:
   --store-dir <dir>   rsReticulum discovery interface store

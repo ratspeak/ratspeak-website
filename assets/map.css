@@ -309,7 +309,7 @@ a {
     color: var(--map-accent);
 }
 
-.maps-app {
+.map-app {
     position: fixed;
     inset: var(--nav-height) 0 var(--footer-height) 0;
     overflow: hidden;

@@ -5,13 +5,13 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
-const soakRoot = path.join(repoRoot, '.tmp', 'maps-soak');
+const soakRoot = path.join(repoRoot, '.tmp', 'map-soak');
 const rnsDir = path.join(soakRoot, 'rsreticulum');
 const lxmfDir = path.join(soakRoot, 'rslxmf');
 
 const rnsConfig = `[reticulum]
 share_instance = yes
-instance_name = ratspeak_maps_soak
+instance_name = ratspeak_map_soak
 shared_instance_type = tcp
 shared_instance_port = 38430
 instance_control_port = 38431
@@ -37,7 +37,7 @@ announce_at_start = no
 autopeer = no
 
 [lxmf]
-display_name = Ratspeak Maps Soak
+display_name = Ratspeak Map Soak
 announce_at_start = yes
 delivery_transfer_max_accepted_size = 1000
 
