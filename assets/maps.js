@@ -480,14 +480,14 @@ function renderDetail() {
   const coord = `${formatCoord(node.location?.lat, 'lat')}, ${formatCoord(node.location?.lon, 'lon')}`;
   const fields = [
     detailField('Last seen', lastSeenLabel(node)),
-    endpoint.address ? detailField(endpoint.label, endpoint.address, true, true) : '',
-    endpoint.port == null ? '' : detailField('Port', String(endpoint.port), false, true),
     location ? detailField('Location', location) : '',
     detailField('Coordinates', coord, true, true),
     reticulum.interfaceType ? detailField('Interface', reticulum.interfaceType) : '',
     reticulum.heardCount == null ? '' : detailField('Heard', `${reticulum.heardCount} times`),
     detailField('Services', serviceTags(node.services), true, false, true),
-    radio ? detailField('Radio', radio, true, true) : ''
+    radio ? detailField('Radio', radio, true, true) : '',
+    endpoint.address ? detailField(endpoint.label, endpoint.address, true, true) : '',
+    endpoint.port == null ? '' : detailField('Port', String(endpoint.port), false, true)
   ].filter(Boolean).join('');
 
   els.nodeDetail.innerHTML = `
