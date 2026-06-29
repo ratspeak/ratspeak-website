@@ -523,7 +523,6 @@ function renderDetail() {
     location ? detailField('Location', location) : '',
     detailField('Coordinates', coord, true, true),
     detailField('Last seen', lastSeenLabel(node)),
-    reticulum.heardCount == null ? '' : detailField('Heard', `${reticulum.heardCount} times`),
     reticulum.interfaceType ? detailField('Interface', reticulum.interfaceType) : '',
     detailField('Services', serviceTags(node.services), true, false, true),
     radio ? detailField('Radio', radio, true, true) : '',
