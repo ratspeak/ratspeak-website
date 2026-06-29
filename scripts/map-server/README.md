@@ -49,7 +49,7 @@ If publishing to a protected Vercel Preview deployment, the server also needs
 the Preview protection bypass secret as `VERCEL_PROTECTION_BYPASS`. Production
 does not need this value if the production deployment is public.
 
-## Server Setup
+## Suggested Server Setup
 
 Find the RNS config directory for the `deadbeef*` node. The config must have:
 
@@ -64,7 +64,7 @@ Confirm Python RNS can export discovery records:
 rnstatus --config /path/to/deadbeef-rns-config -d --json
 ```
 
-Install the publisher files:
+One simple install shape is:
 
 ```bash
 sudo mkdir -p /opt/ratspeak-map /var/lib/ratspeak-map
@@ -123,9 +123,10 @@ Check website data:
 curl -sS https://ratspeak.org/api/map-nodes
 ```
 
-## systemd
+## Recurring Service
 
-After the dry-run and one-shot publish work:
+The included systemd unit is a starting point. Use it after the dry-run and
+one-shot publish work, or adapt to the server's existing service/timer pattern:
 
 ```bash
 sudo cp ratspeak-map-publisher.service /etc/systemd/system/

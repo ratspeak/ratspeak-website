@@ -273,8 +273,10 @@ python3 /opt/ratspeak-map/ratspeak-map-publisher.py \
   --interval 60
 ```
 
-Recommended production shape is either a `systemd` service for the exporter plus
-publisher loop, or a `systemd` timer that runs export-and-publish every minute.
+Recommended production shape is whatever matches the server's existing service
+management conventions. The bundle includes a systemd service as a starting
+point because that is a common Linux default, but it is not meant to override a
+better local pattern.
 
 ## Smoke Test
 
