@@ -73,7 +73,9 @@ These files are the repo-side production contract:
 ## Server-Side Exporter Responsibilities
 
 Claude on the Linux server should use the self-contained bundle in
-`scripts/map-server/`. It should not need the full website repo.
+`scripts/map-server/` as its starting context. It should not need the full
+website repo, and it should adapt the install/service details to the actual
+server conventions after inspection.
 
 Build the bundle on this local machine:
 
@@ -98,8 +100,8 @@ ratspeak-map-publisher.service
 README.md
 ```
 
-Claude on the Linux server should configure the publisher around the Python RNS
-node whose config belongs to `deadbeef*`.
+Claude on the Linux server should identify the Python RNS node whose config
+belongs to `deadbeef*`, then configure the publisher around that single node.
 
 Preferred discovery export command:
 
@@ -279,8 +281,10 @@ python3 /opt/ratspeak-map/ratspeak-map-publisher.py \
   --interval 60
 ```
 
-Recommended production shape is either a `systemd` service for the exporter plus
-publisher loop, or a `systemd` timer that runs export-and-publish every minute.
+Recommended production shape is whatever matches the server's existing service
+management conventions. The bundle includes a systemd service as a starting
+point because that is a common Linux default, but it is not meant to override a
+better local pattern.
 
 ## Smoke Test
 
@@ -304,30 +308,32 @@ Expected:
 
 ## Server-Claude Prompt
 
-Use this when handing off to Claude on the dedicated Linux server:
+Prefer the current `scripts/map-server/SERVER-CLAUDE-PROMPT.md` in the bundle
+when handing off to Claude on the dedicated Linux server. If you need a short
+fallback prompt, use this:
 
 ```text
-We need to connect one Python RNS node to the Ratspeak website map. Use only the
-existing RNS config for the node whose name starts with deadbeef. Do not alter
-the other nine local RNS nodes except as needed to avoid port/config conflicts.
+We need to connect one Python RNS node to the Ratspeak website map. Inspect the
+server first and use the local service/config conventions where appropriate.
+The hard requirement is that only the RNS instance whose node/config/identity
+starts with deadbeef publishes map data. Do not collect from the other nine RNS
+nodes, because that will duplicate discovery records.
 
 The website/Vercel setup is handled on another machine. This server has only
-Python RNS nodes plus the /opt/ratspeak-map publisher bundle.
+Python RNS nodes plus the map publisher bundle.
 
-On this Linux server:
-1. Confirm the deadbeef RNS config has discover_interfaces = yes.
-2. Export discovery records with:
-   rnstatus --config <deadbeef-config-dir> -d --json
-3. Use /opt/ratspeak-map/ratspeak-map-publisher.py to build and publish the
-   sanitized snapshot to https://ratspeak.org/api/map-ingest.
-4. The publisher classifies kinds as server, client-auto, client-manual, i2p,
-   or yggdrasil.
-5. Preserve public endpoint and radio settings, but never publish identities,
-   private keys, IFAC passphrases, or raw config snippets.
-6. Filter records with missing coordinates, water coordinates, and expired
-   last_heard timestamps.
-7. Only use the deadbeef node's RNS config; do not collect from the other nine
-   local nodes.
+Success criteria:
+- identify the deadbeef* RNS config
+- ensure incoming interface discovery is enabled for that instance
+- dry-run rnstatus/export through the publisher
+- publish one sanitized snapshot to the provided Vercel /api/map-ingest URL
+- only then propose a recurring service/timer
+
+Safety constraints:
+- do not publish identities, keys, IFAC passphrases, or raw config snippets
+- do not restart or modify existing RNS services without asking first
+- report what you found and what persistent changes you plan before applying
+  them
 
 Ask before changing production service files or restarting any RNS node.
 ```

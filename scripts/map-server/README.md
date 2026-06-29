@@ -4,6 +4,11 @@ This folder is the dedicated-server side of the map pipeline. It is written for
 the Linux host that runs the Python RNS nodes. It does not require the website
 repo or Vercel login on that server.
 
+The commands below are a conservative reference implementation. If the server
+already has clear conventions for service users, config locations, timers, or
+deployment layout, use those conventions while preserving the constraints in
+`SERVER-CLAUDE-PROMPT.md`.
+
 ## What This Does
 
 One RNS node, the node whose name starts with `deadbeef`, acts as the map
@@ -50,7 +55,7 @@ If publishing to a protected Vercel Preview deployment, the server also needs
 the Preview protection bypass secret as `VERCEL_PROTECTION_BYPASS`. Production
 does not need this value if the production deployment is public.
 
-## Server Setup
+## Suggested Server Setup
 
 Find the RNS config directory for the `deadbeef*` node. The config must have:
 
@@ -65,7 +70,7 @@ Confirm Python RNS can export discovery records:
 rnstatus --config /path/to/deadbeef-rns-config -d --json
 ```
 
-Install the publisher files:
+One simple install shape is:
 
 ```bash
 sudo mkdir -p /opt/ratspeak-map /var/lib/ratspeak-map
@@ -124,9 +129,10 @@ Check website data:
 curl -sS https://ratspeak.org/api/map-nodes
 ```
 
-## systemd
+## Recurring Service
 
-After the dry-run and one-shot publish work:
+The included systemd unit is a starting point. Use it after the dry-run and
+one-shot publish work, or adapt to the server's existing service/timer pattern:
 
 ```bash
 sudo cp ratspeak-map-publisher.service /etc/systemd/system/
@@ -152,7 +158,7 @@ The website/Vercel setup is handled on another machine. This server only needs
 to export discovery data from the deadbeef RNS config and POST sanitized JSON to
 https://ratspeak.org/api/map-ingest with MAP_INGEST_TOKEN.
 
-Use /opt/ratspeak-map/ratspeak-map-publisher.py. It runs:
+The provided publisher runs:
 rnstatus --config <deadbeef-config-dir> -d --json
 
 Then it:
@@ -167,7 +173,7 @@ First find the deadbeef RNS config directory and confirm it has:
 [reticulum]
 discover_interfaces = yes
 
-Then set /etc/ratspeak-map.env with RNS_CONFIG_DIR, MAP_INGEST_URL,
+Then set the publisher environment with RNS_CONFIG_DIR, MAP_INGEST_URL,
 MAP_INGEST_TOKEN, MAP_LAND_GEOJSON, MAP_SNAPSHOT_OUT, and MAP_PUBLISH_INTERVAL.
 
 Run a dry-run before publishing. Ask before restarting any existing RNS service.

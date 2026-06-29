@@ -4,50 +4,64 @@ Paste this into Claude on the dedicated Linux server after copying and extractin
 `ratspeak-map-server-bundle.tar.gz`.
 
 ```text
-We are adding a small map publisher service to this dedicated Linux server.
-This server runs 10 Python Reticulum/RNS nodes. Only one node should be used for
-the map publisher: the RNS instance whose node/identity/config name starts with
-"deadbeef". That instance is our propagation/sync node. Do not collect from the
-other nine nodes because doing so will duplicate discovery data.
+We are adding a small Ratspeak map publisher to this dedicated Linux server.
+Use your judgment for the local Linux/service details after inspecting the host;
+the paths and commands below are examples, not a demand to ignore existing
+server conventions.
 
-The website and Vercel project are managed on another machine. You do not need
-the website repo. You only need this extracted bundle:
+Context:
+- This server runs 10 Python Reticulum/RNS nodes.
+- Only one node should feed the map publisher: the RNS instance whose
+  node/identity/config name starts with "deadbeef".
+- The deadbeef* instance is our propagation/sync node.
+- Do not collect discovery data from the other nine nodes, because that will
+  duplicate records.
+- The website repo, map.html, and Vercel project are managed on another machine.
+  This server only publishes sanitized discovery snapshots to Vercel.
+
+Provided bundle:
 - ratspeak-map-publisher.py
 - ne_110m_land.geojson
 - ratspeak-map.env.example
 - ratspeak-map-publisher.service
 - README.md
 
-Goal:
+Hard constraints:
+1. Use only the deadbeef* RNS instance as the discovery source.
+2. Do not publish private keys, identities, IFAC passphrases, or raw config
+   snippets.
+3. Do not restart or modify existing production RNS services without asking.
+4. Dry-run before publishing.
+5. One-shot publish before installing or enabling any long-running service.
+
+Success criteria:
 1. Find the RNS config directory for the deadbeef* instance.
-2. Confirm it has:
-   [reticulum]
+2. Confirm or enable incoming interface discovery for that instance:
    discover_interfaces = yes
-3. Do not restart or modify existing production RNS services unless you ask first.
-4. Configure /etc/ratspeak-map.env from ratspeak-map.env.example.
-5. Run a dry-run of /opt/ratspeak-map/ratspeak-map-publisher.py.
-6. If the dry-run looks good, publish once to the Vercel Preview ingest URL.
-7. Only after the one-shot publish succeeds, set up the systemd service.
+3. Confirm Python RNS can export records with rnstatus.
+4. Generate /var/lib/ratspeak-map/map-live.json or an equivalent local snapshot.
+5. Publish one sanitized snapshot to the supplied Vercel /api/map-ingest URL.
+6. Leave behind a maintainable service/timer only after the one-shot publish is
+   confirmed.
 
-Important environment values:
-- RNS_CONFIG_DIR must point to the deadbeef* RNS config directory.
-- MAP_INGEST_URL should be the Vercel Preview or Production /api/map-ingest URL.
-- MAP_INGEST_TOKEN is the shared Vercel ingest token.
-- VERCEL_PROTECTION_BYPASS is required only while publishing to a protected
-  Vercel Preview deployment. It is not needed for production if production is
-  public.
-- MAP_LAND_GEOJSON should point to /opt/ratspeak-map/ne_110m_land.geojson.
-- MAP_SNAPSHOT_OUT should point to /var/lib/ratspeak-map/map-live.json.
+Environment values that will be provided:
+- MAP_INGEST_URL: Vercel Preview or Production /api/map-ingest URL.
+- MAP_INGEST_TOKEN: shared Vercel ingest token.
+- VERCEL_PROTECTION_BYPASS: required only for protected Vercel Preview.
+- MAP_LAND_GEOJSON: path to ne_110m_land.geojson.
+- MAP_SNAPSHOT_OUT: path for the local snapshot copy.
+- MAP_PUBLISH_INTERVAL: desired recurring publish interval, probably 60 seconds.
 
-Useful read-only discovery commands:
+Suggested investigation commands, adapt as needed:
 ps aux | grep -Ei '[r]ns|[r]eticulum'
 systemctl list-units --type=service | grep -Ei 'rns|reticulum|ratspeak'
 find /etc /opt /var/lib "$HOME" -maxdepth 5 -type f -name config 2>/dev/null | grep -Ei 'rns|reticulum|deadbeef'
 
-Confirm discovery export works:
+Suggested rnstatus check:
 rnstatus --config <deadbeef-config-dir> -d --json
 
-Install bundle files:
+Suggested install shape, adapt to existing local conventions if there is a
+better standard path/user/service manager on this host:
 sudo mkdir -p /opt/ratspeak-map /var/lib/ratspeak-map
 sudo cp ratspeak-map-publisher.py /opt/ratspeak-map/
 sudo cp ne_110m_land.geojson /opt/ratspeak-map/
@@ -55,7 +69,16 @@ sudo cp ratspeak-map.env.example /etc/ratspeak-map.env
 sudo chmod +x /opt/ratspeak-map/ratspeak-map-publisher.py
 sudo chmod 600 /etc/ratspeak-map.env
 
-Dry-run:
+Suggested /etc/ratspeak-map.env keys:
+- RNS_CONFIG_DIR=<deadbeef-config-dir>
+- MAP_INGEST_URL=<provided ingest URL>
+- MAP_INGEST_TOKEN=<provided ingest token>
+- VERCEL_PROTECTION_BYPASS=<provided only for protected Preview>
+- MAP_LAND_GEOJSON=/opt/ratspeak-map/ne_110m_land.geojson
+- MAP_SNAPSHOT_OUT=/var/lib/ratspeak-map/map-live.json
+- MAP_PUBLISH_INTERVAL=60
+
+Suggested dry-run:
 set -a
 . /etc/ratspeak-map.env
 set +a
@@ -66,20 +89,20 @@ python3 /opt/ratspeak-map/ratspeak-map-publisher.py \
   --dry-run \
   --require-land-mask
 
-Publish once:
+Suggested one-shot publish:
 python3 /opt/ratspeak-map/ratspeak-map-publisher.py \
   --rns-config "$RNS_CONFIG_DIR" \
   --land-geojson "$MAP_LAND_GEOJSON" \
   --out "$MAP_SNAPSHOT_OUT" \
   --require-land-mask
 
-If that succeeds, install systemd:
-sudo cp ratspeak-map-publisher.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable --now ratspeak-map-publisher.service
-sudo journalctl -u ratspeak-map-publisher.service -f
+If a recurring service is appropriate, you can use the included systemd unit as
+a starting point. If this server uses a different pattern, prefer the existing
+local convention and explain the choice.
 
-The publisher must never send private keys, identities, IFAC passphrases, or raw
-config snippets. It only publishes sanitized node kind, label, coordinates,
-public endpoint, public radio settings, services, and observed timestamps.
+Before making persistent changes, report:
+- which deadbeef* config directory you identified,
+- whether discover_interfaces was already enabled,
+- how many records the dry-run read/accepted/plotted,
+- and exactly what recurring service/timer you intend to install.
 ```
