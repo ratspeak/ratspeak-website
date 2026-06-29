@@ -76,8 +76,12 @@ const DENSE_MARKER_DISTANCE_PX = 18;
 const MOBILE_MARKER_PICK_RADIUS_PX = 22;
 const MOBILE_MARKER_PRECISE_RADIUS_PX = 10;
 const MOBILE_MARKER_PICK_TIE_PX = 9;
+const MOBILE_SHEET_DISMISS_DISTANCE_PX = 72;
+const MOBILE_SHEET_DISMISS_FAST_DISTANCE_PX = 28;
+const MOBILE_SHEET_DISMISS_VELOCITY_PX_MS = 0.5;
 const MIN_MAP_ZOOM = 2;
 const MOBILE_VIEWPORT_QUERY = '(max-width: 900px)';
+const MOBILE_SHEET_VIEWPORT_QUERY = '(max-width: 620px)';
 const LOW_ZOOM_LABEL_CUTOFF = MIN_MAP_ZOOM;
 const LOW_ZOOM_LABELS = [
   { label: 'North America', lat: 48, lon: -103 },
@@ -123,6 +127,7 @@ const state = {
   placeIndex: [],
   countryIndex: [],
   nodeCursorActive: false,
+  detailSheetDrag: null,
   refreshTimer: null,
   suppressMapClickUntil: 0
 };
@@ -238,10 +243,21 @@ function bindControls() {
     });
   }
 
+  if (els.nodeDetail) {
+    els.nodeDetail.addEventListener('pointerdown', handleDetailSheetPointerDown);
+    els.nodeDetail.addEventListener('click', (event) => {
+      event.stopPropagation();
+    });
+  }
+
 }
 
 function isMobileViewport() {
   return window.matchMedia(MOBILE_VIEWPORT_QUERY).matches;
+}
+
+function isMobileSheetViewport() {
+  return window.matchMedia(MOBILE_SHEET_VIEWPORT_QUERY).matches;
 }
 
 function usesCoarsePointer() {
@@ -771,6 +787,11 @@ function roundPixel(value) {
 function handleMapClick(event) {
   if (Date.now() < state.suppressMapClickUntil) return;
 
+  if (state.selectedId && isMobileSheetViewport()) {
+    clearSelectedNode();
+    return;
+  }
+
   const hit = pickNodeAt(event.containerPoint);
   if (hit) {
     selectNode(hit.node.id, { pan: false });
@@ -778,6 +799,110 @@ function handleMapClick(event) {
   }
 
   clearSelectedNode();
+}
+
+function handleDetailSheetPointerDown(event) {
+  if (!state.selectedId || !isMobileSheetViewport()) return;
+  if (event.target.closest('button, a, input, select, textarea')) return;
+
+  state.detailSheetDrag = {
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    lastY: event.clientY,
+    startedAt: performance.now(),
+    dragging: false,
+    initialScrollTop: els.nodeDetail.scrollTop
+  };
+
+  window.addEventListener('pointermove', handleDetailSheetPointerMove, { passive: false });
+  window.addEventListener('pointerup', handleDetailSheetPointerUp, { passive: true });
+  window.addEventListener('pointercancel', handleDetailSheetPointerCancel, { passive: true });
+}
+
+function handleDetailSheetPointerMove(event) {
+  const drag = state.detailSheetDrag;
+  if (!drag || event.pointerId !== drag.pointerId || !state.selectedId) return;
+
+  const dx = event.clientX - drag.startX;
+  const dy = event.clientY - drag.startY;
+  drag.lastY = event.clientY;
+
+  if (!drag.dragging) {
+    if (Math.abs(dx) > 16 && Math.abs(dx) > Math.abs(dy)) {
+      resetDetailSheetDrag();
+      return;
+    }
+    if (dy < 8) return;
+    if (drag.initialScrollTop > 0 || els.nodeDetail.scrollTop > 0) return;
+
+    drag.dragging = true;
+    els.nodeDetail.classList.add('is-dragging');
+  }
+
+  if (!drag.dragging) return;
+  event.preventDefault();
+
+  const dragY = Math.max(0, dy);
+  const opacity = Math.max(0.58, 1 - (dragY / 420));
+  els.nodeDetail.style.setProperty('--sheet-drag-y', `${dragY}px`);
+  els.nodeDetail.style.setProperty('--sheet-drag-opacity', String(opacity));
+}
+
+function handleDetailSheetPointerUp(event) {
+  const drag = state.detailSheetDrag;
+  if (!drag || event.pointerId !== drag.pointerId) return;
+
+  const dragY = Math.max(0, drag.lastY - drag.startY);
+  const elapsed = Math.max(1, performance.now() - drag.startedAt);
+  const velocity = dragY / elapsed;
+  const shouldDismiss = drag.dragging && (
+    dragY >= MOBILE_SHEET_DISMISS_DISTANCE_PX ||
+    (dragY >= MOBILE_SHEET_DISMISS_FAST_DISTANCE_PX && velocity >= MOBILE_SHEET_DISMISS_VELOCITY_PX_MS)
+  );
+
+  if (shouldDismiss) {
+    dismissDetailSheet();
+    return;
+  }
+
+  resetDetailSheetDrag();
+}
+
+function handleDetailSheetPointerCancel(event) {
+  const drag = state.detailSheetDrag;
+  if (!drag || event.pointerId !== drag.pointerId) return;
+  resetDetailSheetDrag();
+}
+
+function dismissDetailSheet() {
+  cleanupDetailSheetDragListeners();
+  state.detailSheetDrag = null;
+  suppressNextMapClick();
+  els.nodeDetail.classList.remove('is-dragging');
+  els.nodeDetail.classList.add('is-dismissing');
+  els.nodeDetail.style.removeProperty('--sheet-drag-y');
+  els.nodeDetail.style.removeProperty('--sheet-drag-opacity');
+
+  window.setTimeout(() => {
+    els.nodeDetail.classList.remove('is-dismissing');
+    clearSelectedNode();
+  }, 180);
+}
+
+function resetDetailSheetDrag() {
+  cleanupDetailSheetDragListeners();
+  state.detailSheetDrag = null;
+  suppressNextMapClick();
+  els.nodeDetail.classList.remove('is-dragging');
+  els.nodeDetail.style.removeProperty('--sheet-drag-y');
+  els.nodeDetail.style.removeProperty('--sheet-drag-opacity');
+}
+
+function cleanupDetailSheetDragListeners() {
+  window.removeEventListener('pointermove', handleDetailSheetPointerMove);
+  window.removeEventListener('pointerup', handleDetailSheetPointerUp);
+  window.removeEventListener('pointercancel', handleDetailSheetPointerCancel);
 }
 
 function syncNodeCursor(event) {
@@ -887,9 +1012,19 @@ function selectNode(id, options = {}) {
 
 function clearSelectedNode() {
   if (!state.selectedId) return;
+  clearDetailSheetState();
   state.selectedId = null;
   renderDetail();
   renderMap();
+}
+
+function clearDetailSheetState() {
+  cleanupDetailSheetDragListeners();
+  state.detailSheetDrag = null;
+  if (!els.nodeDetail) return;
+  els.nodeDetail.classList.remove('is-dragging', 'is-dismissing');
+  els.nodeDetail.style.removeProperty('--sheet-drag-y');
+  els.nodeDetail.style.removeProperty('--sheet-drag-opacity');
 }
 
 function suppressNextMapClick() {
