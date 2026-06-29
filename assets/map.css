@@ -1061,6 +1061,20 @@ a {
 }
 
 @media (max-width: 900px) {
+    :root {
+        --map-control-bg: rgba(250, 247, 243, 0.40);
+        --map-control-bg-hover: rgba(250, 247, 243, 0.52);
+        --map-control-field-bg: rgba(250, 247, 243, 0.30);
+        --map-control-field-bg-focus: rgba(250, 247, 243, 0.46);
+    }
+
+    [data-theme="dark"] {
+        --map-control-bg: rgba(24, 23, 26, 0.38);
+        --map-control-bg-hover: rgba(31, 29, 32, 0.50);
+        --map-control-field-bg: rgba(24, 23, 26, 0.28);
+        --map-control-field-bg-focus: rgba(31, 29, 32, 0.42);
+    }
+
     .navbar {
         padding: 0 18px;
     }
@@ -1089,7 +1103,7 @@ a {
     .leaflet-bottom.leaflet-left .map-legend {
         width: min(248px, calc(100vw - 118px));
         margin-left: 12px !important;
-        margin-bottom: 12px !important;
+        margin-bottom: 30px !important;
     }
 
     .map-legend {
