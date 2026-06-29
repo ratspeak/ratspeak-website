@@ -1,5 +1,5 @@
 import { buildMapSnapshot } from './map-data.js';
-import { isYggdrasilAddress, textMentionsYggdrasil } from './map-network.js';
+import { isIpv6Address, isYggdrasilAddress, textMentionsYggdrasil } from './map-network.js';
 import { buildCountryIndex, buildPlaceIndex, locationLabelForNode } from './map-places.js';
 
 const API_URL = '/api/map-nodes';
@@ -24,11 +24,17 @@ const TILE_LAYER_STYLES = {
 };
 
 const KIND_META = {
-  server: {
-    label: 'Server',
-    badgeLabel: 'Server',
-    shortLabel: 'Server',
+  'server-ipv4': {
+    label: 'Server (IPv4)',
+    badgeLabel: 'Server (IPv4)',
+    shortLabel: 'IPv4',
     color: '#1687B8'
+  },
+  'server-ipv6': {
+    label: 'Server (IPv6)',
+    badgeLabel: 'Server (IPv6)',
+    shortLabel: 'IPv6',
+    color: '#1F4E95'
   },
   'client-auto': {
     label: 'Client (Auto)',
@@ -56,7 +62,7 @@ const KIND_META = {
   }
 };
 
-const LEGEND_KIND_IDS = ['server', 'client-auto', 'client-manual', 'i2p', 'yggdrasil'];
+const LEGEND_KIND_IDS = ['server-ipv4', 'server-ipv6', 'client-auto', 'client-manual', 'i2p', 'yggdrasil'];
 
 const MARKER_SCALE_BANDS = [
   { maxZoom: 2, size: 5.5, selectedCore: 7.5, selected: 17, ring: 1.75, ringAlpha: 16, selectedRing: 2.75, selectedHalo: 5.5 },
@@ -908,8 +914,14 @@ function nodeLocationLabel(node) {
 function nodeKind(node) {
   if (isI2PNode(node)) return 'i2p';
   if (isYggdrasilNode(node)) return 'yggdrasil';
+  if (node.kind === 'server') return serverAddressKind(node);
   if (KIND_META[node.kind]) return node.kind;
   return 'client-manual';
+}
+
+function serverAddressKind(node) {
+  const address = nodeAddress(node, node.reticulum || {});
+  return isIpv6Address(address) ? 'server-ipv6' : 'server-ipv4';
 }
 
 function isI2PNode(node) {
@@ -922,11 +934,7 @@ function isYggdrasilNode(node) {
   if (node.kind === 'yggdrasil') return true;
   if (String(node.reticulum?.interfaceType || '').toLowerCase().includes('yggdrasil')) return true;
 
-  const endpoint = node.endpoint || {};
-  const address = stringValue(endpoint.ip) ||
-    stringValue(endpoint.host) ||
-    stringValue(endpoint.address) ||
-    stringValue(node.reticulum?.reachableOn);
+  const address = nodeAddress(node, node.reticulum || {});
   if (isYggdrasilAddress(address)) return true;
 
   return textMentionsYggdrasil(
@@ -1010,10 +1018,7 @@ function serviceTags(services = []) {
 
 function nodeEndpoint(node, reticulum) {
   const endpoint = node.endpoint || {};
-  const address = stringValue(endpoint.ip) ||
-    stringValue(endpoint.host) ||
-    stringValue(endpoint.address) ||
-    stringValue(reticulum.reachableOn);
+  const address = nodeAddress(node, reticulum);
 
   if (isI2PNode(node)) {
     const port = positiveIntegerValue(endpoint.port) ?? positiveIntegerValue(reticulum.port);
@@ -1032,13 +1037,25 @@ function nodeEndpoint(node, reticulum) {
     };
   }
 
-  if (nodeKind(node) !== 'server') return {};
+  if (!isServerKind(nodeKind(node))) return {};
 
   return {
     label: 'IP',
     address,
     port: integerValue(endpoint.port) ?? integerValue(reticulum.port)
   };
+}
+
+function nodeAddress(node, reticulum = {}) {
+  const endpoint = node.endpoint || {};
+  return stringValue(endpoint.ip) ||
+    stringValue(endpoint.host) ||
+    stringValue(endpoint.address) ||
+    stringValue(reticulum.reachableOn);
+}
+
+function isServerKind(kind) {
+  return kind === 'server' || kind === 'server-ipv4' || kind === 'server-ipv6';
 }
 
 function radioSummary(reticulum) {

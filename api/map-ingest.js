@@ -19,7 +19,7 @@ const MAX_SERVICES = 20;
 const WEB_MERCATOR_LAT_LIMIT = 85.05112878;
 const NO_STORE = { 'Cache-Control': 'no-store' };
 
-const ALLOWED_KINDS = new Set(['server', 'client-auto', 'client-manual', 'i2p', 'yggdrasil']);
+const ALLOWED_KINDS = new Set(['server-ipv4', 'server-ipv6', 'client-auto', 'client-manual', 'i2p', 'yggdrasil']);
 const ALLOWED_STATUS = new Set(['available', 'seen', 'recent', 'stale', 'unknown']);
 
 export default async function handler(req) {
@@ -124,7 +124,8 @@ function sanitizeNode(node, index) {
 
   const location = sanitizeLocation(node.location, index);
   const reticulum = sanitizeReticulum(node.reticulum);
-  const kind = normalizeKind(node.kind, reticulum);
+  const endpoint = sanitizeEndpoint(node.endpoint);
+  const kind = normalizeKind(node.kind, reticulum, endpoint);
   const status = boundedString(node.status, 24);
   const sanitized = {
     id,
@@ -139,7 +140,6 @@ function sanitizeNode(node, index) {
   const sourceMode = boundedString(node.sourceMode, 64);
   const lastSeen = isoTimestamp(node.lastSeen);
   const firstSeen = isoTimestamp(node.firstSeen);
-  const endpoint = sanitizeEndpoint(node.endpoint);
   if (sourceId) sanitized.sourceId = sourceId;
   if (sourceMode) sanitized.sourceMode = sourceMode;
   if (lastSeen) sanitized.lastSeen = lastSeen;
@@ -220,15 +220,61 @@ function sanitizeRadio(radio) {
   return Object.keys(result).length ? result : null;
 }
 
-function normalizeKind(kind, reticulum) {
+function normalizeKind(kind, reticulum, endpoint = {}) {
   const value = boundedString(kind, 40);
+  if (value === 'server') return serverKindForEndpoint(reticulum, endpoint);
   if (ALLOWED_KINDS.has(value)) return value;
 
   const interfaceType = String(reticulum.interfaceType || '').toLowerCase();
   if (interfaceType.includes('i2p')) return 'i2p';
   if (interfaceType.includes('yggdrasil')) return 'yggdrasil';
-  if (interfaceType === 'backboneinterface' || interfaceType === 'tcpserverinterface') return 'server';
+  if (interfaceType === 'backboneinterface' || interfaceType === 'tcpserverinterface') {
+    return serverKindForEndpoint(reticulum, endpoint);
+  }
   return 'client-auto';
+}
+
+function serverKindForEndpoint(reticulum, endpoint = {}) {
+  const address = boundedString(endpoint.ip, 512) ||
+    boundedString(endpoint.host, 512) ||
+    boundedString(endpoint.address, 512) ||
+    boundedString(reticulum.reachableOn, 512);
+
+  if (isYggdrasilAddress(address)) return 'yggdrasil';
+  return isIpv6Address(address) ? 'server-ipv6' : 'server-ipv4';
+}
+
+function isYggdrasilAddress(value) {
+  let address = boundedString(value, 512).toLowerCase();
+  const bracketed = /^\[([^\]]+)\](?::\d+)?$/.exec(address);
+  if (bracketed) address = bracketed[1];
+  address = address.split('%', 1)[0];
+
+  if (!address.includes(':')) return false;
+  const firstHextet = address.split(':', 1)[0];
+  if (!/^[0-9a-f]{1,4}$/.test(firstHextet)) return false;
+  const number = Number.parseInt(firstHextet, 16);
+  return number >= 0x0200 && number <= 0x03ff;
+}
+
+function isIpv6Address(value) {
+  let address = boundedString(value, 512).toLowerCase();
+  const bracketed = /^\[([^\]]+)\](?::\d+)?$/.exec(address);
+  if (bracketed) address = bracketed[1];
+  address = address.split('%', 1)[0];
+
+  if (!address.includes(':')) return false;
+  if (!/^[0-9a-f:.]+$/.test(address)) return false;
+  const doubleColonMatches = address.match(/::/g) || [];
+  if (doubleColonMatches.length > 1) return false;
+
+  const parts = address.split(':').filter(Boolean);
+  if (parts.length < 2 || parts.length > 8) return false;
+
+  return parts.every((part) => {
+    if (part.includes('.')) return /^\d{1,3}(\.\d{1,3}){3}$/.test(part);
+    return /^[0-9a-f]{1,4}$/.test(part);
+  });
 }
 
 function sanitizeSources(sources) {

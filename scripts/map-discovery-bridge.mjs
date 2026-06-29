@@ -2,7 +2,7 @@
 import { readdir, readFile, mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { isYggdrasilAddress, textMentionsYggdrasil } from '../assets/map-network.js';
+import { isIpv6Address, isYggdrasilAddress, textMentionsYggdrasil } from '../assets/map-network.js';
 import { buildCountryIndex, buildPlaceIndex, locationForCoordinates } from '../assets/map-places.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -262,9 +262,14 @@ function recordToNode(record, now) {
 
 function kindForRecord(record) {
   const type = stringOrNull(record.type);
+  const reachableOn = stringOrNull(record.reachable_on);
   if (type === 'I2PInterface') return 'i2p';
   if (isYggdrasilRecord(record)) return 'yggdrasil';
-  return SERVER_TYPES.has(type) ? 'server' : 'client-auto';
+  return SERVER_TYPES.has(type) ? serverKindForAddress(reachableOn) : 'client-auto';
+}
+
+function serverKindForAddress(address) {
+  return isIpv6Address(address) ? 'server-ipv6' : 'server-ipv4';
 }
 
 function isYggdrasilRecord(record) {

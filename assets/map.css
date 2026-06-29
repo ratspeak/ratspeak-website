@@ -29,6 +29,7 @@
     --map-accent-strong: var(--accent-dark);
     --map-green: #35B875;
     --map-blue: #1687B8;
+    --map-blue-dark: #1F4E95;
     --map-yellow: #C79A2B;
     --map-i2p: var(--accent);
     --map-yggdrasil: #E989B1;
@@ -71,6 +72,7 @@
     --map-border-strong: rgba(210, 105, 59, 0.44);
     --map-green: #63D98F;
     --map-blue: #36B6E6;
+    --map-blue-dark: #4F74D8;
     --map-yellow: #E4BD4B;
     --map-i2p: #F0834D;
     --map-yggdrasil: #FF9EC8;
@@ -1081,8 +1083,13 @@ a {
         0 1px 2px var(--pin-shadow);
 }
 
-.map-pin--server {
+.map-pin--server,
+.map-pin--server-ipv4 {
     --pin-color: var(--map-blue);
+}
+
+.map-pin--server-ipv6 {
+    --pin-color: var(--map-blue-dark);
 }
 
 .map-pin--client-auto {
