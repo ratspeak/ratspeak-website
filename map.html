@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#18171a">
-    <title>Ratspeak Maps</title>
-    <meta name="description" content="Exploratory Ratspeak network map for public, discoverable, and manual opt-in presence.">
+    <title>Ratspeak Map</title>
+    <meta name="description" content="Ratspeak network map for public servers, discoverable clients, and manual opt-in presence.">
     <meta name="base:app_id" content="6a3c6e26bff5f57cb7afde68">
-    <link rel="canonical" href="https://ratspeak.org/maps.html">
+    <link rel="canonical" href="https://ratspeak.org/map.html">
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
@@ -22,20 +22,20 @@
     <meta property="og:type" content="website">
     <meta property="og:locale" content="en_US">
     <meta property="og:site_name" content="Ratspeak">
-    <meta property="og:title" content="Ratspeak Maps">
-    <meta property="og:description" content="Exploratory Ratspeak network map for public, discoverable, and manual opt-in presence.">
-    <meta property="og:url" content="https://ratspeak.org/maps.html">
+    <meta property="og:title" content="Ratspeak Map">
+    <meta property="og:description" content="Ratspeak network map for public servers, discoverable clients, and manual opt-in presence.">
+    <meta property="og:url" content="https://ratspeak.org/map.html">
     <meta property="og:image" content="https://ratspeak.org/assets/seo/og-home.png">
     <meta property="og:image:secure_url" content="https://ratspeak.org/assets/seo/og-home.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Ratspeak Maps - exploratory network presence map.">
+    <meta property="og:image:alt" content="Ratspeak Map - network presence map.">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@ratspeakorg">
-    <meta name="twitter:title" content="Ratspeak Maps">
-    <meta name="twitter:description" content="Exploratory Ratspeak network map for public, discoverable, and manual opt-in presence.">
+    <meta name="twitter:title" content="Ratspeak Map">
+    <meta name="twitter:description" content="Ratspeak network map for public servers, discoverable clients, and manual opt-in presence.">
     <meta name="twitter:image" content="https://ratspeak.org/assets/seo/og-home.png">
-    <meta name="twitter:image:alt" content="Ratspeak Maps - exploratory network presence map.">
+    <meta name="twitter:image:alt" content="Ratspeak Map - network presence map.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://unpkg.com">
@@ -62,6 +62,7 @@
     <div class="navbar-center">
         <a href="index.html">Home</a>
         <a href="about.html">About</a>
+        <a href="map.html" class="nav-active">Map</a>
         <a href="https://docs.ratspeak.org/">Docs</a>
         <a href="download.html">Download</a>
     </div>
@@ -84,13 +85,14 @@
 <div class="navbar-menu" id="navMobileMenu">
     <a href="index.html">Home</a>
     <a href="about.html">About</a>
+    <a href="map.html" class="menu-active">Map</a>
     <a href="https://docs.ratspeak.org/">Docs</a>
     <a href="download.html">Download</a>
     <a href="poll.html">Community Poll</a>
     <a href="https://github.com/ratspeak" target="_blank" rel="noopener noreferrer">GitHub</a>
 </div>
 
-<main class="maps-app" id="mapsApp" aria-label="Ratspeak Maps">
+<main class="maps-app" id="mapsApp" aria-label="Ratspeak Map">
     <div class="map-canvas" id="map" aria-hidden="true"></div>
     <div class="map-fallback" id="mapFallback" hidden>Map tiles are unavailable in this browser session.</div>
 
@@ -167,6 +169,7 @@
         </div>
         <div class="footer-links">
             <a href="about.html">About</a>
+            <a href="map.html">Map</a>
             <a href="https://docs.ratspeak.org/">Docs</a>
             <a href="download.html">Download</a>
             <a href="https://github.com/ratspeak" target="_blank" rel="noopener noreferrer">GitHub</a>
