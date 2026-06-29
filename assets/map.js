@@ -25,14 +25,14 @@ const TILE_LAYER_STYLES = {
 
 const KIND_META = {
   'server-ipv4': {
-    label: 'Server (IPv4)',
-    badgeLabel: 'Server (IPv4)',
+    label: 'IPv4',
+    badgeLabel: 'IPv4',
     shortLabel: 'IPv4',
     color: '#1687B8'
   },
   'server-ipv6': {
-    label: 'Server (IPv6)',
-    badgeLabel: 'Server (IPv6)',
+    label: 'IPv6',
+    badgeLabel: 'IPv6',
     shortLabel: 'IPv6',
     color: '#1F4E95'
   },
