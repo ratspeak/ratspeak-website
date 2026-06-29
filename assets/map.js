@@ -116,8 +116,11 @@ const state = {
   statusFilter: 'all',
   query: '',
   map: null,
-  tileLayer: null,
-  tileLayerUrl: '',
+  tileLayers: {
+    labels: null,
+    noLabels: null
+  },
+  tileLayerTheme: '',
   lowZoomLabelLayer: null,
   markerLayer: null,
   markers: new Map(),
@@ -377,10 +380,16 @@ function initMap() {
   }).addTo(state.map);
   initLegendControl();
 
-  state.tileLayerUrl = tileLayerUrl();
-  state.tileLayer = window.L.tileLayer(state.tileLayerUrl, {
+  state.tileLayerTheme = currentTheme();
+  const tileUrls = tileLayerUrlsForTheme(state.tileLayerTheme);
+  state.tileLayers.noLabels = window.L.tileLayer(tileUrls.noLabels, {
     maxZoom: 19,
     attribution: TILE_ATTRIBUTION
+  }).addTo(state.map);
+  state.tileLayers.labels = window.L.tileLayer(tileUrls.labels, {
+    maxZoom: 19,
+    attribution: TILE_ATTRIBUTION,
+    opacity: 0
   }).addTo(state.map);
 
   initLowZoomLabels();
@@ -431,20 +440,30 @@ function initLegendControl() {
 }
 
 function syncMapTheme() {
-  if (!state.tileLayer) return;
-  const nextUrl = tileLayerUrl();
-  if (state.tileLayerUrl !== nextUrl) {
-    state.tileLayerUrl = nextUrl;
-    state.tileLayer.setUrl(nextUrl);
+  if (!state.tileLayers.labels || !state.tileLayers.noLabels) return;
+  const nextTheme = currentTheme();
+  if (state.tileLayerTheme !== nextTheme) {
+    state.tileLayerTheme = nextTheme;
+    const tileUrls = tileLayerUrlsForTheme(nextTheme);
+    state.tileLayers.labels.setUrl(tileUrls.labels);
+    state.tileLayers.noLabels.setUrl(tileUrls.noLabels);
   }
+  syncTileLayerVisibility();
   syncLowZoomLabels();
 }
 
-function tileLayerUrl() {
-  const theme = currentTheme();
+function tileLayerUrlsForTheme(theme) {
   const styles = TILE_LAYER_STYLES[theme] || TILE_LAYER_STYLES.dark;
-  const style = isLowZoomLabelMode() ? styles.noLabels : styles.labels;
-  return `${CARTO_TILE_BASE_URL}/${style}/{z}/{x}/{y}{r}.png`;
+  return {
+    labels: `${CARTO_TILE_BASE_URL}/${styles.labels}/{z}/{x}/{y}{r}.png`,
+    noLabels: `${CARTO_TILE_BASE_URL}/${styles.noLabels}/{z}/{x}/{y}{r}.png`
+  };
+}
+
+function syncTileLayerVisibility() {
+  const showLowZoomLabels = isLowZoomLabelMode();
+  state.tileLayers.noLabels?.setOpacity(showLowZoomLabels ? 1 : 0);
+  state.tileLayers.labels?.setOpacity(showLowZoomLabels ? 0 : 1);
 }
 
 function currentTheme() {
@@ -462,14 +481,6 @@ function initLowZoomLabels() {
   pane.style.zIndex = 360;
   pane.style.pointerEvents = 'none';
   state.lowZoomLabelLayer = window.L.layerGroup().addTo(state.map);
-  syncLowZoomLabels();
-}
-
-function syncLowZoomLabels() {
-  if (!state.lowZoomLabelLayer || !window.L) return;
-  state.lowZoomLabelLayer.clearLayers();
-  if (!isLowZoomLabelMode()) return;
-
   LOW_ZOOM_LABELS.forEach((label) => {
     MARKER_WORLD_OFFSETS.forEach((worldOffset) => {
       window.L.marker([label.lat, label.lon + worldOffset], {
@@ -485,6 +496,13 @@ function syncLowZoomLabels() {
       }).addTo(state.lowZoomLabelLayer);
     });
   });
+  syncLowZoomLabels();
+}
+
+function syncLowZoomLabels() {
+  if (!state.map) return;
+  const pane = state.map.getPane('continentLabels');
+  pane?.classList.toggle('is-visible', isLowZoomLabelMode());
 }
 
 function syncMapViewport() {
