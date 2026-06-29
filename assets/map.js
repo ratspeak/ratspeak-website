@@ -43,8 +43,8 @@ const KIND_META = {
     color: '#35B875'
   },
   'client-manual': {
-    label: 'User added*',
-    badgeLabel: 'User added*',
+    label: 'Manual',
+    badgeLabel: 'Manual',
     shortLabel: 'Manual',
     color: '#C79A2B'
   },
