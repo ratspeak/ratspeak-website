@@ -1,12 +1,13 @@
 import { buildMapSnapshot } from './map-data.js';
 import { isYggdrasilAddress, textMentionsYggdrasil } from './map-network.js';
-import { buildCountryIndex, locationLabelForNode } from './map-places.js';
+import { buildCountryIndex, buildPlaceIndex, locationLabelForNode } from './map-places.js';
 
 const API_URL = '/api/map-nodes';
 const LIVE_SNAPSHOT_URL = '/.tmp/map-live.json';
 const SNAPSHOT_URLS = [LIVE_SNAPSHOT_URL, API_URL];
 const SNAPSHOT_REFRESH_MS = 15_000;
 const LAND_MASK_URL = 'scripts/data/ne_110m_land.geojson';
+const PLACE_GAZETTEER_URL = 'scripts/data/ne_110m_populated_places_simple.geojson';
 const COUNTRY_GEOJSON_URL = 'scripts/data/ne_110m_admin_0_countries.geojson';
 const TILE_ATTRIBUTION = '&copy; OpenStreetMap contributors &copy; CARTO';
 
@@ -109,6 +110,7 @@ const state = {
   markerPlacements: new Map(),
   markerScale: MARKER_SCALE_BANDS[0],
   landMask: null,
+  placeIndex: [],
   countryIndex: [],
   nodeCursorActive: false,
   refreshTimer: null,
@@ -138,13 +140,15 @@ init();
 async function init() {
   bindChrome();
   bindControls();
-  const [snapshot, landMask, countryIndex] = await Promise.all([
+  const [snapshot, landMask, placeIndex, countryIndex] = await Promise.all([
     loadSnapshot(),
     loadLandMask(),
+    loadPlaceIndex(),
     loadCountryIndex()
   ]);
   state.snapshot = snapshot;
   state.landMask = landMask;
+  state.placeIndex = placeIndex;
   state.countryIndex = countryIndex;
   initMap();
   applyFilters();
@@ -280,6 +284,17 @@ async function loadCountryIndex() {
     return buildCountryIndex(await response.json());
   } catch (error) {
     console.info('Map country index unavailable:', error.message);
+    return [];
+  }
+}
+
+async function loadPlaceIndex() {
+  try {
+    const response = await fetch(PLACE_GAZETTEER_URL, { cache: 'force-cache' });
+    if (!response.ok) throw new Error(`${PLACE_GAZETTEER_URL} returned ${response.status}`);
+    return buildPlaceIndex(await response.json());
+  } catch (error) {
+    console.info('Map place gazetteer unavailable:', error.message);
     return [];
   }
 }
@@ -847,7 +862,7 @@ function nodeDisplayName(node) {
 }
 
 function nodeLocationLabel(node) {
-  return locationLabelForNode(node, state.countryIndex);
+  return locationLabelForNode(node, state.placeIndex, state.countryIndex);
 }
 
 function nodeKind(node) {
