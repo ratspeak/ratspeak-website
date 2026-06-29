@@ -16,6 +16,10 @@
     --map-bg-elevated: color-mix(in srgb, var(--bg-card) 94%, transparent);
     --map-bg-panel: color-mix(in srgb, var(--bg-card) 90%, transparent);
     --map-bg-panel-strong: color-mix(in srgb, var(--bg-card) 98%, transparent);
+    --map-control-bg: rgba(250, 247, 243, 0.52);
+    --map-control-bg-hover: rgba(250, 247, 243, 0.66);
+    --map-control-field-bg: rgba(250, 247, 243, 0.38);
+    --map-control-field-bg-focus: rgba(250, 247, 243, 0.58);
     --map-border: color-mix(in srgb, var(--border-card) 82%, transparent);
     --map-border-strong: color-mix(in srgb, var(--accent) 44%, var(--border-card));
     --map-text: var(--text-primary);
@@ -59,6 +63,10 @@
     --accent: #D2693B;
     --accent-dark: #F0834D;
     --accent-soft: rgba(210, 105, 59, 0.16);
+    --map-control-bg: rgba(24, 23, 26, 0.52);
+    --map-control-bg-hover: rgba(31, 29, 32, 0.66);
+    --map-control-field-bg: rgba(24, 23, 26, 0.38);
+    --map-control-field-bg-focus: rgba(31, 29, 32, 0.56);
     --map-border: rgba(232, 228, 224, 0.14);
     --map-border-strong: rgba(210, 105, 59, 0.44);
     --map-green: #63D98F;
@@ -386,6 +394,13 @@ a {
     -webkit-backdrop-filter: blur(18px) saturate(1.18);
 }
 
+.map-rail,
+.map-legend {
+    background: var(--map-control-bg);
+    backdrop-filter: blur(26px) saturate(1.28);
+    -webkit-backdrop-filter: blur(26px) saturate(1.28);
+}
+
 .map-left-stack {
     top: 18px;
     left: 18px;
@@ -407,7 +422,7 @@ a {
     min-height: 42px;
     border: 0;
     border-bottom: 1px solid color-mix(in srgb, var(--map-border) 78%, transparent);
-    background: color-mix(in srgb, var(--bg-primary) 42%, transparent);
+    background: color-mix(in srgb, var(--map-control-bg-hover) 58%, transparent);
     color: var(--map-text);
     padding: 0 14px;
     text-align: left;
@@ -416,7 +431,7 @@ a {
 
 .map-menu-toggle:hover,
 .map-menu-toggle:focus {
-    background: color-mix(in srgb, var(--map-accent) 9%, var(--bg-primary));
+    background: color-mix(in srgb, var(--map-accent) 10%, var(--map-control-bg-hover));
     color: var(--map-text);
     outline: none;
 }
@@ -486,7 +501,7 @@ a {
     height: 40px;
     border: 1px solid var(--map-border);
     border-radius: 8px;
-    background: color-mix(in srgb, var(--bg-primary) 56%, transparent);
+    background: var(--map-control-field-bg);
     color: var(--map-text);
     font-size: 14px;
     outline: none;
@@ -496,7 +511,7 @@ a {
 
 .search-input:focus {
     border-color: color-mix(in srgb, var(--map-accent) 62%, var(--map-border));
-    background: color-mix(in srgb, var(--bg-primary) 68%, transparent);
+    background: var(--map-control-field-bg-focus);
 }
 
 .filter-row {
@@ -546,7 +561,7 @@ a {
     -webkit-appearance: none;
     border: 1px solid var(--map-border);
     border-radius: 8px;
-    background: color-mix(in srgb, var(--bg-primary) 54%, transparent);
+    background: var(--map-control-field-bg);
     color: var(--map-text);
     font-size: 13px;
     font-weight: 700;
@@ -560,7 +575,7 @@ a {
 .filter-select:hover,
 .filter-select:focus {
     border-color: var(--map-border-strong);
-    background: color-mix(in srgb, var(--map-accent) 10%, var(--bg-primary));
+    background: color-mix(in srgb, var(--map-accent) 10%, var(--map-control-field-bg-focus));
     color: var(--map-text);
 }
 
@@ -861,10 +876,10 @@ a {
 .leaflet-control-zoom {
     border: 1px solid var(--map-border) !important;
     border-radius: 8px !important;
-    background: var(--map-bg-panel) !important;
+    background: var(--map-control-bg) !important;
     box-shadow: var(--leaflet-control-shadow) !important;
-    backdrop-filter: blur(14px) saturate(1.16);
-    -webkit-backdrop-filter: blur(14px) saturate(1.16);
+    backdrop-filter: blur(26px) saturate(1.28);
+    -webkit-backdrop-filter: blur(26px) saturate(1.28);
     overflow: hidden;
 }
 
@@ -898,7 +913,7 @@ a {
     height: 34px !important;
     border: 0 !important;
     border-bottom: 1px solid color-mix(in srgb, var(--map-border) 76%, transparent) !important;
-    background: color-mix(in srgb, var(--bg-primary) 54%, transparent) !important;
+    background: var(--map-control-field-bg) !important;
     color: var(--map-text) !important;
     font-family: var(--font-sans) !important;
     font-size: 22px !important;
@@ -914,7 +929,7 @@ a {
 
 .leaflet-control-zoom a:hover,
 .leaflet-control-zoom a:focus {
-    background: color-mix(in srgb, var(--map-accent) 12%, var(--bg-primary)) !important;
+    background: color-mix(in srgb, var(--map-accent) 12%, var(--map-control-field-bg-focus)) !important;
     color: var(--map-accent-strong) !important;
     outline: none;
 }
@@ -924,7 +939,7 @@ a {
 }
 
 .leaflet-control-zoom a.leaflet-disabled {
-    background: color-mix(in srgb, var(--bg-primary) 34%, transparent) !important;
+    background: color-mix(in srgb, var(--map-control-field-bg) 70%, transparent) !important;
     color: var(--map-text-muted) !important;
     opacity: 0.55;
 }
