@@ -162,7 +162,7 @@ The exporter should convert each accepted RNS discovery record into this shape:
 {
   "id": "disc:<stable-id>",
   "label": "Node display name",
-  "kind": "server",
+  "kind": "server-ipv4",
   "status": "seen",
   "lastSeen": "2026-06-28T00:00:00.000Z",
   "firstSeen": "2026-06-28T00:00:00.000Z",
@@ -185,7 +185,8 @@ The exporter should convert each accepted RNS discovery record into this shape:
 
 Allowed `kind` values:
 
-- `server`
+- `server-ipv4`
+- `server-ipv6`
 - `client-auto`
 - `client-manual`
 - `i2p`
@@ -193,7 +194,8 @@ Allowed `kind` values:
 
 Kind mapping guidance:
 
-- `BackboneInterface` and `TCPServerInterface` are `server`.
+- `BackboneInterface` and `TCPServerInterface` are `server-ipv4` or
+  `server-ipv6`, depending on the public endpoint address.
 - `I2PInterface` is `i2p`.
 - Yggdrasil endpoints must be emitted as `yggdrasil` explicitly by the exporter.
 - Radio/client interfaces such as `RNodeInterface` are generally `client-auto`

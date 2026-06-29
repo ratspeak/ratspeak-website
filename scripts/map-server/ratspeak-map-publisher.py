@@ -210,7 +210,7 @@ def kind_for_record(record: dict[str, Any]) -> str:
     if text_mentions_yggdrasil(record.get("name"), interface_type, reachable_on) or is_yggdrasil_address(reachable_on):
         return "yggdrasil"
     if interface_type in SERVER_TYPES:
-        return "server"
+        return "server-ipv6" if is_ipv6_address(reachable_on) else "server-ipv4"
     return "client-auto"
 
 
@@ -395,6 +395,9 @@ def now_iso() -> str:
 
 def is_yggdrasil_address(value: Any) -> bool:
     address = string_value(value).lower()
+    if address.startswith("[") and "]" in address:
+        address = address[1:address.index("]")]
+    address = address.split("%", 1)[0]
     if ":" not in address:
         return False
     first_hextet = address.split(":", 1)[0]
@@ -403,6 +406,35 @@ def is_yggdrasil_address(value: Any) -> bool:
     except ValueError:
         return False
     return 0x0200 <= number <= 0x03FF
+
+
+def is_ipv6_address(value: Any) -> bool:
+    address = string_value(value).lower()
+    if address.startswith("[") and "]" in address:
+        address = address[1:address.index("]")]
+    address = address.split("%", 1)[0]
+    if ":" not in address:
+        return False
+    if not all(char in "0123456789abcdef:." for char in address):
+        return False
+    if address.count("::") > 1:
+        return False
+    parts = [part for part in address.split(":") if part]
+    if len(parts) < 2 or len(parts) > 8:
+        return False
+    for part in parts:
+        if "." in part:
+            octets = part.split(".")
+            if len(octets) != 4:
+                return False
+            try:
+                if any(not octet.isdigit() or int(octet) > 255 for octet in octets):
+                    return False
+            except ValueError:
+                return False
+        elif len(part) > 4:
+            return False
+    return True
 
 
 def text_mentions_yggdrasil(*values: Any) -> bool:

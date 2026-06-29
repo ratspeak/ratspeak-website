@@ -165,7 +165,7 @@ Then it:
 - keeps only valid coordinate records
 - filters points outside land
 - expires old records
-- classifies server/client-auto/I2P/Yggdrasil nodes
+- classifies IPv4 server, IPv6 server, client-auto, I2P, and Yggdrasil nodes
 - preserves public endpoint and radio settings
 - never publishes identities, keys, IFAC passphrases, or raw config snippets
 
