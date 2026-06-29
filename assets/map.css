@@ -821,6 +821,10 @@ a {
     font-family: var(--font-sans);
 }
 
+.leaflet-tile-pane .leaflet-layer {
+    transition: opacity 0.16s ease;
+}
+
 .leaflet-control-zoom {
     border: 1px solid var(--map-border) !important;
     border-radius: 8px !important;
@@ -904,7 +908,13 @@ a {
 }
 
 .continent-label-pane {
+    opacity: 0;
     pointer-events: none;
+    transition: opacity 0.16s ease;
+}
+
+.continent-label-pane.is-visible {
+    opacity: 1;
 }
 
 .continent-label-icon {
