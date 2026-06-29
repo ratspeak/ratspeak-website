@@ -48,7 +48,7 @@ async function main() {
 
 async function writeSnapshot() {
   const generatedAt = new Date();
-  const { records, scanned, skipped, errors } = await readDiscoveryRecords(args.storeDir);
+  const { records, scanned, skipped, errors } = await readDiscoveryRecords();
   const nodes = records
     .map((record) => recordToNode(record, generatedAt))
     .filter(Boolean);
@@ -89,7 +89,12 @@ async function writeSnapshot() {
   );
 }
 
-async function readDiscoveryRecords(storeDir) {
+async function readDiscoveryRecords() {
+  if (args.rnstatusJson) return readRnstatusRecords(args.rnstatusJson);
+  return readStoredDiscoveryRecords(args.storeDir);
+}
+
+async function readStoredDiscoveryRecords(storeDir) {
   const skipped = { missingLocation: 0, water: 0, expired: 0 };
   const errors = [];
   const records = [];
@@ -109,20 +114,8 @@ async function readDiscoveryRecords(storeDir) {
     try {
       const record = decodeDiscoveryRecord(await readFile(filePath));
       scanned += 1;
-      const ageSeconds = secondsSince(record.last_heard);
-      if (ageSeconds > THRESHOLD_REMOVE_SECS) {
-        skipped.expired += 1;
-        continue;
-      }
-      if (!args.includeZero && !hasUsableLocation(record)) {
-        skipped.missingLocation += 1;
-        continue;
-      }
-      if (landMask && !recordIsOnLand(record)) {
-        skipped.water += 1;
-        continue;
-      }
-      records.push({ ...record, fileStem: entry.name });
+      const normalized = { ...record, fileStem: entry.name };
+      if (shouldAcceptRecord(normalized, skipped)) records.push(normalized);
     } catch (error) {
       errors.push({ file: entry.name, message: error.message });
       if (args.verbose) {
@@ -133,6 +126,86 @@ async function readDiscoveryRecords(storeDir) {
 
   records.sort((a, b) => Number(b.last_heard || 0) - Number(a.last_heard || 0));
   return { records, scanned, skipped, errors };
+}
+
+async function readRnstatusRecords(filePath) {
+  const skipped = { missingLocation: 0, water: 0, expired: 0 };
+  const errors = [];
+  const records = [];
+  const raw = await readFile(filePath, 'utf8');
+  const payload = JSON.parse(raw);
+  const hasEntriesArray = Array.isArray(payload) || Array.isArray(payload?.interfaces);
+  const entries = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.interfaces)
+      ? payload.interfaces
+      : [];
+
+  if (!hasEntriesArray) {
+    throw new Error(`rnstatus JSON must be an array or { interfaces: [...] }: ${filePath}`);
+  }
+
+  let scanned = 0;
+  for (const entry of entries) {
+    scanned += 1;
+    try {
+      const record = normalizeRnstatusRecord(entry, scanned);
+      if (shouldAcceptRecord(record, skipped)) records.push(record);
+    } catch (error) {
+      errors.push({ file: `rnstatus[${scanned - 1}]`, message: error.message });
+      if (args.verbose) {
+        console.warn(`[map-bridge] skipped rnstatus[${scanned - 1}]: ${error.message}`);
+      }
+    }
+  }
+
+  records.sort((a, b) => Number(b.last_heard || 0) - Number(a.last_heard || 0));
+  return { records, scanned, skipped, errors };
+}
+
+function normalizeRnstatusRecord(entry, index) {
+  if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+    throw new Error('record is not an object');
+  }
+  const discoveryHash = stringOrNull(entry.discovery_hash) ||
+    stringOrNull(entry.transport_id) ||
+    stringOrNull(entry.network_id) ||
+    `rnstatus-${index}`;
+  return {
+    ...entry,
+    fileStem: discoveryHash,
+    name: stringOrNull(entry.name) || stringOrNull(entry.discovery_name) || 'Unnamed node',
+    type: stringOrNull(entry.type),
+    latitude: finiteNumber(entry.latitude),
+    longitude: finiteNumber(entry.longitude),
+    height: finiteNumber(entry.height),
+    last_heard: finiteNumber(entry.last_heard),
+    discovered: finiteNumber(entry.discovered),
+    hops: finiteInteger(entry.hops),
+    heard_count: finiteInteger(entry.heard_count),
+    value: finiteInteger(entry.value),
+    port: finiteInteger(entry.port),
+    reachable_on: stringOrNull(entry.reachable_on),
+    transport_id: stringOrNull(entry.transport_id),
+    network_id: stringOrNull(entry.network_id)
+  };
+}
+
+function shouldAcceptRecord(record, skipped) {
+  const ageSeconds = secondsSince(record.last_heard);
+  if (ageSeconds > THRESHOLD_REMOVE_SECS) {
+    skipped.expired += 1;
+    return false;
+  }
+  if (!args.includeZero && !hasUsableLocation(record)) {
+    skipped.missingLocation += 1;
+    return false;
+  }
+  if (landMask && !recordIsOnLand(record)) {
+    skipped.water += 1;
+    return false;
+  }
+  return true;
 }
 
 function recordToNode(record, now) {
@@ -488,6 +561,7 @@ class MsgpackDecoder {
 function parseArgs(rawArgs) {
   const parsed = {
     storeDir: DEFAULT_STORE_DIR,
+    rnstatusJson: '',
     out: DEFAULT_OUT,
     landGeojson: DEFAULT_LAND_GEOJSON,
     placesGeojson: DEFAULT_PLACES_GEOJSON,
@@ -503,6 +577,7 @@ function parseArgs(rawArgs) {
   for (let i = 0; i < rawArgs.length; i += 1) {
     const arg = rawArgs[i];
     if (arg === '--store-dir') parsed.storeDir = path.resolve(rawArgs[++i]);
+    else if (arg === '--rnstatus-json') parsed.rnstatusJson = path.resolve(rawArgs[++i]);
     else if (arg === '--out') parsed.out = path.resolve(rawArgs[++i]);
     else if (arg === '--land-geojson') parsed.landGeojson = path.resolve(rawArgs[++i]);
     else if (arg === '--places-geojson') parsed.placesGeojson = path.resolve(rawArgs[++i]);
@@ -527,6 +602,7 @@ function printHelp() {
 
 Options:
   --store-dir <dir>   rsReticulum discovery interface store
+  --rnstatus-json <f> Python RNS rnstatus -d --json output instead of --store-dir
   --out <file>        output snapshot JSON
   --land-geojson <f>  land polygon GeoJSON used to filter water points
   --places-geojson <f> populated places GeoJSON used for nearest city labels
