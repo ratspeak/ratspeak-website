@@ -14,6 +14,7 @@ cp "${SCRIPT_DIR}/ratspeak-map-publisher.py" "${BUNDLE_DIR}/"
 cp "${SCRIPT_DIR}/ratspeak-map.env.example" "${BUNDLE_DIR}/"
 cp "${SCRIPT_DIR}/ratspeak-map-publisher.service" "${BUNDLE_DIR}/"
 cp "${SCRIPT_DIR}/README.md" "${BUNDLE_DIR}/"
+cp "${SCRIPT_DIR}/SERVER-CLAUDE-PROMPT.md" "${BUNDLE_DIR}/"
 cp "${REPO_ROOT}/scripts/data/ne_110m_land.geojson" "${BUNDLE_DIR}/"
 
 mkdir -p "$(dirname "${OUT}")"

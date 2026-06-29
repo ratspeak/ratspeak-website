@@ -22,6 +22,7 @@ ratspeak-map-publisher.py
 ne_110m_land.geojson
 ratspeak-map.env.example
 ratspeak-map-publisher.service
+SERVER-CLAUDE-PROMPT.md
 ```
 
 `ne_110m_land.geojson` is in the website repo at:
@@ -44,6 +45,10 @@ MAP_BLOB_PATH=map/live.json
 ```
 
 The server must receive the same `MAP_INGEST_TOKEN`.
+
+If publishing to a protected Vercel Preview deployment, the server also needs
+the Preview protection bypass secret as `VERCEL_PROTECTION_BYPASS`. Production
+does not need this value if the production deployment is public.
 
 ## Server Setup
 
@@ -77,9 +82,17 @@ Edit `/etc/ratspeak-map.env`:
 RNS_CONFIG_DIR=/path/to/deadbeef-rns-config
 MAP_INGEST_URL=https://ratspeak.org/api/map-ingest
 MAP_INGEST_TOKEN=<same-token-as-vercel>
+VERCEL_PROTECTION_BYPASS=
 MAP_LAND_GEOJSON=/opt/ratspeak-map/ne_110m_land.geojson
 MAP_SNAPSHOT_OUT=/var/lib/ratspeak-map/map-live.json
 MAP_PUBLISH_INTERVAL=60
+```
+
+For protected Preview testing, set:
+
+```text
+MAP_INGEST_URL=https://ratspeak-git-maps-exploration-defidudes-projects.vercel.app/api/map-ingest
+VERCEL_PROTECTION_BYPASS=<preview-bypass-secret>
 ```
 
 Dry-run locally:
@@ -124,7 +137,10 @@ sudo journalctl -u ratspeak-map-publisher.service -f
 
 ## Server-Claude Prompt
 
-Use this as the server-side Claude context:
+The exact prompt is included in `SERVER-CLAUDE-PROMPT.md`. Paste that file into
+Claude on the dedicated server after extracting the bundle.
+
+Short version:
 
 ```text
 This Linux server runs 10 Python Reticulum nodes. Only one node should publish
