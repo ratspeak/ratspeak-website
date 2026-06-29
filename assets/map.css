@@ -395,7 +395,8 @@ a {
 }
 
 .map-rail,
-.map-legend {
+.map-legend,
+.node-detail {
     background: var(--map-control-bg);
     backdrop-filter: blur(26px) saturate(1.28);
     -webkit-backdrop-filter: blur(26px) saturate(1.28);
@@ -636,7 +637,7 @@ a {
     height: 26px;
     border: 1px solid color-mix(in srgb, var(--map-border) 86%, transparent);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--bg-primary) 52%, transparent);
+    background: var(--map-control-field-bg);
     color: var(--map-text-muted);
     line-height: 1;
     transition: border-color 0.16s, background 0.16s, color 0.16s, transform 0.16s;
@@ -650,7 +651,7 @@ a {
 .detail-close:hover,
 .detail-close:focus {
     border-color: color-mix(in srgb, var(--map-accent) 54%, var(--map-border));
-    background: color-mix(in srgb, var(--map-accent) 10%, var(--bg-primary));
+    background: color-mix(in srgb, var(--map-accent) 10%, var(--map-control-field-bg-focus));
     color: var(--map-text);
     outline: none;
 }
@@ -676,8 +677,8 @@ a {
     border: 1px solid rgba(124, 153, 167, 0.16);
     border-radius: 8px;
     background:
-        linear-gradient(120deg, color-mix(in srgb, var(--bg-card) 82%, transparent), color-mix(in srgb, var(--bg-secondary) 72%, transparent)),
-        color-mix(in srgb, var(--bg-primary) 72%, transparent);
+        linear-gradient(120deg, color-mix(in srgb, var(--map-control-field-bg-focus) 72%, transparent), color-mix(in srgb, var(--map-control-field-bg) 84%, transparent)),
+        var(--map-control-field-bg);
     overflow: hidden;
 }
 
