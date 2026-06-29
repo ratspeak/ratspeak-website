@@ -333,7 +333,7 @@ function initMap() {
   state.map.setMaxBounds(WRAPPED_WORLD_BOUNDS);
   state.map.setView([29, -18], minZoom);
 
-  window.L.control.zoom({ position: 'bottomleft' }).addTo(state.map);
+  window.L.control.zoom({ position: 'bottomright' }).addTo(state.map);
   window.L.control.attribution({
     position: 'bottomright',
     prefix: false

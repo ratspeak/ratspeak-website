@@ -96,7 +96,7 @@
     <div class="map-canvas" id="map" aria-hidden="true"></div>
     <div class="map-fallback" id="mapFallback" hidden>Map tiles are unavailable in this browser session.</div>
 
-    <div class="map-left-stack" role="group" aria-label="Map controls and legend">
+    <div class="map-left-stack" role="group" aria-label="Map controls">
         <aside class="map-rail" id="mapMenu" aria-label="Map filters">
             <button class="map-menu-toggle" id="mapMenuToggle" type="button" aria-expanded="true" aria-controls="mapMenuBody">
                 <span class="map-menu-title">Menu</span>
@@ -136,19 +136,20 @@
                         </span>
                     </label>
                 </div>
-                <section class="map-legend" aria-label="Legend">
-                    <h2 class="legend-title">Legend</h2>
-                    <div class="legend-grid">
-                        <span class="legend-item"><span class="legend-marker"><span class="map-pin map-pin--server" aria-hidden="true"></span></span>Server</span>
-                        <span class="legend-item"><span class="legend-marker"><span class="map-pin map-pin--client-auto" aria-hidden="true"></span></span>Client (Auto)</span>
-                        <span class="legend-item"><span class="legend-marker"><span class="map-pin map-pin--client-manual" aria-hidden="true"></span></span>Client (Manual)</span>
-                        <span class="legend-item"><span class="legend-marker"><span class="map-pin map-pin--i2p" aria-hidden="true"></span></span>I2P</span>
-                        <span class="legend-item"><span class="legend-marker"><span class="map-pin map-pin--yggdrasil" aria-hidden="true"></span></span>Yggdrasil</span>
-                    </div>
-                </section>
             </section>
         </aside>
     </div>
+
+    <section class="map-legend" aria-label="Legend">
+        <h2 class="legend-title">Legend</h2>
+        <div class="legend-grid">
+            <span class="legend-item"><span class="legend-marker"><span class="map-pin map-pin--server" aria-hidden="true"></span></span>Server</span>
+            <span class="legend-item"><span class="legend-marker"><span class="map-pin map-pin--client-auto" aria-hidden="true"></span></span>Client (Auto)</span>
+            <span class="legend-item"><span class="legend-marker"><span class="map-pin map-pin--client-manual" aria-hidden="true"></span></span>Client (Manual)</span>
+            <span class="legend-item"><span class="legend-marker"><span class="map-pin map-pin--i2p" aria-hidden="true"></span></span>I2P</span>
+            <span class="legend-item"><span class="legend-marker"><span class="map-pin map-pin--yggdrasil" aria-hidden="true"></span></span>Yggdrasil</span>
+        </div>
+    </section>
 
     <section class="node-detail" id="nodeDetail" aria-live="polite" aria-label="Selected node details" hidden></section>
 </main>
