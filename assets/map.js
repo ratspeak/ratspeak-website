@@ -73,6 +73,8 @@ const MARKER_SCALE_BANDS = [
 
 const MARKER_ICON_SIZE = 32;
 const DENSE_MARKER_DISTANCE_PX = 18;
+const MOBILE_MARKER_PICK_RADIUS_PX = 22;
+const MOBILE_MARKER_PICK_TIE_PX = 9;
 const MIN_MAP_ZOOM = 2;
 const MOBILE_VIEWPORT_QUERY = '(max-width: 900px)';
 const LOW_ZOOM_LABEL_CUTOFF = MIN_MAP_ZOOM;
@@ -239,6 +241,10 @@ function bindControls() {
 
 function isMobileViewport() {
   return window.matchMedia(MOBILE_VIEWPORT_QUERY).matches;
+}
+
+function usesCoarsePointer() {
+  return isMobileViewport() || window.matchMedia('(pointer: coarse)').matches;
 }
 
 function setMapMenuExpanded(expanded) {
@@ -791,11 +797,15 @@ function pickNodeAt(containerPoint) {
   if (!state.map || !containerPoint) return null;
 
   let nearest = null;
+  let visualRank = 0;
+  const coarsePointer = usesCoarsePointer();
   state.filteredNodes.forEach((node) => {
-    const radius = markerPickRadius(node);
+    const radius = markerPickRadius(node, coarsePointer);
     const radiusSq = radius * radius;
 
     MARKER_WORLD_OFFSETS.forEach((worldOffset) => {
+      const rank = visualRank;
+      visualRank += 1;
       const key = markerKey(node, worldOffset);
       const placement = state.markerPlacements.get(key) || ZERO_PLACEMENT;
       const center = state.map.latLngToContainerPoint([node.location.lat, node.location.lon + worldOffset]);
@@ -803,8 +813,8 @@ function pickNodeAt(containerPoint) {
       const dy = containerPoint.y - (center.y + placement.dy);
       const distanceSq = (dx * dx) + (dy * dy);
       if (distanceSq > radiusSq) return;
-      const candidate = { node, key, distanceSq };
-      if (isBetterPick(candidate, nearest)) {
+      const candidate = { node, key, distance: Math.sqrt(distanceSq), distanceSq, rank };
+      if (isBetterPick(candidate, nearest, coarsePointer)) {
         nearest = candidate;
       }
     });
@@ -813,23 +823,29 @@ function pickNodeAt(containerPoint) {
   return nearest;
 }
 
-function isBetterPick(candidate, current) {
+function isBetterPick(candidate, current, coarsePointer = usesCoarsePointer()) {
   if (!current) return true;
   if (candidate.node.id === state.selectedId && current.node.id !== state.selectedId) return true;
   if (candidate.node.id !== state.selectedId && current.node.id === state.selectedId) return false;
-  if (Math.abs(candidate.distanceSq - current.distanceSq) > 0.01) {
+
+  if (coarsePointer && Math.abs(candidate.distance - current.distance) <= MOBILE_MARKER_PICK_TIE_PX) {
+    return candidate.rank > current.rank;
+  }
+
+  if (Math.abs(candidate.distance - current.distance) > 0.01) {
     return candidate.distanceSq < current.distanceSq;
   }
   return candidate.key < current.key;
 }
 
-function markerPickRadius(node) {
+function markerPickRadius(node, coarsePointer = usesCoarsePointer()) {
   const scale = state.markerScale || MARKER_SCALE_BANDS[0];
+  const minimumRadius = coarsePointer ? MOBILE_MARKER_PICK_RADIUS_PX : 0;
   if (node.id === state.selectedId) {
-    return (scale.selectedCore / 2) + scale.selectedRing + 2;
+    return Math.max(minimumRadius, (scale.selectedCore / 2) + scale.selectedRing + 2);
   }
 
-  return (scale.size / 2) + 3;
+  return Math.max(minimumRadius, (scale.size / 2) + 3);
 }
 
 function selectNode(id, options = {}) {
