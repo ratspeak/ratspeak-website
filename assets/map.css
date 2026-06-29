@@ -879,7 +879,6 @@ a {
     align-items: flex-end;
     gap: 8px;
     padding-right: 10px;
-    padding-bottom: 8px;
 }
 
 .leaflet-bottom.leaflet-right .leaflet-control {
