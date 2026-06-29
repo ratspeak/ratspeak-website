@@ -540,9 +540,11 @@ function renderDetail() {
   ].filter(Boolean).join('');
 
   els.nodeDetail.innerHTML = `
+    <div class="detail-grabber" aria-hidden="true"></div>
     <div class="detail-head">
-      <div class="detail-kicker">
-        <span class="eyebrow">Selected node</span>
+      <span class="eyebrow">Selected node</span>
+      <div class="detail-title-row">
+        <h2 class="detail-title">${escapeHtml(nodeDisplayName(node))}</h2>
         <span class="detail-actions">
           <span class="tag tag--type" style="--type-color: ${kind.color}">${escapeHtml(kind.badgeLabel || kind.label)}</span>
           <button class="detail-close" type="button" aria-label="Close selected node details" title="Close">
@@ -553,7 +555,6 @@ function renderDetail() {
           </button>
         </span>
       </div>
-      <h2 class="detail-title">${escapeHtml(nodeDisplayName(node))}</h2>
     </div>
     <dl class="detail-list">
       ${fields}
