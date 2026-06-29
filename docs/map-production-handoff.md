@@ -3,6 +3,14 @@
 This is the handoff for moving `map.html` from local soak data to the dedicated
 Linux server that runs the real Python RNS nodes.
 
+Important split of responsibility:
+
+- This local machine owns the website repo, `map.html`, Vercel login, and Vercel
+  project configuration.
+- The dedicated Linux server owns only the Python RNS nodes and a small map
+  publisher bundle.
+- The Linux server should not need to clone or understand the website repo.
+
 ## Goal
 
 Use exactly one existing server-side RNS node, the node whose display/name starts
@@ -59,11 +67,39 @@ These files are the repo-side production contract:
 - `scripts/map-publish-snapshot.mjs` posts a prepared snapshot JSON to Vercel.
 - `scripts/map-discovery-bridge.mjs` transforms either local rsReticulum soak
   data or Python `rnstatus -d --json` output into the map snapshot schema.
+- `scripts/map-server/` is the self-contained Linux server bundle. This is the
+  preferred production handoff for the dedicated RNS host.
 
 ## Server-Side Exporter Responsibilities
 
-Claude on the Linux server should implement or adapt a small exporter around
-the Python RNS node whose config belongs to `deadbeef*`.
+Claude on the Linux server should use the self-contained bundle in
+`scripts/map-server/`. It should not need the full website repo.
+
+Build the bundle on this local machine:
+
+```bash
+bash scripts/map-server/build-bundle.sh
+```
+
+This writes:
+
+```text
+.tmp/ratspeak-map-server-bundle.tar.gz
+```
+
+Copy that archive to the dedicated server and extract it under a temporary work
+directory. The bundle contains:
+
+```text
+ratspeak-map-publisher.py
+ne_110m_land.geojson
+ratspeak-map.env.example
+ratspeak-map-publisher.service
+README.md
+```
+
+Claude on the Linux server should configure the publisher around the Python RNS
+node whose config belongs to `deadbeef*`.
 
 Preferred discovery export command:
 
@@ -91,7 +127,17 @@ required_discovery_value = 14
 # autoconnect_discovered_interfaces = 0
 ```
 
-Convert Python RNS discovery export to a map snapshot:
+The standalone publisher normally runs `rnstatus` itself:
+
+```bash
+python3 /opt/ratspeak-map/ratspeak-map-publisher.py \
+  --rns-config /path/to/deadbeef-rns-config \
+  --land-geojson /opt/ratspeak-map/ne_110m_land.geojson \
+  --out /var/lib/ratspeak-map/map-live.json \
+  --dry-run
+```
+
+It can also convert a saved Python RNS discovery export to a map snapshot:
 
 ```bash
 mkdir -p /var/lib/ratspeak-map
@@ -104,6 +150,9 @@ node scripts/map-discovery-bridge.mjs \
   --out /var/lib/ratspeak-map/map-live.json \
   --once
 ```
+
+The Node bridge is useful from the website repo. The Python publisher is the
+preferred server-side path because it is standalone.
 
 The exporter should convert each accepted RNS discovery record into this shape:
 
@@ -207,13 +256,15 @@ The top-level snapshot should look like:
 
 ## Publishing
 
-One-shot publish:
+One-shot publish from the dedicated server:
 
 ```bash
 MAP_INGEST_TOKEN='<same-token-as-vercel>' \
 MAP_INGEST_URL='https://ratspeak.org/api/map-ingest' \
-node scripts/map-publish-snapshot.mjs \
-  --snapshot /var/lib/ratspeak-map/map-live.json
+python3 /opt/ratspeak-map/ratspeak-map-publisher.py \
+  --rns-config /path/to/deadbeef-rns-config \
+  --land-geojson /opt/ratspeak-map/ne_110m_land.geojson \
+  --out /var/lib/ratspeak-map/map-live.json
 ```
 
 Loop publish every 60 seconds:
@@ -221,8 +272,10 @@ Loop publish every 60 seconds:
 ```bash
 MAP_INGEST_TOKEN='<same-token-as-vercel>' \
 MAP_INGEST_URL='https://ratspeak.org/api/map-ingest' \
-node scripts/map-publish-snapshot.mjs \
-  --snapshot /var/lib/ratspeak-map/map-live.json \
+python3 /opt/ratspeak-map/ratspeak-map-publisher.py \
+  --rns-config /path/to/deadbeef-rns-config \
+  --land-geojson /opt/ratspeak-map/ne_110m_land.geojson \
+  --out /var/lib/ratspeak-map/map-live.json \
   --interval 60
 ```
 
@@ -258,27 +311,23 @@ We need to connect one Python RNS node to the Ratspeak website map. Use only the
 existing RNS config for the node whose name starts with deadbeef. Do not alter
 the other nine local RNS nodes except as needed to avoid port/config conflicts.
 
-The website repo now has:
-- api/map-ingest.js: authenticated Vercel Blob snapshot ingest
-- api/map-nodes.js: public snapshot read endpoint
-- scripts/map-publish-snapshot.mjs: POST a prepared snapshot JSON to Vercel
-- docs/map-production-handoff.md: full schema and operating contract
+The website/Vercel setup is handled on another machine. This server has only
+Python RNS nodes plus the /opt/ratspeak-map publisher bundle.
 
 On this Linux server:
 1. Confirm the deadbeef RNS config has discover_interfaces = yes.
 2. Export discovery records with:
    rnstatus --config <deadbeef-config-dir> -d --json
-3. Transform the JSON into schemaVersion 1 map-live.json with:
-   node scripts/map-discovery-bridge.mjs --rnstatus-json <rnstatus-json> --out /var/lib/ratspeak-map/map-live.json --once
-4. Classify kinds as server, client-auto, client-manual, i2p, or yggdrasil.
+3. Use /opt/ratspeak-map/ratspeak-map-publisher.py to build and publish the
+   sanitized snapshot to https://ratspeak.org/api/map-ingest.
+4. The publisher classifies kinds as server, client-auto, client-manual, i2p,
+   or yggdrasil.
 5. Preserve public endpoint and radio settings, but never publish identities,
    private keys, IFAC passphrases, or raw config snippets.
 6. Filter records with missing coordinates, water coordinates, and expired
    last_heard timestamps.
-7. Publish to Vercel:
-   MAP_INGEST_URL=https://ratspeak.org/api/map-ingest
-   MAP_INGEST_TOKEN=<shared secret>
-   node scripts/map-publish-snapshot.mjs --snapshot /var/lib/ratspeak-map/map-live.json
+7. Only use the deadbeef node's RNS config; do not collect from the other nine
+   local nodes.
 
 Ask before changing production service files or restarting any RNS node.
 ```

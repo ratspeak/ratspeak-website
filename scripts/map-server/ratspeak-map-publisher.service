@@ -1,0 +1,22 @@
+[Unit]
+Description=Ratspeak map discovery publisher
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/ratspeak-map.env
+WorkingDirectory=/opt/ratspeak-map
+ExecStart=/usr/bin/python3 /opt/ratspeak-map/ratspeak-map-publisher.py --rns-config ${RNS_CONFIG_DIR} --land-geojson ${MAP_LAND_GEOJSON} --out ${MAP_SNAPSHOT_OUT} --interval ${MAP_PUBLISH_INTERVAL} --require-land-mask
+Restart=always
+RestartSec=10
+
+# If the RNS config is owned by a dedicated service user, uncomment and set it.
+# User=ratspeak
+# Group=ratspeak
+
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
