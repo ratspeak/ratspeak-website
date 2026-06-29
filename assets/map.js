@@ -74,6 +74,7 @@ const MARKER_SCALE_BANDS = [
 const MARKER_ICON_SIZE = 32;
 const DENSE_MARKER_DISTANCE_PX = 18;
 const MOBILE_MARKER_PICK_RADIUS_PX = 22;
+const MOBILE_MARKER_PRECISE_RADIUS_PX = 10;
 const MOBILE_MARKER_PICK_TIE_PX = 9;
 const MIN_MAP_ZOOM = 2;
 const MOBILE_VIEWPORT_QUERY = '(max-width: 900px)';
@@ -813,7 +814,9 @@ function pickNodeAt(containerPoint) {
       const dy = containerPoint.y - (center.y + placement.dy);
       const distanceSq = (dx * dx) + (dy * dy);
       if (distanceSq > radiusSq) return;
-      const candidate = { node, key, distance: Math.sqrt(distanceSq), distanceSq, rank };
+      const distance = Math.sqrt(distanceSq);
+      const preciseRadius = markerPreciseRadius(node, coarsePointer);
+      const candidate = { node, key, distance, distanceSq, rank, isPrecise: distance <= preciseRadius };
       if (isBetterPick(candidate, nearest, coarsePointer)) {
         nearest = candidate;
       }
@@ -828,7 +831,16 @@ function isBetterPick(candidate, current, coarsePointer = usesCoarsePointer()) {
   if (candidate.node.id === state.selectedId && current.node.id !== state.selectedId) return true;
   if (candidate.node.id !== state.selectedId && current.node.id === state.selectedId) return false;
 
-  if (coarsePointer && Math.abs(candidate.distance - current.distance) <= MOBILE_MARKER_PICK_TIE_PX) {
+  if (coarsePointer && candidate.isPrecise !== current.isPrecise) {
+    return candidate.isPrecise;
+  }
+
+  if (
+    coarsePointer &&
+    !candidate.isPrecise &&
+    !current.isPrecise &&
+    Math.abs(candidate.distance - current.distance) <= MOBILE_MARKER_PICK_TIE_PX
+  ) {
     return candidate.rank > current.rank;
   }
 
@@ -846,6 +858,16 @@ function markerPickRadius(node, coarsePointer = usesCoarsePointer()) {
   }
 
   return Math.max(minimumRadius, (scale.size / 2) + 3);
+}
+
+function markerPreciseRadius(node, coarsePointer = usesCoarsePointer()) {
+  const scale = state.markerScale || MARKER_SCALE_BANDS[0];
+  if (!coarsePointer) return 0;
+  if (node.id === state.selectedId) {
+    return Math.max(MOBILE_MARKER_PRECISE_RADIUS_PX, (scale.selectedCore / 2) + scale.selectedRing + 2);
+  }
+
+  return Math.max(MOBILE_MARKER_PRECISE_RADIUS_PX, (scale.size / 2) + scale.ring + 2);
 }
 
 function selectNode(id, options = {}) {
