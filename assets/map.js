@@ -70,6 +70,7 @@ const MARKER_SCALE_BANDS = [
 const MARKER_ICON_SIZE = 32;
 const DENSE_MARKER_DISTANCE_PX = 18;
 const MIN_MAP_ZOOM = 2;
+const MOBILE_VIEWPORT_QUERY = '(max-width: 900px)';
 const LOW_ZOOM_LABEL_CUTOFF = MIN_MAP_ZOOM;
 const LOW_ZOOM_LABELS = [
   { label: 'North America', lat: 48, lon: -103 },
@@ -201,12 +202,11 @@ function bindChrome() {
 
 function bindControls() {
   if (els.mapMenu && els.mapMenuToggle && els.mapMenuBody) {
+    setMapMenuExpanded(!isMobileViewport());
+
     els.mapMenuToggle.addEventListener('click', () => {
       const expanded = els.mapMenuToggle.getAttribute('aria-expanded') === 'true';
-      const nextExpanded = !expanded;
-      els.mapMenuToggle.setAttribute('aria-expanded', String(nextExpanded));
-      els.mapMenuBody.hidden = !nextExpanded;
-      els.mapMenu.classList.toggle('is-collapsed', !nextExpanded);
+      setMapMenuExpanded(!expanded);
     });
   }
 
@@ -231,6 +231,16 @@ function bindControls() {
     });
   }
 
+}
+
+function isMobileViewport() {
+  return window.matchMedia(MOBILE_VIEWPORT_QUERY).matches;
+}
+
+function setMapMenuExpanded(expanded) {
+  els.mapMenuToggle.setAttribute('aria-expanded', String(expanded));
+  els.mapMenuBody.hidden = !expanded;
+  els.mapMenu.classList.toggle('is-collapsed', !expanded);
 }
 
 async function loadSnapshot() {
