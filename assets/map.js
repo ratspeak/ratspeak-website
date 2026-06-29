@@ -43,8 +43,8 @@ const KIND_META = {
     color: '#35B875'
   },
   'client-manual': {
-    label: 'Client (Manual)',
-    badgeLabel: 'Client',
+    label: 'User added*',
+    badgeLabel: 'User added*',
     shortLabel: 'Manual',
     color: '#C79A2B'
   },
@@ -62,7 +62,7 @@ const KIND_META = {
   }
 };
 
-const LEGEND_KIND_IDS = ['server-ipv4', 'server-ipv6', 'client-auto', 'client-manual', 'i2p', 'yggdrasil'];
+const LEGEND_KIND_IDS = ['server-ipv4', 'server-ipv6', 'client-auto', 'i2p', 'yggdrasil', 'client-manual'];
 
 const MARKER_SCALE_BANDS = [
   { maxZoom: 2, size: 5.5, selectedCore: 7.5, selected: 17, ring: 1.75, ringAlpha: 16, selectedRing: 2.75, selectedHalo: 5.5 },
