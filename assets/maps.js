@@ -56,6 +56,8 @@ const KIND_META = {
   }
 };
 
+const LEGEND_KIND_IDS = ['server', 'client-auto', 'client-manual', 'i2p', 'yggdrasil'];
+
 const MARKER_SCALE_BANDS = [
   { maxZoom: 2, size: 5.5, selectedCore: 7.5, selected: 17, ring: 1.75, ringAlpha: 16, selectedRing: 2.75, selectedHalo: 5.5 },
   { maxZoom: 3, size: 6.1, selectedCore: 8, selected: 18, ring: 1.85, ringAlpha: 17, selectedRing: 3, selectedHalo: 6 },
@@ -338,6 +340,7 @@ function initMap() {
     position: 'bottomright',
     prefix: false
   }).addTo(state.map);
+  initLegendControl();
 
   state.tileLayerUrl = tileLayerUrl();
   state.tileLayer = window.L.tileLayer(state.tileLayerUrl, {
@@ -362,6 +365,34 @@ function initMap() {
   state.map.on('mouseout', clearNodeCursor);
   state.map.on('click', handleMapClick);
   window.addEventListener('resize', syncMapViewport, { passive: true });
+}
+
+function initLegendControl() {
+  const legend = window.L.control({ position: 'bottomleft' });
+
+  legend.onAdd = () => {
+    const container = window.L.DomUtil.create('section', 'map-legend');
+    container.setAttribute('aria-label', 'Legend');
+    container.innerHTML = `
+      <h2 class="legend-title">Legend</h2>
+      <div class="legend-grid">
+        ${LEGEND_KIND_IDS.map((kindId) => {
+          const kind = KIND_META[kindId];
+          return `
+            <span class="legend-item">
+              <span class="legend-marker"><span class="map-pin map-pin--${cssToken(kindId)}" aria-hidden="true"></span></span>
+              ${escapeHtml(kind.label)}
+            </span>
+          `;
+        }).join('')}
+      </div>
+    `;
+    window.L.DomEvent.disableClickPropagation(container);
+    window.L.DomEvent.disableScrollPropagation(container);
+    return container;
+  };
+
+  legend.addTo(state.map);
 }
 
 function syncMapTheme() {

@@ -371,7 +371,6 @@ a {
 }
 
 .map-left-stack,
-.map-legend,
 .node-detail {
     position: absolute;
     z-index: 60;
@@ -714,8 +713,6 @@ a {
 }
 
 .map-legend {
-    left: 18px;
-    bottom: 18px;
     display: grid;
     gap: 8px;
     width: min(330px, calc(100vw - 36px));
@@ -871,9 +868,30 @@ a {
     overflow: hidden;
 }
 
+.leaflet-bottom.leaflet-left .map-legend {
+    margin-left: 18px !important;
+    margin-bottom: 18px !important;
+}
+
+.leaflet-bottom.leaflet-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    padding-right: 10px;
+    padding-bottom: 8px;
+}
+
+.leaflet-bottom.leaflet-right .leaflet-control {
+    margin: 0 !important;
+}
+
 .leaflet-bottom.leaflet-right .leaflet-control-zoom {
-    margin-right: 10px !important;
-    margin-bottom: 30px !important;
+    order: 1;
+}
+
+.leaflet-bottom.leaflet-right .leaflet-control-attribution {
+    order: 2;
 }
 
 .leaflet-control-zoom a {
@@ -1113,11 +1131,10 @@ a {
         max-height: 46vh;
     }
 
-    .map-legend {
-        right: 12px;
-        bottom: 12px;
-        left: 12px;
-        width: auto;
+    .leaflet-bottom.leaflet-left .map-legend {
+        width: min(290px, calc(100vw - 96px));
+        margin-left: 12px !important;
+        margin-bottom: 12px !important;
     }
 
     .rail-controls {
