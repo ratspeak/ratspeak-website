@@ -1103,7 +1103,7 @@ a {
     .leaflet-bottom.leaflet-left .map-legend {
         width: min(248px, calc(100vw - 118px));
         margin-left: 12px !important;
-        margin-bottom: 30px !important;
+        margin-bottom: 22px !important;
     }
 
     .map-legend {
