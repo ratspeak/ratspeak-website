@@ -177,7 +177,6 @@ The exporter should convert each accepted RNS discovery record into this shape:
     "interfaceType": "BackboneInterface",
     "transportId": "optional-public-id",
     "networkId": "optional-public-id",
-    "heardCount": 4,
     "reachableOn": "82.223.44.241",
     "port": 4242
   }

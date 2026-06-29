@@ -159,7 +159,6 @@ def normalize_record(record: dict[str, Any], index: int) -> dict[str, Any]:
     normalized["last_heard"] = finite_number(record.get("last_heard"))
     normalized["discovered"] = finite_number(record.get("discovered"))
     normalized["hops"] = finite_int(record.get("hops"))
-    normalized["heard_count"] = finite_int(record.get("heard_count"))
     normalized["value"] = finite_int(record.get("value"))
     normalized["port"] = finite_int(record.get("port"))
     normalized["reachable_on"] = string_value(record.get("reachable_on"))
@@ -191,7 +190,6 @@ def record_to_node(record: dict[str, Any]) -> dict[str, Any]:
             "networkId": record.get("network_id") or None,
             "hops": record.get("hops"),
             "stampValue": record.get("value"),
-            "heardCount": record.get("heard_count"),
             "reachableOn": record.get("reachable_on") or None,
             "port": record.get("port"),
             "heightMeters": record.get("height"),

@@ -191,7 +191,7 @@ function sanitizeReticulum(reticulum) {
     if (value) result[key] = value;
   }
 
-  for (const key of ['hops', 'stampValue', 'heardCount', 'port']) {
+  for (const key of ['hops', 'stampValue', 'port']) {
     const value = integerValue(reticulum[key]);
     if (value != null) result[key] = value;
   }
