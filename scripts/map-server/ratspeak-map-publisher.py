@@ -109,7 +109,7 @@ def publish_cycle(args: argparse.Namespace) -> None:
         print_status("dry-run", snapshot)
         return
 
-    publish_snapshot(snapshot, args.ingest_url, args.ingest_token, args.timeout)
+    publish_snapshot(snapshot, args.ingest_url, args.ingest_token, args.vercel_bypass, args.timeout)
     print_status("published", snapshot)
 
 
@@ -255,17 +255,21 @@ def dedupe_nodes(nodes: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(by_id.values(), key=lambda node: timestamp_value(node.get("lastSeen")), reverse=True)
 
 
-def publish_snapshot(snapshot: dict[str, Any], ingest_url: str, token: str, timeout: int) -> None:
+def publish_snapshot(snapshot: dict[str, Any], ingest_url: str, token: str, vercel_bypass: str | None, timeout: int) -> None:
     body = json.dumps(snapshot).encode("utf-8")
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+        "User-Agent": "ratspeak-map-publisher/1",
+    }
+    if vercel_bypass:
+        headers["x-vercel-protection-bypass"] = vercel_bypass
+
     request = urllib.request.Request(
         ingest_url,
         data=body,
         method="POST",
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-            "User-Agent": "ratspeak-map-publisher/1",
-        },
+        headers=headers,
     )
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
@@ -465,6 +469,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-age", type=int, default=int(os.environ.get("MAP_MAX_AGE_SECONDS", DEFAULT_MAX_AGE_SECONDS)), help="max last_heard age in seconds")
     parser.add_argument("--ingest-url", default=os.environ.get("MAP_INGEST_URL", "https://ratspeak.org/api/map-ingest"), help="Vercel map ingest URL")
     parser.add_argument("--ingest-token", default=os.environ.get("MAP_INGEST_TOKEN"), help="Vercel map ingest bearer token")
+    parser.add_argument("--vercel-bypass", default=os.environ.get("VERCEL_PROTECTION_BYPASS"), help="optional Vercel Preview protection bypass secret")
     parser.add_argument("--out", default=os.environ.get("MAP_SNAPSHOT_OUT", "/var/lib/ratspeak-map/map-live.json"), help="write snapshot copy to this path")
     parser.add_argument("--interval", type=int, default=int(os.environ.get("MAP_PUBLISH_INTERVAL", "0")), help="repeat every N seconds")
     parser.add_argument("--timeout", type=int, default=int(os.environ.get("MAP_PUBLISH_TIMEOUT", "30")), help="subprocess and HTTP timeout")

@@ -45,6 +45,10 @@ MAP_BLOB_PATH=map/live.json
 
 The server must receive the same `MAP_INGEST_TOKEN`.
 
+If publishing to a protected Vercel Preview deployment, the server also needs
+the Preview protection bypass secret as `VERCEL_PROTECTION_BYPASS`. Production
+does not need this value if the production deployment is public.
+
 ## Server Setup
 
 Find the RNS config directory for the `deadbeef*` node. The config must have:
@@ -77,9 +81,17 @@ Edit `/etc/ratspeak-map.env`:
 RNS_CONFIG_DIR=/path/to/deadbeef-rns-config
 MAP_INGEST_URL=https://ratspeak.org/api/map-ingest
 MAP_INGEST_TOKEN=<same-token-as-vercel>
+VERCEL_PROTECTION_BYPASS=
 MAP_LAND_GEOJSON=/opt/ratspeak-map/ne_110m_land.geojson
 MAP_SNAPSHOT_OUT=/var/lib/ratspeak-map/map-live.json
 MAP_PUBLISH_INTERVAL=60
+```
+
+For protected Preview testing, set:
+
+```text
+MAP_INGEST_URL=https://ratspeak-git-maps-exploration-defidudes-projects.vercel.app/api/map-ingest
+VERCEL_PROTECTION_BYPASS=<preview-bypass-secret>
 ```
 
 Dry-run locally:
