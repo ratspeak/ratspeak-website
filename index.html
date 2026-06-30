@@ -337,6 +337,7 @@
             max-width: 480px; line-height: 1.6;
             margin-bottom: 10px;
         }
+        .hero-sub__mobile-break { display: none; }
         .hero-built-on {
             font-size: 13.5px; color: var(--text-muted);
             margin-bottom: 32px;
@@ -1068,6 +1069,7 @@
             .hero-text { flex: none; width: 100%; }
             .hero h1 { font-size: 34px; }
             .hero-sub { margin-left: auto; margin-right: auto; font-size: 15.5px; }
+            .hero-sub__mobile-break { display: block; }
             .hero-buttons { justify-content: center; }
             .hero-visual {
                 position: absolute; top: 58px; left: 0; right: 0; bottom: 0;
@@ -1216,7 +1218,7 @@
 <section class="hero">
     <div class="hero-text">
         <h1>New Network.<br>New <span class="accent" id="hero-cycle">Privacy.</span></h1>
-        <p class="hero-sub">A decentralized mesh network with privacy baked into the core. A new way to communicate.</p>
+        <p class="hero-sub">A decentralized mesh network with privacy baked into the core.<br class="hero-sub__mobile-break"> A new way to communicate.</p>
         <p class="hero-built-on">Built with <a href="https://docs.ratspeak.org/concepts/what-is-reticulum" target="_blank" rel="noopener noreferrer">Reticulum</a></p>
         <div class="hero-buttons">
             <a href="download.html" class="nr-btn nr-btn-lg">
