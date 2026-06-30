@@ -832,14 +832,14 @@ function roundPixel(value) {
 function handleMapClick(event) {
   if (Date.now() < state.suppressMapClickUntil) return;
 
-  if (state.selectedId && isMobileSheetViewport()) {
-    clearSelectedNode();
-    return;
-  }
-
   const hit = pickNodeAt(event.containerPoint);
   if (hit) {
     selectNode(hit.node.id, { pan: false });
+    return;
+  }
+
+  if (state.selectedId && isMobileSheetViewport()) {
+    clearSelectedNode();
     return;
   }
 
