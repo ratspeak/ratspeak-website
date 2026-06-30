@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#18171a">
     <title>Community Poll — Ratspeak</title>
-    <meta name="description" content="Join the experimental Ratspeak community poll on Base. Eligible RATSPEAK token holders can sign a gasless vote on future community initiatives.">
+    <meta name="description" content="View the final Ratspeak community poll results on Base. Distribute more nodes was selected as the winning community allocation.">
     <meta name="base:app_id" content="6a3c6e26bff5f57cb7afde68" />
     <link rel="canonical" href="https://ratspeak.org/poll.html">
     <link rel="icon" href="/favicon.ico" sizes="any">
@@ -23,7 +23,7 @@
     <meta property="og:locale" content="en_US">
     <meta property="og:site_name" content="Ratspeak">
     <meta property="og:title" content="Community Poll — Ratspeak">
-    <meta property="og:description" content="Join the experimental Ratspeak community poll on Base. Eligible RATSPEAK token holders can sign a gasless vote on future community initiatives.">
+    <meta property="og:description" content="View the final Ratspeak community poll results on Base. Distribute more nodes was selected as the winning community allocation.">
     <meta property="og:url" content="https://ratspeak.org/poll.html">
     <meta property="og:image" content="https://ratspeak.org/assets/seo/og-home.png">
     <meta property="og:image:secure_url" content="https://ratspeak.org/assets/seo/og-home.png">
@@ -33,7 +33,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@ratspeakorg">
     <meta name="twitter:title" content="Community Poll — Ratspeak">
-    <meta name="twitter:description" content="Join the experimental Ratspeak community poll on Base. Eligible RATSPEAK token holders can sign a gasless vote on future community initiatives.">
+    <meta name="twitter:description" content="View the final Ratspeak community poll results on Base. Distribute more nodes was selected as the winning community allocation.">
     <meta name="twitter:image" content="https://ratspeak.org/assets/seo/og-home.png">
     <meta name="twitter:image:alt" content="Ratspeak Community Poll — Experimental community voting on Base.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -46,7 +46,7 @@
       "@type": "WebPage",
       "name": "Community Poll — Ratspeak",
       "url": "https://ratspeak.org/poll.html",
-      "description": "Join the experimental Ratspeak community poll on Base. Eligible RATSPEAK token holders can sign a gasless vote on future community initiatives.",
+      "description": "View the final Ratspeak community poll results on Base. Distribute more nodes was selected as the winning community allocation.",
       "isPartOf": {
         "@type": "WebSite",
         "name": "Ratspeak",
@@ -461,6 +461,7 @@
             border-radius: 8px;
             background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
             color: inherit;
+            isolation: isolate;
             overflow: hidden;
             padding: 12px;
             text-align: left;
@@ -468,7 +469,9 @@
         .proposal-card::before {
             content: "";
             position: absolute;
-            inset: 0;
+            inset: 1px;
+            z-index: 0;
+            border-radius: 7px;
             background: linear-gradient(130deg, rgba(225, 116, 63, 0.18), transparent 50%);
             opacity: 0;
             pointer-events: none;
@@ -480,12 +483,17 @@
             transform: translateY(-1px);
         }
         .proposal-card.active {
+            border-color: var(--accent);
             background: color-mix(in srgb, var(--accent-soft) 72%, var(--bg-elevated));
-            box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 42%, transparent);
+            box-shadow:
+                inset 0 0 0 1px color-mix(in srgb, var(--accent) 76%, transparent),
+                0 0 0 1px color-mix(in srgb, var(--accent) 36%, transparent);
         }
         .proposal-card.active::before { opacity: 1; }
 
         .proposal-status {
+            position: relative;
+            z-index: 1;
             display: inline-flex;
             align-items: center;
             gap: 6px;
@@ -504,8 +512,12 @@
             border-radius: 50%;
             background: currentColor;
         }
+        .proposal-status.is-closed {
+            color: var(--accent);
+        }
         .proposal-card h2 {
             position: relative;
+            z-index: 1;
             color: var(--text-primary);
             font-size: 15px;
             font-weight: 700;
@@ -514,6 +526,7 @@
         }
         .proposal-meta {
             position: relative;
+            z-index: 1;
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
@@ -561,6 +574,12 @@
             border-color: var(--green);
             background: var(--green-soft);
             color: var(--green);
+        }
+        .tag-closed,
+        .tag-winner {
+            border-color: color-mix(in srgb, var(--accent) 54%, var(--border));
+            background: var(--accent-soft);
+            color: var(--accent);
         }
 
         .ballot-title {
@@ -654,6 +673,19 @@
             text-transform: uppercase;
         }
         .choice-card.selected .choice-selected { display: block; }
+        .choice-card.is-winner {
+            border-color: var(--accent);
+            box-shadow:
+                inset 0 0 0 1px color-mix(in srgb, var(--accent) 54%, transparent),
+                0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent);
+        }
+        .choice-card:disabled {
+            cursor: default;
+            opacity: 1;
+        }
+        .choice-card:disabled:hover {
+            transform: none;
+        }
 
         .results-panel {
             border: 1px solid var(--border-subtle);
@@ -752,6 +784,28 @@
         }
         .result-value span:last-child {
             color: var(--text-secondary);
+        }
+        .result-row.is-winner .result-label strong {
+            color: var(--accent);
+        }
+        .result-row.is-winner .result-track {
+            border-color: color-mix(in srgb, var(--accent) 46%, var(--border));
+        }
+        .result-winner {
+            border: 1px solid color-mix(in srgb, var(--accent) 48%, var(--border));
+            border-radius: 8px;
+            background: color-mix(in srgb, var(--accent-soft) 68%, var(--bg-primary));
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.45;
+            padding: 14px;
+        }
+        .result-winner strong {
+            display: block;
+            color: var(--text-primary);
+            font-size: 16px;
+            line-height: 1.25;
+            margin-bottom: 4px;
         }
 
         .sidebar-stack {
@@ -1477,9 +1531,9 @@
 
     <section class="proposal-panel">
         <span class="panel-kicker">Proposal</span>
-        <h2 class="panel-title">Active proposal</h2>
-        <p class="panel-copy">Select the proposal to vote on.</p>
-        <div class="proposal-strip" id="proposalStrip" aria-label="Active proposals"></div>
+        <h2 class="panel-title">Final proposal</h2>
+        <p class="panel-copy">Voting ended Jun 7, 2026.</p>
+        <div class="proposal-strip" id="proposalStrip" aria-label="Final proposals"></div>
     </section>
 
     <aside class="sidebar-stack">
@@ -1622,6 +1676,7 @@
 import {
   DEFAULT_POLLS as SHARED_DEFAULT_POLLS,
   SNAPSHOT_BLOCK as DEFAULT_SNAPSHOT_BLOCK,
+  STARTER_POLL_WINNER_CHOICE_ID,
   TOKEN_ADDRESS as RATSPEAK_TOKEN_ADDRESS,
   VOTE_DOMAIN,
   VOTE_KIND,
@@ -1629,7 +1684,7 @@ import {
   VOTE_TYPES,
   isEligibleBalance,
   serializableVoteMessage
-} from './lib/vote-core.js';
+} from './lib/vote-core.js?v=poll-final-1';
 
 const PROJECT_ID = 'bd455db9c9bb0f7804164eb260a9fd47';
 const RATSPEAK_ORIGIN = 'https://ratspeak.org';
@@ -1834,6 +1889,19 @@ function isPollClosed(poll) {
   return Number.isFinite(closes) && Date.now() > closes;
 }
 
+function finalWinnerChoice(poll) {
+  if (!poll || !isPollClosed(poll)) return null;
+  return poll.choices.find(choice => choice.id === STARTER_POLL_WINNER_CHOICE_ID) || null;
+}
+
+function pollStatusLabel(poll) {
+  return isPollClosed(poll) ? 'Finished' : 'Live';
+}
+
+function pollCloseLabel(poll) {
+  return `${isPollClosed(poll) ? 'Ended' : 'Closes'} ${formatCloseTime(poll.closes)}`;
+}
+
 function closeTimeToInput(value) {
   const normalized = normalizeCloseTime(value);
   return normalized ? normalized.slice(0, 16) : '';
@@ -2025,14 +2093,16 @@ function render() {
 
 function renderProposalStrip() {
   els.proposalStrip.innerHTML = polls.map(poll => {
+    const closed = isPollClosed(poll);
+    const statusClass = closed ? ' is-closed' : '';
     return `
       <button class="proposal-card ${poll.id === selectedPollId ? 'active' : ''}" type="button" data-poll="${poll.id}">
-        <span class="proposal-status">Live</span>
+        <span class="proposal-status${statusClass}">${pollStatusLabel(poll)}</span>
         <h2>${escapeHtml(poll.deckTitle)}</h2>
         <div class="proposal-meta">
           <span>${escapeHtml(poll.type)}</span>
           <span>Snapshot ${formatBlock(poll.snapshotBlock).replace('Base ', '')}</span>
-          <span>${escapeHtml(formatCloseTime(poll.closes))}</span>
+          <span>${escapeHtml(pollCloseLabel(poll))}</span>
           <span>${poll.choices.length} options</span>
         </div>
       </button>
@@ -2053,25 +2123,36 @@ function renderProposalStrip() {
 
 function renderBallot() {
   const poll = selectedPoll();
+  const closed = isPollClosed(poll);
+  const winner = finalWinnerChoice(poll);
+  const statusTagClass = closed ? 'tag-closed' : 'tag-live';
 
   els.ballot.innerHTML = `
     <div class="ballot-head">
       <div class="poll-tags">
-        <span class="tag tag-live">Live</span>
+        <span class="tag ${statusTagClass}">${pollStatusLabel(poll)}</span>
         <span class="tag">${escapeHtml(poll.type)}</span>
         <span class="tag">Snapshot ${formatBlock(poll.snapshotBlock).replace('Base ', '')}</span>
-        <span class="tag">Closes ${escapeHtml(formatCloseTime(poll.closes))}</span>
+        <span class="tag">${escapeHtml(pollCloseLabel(poll))}</span>
+        ${winner ? `<span class="tag tag-winner">Winner: ${escapeHtml(winner.name)}</span>` : ''}
       </div>
       <h2 class="ballot-title">${escapeHtml(poll.title)}</h2>
       <p class="ballot-desc">${escapeHtml(poll.description)}</p>
     </div>
     <div class="choice-grid">
       ${poll.choices.map(choice => {
+        const isWinner = Boolean(winner && choice.id === winner.id);
+        const selected = closed ? isWinner : choice.id === selectedChoiceId;
+        const classes = [
+          'choice-card',
+          selected ? 'selected' : '',
+          isWinner ? 'is-winner' : ''
+        ].filter(Boolean).join(' ');
         return `
-          <button class="choice-card ${choice.id === selectedChoiceId ? 'selected' : ''}" type="button" data-choice="${choice.id}">
+          <button class="${classes}" type="button" data-choice="${choice.id}" ${closed ? 'disabled' : ''}>
             <h3>${escapeHtml(choice.name)}</h3>
             <p>${escapeHtml(choice.detail)}</p>
-            <span class="choice-selected">Selected</span>
+            <span class="choice-selected">${closed && isWinner ? 'Winner' : 'Selected'}</span>
           </button>
         `;
       }).join('')}
@@ -2088,6 +2169,8 @@ function renderBallot() {
 
 function renderResults() {
   const poll = selectedPoll();
+  const closed = isPollClosed(poll);
+  const winner = finalWinnerChoice(poll);
   const isCurrent = resultsState.pollId === poll.id;
   const data = isCurrent ? resultsState.data : null;
   const loading = isCurrent && resultsState.loading;
@@ -2096,11 +2179,13 @@ function renderResults() {
 
   let body;
   if (error && !data) {
-    body = `<div class="results-error">Current results are unavailable right now.</div>`;
+    body = winner
+      ? finalWinnerMarkup(winner, poll)
+      : `<div class="results-error">${closed ? 'Final' : 'Current'} results are unavailable right now.</div>`;
   } else if (loading && !data) {
-    body = `<div class="results-empty">Loading current results...</div>`;
+    body = `<div class="results-empty">Loading ${closed ? 'final' : 'current'} results...</div>`;
   } else if (!data || voterCount === 0) {
-    body = `<div class="results-empty">No votes have been recorded yet.</div>`;
+    body = winner ? finalWinnerMarkup(winner, poll) : `<div class="results-empty">No votes have been recorded yet.</div>`;
   } else {
     body = `
       <div class="results-list">
@@ -2108,11 +2193,12 @@ function renderResults() {
           const percent = Number(choice.percent || 0);
           const width = Math.max(0, Math.min(100, percent));
           const votes = choice.voters === 1 ? '1 vote' : `${choice.voters} votes`;
+          const isWinner = Boolean(winner && choice.choiceId === winner.id);
           return `
-            <div class="result-row">
+            <div class="result-row ${isWinner ? 'is-winner' : ''}">
               <div class="result-label">
                 <strong>${escapeHtml(choice.name)}</strong>
-                <span>Option ${index + 1}</span>
+                <span>${isWinner ? 'Winner' : `Option ${index + 1}`}</span>
               </div>
               <div class="result-track" style="--result-width: ${width}%">
                 <div class="result-fill"></div>
@@ -2132,10 +2218,19 @@ function renderResults() {
     <div class="results-head">
       <div>
         <span class="panel-kicker">Results</span>
-        <h2 class="results-title">Current results</h2>
+        <h2 class="results-title">${closed ? 'Final results' : 'Current results'}</h2>
       </div>
     </div>
     ${body}
+  `;
+}
+
+function finalWinnerMarkup(winner, poll) {
+  return `
+    <div class="result-winner">
+      <strong>${escapeHtml(winner.name)} won.</strong>
+      Voting ended ${escapeHtml(formatCloseTime(poll.closes))}.
+    </div>
   `;
 }
 
@@ -2143,6 +2238,7 @@ function renderWallet() {
   const poll = selectedPoll();
   const choice = selectedChoice();
   const closed = isPollClosed(poll);
+  const winner = finalWinnerChoice(poll);
   els.walletAddress.textContent = shortAddress(account);
   els.tokenSymbol.textContent = token.symbol || 'RATSPEAK';
   els.eligibilityStatus.className = 'eligibility-value';
@@ -2151,10 +2247,10 @@ function renderWallet() {
   }
   els.eligibilityStatus.innerHTML = eligibilityMarkup();
   els.snapshotBlock.textContent = formatBlock(poll.snapshotBlock);
-  els.selectedChoice.textContent = choice ? choice.name : 'Pick an option';
+  els.selectedChoice.textContent = closed && winner ? `${winner.name} won` : choice ? choice.name : 'Pick an option';
   els.castVoteBtn.disabled = casting || token.loading || !account || !selectedChoiceId || !hasSnapshotEligibility() || closed;
-  els.castVoteBtn.hidden = !account;
-  els.connectSideBtn.hidden = Boolean(account);
+  els.castVoteBtn.hidden = closed || !account;
+  els.connectSideBtn.hidden = closed || Boolean(account);
 
   if (casting) {
     els.castVoteBtn.innerHTML = 'Waiting for signature...';
@@ -2172,7 +2268,14 @@ function renderWallet() {
     els.castVoteBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Sign vote';
   }
 
-  if (account) {
+  if (closed) {
+    els.walletStatus.textContent = winner
+      ? `Voting ended ${formatCloseTime(poll.closes)}. ${winner.name} was the final winner.`
+      : `Voting ended ${formatCloseTime(poll.closes)}.`;
+    els.connectBtn.innerHTML = '<span>Poll finished</span>';
+    els.connectBtn.disabled = true;
+    els.connectBtn.setAttribute('aria-disabled', 'true');
+  } else if (account) {
     if (token.loading) {
       els.walletStatus.textContent = `Checking eligibility at ${formatBaseBlock(poll.snapshotBlock)}.`;
     } else if (token.error) {
