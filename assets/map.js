@@ -102,12 +102,17 @@ const DECLUTTER_LOCAL_MAX_STRENGTH = 0.5;
 const DECLUTTER_FULL_ZOOM = MIN_MAP_ZOOM;
 const DECLUTTER_END_ZOOM = MIN_MAP_ZOOM + 2.6;
 const WEB_MERCATOR_LAT_LIMIT = 85.05112878;
+const WORLD_LONGITUDE_SPAN = 360;
+const WORLD_RENDER_PADDING = 1;
+const PAN_LONGITUDE_LIMIT = 1_000_000;
 const COORDINATE_ACCURACY_NOTE = 'Coordinates can be self-reported and may not be accurate.';
-const WRAPPED_WORLD_BOUNDS = [
-  [-WEB_MERCATOR_LAT_LIMIT, -540],
-  [WEB_MERCATOR_LAT_LIMIT, 540]
+// Leaflet's worldCopyJump keeps longitude normalized; this leaves practical
+// horizontal room while still clamping north/south to Web Mercator's limit.
+const MAP_PAN_BOUNDS = [
+  [-WEB_MERCATOR_LAT_LIMIT, -PAN_LONGITUDE_LIMIT],
+  [WEB_MERCATOR_LAT_LIMIT, PAN_LONGITUDE_LIMIT]
 ];
-const MARKER_WORLD_OFFSETS = [-360, 0, 360];
+const DEFAULT_WORLD_OFFSETS = [-WORLD_LONGITUDE_SPAN, 0, WORLD_LONGITUDE_SPAN];
 
 const state = {
   snapshot: null,
@@ -126,6 +131,7 @@ const state = {
   markerLayer: null,
   markers: new Map(),
   markerPlacements: new Map(),
+  renderedWorldOffsets: DEFAULT_WORLD_OFFSETS,
   markerScale: MARKER_SCALE_BANDS[0],
   landMask: null,
   placeIndex: [],
@@ -373,13 +379,13 @@ function initMap() {
   state.map = window.L.map(els.map, {
     zoomControl: false,
     attributionControl: false,
-    worldCopyJump: false,
+    worldCopyJump: true,
     maxBoundsViscosity: 1
   });
 
   const minZoom = viewportMinZoom();
   state.map.setMinZoom(minZoom);
-  state.map.setMaxBounds(WRAPPED_WORLD_BOUNDS);
+  state.map.setMaxBounds(MAP_PAN_BOUNDS);
   state.map.setView([29, -18], minZoom);
 
   window.L.control.zoom({ position: 'bottomright' }).addTo(state.map);
@@ -407,13 +413,14 @@ function initMap() {
   state.map.on('zoomend', () => {
     syncMapTheme();
     updateMarkerScale();
-    renderMap();
+    renderWrappedOverlays();
   });
   state.map.on('dragstart', () => {
     suppressNextMapClick();
     clearNodeCursor();
   });
   state.map.on('dragend', suppressNextMapClick);
+  state.map.on('moveend', renderWrappedOverlays);
   state.map.on('mousemove', syncNodeCursor);
   state.map.on('mouseout', clearNodeCursor);
   state.map.on('click', handleMapClick);
@@ -483,6 +490,26 @@ function isLowZoomLabelMode() {
   return state.map ? state.map.getZoom() <= LOW_ZOOM_LABEL_CUTOFF + 0.001 : true;
 }
 
+function visibleWorldOffsets() {
+  if (!state.map) return [...DEFAULT_WORLD_OFFSETS];
+
+  const bounds = state.map.getBounds();
+  if (!bounds) return [...DEFAULT_WORLD_OFFSETS];
+
+  const west = bounds.getWest();
+  const east = bounds.getEast();
+  if (!Number.isFinite(west) || !Number.isFinite(east)) return [...DEFAULT_WORLD_OFFSETS];
+
+  const firstWorld = Math.ceil((west - 180) / WORLD_LONGITUDE_SPAN) - WORLD_RENDER_PADDING;
+  const lastWorld = Math.floor((east + 180) / WORLD_LONGITUDE_SPAN) + WORLD_RENDER_PADDING;
+  const offsets = [];
+  for (let world = firstWorld; world <= lastWorld; world += 1) {
+    offsets.push(world * WORLD_LONGITUDE_SPAN);
+  }
+
+  return offsets.length ? offsets : [...DEFAULT_WORLD_OFFSETS];
+}
+
 function initLowZoomLabels() {
   state.map.createPane('continentLabels');
   const pane = state.map.getPane('continentLabels');
@@ -490,8 +517,16 @@ function initLowZoomLabels() {
   pane.style.zIndex = 360;
   pane.style.pointerEvents = 'none';
   state.lowZoomLabelLayer = window.L.layerGroup().addTo(state.map);
+  renderLowZoomLabels();
+}
+
+function renderLowZoomLabels() {
+  if (!state.map || !state.lowZoomLabelLayer) return;
+
+  state.lowZoomLabelLayer.clearLayers();
+  const worldOffsets = visibleWorldOffsets();
   LOW_ZOOM_LABELS.forEach((label) => {
-    MARKER_WORLD_OFFSETS.forEach((worldOffset) => {
+    worldOffsets.forEach((worldOffset) => {
       window.L.marker([label.lat, label.lon + worldOffset], {
         pane: 'continentLabels',
         interactive: false,
@@ -522,6 +557,7 @@ function syncMapViewport() {
   if (state.map.getZoom() < minZoom) state.map.setZoom(minZoom);
   state.map.panInsideBounds(state.map.options.maxBounds, { animate: false });
   syncMapTheme();
+  renderWrappedOverlays();
 }
 
 function viewportMinZoom() {
@@ -552,6 +588,11 @@ function applyFilters() {
   }
 
   renderDetail();
+  renderMap();
+}
+
+function renderWrappedOverlays() {
+  renderLowZoomLabels();
   renderMap();
 }
 
@@ -633,7 +674,9 @@ function renderMap() {
 
   state.markerLayer.clearLayers();
   state.markers.clear();
-  state.markerPlacements = getMarkerDisplayLayout(state.filteredNodes);
+  const worldOffsets = visibleWorldOffsets();
+  state.renderedWorldOffsets = worldOffsets;
+  state.markerPlacements = getMarkerDisplayLayout(state.filteredNodes, worldOffsets);
   const denseNodeIds = getDenseNodeIds(state.filteredNodes);
 
   state.filteredNodes.forEach((node) => {
@@ -641,7 +684,7 @@ function renderMap() {
     const kindClass = cssToken(nodeKind(node));
     const isSelected = node.id === state.selectedId ? ' is-selected' : '';
     const isDense = denseNodeIds.has(node.id) ? ' is-dense' : '';
-    MARKER_WORLD_OFFSETS.forEach((worldOffset) => {
+    worldOffsets.forEach((worldOffset) => {
       const key = markerKey(node, worldOffset);
       const placement = state.markerPlacements.get(key) || ZERO_PLACEMENT;
       const latLng = [node.location.lat, node.location.lon + worldOffset];
@@ -667,7 +710,7 @@ function renderMap() {
 
 const ZERO_PLACEMENT = Object.freeze({ dx: 0, dy: 0, isSpread: false });
 
-function getMarkerDisplayLayout(nodes) {
+function getMarkerDisplayLayout(nodes, worldOffsets = state.renderedWorldOffsets || DEFAULT_WORLD_OFFSETS) {
   const placements = new Map();
   if (!state.map) return placements;
 
@@ -675,7 +718,7 @@ function getMarkerDisplayLayout(nodes) {
   const sortedNodes = [...nodes].sort((a, b) => String(a.id).localeCompare(String(b.id)));
 
   sortedNodes.forEach((node) => {
-    MARKER_WORLD_OFFSETS.forEach((worldOffset) => {
+    worldOffsets.forEach((worldOffset) => {
       const key = markerKey(node, worldOffset);
       const point = state.map.latLngToContainerPoint([node.location.lat, node.location.lon + worldOffset]);
       items.push({
@@ -971,11 +1014,12 @@ function pickNodeAt(containerPoint) {
   let nearest = null;
   let visualRank = 0;
   const coarsePointer = usesCoarsePointer();
+  const worldOffsets = state.renderedWorldOffsets || DEFAULT_WORLD_OFFSETS;
   state.filteredNodes.forEach((node) => {
     const radius = markerPickRadius(node, coarsePointer);
     const radiusSq = radius * radius;
 
-    MARKER_WORLD_OFFSETS.forEach((worldOffset) => {
+    worldOffsets.forEach((worldOffset) => {
       const rank = visualRank;
       visualRank += 1;
       const key = markerKey(node, worldOffset);
