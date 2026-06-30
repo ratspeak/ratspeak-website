@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#FAF7F3">
+    <meta name="theme-color" content="#18171a">
     <title>About — Ratspeak</title>
     <meta name="description" content="Communication is a right, not a service. Learn why Ratspeak is building private, resilient networks in the open.">
     <link rel="canonical" href="https://ratspeak.org/about.html">
@@ -41,7 +41,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Familjen+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
-    <script>!function(){var t=localStorage.getItem('ratspeak-theme');if(t)document.documentElement.setAttribute('data-theme',t);else if(window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.setAttribute('data-theme','dark')}()</script>
+    <script>!function(){var t=localStorage.getItem('ratspeak-theme')||'dark';document.documentElement.setAttribute('data-theme',t);var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',t==='dark'?'#18171a':'#FAF7F3')}()</script>
     <style>
         :root {
             --bg-primary:    #FAF7F3;
