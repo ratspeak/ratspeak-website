@@ -128,10 +128,11 @@ const state = {
   },
   tileLayerTheme: '',
   lowZoomLabelLayer: null,
+  lowZoomLabelOffsets: null,
   markerLayer: null,
   markers: new Map(),
   markerPlacements: new Map(),
-  renderedWorldOffsets: DEFAULT_WORLD_OFFSETS,
+  renderedWorldOffsets: null,
   markerScale: MARKER_SCALE_BANDS[0],
   landMask: null,
   placeIndex: [],
@@ -413,7 +414,9 @@ function initMap() {
   state.map.on('zoomend', () => {
     syncMapTheme();
     updateMarkerScale();
-    renderWrappedOverlays();
+    const worldOffsets = visibleWorldOffsets();
+    renderLowZoomLabels(worldOffsets);
+    renderMap({ worldOffsets });
   });
   state.map.on('dragstart', () => {
     suppressNextMapClick();
@@ -510,6 +513,11 @@ function visibleWorldOffsets() {
   return offsets.length ? offsets : [...DEFAULT_WORLD_OFFSETS];
 }
 
+function sameWorldOffsets(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+  return a.every((offset, index) => offset === b[index]);
+}
+
 function initLowZoomLabels() {
   state.map.createPane('continentLabels');
   const pane = state.map.getPane('continentLabels');
@@ -520,11 +528,16 @@ function initLowZoomLabels() {
   renderLowZoomLabels();
 }
 
-function renderLowZoomLabels() {
+function renderLowZoomLabels(worldOffsets = visibleWorldOffsets(), options = {}) {
   if (!state.map || !state.lowZoomLabelLayer) return;
 
+  if (!options.force && sameWorldOffsets(worldOffsets, state.lowZoomLabelOffsets)) {
+    syncLowZoomLabels();
+    return;
+  }
+
   state.lowZoomLabelLayer.clearLayers();
-  const worldOffsets = visibleWorldOffsets();
+  state.lowZoomLabelOffsets = [...worldOffsets];
   LOW_ZOOM_LABELS.forEach((label) => {
     worldOffsets.forEach((worldOffset) => {
       window.L.marker([label.lat, label.lon + worldOffset], {
@@ -557,7 +570,9 @@ function syncMapViewport() {
   if (state.map.getZoom() < minZoom) state.map.setZoom(minZoom);
   state.map.panInsideBounds(state.map.options.maxBounds, { animate: false });
   syncMapTheme();
-  renderWrappedOverlays();
+  const worldOffsets = visibleWorldOffsets();
+  renderLowZoomLabels(worldOffsets);
+  renderMap({ worldOffsets });
 }
 
 function viewportMinZoom() {
@@ -592,8 +607,14 @@ function applyFilters() {
 }
 
 function renderWrappedOverlays() {
-  renderLowZoomLabels();
-  renderMap();
+  const worldOffsets = visibleWorldOffsets();
+  const shouldRenderLabels = !sameWorldOffsets(worldOffsets, state.lowZoomLabelOffsets);
+  const shouldRenderMarkers = !sameWorldOffsets(worldOffsets, state.renderedWorldOffsets);
+
+  if (shouldRenderLabels) renderLowZoomLabels(worldOffsets, { force: true });
+  else syncLowZoomLabels();
+
+  if (shouldRenderMarkers) renderMap({ worldOffsets });
 }
 
 function renderDetail() {
@@ -669,13 +690,13 @@ function setDetailInfoOpen(button, open) {
   if (popover) popover.hidden = !open;
 }
 
-function renderMap() {
+function renderMap(options = {}) {
   if (!state.map) return;
 
   state.markerLayer.clearLayers();
   state.markers.clear();
-  const worldOffsets = visibleWorldOffsets();
-  state.renderedWorldOffsets = worldOffsets;
+  const worldOffsets = options.worldOffsets || visibleWorldOffsets();
+  state.renderedWorldOffsets = [...worldOffsets];
   state.markerPlacements = getMarkerDisplayLayout(state.filteredNodes, worldOffsets);
   const denseNodeIds = getDenseNodeIds(state.filteredNodes);
 
