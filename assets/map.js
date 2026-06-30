@@ -102,6 +102,7 @@ const DECLUTTER_LOCAL_MAX_STRENGTH = 0.5;
 const DECLUTTER_FULL_ZOOM = MIN_MAP_ZOOM;
 const DECLUTTER_END_ZOOM = MIN_MAP_ZOOM + 2.6;
 const WEB_MERCATOR_LAT_LIMIT = 85.05112878;
+const COORDINATE_ACCURACY_NOTE = 'Coordinates can be self-reported and may not be accurate.';
 const WRAPPED_WORLD_BOUNDS = [
   [-WEB_MERCATOR_LAT_LIMIT, -540],
   [WEB_MERCATOR_LAT_LIMIT, 540]
@@ -249,6 +250,14 @@ function bindControls() {
   if (els.nodeDetail) {
     els.nodeDetail.addEventListener('pointerdown', handleDetailSheetPointerDown);
     els.nodeDetail.addEventListener('click', (event) => {
+      const infoButton = event.target instanceof Element ? event.target.closest('.detail-info') : null;
+      if (infoButton && els.nodeDetail.contains(infoButton)) {
+        event.stopPropagation();
+        toggleDetailInfo(infoButton);
+        return;
+      }
+
+      closeDetailInfo();
       event.stopPropagation();
     });
   }
@@ -564,7 +573,7 @@ function renderDetail() {
   const coord = `${formatCoord(node.location?.lat, 'lat')}, ${formatCoord(node.location?.lon, 'lon')}`;
   const fields = [
     location ? detailField('Location', location) : '',
-    detailField('Coordinates', coord, true, true),
+    coordinateDetailField(coord),
     detailField('Last seen', lastSeenLabel(node)),
     reticulum.interfaceType ? detailField('Interface', reticulum.interfaceType) : '',
     detailField('Services', serviceTags(node.services), true, false, true),
@@ -599,6 +608,24 @@ function renderDetail() {
     event.stopPropagation();
     clearSelectedNode();
   });
+}
+
+function toggleDetailInfo(button) {
+  const isOpen = button.getAttribute('aria-expanded') === 'true';
+  closeDetailInfo(button);
+  setDetailInfoOpen(button, !isOpen);
+}
+
+function closeDetailInfo(exceptButton = null) {
+  els.nodeDetail?.querySelectorAll('.detail-info').forEach((button) => {
+    if (button !== exceptButton) setDetailInfoOpen(button, false);
+  });
+}
+
+function setDetailInfoOpen(button, open) {
+  const popover = button.closest('.detail-row')?.querySelector('.detail-info-popover');
+  button.setAttribute('aria-expanded', String(open));
+  if (popover) popover.hidden = !open;
 }
 
 function renderMap() {
@@ -1195,6 +1222,21 @@ function detailField(label, value, _wide = false, code = false, html = false) {
     <div class="detail-row">
       <dt class="detail-label">${escapeHtml(label)}</dt>
       <dd class="detail-value${valueClass}">${content}</dd>
+    </div>
+  `;
+}
+
+function coordinateDetailField(value) {
+  return `
+    <div class="detail-row">
+      <dt class="detail-label detail-label--with-info">
+        <span>Coordinates</span>
+        <button class="detail-info" type="button" aria-expanded="false" aria-controls="coordinateAccuracyNote" aria-label="About coordinate accuracy">
+          <span aria-hidden="true">i</span>
+        </button>
+      </dt>
+      <dd class="detail-value detail-value--code">${escapeHtml(value)}</dd>
+      <span class="detail-info-popover" id="coordinateAccuracyNote" role="tooltip" hidden>${escapeHtml(COORDINATE_ACCURACY_NOTE)}</span>
     </div>
   `;
 }
