@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, follow">
-    <meta name="theme-color" content="#FAF7F3">
+    <meta name="theme-color" content="#18171a">
     <meta http-equiv="refresh" content="0; url=https://docs.ratspeak.org/">
     <title>Docs moved | Ratspeak</title>
     <meta name="description" content="Ratspeak documentation has moved to docs.ratspeak.org.">
@@ -40,6 +40,12 @@
     <style>
         :root {
             --accent: #D2693B;
+            --bg-primary: #18171a;
+            --text-primary: #e8e4e0;
+            --text-secondary: #a89f96;
+        }
+
+        [data-theme="light"] {
             --bg-primary: #FAF7F3;
             --text-primary: #2A2522;
             --text-secondary: #6F675F;
@@ -83,6 +89,7 @@
             text-decoration: underline;
         }
     </style>
+    <script>!function(){var t=localStorage.getItem('ratspeak-theme')||'dark';document.documentElement.setAttribute('data-theme',t);var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',t==='dark'?'#18171a':'#FAF7F3')}()</script>
     <script>
         (function() {
             var routes = {

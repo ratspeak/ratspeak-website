@@ -39,7 +39,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Familjen+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
-    <script>!function(){var t=localStorage.getItem('ratspeak-theme');if(t)document.documentElement.setAttribute('data-theme',t);else if(window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.setAttribute('data-theme','dark')}()</script>
+    <script>!function(){var t=localStorage.getItem('ratspeak-theme')||'dark';document.documentElement.setAttribute('data-theme',t);var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',t==='dark'?'#18171a':'#FAF7F3')}()</script>
     <script type="application/ld+json">
 {
       "@context": "https://schema.org",
@@ -3039,8 +3039,10 @@ document.addEventListener('click', event => {
 });
 els.themeToggle.addEventListener('click', () => {
   const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
   document.documentElement.setAttribute('data-theme', next);
   localStorage.setItem(THEME_KEY, next);
+  if (themeMeta) themeMeta.setAttribute('content', next === 'dark' ? '#18171a' : '#FAF7F3');
 });
 
 syncNavbar();
