@@ -5,6 +5,7 @@ export const config = { runtime: 'edge' };
 const BLOB_API = 'https://vercel.com/api/blob';
 const API_VERSION = '12';
 const DEFAULT_PATHNAME = 'map/live.json';
+const NODE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 const JSON_HEADERS = {
   'Content-Type': 'application/json; charset=utf-8',
@@ -27,6 +28,8 @@ export default async function handler(req) {
     return jsonResponse({ error: 'Map snapshot read failed' }, 502);
   }
 
+  snapshot = pruneExpiredNodes(snapshot);
+
   if (req.method === 'HEAD') {
     return new Response(null, {
       status: 200,
@@ -39,6 +42,18 @@ export default async function handler(req) {
 
 function mapPathname() {
   return process.env.MAP_BLOB_PATH || DEFAULT_PATHNAME;
+}
+
+// Nodes without lastSeen (manual opt-ins) are kept unconditionally.
+export function pruneExpiredNodes(snapshot, now = Date.now()) {
+  if (!snapshot || !Array.isArray(snapshot.nodes)) return snapshot;
+  const cutoff = now - NODE_MAX_AGE_MS;
+  const nodes = snapshot.nodes.filter((node) => {
+    if (!node || !node.lastSeen) return true;
+    const lastSeen = Date.parse(node.lastSeen);
+    return !Number.isFinite(lastSeen) || lastSeen >= cutoff;
+  });
+  return nodes.length === snapshot.nodes.length ? snapshot : { ...snapshot, nodes };
 }
 
 async function loadPublishedSnapshot(blobToken, pathname) {
