@@ -4,6 +4,7 @@ import { buildCountryIndex, buildPlaceIndex, locationLabelForNode } from './map-
 
 const API_URL = '/api/map-nodes';
 const SNAPSHOT_REFRESH_MS = 15_000;
+const NODE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const LAND_MASK_URL = 'scripts/data/ne_110m_land.geojson';
 const PLACE_GAZETTEER_URL = 'scripts/data/ne_110m_populated_places_simple.geojson';
 const COUNTRY_GEOJSON_URL = 'scripts/data/ne_110m_admin_0_countries.geojson';
@@ -581,7 +582,9 @@ function viewportMinZoom() {
 
 function applyFilters() {
   const nodes = state.snapshot.nodes || [];
+  const expiryCutoff = Date.now() - NODE_MAX_AGE_MS;
   state.filteredNodes = nodes.filter((node) => {
+    if (nodeIsExpired(node, expiryCutoff)) return false;
     const kind = nodeKind(node);
     const matchesKind = state.kindFilter === 'all' || kind === state.kindFilter;
     const matchesStatus = state.statusFilter === 'all' || node.status === state.statusFilter;
@@ -1395,6 +1398,14 @@ function trimNumber(value, digits) {
 function lastSeenLabel(node) {
   if (!node.lastSeen) return 'Manual';
   return relativeTime(node.lastSeen);
+}
+
+// Mirrors the /api/map-nodes expiry rule so long-lived tabs age nodes out
+// between fetches; nodes without lastSeen (manual opt-ins) never expire.
+function nodeIsExpired(node, cutoff) {
+  if (!node.lastSeen) return false;
+  const lastSeen = Date.parse(node.lastSeen);
+  return Number.isFinite(lastSeen) && lastSeen < cutoff;
 }
 
 function formatCoord(value, axis) {
