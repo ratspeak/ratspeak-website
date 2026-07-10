@@ -3,6 +3,9 @@
     { "source": "/discord", "destination": "https://discord.gg/mvS6adBEdW", "statusCode": 302 },
     { "source": "/telegram", "destination": "https://t.me/ratspeak", "statusCode": 302 }
   ],
+  "rewrites": [
+    { "source": "/assets/seo/og-map.png", "destination": "/api/og-map" }
+  ],
   "functions": {
     "api/firmware.js": {
       "maxDuration": 30
@@ -12,6 +15,10 @@
     },
     "api/map-ingest.js": {
       "maxDuration": 10
+    },
+    "api/og-map.js": {
+      "maxDuration": 10,
+      "includeFiles": "{scripts/data,lib/fonts}/**"
     },
     "api/tasks.js": {
       "maxDuration": 10
