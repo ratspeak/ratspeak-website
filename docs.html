@@ -93,12 +93,12 @@
     <script>
         (function() {
             var routes = {
-                'getting-started/building-from-source': 'reference/building-from-source',
-                'introduction/what-is-ratspeak': '',
-                'introduction/faq': 'reference/faq'
+                'getting-started/building-from-source': 'docs/reference/building-from-source',
+                'introduction/what-is-ratspeak': 'docs/',
+                'introduction/faq': 'docs/reference/faq'
             };
             var hash = window.location.hash.replace(/^#\/?/, '');
-            var targetPath = hash ? (routes[hash] || hash) : '';
+            var targetPath = hash ? (routes[hash] || 'docs/' + hash) : '';
             var target = 'https://docs.ratspeak.org/' + targetPath;
             window.location.replace(target);
         })();
