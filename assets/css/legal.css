@@ -203,7 +203,7 @@ body.legal-page {
     gap: 14px;
 }
 
-.navbar-icon-btn {
+.legal-page .navbar-icon-btn {
     display: flex;
     width: 32px;
     height: 32px;
@@ -219,16 +219,16 @@ body.legal-page {
     transition: color 0.2s ease, background 0.2s ease;
 }
 
-.navbar-icon-btn:hover {
+.legal-page .navbar-icon-btn:hover {
     background: rgba(42, 37, 34, 0.045);
     color: var(--text-primary);
 }
 
-[data-theme="dark"] .navbar-icon-btn:hover {
+[data-theme="dark"] .legal-page .navbar-icon-btn:hover {
     background: var(--bg-secondary);
 }
 
-.navbar-icon-btn svg {
+.legal-page .navbar-icon-btn svg {
     width: 18px;
     height: 18px;
 }
