@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { webcrypto } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
@@ -83,11 +84,10 @@ function evaluateObject(literal, context = {}) {
 }
 
 function extractFunction(name) {
-  const start = downloadHtml.indexOf(`function ${name}`);
-  assert.notEqual(start, -1, `missing function ${name}`);
-  const functionStart = downloadHtml.slice(Math.max(0, start - 6), start) === 'async '
-    ? start - 6
-    : start;
+  const match = new RegExp(`(?:async\\s+)?function\\s+${name}\\s*\\(`).exec(downloadHtml);
+  assert.ok(match, `missing function ${name}`);
+  const functionStart = match.index;
+  const start = downloadHtml.indexOf('function', functionStart);
   const open = downloadHtml.indexOf('{', start);
   const close = findMatchingBrace(downloadHtml, open);
   return downloadHtml.slice(functionStart, close + 1);
@@ -170,17 +170,18 @@ test('legacy TCXO alias EEPROM readback is rejected with a specific error', () =
   );
 });
 
-test('valid unlocked RNode identities are recovered by writing only the lock byte', () => {
+test('valid unlocked browser identities are completed and verified before locking', () => {
   assert.match(downloadHtml, /validateUnlockedRnodeIdentityPayloadForBoard\(rom, product, model\)/);
-  assert.match(downloadHtml, /lockExistingRnodeIdentity\(session, product, model, logMessage\)/);
-  assert.match(downloadHtml, /Locking existing RNode identity/);
+  assert.match(downloadHtml, /browserSignatureIsRepairable\(rom\)/);
+  assert.match(downloadHtml, /Completing and verifying the unlocked browser identity before lock/);
+  assert.match(downloadHtml, /Unlocked identity contains a non-browser signature; use rnodeconf/);
   assert.match(downloadHtml, /use Full Erase and flash again/);
-  assert.doesNotMatch(downloadHtml, /RNode identity write did not read back/);
 
   const ROM_ADDR = {
     PRODUCT: 0x00,
     MODEL: 0x01,
     HW_REV: 0x02,
+    SIGNATURE: 0x1B,
     INFO_LOCK: 0x9B
   };
   const context = {
@@ -192,9 +193,11 @@ test('valid unlocked RNode identities are recovered by writing only the lock byt
     }
   };
   const {
+    browserSignatureIsRepairable,
     validateRnodeIdentityForBoard,
     validateUnlockedRnodeIdentityPayloadForBoard
   } = evaluateDownloadFunctions([
+    'browserSignatureIsRepairable',
     'normalizeRnodeEepromModel',
     'validateRnodeIdentityForBoard',
     'validateUnlockedRnodeIdentityPayloadForBoard'
@@ -207,37 +210,127 @@ test('valid unlocked RNode identities are recovered by writing only the lock byt
 
   assert.equal(validateRnodeIdentityForBoard(rom, 0x15, 0x17), 'RNode identity was not locked');
   assert.equal(validateUnlockedRnodeIdentityPayloadForBoard(rom, 0x15, 0x17), null);
+  assert.equal(browserSignatureIsRepairable(rom), true);
+  rom[ROM_ADDR.SIGNATURE + 12] = 0x42;
+  assert.equal(browserSignatureIsRepairable(rom), false);
 });
 
-test('nRF52 identity writes lock before validation and wait for EEPROM flush', () => {
+test('nRF52 identity writes are paced and fully verified before lock', () => {
+  assert.equal(extractNumberConst('RNODE_NRF52_ROM_WRITE_DELAY_MS') >= 150, true);
   assert.equal(extractNumberConst('RNODE_NRF52_POST_IDENTITY_WRITE_DELAY_MS') >= 3000, true);
-  assert.match(
-    downloadHtml,
-    /writeRnodeIdentityPayload\(session, product, model, hwRev, serialBytes, madeBytes, checksum, signature\);[\s\S]*writeRomOrLocked\(session, ROM_ADDR\.INFO_LOCK, INFO_LOCK_BYTE\);[\s\S]*readRnodeRomWithRetry\(session, 3, logMessage\);/
-  );
+  const identitySource = extractFunction('writeRnodeIdentity');
+  const preLockVerification = identitySource.indexOf('rnodeIdentityMismatchAddresses(unlockedRom, expected)');
+  const lockWrite = identitySource.indexOf('writeRomOrLocked(session, ROM_ADDR.INFO_LOCK, INFO_LOCK_BYTE)');
+  assert.notEqual(preLockVerification, -1);
+  assert.notEqual(lockWrite, -1);
+  assert.ok(preLockVerification < lockWrite, 'identity must be verified before INFO_LOCK is written');
+  assert.match(identitySource, /Full identity verified before lock/);
+  assert.match(identitySource, /EEPROM was left unlocked/);
 
   const state = {
     device: 'custom',
     rnodeAssetName: 'rnode_firmware_techo.zip',
     rnodeFlashStrategy: 'nrf52-dfu'
   };
-  const { rnodePostIdentityWriteDelayMs } = evaluateDownloadFunctions([
+  const { rnodePostIdentityWriteDelayMs, rnodeRomWriteDelayMs } = evaluateDownloadFunctions([
     'selectedFlashStrategy',
     'isOfficialRnodeFirmwareSelected',
     'isNrf52RnodeFirmwareSelected',
-    'rnodePostIdentityWriteDelayMs'
+    'rnodePostIdentityWriteDelayMs',
+    'rnodeRomWriteDelayMs'
   ], {
     state,
+    RNODE_NRF52_ROM_WRITE_DELAY_MS: 150,
+    RNODE_ROM_WRITE_DELAY_MS: 25,
     RNODE_NRF52_POST_IDENTITY_WRITE_DELAY_MS: 3500,
     RNODE_POST_EEPROM_DELAY_MS: 1000
   });
 
   assert.equal(rnodePostIdentityWriteDelayMs(), 3500);
+  assert.equal(rnodeRomWriteDelayMs(), 150);
   state.rnodeFlashStrategy = 'esp32-esptool';
   assert.equal(rnodePostIdentityWriteDelayMs(), 1000);
+  assert.equal(rnodeRomWriteDelayMs(), 25);
 });
 
-test('firmware hash verification rejects uninitialized zero hashes', async () => {
+test('EEPROM writes fail on every device error and never silently continue', async () => {
+  const context = {
+    KISS: {
+      CMD_ROM_WRITE: 0x52,
+      CMD_ERROR: 0x90,
+      ERROR_EEPROM_LOCKED: 0x03
+    },
+    RNODE_ROM_WRITE_ERROR_WINDOW_MS: 45,
+    rnodeRomWriteDelayMs: () => 150,
+    sleepMs: async () => {},
+    hexByte: (value) => `0x${value.toString(16).padStart(2, '0').toUpperCase()}`
+  };
+  const { sendRomWrite } = evaluateDownloadFunctions(['sendRomWrite'], context);
+  const makeSession = (frame) => ({
+    send: async () => {},
+    readFrame: async () => frame
+  });
+
+  assert.equal(
+    await sendRomWrite(makeSession({ command: 0x90, payload: [0x03] }), 1, 2),
+    false
+  );
+  await assert.rejects(
+    () => sendRomWrite(makeSession({ command: 0x90, payload: [0x07] }), 1, 2),
+    /error 0x07 during EEPROM write/
+  );
+  assert.equal(await sendRomWrite(makeSession(null), 1, 2), true);
+});
+
+test('incomplete identity readback never writes the irreversible lock byte', async () => {
+  const ROM_ADDR = {
+    PRODUCT: 0x00,
+    MODEL: 0x01,
+    HW_REV: 0x02,
+    SERIAL: 0x03,
+    MADE: 0x07,
+    CHKSUM: 0x0B,
+    SIGNATURE: 0x1B,
+    INFO_LOCK: 0x9B
+  };
+  const incompleteRom = new Uint8Array(200).fill(0xFF);
+  let lockWrites = 0;
+  const context = {
+    ROM_ADDR,
+    INFO_LOCK_BYTE: 0x73,
+    RNODE_EEPROM_RESERVED: 200,
+    RNODE_EEPROM_READ_RETRY_DELAY_MS: 1200,
+    readRnodeRomWithRetry: async () => incompleteRom,
+    writeRnodeIdentityPayload: async () => {},
+    writeRomOrLocked: async (_session, address) => {
+      if (address === ROM_ADDR.INFO_LOCK) lockWrites += 1;
+    },
+    rnodePostIdentityWriteDelayMs: () => 3500,
+    sleepMs: async () => {}
+  };
+  const { writeRnodeIdentity } = evaluateDownloadFunctions([
+    'buildRnodeIdentityPayload',
+    'rnodeIdentityMismatchAddresses',
+    'verifyRnodeIdentityPayload',
+    'verifyProvisionedEeprom',
+    'writeRnodeIdentity'
+  ], context);
+
+  await assert.rejects(
+    () => writeRnodeIdentity(
+      {}, 0xC2, 0xC7, 1,
+      new Uint8Array([0, 0, 0, 1]),
+      new Uint8Array([0, 0, 0, 2]),
+      new Uint8Array(16),
+      new Uint8Array(128),
+      () => {}
+    ),
+    /identity remained incomplete; EEPROM was left unlocked/
+  );
+  assert.equal(lockWrites, 0);
+});
+
+test('firmware hash verification rejects zero and erased hashes', async () => {
   let targetHash = new Uint8Array(32);
   let actualHash = new Uint8Array(32);
   const context = {
@@ -254,9 +347,18 @@ test('firmware hash verification rejects uninitialized zero hashes', async () =>
   const { ensureRnodeFirmwareHashMatches } = evaluateDownloadFunctions([
     'hashesEqual',
     'isZeroHash',
+    'isErasedHash',
+    'isUninitializedRnodeHash',
     'ensureRnodeFirmwareHashMatches'
   ], context);
 
+  await assert.rejects(
+    () => ensureRnodeFirmwareHashMatches(() => {}, null, { quiet: true }),
+    /RNode firmware hashes are not initialized yet/
+  );
+
+  targetHash.fill(0xFF);
+  actualHash.fill(0xFF);
   await assert.rejects(
     () => ensureRnodeFirmwareHashMatches(() => {}, null, { quiet: true }),
     /RNode firmware hashes are not initialized yet/
@@ -266,6 +368,115 @@ test('firmware hash verification rejects uninitialized zero hashes', async () =>
   actualHash = Uint8Array.from(targetHash);
   const status = await ensureRnodeFirmwareHashMatches(() => {}, null, { quiet: true });
   assert.deepEqual(Array.from(status.target), Array.from(targetHash));
+});
+
+test('firmware hash adoption requires a fresh post-reboot readback', async () => {
+  const actualHash = Uint8Array.from({ length: 32 }, (_value, index) => index + 1);
+  const erasedHash = new Uint8Array(32).fill(0xFF);
+  let sessionCount = 0;
+  let hashSent = false;
+  let persistWrite = false;
+  const context = {
+    RNODE_REPAIR_SETTLE_MS: 1500,
+    KISS: {
+      HASH_TYPE_TARGET_FIRMWARE: 0x01,
+      HASH_TYPE_FIRMWARE: 0x02
+    },
+    rnodePostResetSettleMs: () => 20000,
+    withRnodeSession: async (_logMessage, _settleMs, callback) => {
+      const session = { pass: sessionCount };
+      sessionCount += 1;
+      return callback(session);
+    },
+    readRnodeFirmwareHash: async (session, hashType) => {
+      if (hashType === 0x02) return actualHash;
+      if (session.pass === 0 || !persistWrite) return erasedHash;
+      return actualHash;
+    },
+    sendRnodeFirmwareHash: async () => {
+      hashSent = true;
+    }
+  };
+  const { ensureRnodeFirmwareHashMatches } = evaluateDownloadFunctions([
+    'hashesEqual',
+    'isZeroHash',
+    'isErasedHash',
+    'isUninitializedRnodeHash',
+    'ensureRnodeFirmwareHashMatches'
+  ], context);
+
+  await assert.rejects(
+    () => ensureRnodeFirmwareHashMatches(() => {}, null, { quiet: true }),
+    /firmware hash did not persist across the RNode reboot/
+  );
+  assert.equal(hashSent, true);
+  assert.equal(sessionCount, 2);
+
+  sessionCount = 0;
+  hashSent = false;
+  persistWrite = true;
+  const status = await ensureRnodeFirmwareHashMatches(() => {}, null, { quiet: true });
+  assert.equal(hashSent, true);
+  assert.equal(sessionCount, 2);
+  assert.deepEqual(Array.from(status.target), Array.from(actualHash));
+});
+
+test('selected nRF52 image hash cannot be replaced by an unexpected running hash', async () => {
+  const selectedHash = new Uint8Array(32).fill(0xA5);
+  const unexpectedHash = new Uint8Array(32).fill(0x5A);
+  let hashSent = false;
+  const context = {
+    RNODE_REPAIR_SETTLE_MS: 1500,
+    KISS: {
+      HASH_TYPE_TARGET_FIRMWARE: 0x01,
+      HASH_TYPE_FIRMWARE: 0x02
+    },
+    withRnodeSession: async (_logMessage, _settleMs, callback) => callback({}),
+    readRnodeFirmwareHash: async () => unexpectedHash,
+    sendRnodeFirmwareHash: async () => {
+      hashSent = true;
+    }
+  };
+  const { ensureRnodeFirmwareHashMatches } = evaluateDownloadFunctions([
+    'hashesEqual',
+    'isZeroHash',
+    'isErasedHash',
+    'isUninitializedRnodeHash',
+    'ensureRnodeFirmwareHashMatches'
+  ], context);
+
+  await assert.rejects(
+    () => ensureRnodeFirmwareHashMatches(() => {}, null, {
+      quiet: true,
+      expectedHash: selectedHash
+    }),
+    /running firmware hash does not match the selected image/
+  );
+  assert.equal(hashSent, false);
+  assert.match(
+    extractFunction('runProvisioning'),
+    /expectedHash:\s*expectedFirmwareHash/
+  );
+});
+
+test('nRF52 target hash covers the exact DFU application bytes', async () => {
+  const state = {
+    device: 'custom',
+    rnodeAssetName: 'rnode_firmware_heltec_t114.zip',
+    rnodeFlashStrategy: 'nrf52-dfu'
+  };
+  const { computeFirmwareHash } = evaluateDownloadFunctions([
+    'selectedFlashStrategy',
+    'sha256',
+    'computeFirmwareHash'
+  ], { state, crypto: webcrypto });
+
+  const hash = await computeFirmwareHash(new Uint8Array([0x61, 0x62, 0x63]));
+  assert.equal(
+    Buffer.from(hash).toString('hex'),
+    'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad'
+  );
+  assert.match(downloadHtml, /state\.firmwareAppBytes = firmware/);
 });
 
 test('unsigned browser provisioning is explicit and always uses a blank signature', () => {
@@ -383,6 +594,10 @@ test('nRF52 RNode provisioning is click-driven after a physical reset', () => {
   assert.match(downloadHtml, /requestToSend:\s*true/);
   assert.match(downloadHtml, /detectRnodeKissService\(session\)/);
   assert.match(downloadHtml, /CMD_DETECT/);
+  assert.match(
+    extractFunction('runReprovisionOnly'),
+    /if \(!result \|\| !result\.firmwareHashWritten\)[\s\S]*throw new Error\('RNode firmware hash was not written and verified'\)/
+  );
 
   const state = {
     device: 'custom',
