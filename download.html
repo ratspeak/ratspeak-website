@@ -6141,6 +6141,10 @@
         return isNrf52RnodeFirmwareSelected() ? RNODE_NRF52_POST_IDENTITY_WRITE_DELAY_MS : RNODE_POST_EEPROM_DELAY_MS;
     }
 
+    function rnodeRomWriteDelayMs() {
+        return isNrf52RnodeFirmwareSelected() ? RNODE_NRF52_ROM_WRITE_DELAY_MS : RNODE_ROM_WRITE_DELAY_MS;
+    }
+
     function resetRnodeSelection(message) {
         state.rnodeAsset = null;
         state.rnodeAssetName = null;
@@ -6726,6 +6730,10 @@
         HASH_TYPE_FIRMWARE:        0x02
     };
     var RNODE_ROM_WRITE_DELAY_MS = 25;
+    // Stock nRF52 RNode firmware persists each emulated-EEPROM byte by closing
+    // and reopening its LittleFS file. Keep the host cadence conservative so
+    // the identity tail cannot be silently dropped before the lock write.
+    var RNODE_NRF52_ROM_WRITE_DELAY_MS = 150;
     var RNODE_ROM_WRITE_ERROR_WINDOW_MS = 45;
     var RNODE_POST_EEPROM_DELAY_MS = 1000;
     var RNODE_NRF52_POST_IDENTITY_WRITE_DELAY_MS = 3500;
@@ -6735,7 +6743,6 @@
     // USB serial connection is disrupted and display boards can take time to boot.
     var RNODE_NRF52_ACTIVATION_SETTLE_MS = 20000;
     var RNODE_NRF52_POST_RESET_SETTLE_MS = 20000;
-    var RNODE_HASH_ADOPT_BOOT_WAIT_MS = 3500;
     var RNODE_POST_FLASH_BOOT_WAIT_MS = 9000;
     var RNODE_NRF52_DFU_REBOOT_WAIT_MS = 9000;
     var RNODE_POST_OPEN_SIGNAL_SETTLE_MS = 1200;
@@ -6774,6 +6781,16 @@
             if ((bytes[i] & 0xFF) !== 0) return false;
         }
         return true;
+    }
+    function isErasedHash(bytes) {
+        if (!bytes || !bytes.length) return true;
+        for (var i = 0; i < bytes.length; i++) {
+            if ((bytes[i] & 0xFF) !== 0xFF) return false;
+        }
+        return true;
+    }
+    function isUninitializedRnodeHash(bytes) {
+        return isZeroHash(bytes) || isErasedHash(bytes);
     }
     function hexByte(byte) {
         return '0x' + (byte & 0xFF).toString(16).padStart(2, '0').toUpperCase();
@@ -7292,7 +7309,11 @@
             return candidate.command === KISS.CMD_ERROR;
         }, RNODE_ROM_WRITE_ERROR_WINDOW_MS);
         if (errorFrame && errorFrame.payload[0] === KISS.ERROR_EEPROM_LOCKED) return false;
-        if (!errorFrame) await sleepMs(RNODE_ROM_WRITE_DELAY_MS);
+        if (errorFrame) {
+            var code = errorFrame.payload && errorFrame.payload.length ? errorFrame.payload[0] : 0xFF;
+            throw new Error('RNode returned error ' + hexByte(code) + ' during EEPROM write');
+        }
+        if (!errorFrame) await sleepMs(rnodeRomWriteDelayMs());
         return true;
     }
 
@@ -7314,10 +7335,10 @@
         var fwHash = await computeFirmwareHash(state.firmwareAppBytes);
         if (!fwHash) {
             logMessage('Firmware hash unavailable; will try running hash after reboot.', 'log-orange');
-            return false;
+            return null;
         }
         await sendRnodeFirmwareHash(session, fwHash);
-        return true;
+        return fwHash;
     }
 
     async function logRnodeHashStatus(session, logMessage) {
@@ -7335,43 +7356,52 @@
 
     async function ensureRnodeFirmwareHashMatches(logMessage, settleMs, options) {
         var quiet = options && options.quiet;
-        return await withRnodeSession(logMessage, settleMs == null ? RNODE_REPAIR_SETTLE_MS : settleMs, async function (session) {
+        var expectedHash = options && options.expectedHash;
+        var result = await withRnodeSession(logMessage, settleMs == null ? RNODE_REPAIR_SETTLE_MS : settleMs, async function (session) {
             var status = quiet
                 ? {
                     target: await readRnodeFirmwareHash(session, KISS.HASH_TYPE_TARGET_FIRMWARE),
                     actual: await readRnodeFirmwareHash(session, KISS.HASH_TYPE_FIRMWARE)
                 }
                 : await logRnodeHashStatus(session, logMessage);
+            if (expectedHash && !hashesEqual(status.actual, expectedHash)) {
+                throw new Error('running firmware hash does not match the selected image');
+            }
             if (hashesEqual(status.target, status.actual)) {
-                if (isZeroHash(status.target)) {
+                if (isUninitializedRnodeHash(status.target)) {
                     throw new Error('RNode firmware hashes are not initialized yet');
                 }
-                return status;
+                return { status: status, adopted: false };
             }
-            if (isZeroHash(status.actual)) {
+            if (isUninitializedRnodeHash(status.actual)) {
                 throw new Error('RNode running firmware hash is not available yet');
             }
 
             if (!quiet) logMessage('Target hash differs from running firmware; adopting running hash...', 'log-orange');
-            await sendRnodeFirmwareHash(session, status.actual);
-
-            try {
-                var verified = quiet
-                    ? {
-                        target: await readRnodeFirmwareHash(session, KISS.HASH_TYPE_TARGET_FIRMWARE),
-                        actual: status.actual
-                    }
-                    : await logRnodeHashStatus(session, logMessage);
-                if (!hashesEqual(verified.target, verified.actual)) {
-                    throw new Error('target still differs from actual after adoption');
-                }
-                if (!quiet) logMessage('Running firmware hash adopted.', 'log-green');
-                return verified;
-            } catch (verifyErr) {
-                if (!quiet) logMessage('Running hash adoption was sent; device reset before verification completed.', 'log-orange');
-                return { target: status.actual, actual: status.actual };
-            }
+            await sendRnodeFirmwareHash(session, expectedHash || status.actual);
+            return { status: status, adopted: true };
         });
+
+        if (!result.adopted) return result.status;
+
+        if (!quiet) logMessage('Waiting for RNode to reboot before verifying the adopted hash...', 'log-orange');
+        var verified = await withRnodeSession(logMessage, rnodePostResetSettleMs(), async function (session) {
+            return quiet
+                ? {
+                    target: await readRnodeFirmwareHash(session, KISS.HASH_TYPE_TARGET_FIRMWARE),
+                    actual: await readRnodeFirmwareHash(session, KISS.HASH_TYPE_FIRMWARE)
+                }
+                : await logRnodeHashStatus(session, logMessage);
+        });
+        if (!hashesEqual(verified.target, verified.actual) || isUninitializedRnodeHash(verified.target)) {
+            throw new Error('firmware hash did not persist across the RNode reboot');
+        }
+        var requiredActual = expectedHash || result.status.actual;
+        if (!hashesEqual(verified.actual, requiredActual)) {
+            throw new Error('running firmware changed while the target hash was being adopted');
+        }
+        if (!quiet) logMessage('Running firmware hash adopted and verified after reboot.', 'log-green');
+        return verified;
     }
 
     async function logRnodeConfigStatus(session, logMessage) {
@@ -7387,7 +7417,35 @@
         return status;
     }
 
-    function verifyRnodeIdentityPayload(rom, product, model, hwRev, serialBytes, madeBytes, checksum) {
+    function buildRnodeIdentityPayload(product, model, hwRev, serialBytes, madeBytes, checksum, signature) {
+        var expected = new Uint8Array(ROM_ADDR.INFO_LOCK);
+        expected[ROM_ADDR.PRODUCT] = product;
+        expected[ROM_ADDR.MODEL] = model;
+        expected[ROM_ADDR.HW_REV] = hwRev;
+        expected.set(serialBytes, ROM_ADDR.SERIAL);
+        expected.set(madeBytes, ROM_ADDR.MADE);
+        expected.set(checksum, ROM_ADDR.CHKSUM);
+        expected.set(signature, ROM_ADDR.SIGNATURE);
+        return expected;
+    }
+
+    function rnodeIdentityMismatchAddresses(rom, expected) {
+        var mismatches = [];
+        for (var i = 0; i < expected.length; i++) {
+            if (!rom || rom[i] !== expected[i]) mismatches.push(i);
+        }
+        return mismatches;
+    }
+
+    function browserSignatureIsRepairable(rom) {
+        if (!rom || rom.length < RNODE_EEPROM_RESERVED) return false;
+        for (var i = ROM_ADDR.SIGNATURE; i < ROM_ADDR.INFO_LOCK; i++) {
+            if (rom[i] !== 0x00 && rom[i] !== 0xFF) return false;
+        }
+        return true;
+    }
+
+    function verifyRnodeIdentityPayload(rom, product, model, hwRev, serialBytes, madeBytes, checksum, signature) {
         if (!rom || rom.length < RNODE_EEPROM_RESERVED) return 'EEPROM readback was too short';
         if (rom[ROM_ADDR.PRODUCT] !== product) return 'EEPROM product readback mismatch';
         if (rom[ROM_ADDR.MODEL] !== model) return 'EEPROM model readback mismatch';
@@ -7401,11 +7459,14 @@
         for (var i = 0; i < 16; i++) {
             if (rom[ROM_ADDR.CHKSUM + i] !== checksum[i]) return 'EEPROM checksum readback mismatch';
         }
+        for (var sig = 0; sig < 128; sig++) {
+            if (rom[ROM_ADDR.SIGNATURE + sig] !== signature[sig]) return 'EEPROM signature readback mismatch';
+        }
         return null;
     }
 
-    function verifyProvisionedEeprom(rom, product, model, hwRev, serialBytes, madeBytes, checksum) {
-        var payloadIssue = verifyRnodeIdentityPayload(rom, product, model, hwRev, serialBytes, madeBytes, checksum);
+    function verifyProvisionedEeprom(rom, product, model, hwRev, serialBytes, madeBytes, checksum, signature) {
+        var payloadIssue = verifyRnodeIdentityPayload(rom, product, model, hwRev, serialBytes, madeBytes, checksum, signature);
         if (payloadIssue) return payloadIssue;
         if (rom[ROM_ADDR.INFO_LOCK] !== INFO_LOCK_BYTE) return 'EEPROM identity lock byte was not written';
         return null;
@@ -7457,32 +7518,40 @@
             rom[ROM_ADDR.INFO_LOCK] === 0xFF;
     }
 
-    async function writeRnodeIdentityPayload(session, product, model, hwRev, serialBytes, madeBytes, checksum, signature) {
-        await writeRomOrLocked(session, ROM_ADDR.PRODUCT, product);
-        await writeRomOrLocked(session, ROM_ADDR.MODEL, model);
-        await writeRomOrLocked(session, ROM_ADDR.HW_REV, hwRev);
-        for (var i = 0; i < 4; i++) await writeRomOrLocked(session, ROM_ADDR.SERIAL + i, serialBytes[i]);
-        for (var j = 0; j < 4; j++) await writeRomOrLocked(session, ROM_ADDR.MADE + j, madeBytes[j]);
-        for (var k = 0; k < 16; k++) await writeRomOrLocked(session, ROM_ADDR.CHKSUM + k, checksum[k]);
-        for (var s = 0; s < 128; s++) await writeRomOrLocked(session, ROM_ADDR.SIGNATURE + s, signature[s]);
+    async function writeRnodeIdentityPayload(session, expected, addresses) {
+        for (var i = 0; i < addresses.length; i++) {
+            var addr = addresses[i];
+            await writeRomOrLocked(session, addr, expected[addr]);
+        }
     }
 
     async function writeRnodeIdentity(session, product, model, hwRev, serialBytes, madeBytes, checksum, signature, logMessage) {
         logMessage('Writing RNode identity...', '');
-        await writeRnodeIdentityPayload(session, product, model, hwRev, serialBytes, madeBytes, checksum, signature);
+        var expected = buildRnodeIdentityPayload(product, model, hwRev, serialBytes, madeBytes, checksum, signature);
+        var unlockedRom = null;
+        var mismatches = [];
+        for (var attempt = 0; attempt < 3; attempt++) {
+            unlockedRom = await readRnodeRomWithRetry(session, 3, logMessage);
+            mismatches = rnodeIdentityMismatchAddresses(unlockedRom, expected);
+            if (!mismatches.length) break;
+            if (attempt > 0) {
+                logMessage('Retrying ' + mismatches.length + ' unpersisted EEPROM byte(s)...', 'log-orange');
+            }
+            await writeRnodeIdentityPayload(session, expected, mismatches);
+            await sleepMs(RNODE_EEPROM_READ_RETRY_DELAY_MS);
+        }
+        unlockedRom = await readRnodeRomWithRetry(session, 3, logMessage);
+        mismatches = rnodeIdentityMismatchAddresses(unlockedRom, expected);
+        if (mismatches.length) {
+            throw new Error('RNode identity remained incomplete; EEPROM was left unlocked');
+        }
+        var unlockedIssue = verifyRnodeIdentityPayload(unlockedRom, product, model, hwRev, serialBytes, madeBytes, checksum, signature);
+        if (unlockedIssue) throw new Error(unlockedIssue + '; EEPROM was left unlocked');
+        logMessage('Full identity verified before lock.', 'log-green');
         await writeRomOrLocked(session, ROM_ADDR.INFO_LOCK, INFO_LOCK_BYTE);
         await sleepMs(rnodePostIdentityWriteDelayMs());
         var lockedRom = await readRnodeRomWithRetry(session, 3, logMessage);
-        var lockedIssue = verifyProvisionedEeprom(lockedRom, product, model, hwRev, serialBytes, madeBytes, checksum);
-        if (lockedIssue) throw new Error(lockedIssue);
-    }
-
-    async function lockExistingRnodeIdentity(session, product, model, logMessage) {
-        logMessage('Locking existing RNode identity...', 'log-orange');
-        await writeRomOrLocked(session, ROM_ADDR.INFO_LOCK, INFO_LOCK_BYTE);
-        await sleepMs(rnodePostIdentityWriteDelayMs());
-        var lockedRom = await readRnodeRomWithRetry(session, 3, logMessage);
-        var lockedIssue = validateRnodeIdentityForBoard(lockedRom, product, model);
+        var lockedIssue = verifyProvisionedEeprom(lockedRom, product, model, hwRev, serialBytes, madeBytes, checksum, signature);
         if (lockedIssue) throw new Error(lockedIssue);
     }
 
@@ -7516,6 +7585,7 @@
         var signature = buildUnsignedRnodeSignature();
         var settleMs = options && options.settleMs != null ? options.settleMs : RNODE_POST_FLASH_BOOT_WAIT_MS;
         var wroteFirmwareHash = false;
+        var expectedFirmwareHash = null;
         var normalModeSet = false;
         var identityVerified = false;
         var lastIdentityIssue = null;
@@ -7528,9 +7598,24 @@
                 if (!existingIssue) {
                     identityVerified = true;
                 } else if (existingIssue === 'RNode identity was not locked' &&
+                    !validateUnlockedRnodeIdentityPayloadForBoard(rom, product, model) &&
+                    browserSignatureIsRepairable(rom)) {
+                    if (setProgress) setProgress(96, 'Completing RNode identity...');
+                    logMessage('Completing and verifying the unlocked browser identity before lock.', 'log-orange');
+                    await writeRnodeIdentity(
+                        session,
+                        product,
+                        model,
+                        rom[ROM_ADDR.HW_REV],
+                        rom.slice(ROM_ADDR.SERIAL, ROM_ADDR.SERIAL + 4),
+                        rom.slice(ROM_ADDR.MADE, ROM_ADDR.MADE + 4),
+                        rom.slice(ROM_ADDR.CHKSUM, ROM_ADDR.CHKSUM + 16),
+                        signature,
+                        logMessage
+                    );
+                } else if (existingIssue === 'RNode identity was not locked' &&
                     !validateUnlockedRnodeIdentityPayloadForBoard(rom, product, model)) {
-                    if (setProgress) setProgress(96, 'Locking RNode identity...');
-                    await lockExistingRnodeIdentity(session, product, model, logMessage);
+                    throw new Error('Unlocked identity contains a non-browser signature; use rnodeconf to verify and lock it');
                 } else if (identityLooksBlank(rom)) {
                     if (setProgress) setProgress(96, 'Writing RNode identity...');
                     logMessage(RNODE_UNSIGNED_PROVISIONING_NOTICE, 'log-orange');
@@ -7564,14 +7649,18 @@
 
         await withRnodeSession(logMessage, RNODE_REPAIR_SETTLE_MS, async function (session) {
             if (setProgress) setProgress(98, 'Writing firmware hash...');
-            wroteFirmwareHash = await writeLoadedFirmwareHash(session, logMessage);
+            expectedFirmwareHash = await writeLoadedFirmwareHash(session, logMessage);
+            wroteFirmwareHash = !!expectedFirmwareHash;
             await resetRnodeAfterSetup(session, null);
         });
 
         if (setProgress) setProgress(99, 'Verifying firmware hash...');
         logMessage('Verifying firmware hash...', '');
         try {
-            await ensureRnodeFirmwareHashMatches(logMessage, rnodePostResetSettleMs(), { quiet: true });
+            await ensureRnodeFirmwareHashMatches(logMessage, rnodePostResetSettleMs(), {
+                quiet: true,
+                expectedHash: expectedFirmwareHash
+            });
             wroteFirmwareHash = true;
             logMessage('Firmware hash verified.', 'log-green');
         } catch (hashErr) {
@@ -7666,6 +7755,9 @@
                 ui.log('No firmware bytes loaded; firmware hash will be left unchanged.', 'log-orange');
             }
             var result = await runProvisioning(ui.log, ui.setProgress, { settleMs: rnodeActivationSettleMs() });
+            if (!result || !result.firmwareHashWritten) {
+                throw new Error('RNode firmware hash was not written and verified');
+            }
             state.rnodeHostControlledMode = !!(result && result.normalModeSet);
             ui.setProgress(100, 'RNode setup complete');
             showRnodeSetupComplete();
@@ -7696,13 +7788,18 @@
         try { await requestFreshRnodePortFromUser(); } catch (e) { return; }
         var ui = openProgressLog('Writing firmware hash…');
         try {
+            var expectedFirmwareHash = null;
             await withRnodeSession(ui.log, RNODE_REPAIR_SETTLE_MS, async function (session) {
                 var wrote = await writeLoadedFirmwareHash(session, ui.log);
                 if (!wrote) throw new Error('No valid firmware hash was written');
+                expectedFirmwareHash = wrote;
                 await resetRnodeAfterSetup(session, null);
             });
             ui.log('Verifying firmware hash...', '');
-            await ensureRnodeFirmwareHashMatches(ui.log, rnodePostResetSettleMs(), { quiet: true });
+            await ensureRnodeFirmwareHashMatches(ui.log, rnodePostResetSettleMs(), {
+                quiet: true,
+                expectedHash: expectedFirmwareHash
+            });
             ui.log('Firmware hash verified.', 'log-green');
             ui.setStatus('Firmware hash verified.');
         } catch (err) {
@@ -7719,24 +7816,24 @@
         try { await requestFreshRnodePortFromUser(); } catch (e) { return; }
         var ui = openProgressLog('Adopting running firmware hash…');
         try {
+            var adoptionSent = false;
             await withRnodeSession(ui.log, RNODE_REPAIR_SETTLE_MS, async function (session) {
                 var status = await logRnodeHashStatus(session, ui.log);
-                if (isZeroHash(status.actual)) throw new Error('RNode running firmware hash is not available yet');
-                ui.log('Writing actual hash as target...', '');
-                await sendRnodeFirmwareHash(session, status.actual);
-                try {
-                    var target = await readRnodeFirmwareHash(session, KISS.HASH_TYPE_TARGET_FIRMWARE);
-                    if (hashesEqual(target, status.actual)) {
-                        ui.log('Verified target hash now matches running firmware.', 'log-green');
-                    } else {
-                        ui.log('Target hash write was sent, but verification still differs.', 'log-orange');
-                    }
-                } catch (verifyErr) {
-                    ui.log('Hash write sent; device reset before verification completed.', 'log-orange');
+                if (isUninitializedRnodeHash(status.actual)) throw new Error('RNode running firmware hash is not available yet');
+                if (!hashesEqual(status.target, status.actual) || isUninitializedRnodeHash(status.target)) {
+                    ui.log('Writing actual hash as target...', '');
+                    await sendRnodeFirmwareHash(session, status.actual);
+                    adoptionSent = true;
                 }
-                ui.log('Running firmware hash adopted; device may reset itself.', 'log-green');
             });
-            ui.setStatus('Running hash adopted.');
+            if (adoptionSent) {
+                ui.log('Waiting for the RNode reboot, then verifying persistence...', 'log-orange');
+                await ensureRnodeFirmwareHashMatches(ui.log, rnodePostResetSettleMs(), { quiet: true });
+                ui.log('Running firmware hash adopted and verified.', 'log-green');
+            } else {
+                ui.log('Target hash already matches running firmware.', 'log-green');
+            }
+            ui.setStatus('Running hash verified.');
         } catch (err) {
             ui.log('Error: ' + (err.message || err), 'log-red');
             ui.setStatus('Adopt hash failed.');
