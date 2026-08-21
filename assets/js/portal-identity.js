@@ -401,7 +401,7 @@ function currentView(account) {
 }
 
 function chipFor(view) {
-  if (view === 'done') return { text: 'Verified', tone: 'good' };
+  if (view === 'done') return { text: 'Paired', tone: 'good' };
   if (view === 'welcome' || view === 'enter') return { text: 'Not registered', tone: '' };
   return { text: 'In progress', tone: 'warn' };
 }
@@ -544,7 +544,7 @@ const VIEWS = {
     const fullAddress = registeredAddressFor(currentAccount());
     return flowCard({
       headClass: 'id-flow-head-good',
-      tags: [tag('Registered', 'live')],
+      tags: [],
       title: 'Registered!',
       desc: 'Your wallet address is now paired with your Ratspeak identity.',
       body: `
@@ -596,7 +596,7 @@ function flowCard({ tags, title, desc, body, headClass = '' }) {
   return `
     <section class="ballot id-flow">
       <div class="ballot-head ${headClass}">
-        <div class="poll-tags">${tags.join('')}</div>
+        ${tags.length ? `<div class="poll-tags">${tags.join('')}</div>` : ''}
         <h2 class="ballot-title id-flow-title">${title}</h2>
         <p class="ballot-desc">${desc}</p>
       </div>
