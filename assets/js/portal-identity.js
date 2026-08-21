@@ -4,6 +4,7 @@
 import {
   CODE_LENGTH,
   CODE_TTL_MS,
+  DELIVERY_STATUSES,
   REGISTRY_DOMAIN,
   REGISTRATION_TYPES,
   UNLINK_TYPES,
@@ -87,6 +88,11 @@ async function refreshStatus(options = {}) {
   if (currentAccount() !== account) return;
   const next = { registration: data.registration || null, pending: data.pending || null, badge: data.badge || 'none' };
   if (next.pending?.status === 'registered') next.pending = null;
+  // A verified code is known locally from the verify response; never let a
+  // stale-cached poll regress it to an earlier delivery status.
+  if (status.pending?.status === 'code_verified' && next.pending && DELIVERY_STATUSES.includes(next.pending.status)) {
+    next.pending = { ...next.pending, status: 'code_verified' };
+  }
   const changed = JSON.stringify(next) !== JSON.stringify(status);
   status = next;
   // Re-render only on real change (or when forced) — a blind re-render every
