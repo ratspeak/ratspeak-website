@@ -280,11 +280,21 @@ async function resendCode(body, blobToken, codeSecret) {
 
 // ------------------------------------------------------------- cancel -------
 async function cancelVerification(body, blobToken, secret) {
-  const pending = await loadOwnedPending(body, blobToken, secret);
-  if (pending.error) return pending.error;
-  const record = pending.record;
-  await putSealed(blobToken, secret, pendingPath(record.wallet), { ...record, codeDigest: '', status: 'cancelled' });
-  await putSealed(blobToken, secret, queuePath(record.verificationId), { tombstone: true });
+  // Wallet-scoped, no verification id: pendings are created by an unsigned
+  // start, so the id proves nothing about ownership — requiring it only
+  // strands the wallet owner (lost storage, another browser, or a pending
+  // someone else started for their address). Registration stays gated by
+  // the code and the wallet signature regardless.
+  if (!isAddress(String(body.wallet || ''))) return jsonResponse({ error: 'Invalid wallet address' }, 400, NO_STORE);
+  const wallet = getAddress(body.wallet);
+  const record = await readSealed(blobToken, secret, pendingPath(wallet));
+  if (!record || ['registered', 'cancelled'].includes(record.status)) {
+    return jsonResponse({ ok: true }, 200, NO_STORE);
+  }
+  await putSealed(blobToken, secret, pendingPath(wallet), { ...record, codeDigest: '', status: 'cancelled' });
+  if (record.verificationId) {
+    await putSealed(blobToken, secret, queuePath(record.verificationId), { tombstone: true });
+  }
   return jsonResponse({ ok: true }, 200, NO_STORE);
 }
 

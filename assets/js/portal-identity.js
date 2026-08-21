@@ -156,7 +156,9 @@ async function startVerification() {
   }
   await withBusy(async () => {
     const data = await api({ action: 'start', wallet: account, lxmfAddress });
-    verificationId = data.verificationId || verificationId;
+    // Idempotent starts return the live pending without re-revealing its id;
+    // fall back to the stored one so a restarted flow keeps its credentials.
+    verificationId = data.verificationId || verificationId || restoreVerificationId(account);
     knownAddress = lxmfAddress;
     if (verificationId) storeVerificationId(account, verificationId, lxmfAddress);
     status.pending = data.pending;
@@ -218,9 +220,10 @@ async function resend() {
 async function cancel() {
   const account = currentAccount();
   await withBusy(async () => {
-    await api({ action: 'cancel', wallet: account, verificationId });
+    await api({ action: 'cancel', wallet: account });
     status.pending = null;
     verificationId = '';
+    try { localStorage.removeItem(VID_STORE_KEY); } catch (e) {}
     toast('Verification cancelled.');
   });
 }
