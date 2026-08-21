@@ -409,17 +409,16 @@ function renderWalletPanel(account) {
 const VIEWS = {
   welcome: () => flowCard({
     tags: [tag('Step 1 of 4', 'accent')],
-    title: 'Register your Ratspeak identity',
-    desc: 'Link the wallet that holds your RATSPEAK to an LXMF address. Verification runs over the mesh itself: we message a one-time code to your Ratspeak inbox, and your wallet signs the pairing.',
+    title: 'Pair your wallet',
+    desc: 'Pair your wallet to a Ratspeak identity for future perks or services. See our docs for more information and best privacy practices.',
     body: `
       <div class="id-steps-preview">
         ${previewStep(2, 'Your address', 'Paste the LXMF address from the Ratspeak app.')}
-        ${previewStep(3, 'Code over the mesh', 'A one-time code lands in your Ratspeak inbox &mdash; like email verification, without the email.')}
-        ${previewStep(4, 'Sign the pairing', 'One gas-free signature binds wallet and identity. Unlink any time.')}
+        ${previewStep(3, 'Verify code', 'Receive a one-time code over Ratspeak')}
+        ${previewStep(4, 'Sign onchain', 'Sign the pairing onchain, gas-free.')}
       </div>
       <div class="id-btn-row">
         <button class="primary-btn" type="button" data-id-action="connect">${icon('wallet')}Connect wallet</button>
-        <span class="id-btn-note">Registering requires holding RATSPEAK.</span>
       </div>
       ${errorBanner()}`
   }),
