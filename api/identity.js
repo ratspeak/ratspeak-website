@@ -568,9 +568,10 @@ async function bridgeReport(body, blobToken, secret) {
   if (!record || record.verificationId !== verificationId) {
     return jsonResponse({ error: 'Unknown verification' }, 404, NO_STORE);
   }
-  // A late bridge report never regresses a user-driven state; 'failed' maps
-  // to the retryable 'unreachable' rather than resetting the flow.
-  const mapped = status === 'failed' ? 'unreachable' : status;
+  // A late bridge report never regresses a user-driven state. Both failure
+  // reports stay retryable but distinct: 'unreachable' = no path resolved,
+  // 'failed' = sent without a delivery proof ('undelivered').
+  const mapped = status === 'failed' ? 'undelivered' : status;
   const protectedStatuses = ['registered', 'cancelled', 'code_verified'];
   const next = {
     ...record,
