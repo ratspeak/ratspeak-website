@@ -17,7 +17,8 @@ import {
   isDeliveryComplete,
   normalizeCode,
   normalizeLxmfAddress,
-  serializableMessage
+  serializableMessage,
+  shortLxmfAddress
 } from '../../lib/identity-core.js?v=portal-1';
 import { connectWallet, currentAccount, onAccountChange, signTypedData } from './portal-wallet.js?v=portal-1';
 import { badgeName, badgeTile } from './portal-badge.js?v=portal-1';
@@ -32,7 +33,7 @@ const POLL_MS = 2500;
 let els = null;
 let toast = message => console.log(message);
 let onChipChange = () => {};
-let status = { registration: null, pending: null, badge: 'none' };
+let status = { registration: null, pending: null, badge: 'none', probe: null };
 let verificationId = '';
 let verifyProof = null;
 let suppressedIssuedAt = '';
@@ -52,7 +53,7 @@ export function initIdentityTab(options) {
   onAccountChange(account => {
     errorNote = '';
     if (!account) {
-      status = { registration: null, pending: null, badge: 'none' };
+      status = { registration: null, pending: null, badge: 'none', probe: null };
       verificationId = '';
       verifyProof = null;
       render();
@@ -89,8 +90,11 @@ async function refreshStatus(options = {}) {
   const data = await resp.json().catch(() => ({}));
   if (!resp.ok) throw new Error(data.error || 'Registry unavailable');
   if (currentAccount() !== account) return;
-  const next = { registration: data.registration || null, pending: data.pending || null, badge: data.badge || 'none' };
+  const next = { registration: data.registration || null, pending: data.pending || null, badge: data.badge || 'none', probe: data.probe || null };
   if (next.pending?.status === 'registered') next.pending = null;
+  if (status.probe && next.probe && Date.parse(next.probe.checkedAt || 0) < Date.parse(status.probe.checkedAt || 0)) {
+    next.probe = status.probe;
+  }
   // Storage reads can lag actions taken in this session; state only moves
   // forward here. A cancelled code stays cancelled, a verified code stays
   // verified, and the delivery timeline never steps backwards.
@@ -115,7 +119,9 @@ async function refreshStatus(options = {}) {
 }
 
 function schedulePolling() {
-  const active = status.pending && !['registered'].includes(status.pending.status);
+  const probing = status.probe?.status === 'probing'
+    && Date.now() - Date.parse(status.probe.checkedAt || 0) < 120_000;
+  const active = probing || (status.pending && !['registered'].includes(status.pending.status));
   if (active && !pollTimer) {
     pollTimer = window.setInterval(() => refreshStatus().catch(() => {}), POLL_MS);
   } else if (!active && pollTimer) {
@@ -161,6 +167,36 @@ function registeredAddressFor(account) {
 }
 
 // ------------------------------------------------------------- actions ------
+// The current probe verdict, but only if it applies to the drafted address
+// and is fresh enough to act on.
+function probeFor(draft) {
+  const normalized = normalizeLxmfAddress(draft);
+  const masked = normalized ? shortLxmfAddress(normalized) : '';
+  const p = status.probe;
+  if (!p || !masked || p.lxmfAddress !== masked) return {};
+  const age = Date.now() - Date.parse(p.checkedAt || 0);
+  if (p.status === 'probing') return age < 90_000 ? { probing: true } : { stalled: true };
+  if (age > 10 * 60_000) return {};
+  if (p.status === 'reachable') return { reachable: true };
+  if (p.status === 'unreachable') return { unreachable: true };
+  return {};
+}
+
+async function probeAddress() {
+  const account = currentAccount();
+  const lxmfAddress = normalizeLxmfAddress(els.main.querySelector('#idAddressInput')?.value);
+  if (!lxmfAddress) {
+    errorNote = 'That doesn’t look like an LXMF address — expected 32 hex characters.';
+    return render();
+  }
+  await withBusy(async () => {
+    const data = await api({ action: 'probe', wallet: account, lxmfAddress });
+    status.probe = data.probe;
+    toast('Checking the mesh for your identity…');
+  });
+  schedulePolling();
+}
+
 async function startVerification() {
   const account = currentAccount();
   const lxmfAddress = normalizeLxmfAddress(els.main.querySelector('#idAddressInput')?.value);
@@ -304,6 +340,7 @@ function onClick(event) {
   if (action === 'verify') verifyCode();
   if (action === 'sign') signAndRegister();
   if (action === 'resend') resend();
+  if (action === 'probe') probeAddress();
   if (action === 'cancel') cancel();
   if (action === 'restart') { errorNote = ''; cancel(); }
   if (action === 'unlink') unlink();
@@ -455,23 +492,41 @@ const VIEWS = {
       ${errorBanner()}`
   }),
 
-  enter: () => flowCard({
-    tags: [tag('Step 2 of 4', 'accent')],
-    title: 'Pair wallet to Ratspeak',
-    desc: 'Enter the Ratspeak address you want associated with your Base wallet. <strong style="color: var(--text-primary); font-weight: 600">You must be able to reach our verification node, which can be done by connecting to an official TCP server in the Ratspeak app.</strong>',
-    body: `
-      <label class="id-field-label" for="idAddressInput">Your LXMF address</label>
-      <div class="id-hash-input">
-        ${icon('hash')}
-        <input id="idAddressInput" type="text" inputmode="text" autocomplete="off" spellcheck="false" maxlength="64" placeholder="32 hex characters" value="${escapeHtml(lastAddressInput)}">
-      </div>
-      <p class="id-field-help">In the app: <strong>Ratspeak &rarr; Identity &rarr; Copy LXMF address</strong>.</p>
-      <div class="id-btn-row">
-        <button class="primary-btn" type="button" data-id-action="start" ${busyAttr()}>${icon('send')}Send code</button>
-      </div>
-      <div class="id-banner">${icon('shield')}<div>Only trust a code received from <span class="id-mono">${escapeHtml(PORTAL_SENDER_HASH)}</span>.</div></div>
-      ${errorBanner()}`
-  }),
+  enter: () => {
+    const p = probeFor(lastAddressInput);
+    const reachBanner = p.reachable
+      ? `<div class="id-banner good">${icon('check')}<div><strong>Reachable.</strong> Your identity answered on the mesh &mdash; send the code.</div></div>`
+      : p.unreachable
+        ? `<div class="id-banner warn">${icon('alert')}<div><strong>Not reachable right now.</strong> Open Ratspeak, make sure you’re connected (the Ruby or Emerald server in Ratspeak work well for this), tap Announce, then check again.</div></div>`
+        : p.probing
+          ? `<div class="id-banner">${icon('clock')}<div><strong>Checking the mesh&hellip;</strong> Asking for a path to your identity. This usually takes a few seconds.</div></div>`
+          : '';
+    const primary = p.reachable
+      ? `<button class="primary-btn" type="button" data-id-action="start" ${busyAttr()}>${icon('send')}Send code</button>`
+      : `<button class="primary-btn" type="button" data-id-action="probe" ${p.probing || busy ? 'disabled' : ''}>${icon('radar')}${p.unreachable ? 'Check again' : 'Check reachability'}</button>`;
+    const escapeHatch = (p.unreachable || p.stalled)
+      ? `<button class="secondary-btn" type="button" data-id-action="start" ${busyAttr()}>Send code anyway</button>`
+      : '';
+    return flowCard({
+      tags: [tag('Step 2 of 4', 'accent')],
+      title: 'Pair wallet to Ratspeak',
+      desc: 'Enter the Ratspeak address you want associated with your Base wallet. <strong style="color: var(--text-primary); font-weight: 600">You must be able to reach our verification node, which can be done by connecting to an official TCP server in the Ratspeak app.</strong>',
+      body: `
+        <label class="id-field-label" for="idAddressInput">Your LXMF address</label>
+        <div class="id-hash-input">
+          ${icon('hash')}
+          <input id="idAddressInput" type="text" inputmode="text" autocomplete="off" spellcheck="false" maxlength="64" placeholder="32 hex characters" value="${escapeHtml(lastAddressInput)}">
+        </div>
+        <p class="id-field-help">In the app: <strong>Ratspeak &rarr; Identity &rarr; Copy LXMF address</strong>.</p>
+        ${reachBanner}
+        <div class="id-btn-row">
+          ${primary}
+          ${escapeHatch}
+        </div>
+        <div class="id-banner">${icon('shield')}<div>Only trust a code received from <span class="id-mono">${escapeHtml(PORTAL_SENDER_HASH)}</span>.</div></div>
+        ${errorBanner()}`
+    });
+  },
 
   code: () => {
     const pending = status.pending;
@@ -673,6 +728,7 @@ function icon(name, size = 16) {
     pen: '<path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>',
     clock: '<circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>',
     refresh: '<path d="M21 12a9 9 0 1 1-3-6.7L21 8"></path><path d="M21 3v5h-5"></path>',
+    radar: '<path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"></path><path d="M4 6h.01"></path><path d="M2.29 9.62a10 10 0 1 0 19.02-1.27"></path><path d="M16.24 7.76a6 6 0 1 0 1.07 7.17"></path><path d="M16.24 16.24h.01"></path><path d="M12 18h.01"></path><path d="M17.99 11.66a6 6 0 0 1-2.22 4.58"></path><circle cx="12" cy="12" r="2"></circle><path d="m13.41 10.59 5.66-5.66"></path>',
     copy: '<rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>',
     alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><path d="M12 17h.01"></path>',
     unlink: '<path d="m18.84 12.25 1.72-1.71a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="m5.17 11.75-1.72 1.71a5 5 0 0 0 7.07 7.07l1.71-1.71"></path><line x1="8" y1="2" x2="8" y2="5"></line><line x1="2" y1="8" x2="5" y2="8"></line><line x1="16" y1="19" x2="16" y2="22"></line><line x1="19" y1="16" x2="22" y2="16"></line>'
@@ -680,7 +736,11 @@ function icon(name, size = 16) {
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:${size}px;height:${size}px">${paths[name]}</svg>`;
 }
 
-// Remember typed address across renders.
+// Remember typed address across renders; re-render only when the edit
+// changes whether the current probe verdict still applies to the draft.
 document.addEventListener('input', event => {
-  if (event.target && event.target.id === 'idAddressInput') lastAddressInput = event.target.value;
+  if (!event.target || event.target.id !== 'idAddressInput') return;
+  const before = JSON.stringify(probeFor(lastAddressInput));
+  lastAddressInput = event.target.value;
+  if (JSON.stringify(probeFor(lastAddressInput)) !== before) render();
 });
