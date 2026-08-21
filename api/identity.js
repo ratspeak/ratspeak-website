@@ -227,9 +227,14 @@ async function verifyCode(body, blobToken, codeSecret) {
 
   const next = { ...record, status: 'code_verified', codeVerifiedAt: new Date().toISOString() };
   await putSealed(blobToken, secret, pendingPath(record.wallet), next);
+  const verifiedAt = Date.now();
   return jsonResponse({
     ok: true,
     pending: publicPending(next),
+    proof: {
+      verifiedAt,
+      mac: await verifyProofMac(codeSecret, record.wallet, record.verificationId, record.lxmfAddress, verifiedAt)
+    },
     sign: {
       domain: REGISTRY_DOMAIN,
       types: REGISTRATION_TYPES,
@@ -308,18 +313,19 @@ async function register(body, blobToken, secret) {
 
   const wallet = getAddress(message.wallet);
   const record = await readSealed(blobToken, secret, pendingPath(wallet));
-  if (!record || record.status !== 'code_verified') {
+  const recordVerified = record
+    && record.status === 'code_verified'
+    && record.verificationId === message.verificationId
+    && record.lxmfAddress === message.lxmfAddress
+    && !isCodeExpired(record);
+  if (!recordVerified && !(await isValidVerifyProof(secret, body.proof, wallet, message))) {
     return jsonResponse({ error: 'Verify the code before signing' }, 409, NO_STORE);
   }
-  if (record.verificationId !== message.verificationId || record.lxmfAddress !== message.lxmfAddress) {
-    return jsonResponse({ error: 'Signature does not match this verification' }, 409, NO_STORE);
-  }
-  if (isCodeExpired(record)) return jsonResponse({ error: 'This verification expired. Start over.' }, 409, NO_STORE);
 
   const canonical = canonicalRegistrationMessage({
     wallet,
-    lxmfAddress: record.lxmfAddress,
-    verificationId: record.verificationId,
+    lxmfAddress: message.lxmfAddress,
+    verificationId: message.verificationId,
     issuedAt: input.issuedAt
   });
   const verified = await verifyTypedData({
@@ -334,28 +340,30 @@ async function register(body, blobToken, secret) {
 
   const now = new Date().toISOString();
   // Takeover: an address moving here unlinks its previous wallet's record.
-  const previous = await readSealed(blobToken, secret, byAddressPath(record.lxmfAddress));
+  const previous = await readSealed(blobToken, secret, byAddressPath(message.lxmfAddress));
   if (previous && !previous.tombstone && previous.wallet && previous.wallet !== wallet) {
     const old = normalizeRegistration(await readSealed(blobToken, secret, registrationPath(previous.wallet)));
-    if (isActiveRegistration(old) && old.lxmfAddress === record.lxmfAddress) {
+    if (isActiveRegistration(old) && old.lxmfAddress === message.lxmfAddress) {
       await putSealed(blobToken, secret, registrationPath(previous.wallet), { ...old, unlinkedAt: now });
     }
   }
 
   const registration = normalizeRegistration({
     wallet,
-    lxmfAddress: record.lxmfAddress,
+    lxmfAddress: message.lxmfAddress,
     signature,
     message: serializableMessage(canonical),
     registeredAt: now
   });
   await putSealed(blobToken, secret, registrationPath(wallet), registration);
-  await putSealed(blobToken, secret, byAddressPath(record.lxmfAddress), {
-    lxmfAddress: record.lxmfAddress,
+  await putSealed(blobToken, secret, byAddressPath(message.lxmfAddress), {
+    lxmfAddress: message.lxmfAddress,
     wallet,
     registeredAt: now
   });
-  await putSealed(blobToken, secret, pendingPath(wallet), { ...record, codeDigest: '', status: 'registered' });
+  if (record) {
+    await putSealed(blobToken, secret, pendingPath(wallet), { ...record, codeDigest: '', status: 'registered' });
+  }
 
   return jsonResponse({ ok: true, registration: publicRegistration(registration) }, 200, NO_STORE);
 }
@@ -579,6 +587,20 @@ async function digestCode(secret, verificationId, code) {
   );
   const mac = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`${verificationId}:${code}`));
   return [...new Uint8Array(mac)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Stateless attestation that a code was verified: register accepts it in
+// place of a fresh `code_verified` read, because Blob overwrites are not
+// reliably read-your-write and must never block the final signature.
+async function verifyProofMac(secret, wallet, verificationId, lxmfAddress, verifiedAt) {
+  return digestCode(secret, verificationId, `verified:${wallet}:${lxmfAddress}:${verifiedAt}`);
+}
+
+async function isValidVerifyProof(secret, proof, wallet, message) {
+  const verifiedAt = Number(proof?.verifiedAt || 0);
+  if (!verifiedAt || Math.abs(Date.now() - verifiedAt) > CODE_TTL_MS) return false;
+  const expected = await verifyProofMac(secret, wallet, message.verificationId, message.lxmfAddress, verifiedAt);
+  return timingSafeEqual(expected, String(proof?.mac || ''));
 }
 
 function randomHex(bytes) {
