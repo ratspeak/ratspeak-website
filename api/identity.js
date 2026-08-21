@@ -54,12 +54,14 @@ export const config = { runtime: 'edge' };
 //   IDENTITY_CODE_SECRET     HMAC key for stored verification-code digests.
 //   IDENTITY_BRIDGE_TOKEN    Bearer token for the mesh bridge daemon.
 //
-// Storage (Vercel Blob). Records are overwritten with tombstones instead of
-// deleted so this file only relies on the already-proven list/fetch/PUT API.
-//   holder-registry/pending/<wallet>.json     verification in flight (digest only)
+// Storage (Vercel Blob). Overwrites are not read-your-write, so records that
+// transition state (pending, badges) are append-only: each transition is a
+// new immutable file under the record's prefix and reads take the newest.
+//   holder-registry/pending/<wallet>/<version>.json  verification in flight (digest only)
+//   holder-registry/badges/<wallet>/<version>.json   claimed badge tier
 //   holder-registry/queue/<verificationId>.json  bridge outbox (plaintext code;
 //                                             tombstoned when the bridge claims it)
-//   holder-registry/registrations/<wallet>.json  the public pairing record
+//   holder-registry/registrations/<wallet>.json  the pairing record
 //   holder-registry/by-address/<lxmf>.json    reverse index for takeover flow
 
 const BLOB_API = 'https://vercel.com/api/blob';
@@ -131,8 +133,8 @@ async function getStatus(url, blobToken, secret) {
   const wallet = getAddress(walletParam);
   const [registration, pending, badgeRecord] = await Promise.all([
     readSealed(blobToken, secret, registrationPath(wallet)),
-    readSealed(blobToken, secret, pendingPath(wallet)),
-    readSealed(blobToken, secret, badgePath(wallet))
+    readPending(blobToken, secret, wallet),
+    readBadge(blobToken, secret, wallet)
   ]);
   const activeRegistration = normalizeRegistration(registration);
   return jsonResponse({
@@ -167,7 +169,7 @@ async function startVerification(body, blobToken, codeSecret) {
 
   // One live verification per wallet; an unexpired one for the same address
   // is returned as-is (idempotent), a different address replaces it.
-  const existing = await readSealed(blobToken, secret, pendingPath(wallet));
+  const existing = await readPending(blobToken, secret, wallet);
   if (isLivePending(existing) && existing.lxmfAddress === lxmfAddress) {
     return jsonResponse({ ok: true, pending: publicPending(existing) }, 200, NO_STORE);
   }
@@ -191,7 +193,7 @@ async function startVerification(body, blobToken, codeSecret) {
     status: 'queued',
     createdAt: now
   };
-  await putSealed(blobToken, secret, pendingPath(wallet), pending);
+  await writePending(blobToken, secret, wallet, pending);
   await putSealed(blobToken, secret, queuePath(verificationId), {
     version: 1,
     verificationId,
@@ -226,7 +228,7 @@ async function verifyCode(body, blobToken, codeSecret) {
   }
 
   const next = { ...record, status: 'code_verified', codeVerifiedAt: new Date().toISOString() };
-  await putSealed(blobToken, secret, pendingPath(record.wallet), next);
+  await writePending(blobToken, secret, record.wallet, next);
   const verifiedAt = Date.now();
   return jsonResponse({
     ok: true,
@@ -271,7 +273,7 @@ async function resendCode(body, blobToken, codeSecret) {
     sendCount: Number(record.sendCount || 0) + 1,
     status: 'queued'
   };
-  await putSealed(blobToken, secret, pendingPath(record.wallet), next);
+  await writePending(blobToken, secret, record.wallet, next);
   await putSealed(blobToken, secret, queuePath(record.verificationId), {
     version: 1,
     verificationId: record.verificationId,
@@ -292,11 +294,11 @@ async function cancelVerification(body, blobToken, secret) {
   // the code and the wallet signature regardless.
   if (!isAddress(String(body.wallet || ''))) return jsonResponse({ error: 'Invalid wallet address' }, 400, NO_STORE);
   const wallet = getAddress(body.wallet);
-  const record = await readSealed(blobToken, secret, pendingPath(wallet));
+  const record = await readPending(blobToken, secret, wallet);
   if (!record || ['registered', 'cancelled'].includes(record.status)) {
     return jsonResponse({ ok: true }, 200, NO_STORE);
   }
-  await putSealed(blobToken, secret, pendingPath(wallet), { ...record, codeDigest: '', status: 'cancelled' });
+  await writePending(blobToken, secret, wallet, { ...record, codeDigest: '', status: 'cancelled' });
   if (record.verificationId) {
     await putSealed(blobToken, secret, queuePath(record.verificationId), { tombstone: true });
   }
@@ -312,7 +314,7 @@ async function register(body, blobToken, secret) {
   if (!isAddress(String(message.wallet || ''))) return jsonResponse({ error: 'Invalid wallet address' }, 400, NO_STORE);
 
   const wallet = getAddress(message.wallet);
-  const record = await readSealed(blobToken, secret, pendingPath(wallet));
+  const record = await readPending(blobToken, secret, wallet);
   const recordVerified = record
     && record.status === 'code_verified'
     && record.verificationId === message.verificationId
@@ -362,7 +364,7 @@ async function register(body, blobToken, secret) {
     registeredAt: now
   });
   if (record) {
-    await putSealed(blobToken, secret, pendingPath(wallet), { ...record, codeDigest: '', status: 'registered' });
+    await writePending(blobToken, secret, wallet, { ...record, codeDigest: '', status: 'registered' });
   }
 
   return jsonResponse({ ok: true, registration: publicRegistration(registration) }, 200, NO_STORE);
@@ -438,13 +440,13 @@ async function claimBadge(body, blobToken, secret) {
     return jsonResponse({ error: 'Balance check failed' }, 502, NO_STORE);
   }
   const earned = badgeForBalance(balance.rawBalance, balance.decimals);
-  const existing = await readSealed(blobToken, secret, badgePath(wallet));
+  const existing = await readBadge(blobToken, secret, wallet);
   const badge = higherBadge(normalizeBadge(existing?.badge), earned);
   if (badge === 'none') {
     return jsonResponse({ error: 'This wallet does not hold enough RATSPEAK for a badge' }, 403, NO_STORE);
   }
   const now = new Date().toISOString();
-  await putSealed(blobToken, secret, badgePath(wallet), {
+  await writeBadge(blobToken, secret, wallet, {
     version: 1,
     wallet,
     badge,
@@ -477,7 +479,7 @@ async function bridgeReport(body, blobToken, secret) {
   const wallet = job?.wallet || (isAddress(String(body.wallet || '')) ? getAddress(body.wallet) : null);
   if (!wallet) return jsonResponse({ error: 'Unknown verification' }, 404, NO_STORE);
 
-  const record = await readSealed(blobToken, secret, pendingPath(wallet));
+  const record = await readPending(blobToken, secret, wallet);
   if (!record || record.verificationId !== verificationId) {
     return jsonResponse({ error: 'Unknown verification' }, 404, NO_STORE);
   }
@@ -492,7 +494,7 @@ async function bridgeReport(body, blobToken, secret) {
       ? (record.deliveredAt || new Date().toISOString())
       : record.deliveredAt
   };
-  await putSealed(blobToken, secret, pendingPath(wallet), next);
+  await writePending(blobToken, secret, wallet, next);
   // The first post-resolve report claims the job: the plaintext code leaves
   // storage once the bridge holds it in memory. The tombstone keeps the
   // wallet mapping so later reports for the same send still resolve.
@@ -507,7 +509,7 @@ async function loadOwnedPending(body, blobToken, secret) {
   if (!isAddress(String(body.wallet || ''))) return { error: jsonResponse({ error: 'Invalid wallet address' }, 400, NO_STORE) };
   const wallet = getAddress(body.wallet);
   if (!isVerificationId(String(body.verificationId || ''))) return { error: jsonResponse({ error: 'Invalid verification id' }, 400, NO_STORE) };
-  const record = await readSealed(blobToken, secret, pendingPath(wallet));
+  const record = await readPending(blobToken, secret, wallet);
   if (!record || record.verificationId !== body.verificationId || ['registered', 'cancelled'].includes(record.status)) {
     return { error: jsonResponse({ error: 'No verification in progress' }, 404, NO_STORE) };
   }
@@ -544,6 +546,60 @@ function publicRegistration(record) {
 function pendingPath(wallet) {
   return `${ROOT}/pending/${String(wallet).toLowerCase()}.json`;
 }
+
+// ---------------------------------------------------- versioned records -----
+// Pending and badge records transition state, and Blob overwrites are not
+// read-your-write: every transition is a NEW immutable file under the
+// record's prefix, reads take the newest, older versions are pruned
+// best-effort. The single-file paths remain as read-only legacy fallback.
+function pendingPrefix(wallet) {
+  return `${ROOT}/pending/${String(wallet).toLowerCase()}/`;
+}
+
+function badgePrefix(wallet) {
+  return `${ROOT}/badges/${String(wallet).toLowerCase()}/`;
+}
+
+function versionKey() {
+  return `${String(Date.now()).padStart(14, '0')}-${randomHex(4)}`;
+}
+
+function sortedVersions(blobs, prefix) {
+  return blobs.filter(b => b.pathname.startsWith(prefix)).sort((a, b) => (a.pathname < b.pathname ? -1 : 1));
+}
+
+async function readVersioned(blobToken, secret, prefix, legacyPath) {
+  const versions = sortedVersions(await listBlobs(blobToken, prefix, 1000), prefix);
+  const newest = versions[versions.length - 1];
+  if (newest) return openSealedValue(secret, await fetchJson(newest.url));
+  return readSealed(blobToken, secret, legacyPath);
+}
+
+async function writeVersioned(blobToken, secret, prefix, value) {
+  await putSealed(blobToken, secret, `${prefix}${versionKey()}.json`, value);
+  try {
+    const versions = sortedVersions(await listBlobs(blobToken, prefix, 1000), prefix);
+    const stale = versions.slice(0, -8);
+    if (stale.length) await deleteBlobs(blobToken, stale.map(b => b.url));
+  } catch (e) {}
+}
+
+async function deleteBlobs(blobToken, urls) {
+  await fetch(`${BLOB_API}/delete`, {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${blobToken}`,
+      'x-api-version': API_VERSION,
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({ urls })
+  });
+}
+
+const readPending = (t, s, wallet) => readVersioned(t, s, pendingPrefix(wallet), pendingPath(wallet));
+const writePending = (t, s, wallet, value) => writeVersioned(t, s, pendingPrefix(wallet), value);
+const readBadge = (t, s, wallet) => readVersioned(t, s, badgePrefix(wallet), badgePath(wallet));
+const writeBadge = (t, s, wallet, value) => writeVersioned(t, s, badgePrefix(wallet), value);
 
 function queuePath(verificationId) {
   return `${ROOT}/queue/${verificationId}.json`;
