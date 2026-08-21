@@ -5279,6 +5279,7 @@
         rnodeAsset: null,
         rnodeAssetName: null,
         rnodeAssetLabel: null,
+        rnodeAssetSha256: null,
         rnodeFlashStrategy: null,
         rnodePlatform: null,
         rnodeBand: null,
@@ -5435,6 +5436,7 @@
         state.rnodeAsset = null;
         state.rnodeAssetName = null;
         state.rnodeAssetLabel = null;
+        state.rnodeAssetSha256 = null;
         state.rnodeFlashStrategy = null;
         state.rnodePlatform = null;
         state.rnodeBand = null;
@@ -5823,6 +5825,7 @@
         state.rnodeAsset = null;
         state.rnodeAssetName = null;
         state.rnodeAssetLabel = null;
+        state.rnodeAssetSha256 = null;
         state.rnodeFlashStrategy = null;
         state.rnodePlatform = null;
         state.rnodeBand = null;
@@ -6034,6 +6037,7 @@
             state.rnodeAsset = null;
             state.rnodeAssetName = null;
             state.rnodeAssetLabel = null;
+            state.rnodeAssetSha256 = null;
             state.rnodeFlashStrategy = null;
             state.rnodePlatform = null;
             state.rnodeBand = null;
@@ -6047,7 +6051,7 @@
             // Clear upload state when switching to RNode
             state.customFile = null;
             state.firmwareAppBytes = null;
-            state.firmwareReady = !!state.rnodeAsset;
+            state.firmwareReady = !!state.rnodeAsset && !!state.rnodeAssetSha256;
             state.rnodeHostControlledMode = false;
             if (!state.rnodeAssetName) populateRnodeBandSelect(null);
             if (!rnodeLoaded) loadRnodeVariants();
@@ -6149,6 +6153,7 @@
         state.rnodeAsset = null;
         state.rnodeAssetName = null;
         state.rnodeAssetLabel = null;
+        state.rnodeAssetSha256 = null;
         state.rnodeFlashStrategy = null;
         state.rnodePlatform = null;
         state.rnodeBand = null;
@@ -6237,6 +6242,10 @@
             rnodeStatus.textContent = 'Downloading ' + name + '…';
             state.firmwareReady = false;
             state.firmwareAppBytes = null;
+            state.rnodeAsset = null;
+            state.rnodeAssetName = null;
+            state.rnodeAssetLabel = null;
+            state.rnodeAssetSha256 = null;
             state.rnodeFlashStrategy = null;
             state.rnodePlatform = null;
             updateFlashBtn();
@@ -6253,9 +6262,12 @@
                 var binResp = await fetch('/api/firmware?source=rnode&asset=' + encodeURIComponent(name) + rnodeVersionQuery());
                 if (!binResp.ok) throw new Error('Download failed');
                 var buf = await binResp.arrayBuffer();
+                rnodeStatus.textContent = 'Verifying publisher SHA-256 for ' + meta.label + '…';
+                var verifiedSha256 = await verifyOfficialRnodeReleaseAsset(buf, meta);
                 state.rnodeAsset = buf;
                 state.rnodeAssetName = name;
                 state.rnodeAssetLabel = meta.label;
+                state.rnodeAssetSha256 = verifiedSha256;
                 state.firmwareReady = true;
                 updateRnodeReadyStatus();
                 // Auto-suggest the matching product/model in the provision form
@@ -6270,8 +6282,10 @@
                 rnodeStatus.classList.add('is-error');
                 rnodeStatus.textContent = 'Error: ' + (err.message || err);
                 state.rnodeAsset = null;
+                state.rnodeAssetName = null;
                 state.firmwareAppBytes = null;
                 state.rnodeAssetLabel = null;
+                state.rnodeAssetSha256 = null;
                 state.rnodeFlashStrategy = null;
                 state.rnodePlatform = null;
                 state.firmwareReady = false;
@@ -6531,7 +6545,7 @@
     }
 
     function updateRnodeReadyStatus() {
-        if (!rnodeStatus || !state.rnodeAsset || !state.rnodeAssetLabel) return;
+        if (!rnodeStatus || !state.rnodeAsset || !state.rnodeAssetLabel || !state.rnodeAssetSha256) return;
         var band = rnodeBandShortLabel(selectedRnodeBandOption(state.rnodeAssetName));
         var path = isNrf52RnodeFirmwareSelected()
             ? 'nRF52 app DFU, bootloader and EEPROM preserved'
@@ -6539,7 +6553,8 @@
         rnodeStatus.classList.add('is-ready');
         rnodeStatus.textContent = '✓ ' + state.rnodeAssetLabel +
             (band ? ' · ' + band : '') +
-            ' · ' + formatBytes(state.rnodeAsset.byteLength) + ' · ' + path + ' · ready to flash';
+            ' · ' + formatBytes(state.rnodeAsset.byteLength) +
+            ' · publisher SHA-256 verified · ' + path + ' · ready to flash';
     }
 
     function productLabelFor(byte) {
@@ -7206,6 +7221,29 @@
     async function sha256(bytes) {
         var buf = await crypto.subtle.digest('SHA-256', bytes);
         return new Uint8Array(buf);
+    }
+
+    function normalizeSha256Hex(value) {
+        var normalized = String(value || '').trim().toLowerCase();
+        return /^[0-9a-f]{64}$/.test(normalized) ? normalized : null;
+    }
+
+    async function verifyOfficialRnodeReleaseAsset(buffer, metadata) {
+        if (!metadata || !Number.isSafeInteger(metadata.size) || metadata.size < 0) {
+            throw new Error('Official release metadata is missing a valid asset size');
+        }
+        if (!buffer || buffer.byteLength !== metadata.size) {
+            throw new Error('Official release download size does not match publisher metadata');
+        }
+        var expected = normalizeSha256Hex(metadata.sha256);
+        if (!expected) {
+            throw new Error('Official release metadata is missing a valid publisher SHA-256 digest');
+        }
+        var actual = bytesToHex(await sha256(new Uint8Array(buffer)));
+        if (actual !== expected) {
+            throw new Error('Official release download failed publisher SHA-256 verification');
+        }
+        return expected;
     }
 
     // Compute the firmware partition hash, mirroring rnodeconf.get_partition_hash.
