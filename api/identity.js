@@ -660,7 +660,10 @@ async function readBlobJson(blobToken, pathname) {
 }
 
 async function fetchJson(url) {
-  const resp = await fetch(url, { cache: 'no-store' });
+  // Unique query bypasses the Blob CDN cache: overwritten records must read
+  // back fresh (verify/register would otherwise see stale pending state).
+  const fresh = `${url}${url.includes('?') ? '&' : '?'}nocache=${crypto.randomUUID()}`;
+  const resp = await fetch(fresh, { cache: 'no-store' });
   if (!resp.ok) return null;
   return resp.json().catch(() => null);
 }
