@@ -108,6 +108,7 @@ export default async function handler(req) {
     const limit = checkRequestRate(req, 'identity:post', IDENTITY_WRITE_RATE_LIMIT);
     if (!limit.allowed) return tooManyRequests(limit, 'Too many registration requests. Try again shortly.');
 
+    if (action === 'probe') return probeReachability(body, blobToken, codeSecret);
     if (action === 'start') return startVerification(body, blobToken, codeSecret);
     if (action === 'verify') return verifyCode(body, blobToken, codeSecret);
     if (action === 'resend') return resendCode(body, blobToken, codeSecret);
@@ -131,10 +132,11 @@ async function getStatus(url, blobToken, secret) {
   // (needed for the owner's own resume UX, rate limited).
   if (!isAddress(walletParam)) return jsonResponse({ error: 'Invalid wallet address' }, 400, NO_STORE);
   const wallet = getAddress(walletParam);
-  const [registration, pending, badgeRecord] = await Promise.all([
+  const [registration, pending, badgeRecord, probe] = await Promise.all([
     readSealed(blobToken, secret, registrationPath(wallet)),
     readPending(blobToken, secret, wallet),
-    readBadge(blobToken, secret, wallet)
+    readBadge(blobToken, secret, wallet),
+    readProbe(blobToken, secret, wallet)
   ]);
   const activeRegistration = normalizeRegistration(registration);
   return jsonResponse({
@@ -143,8 +145,60 @@ async function getStatus(url, blobToken, secret) {
     eligibilityRule: REGISTRY_ELIGIBILITY_RULE,
     badge: normalizeBadge(badgeRecord?.badge),
     registration: isActiveRegistration(activeRegistration) ? publicRegistration(activeRegistration) : null,
-    pending: publicPending(pending)
+    pending: publicPending(pending),
+    probe: publicProbe(probe)
   }, 200, NO_STORE);
+}
+
+// ------------------------------------------------------------- probe --------
+// Resolve-only reachability check before any code is sent: same gates as
+// start (RF traffic), answered by the bridge as reachable/unreachable.
+async function probeReachability(body, blobToken, codeSecret) {
+  const secret = codeSecret;
+  if (!isAddress(String(body.wallet || ''))) return jsonResponse({ error: 'Invalid wallet address' }, 400, NO_STORE);
+  const wallet = getAddress(body.wallet);
+  const lxmfAddress = normalizeLxmfAddress(body.lxmfAddress);
+  if (!lxmfAddress) return jsonResponse({ error: 'That does not look like an LXMF address (32 hex characters)' }, 400, NO_STORE);
+
+  let balance;
+  try {
+    balance = await readSnapshotBalance(wallet, null);
+  } catch (err) {
+    console.error('Latest balance read failed', err);
+    return jsonResponse({ error: 'Balance check failed' }, 502, NO_STORE);
+  }
+  if (!isEligibleToRegister(balance.rawBalance, balance.decimals)) {
+    return jsonResponse({ error: 'This wallet does not hold RATSPEAK' }, 403, NO_STORE);
+  }
+
+  const existing = await readProbe(blobToken, secret, wallet);
+  if (existing && existing.lxmfAddress === lxmfAddress && existing.status === 'probing'
+    && Date.now() - Date.parse(existing.createdAt || 0) < 60_000) {
+    return jsonResponse({ ok: true, probe: publicProbe(existing) }, 200, NO_STORE);
+  }
+
+  const probeId = randomHex(16);
+  const now = new Date().toISOString();
+  const record = { version: 1, wallet, lxmfAddress, probeId, status: 'probing', createdAt: now };
+  await writeProbe(blobToken, secret, wallet, record);
+  await writeQueueJob(blobToken, secret, probeId, {
+    version: 1,
+    kind: 'probe',
+    verificationId: probeId,
+    wallet,
+    lxmfAddress,
+    createdAt: now
+  });
+  return jsonResponse({ ok: true, probe: publicProbe(record) }, 200, NO_STORE);
+}
+
+function publicProbe(record) {
+  if (!record) return null;
+  return {
+    lxmfAddress: shortLxmfAddress(record.lxmfAddress),
+    status: ['probing', 'reachable', 'unreachable'].includes(record.status) ? record.status : 'probing',
+    checkedAt: record.updatedAt || record.createdAt || ''
+  };
 }
 
 // ------------------------------------------------------------- start --------
@@ -478,12 +532,12 @@ async function bridgeQueue(blobToken, secret) {
     const newest = entry.versions[entry.versions.length - 1] || entry.legacy;
     if (!newest) continue;
     const job = await openSealedValue(secret, await fetchJson(newest.url));
-    if (job && !job.tombstone && job.code) jobs.push(job);
+    if (job && !job.tombstone && (job.code || job.kind === 'probe')) jobs.push(job);
   }
   return jsonResponse({ ok: true, jobs }, 200, NO_STORE);
 }
 
-const BRIDGE_STATUSES = ['resolving', 'sending', 'delivered', 'propagated', 'unreachable', 'failed'];
+const BRIDGE_STATUSES = ['resolving', 'sending', 'delivered', 'propagated', 'reachable', 'unreachable', 'failed'];
 
 async function bridgeReport(body, blobToken, secret) {
   const verificationId = String(body.verificationId || '');
@@ -494,6 +548,21 @@ async function bridgeReport(body, blobToken, secret) {
   const job = await readQueueJob(blobToken, secret, verificationId);
   const wallet = job?.wallet || (isAddress(String(body.wallet || '')) ? getAddress(body.wallet) : null);
   if (!wallet) return jsonResponse({ error: 'Unknown verification' }, 404, NO_STORE);
+
+  if (job?.kind === 'probe') {
+    const probe = await readProbe(blobToken, secret, wallet);
+    if (probe && probe.probeId === verificationId) {
+      const mapped = status === 'reachable' ? 'reachable'
+        : status === 'resolving' ? 'probing'
+        : 'unreachable';
+      await writeProbe(blobToken, secret, wallet, { ...probe, status: mapped, updatedAt: new Date().toISOString() });
+    }
+    if (!job.tombstone && status !== 'resolving') {
+      await writeQueueJob(blobToken, secret, verificationId, { tombstone: true, wallet: job.wallet, verificationId });
+    }
+    return jsonResponse({ ok: true }, 200, NO_STORE);
+  }
+  if (status === 'reachable') return jsonResponse({ error: 'Invalid status' }, 400, NO_STORE);
 
   const record = await readPending(blobToken, secret, wallet);
   if (!record || record.verificationId !== verificationId) {
@@ -616,9 +685,15 @@ function queuePrefix(verificationId) {
   return `${ROOT}/queue/${verificationId}/`;
 }
 
+function probePrefix(wallet) {
+  return `${ROOT}/probe/${String(wallet).toLowerCase()}/`;
+}
+
 const readPending = (t, s, wallet) => readVersioned(t, s, pendingPrefix(wallet), pendingPath(wallet));
 const readQueueJob = (t, s, vid) => readVersioned(t, s, queuePrefix(vid), queuePath(vid));
 const writeQueueJob = (t, s, vid, value) => writeVersioned(t, s, queuePrefix(vid), value);
+const readProbe = (t, s, wallet) => readVersioned(t, s, probePrefix(wallet), `${probePrefix(wallet).slice(0, -1)}.json`);
+const writeProbe = (t, s, wallet, value) => writeVersioned(t, s, probePrefix(wallet), value);
 const writePending = (t, s, wallet, value) => writeVersioned(t, s, pendingPrefix(wallet), value);
 const readBadge = (t, s, wallet) => readVersioned(t, s, badgePrefix(wallet), badgePath(wallet));
 const writeBadge = (t, s, wallet, value) => writeVersioned(t, s, badgePrefix(wallet), value);
