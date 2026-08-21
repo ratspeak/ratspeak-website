@@ -3,7 +3,9 @@
     { "source": "/discord", "destination": "https://discord.gg/mvS6adBEdW", "statusCode": 302 },
     { "source": "/telegram", "destination": "https://t.me/ratspeak", "statusCode": 302 },
     { "source": "/docs", "destination": "https://docs.ratspeak.org/", "statusCode": 308 },
-    { "source": "/docs/:path*", "destination": "https://docs.ratspeak.org/docs/:path*", "statusCode": 308 }
+    { "source": "/docs/:path*", "destination": "https://docs.ratspeak.org/docs/:path*", "statusCode": 308 },
+    { "source": "/poll.html", "destination": "/portal.html", "statusCode": 308 },
+    { "source": "/portal", "destination": "/portal.html", "statusCode": 308 }
   ],
   "rewrites": [
     { "source": "/assets/seo/og-map.png", "destination": "/api/og-map" }
@@ -32,6 +34,9 @@
       "maxDuration": 10
     },
     "api/votes.js": {
+      "maxDuration": 10
+    },
+    "api/identity.js": {
       "maxDuration": 10
     }
   },
