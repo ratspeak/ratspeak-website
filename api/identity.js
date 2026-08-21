@@ -59,8 +59,8 @@ export const config = { runtime: 'edge' };
 // new immutable file under the record's prefix and reads take the newest.
 //   holder-registry/pending/<wallet>/<version>.json  verification in flight (digest only)
 //   holder-registry/badges/<wallet>/<version>.json   claimed badge tier
-//   holder-registry/queue/<verificationId>.json  bridge outbox (plaintext code;
-//                                             tombstoned when the bridge claims it)
+//   holder-registry/queue/<verificationId>/<version>.json  bridge outbox
+//     (plaintext code; a tombstone version marks the job claimed)
 //   holder-registry/registrations/<wallet>.json  the pairing record
 //   holder-registry/by-address/<lxmf>.json    reverse index for takeover flow
 
@@ -175,7 +175,7 @@ async function startVerification(body, blobToken, codeSecret) {
   }
   if (existing && isVerificationId(existing.verificationId)) {
     // A replaced verification must not leave its old code claimable.
-    await putSealed(blobToken, secret, queuePath(existing.verificationId), { tombstone: true });
+    await writeQueueJob(blobToken, secret, existing.verificationId, { tombstone: true });
   }
 
   const verificationId = randomHex(16);
@@ -194,7 +194,7 @@ async function startVerification(body, blobToken, codeSecret) {
     createdAt: now
   };
   await writePending(blobToken, secret, wallet, pending);
-  await putSealed(blobToken, secret, queuePath(verificationId), {
+  await writeQueueJob(blobToken, secret, verificationId, {
     version: 1,
     verificationId,
     wallet,
@@ -274,7 +274,7 @@ async function resendCode(body, blobToken, codeSecret) {
     status: 'queued'
   };
   await writePending(blobToken, secret, record.wallet, next);
-  await putSealed(blobToken, secret, queuePath(record.verificationId), {
+  await writeQueueJob(blobToken, secret, record.verificationId, {
     version: 1,
     verificationId: record.verificationId,
     wallet: record.wallet,
@@ -300,7 +300,7 @@ async function cancelVerification(body, blobToken, secret) {
   }
   await writePending(blobToken, secret, wallet, { ...record, codeDigest: '', status: 'cancelled' });
   if (record.verificationId) {
-    await putSealed(blobToken, secret, queuePath(record.verificationId), { tombstone: true });
+    await writeQueueJob(blobToken, secret, record.verificationId, { tombstone: true });
   }
   return jsonResponse({ ok: true }, 200, NO_STORE);
 }
@@ -458,10 +458,26 @@ async function claimBadge(body, blobToken, secret) {
 
 // ------------------------------------------------------------- bridge -------
 async function bridgeQueue(blobToken, secret) {
+  // Queue records are versioned like pendings (resends must never hide
+  // behind a stale tombstone read): newest version per id wins, the legacy
+  // single-file form is a fallback.
   const blobs = await listBlobs(blobToken, `${ROOT}/queue/`);
-  const jobs = [];
+  const groups = new Map();
   for (const blob of blobs) {
-    const job = await openSealedValue(secret, await fetchJson(blob.url));
+    const rel = blob.pathname.slice(`${ROOT}/queue/`.length);
+    const [head, version] = rel.split('/');
+    const vid = head.replace(/\.json$/, '');
+    const entry = groups.get(vid) || { legacy: null, versions: [] };
+    if (version) entry.versions.push(blob);
+    else entry.legacy = blob;
+    groups.set(vid, entry);
+  }
+  const jobs = [];
+  for (const entry of groups.values()) {
+    entry.versions.sort((a, b) => (a.pathname < b.pathname ? -1 : 1));
+    const newest = entry.versions[entry.versions.length - 1] || entry.legacy;
+    if (!newest) continue;
+    const job = await openSealedValue(secret, await fetchJson(newest.url));
     if (job && !job.tombstone && job.code) jobs.push(job);
   }
   return jsonResponse({ ok: true, jobs }, 200, NO_STORE);
@@ -475,7 +491,7 @@ async function bridgeReport(body, blobToken, secret) {
   if (!isVerificationId(verificationId)) return jsonResponse({ error: 'Invalid verification id' }, 400, NO_STORE);
   if (!BRIDGE_STATUSES.includes(status)) return jsonResponse({ error: 'Invalid status' }, 400, NO_STORE);
 
-  const job = await readSealed(blobToken, secret, queuePath(verificationId));
+  const job = await readQueueJob(blobToken, secret, verificationId);
   const wallet = job?.wallet || (isAddress(String(body.wallet || '')) ? getAddress(body.wallet) : null);
   if (!wallet) return jsonResponse({ error: 'Unknown verification' }, 404, NO_STORE);
 
@@ -499,7 +515,7 @@ async function bridgeReport(body, blobToken, secret) {
   // storage once the bridge holds it in memory. The tombstone keeps the
   // wallet mapping so later reports for the same send still resolve.
   if (job && !job.tombstone && status !== 'resolving') {
-    await putSealed(blobToken, secret, queuePath(verificationId), { tombstone: true, wallet: job.wallet, verificationId });
+    await writeQueueJob(blobToken, secret, verificationId, { tombstone: true, wallet: job.wallet, verificationId });
   }
   return jsonResponse({ ok: true }, 200, NO_STORE);
 }
@@ -596,7 +612,13 @@ async function deleteBlobs(blobToken, urls) {
   });
 }
 
+function queuePrefix(verificationId) {
+  return `${ROOT}/queue/${verificationId}/`;
+}
+
 const readPending = (t, s, wallet) => readVersioned(t, s, pendingPrefix(wallet), pendingPath(wallet));
+const readQueueJob = (t, s, vid) => readVersioned(t, s, queuePrefix(vid), queuePath(vid));
+const writeQueueJob = (t, s, vid, value) => writeVersioned(t, s, queuePrefix(vid), value);
 const writePending = (t, s, wallet, value) => writeVersioned(t, s, pendingPrefix(wallet), value);
 const readBadge = (t, s, wallet) => readVersioned(t, s, badgePrefix(wallet), badgePath(wallet));
 const writeBadge = (t, s, wallet, value) => writeVersioned(t, s, badgePrefix(wallet), value);

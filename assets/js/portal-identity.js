@@ -501,7 +501,8 @@ const VIEWS = {
     title: 'We couldn’t reach your identity',
     desc: `${escapeHtml(status.pending.lxmfAddress)} didn’t answer on the mesh.`,
     body: `
-      <div class="id-banner warn">${icon('alert')}<div><strong>Still unreachable.</strong> Open Ratspeak, make sure you’re connected (the Ratspeak server interface works well for this), tap Announce, then resend the code.</div></div>
+      ${deliveryTimeline(status.pending)}
+      <div class="id-banner warn">${icon('alert')}<div><strong>Still unreachable.</strong> Open Ratspeak, make sure you’re connected (the Ruby or Emerald server in Ratspeak work well for this), tap Announce, then resend the code.</div></div>
       <div class="id-btn-row">
         <button class="primary-btn" type="button" data-id-action="resend" ${canResend(status.pending) && !busy ? '' : 'disabled'}>${icon('refresh')}Resend code</button>
         <button class="secondary-btn" type="button" data-id-action="cancel" ${busyAttr()}>Start over</button>
@@ -567,9 +568,14 @@ const VIEWS = {
 };
 
 function deliveryTimeline(pending) {
+  const failed = pending.status === 'unreachable';
   const stages = [
     { key: 'queued', label: 'Queued' },
-    { key: 'resolving', label: 'Finding your device' },
+    {
+      key: 'resolving',
+      label: 'Finding your device',
+      sub: failed ? 'No answer on the mesh yet.' : ''
+    },
     { key: 'sending', label: 'Sending over the mesh' },
     {
       key: 'arrived',
@@ -580,11 +586,14 @@ function deliveryTimeline(pending) {
   const order = ['queued', 'resolving', 'sending', 'delivered', 'propagated'];
   const position = Math.max(0, order.indexOf(pending.status));
   const arrivedIndex = 3;
-  const currentIndex = pending.status === 'delivered' || pending.status === 'propagated' ? arrivedIndex : Math.min(position, 2);
+  const currentIndex = failed ? 1
+    : pending.status === 'delivered' || pending.status === 'propagated' ? arrivedIndex
+    : Math.min(position, 2);
   return `<div class="id-timeline">${stages.map((stage, index) => {
     const done = index < currentIndex || (index === arrivedIndex && currentIndex === arrivedIndex);
-    const wait = index === currentIndex && currentIndex < arrivedIndex;
-    const dot = done ? `<span class="id-tl-dot done">${icon('check', 12)}</span>`
+    const wait = index === currentIndex && currentIndex < arrivedIndex && !failed;
+    const dot = failed && index === currentIndex ? `<span class="id-tl-dot fail">${icon('x', 12)}</span>`
+      : done ? `<span class="id-tl-dot done">${icon('check', 12)}</span>`
       : wait ? `<span class="id-tl-dot wait">${icon('clock', 12)}</span>`
       : '<span class="id-tl-dot"></span>';
     const line = index < stages.length - 1 ? `<span class="id-tl-line${done ? ' done' : ''}"></span>` : '';
