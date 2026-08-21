@@ -433,7 +433,7 @@ function currentView(account) {
   if (!pending) return 'enter';
   if (isCodeExpired(pending)) return 'expired';
   if (pending.status === 'code_verified') return 'sign';
-  if (pending.status === 'unreachable') return 'unreachable';
+  if (pending.status === 'unreachable' || pending.status === 'undelivered') return 'unreachable';
   return 'code';
 }
 
@@ -553,11 +553,15 @@ const VIEWS = {
 
   unreachable: () => flowCard({
     tags: [tag('Step 3 of 4', 'accent')],
-    title: 'We couldn’t reach your identity',
-    desc: `${escapeHtml(status.pending.lxmfAddress)} didn’t answer on the mesh.`,
+    title: status.pending.status === 'undelivered' ? 'Delivery wasn’t confirmed' : 'We couldn’t reach your identity',
+    desc: status.pending.status === 'undelivered'
+      ? `${escapeHtml(status.pending.lxmfAddress)} was found on the mesh, but the code wasn’t confirmed as received.`
+      : `${escapeHtml(status.pending.lxmfAddress)} didn’t answer on the mesh.`,
     body: `
       ${deliveryTimeline(status.pending)}
-      <div class="id-banner warn">${icon('alert')}<div><strong>Still unreachable.</strong> Open Ratspeak, make sure you’re connected (the Ruby or Emerald server in Ratspeak work well for this), tap Announce, then resend the code.</div></div>
+      ${status.pending.status === 'undelivered'
+        ? `<div class="id-banner warn">${icon('alert')}<div><strong>Almost there.</strong> Keep Ratspeak open and in the foreground, stay connected to a single server (Ruby or Emerald), then resend the code.</div></div>`
+        : `<div class="id-banner warn">${icon('alert')}<div><strong>Still unreachable.</strong> Open Ratspeak, make sure you’re connected (the Ruby or Emerald server in Ratspeak work well for this), tap Announce, then resend the code.</div></div>`}
       <div class="id-btn-row">
         <button class="primary-btn" type="button" data-id-action="resend" ${canResend(status.pending) && !busy ? '' : 'disabled'}>${icon('refresh')}Resend code</button>
         <button class="secondary-btn" type="button" data-id-action="cancel" ${busyAttr()}>Start over</button>
@@ -623,15 +627,19 @@ const VIEWS = {
 };
 
 function deliveryTimeline(pending) {
-  const failed = pending.status === 'unreachable';
+  const failed = pending.status === 'unreachable' || pending.status === 'undelivered';
   const stages = [
     { key: 'queued', label: 'Queued' },
     {
       key: 'resolving',
       label: 'Finding your device',
-      sub: failed ? 'No answer on the mesh yet.' : ''
+      sub: pending.status === 'unreachable' ? 'No answer on the mesh yet.' : ''
     },
-    { key: 'sending', label: 'Sending over the mesh' },
+    {
+      key: 'sending',
+      label: 'Sending over the mesh',
+      sub: pending.status === 'undelivered' ? 'Sent, but no delivery confirmation came back.' : ''
+    },
     {
       key: 'arrived',
       label: pending.status === 'propagated' ? 'In your Offline Inbox' : 'Delivered',
@@ -641,7 +649,8 @@ function deliveryTimeline(pending) {
   const order = ['queued', 'resolving', 'sending', 'delivered', 'propagated'];
   const position = Math.max(0, order.indexOf(pending.status));
   const arrivedIndex = 3;
-  const currentIndex = failed ? 1
+  const currentIndex = pending.status === 'unreachable' ? 1
+    : pending.status === 'undelivered' ? 2
     : pending.status === 'delivered' || pending.status === 'propagated' ? arrivedIndex
     : Math.min(position, 2);
   return `<div class="id-timeline">${stages.map((stage, index) => {
