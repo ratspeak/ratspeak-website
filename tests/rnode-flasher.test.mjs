@@ -479,6 +479,49 @@ test('nRF52 target hash covers the exact DFU application bytes', async () => {
   assert.match(downloadHtml, /state\.firmwareAppBytes = firmware/);
 });
 
+test('official RNode release assets are size- and SHA-256-verified before becoming ready', async () => {
+  const {
+    verifyOfficialRnodeReleaseAsset
+  } = evaluateDownloadFunctions([
+    'bytesToHex',
+    'sha256',
+    'normalizeSha256Hex',
+    'verifyOfficialRnodeReleaseAsset'
+  ], { crypto: webcrypto });
+  const asset = new Uint8Array([0x61, 0x62, 0x63]);
+  const published = {
+    size: asset.byteLength,
+    sha256: 'BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD'
+  };
+
+  assert.equal(
+    await verifyOfficialRnodeReleaseAsset(asset.buffer, published),
+    published.sha256.toLowerCase()
+  );
+  await assert.rejects(
+    () => verifyOfficialRnodeReleaseAsset(asset.buffer, { ...published, size: 4 }),
+    /size does not match publisher metadata/
+  );
+  await assert.rejects(
+    () => verifyOfficialRnodeReleaseAsset(asset.buffer, { ...published, sha256: null }),
+    /missing a valid publisher SHA-256 digest/
+  );
+  await assert.rejects(
+    () => verifyOfficialRnodeReleaseAsset(asset.buffer, { ...published, sha256: '00'.repeat(32) }),
+    /failed publisher SHA-256 verification/
+  );
+
+  const downloadStart = downloadHtml.indexOf("rnodeVariantSelect.addEventListener('change'");
+  const verifyCall = downloadHtml.indexOf('await verifyOfficialRnodeReleaseAsset(buf, meta)', downloadStart);
+  const assetAssignment = downloadHtml.indexOf('state.rnodeAsset = buf', downloadStart);
+  const readyAssignment = downloadHtml.indexOf('state.firmwareReady = true', downloadStart);
+  assert.ok(downloadStart >= 0);
+  assert.ok(verifyCall > downloadStart);
+  assert.ok(assetAssignment > verifyCall);
+  assert.ok(readyAssignment > assetAssignment);
+  assert.match(extractFunction('updateRnodeReadyStatus'), /publisher SHA-256 verified/);
+});
+
 test('unsigned browser provisioning is explicit and always uses a blank signature', () => {
   assert.match(downloadHtml, /use rnodeconf when signed identity/);
   assert.match(downloadHtml, /Browser RNode setup writes an unsigned identity/);
