@@ -35,6 +35,7 @@ let onChipChange = () => {};
 let status = { registration: null, pending: null, badge: 'none' };
 let verificationId = '';
 let verifyProof = null;
+let suppressedIssuedAt = '';
 let knownAddress = '';
 let busy = false;
 let errorNote = '';
@@ -90,10 +91,20 @@ async function refreshStatus(options = {}) {
   if (currentAccount() !== account) return;
   const next = { registration: data.registration || null, pending: data.pending || null, badge: data.badge || 'none' };
   if (next.pending?.status === 'registered') next.pending = null;
-  // A verified code is known locally from the verify response; never let a
-  // stale-cached poll regress it to an earlier delivery status.
+  // Storage reads can lag actions taken in this session; state only moves
+  // forward here. A cancelled code stays cancelled, a verified code stays
+  // verified, and the delivery timeline never steps backwards.
+  if (next.pending && suppressedIssuedAt && next.pending.codeIssuedAt === suppressedIssuedAt) {
+    next.pending = null;
+  }
   if (status.pending?.status === 'code_verified' && next.pending && DELIVERY_STATUSES.includes(next.pending.status)) {
     next.pending = { ...next.pending, status: 'code_verified' };
+  } else if (status.pending && next.pending && status.pending.codeIssuedAt === next.pending.codeIssuedAt) {
+    const localRank = DELIVERY_STATUSES.indexOf(status.pending.status);
+    const polledRank = DELIVERY_STATUSES.indexOf(next.pending.status);
+    if (localRank !== -1 && polledRank !== -1 && polledRank < localRank) {
+      next.pending = { ...next.pending, status: status.pending.status };
+    }
   }
   const changed = JSON.stringify(next) !== JSON.stringify(status);
   status = next;
@@ -163,6 +174,7 @@ async function startVerification() {
     // fall back to the stored one so a restarted flow keeps its credentials.
     verificationId = data.verificationId || verificationId || restoreVerificationId(account);
     knownAddress = lxmfAddress;
+    suppressedIssuedAt = '';
     if (data.verificationId) verifyProof = null;
     if (verificationId) storeVerificationId(account, verificationId, lxmfAddress);
     status.pending = data.pending;
@@ -230,6 +242,7 @@ async function cancel() {
   const account = currentAccount();
   await withBusy(async () => {
     await api({ action: 'cancel', wallet: account });
+    suppressedIssuedAt = status.pending?.codeIssuedAt || '';
     status.pending = null;
     verificationId = '';
     verifyProof = null;
@@ -292,7 +305,7 @@ function onClick(event) {
   if (action === 'sign') signAndRegister();
   if (action === 'resend') resend();
   if (action === 'cancel') cancel();
-  if (action === 'restart') { status.pending = null; verificationId = ''; errorNote = ''; render(); }
+  if (action === 'restart') { errorNote = ''; cancel(); }
   if (action === 'unlink') unlink();
   if (action === 'copy-address' && status.registration) {
     navigator.clipboard?.writeText(registeredAddressFor(currentAccount()) || status.registration.lxmfAddress)
