@@ -1458,7 +1458,8 @@
         .id-banner.error svg { color: var(--red); }
 
         .id-timeline { display: grid; }
-        .id-tl-row { display: flex; align-items: flex-start; gap: 11px; }
+        .id-tl-row { display: flex; align-items: flex-start; gap: 11px; animation: id-tl-in 0.3s both; animation-delay: calc(var(--tl-i, 0) * 140ms); }
+        @keyframes id-tl-in { from { opacity: 0; transform: translateY(3px); } }
         .id-tl-rail { display: flex; flex-direction: column; align-items: center; }
         .id-tl-dot {
             width: 22px;

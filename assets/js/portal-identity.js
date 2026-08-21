@@ -34,6 +34,7 @@ let toast = message => console.log(message);
 let onChipChange = () => {};
 let status = { registration: null, pending: null, badge: 'none' };
 let verificationId = '';
+let verifyProof = null;
 let knownAddress = '';
 let busy = false;
 let errorNote = '';
@@ -52,6 +53,7 @@ export function initIdentityTab(options) {
     if (!account) {
       status = { registration: null, pending: null, badge: 'none' };
       verificationId = '';
+      verifyProof = null;
       render();
       return;
     }
@@ -113,7 +115,7 @@ function schedulePolling() {
 
 function storeVerificationId(account, vid, lxmfAddress) {
   try {
-    localStorage.setItem(VID_STORE_KEY, JSON.stringify({ wallet: account, verificationId: vid, lxmfAddress }));
+    localStorage.setItem(VID_STORE_KEY, JSON.stringify({ wallet: account, verificationId: vid, lxmfAddress, proof: verifyProof }));
   } catch (e) {}
 }
 
@@ -122,6 +124,7 @@ function restoreVerificationId(account) {
     const parsed = JSON.parse(localStorage.getItem(VID_STORE_KEY));
     if (!parsed || parsed.wallet !== account) return '';
     knownAddress = String(parsed.lxmfAddress || '');
+    verifyProof = parsed.proof || null;
     return String(parsed.verificationId || '');
   } catch (e) {
     return '';
@@ -160,9 +163,12 @@ async function startVerification() {
     // fall back to the stored one so a restarted flow keeps its credentials.
     verificationId = data.verificationId || verificationId || restoreVerificationId(account);
     knownAddress = lxmfAddress;
+    if (data.verificationId) verifyProof = null;
     if (verificationId) storeVerificationId(account, verificationId, lxmfAddress);
     status.pending = data.pending;
-    toast('Verification code queued for the mesh.');
+    toast(data.verificationId
+      ? 'Verification code queued for the mesh.'
+      : 'You already have an active code — enter it below, or resend.');
   });
 }
 
@@ -176,6 +182,8 @@ async function verifyCode() {
   await withBusy(async () => {
     const data = await api({ action: 'verify', wallet: account, verificationId, code });
     status.pending = data.pending;
+    verifyProof = data.proof || null;
+    storeVerificationId(account, verificationId, knownAddress);
     codeInput = '';
     toast('Code verified — one signature to go.');
   });
@@ -198,10 +206,11 @@ async function signAndRegister() {
       primaryType: 'Registration',
       message
     });
-    const data = await api({ action: 'register', message: serializableMessage(message), signature });
+    const data = await api({ action: 'register', message: serializableMessage(message), signature, proof: verifyProof });
     status.registration = data.registration;
     status.pending = null;
     verificationId = '';
+    verifyProof = null;
     storeRegisteredAddress(account, fullAddress);
     toast('Registered!');
   });
@@ -223,6 +232,7 @@ async function cancel() {
     await api({ action: 'cancel', wallet: account });
     status.pending = null;
     verificationId = '';
+    verifyProof = null;
     try { localStorage.removeItem(VID_STORE_KEY); } catch (e) {}
     toast('Verification cancelled.');
   });
@@ -565,7 +575,7 @@ function deliveryTimeline(pending) {
       : wait ? `<span class="id-tl-dot wait">${icon('clock', 12)}</span>`
       : '<span class="id-tl-dot"></span>';
     const line = index < stages.length - 1 ? `<span class="id-tl-line${done ? ' done' : ''}"></span>` : '';
-    return `<div class="id-tl-row"><div class="id-tl-rail">${dot}${line}</div><div><div class="id-tl-label">${stage.label}</div>${stage.sub ? `<div class="id-tl-sub">${stage.sub}</div>` : ''}</div></div>`;
+    return `<div class="id-tl-row" style="--tl-i:${index}"><div class="id-tl-rail">${dot}${line}</div><div><div class="id-tl-label">${stage.label}</div>${stage.sub ? `<div class="id-tl-sub">${stage.sub}</div>` : ''}</div></div>`;
   }).join('')}</div>`;
 }
 
