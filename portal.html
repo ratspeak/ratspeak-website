@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#18171a">
-    <title>Community Poll — Ratspeak</title>
-    <meta name="description" content="View the final Ratspeak community poll results on Base. Distribute more nodes was selected as the winning community allocation.">
+    <title>Onchain Portal — Ratspeak</title>
+    <meta name="description" content="The Ratspeak token holder portal on Base. Vote on proposals and register your Ratspeak identity over the mesh.">
     <meta name="base:app_id" content="6a3c6e26bff5f57cb7afde68" />
-    <link rel="canonical" href="https://ratspeak.org/poll.html">
+    <link rel="canonical" href="https://ratspeak.org/portal.html">
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
@@ -22,20 +22,20 @@
     <meta property="og:type" content="website">
     <meta property="og:locale" content="en_US">
     <meta property="og:site_name" content="Ratspeak">
-    <meta property="og:title" content="Community Poll — Ratspeak">
-    <meta property="og:description" content="View the final Ratspeak community poll results on Base. Distribute more nodes was selected as the winning community allocation.">
-    <meta property="og:url" content="https://ratspeak.org/poll.html">
+    <meta property="og:title" content="Onchain Portal — Ratspeak">
+    <meta property="og:description" content="The Ratspeak token holder portal on Base. Vote on proposals and register your Ratspeak identity over the mesh.">
+    <meta property="og:url" content="https://ratspeak.org/portal.html">
     <meta property="og:image" content="https://ratspeak.org/assets/seo/og-home.png">
     <meta property="og:image:secure_url" content="https://ratspeak.org/assets/seo/og-home.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Ratspeak Community Poll — Experimental community voting on Base.">
+    <meta property="og:image:alt" content="Ratspeak Holder Portal — voting and identity registration on Base.">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@ratspeakorg">
-    <meta name="twitter:title" content="Community Poll — Ratspeak">
-    <meta name="twitter:description" content="View the final Ratspeak community poll results on Base. Distribute more nodes was selected as the winning community allocation.">
+    <meta name="twitter:title" content="Onchain Portal — Ratspeak">
+    <meta name="twitter:description" content="The Ratspeak token holder portal on Base. Vote on proposals and register your Ratspeak identity over the mesh.">
     <meta name="twitter:image" content="https://ratspeak.org/assets/seo/og-home.png">
-    <meta name="twitter:image:alt" content="Ratspeak Community Poll — Experimental community voting on Base.">
+    <meta name="twitter:image:alt" content="Ratspeak Holder Portal — voting and identity registration on Base.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Familjen+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
@@ -44,9 +44,9 @@
 {
       "@context": "https://schema.org",
       "@type": "WebPage",
-      "name": "Community Poll — Ratspeak",
-      "url": "https://ratspeak.org/poll.html",
-      "description": "View the final Ratspeak community poll results on Base. Distribute more nodes was selected as the winning community allocation.",
+      "name": "Onchain Portal — Ratspeak",
+      "url": "https://ratspeak.org/portal.html",
+      "description": "The Ratspeak token holder portal on Base. Vote on proposals and register your Ratspeak identity over the mesh.",
       "isPartOf": {
         "@type": "WebSite",
         "name": "Ratspeak",
@@ -363,6 +363,13 @@
             color: var(--text-primary);
         }
         .navbar-hamburger { display: none; }
+        .navbar-divider {
+            width: 1px;
+            height: 22px;
+            background: var(--border-subtle);
+            margin: 0 4px;
+            flex-shrink: 0;
+        }
 
         body.public-mode .admin-only { display: none !important; }
 
@@ -609,17 +616,18 @@
             border-radius: 8px;
             background: var(--bg-secondary);
             color: var(--text-primary);
-            min-height: 122px;
-            padding: 16px;
+            padding: 12px 42px 12px 14px;
             text-align: left;
             overflow: hidden;
         }
         .choice-card::before {
             content: "";
             position: absolute;
-            inset: 14px 14px auto auto;
-            width: 18px;
-            height: 18px;
+            top: 50%;
+            right: 14px;
+            margin-top: -8px;
+            width: 16px;
+            height: 16px;
             border: 1px solid var(--border);
             border-radius: 50%;
             background: var(--bg-primary);
@@ -646,33 +654,18 @@
         .choice-card h3 {
             position: relative;
             color: var(--text-primary);
-            font-size: 17px;
+            font-size: 15px;
             font-weight: 700;
             letter-spacing: 0;
-            line-height: 1.22;
-            padding-right: 34px;
+            line-height: 1.25;
         }
         .choice-card p {
             position: relative;
             color: var(--text-secondary);
-            font-size: 13px;
+            font-size: 12.5px;
             line-height: 1.45;
-            margin-top: 8px;
-            padding-right: 12px;
+            margin-top: 3px;
         }
-        .choice-selected {
-            position: absolute;
-            right: 14px;
-            bottom: 12px;
-            color: var(--accent);
-            display: none;
-            font-family: var(--font-mono);
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-        }
-        .choice-card.selected .choice-selected { display: block; }
         .choice-card.is-winner {
             border-color: var(--accent);
             box-shadow:
@@ -1068,6 +1061,7 @@
         }
         .auth-modal__input,
         .proposal-form input,
+        .proposal-form select,
         .proposal-form textarea {
             width: 100%;
             border: 1px solid var(--border-subtle);
@@ -1079,6 +1073,7 @@
         }
         .auth-modal__input:focus,
         .proposal-form input:focus,
+        .proposal-form select:focus,
         .proposal-form textarea:focus {
             border-color: var(--accent);
             box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
@@ -1268,6 +1263,356 @@
             transform: translateX(-50%) translateY(0);
         }
 
+        .hero.portal-masthead { padding-bottom: 0; margin-bottom: 24px; }
+        .portal-masthead .eyebrow { margin-bottom: 10px; }
+        .portal-masthead .hero-title { font-size: clamp(30px, 3.4vw, 40px); }
+
+        .portal-tabs {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .portal-tab {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            min-height: 46px;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 14.5px;
+            font-weight: 600;
+            padding: 10px 14px 12px;
+            transition: color 0.16s, background 0.16s;
+        }
+        .portal-tab::after {
+            content: "";
+            position: absolute;
+            left: 10px;
+            right: 10px;
+            bottom: -1px;
+            height: 2px;
+            border-radius: 2px 2px 0 0;
+            background: var(--accent);
+            transform: scaleX(0);
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+        .portal-tab svg { width: 16px; height: 16px; transition: color 0.16s; }
+        @media (hover: hover) {
+            .portal-tab:hover {
+                color: var(--text-primary);
+                background: linear-gradient(to bottom, transparent, var(--accent-a05));
+            }
+            .portal-tab:hover::after { background: var(--border); transform: scaleX(1); }
+        }
+        .portal-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+        .portal-tab.active { color: var(--text-primary); }
+        .portal-tab.active svg { color: var(--accent); }
+        .portal-tab.active::after,
+        .portal-tab.active:hover::after { background: var(--accent); transform: scaleX(1); }
+        .tab-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-radius: 999px;
+            background: var(--bg-tertiary);
+            padding: 3px 9px;
+        }
+        .tab-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+        .tab-chip.good { color: var(--green); background: var(--green-soft); }
+        .tab-chip.warn { color: var(--yellow); background: var(--yellow-soft); }
+
+        .id-panel {
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
+            padding: 14px;
+        }
+        .id-flow-body { padding: 22px 26px 26px; }
+        .id-flow-title { font-size: 32px; }
+        .id-flow .ballot-head.id-flow-head-good {
+            background:
+                radial-gradient(circle at 8% 10%, color-mix(in srgb, var(--green) 16%, transparent), transparent 32%),
+                linear-gradient(135deg, color-mix(in srgb, var(--bg-secondary) 84%, transparent), var(--bg-elevated));
+        }
+        .id-steps-preview {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+        .id-preview-step {
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            padding: 16px;
+        }
+        .id-preview-step .id-step-dot { margin-bottom: 10px; }
+        .id-step-row { display: flex; align-items: flex-start; gap: 11px; padding: 9px 0; }
+        .id-step-dot {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            background: var(--bg-primary);
+        }
+        .id-step-dot.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+        .id-step-dot.done { border-color: var(--green); color: var(--green); background: var(--green-soft); }
+        .id-step-dot svg { width: 13px; height: 13px; }
+        .id-step-name { color: var(--text-primary); font-size: 14px; font-weight: 600; line-height: 1.3; }
+        .id-step-sub { color: var(--text-muted); font-size: 12px; line-height: 1.4; margin-top: 1px; }
+        .id-step-row.todo .id-step-name { color: var(--text-muted); }
+
+        .id-field-label {
+            color: var(--text-muted);
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 7px;
+        }
+        .id-hash-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            padding: 12px 14px;
+        }
+        .id-hash-input svg { width: 16px; height: 16px; color: var(--text-muted); flex-shrink: 0; }
+        .id-hash-input input {
+            flex: 1;
+            min-width: 0;
+            border: none;
+            background: transparent;
+            color: var(--text-primary);
+            font-family: var(--font-code);
+            font-size: 14px;
+            letter-spacing: 0.02em;
+            outline: none;
+        }
+        .id-hash-input:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-a18);
+        }
+        .id-field-help { color: var(--text-muted); font-size: 12.5px; line-height: 1.45; margin-top: 8px; }
+        .id-field-help strong { color: var(--text-secondary); font-weight: 600; }
+        .id-btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 18px; }
+        .id-btn-row .primary-btn, .id-btn-row .secondary-btn, .id-btn-row .danger-btn { width: auto; }
+        .id-btn-note { color: var(--text-muted); font-size: 12.5px; margin-top: 10px; }
+        .id-divider { border-top: 1px solid var(--border-subtle); margin: 18px 0; }
+        .id-mono { font-family: var(--font-code); font-size: 0.92em; color: var(--text-primary); }
+        .danger-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 38px;
+            border: 1px solid color-mix(in srgb, var(--red) 55%, transparent);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--red);
+            font-weight: 700;
+            padding: 8px 13px;
+        }
+        .danger-btn svg { width: 16px; height: 16px; }
+
+        .id-banner {
+            display: flex;
+            gap: 11px;
+            align-items: flex-start;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 12px 14px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            background: var(--bg-primary);
+            margin-top: 16px;
+        }
+        .id-banner svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; }
+        .id-banner strong { color: var(--text-primary); font-weight: 600; }
+        .id-banner.warn { border-color: color-mix(in srgb, var(--yellow) 45%, transparent); background: var(--yellow-soft); }
+        .id-banner.warn svg { color: var(--yellow); }
+        .id-banner.error { border-color: color-mix(in srgb, var(--red) 50%, transparent); background: color-mix(in srgb, var(--red) 8%, var(--bg-primary)); }
+        .id-banner.error svg { color: var(--red); }
+
+        .id-timeline { display: grid; }
+        .id-tl-row { display: flex; align-items: flex-start; gap: 11px; }
+        .id-tl-rail { display: flex; flex-direction: column; align-items: center; }
+        .id-tl-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+        .id-tl-dot svg { width: 12px; height: 12px; }
+        .id-tl-dot.done { border-color: var(--green); background: var(--green-soft); color: var(--green); }
+        .id-tl-dot.wait { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+        .id-tl-line { width: 1px; height: 20px; background: var(--border); }
+        .id-tl-line.done { background: var(--green); opacity: 0.5; }
+        .id-tl-label { color: var(--text-primary); font-size: 13.5px; font-weight: 600; padding-top: 1px; }
+        .id-tl-sub { color: var(--text-muted); font-size: 12px; line-height: 1.4; }
+
+        .id-code-boxes { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .id-code-box {
+            width: 46px;
+            height: 54px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            text-align: center;
+            font-family: var(--font-code);
+            font-size: 21px;
+            font-weight: 600;
+            color: var(--text-primary);
+            outline: none;
+            text-transform: uppercase;
+        }
+        .id-code-box.gap { margin-left: 12px; }
+        .id-code-box:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-a18); }
+
+        .id-badges {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .id-badge {
+            position: relative;
+            isolation: isolate;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            padding: 12px 8px 10px;
+        }
+        .id-badge.earned {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 1px var(--accent-a25);
+        }
+        .id-badge-name { color: var(--text-primary); font-size: 14px; font-weight: 700; }
+        .id-badge-min { color: var(--accent); font-family: var(--font-mono); font-size: 11px; font-weight: 600; }
+        .id-badge-tile {
+            position: relative;
+            width: 46px;
+            height: 46px;
+            border-radius: 11px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.45), inset 0 -2px 3px rgba(0,0,0,0.25), 0 2px 5px rgba(0,0,0,0.25);
+        }
+        .id-badge-tile svg { width: 28px; height: 28px; color: rgba(255,255,255,0.94); filter: drop-shadow(0 1px 1px rgba(0,0,0,0.35)); }
+        .id-badge-tile.bronze { background: linear-gradient(145deg, #d9a06c, #8a5432); }
+        .id-badge-tile.silver { background: linear-gradient(145deg, #eceff4, #9aa0ad); }
+        .id-badge-tile.silver svg, .id-badge-tile.diamond svg { color: rgba(90, 96, 108, 0.8); filter: drop-shadow(0 1px 1px rgba(255,255,255,0.5)); }
+        .id-badge-tile.gold { background: linear-gradient(145deg, #f4d97a, #bd8d1f); }
+        .id-badge-tile.diamond { background: linear-gradient(145deg, #f5f8ff, #c2cde2); }
+        .id-badge-tile.bronze::before,
+        .id-badge-tile.silver::before,
+        .id-badge-tile.gold::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            z-index: -1;
+            border-radius: 12px;
+            filter: blur(4px);
+            opacity: 0.4;
+        }
+        .id-badge-tile.bronze::before { background: #c98a55; }
+        .id-badge-tile.silver::before { background: #ccd2dc; }
+        .id-badge-tile.gold::before { background: #e5bd4a; }
+        .id-badge-tile.diamond::before {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            z-index: -1;
+            border-radius: 13px;
+            background: conic-gradient(from var(--id-glow-angle), #f0655d, #e9c341, #57c26f, #4fa8e8, #9d6ee0, #f0655d);
+            filter: blur(6px);
+            opacity: 0.7;
+            animation: id-badge-glow 4s linear infinite;
+        }
+        @property --id-glow-angle {
+            syntax: "<angle>";
+            initial-value: 0deg;
+            inherits: false;
+        }
+        @keyframes id-badge-glow {
+            to { --id-glow-angle: 360deg; }
+        }
+
+        .id-kv-card { border: 1px solid var(--border-subtle); border-radius: 8px; background: var(--bg-primary); }
+        .id-kv-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .id-kv-row:last-child { border-bottom: none; }
+        .id-kv-key {
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+        }
+        .id-kv-val {
+            color: var(--text-primary);
+            font-family: var(--font-code);
+            font-size: 13px;
+            text-align: right;
+            overflow-wrap: anywhere;
+        }
+        .id-kv-val.good { color: var(--green); display: inline-flex; align-items: center; gap: 6px; }
+
+        .id-reg-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            padding: 14px;
+        }
+        .id-reg-main { min-width: 0; flex: 1; }
+        .id-reg-address { font-size: 13.5px; overflow-wrap: anywhere; }
+        .id-reg-sub { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+
         @media (max-width: 1120px) {
             .vote-shell {
                 grid-template-columns: 1fr;
@@ -1288,7 +1633,8 @@
                 padding: 0 18px;
             }
             .navbar-center,
-            .navbar-gh {
+            .navbar-gh,
+            .navbar-poll {
                 display: none;
             }
             .navbar-hamburger,
@@ -1356,7 +1702,18 @@
             }
         }
 
+        @media (max-width: 900px) {
+            .portal-tabs { margin-top: 14px; }
+            .id-steps-preview { grid-template-columns: 1fr; }
+            .id-flow-body { padding: 16px; }
+            .id-flow-title { font-size: 26px; }
+        }
+
         @media (max-width: 620px) {
+            .id-badges { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .id-code-box { width: 36px; height: 48px; font-size: 18px; }
+            .id-code-box.gap { margin-left: 6px; }
+            .id-btn-row .primary-btn, .id-btn-row .secondary-btn, .id-btn-row .danger-btn { width: 100%; min-height: 44px; }
             .navbar-wallet-btn span,
             .navbar-admin-btn span {
                 display: none;
@@ -1370,6 +1727,15 @@
                 padding-top: 22px;
                 padding-bottom: 14px;
             }
+            .hero.portal-masthead { margin-bottom: 18px; }
+            .portal-tab {
+                gap: 7px;
+                min-height: 42px;
+                font-size: 14px;
+                padding: 8px 10px 10px;
+            }
+            .portal-tab svg { display: none; }
+            .tab-chip { font-size: 9px; padding: 2px 7px; }
             .eyebrow {
                 font-size: 12px;
                 margin-bottom: 8px;
@@ -1436,10 +1802,6 @@
                 font-size: 14px;
                 margin-top: 10px;
             }
-            .choice-card {
-                min-height: 118px;
-                padding: 16px;
-            }
             .results-panel {
                 padding: 14px;
             }
@@ -1483,14 +1845,6 @@
         <a href="download.html">Download</a>
     </div>
     <div class="navbar-right">
-        <button class="navbar-wallet-btn" id="connectBtn" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 14h.01"/><path d="M2 10h20"/></svg>
-            <span>Connect</span>
-        </button>
-        <button class="navbar-admin-btn admin-only" id="newProposalBtn" type="button" title="Create proposal">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-            <span>New proposal</span>
-        </button>
         <button class="navbar-icon-btn" id="themeToggle" type="button" aria-label="Toggle theme">
             <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
             <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -1498,6 +1852,18 @@
         <a href="https://github.com/ratspeak" class="navbar-icon-btn navbar-gh" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
         </a>
+        <a href="portal.html" class="navbar-icon-btn navbar-poll" aria-label="Onchain portal" title="Onchain portal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 7V5a1 1 0 0 0-1-1H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H5a2 2 0 0 1-2-2"/><path d="M16.5 13.5h.01"/></svg>
+        </a>
+        <span class="navbar-divider" aria-hidden="true"></span>
+        <button class="navbar-admin-btn admin-only" id="newProposalBtn" type="button" title="Create proposal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            <span>New proposal</span>
+        </button>
+        <button class="navbar-wallet-btn" id="connectBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 14h.01"/><path d="M2 10h20"/></svg>
+            <span>Connect</span>
+        </button>
         <button class="navbar-icon-btn navbar-hamburger" id="navHamburger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navMobileMenu">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
         </button>
@@ -1513,27 +1879,82 @@
 
 <div class="admin-badge">Admin mode</div>
 
-<header class="hero">
-    <div class="hero-grid">
-        <div>
-            <span class="eyebrow">Community poll on Base</span>
-            <h1 class="hero-title">Make yourself heard.</h1>
-            <p class="hero-sub">This is an experiment to gauge community interest in voting on future Ratspeak initiatives. For more information about what this is all about, <a href="community.html">please read this</a>.</p>
-        </div>
+<header class="hero portal-masthead">
+    <span class="eyebrow">Base network</span>
+    <h1 class="hero-title">Onchain Portal</h1>
+    <div class="portal-tabs" role="tablist" aria-label="Portal sections">
+    <button class="portal-tab active" id="tabIdentityBtn" type="button" role="tab" aria-selected="true" aria-controls="tabIdentity">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="9" x2="20" y2="9"></line><line x1="4" y1="15" x2="20" y2="15"></line><line x1="10" y1="3" x2="8" y2="21"></line><line x1="16" y1="3" x2="14" y2="21"></line></svg>
+        <span>Identity</span>
+        <span class="tab-chip" id="identityChip"><span class="dot"></span>Not registered</span>
+    </button>
+    <button class="portal-tab" id="tabBadgeBtn" type="button" role="tab" aria-selected="false" aria-controls="tabBadge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"></circle><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path></svg>
+        <span>Badge</span>
+        <span class="tab-chip" id="badgeChip"><span class="dot"></span>Unclaimed</span>
+    </button>
+    <button class="portal-tab" id="tabVotingBtn" type="button" role="tab" aria-selected="false" aria-controls="tabVoting">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 12 2 2 4-4"></path><path d="M5 7c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v12H5V7Z"></path><path d="M22 19H2"></path></svg>
+        <span>Voting</span>
+        <span class="tab-chip" id="votingChip"><span class="dot"></span>Polls</span>
+    </button>
     </div>
 </header>
 
-<main class="vote-shell">
+<main>
+<section id="tabIdentity" role="tabpanel">
+    <div class="vote-shell">
+        <div class="vote-main" id="identityMain"></div>
+        <aside class="sidebar-stack">
+            <section class="id-panel">
+                <span class="panel-kicker">Registration</span>
+                <h2 class="panel-title">How it works</h2>
+                <div id="identityStepper" style="margin-top: 8px">
+                    <div class="id-step-row"><span class="id-step-dot">1</span><div><div class="id-step-name">Wallet</div><div class="id-step-sub">Connect your wallet.</div></div></div>
+                    <div class="id-step-row"><span class="id-step-dot">2</span><div><div class="id-step-name">Identity</div><div class="id-step-sub">Enter your LXMF address.</div></div></div>
+                    <div class="id-step-row"><span class="id-step-dot">3</span><div><div class="id-step-name">Code</div><div class="id-step-sub">Receive a one-time code over Ratspeak.</div></div></div>
+                    <div class="id-step-row"><span class="id-step-dot">4</span><div><div class="id-step-name">Signature</div><div class="id-step-sub">Sign a gas-free verification, done.</div></div></div>
+                </div>
+            </section>
+            <section class="id-panel" id="identityWalletPanel" hidden>
+                <span class="panel-kicker">Wallet</span>
+                <h2 class="panel-title">Connected</h2>
+                <div class="wallet-box">
+                    <div class="wallet-address" id="identityWalletAddress"></div>
+                    <p class="wallet-status" id="identityWalletBadge">No badge</p>
+                </div>
+            </section>
+        </aside>
+    </div>
+</section>
+<section id="tabBadge" role="tabpanel" hidden>
+    <div class="vote-shell">
+        <div class="vote-main" id="badgeMain"></div>
+        <aside class="sidebar-stack">
+            <section class="id-panel">
+                <span class="panel-kicker">Badge</span>
+                <h2 class="panel-title">How it works</h2>
+                <div id="badgeStepper" style="margin-top: 8px">
+                    <div class="id-step-row"><span class="id-step-dot">1</span><div><div class="id-step-name">Wallet</div><div class="id-step-sub">Connect your wallet.</div></div></div>
+                    <div class="id-step-row"><span class="id-step-dot">2</span><div><div class="id-step-name">Signature</div><div class="id-step-sub">Sign a gas-free claim.</div></div></div>
+                    <div class="id-step-row"><span class="id-step-dot">3</span><div><div class="id-step-name">Badge</div><div class="id-step-sub">Your badge tier is ready!</div></div></div>
+                </div>
+            </section>
+        </aside>
+    </div>
+</section>
+<section id="tabVoting" role="tabpanel" hidden>
+<div class="vote-shell">
     <section class="vote-main">
         <article class="ballot" id="ballot" aria-live="polite"></article>
         <section class="results-panel" id="resultsPanel" aria-live="polite"></section>
     </section>
 
     <section class="proposal-panel">
-        <span class="panel-kicker">Proposal</span>
-        <h2 class="panel-title">Final proposal</h2>
-        <p class="panel-copy">Voting ended Jun 7, 2026.</p>
-        <div class="proposal-strip" id="proposalStrip" aria-label="Final proposals"></div>
+        <span class="panel-kicker">Proposals</span>
+        <h2 class="panel-title" id="proposalPanelTitle">Proposals</h2>
+        <p class="panel-copy" id="proposalPanelCopy">Loading proposals.</p>
+        <div class="proposal-strip" id="proposalStrip" aria-label="Proposals"></div>
     </section>
 
     <aside class="sidebar-stack">
@@ -1592,6 +2013,8 @@
             <p class="admin-status" id="adminStatus">Unlocked with the shared admin token.</p>
         </section>
     </aside>
+</div>
+</section>
 </main>
 
 <footer class="footer">
@@ -1612,6 +2035,10 @@
             <a href="map.html">Map</a>
             <a href="https://docs.ratspeak.org/">Docs</a>
             <a href="download.html">Download</a>
+            <a href="privacy.html">Privacy</a>
+            <a href="terms.html">Terms</a>
+            <a href="community-guidelines.html">Guidelines</a>
+            <a href="support.html">Support</a>
             <a href="https://github.com/ratspeak" target="_blank" rel="noopener noreferrer">GitHub</a>
         </div>
     </div>
@@ -1650,6 +2077,9 @@
                 <label>Snapshot block
                     <input id="proposalSnapshotInput" name="snapshotBlock" type="number" min="1" step="1" inputmode="numeric" required>
                 </label>
+                <label>Winner (set after close)
+                    <select id="proposalWinnerInput" name="winnerChoiceId"></select>
+                </label>
             </div>
             <label>Question
                 <textarea id="proposalTitleInput" name="title" required></textarea>
@@ -1676,20 +2106,25 @@
 import {
   DEFAULT_POLLS as SHARED_DEFAULT_POLLS,
   SNAPSHOT_BLOCK as DEFAULT_SNAPSHOT_BLOCK,
-  STARTER_POLL_WINNER_CHOICE_ID,
   TOKEN_ADDRESS as RATSPEAK_TOKEN_ADDRESS,
   VOTE_DOMAIN,
   VOTE_KIND,
   VOTE_STRATEGY,
   VOTE_TYPES,
+  cleanText,
   isEligibleBalance,
-  serializableVoteMessage
-} from './lib/vote-core.js?v=poll-final-1';
+  isPollClosed,
+  normalizeCloseTime,
+  normalizePollState,
+  pollWinnerChoice,
+  serializableVoteMessage,
+  slugify
+} from './lib/vote-core.js?v=poll-refresh-2';
+import { connectWallet, currentAccount, initWallet, onAccountChange, signTypedData } from './assets/js/portal-wallet.js?v=portal-1';
+import { initIdentityTab } from './assets/js/portal-identity.js?v=portal-1';
+import { initBadgeTab } from './assets/js/portal-badge.js?v=portal-1';
 
-const PROJECT_ID = 'bd455db9c9bb0f7804164eb260a9fd47';
-const RATSPEAK_ORIGIN = 'https://ratspeak.org';
 const TOKEN_ADDRESS = RATSPEAK_TOKEN_ADDRESS;
-const APPKIT_CDN_URL = 'https://cdn.jsdelivr.net/npm/@reown/appkit-cdn@1.8.19/dist/appkit.js';
 const POLL_STORE_KEY = 'ratspeak-community-poll-proposals-v2';
 const ADMIN_TOKEN_KEY = 'ratspeak-community-poll-admin-token';
 const THEME_KEY = 'ratspeak-theme';
@@ -1698,23 +2133,14 @@ const SNAPSHOT_API_URL = '/api/snapshot';
 const VOTE_API_URL = '/api/votes';
 const RESULTS_POLL_MS = 30000;
 const SNAPSHOT_BLOCK = DEFAULT_SNAPSHOT_BLOCK;
-const BASE_CHAIN = {
-  id: 8453,
-  name: 'Base',
-  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-  rpcUrls: { default: { http: ['https://mainnet.base.org'] } },
-  blockExplorers: { default: { name: 'BaseScan', url: 'https://basescan.org' } }
-};
-
 const DEFAULT_POLLS = SHARED_DEFAULT_POLLS;
 
-let appKitStatePromise = null;
-let appKitState = null;
 let account = null;
 let pollState = loadPollStateCache() || seedPollState();
 let polls = pollState.polls;
-let selectedPollId = polls[0].id;
-let selectedChoiceId = polls[0].choices[0].id;
+let userSelectedPoll = false;
+let selectedPollId = preferredPollId(polls);
+let selectedChoiceId = (polls.find(poll => poll.id === selectedPollId) || polls[0]).choices[0].id;
 let token = {
   symbol: 'RATSPEAK',
   decimals: 18,
@@ -1769,10 +2195,13 @@ const els = {
   proposalFormError: document.getElementById('proposalFormError'),
   proposalModal: document.getElementById('proposalModal'),
   proposalModalTitle: document.getElementById('proposalModalTitle'),
+  proposalPanelCopy: document.getElementById('proposalPanelCopy'),
+  proposalPanelTitle: document.getElementById('proposalPanelTitle'),
   proposalSaveBtn: document.getElementById('proposalSaveBtn'),
   proposalSnapshotInput: document.getElementById('proposalSnapshotInput'),
   proposalTitleInput: document.getElementById('proposalTitleInput'),
   proposalTypeInput: document.getElementById('proposalTypeInput'),
+  proposalWinnerInput: document.getElementById('proposalWinnerInput'),
   proposalStrip: document.getElementById('proposalStrip'),
   resultsPanel: document.getElementById('resultsPanel'),
   selectedChoice: document.getElementById('selectedChoice'),
@@ -1803,72 +2232,6 @@ function writePollStateCache() {
   } catch (e) {}
 }
 
-function normalizePollState(value) {
-  const source = value && Array.isArray(value.polls) ? value.polls : DEFAULT_POLLS;
-  const seen = new Set();
-  const normalized = [];
-
-  source.forEach((poll, index) => {
-    const next = normalizePoll(poll, index);
-    if (!next || seen.has(next.id)) return;
-    seen.add(next.id);
-    normalized.push(next);
-  });
-
-  if (!normalized.length && source !== DEFAULT_POLLS) {
-    return seedPollState();
-  }
-
-  return { version: 1, polls: normalized };
-}
-
-function normalizePoll(poll, index) {
-  if (!poll || typeof poll !== 'object') return null;
-  const id = slugify(poll.id, `proposal-${index + 1}`);
-  const choices = Array.isArray(poll.choices)
-    ? poll.choices.map((choice, choiceIndex) => normalizeChoice(choice, choiceIndex)).filter(Boolean)
-    : [];
-  if (choices.length < 2) return null;
-
-  const snapshotBlock = Number(poll.snapshotBlock);
-  return {
-    id,
-    title: cleanText(poll.title, 'Untitled proposal', 220),
-    deckTitle: cleanText(poll.deckTitle || poll.title, 'Proposal', 80),
-    type: cleanText(poll.type, 'Proposal', 48),
-    snapshotBlock: Number.isSafeInteger(snapshotBlock) && snapshotBlock > 0 ? snapshotBlock : SNAPSHOT_BLOCK,
-    closes: normalizeCloseTime(poll.closes),
-    description: cleanText(poll.description, '', 280),
-    choices,
-    createdAt: cleanText(poll.createdAt, '', 40),
-    updatedAt: cleanText(poll.updatedAt, '', 40)
-  };
-}
-
-function normalizeChoice(choice, index) {
-  if (!choice || typeof choice !== 'object') return null;
-  const name = cleanText(choice.name, '', 120);
-  if (!name) return null;
-  return {
-    id: slugify(choice.id || name, `choice-${index + 1}`),
-    name,
-    detail: cleanText(choice.detail, '', 220)
-  };
-}
-
-function cleanText(value, fallback, maxLength) {
-  const text = String(value == null ? fallback : value).trim();
-  return text.slice(0, maxLength);
-}
-
-function normalizeCloseTime(value) {
-  const raw = String(value || '').trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return `${raw}T23:59:00Z`;
-  const parsed = new Date(raw);
-  if (!Number.isNaN(parsed.getTime())) return parsed.toISOString().replace(/\.\d{3}Z$/, 'Z');
-  return '';
-}
-
 function formatCloseTime(value) {
   const normalized = normalizeCloseTime(value);
   if (!normalized) return 'No close time';
@@ -1882,16 +2245,6 @@ function formatCloseTime(value) {
     timeZone: 'UTC',
     timeZoneName: 'short'
   }).format(new Date(normalized));
-}
-
-function isPollClosed(poll) {
-  const closes = Date.parse(normalizeCloseTime(poll?.closes));
-  return Number.isFinite(closes) && Date.now() > closes;
-}
-
-function finalWinnerChoice(poll) {
-  if (!poll || !isPollClosed(poll)) return null;
-  return poll.choices.find(choice => choice.id === STARTER_POLL_WINNER_CHOICE_ID) || null;
 }
 
 function pollStatusLabel(poll) {
@@ -1913,15 +2266,6 @@ function inputToCloseTime(value) {
   return `${raw}:00Z`;
 }
 
-function slugify(value, fallback) {
-  const slug = String(value || '')
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-  return slug || fallback;
-}
-
 function applyPollState(nextState, options = {}) {
   pollState = normalizePollState(nextState);
   polls = pollState.polls;
@@ -1933,10 +2277,18 @@ function applyPollState(nextState, options = {}) {
   if (options.refreshResults !== false) refreshResults().catch(reportResultsError);
 }
 
+function preferredPollId(list) {
+  const live = list.find(poll => !isPollClosed(poll));
+  return (live || list[0]).id;
+}
+
 function ensureSelection() {
   if (!polls.length) {
     pollState = seedPollState();
     polls = pollState.polls;
+  }
+  if (!userSelectedPoll) {
+    selectedPollId = preferredPollId(polls);
   }
   let poll = polls.find(p => p.id === selectedPollId);
   if (!poll) {
@@ -2092,6 +2444,17 @@ function render() {
 }
 
 function renderProposalStrip() {
+  const liveCount = polls.filter(poll => !isPollClosed(poll)).length;
+  const votingChip = document.getElementById('votingChip');
+  if (votingChip) {
+    votingChip.className = 'tab-chip' + (liveCount ? ' good' : '');
+    votingChip.innerHTML = '<span class="dot"></span>' + (liveCount ? `${liveCount} open` : 'Closed');
+  }
+  els.proposalPanelTitle.textContent = liveCount ? 'Open proposals' : 'Past proposals';
+  els.proposalPanelCopy.textContent = liveCount
+    ? (liveCount === 1 ? 'One proposal is open for voting.' : `${liveCount} proposals are open for voting.`)
+    : 'Voting has ended on all proposals.';
+
   els.proposalStrip.innerHTML = polls.map(poll => {
     const closed = isPollClosed(poll);
     const statusClass = closed ? ' is-closed' : '';
@@ -2111,6 +2474,7 @@ function renderProposalStrip() {
 
   els.proposalStrip.querySelectorAll('[data-poll]').forEach(btn => {
     btn.addEventListener('click', () => {
+      userSelectedPoll = true;
       selectedPollId = btn.dataset.poll;
       selectedChoiceId = selectedPoll().choices[0].id;
       resetSnapshotBalance();
@@ -2124,18 +2488,10 @@ function renderProposalStrip() {
 function renderBallot() {
   const poll = selectedPoll();
   const closed = isPollClosed(poll);
-  const winner = finalWinnerChoice(poll);
-  const statusTagClass = closed ? 'tag-closed' : 'tag-live';
+  const winner = pollWinnerChoice(poll);
 
   els.ballot.innerHTML = `
     <div class="ballot-head">
-      <div class="poll-tags">
-        <span class="tag ${statusTagClass}">${pollStatusLabel(poll)}</span>
-        <span class="tag">${escapeHtml(poll.type)}</span>
-        <span class="tag">Snapshot ${formatBlock(poll.snapshotBlock).replace('Base ', '')}</span>
-        <span class="tag">${escapeHtml(pollCloseLabel(poll))}</span>
-        ${winner ? `<span class="tag tag-winner">Winner: ${escapeHtml(winner.name)}</span>` : ''}
-      </div>
       <h2 class="ballot-title">${escapeHtml(poll.title)}</h2>
       <p class="ballot-desc">${escapeHtml(poll.description)}</p>
     </div>
@@ -2152,8 +2508,7 @@ function renderBallot() {
           <button class="${classes}" type="button" data-choice="${choice.id}" ${closed ? 'disabled' : ''}>
             <h3>${escapeHtml(choice.name)}</h3>
             <p>${escapeHtml(choice.detail)}</p>
-            <span class="choice-selected">${closed && isWinner ? 'Winner' : 'Selected'}</span>
-          </button>
+                      </button>
         `;
       }).join('')}
     </div>
@@ -2170,7 +2525,7 @@ function renderBallot() {
 function renderResults() {
   const poll = selectedPoll();
   const closed = isPollClosed(poll);
-  const winner = finalWinnerChoice(poll);
+  const winner = pollWinnerChoice(poll);
   const isCurrent = resultsState.pollId === poll.id;
   const data = isCurrent ? resultsState.data : null;
   const loading = isCurrent && resultsState.loading;
@@ -2238,7 +2593,7 @@ function renderWallet() {
   const poll = selectedPoll();
   const choice = selectedChoice();
   const closed = isPollClosed(poll);
-  const winner = finalWinnerChoice(poll);
+  const winner = pollWinnerChoice(poll);
   els.walletAddress.textContent = shortAddress(account);
   els.tokenSymbol.textContent = token.symbol || 'RATSPEAK';
   els.eligibilityStatus.className = 'eligibility-value';
@@ -2272,24 +2627,25 @@ function renderWallet() {
     els.walletStatus.textContent = winner
       ? `Voting ended ${formatCloseTime(poll.closes)}. ${winner.name} was the final winner.`
       : `Voting ended ${formatCloseTime(poll.closes)}.`;
-    els.connectBtn.innerHTML = '<span>Poll finished</span>';
-    els.connectBtn.disabled = true;
-    els.connectBtn.setAttribute('aria-disabled', 'true');
-  } else if (account) {
-    if (token.loading) {
-      els.walletStatus.textContent = `Checking eligibility at ${formatBaseBlock(poll.snapshotBlock)}.`;
-    } else if (token.error) {
-      els.walletStatus.textContent = 'Eligibility check failed. Try again later.';
-    } else if (hasSnapshotEligibility()) {
-      els.walletStatus.textContent = `Eligible at ${formatBaseBlock(poll.snapshotBlock)}. Each eligible wallet counts as one vote.`;
-    } else {
-      els.walletStatus.textContent = `Ineligible at ${formatBaseBlock(poll.snapshotBlock)}. This poll requires at least 1 ${token.symbol || 'token'} at the snapshot block.`;
+  }
+
+  if (account) {
+    if (!closed) {
+      if (token.loading) {
+        els.walletStatus.textContent = `Checking eligibility at ${formatBaseBlock(poll.snapshotBlock)}.`;
+      } else if (token.error) {
+        els.walletStatus.textContent = 'Eligibility check failed. Try again later.';
+      } else if (hasSnapshotEligibility()) {
+        els.walletStatus.textContent = `Eligible at ${formatBaseBlock(poll.snapshotBlock)}. Each eligible wallet counts as one vote.`;
+      } else {
+        els.walletStatus.textContent = `Ineligible at ${formatBaseBlock(poll.snapshotBlock)}. This poll requires at least 1 ${token.symbol || 'token'} at the snapshot block.`;
+      }
     }
     els.connectBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Connected</span>';
     els.connectBtn.disabled = true;
     els.connectBtn.setAttribute('aria-disabled', 'true');
   } else {
-    els.walletStatus.textContent = `Connect a wallet to check eligibility at ${formatBaseBlock(poll.snapshotBlock)}.`;
+    if (!closed) els.walletStatus.textContent = `Connect a wallet to check eligibility at ${formatBaseBlock(poll.snapshotBlock)}.`;
     els.connectBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 14h.01"/><path d="M2 10h20"/></svg><span>Connect</span>';
     els.connectBtn.disabled = false;
     els.connectBtn.removeAttribute('aria-disabled');
@@ -2309,113 +2665,6 @@ function renderAdmin() {
 
 function applyAdminMode() {
   document.body.classList.toggle('public-mode', !ADMIN_MODE);
-}
-
-function appMetadataUrl() {
-  const host = window.location.hostname;
-  if (host === 'localhost' || host === '127.0.0.1') return window.location.origin;
-  return RATSPEAK_ORIGIN;
-}
-
-async function initAppKit() {
-  if (appKitStatePromise) return appKitStatePromise;
-  appKitStatePromise = createAppKitState();
-  return appKitStatePromise;
-}
-
-async function createAppKitState() {
-  const appkitMod = await import(APPKIT_CDN_URL);
-
-  const network = appkitMod.networks.base || BASE_CHAIN;
-  const networks = [network];
-  const wagmiAdapter = new appkitMod.WagmiAdapter({ projectId: PROJECT_ID, networks });
-  const modal = appkitMod.createAppKit({
-    adapters: [wagmiAdapter],
-    networks,
-    projectId: PROJECT_ID,
-    metadata: {
-      name: 'Ratspeak Community Poll',
-      description: 'Experimental Ratspeak community polling on Base.',
-      url: appMetadataUrl(),
-      icons: [new URL('favicon-32x32.png', `${appMetadataUrl()}/`).href]
-    },
-    themeMode: document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark',
-    features: { analytics: false, email: false, socials: [] }
-  });
-
-  await appkitMod.WagmiCore.reconnect?.(wagmiAdapter.wagmiConfig);
-  appKitState = {
-    modal,
-    wagmiConfig: wagmiAdapter.wagmiConfig,
-    wagmi: appkitMod.WagmiCore,
-    network
-  };
-
-  const current = appkitMod.WagmiCore.getAccount(wagmiAdapter.wagmiConfig);
-  if (isConnectedAccount(current)) {
-    account = normalizeWalletAccount(current.address || '');
-    refreshSnapshotBalance().catch(reportBalanceError);
-  }
-
-  appkitMod.WagmiCore.watchAccount(wagmiAdapter.wagmiConfig, {
-    onChange(next) {
-      account = isConnectedAccount(next) ? normalizeWalletAccount(next.address || '') : null;
-      resetSnapshotBalance();
-      if (account) refreshSnapshotBalance().catch(reportBalanceError);
-      render();
-    }
-  });
-
-  render();
-  return appKitState;
-}
-
-async function connectWallet(options = {}) {
-  const state = await initAppKit().catch(err => {
-    console.warn(err);
-    toast('Wallet connection failed to load. Check network access and try again.');
-    return null;
-  });
-  if (!state) return;
-
-  const current = state.wagmi.getAccount(state.wagmiConfig);
-  if (isConnectedAccount(current)) {
-    account = normalizeWalletAccount(current.address || '');
-    if (current.chainId !== undefined && current.chainId !== 8453) {
-      await state.wagmi.switchChain?.(state.wagmiConfig, { chainId: 8453 });
-    }
-    if (!options.skipBalance) await refreshSnapshotBalance();
-    render();
-    return;
-  }
-
-  const connected = waitForConnectedAccount(state);
-  await Promise.resolve(state.modal.open({ view: 'Connect' }));
-  const next = await connected;
-  account = normalizeWalletAccount(next.address || '');
-  if (next.chainId !== undefined && next.chainId !== 8453) {
-    await state.wagmi.switchChain?.(state.wagmiConfig, { chainId: 8453 });
-  }
-  if (!options.skipBalance) await refreshSnapshotBalance();
-  render();
-}
-
-function waitForConnectedAccount(state) {
-  return new Promise((resolve, reject) => {
-    let cleanup = function() {};
-    const timeout = window.setTimeout(() => {
-      cleanup();
-      reject(new Error('Timed out waiting for wallet connection'));
-    }, 120000);
-    cleanup = state.wagmi.watchAccount(state.wagmiConfig, {
-      onChange(next) {
-        if (!isConnectedAccount(next)) return;
-        window.clearTimeout(timeout);
-        cleanup();
-        resolve(next);
-      }
-    });
-  });
 }
 
 async function refreshSnapshotBalance() {
@@ -2517,14 +2766,11 @@ function reportResultsError(err) {
 }
 
 async function signSnapshotVote() {
-  const state = await initAppKit().catch(err => {
-    console.warn(err);
-    toast('Wallet connection failed to load.');
-    return null;
-  });
-  if (!state) return;
   if (!account) {
-    await connectWallet();
+    await connectWallet().catch(err => {
+      console.warn(err);
+      toast('Wallet connection failed.');
+    });
   }
   if (!account) return;
   try {
@@ -2560,15 +2806,7 @@ async function signSnapshotVote() {
   casting = true;
   render();
   try {
-    const current = state.wagmi.getAccount(state.wagmiConfig);
-    if (current.chainId !== undefined && current.chainId !== 8453) {
-      await state.wagmi.switchChain?.(state.wagmiConfig, { chainId: 8453 });
-    }
-    if (typeof state.wagmi.signTypedData !== 'function') {
-      throw new Error('Wallet signing is unavailable in this browser.');
-    }
-    const signature = await state.wagmi.signTypedData(state.wagmiConfig, {
-      account,
+    const signature = await signTypedData({
       domain: VOTE_DOMAIN,
       types: VOTE_TYPES,
       primaryType: 'Vote',
@@ -2714,19 +2952,6 @@ function submitAuth() {
   });
 }
 
-function isConnectedAccount(next) {
-  return Boolean(next && next.isConnected && next.address);
-}
-
-function normalizeWalletAccount(value) {
-  const raw = String(value || '');
-  const address = raw.includes(':') ? raw.split(':').at(-1) : raw;
-  if (!/^0x[0-9a-fA-F]{40}$/.test(address)) {
-    throw new Error('WalletConnect returned an invalid account: ' + value);
-  }
-  return address;
-}
-
 function makeNonce() {
   const bytes = new Uint8Array(16);
   crypto.getRandomValues(bytes);
@@ -2753,6 +2978,7 @@ function proposalDraft() {
     snapshotBlock: SNAPSHOT_BLOCK,
     closes,
     description: '',
+    winnerChoiceId: '',
     choices: [
       { id: 'option-a', name: 'Option A', detail: '' },
       { id: 'option-b', name: 'Option B', detail: '' }
@@ -2776,6 +3002,7 @@ function openProposalEditor(poll) {
   els.proposalSnapshotInput.value = String(draft.snapshotBlock || SNAPSHOT_BLOCK);
   els.proposalTitleInput.value = draft.title || '';
   els.proposalDescriptionInput.value = draft.description || '';
+  renderWinnerOptions(draft);
   renderChoiceEditor(draft.choices || []);
   els.proposalFormError.classList.remove('show');
   els.proposalModal.classList.add('show');
@@ -2793,6 +3020,17 @@ function closeProposalEditor() {
 function renderChoiceEditor(choices) {
   const source = choices.length >= 2 ? choices : proposalDraft().choices;
   els.proposalChoicesList.innerHTML = source.map(choice => choiceRowHtml(choice)).join('');
+}
+
+function renderWinnerOptions(draft) {
+  const options = (draft.choices || [])
+    .filter(choice => choice && choice.name)
+    .map(choice => {
+      const id = choice.id || slugify(choice.name, '');
+      const selected = draft.winnerChoiceId === id ? ' selected' : '';
+      return `<option value="${escapeHtml(id)}"${selected}>${escapeHtml(choice.name)}</option>`;
+    });
+  els.proposalWinnerInput.innerHTML = ['<option value="">None yet</option>', ...options].join('');
 }
 
 function choiceRowHtml(choice) {
@@ -2882,6 +3120,12 @@ function proposalFromForm() {
   const closes = inputToCloseTime(els.proposalClosesInput.value);
   if (!closes) throw new Error('Close time must include a UTC date and time.');
 
+  const choices = readChoiceRows();
+  const winnerChoiceId = String(els.proposalWinnerInput.value || '');
+  if (winnerChoiceId && !choices.some(choice => choice.id === winnerChoiceId)) {
+    throw new Error('Winner must match one of the current choices. Reopen the editor after changing choices.');
+  }
+
   const old = editingProposalId ? polls.find(poll => poll.id === editingProposalId) : null;
   const now = new Date().toISOString();
   return {
@@ -2892,7 +3136,8 @@ function proposalFromForm() {
     snapshotBlock,
     closes,
     description,
-    choices: readChoiceRows(),
+    winnerChoiceId,
+    choices,
     createdAt: old?.createdAt || now,
     updatedAt: now
   };
@@ -2920,6 +3165,7 @@ function saveProposalFromForm(event) {
   else nextPolls.unshift(proposal);
   pollState = normalizePollState({ version: 1, polls: nextPolls });
   polls = pollState.polls;
+  userSelectedPoll = true;
   selectedPollId = proposal.id;
   selectedChoiceId = proposal.choices[0].id;
   resetSnapshotBalance();
@@ -2948,8 +3194,9 @@ function deleteSelectedProposal() {
   const nextPolls = polls.filter(item => item.id !== poll.id);
   pollState = normalizePollState({ version: 1, polls: nextPolls });
   polls = pollState.polls;
-  selectedPollId = polls[0].id;
-  selectedChoiceId = polls[0].choices[0].id;
+  userSelectedPoll = false;
+  selectedPollId = preferredPollId(polls);
+  selectedChoiceId = (polls.find(item => item.id === selectedPollId) || polls[0]).choices[0].id;
   resetSnapshotBalance();
   savePollState();
   render();
@@ -3045,13 +3292,77 @@ els.themeToggle.addEventListener('click', () => {
   if (themeMeta) themeMeta.setAttribute('content', next === 'dark' ? '#18171a' : '#FAF7F3');
 });
 
+const PORTAL_TABS = {
+  identity: { btn: document.getElementById('tabIdentityBtn'), panel: document.getElementById('tabIdentity') },
+  badge: { btn: document.getElementById('tabBadgeBtn'), panel: document.getElementById('tabBadge') },
+  voting: { btn: document.getElementById('tabVotingBtn'), panel: document.getElementById('tabVoting') }
+};
+const tabEls = {
+  identityChip: document.getElementById('identityChip'),
+  badgeChip: document.getElementById('badgeChip')
+};
+
+function selectPortalTab(name) {
+  const active = PORTAL_TABS[name] ? name : 'identity';
+  for (const [key, tab] of Object.entries(PORTAL_TABS)) {
+    const selected = key === active;
+    tab.panel.hidden = !selected;
+    tab.btn.classList.toggle('active', selected);
+    tab.btn.setAttribute('aria-selected', String(selected));
+  }
+  try { history.replaceState({}, '', '#' + active); } catch (e) {}
+}
+
+for (const [key, tab] of Object.entries(PORTAL_TABS)) {
+  tab.btn.addEventListener('click', () => selectPortalTab(key));
+}
+
+onAccountChange(next => {
+  account = next;
+  resetSnapshotBalance();
+  if (account) refreshSnapshotBalance().catch(reportBalanceError);
+  render();
+});
+
+initBadgeTab({
+  els: {
+    main: document.getElementById('badgeMain'),
+    steps: [...document.querySelectorAll('#badgeStepper .id-step-row')].map(row => ({ row, dot: row.querySelector('.id-step-dot') }))
+  },
+  toast,
+  onChipChange(chip) {
+    tabEls.badgeChip.className = 'tab-chip' + (chip.tone ? ' ' + chip.tone : '');
+    tabEls.badgeChip.innerHTML = '<span class="dot"></span>' + chip.text;
+  }
+});
+
+initIdentityTab({
+  els: {
+    main: document.getElementById('identityMain'),
+    steps: [...document.querySelectorAll('#identityStepper .id-step-row')].map(row => ({ row, dot: row.querySelector('.id-step-dot') })),
+    walletPanel: document.getElementById('identityWalletPanel'),
+    walletAddress: document.getElementById('identityWalletAddress'),
+    walletBadge: document.getElementById('identityWalletBadge')
+  },
+  toast,
+  onChipChange(chip) {
+    tabEls.identityChip.className = 'tab-chip' + (chip.tone ? ' ' + chip.tone : '');
+    tabEls.identityChip.innerHTML = '<span class="dot"></span>' + chip.text;
+  }
+});
+
 syncNavbar();
 render();
 hydratePollsFromApi();
 refreshResults().catch(reportResultsError);
 window.setInterval(() => refreshResults({ silent: true }).catch(reportResultsError), RESULTS_POLL_MS);
 attemptAdminUnlock();
-initAppKit().catch(err => console.warn('AppKit preload failed', err));
+selectPortalTab(window.location.hash.replace('#', '') || 'identity');
+initWallet().catch(err => console.warn('Wallet preload failed', err));
 </script>
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

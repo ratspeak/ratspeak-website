@@ -2,7 +2,7 @@ import { normalizePollState } from '../lib/vote-core.js';
 
 export const config = { runtime: 'edge' };
 
-// Proposal source of truth for poll.html.
+// Proposal source of truth for portal.html.
 //
 // Reads are public. Writes require TASKS_ADMIN_TOKEN and are intended to
 // be used from the ?admin UI.
@@ -200,6 +200,11 @@ function validatePoll(poll, pollIds) {
     choiceIds.add(choice.id);
     if (!isText(choice.name, 1, 120)) return fail(`invalid choice label for ${poll.id}`);
     if (choice.detail != null && !isText(choice.detail, 0, 220)) return fail(`invalid choice detail for ${poll.id}`);
+  }
+
+  if (poll.winnerChoiceId != null && poll.winnerChoiceId !== '') {
+    if (!isSlug(poll.winnerChoiceId)) return fail(`invalid winner choice for ${poll.id}`);
+    if (!choiceIds.has(poll.winnerChoiceId)) return fail(`winner is not a choice for ${poll.id}`);
   }
 
   return { ok: true };
