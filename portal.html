@@ -1897,7 +1897,7 @@
         <span>Badge</span>
         <span class="tab-chip" id="badgeChip"><span class="dot"></span>Unclaimed</span>
     </button>
-    <button class="portal-tab" id="tabVotingBtn" type="button" role="tab" aria-selected="false" aria-controls="tabVoting">
+    <button class="portal-tab admin-only" id="tabVotingBtn" type="button" role="tab" aria-selected="false" aria-controls="tabVoting">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 12 2 2 4-4"></path><path d="M5 7c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v12H5V7Z"></path><path d="M22 19H2"></path></svg>
         <span>Voting</span>
         <span class="tab-chip" id="votingChip"><span class="dot"></span>Polls</span>
@@ -3307,6 +3307,9 @@ const tabEls = {
 };
 
 function selectPortalTab(name) {
+  // Voting is parked until the next poll: hidden and unroutable unless the
+  // admin mode is unlocked.
+  if (name === 'voting' && !ADMIN_MODE) name = 'identity';
   const active = PORTAL_TABS[name] ? name : 'identity';
   for (const [key, tab] of Object.entries(PORTAL_TABS)) {
     const selected = key === active;
