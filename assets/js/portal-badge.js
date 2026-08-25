@@ -162,7 +162,6 @@ function render() {
           <div class="id-btn-row">
             <button class="primary-btn" type="button" data-badge-action="claim" ${busy ? 'disabled' : ''}>${penIcon()}${busy ? 'Waiting for signature…' : earned ? 'Re-check holdings' : 'Claim badge'}</button>
           </div>
-          ${earned ? '<p class="id-field-help">Claims only ever upgrade — selling later never takes a badge away.</p>' : ''}
         ` : `
           <div class="id-btn-row">
             <button class="primary-btn" type="button" data-badge-action="connect">${walletIcon()}Connect wallet</button>
