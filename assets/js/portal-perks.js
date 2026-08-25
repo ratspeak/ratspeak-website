@@ -251,7 +251,7 @@ function perkCard(icon, name, sub) {
 
 function perkGrid() {
   return `<div class="pk-grid">
-    ${perkCard('database', 'Priority Storage', 'Your messages survive 10× longer in every Ratspeak inbox.')}
+    ${perkCard('database', 'Priority Storage', 'Priority retention in every Ratspeak inbox — your messages are last to be evicted.')}
     ${perkCard('mail', 'Mailbox Status', 'See how much mail is waiting for you, right here in the portal.')}
     ${perkCard('inbox', 'Gold Inbox', 'A private offline-inbox for holders only — 10 MB messages, 5× the public limit.')}
     ${perkCard('bell', 'Arrival Alerts', 'A message over the mesh nudges you when mail waits too long.')}
