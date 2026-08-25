@@ -372,8 +372,8 @@ function render() {
       </div>
       ${errorBanner()}`);
   } else if (!perks?.enrolled) {
-    view = `<div class="pk-halo">${card('Your mail rides first-class',
-      `${badgeName(identity.badge)} holder perks on the Ratspeak relay network — private, opt-in, one signature.`, `
+    view = `<div class="pk-halo">${card(`Welcome, ${badgeName(identity.badge)} Rat.`,
+      'Enjoy the latest perks and upgrades.', `
       ${perkGrid()}
       <div class="id-btn-row" style="margin-top: 14px">
         <button class="primary-btn" type="button" data-pk-action="open-modal" ${busy ? 'disabled' : ''}>Enable network perks</button>
