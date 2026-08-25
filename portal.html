@@ -1370,11 +1370,12 @@
                 radial-gradient(720px 340px at 4% -6%, color-mix(in srgb, var(--green) 14%, transparent), transparent 62%),
                 color-mix(in srgb, var(--bg-elevated) 92%, transparent);
         }
-        .id-steps-preview {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 10px;
-        }
+        .id-steps-preview { display: flex; align-items: stretch; gap: 4px; }
+        .id-preview-step { flex: 1; }
+        .id-step-arrow { align-self: center; flex: 0 0 auto; color: var(--text-muted); opacity: 0.55; padding: 0 3px; }
+        .id-step-arrow svg { width: 14px; height: 14px; display: block; }
+        .pk-ico.sm { width: 28px; height: 28px; border-radius: 8px; }
+        .pk-ico.sm svg { width: 14px; height: 14px; }
         .id-preview-step {
             position: relative;
             border: 1px solid color-mix(in srgb, var(--border-subtle) 60%, transparent);
@@ -1838,7 +1839,8 @@
 
         @media (max-width: 900px) {
             .portal-tabs { margin-top: 14px; }
-            .id-steps-preview { grid-template-columns: 1fr; }
+            .id-steps-preview { flex-direction: column; }
+            .id-step-arrow { transform: rotate(90deg); align-self: flex-start; margin-left: 21px; padding: 3px 0; }
             .id-flow-body { padding: 16px; }
             .id-flow-title { font-size: 26px; }
         }

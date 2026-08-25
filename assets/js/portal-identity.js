@@ -482,9 +482,11 @@ const VIEWS = {
     desc: 'Pair your wallet to a Ratspeak identity for future perks or services. See our docs for more information and best privacy practices.',
     body: `
       <div class="id-steps-preview">
-        ${previewStep('Your address', 'Paste the LXMF address from the Ratspeak app.')}
-        ${previewStep('Verify code', 'Receive a one-time code over Ratspeak')}
-        ${previewStep('Sign onchain', 'Sign the pairing onchain, gas-free.')}
+        ${previewStep('hash', 'Your address', 'Paste the LXMF address from the Ratspeak app.')}
+        ${previewArrow()}
+        ${previewStep('shield', 'Verify code', 'Receive a one-time code over Ratspeak')}
+        ${previewArrow()}
+        ${previewStep('pen', 'Sign onchain', 'Sign the pairing onchain, gas-free.')}
       </div>
       <div class="id-btn-row">
         <button class="primary-btn" type="button" data-id-action="connect">${icon('wallet')}Connect wallet</button>
@@ -677,8 +679,12 @@ function flowCard({ tags, title, desc, body, headClass = '' }) {
     </section>`;
 }
 
-function previewStep(name, sub) {
-  return `<div class="id-preview-step"><div class="id-step-name">${name}</div><div class="id-step-sub" style="margin-top: 4px">${sub}</div></div>`;
+function previewStep(glyph, name, sub) {
+  return `<div class="id-preview-step"><span class="pk-ico sm">${icon(glyph, 14)}</span><div class="id-step-name" style="margin-top: 9px">${name}</div><div class="id-step-sub" style="margin-top: 3px">${sub}</div></div>`;
+}
+
+function previewArrow() {
+  return `<span class="id-step-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></span>`;
 }
 
 function codeBoxes() {
