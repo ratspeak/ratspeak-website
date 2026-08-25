@@ -353,7 +353,7 @@ function render() {
     view = card('Badge perks', 'Use your badge status to claim your network perks and enjoy the upgrades!', `
       ${perkGrid()}
       <div class="id-btn-row" style="margin-top: 14px">
-        <button class="primary-btn" type="button" data-pk-action="connect">Connect wallet</button>
+        <button class="primary-btn" type="button" data-pk-action="connect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px"><rect x="2" y="5" width="20" height="14" rx="2"></rect><path d="M16 14h.01"></path><path d="M2 10h20"></path></svg>Connect wallet</button>
       </div>
       ${errorBanner()}`);
   } else if (!identity.registered) {

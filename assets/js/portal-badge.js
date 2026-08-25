@@ -153,7 +153,6 @@ function render() {
   els.main.innerHTML = `
     <section class="ballot id-flow">
       <div class="ballot-head${earned ? ' id-flow-head-good' : ''}">
-        <div class="poll-tags">${earned ? '<span class="tag tag-live">Claimed</span>' : '<span class="tag tag-closed">Badge</span>'}</div>
         <h2 class="ballot-title id-flow-title">${earned ? `${badgeName(badge)} holder` : 'Claim your badge'}</h2>
         <p class="ballot-desc">Sign a message with your wallet and your badge is issued from your live RATSPEAK holdings.</p>
       </div>
