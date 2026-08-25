@@ -1577,6 +1577,89 @@
             to { --id-glow-angle: 360deg; }
         }
 
+        /* ---- Perks -------------------------------------------------- */
+        .tab-chip.accent { color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--bg-tertiary)); }
+        .pk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 4px; }
+        .pk-card {
+            position: relative;
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
+            padding: 15px 15px 14px;
+            overflow: hidden;
+        }
+        .pk-card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 2px; opacity: 0.85; }
+        .pk-card.m-bronze::before { background: linear-gradient(90deg, #d9a06c, #8a5432); }
+        .pk-card.m-silver::before { background: linear-gradient(90deg, #eceff4, #9aa0ad); }
+        .pk-card.m-gold::before { background: linear-gradient(90deg, #f4d97a, #bd8d1f); }
+        .pk-card.m-diamond::before { background: linear-gradient(90deg, #f0655d, #e9c341, #57c26f, #4fa8e8, #9d6ee0); }
+        .pk-card > svg { width: 18px; height: 18px; color: var(--accent); }
+        .pk-name { font-weight: 700; font-size: 14.5px; color: var(--text-primary); margin-top: 9px; }
+        .pk-sub { font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin-top: 4px; }
+        .pk-halo { position: relative; border-radius: 12px; isolation: isolate; }
+        .pk-halo::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            z-index: -1;
+            border-radius: 13px;
+            background: conic-gradient(from var(--id-glow-angle), #f0655d, #e9c341, #57c26f, #4fa8e8, #9d6ee0, #f0655d);
+            filter: blur(4px);
+            opacity: 0.45;
+            animation: id-badge-glow 6s linear infinite;
+        }
+        .pk-mail { display: flex; align-items: baseline; gap: 12px; }
+        .pk-mail-count { font-size: 42px; font-weight: 800; letter-spacing: -0.02em; color: var(--text-primary); line-height: 1; }
+        .pk-mail-sub { font-size: 13px; color: var(--text-secondary); }
+        .pk-live-dot {
+            display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+            background: var(--accent); vertical-align: 2px; margin-right: 8px;
+            animation: pk-pulse 1.8s ease-out infinite;
+        }
+        @keyframes pk-pulse {
+            0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+            70% { box-shadow: 0 0 0 9px transparent; }
+            100% { box-shadow: 0 0 0 0 transparent; }
+        }
+        .pk-quiet-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--green); vertical-align: 2px; margin-right: 8px; }
+        .pk-seg { display: flex; gap: 6px; flex-wrap: wrap; }
+        .pk-seg button {
+            border: 1px solid var(--border-subtle); border-radius: 999px; background: var(--bg-tertiary);
+            color: var(--text-secondary); font-size: 12.5px; font-weight: 600; padding: 6px 13px;
+            transition: color 0.14s, border-color 0.14s, background 0.14s;
+        }
+        .pk-seg button.on { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 55%, transparent); background: color-mix(in srgb, var(--accent) 9%, var(--bg-tertiary)); }
+        .pk-hash {
+            font-family: var(--font-mono); font-size: 12.5px; color: var(--text-primary);
+            background: var(--bg-tertiary); border: 1px solid var(--border-subtle);
+            border-radius: 8px; padding: 9px 11px; word-break: break-all;
+        }
+        .pk-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--border-subtle); }
+        .pk-row:first-child { border-top: none; padding-top: 0; }
+        .pk-row-label { font-weight: 600; font-size: 14px; color: var(--text-primary); }
+        .pk-row-sub { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+        .pk-scrim {
+            position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center;
+            padding: 18px; background: color-mix(in srgb, #000 55%, transparent); animation: pk-fade 0.16s ease;
+        }
+        @keyframes pk-fade { from { opacity: 0; } }
+        .pk-modal { width: min(500px, 100%); border: 1px solid var(--border); border-radius: 12px; background: var(--bg-elevated); padding: 22px; }
+        .pk-modal h3 { font-size: 19px; margin: 0 0 10px; color: var(--text-primary); }
+        .pk-modal p { font-size: 13.5px; line-height: 1.55; color: var(--text-secondary); margin: 0 0 10px; }
+        @media (max-width: 700px) {
+            .portal-tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                scrollbar-width: none;
+                -webkit-overflow-scrolling: touch;
+                scroll-snap-type: x proximity;
+                mask-image: linear-gradient(to right, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+            }
+            .portal-tabs::-webkit-scrollbar { display: none; }
+            .portal-tab { flex: 0 0 auto; white-space: nowrap; scroll-snap-align: start; }
+            .pk-grid { grid-template-columns: 1fr; }
+        }
+
         .id-kv-card { border: 1px solid var(--border-subtle); border-radius: 8px; background: var(--bg-primary); }
         .id-kv-row {
             display: flex;
@@ -1897,6 +1980,11 @@
         <span>Badge</span>
         <span class="tab-chip" id="badgeChip"><span class="dot"></span>Unclaimed</span>
     </button>
+    <button class="portal-tab" id="tabPerksBtn" type="button" role="tab" aria-selected="false" aria-controls="tabPerks">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 13L2 9Z"></path><path d="M11 3 8 9l4 13 4-13-3-6"></path><path d="M2 9h20"></path></svg>
+        <span>Perks</span>
+        <span class="tab-chip" id="perksChip"><span class="dot"></span>New</span>
+    </button>
     <button class="portal-tab admin-only" id="tabVotingBtn" type="button" role="tab" aria-selected="false" aria-controls="tabVoting">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 12 2 2 4-4"></path><path d="M5 7c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v12H5V7Z"></path><path d="M22 19H2"></path></svg>
         <span>Voting</span>
@@ -1942,6 +2030,23 @@
                     <div class="id-step-row"><span class="id-step-dot">1</span><div><div class="id-step-name">Wallet</div><div class="id-step-sub">Connect your wallet.</div></div></div>
                     <div class="id-step-row"><span class="id-step-dot">2</span><div><div class="id-step-name">Signature</div><div class="id-step-sub">Sign a gas-free claim.</div></div></div>
                     <div class="id-step-row"><span class="id-step-dot">3</span><div><div class="id-step-name">Badge</div><div class="id-step-sub">Your badge tier is ready!</div></div></div>
+                </div>
+            </section>
+        </aside>
+    </div>
+</section>
+<section id="tabPerks" role="tabpanel" hidden>
+    <div class="vote-shell">
+        <div class="vote-main" id="perksMain"></div>
+        <aside class="sidebar-stack">
+            <section class="id-panel">
+                <span class="panel-kicker">Perks</span>
+                <h2 class="panel-title">How it works</h2>
+                <div id="perksStepper" style="margin-top: 8px">
+                    <div class="id-step-row"><span class="id-step-dot">1</span><div><div class="id-step-name">Wallet</div><div class="id-step-sub">Connect your wallet.</div></div></div>
+                    <div class="id-step-row"><span class="id-step-dot">2</span><div><div class="id-step-name">Badge</div><div class="id-step-sub">Pair and claim your badge.</div></div></div>
+                    <div class="id-step-row"><span class="id-step-dot">3</span><div><div class="id-step-name">Enroll</div><div class="id-step-sub">Sign a gas-free enrollment.</div></div></div>
+                    <div class="id-step-row"><span class="id-step-dot">4</span><div><div class="id-step-name">Relay</div><div class="id-step-sub">Your messages ride first-class.</div></div></div>
                 </div>
             </section>
         </aside>
@@ -2127,6 +2232,7 @@ import {
 import { connectWallet, currentAccount, initWallet, onAccountChange, signTypedData } from './assets/js/portal-wallet.js?v=portal-1';
 import { initIdentityTab } from './assets/js/portal-identity.js?v=portal-1';
 import { initBadgeTab } from './assets/js/portal-badge.js?v=portal-1';
+import { initPerksTab } from './assets/js/portal-perks.js?v=portal-1';
 
 const TOKEN_ADDRESS = RATSPEAK_TOKEN_ADDRESS;
 const POLL_STORE_KEY = 'ratspeak-community-poll-proposals-v2';
@@ -3299,11 +3405,13 @@ els.themeToggle.addEventListener('click', () => {
 const PORTAL_TABS = {
   identity: { btn: document.getElementById('tabIdentityBtn'), panel: document.getElementById('tabIdentity') },
   badge: { btn: document.getElementById('tabBadgeBtn'), panel: document.getElementById('tabBadge') },
+  perks: { btn: document.getElementById('tabPerksBtn'), panel: document.getElementById('tabPerks') },
   voting: { btn: document.getElementById('tabVotingBtn'), panel: document.getElementById('tabVoting') }
 };
 const tabEls = {
   identityChip: document.getElementById('identityChip'),
-  badgeChip: document.getElementById('badgeChip')
+  badgeChip: document.getElementById('badgeChip'),
+  perksChip: document.getElementById('perksChip')
 };
 
 function selectPortalTab(name) {
@@ -3316,6 +3424,7 @@ function selectPortalTab(name) {
     tab.panel.hidden = !selected;
     tab.btn.classList.toggle('active', selected);
     tab.btn.setAttribute('aria-selected', String(selected));
+    if (selected) tab.btn.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   }
   try { history.replaceState({}, '', '#' + active); } catch (e) {}
 }
@@ -3340,6 +3449,18 @@ initBadgeTab({
   onChipChange(chip) {
     tabEls.badgeChip.className = 'tab-chip' + (chip.tone ? ' ' + chip.tone : '');
     tabEls.badgeChip.innerHTML = '<span class="dot"></span>' + chip.text;
+  }
+});
+
+initPerksTab({
+  els: {
+    main: document.getElementById('perksMain'),
+    steps: [...document.querySelectorAll('#perksStepper .id-step-row')].map(row => ({ row, dot: row.querySelector('.id-step-dot') }))
+  },
+  toast,
+  onChipChange(chip) {
+    tabEls.perksChip.className = 'tab-chip' + (chip.tone ? ' ' + chip.tone : '');
+    tabEls.perksChip.innerHTML = '<span class="dot"></span>' + chip.text;
   }
 });
 
