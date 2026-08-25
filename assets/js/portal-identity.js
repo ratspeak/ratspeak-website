@@ -477,7 +477,7 @@ function renderWalletPanel(account) {
 
 const VIEWS = {
   welcome: () => flowCard({
-    tags: [tag('Step 1 of 4', 'accent')],
+    tags: [],
     title: 'Pair your wallet',
     desc: 'Pair your wallet to a Ratspeak identity for future perks or services. See our docs for more information and best privacy practices.',
     body: `
@@ -508,7 +508,7 @@ const VIEWS = {
       ? `<button class="secondary-btn" type="button" data-id-action="start" ${busyAttr()}>Send code anyway</button>`
       : '';
     return flowCard({
-      tags: [tag('Step 2 of 4', 'accent')],
+      tags: [],
       title: 'Pair wallet to Ratspeak',
       desc: 'Enter the Ratspeak address you want associated with your Base wallet. <strong style="color: var(--text-primary); font-weight: 600">You must be able to reach our verification node, which can be done by connecting to an official TCP server in the Ratspeak app.</strong>',
       body: `
@@ -532,7 +532,7 @@ const VIEWS = {
     const pending = status.pending;
     const deliveredish = pending.status === 'delivered' || pending.status === 'propagated';
     return flowCard({
-      tags: [tag('Step 3 of 4', 'accent')],
+      tags: [],
       title: 'Check your Ratspeak inbox',
       desc: `We’re sending a one-time code to <span class="id-mono">${escapeHtml(pending.lxmfAddress)}</span>. Mesh delivery can take a moment.`,
       body: `
@@ -552,7 +552,7 @@ const VIEWS = {
   },
 
   unreachable: () => flowCard({
-    tags: [tag('Step 3 of 4', 'accent')],
+    tags: [],
     title: status.pending.status === 'undelivered' ? 'Delivery wasn’t confirmed' : 'We couldn’t reach your identity',
     desc: status.pending.status === 'undelivered'
       ? `${escapeHtml(status.pending.lxmfAddress)} was found on the mesh, but the code wasn’t confirmed as received.`
@@ -570,7 +570,7 @@ const VIEWS = {
   }),
 
   expired: () => flowCard({
-    tags: [tag('Step 3 of 4', 'accent')],
+    tags: [],
     title: 'That code has expired',
     desc: 'Codes are valid for 15 minutes.',
     body: `
@@ -582,7 +582,7 @@ const VIEWS = {
   }),
 
   sign: () => flowCard({
-    tags: [tag('Step 4 of 4', 'accent')],
+    tags: [],
     title: 'Confirm with your wallet',
     desc: 'Bind your wallet to Ratspeak. This can be changed or removed any time, and is stored by the portal privately.',
     body: `
@@ -678,7 +678,7 @@ function flowCard({ tags, title, desc, body, headClass = '' }) {
 }
 
 function previewStep(n, name, sub) {
-  return `<div class="id-preview-step"><span class="id-step-dot">${n}</span><div class="id-step-name">${name}</div><div class="id-step-sub">${sub}</div></div>`;
+  return `<div class="id-preview-step"><span class="pk-index">0${n}</span><div class="id-step-name">${name}</div><div class="id-step-sub" style="margin-top: 4px">${sub}</div></div>`;
 }
 
 function codeBoxes() {
