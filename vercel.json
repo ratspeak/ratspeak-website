@@ -38,6 +38,9 @@
     },
     "api/identity.js": {
       "maxDuration": 10
+    },
+    "api/perks.js": {
+      "maxDuration": 10
     }
   },
   "headers": [
