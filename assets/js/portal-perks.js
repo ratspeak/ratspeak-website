@@ -402,7 +402,11 @@ function render() {
 
 function syncStepper(account) {
   if (!els.steps?.length) return;
-  const stage = !account ? 0 : !identity.registered || identity.badge === 'none' ? 1 : !perks?.enrolled ? 2 : 3;
+  const stage = !account ? 0
+    : !identity.registered ? 1
+    : identity.badge === 'none' ? 2
+    : !perks?.enrolled ? 3
+    : 4;
   els.steps.forEach((step, index) => {
     const state = perks?.enrolled ? 'done' : index < stage ? 'done' : index === stage ? 'active' : 'todo';
     step.row.classList.toggle('todo', state === 'todo');
