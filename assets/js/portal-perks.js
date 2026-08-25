@@ -228,14 +228,13 @@ function reportError(err) {
 // ------------------------------------------------------------- views --------
 const PERK_ICONS = {
   database: '<ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v14a9 3 0 0 0 18 0V5"></path><path d="M3 12a9 3 0 0 0 18 0"></path>',
-  mail: '<rect x="2" y="5" width="20" height="15" rx="2"></rect><path d="m2 8.5 8.91 5.02a2 2 0 0 0 2.18 0L22 8.5"></path><circle cx="19" cy="4.5" r="2.6" fill="currentColor" stroke="none"></circle>',
+  mail: '<rect x="2" y="5" width="20" height="15" rx="2"></rect><path d="m2 8.5 8.91 5.02a2 2 0 0 0 2.18 0L22 8.5"></path>',
   inbox: '<path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>',
   bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>'
 };
 
-function perkCard(index, icon, name, sub) {
+function perkCard(icon, name, sub) {
   return `<div class="pk-card">
-    <span class="pk-index">${index}</span>
     <span class="pk-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PERK_ICONS[icon]}</svg></span>
     <div class="pk-name">${name}</div>
     <div class="pk-sub">${sub}</div>
@@ -244,10 +243,10 @@ function perkCard(index, icon, name, sub) {
 
 function perkGrid() {
   return `<div class="pk-grid">
-    ${perkCard('01', 'database', 'Priority Storage', 'Your messages survive 10× longer in every Ratspeak inbox.')}
-    ${perkCard('02', 'mail', 'Mailbox Status', 'See how much mail is waiting for you, right here in the portal.')}
-    ${perkCard('03', 'inbox', 'Gold Inbox', 'A private offline-inbox for holders only — 10 MB messages, 5× the public limit.')}
-    ${perkCard('04', 'bell', 'Arrival Alerts', 'A message over the mesh nudges you when mail waits too long.')}
+    ${perkCard('database', 'Priority Storage', 'Your messages survive 10× longer in every Ratspeak inbox.')}
+    ${perkCard('mail', 'Mailbox Status', 'See how much mail is waiting for you, right here in the portal.')}
+    ${perkCard('inbox', 'Gold Inbox', 'A private offline-inbox for holders only — 10 MB messages, 5× the public limit.')}
+    ${perkCard('bell', 'Arrival Alerts', 'A message over the mesh nudges you when mail waits too long.')}
   </div>`;
 }
 
