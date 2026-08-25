@@ -1583,18 +1583,38 @@
         .pk-card {
             position: relative;
             border: 1px solid var(--border-subtle);
-            border-radius: 10px;
-            background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
-            padding: 15px 15px 14px;
-            overflow: hidden;
+            border-radius: 12px;
+            background:
+                radial-gradient(160px 100px at 24px 22px, color-mix(in srgb, var(--accent) 7%, transparent), transparent 72%),
+                color-mix(in srgb, var(--bg-elevated) 94%, transparent);
+            box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 4%, transparent);
+            padding: 16px;
+            transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
         }
-        .pk-card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 2px; opacity: 0.85; }
-        .pk-card.m-bronze::before { background: linear-gradient(90deg, #d9a06c, #8a5432); }
-        .pk-card.m-silver::before { background: linear-gradient(90deg, #eceff4, #9aa0ad); }
-        .pk-card.m-gold::before { background: linear-gradient(90deg, #f4d97a, #bd8d1f); }
-        .pk-card.m-diamond::before { background: linear-gradient(90deg, #f0655d, #e9c341, #57c26f, #4fa8e8, #9d6ee0); }
-        .pk-card > svg { width: 18px; height: 18px; color: var(--accent); }
-        .pk-name { font-weight: 700; font-size: 14.5px; color: var(--text-primary); margin-top: 9px; }
+        @media (hover: hover) {
+            .pk-card:hover {
+                border-color: color-mix(in srgb, var(--accent) 35%, var(--border-subtle));
+                transform: translateY(-1px);
+                box-shadow:
+                    inset 0 1px 0 color-mix(in srgb, #fff 6%, transparent),
+                    0 10px 26px -18px color-mix(in srgb, var(--accent) 55%, transparent);
+            }
+        }
+        .pk-ico {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 10px;
+            color: var(--accent);
+            border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent);
+            background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 15%, transparent), color-mix(in srgb, var(--accent) 4%, transparent));
+            box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 8%, transparent);
+        }
+        .pk-ico svg { width: 17px; height: 17px; }
+        .pk-index {
+            position: absolute; top: 14px; right: 15px;
+            font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.08em;
+            color: var(--text-muted); opacity: 0.55;
+        }
+        .pk-name { font-weight: 700; font-size: 14.5px; color: var(--text-primary); margin-top: 11px; }
         .pk-sub { font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin-top: 4px; }
         .pk-halo { position: relative; border-radius: 12px; isolation: isolate; }
         .pk-halo::before {

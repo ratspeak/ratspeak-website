@@ -233,9 +233,10 @@ const PERK_ICONS = {
   bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>'
 };
 
-function perkCard(metal, icon, name, sub) {
-  return `<div class="pk-card m-${metal}">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PERK_ICONS[icon]}</svg>
+function perkCard(index, icon, name, sub) {
+  return `<div class="pk-card">
+    <span class="pk-index">${index}</span>
+    <span class="pk-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PERK_ICONS[icon]}</svg></span>
     <div class="pk-name">${name}</div>
     <div class="pk-sub">${sub}</div>
   </div>`;
@@ -243,10 +244,10 @@ function perkCard(metal, icon, name, sub) {
 
 function perkGrid() {
   return `<div class="pk-grid">
-    ${perkCard('bronze', 'stack', 'Priority storage', 'Your messages survive 10× longer in every Ratspeak inbox.')}
-    ${perkCard('silver', 'inbox', 'Mailbox status', 'See how much mail is waiting for you, right here in the portal.')}
-    ${perkCard('gold', 'vault', 'Gold inbox', 'A private offline-inbox for holders only — 10 MB messages, 5× the public limit.')}
-    ${perkCard('diamond', 'bell', 'Arrival alerts', 'A message over the mesh nudges you when mail waits too long.')}
+    ${perkCard('01', 'stack', 'Priority storage', 'Your messages survive 10× longer in every Ratspeak inbox.')}
+    ${perkCard('02', 'inbox', 'Mailbox status', 'See how much mail is waiting for you, right here in the portal.')}
+    ${perkCard('03', 'vault', 'Gold inbox', 'A private offline-inbox for holders only — 10 MB messages, 5× the public limit.')}
+    ${perkCard('04', 'bell', 'Arrival alerts', 'A message over the mesh nudges you when mail waits too long.')}
   </div>`;
 }
 
