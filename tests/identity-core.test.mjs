@@ -217,3 +217,22 @@ test('isVerificationId', () => {
   assert.equal(isVerificationId(VID.toUpperCase()), false);
   assert.equal(isVerificationId('a'.repeat(31)), false);
 });
+
+test('perks enrollment message and validation', async () => {
+  const { PERKS_KIND, canonicalPerksMessage, validatePerksInput, normalizeAlertThreshold, ALERT_THRESHOLD_DEFAULT_MIN } = await import('../lib/identity-core.js');
+  const now = Date.now();
+  const message = canonicalPerksMessage({ wallet: WALLET, lxmfAddress: ADDR.toUpperCase(), enrolled: true, nonce: VID, issuedAt: now });
+  assert.equal(message.kind, PERKS_KIND);
+  assert.equal(message.lxmfAddress, ADDR, 'address normalized in canonical form');
+  assert.equal(typeof message.enrolled, 'boolean');
+  const serial = { ...message, issuedAt: String(now) };
+  assert.equal(validatePerksInput(serial, now).ok, true);
+  assert.equal(validatePerksInput({ ...serial, kind: 'nope' }).error, 'wrong perks kind');
+  assert.equal(validatePerksInput({ ...serial, lxmfAddress: 'short' }).error, 'invalid lxmf address');
+  assert.equal(validatePerksInput({ ...serial, enrolled: 'yes' }).error, 'invalid enrolled flag');
+  assert.equal(validatePerksInput({ ...serial, nonce: 'x' }).error, 'invalid nonce');
+  assert.equal(normalizeAlertThreshold(15), 15);
+  assert.equal(normalizeAlertThreshold(1), 5, 'clamped to floor');
+  assert.equal(normalizeAlertThreshold(99999), 1440, 'clamped to ceiling');
+  assert.equal(normalizeAlertThreshold('junk'), ALERT_THRESHOLD_DEFAULT_MIN);
+});
