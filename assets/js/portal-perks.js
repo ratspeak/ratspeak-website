@@ -209,7 +209,12 @@ function onClick(event) {
   if (action === 'go-identity') document.getElementById('tabIdentityBtn')?.click();
   if (action === 'go-badge') document.getElementById('tabBadgeBtn')?.click();
   if (action === 'open-modal') { errorNote = ''; modalOpen = true; render(); }
-  if (action === 'close-modal') { modalOpen = false; errorNote = ''; render(); }
+  if (action === 'close-modal') {
+    // The scrim closes only when clicked directly — clicks inside the dialog
+    // bubble through it and must not dismiss.
+    if (target.classList.contains('pk-scrim') && event.target !== target) return;
+    modalOpen = false; errorNote = ''; render();
+  }
   if (action === 'enroll') enroll();
   if (action === 'unenroll') unenroll();
   if (action === 'alerts-on') setAlerts(true, perks?.alerts?.thresholdMin ?? 15);
@@ -272,7 +277,7 @@ function consentModal() {
     ? `<div class="pk-hash" style="margin: 4px 0 12px">${escapeHtml(address)}</div>`
     : `<div class="id-hash-input" style="margin: 4px 0 12px"><input id="pkAddressInput" type="text" autocomplete="off" spellcheck="false" maxlength="64" placeholder="Your paired LXMF address (32 hex)"></div>`;
   return `<div class="pk-scrim" data-pk-action="close-modal">
-    <div class="pk-modal" onclick="event.stopPropagation()">
+    <div class="pk-modal">
       <h3>Enable network perks</h3>
       <p>You’ll sign a gas-free enrollment for:</p>
       ${addressBlock}
