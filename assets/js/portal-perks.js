@@ -161,20 +161,20 @@ async function enroll() {
   await withBusy(async () => {
     await signEnrollment(true, address);
     modalOpen = false;
-    toast('Enrolled — your relay perks are live.');
+    toast('Enrolled — your network perks are live.');
   });
 }
 
 async function unenroll() {
   const address = perks ? registeredAddress(currentAccount()) : '';
-  if (!window.confirm('Unenroll from relay perks? Your address leaves the perk systems and alerts stop.')) return;
+  if (!window.confirm('Unenroll from network perks? Your address leaves the perk systems and alerts stop.')) return;
   if (!address) {
     errorNote = 'This browser doesn’t have your address on file — re-pair on the Wallet tab first.';
     return render();
   }
   await withBusy(async () => {
     await signEnrollment(false, address);
-    toast('Unenrolled from relay perks.');
+    toast('Unenrolled from network perks.');
   });
 }
 
@@ -243,9 +243,9 @@ function perkCard(metal, icon, name, sub) {
 
 function perkGrid() {
   return `<div class="pk-grid">
-    ${perkCard('bronze', 'stack', 'Priority storage', 'Your messages survive 10× longer in every relay’s store.')}
+    ${perkCard('bronze', 'stack', 'Priority storage', 'Your messages survive 10× longer in every Ratspeak inbox.')}
     ${perkCard('silver', 'inbox', 'Mailbox status', 'See how much mail is waiting for you, right here in the portal.')}
-    ${perkCard('gold', 'vault', 'Gold relay', 'A private relay for holders only — 10 MB messages, 5× the public limit.')}
+    ${perkCard('gold', 'vault', 'Gold inbox', 'A private offline-inbox for holders only — 10 MB messages, 5× the public limit.')}
     ${perkCard('diamond', 'bell', 'Arrival alerts', 'A message over the mesh nudges you when mail waits too long.')}
   </div>`;
 }
@@ -273,7 +273,7 @@ function consentModal() {
     : `<div class="id-hash-input" style="margin: 4px 0 12px"><input id="pkAddressInput" type="text" autocomplete="off" spellcheck="false" maxlength="64" placeholder="Your paired LXMF address (32 hex)"></div>`;
   return `<div class="pk-scrim" data-pk-action="close-modal">
     <div class="pk-modal" onclick="event.stopPropagation()">
-      <h3>Enable relay perks</h3>
+      <h3>Enable network perks</h3>
       <p>You’ll sign a gas-free enrollment for:</p>
       ${addressBlock}
       <p><strong style="color: var(--text-primary)">What this shares:</strong> your address and badge tier go to our relay
@@ -327,8 +327,8 @@ function alertsRows() {
 function goldRelayRow() {
   if (perks.goldRelay) {
     return `<div class="pk-row" style="display: block">
-      <div class="pk-row-label">Gold relay</div>
-      <div class="pk-row-sub" style="margin-bottom: 8px">Your private propagation node. In Ratspeak: Settings &rarr; Propagation node &rarr; paste, then Announce once and Sync.</div>
+      <div class="pk-row-label">Gold inbox</div>
+      <div class="pk-row-sub" style="margin-bottom: 8px">Your private offline-inbox. In Ratspeak: Settings &rarr; Propagation node &rarr; paste, then Announce once and Sync.</div>
       <div class="pk-hash">${escapeHtml(perks.goldRelay)}</div>
       <div class="id-btn-row" style="margin-top: 10px">
         <button class="secondary-btn" type="button" data-pk-action="copy-relay">Copy relay address</button>
@@ -336,8 +336,8 @@ function goldRelayRow() {
     </div>`;
   }
   return `<div class="pk-row">
-    <div><div class="pk-row-label">Gold relay</div>
-    <div class="pk-row-sub">Your private relay is coming online — the address will appear here.</div></div>
+    <div><div class="pk-row-label">Gold inbox</div>
+    <div class="pk-row-sub">Your private inbox is coming online — the address will appear here.</div></div>
   </div>`;
 }
 
@@ -349,7 +349,7 @@ function render() {
   let chip = { text: 'New', tone: 'accent' };
 
   if (!account) {
-    view = card('Relay perks', 'Badge holders get first-class treatment on the Ratspeak relay network.', `
+    view = card('Network perks', 'Badge holders unlock additional perks or upgrades over the network.', `
       ${perkGrid()}
       <div class="id-btn-row" style="margin-top: 14px">
         <button class="primary-btn" type="button" data-pk-action="connect">Connect wallet</button>
@@ -376,12 +376,12 @@ function render() {
       `${badgeName(identity.badge)} holder perks on the Ratspeak relay network — private, opt-in, one signature.`, `
       ${perkGrid()}
       <div class="id-btn-row" style="margin-top: 14px">
-        <button class="primary-btn" type="button" data-pk-action="open-modal" ${busy ? 'disabled' : ''}>Enable relay perks</button>
+        <button class="primary-btn" type="button" data-pk-action="open-modal" ${busy ? 'disabled' : ''}>Enable network perks</button>
       </div>
       ${modalOpen ? '' : errorBanner()}`)}</div>`;
   } else {
     chip = { text: 'Enrolled', tone: 'good' };
-    view = card('Relay perks active', '', `
+    view = card('Network perks active', '', `
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px">
         ${badgeTile(perks.tier)}
         <div><div class="pk-row-label">${badgeName(perks.tier)} holder &middot; ${escapeHtml(perks.lxmfAddress || '')}</div>
