@@ -251,7 +251,7 @@ function perkCard(icon, name, sub) {
 
 function perkGrid() {
   return `<div class="pk-grid">
-    ${perkCard('database', 'Priority Storage', 'Priority retention in every Ratspeak inbox — your messages are last to be evicted.')}
+    ${perkCard('database', 'Priority Storage', 'Eviction priority on your Gold Inbox — your messages are last to be culled, up to the 30-day ceiling.')}
     ${perkCard('mail', 'Mailbox Status', 'See how much mail is waiting for you, right here in the portal.')}
     ${perkCard('inbox', 'Gold Inbox', 'A private offline-inbox for holders only — 10 MB messages, 5× the public limit.')}
     ${perkCard('bell', 'Arrival Alerts', 'A message over the mesh nudges you when mail waits too long.')}
@@ -399,7 +399,7 @@ function render() {
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px">
         ${badgeTile(perks.tier)}
         <div><div class="pk-row-label">${badgeName(perks.tier)} holder &middot; ${escapeHtml(perks.lxmfAddress || '')}</div>
-        <div class="pk-row-sub">Priority storage is active for this address.</div></div>
+        <div class="pk-row-sub">Eviction priority is active on your Gold Inbox.</div></div>
       </div>
       ${mailboxCard()}
       <div style="margin-top: 18px">${alertsRows()}${goldRelayRow()}</div>
