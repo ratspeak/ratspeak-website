@@ -251,9 +251,9 @@ function perkCard(icon, name, sub) {
 
 function perkGrid() {
   return `<div class="pk-grid">
-    ${perkCard('database', 'Priority Storage', 'Eviction priority on your Gold Inbox — your messages are last to be culled, up to the 30-day ceiling.')}
+    ${perkCard('database', 'Priority Storage', 'Eviction priority on your VIP Inbox — your messages are last to be culled, up to the 30-day ceiling.')}
     ${perkCard('mail', 'Mailbox Status', 'See how much mail is waiting for you, right here in the portal.')}
-    ${perkCard('inbox', 'Gold Inbox', 'A private offline-inbox for holders only — 10 MB messages, 5× the public limit.')}
+    ${perkCard('inbox', 'VIP Inbox', 'A private offline-inbox for holders only — 10 MB messages, 5× the public limit.')}
     ${perkCard('bell', 'Arrival Alerts', 'A message over the mesh nudges you when mail waits too long.')}
   </div>`;
 }
@@ -341,7 +341,7 @@ function alertsRows() {
 function goldRelayRow() {
   if (perks.goldRelay) {
     return `<div class="pk-row" style="display: block">
-      <div class="pk-row-label">Gold Inbox</div>
+      <div class="pk-row-label">VIP Inbox</div>
       <div class="pk-row-sub" style="margin-bottom: 8px">Your private offline-inbox. In Ratspeak: Settings &rarr; Propagation node &rarr; paste, then Announce once and Sync.</div>
       <div class="pk-hash">${escapeHtml(perks.goldRelay)}</div>
       <div class="id-btn-row" style="margin-top: 10px">
@@ -350,7 +350,7 @@ function goldRelayRow() {
     </div>`;
   }
   return `<div class="pk-row">
-    <div><div class="pk-row-label">Gold Inbox</div>
+    <div><div class="pk-row-label">VIP Inbox</div>
     <div class="pk-row-sub">Your private inbox is coming online — the address will appear here.</div></div>
   </div>`;
 }
@@ -399,7 +399,7 @@ function render() {
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px">
         ${badgeTile(perks.tier)}
         <div><div class="pk-row-label">${badgeName(perks.tier)} holder &middot; ${escapeHtml(perks.lxmfAddress || '')}</div>
-        <div class="pk-row-sub">Eviction priority is active on your Gold Inbox.</div></div>
+        <div class="pk-row-sub">Eviction priority is active on your VIP Inbox.</div></div>
       </div>
       ${mailboxCard()}
       <div style="margin-top: 18px">${alertsRows()}${goldRelayRow()}</div>
