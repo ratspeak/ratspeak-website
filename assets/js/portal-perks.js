@@ -349,14 +349,14 @@ function render() {
   let chip = { text: 'New', tone: 'accent' };
 
   if (!account) {
-    view = card('Network perks', 'Badge holders unlock additional perks or upgrades over the network.', `
+    view = card('Badge perks', 'Use your badge status to claim your network perks and enjoy the upgrades!', `
       ${perkGrid()}
       <div class="id-btn-row" style="margin-top: 14px">
         <button class="primary-btn" type="button" data-pk-action="connect">Connect wallet</button>
       </div>
       ${errorBanner()}`);
   } else if (!identity.registered) {
-    view = card('One step first', 'Perks attach to your paired Ratspeak address.', `
+    view = card('Badge perks', 'Use your badge status to claim your network perks and enjoy the upgrades!', `
       ${perkGrid()}
       <div class="id-banner" style="margin-top: 14px"><div>Pair your wallet with your Ratspeak identity, then come back here.</div></div>
       <div class="id-btn-row">
@@ -364,7 +364,7 @@ function render() {
       </div>
       ${errorBanner()}`);
   } else if (identity.badge === 'none') {
-    view = card('Almost there', 'Perks are for badge holders.', `
+    view = card('Badge perks', 'Use your badge status to claim your network perks and enjoy the upgrades!', `
       ${perkGrid()}
       <div class="id-banner" style="margin-top: 14px"><div>Claim your holder badge, then enroll for perks.</div></div>
       <div class="id-btn-row">
@@ -373,7 +373,7 @@ function render() {
       ${errorBanner()}`);
   } else if (!perks?.enrolled) {
     view = `<div class="pk-halo">${card(`Welcome, ${badgeName(identity.badge)} Rat.`,
-      'Enjoy the latest perks and upgrades.', `
+      'Click enable perks below to get things started.', `
       ${perkGrid()}
       <div class="id-btn-row" style="margin-top: 14px">
         <button class="primary-btn" type="button" data-pk-action="open-modal" ${busy ? 'disabled' : ''}>Enable network perks</button>
@@ -381,7 +381,7 @@ function render() {
       ${modalOpen ? '' : errorBanner()}`)}</div>`;
   } else {
     chip = { text: 'Enrolled', tone: 'good' };
-    view = card('Network perks active', '', `
+    view = card(`Welcome, ${badgeName(perks.tier)} Rat.`, 'Enjoy the latest perks and upgrades.', `
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px">
         ${badgeTile(perks.tier)}
         <div><div class="pk-row-label">${badgeName(perks.tier)} holder &middot; ${escapeHtml(perks.lxmfAddress || '')}</div>
