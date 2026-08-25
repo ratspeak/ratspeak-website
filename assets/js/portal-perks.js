@@ -298,14 +298,20 @@ function consentModal() {
 function mailboxCard() {
   const box = perks.mailbox || { waiting: 0 };
   const reported = box.reportedAt ? new Date(box.reportedAt) : null;
-  const asOf = reported ? `as of ${reported.toISOString().slice(11, 16)} UTC` : 'no relay report yet';
+  const asOf = reported ? `as of ${reported.toISOString().slice(11, 16)} UTC` : 'no report received yet';
   if (!box.waiting) {
-    return `<div class="pk-mail"><span class="pk-quiet-dot"></span><span class="pk-mail-count">0</span>
-      <span class="pk-mail-sub">messages waiting — all clear, ${asOf}.</span></div>`;
+    return `<div class="pk-mailbox clear">
+      <span class="pk-mailbox-count">0</span>
+      <div><div class="pk-mailbox-label">Messages waiting</div>
+      <div class="pk-mailbox-meta">All clear — ${asOf}.</div></div>
+    </div>`;
   }
   const since = box.oldestTs ? new Date(box.oldestTs * 1000).toISOString().slice(11, 16) + ' UTC' : '';
-  return `<div class="pk-mail"><span class="pk-live-dot"></span><span class="pk-mail-count">${box.waiting}</span>
-    <span class="pk-mail-sub">message${box.waiting === 1 ? '' : 's'} waiting on your relay${since ? ` since ${since}` : ''} — open Ratspeak and sync.</span></div>`;
+  return `<div class="pk-mailbox has-mail">
+    <span class="pk-mailbox-count">${box.waiting}</span>
+    <div><div class="pk-mailbox-label">Message${box.waiting === 1 ? '' : 's'} waiting</div>
+    <div class="pk-mailbox-meta">On your inbox${since ? ` since ${since}` : ''} — open Ratspeak and sync to receive.</div></div>
+  </div>`;
 }
 
 function alertsRows() {
@@ -314,15 +320,15 @@ function alertsRows() {
   return `
     <div class="pk-row">
       <div><div class="pk-row-label">Arrival alerts</div>
-      <div class="pk-row-sub">A mesh message from the portal when mail waits longer than your threshold.</div></div>
+      <div class="pk-row-sub">Receive a Ratspeak message when mail has been waiting longer than your threshold.</div></div>
       <div class="pk-seg">
-        <button type="button" class="${on ? 'on' : ''}" data-pk-action="alerts-on" ${busy ? 'disabled' : ''}>On</button>
-        <button type="button" class="${on ? '' : 'on'}" data-pk-action="alerts-off" ${busy ? 'disabled' : ''}>Off</button>
+        <button type="button" class="${on ? 'on' : ''}" data-pk-action="alerts-on" ${busy ? 'disabled' : ''}>ON</button>
+        <button type="button" class="${on ? '' : 'on'}" data-pk-action="alerts-off" ${busy ? 'disabled' : ''}>OFF</button>
       </div>
     </div>
     <div class="pk-row">
       <div><div class="pk-row-label">Alert after</div>
-      <div class="pk-row-sub">How long mail can wait before the nudge.</div></div>
+      <div class="pk-row-sub">The waiting time before an alert is sent.</div></div>
       <div class="pk-seg">${THRESHOLDS.map(t =>
         `<button type="button" class="${on && threshold === t.min ? 'on' : ''}" data-pk-action="threshold" data-min="${t.min}" ${busy || !on ? 'disabled' : ''}>${t.label}</button>`
       ).join('')}</div>
@@ -386,11 +392,11 @@ function render() {
       ${modalOpen ? '' : errorBanner()}`)}</div>`;
   } else {
     chip = { text: 'Enrolled', tone: 'good' };
-    view = card(`Welcome, ${badgeName(perks.tier)} Rat.`, 'Enjoy the latest perks and upgrades.', `
+    view = card(`Welcome, ${badgeName(perks.tier)} Rat.`, '', `
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px">
         ${badgeTile(perks.tier)}
         <div><div class="pk-row-label">${badgeName(perks.tier)} holder &middot; ${escapeHtml(perks.lxmfAddress || '')}</div>
-        <div class="pk-row-sub">Priority storage is on. Your messages ride first-class.</div></div>
+        <div class="pk-row-sub">Priority storage is active for this address.</div></div>
       </div>
       ${mailboxCard()}
       <div style="margin-top: 18px">${alertsRows()}${goldRelayRow()}</div>
