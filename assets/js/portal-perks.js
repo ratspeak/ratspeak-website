@@ -15,6 +15,9 @@ import { connectWallet, currentAccount, onAccountChange, signTypedData } from '.
 import { badgeName, badgeTile } from './portal-badge.js?v=portal-1';
 
 const API_URL = '/api/perks';
+// The perks daemon's lxmf.delivery destination — the only sender arrival
+// alerts come from.
+const PERKS_ALERT_SENDER = '3d78560c72af48998e9eff6c24834cd3';
 const IDENTITY_URL = '/api/identity';
 const REG_STORE_KEY = 'ratspeak-portal-registered';
 const PERKS_STORE_KEY = 'ratspeak-portal-perks';
@@ -400,6 +403,7 @@ function render() {
       </div>
       ${mailboxCard()}
       <div style="margin-top: 18px">${alertsRows()}${goldRelayRow()}</div>
+      <div class="id-banner" style="margin-top: 16px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg><div>Only trust perk alerts received from <span class="id-mono">${PERKS_ALERT_SENDER}</span>.</div></div>
       <div class="id-btn-row" style="margin-top: 16px">
         <button class="danger-btn" type="button" data-pk-action="unenroll" ${busy ? 'disabled' : ''}>Unenroll</button>
       </div>
