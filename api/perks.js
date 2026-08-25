@@ -1,5 +1,7 @@
-// Holder perks bridge: the infra fleet syncs the PERKS-ENROLLED badge list
-// and reports mailbox facts for those addresses.
+// Holder perks bridge: the infra fleet syncs the PERKS-ENROLLED badge list,
+// reports mailbox facts for those addresses, and receives ready-to-send mesh
+// alerts back. Preferences never cross this boundary — the portal applies
+// prefs/thresholds/dedupe and hands infra finished delivery jobs.
 //
 //   GET  /api/perks?sync=badges     infra polls (~2 min)
 //     -> { version, updated_at, badges: { "<lxmf 32hex>": { tier } } }
@@ -7,15 +9,21 @@
 //        private; nothing leaves it without the owner's signature. Wallets
 //        never cross this boundary in either direction.
 //   POST /api/perks {action:"mailbox_report", generated_at, badges:{...}}
-//     infra pushes full snapshots on change (~1/min); each POST replaces the
-//     previous snapshot wholesale.
+//     Full snapshot, replaces the previous one; an absent address means zero
+//     waiting. Cadence: on change, PLUS every ~60s while any address has
+//     waiting > 0 (threshold crossings happen between changes).
+//     -> { ok, alerts: [{ address, body }] }
+//        Alerts are LXMF messages for infra to deliver over the mesh
+//        (direct/opportunistic, best effort — never via the relay the holder
+//        isn't syncing from). The portal composed them from stored prefs and
+//        already recorded them as sent for dedupe purposes.
 //
 // Auth: Authorization: Bearer <BADGE_SYNC_TOKEN> (distinct from the identity
 // bridge token). Fails closed while unconfigured.
 //
-// STUB: serves one hardcoded test badge and accepts-but-discards mailbox
-// reports so infra can build against the live contract. The real
-// implementation lands with the perks tab + signed enrollment.
+// STUB: serves one hardcoded test badge, accepts-but-discards mailbox
+// reports, and always returns alerts: []. The real implementation lands with
+// the perks tab + signed enrollment.
 
 export const config = { runtime: 'edge' };
 
@@ -57,7 +65,7 @@ export default async function handler(req) {
         return json({ error: `bad waiting count for ${address}` }, 400);
       }
     }
-    return json({ ok: true, stub: true, stored: false });
+    return json({ ok: true, stub: true, stored: false, alerts: [] });
   }
 
   return json({ error: 'Method not allowed' }, 405, { Allow: 'GET, POST' });
