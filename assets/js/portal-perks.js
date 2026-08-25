@@ -227,8 +227,8 @@ function reportError(err) {
 
 // ------------------------------------------------------------- views --------
 const PERK_ICONS = {
-  stack: '<path d="M12 2 2 7l10 5 10-5-10-5Z"></path><path d="m2 17 10 5 10-5"></path><path d="m2 12 10 5 10-5"></path>',
-  vault: '<rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="12" cy="12" r="4"></circle><path d="m12 8 0-2"></path><path d="m16 12 2 0"></path><path d="m12 16 0 2"></path><path d="m8 12-2 0"></path>',
+  database: '<ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v14a9 3 0 0 0 18 0V5"></path><path d="M3 12a9 3 0 0 0 18 0"></path>',
+  mail: '<rect x="2" y="5" width="20" height="15" rx="2"></rect><path d="m2 8.5 8.91 5.02a2 2 0 0 0 2.18 0L22 8.5"></path><circle cx="19" cy="4.5" r="2.6" fill="currentColor" stroke="none"></circle>',
   inbox: '<path d="M22 12h-6l-2 3h-4l-2-3H2"></path><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>',
   bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>'
 };
@@ -244,10 +244,10 @@ function perkCard(index, icon, name, sub) {
 
 function perkGrid() {
   return `<div class="pk-grid">
-    ${perkCard('01', 'stack', 'Priority storage', 'Your messages survive 10× longer in every Ratspeak inbox.')}
-    ${perkCard('02', 'inbox', 'Mailbox status', 'See how much mail is waiting for you, right here in the portal.')}
-    ${perkCard('03', 'vault', 'Gold inbox', 'A private offline-inbox for holders only — 10 MB messages, 5× the public limit.')}
-    ${perkCard('04', 'bell', 'Arrival alerts', 'A message over the mesh nudges you when mail waits too long.')}
+    ${perkCard('01', 'database', 'Priority Storage', 'Your messages survive 10× longer in every Ratspeak inbox.')}
+    ${perkCard('02', 'mail', 'Mailbox Status', 'See how much mail is waiting for you, right here in the portal.')}
+    ${perkCard('03', 'inbox', 'Gold Inbox', 'A private offline-inbox for holders only — 10 MB messages, 5× the public limit.')}
+    ${perkCard('04', 'bell', 'Arrival Alerts', 'A message over the mesh nudges you when mail waits too long.')}
   </div>`;
 }
 
@@ -328,7 +328,7 @@ function alertsRows() {
 function goldRelayRow() {
   if (perks.goldRelay) {
     return `<div class="pk-row" style="display: block">
-      <div class="pk-row-label">Gold inbox</div>
+      <div class="pk-row-label">Gold Inbox</div>
       <div class="pk-row-sub" style="margin-bottom: 8px">Your private offline-inbox. In Ratspeak: Settings &rarr; Propagation node &rarr; paste, then Announce once and Sync.</div>
       <div class="pk-hash">${escapeHtml(perks.goldRelay)}</div>
       <div class="id-btn-row" style="margin-top: 10px">
@@ -337,7 +337,7 @@ function goldRelayRow() {
     </div>`;
   }
   return `<div class="pk-row">
-    <div><div class="pk-row-label">Gold inbox</div>
+    <div><div class="pk-row-label">Gold Inbox</div>
     <div class="pk-row-sub">Your private inbox is coming online — the address will appear here.</div></div>
   </div>`;
 }
