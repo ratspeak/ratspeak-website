@@ -44,8 +44,8 @@
     --map-vignette-x: rgba(101, 85, 70, 0.10);
     --map-vignette-y: rgba(101, 85, 70, 0.08);
     --map-ambient-glow: rgba(210, 105, 59, 0.08);
-    --leaflet-attribution-bg: rgba(250, 247, 243, 0.82);
-    --leaflet-control-shadow: 0 12px 32px rgba(42, 37, 34, 0.16);
+    --map-attribution-bg: rgba(250, 247, 243, 0.82);
+    --map-nav-control-shadow: 0 12px 32px rgba(42, 37, 34, 0.16);
     --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
     --font-mono: 'Familjen Grotesk', system-ui, -apple-system, sans-serif;
     --font-code: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, Consolas, monospace;
@@ -85,8 +85,8 @@
     --map-vignette-x: rgba(7, 11, 13, 0.26);
     --map-vignette-y: rgba(7, 11, 13, 0.12);
     --map-ambient-glow: rgba(69, 216, 156, 0.08);
-    --leaflet-attribution-bg: rgba(7, 11, 13, 0.76);
-    --leaflet-control-shadow: 0 12px 32px rgba(0, 0, 0, 0.32);
+    --map-attribution-bg: rgba(7, 11, 13, 0.76);
+    --map-nav-control-shadow: 0 12px 32px rgba(0, 0, 0, 0.32);
 }
 
 * {
@@ -345,7 +345,7 @@ a {
     content: "";
     position: absolute;
     inset: 0;
-    z-index: 450;
+    z-index: 2;
     pointer-events: none;
     background:
         linear-gradient(90deg, var(--map-vignette-x), transparent 24%, transparent 74%, color-mix(in srgb, var(--map-vignette-x) 72%, transparent)),
@@ -363,20 +363,46 @@ a {
 }
 
 .map-fallback {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     position: absolute;
+    bottom: 18px;
     left: 50%;
-    top: 50%;
-    z-index: 40;
-    width: min(360px, calc(100vw - 40px));
-    transform: translate(-50%, -50%);
+    z-index: 70;
+    width: max-content;
+    max-width: calc(100vw - 40px);
+    transform: translateX(-50%);
     border: 1px solid var(--map-border);
     border-radius: 8px;
     background: var(--map-bg-panel-strong);
     box-shadow: var(--map-shadow);
     color: var(--map-text-soft);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 11px;
+    backdrop-filter: blur(18px) saturate(1.18);
+    -webkit-backdrop-filter: blur(18px) saturate(1.18);
+}
+
+.map-fallback.is-fatal {
+    top: 50%;
+    bottom: auto;
+    width: min(360px, calc(100vw - 40px));
+    justify-content: center;
+    transform: translate(-50%, -50%);
     font-size: 14px;
     padding: 16px;
     text-align: center;
+}
+
+.map-fallback-dot {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 7px;
+    border-radius: 999px;
+    background: var(--map-accent-strong);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--map-accent) 14%, transparent);
 }
 
 .map-left-stack,
@@ -921,113 +947,124 @@ a {
     transform: translate(-50%, -50%);
 }
 
-.leaflet-container {
+.maplibregl-map {
     background: var(--map-canvas-bg);
     color: var(--map-text);
     font-family: var(--font-sans);
 }
 
-.leaflet-tile-pane .leaflet-layer {
-    transition: opacity 0.16s ease;
+.maplibregl-ctrl-top-left,
+.maplibregl-ctrl-top-right,
+.maplibregl-ctrl-bottom-left,
+.maplibregl-ctrl-bottom-right {
+    z-index: 5;
 }
 
-.leaflet-control-zoom {
+.maplibregl-ctrl-group {
     border: 1px solid var(--map-border) !important;
     border-radius: 8px !important;
     background: var(--map-control-bg) !important;
-    box-shadow: var(--leaflet-control-shadow) !important;
+    box-shadow: var(--map-nav-control-shadow) !important;
     backdrop-filter: blur(26px) saturate(1.28);
     -webkit-backdrop-filter: blur(26px) saturate(1.28);
     overflow: hidden;
 }
 
-.leaflet-bottom.leaflet-left .map-legend {
+.maplibregl-ctrl-bottom-left .map-legend {
     margin-left: 18px !important;
     margin-bottom: 18px !important;
 }
 
-.leaflet-bottom.leaflet-right {
+.maplibregl-ctrl-bottom-right {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     gap: 8px;
-    padding-right: 10px;
+    padding: 0 10px 8px 0;
+    pointer-events: none;
 }
 
-.leaflet-bottom.leaflet-right .leaflet-control {
+.maplibregl-ctrl-bottom-right .maplibregl-ctrl {
     margin: 0 !important;
+    pointer-events: auto;
 }
 
-.leaflet-bottom.leaflet-right .leaflet-control-zoom {
+.maplibregl-ctrl-bottom-right .maplibregl-ctrl-group {
     order: 1;
 }
 
-.leaflet-bottom.leaflet-right .leaflet-control-attribution {
+.maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib {
     order: 2;
 }
 
-.leaflet-control-zoom a {
+.maplibregl-ctrl-group button {
     width: 34px !important;
     height: 34px !important;
     border: 0 !important;
-    border-bottom: 1px solid color-mix(in srgb, var(--map-border) 76%, transparent) !important;
     background: var(--map-control-field-bg) !important;
     color: var(--map-text) !important;
-    font-family: var(--font-sans) !important;
-    font-size: 22px !important;
-    font-weight: 700 !important;
-    line-height: 32px !important;
-    text-shadow: none !important;
     transition: background 0.16s, color 0.16s;
 }
 
-.leaflet-control-zoom a:last-child {
-    border-bottom: 0 !important;
+.maplibregl-ctrl-group button + button {
+    border-top: 1px solid color-mix(in srgb, var(--map-border) 76%, transparent) !important;
 }
 
-.leaflet-control-zoom a:hover,
-.leaflet-control-zoom a:focus {
+.maplibregl-ctrl-group button:hover,
+.maplibregl-ctrl-group button:focus {
     background: color-mix(in srgb, var(--map-accent) 12%, var(--map-control-field-bg-focus)) !important;
     color: var(--map-accent-strong) !important;
     outline: none;
 }
 
-.leaflet-control-zoom a:focus-visible {
+.maplibregl-ctrl-group button:focus-visible {
     box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--map-accent) 58%, transparent);
 }
 
-.leaflet-control-zoom a.leaflet-disabled {
+.maplibregl-ctrl-group button:disabled {
     background: color-mix(in srgb, var(--map-control-field-bg) 70%, transparent) !important;
     color: var(--map-text-muted) !important;
     opacity: 0.55;
 }
 
-.leaflet-control-attribution {
+.maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+    filter: none;
+}
+
+[data-theme="dark"] .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+    filter: invert(1) opacity(0.78);
+}
+
+.maplibregl-ctrl-attrib {
     border-radius: 6px 0 0 0;
-    background: var(--leaflet-attribution-bg) !important;
+    background: var(--map-attribution-bg) !important;
     color: var(--map-text-muted) !important;
     font-size: 10px;
 }
 
-.leaflet-control-attribution a {
+.maplibregl-ctrl-attrib a {
     color: var(--map-text-soft) !important;
 }
 
-.continent-label-pane {
+.maplibregl-ctrl-attrib-button {
+    background-color: var(--map-attribution-bg) !important;
+}
+
+.maplibregl-canvas:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--map-accent) 72%, transparent);
+    outline-offset: -2px;
+}
+
+.continent-label-marker {
+    width: 170px;
+    height: 24px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.16s ease;
 }
 
-.continent-label-pane.is-visible {
+.continent-label-marker.is-visible {
     opacity: 1;
-}
-
-.continent-label-icon {
-    overflow: visible;
-    border: 0;
-    background: transparent;
-    pointer-events: none;
 }
 
 .continent-label {
@@ -1054,18 +1091,7 @@ a {
         0 0 10px rgba(0, 0, 0, 0.82);
 }
 
-.ratspeak-marker-icon {
-    overflow: visible;
-    background: transparent;
-    border: 0;
-    pointer-events: none;
-}
-
-.map-canvas.is-node-hit,
-.map-canvas.is-node-hit.leaflet-grab,
-.map-canvas.is-node-hit.leaflet-drag-target,
-.map-canvas.is-node-hit .leaflet-grab,
-.map-canvas.is-node-hit .leaflet-dragging {
+.map-canvas.is-node-hit .maplibregl-canvas {
     cursor: pointer;
 }
 
@@ -1074,11 +1100,6 @@ a {
     position: relative;
     width: 32px;
     height: 32px;
-}
-
-.ratspeak-marker-icon .map-pin {
-    transform: translate(var(--spread-x, 0), var(--spread-y, 0));
-    transition: transform 0.16s ease-out;
 }
 
 .map-pin::before,
@@ -1224,10 +1245,15 @@ a {
         max-height: 46vh;
     }
 
-    .leaflet-bottom.leaflet-left .map-legend {
+    .maplibregl-ctrl-bottom-left .map-legend {
         width: min(248px, calc(100vw - 118px));
         margin-left: 12px !important;
-        margin-bottom: 22px !important;
+        margin-bottom: 48px !important;
+    }
+
+    .map-fallback:not(.is-fatal) {
+        top: 68px;
+        bottom: auto;
     }
 
     .map-legend {
