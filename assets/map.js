@@ -1,6 +1,17 @@
 import { buildMapSnapshot } from './map-data.js';
 import { isIpv6Address, isYggdrasilAddress, textMentionsYggdrasil } from './map-network.js';
 import { buildCountryIndex, buildPlaceIndex, locationLabelForNode } from './map-places.js';
+import {
+  AttributionControl,
+  Map as MapLibreMap,
+  Marker,
+  NavigationControl
+} from './vendor/maplibre/maplibre-gl.mjs';
+import {
+  basemapStyleUrl,
+  createFallbackStyle,
+  isProviderResourceError
+} from './map-basemap.js?v=maplibre-5';
 
 const API_URL = '/api/map-nodes';
 const SNAPSHOT_REFRESH_MS = 15_000;
@@ -8,19 +19,13 @@ const NODE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const LAND_MASK_URL = 'scripts/data/ne_110m_land.geojson';
 const PLACE_GAZETTEER_URL = 'scripts/data/ne_110m_populated_places_simple.geojson';
 const COUNTRY_GEOJSON_URL = 'scripts/data/ne_110m_admin_0_countries.geojson';
-const TILE_ATTRIBUTION = '&copy; OpenStreetMap contributors &copy; CARTO';
-
-const CARTO_TILE_BASE_URL = 'https://{s}.basemaps.cartocdn.com';
-const TILE_LAYER_STYLES = {
-  light: {
-    labels: 'light_all',
-    noLabels: 'light_nolabels'
-  },
-  dark: {
-    labels: 'dark_all',
-    noLabels: 'dark_nolabels'
-  }
-};
+const NODE_SOURCE_ID = 'ratspeak-nodes';
+const NODE_GLOW_LAYER_ID = 'ratspeak-node-glow';
+const NODE_SELECTION_LAYER_ID = 'ratspeak-node-selection';
+const NODE_CORE_LAYER_ID = 'ratspeak-node-core';
+const PROVIDER_ERROR_THRESHOLD = 4;
+const PROVIDER_ERROR_WINDOW_MS = 8_000;
+const FORCE_FALLBACK_BASEMAP = new URLSearchParams(window.location.search).get('basemap') === 'fallback';
 
 const KIND_META = {
   'server-ipv4': {
@@ -61,6 +66,29 @@ const KIND_META = {
   }
 };
 
+const NODE_PALETTES = {
+  light: {
+    'server-ipv4': '#1687B8',
+    'server-ipv6': '#1F4E95',
+    'client-auto': '#35B875',
+    'client-manual': '#C79A2B',
+    i2p: '#D2693B',
+    yggdrasil: '#E989B1',
+    accent: '#B85829',
+    edge: '#2A2522'
+  },
+  dark: {
+    'server-ipv4': '#36B6E6',
+    'server-ipv6': '#4F74D8',
+    'client-auto': '#63D98F',
+    'client-manual': '#E4BD4B',
+    i2p: '#F0834D',
+    yggdrasil: '#FF9EC8',
+    accent: '#F0834D',
+    edge: '#E8E4E0'
+  }
+};
+
 const LEGEND_KIND_IDS = ['server-ipv4', 'server-ipv6', 'client-auto', 'i2p', 'yggdrasil', 'client-manual'];
 
 const MARKER_SCALE_BANDS = [
@@ -72,7 +100,6 @@ const MARKER_SCALE_BANDS = [
   { maxZoom: Infinity, size: 8.5, selectedCore: 10, selected: 22, ring: 2, ringAlpha: 14, selectedRing: 3, selectedHalo: 7 }
 ];
 
-const MARKER_ICON_SIZE = 32;
 const DENSE_MARKER_DISTANCE_PX = 18;
 const MOBILE_MARKER_PICK_RADIUS_PX = 22;
 const MOBILE_MARKER_PRECISE_RADIUS_PX = 10;
@@ -102,17 +129,9 @@ const DECLUTTER_LOCAL_COLLISION_DISTANCE_PX = 10;
 const DECLUTTER_LOCAL_MAX_STRENGTH = 0.5;
 const DECLUTTER_FULL_ZOOM = MIN_MAP_ZOOM;
 const DECLUTTER_END_ZOOM = MIN_MAP_ZOOM + 2.6;
-const WEB_MERCATOR_LAT_LIMIT = 85.05112878;
 const WORLD_LONGITUDE_SPAN = 360;
 const WORLD_RENDER_PADDING = 1;
-const PAN_LONGITUDE_LIMIT = 1_000_000;
 const COORDINATE_ACCURACY_NOTE = 'Coordinates can be self-reported and may not be accurate.';
-// Leaflet's worldCopyJump keeps longitude normalized; this leaves practical
-// horizontal room while still clamping north/south to Web Mercator's limit.
-const MAP_PAN_BOUNDS = [
-  [-WEB_MERCATOR_LAT_LIMIT, -PAN_LONGITUDE_LIMIT],
-  [WEB_MERCATOR_LAT_LIMIT, PAN_LONGITUDE_LIMIT]
-];
 const DEFAULT_WORLD_OFFSETS = [-WORLD_LONGITUDE_SPAN, 0, WORLD_LONGITUDE_SPAN];
 
 const state = {
@@ -123,21 +142,19 @@ const state = {
   statusFilter: 'all',
   query: '',
   map: null,
-  tileLayers: {
-    labels: null,
-    noLabels: null
-  },
-  tileLayerTheme: '',
-  lowZoomLabelLayer: null,
-  lowZoomLabelOffsets: null,
-  markerLayer: null,
-  markers: new Map(),
+  styleReady: false,
+  styleTheme: '',
+  usingFallbackBasemap: false,
+  providerErrorTimes: [],
+  lowZoomLabelMarkers: [],
   markerPlacements: new Map(),
   renderedWorldOffsets: null,
   markerScale: MARKER_SCALE_BANDS[0],
   landMask: null,
+  landMaskPromise: null,
   placeIndex: [],
   countryIndex: [],
+  locationIndexPromise: null,
   nodeCursorActive: false,
   detailSheetDrag: null,
   refreshTimer: null,
@@ -164,20 +181,20 @@ const els = {
 
 init();
 
-async function init() {
+function init() {
   bindChrome();
   bindControls();
-  const [snapshot, landMask, placeIndex, countryIndex] = await Promise.all([
-    loadSnapshot(),
-    loadLandMask(),
-    loadPlaceIndex(),
-    loadCountryIndex()
-  ]);
-  state.snapshot = snapshot;
-  state.landMask = landMask;
-  state.placeIndex = placeIndex;
-  state.countryIndex = countryIndex;
   initMap();
+  void loadInitialSnapshot();
+  state.landMaskPromise = loadLandMask().then((landMask) => {
+    state.landMask = landMask;
+    renderMap();
+    return landMask;
+  });
+}
+
+async function loadInitialSnapshot() {
+  state.snapshot = await loadSnapshot();
   applyFilters();
   scheduleSnapshotRefresh();
 }
@@ -252,6 +269,7 @@ function bindControls() {
     els.searchInput.addEventListener('input', () => {
       state.query = els.searchInput.value.trim().toLowerCase();
       applyFilters();
+      if (state.query) void ensureLocationIndexes();
     });
   }
 
@@ -356,6 +374,23 @@ async function loadPlaceIndex() {
   }
 }
 
+function ensureLocationIndexes() {
+  if (state.locationIndexPromise) return state.locationIndexPromise;
+
+  state.locationIndexPromise = Promise.all([
+    loadPlaceIndex(),
+    loadCountryIndex()
+  ]).then(([placeIndex, countryIndex]) => {
+    state.placeIndex = placeIndex;
+    state.countryIndex = countryIndex;
+    if (state.selectedId) renderDetail();
+    if (state.query) applyFilters();
+    return { placeIndex, countryIndex };
+  });
+
+  return state.locationIndexPromise;
+}
+
 function scheduleSnapshotRefresh() {
   if (state.refreshTimer) window.clearTimeout(state.refreshTimer);
   state.refreshTimer = window.setTimeout(refreshSnapshot, SNAPSHOT_REFRESH_MS);
@@ -372,52 +407,57 @@ async function refreshSnapshot() {
 }
 
 function initMap() {
-  if (!window.L) {
-    els.app.classList.add('map-unavailable');
-    els.fallback.hidden = false;
+  if (!mapLibreSupported()) {
+    showMapFallback('This browser cannot render the interactive map because WebGL is unavailable.', { fatal: true });
     return;
   }
 
-  state.map = window.L.map(els.map, {
-    zoomControl: false,
-    attributionControl: false,
-    worldCopyJump: true,
-    maxBoundsViscosity: 1
-  });
-
   const minZoom = viewportMinZoom();
-  state.map.setMinZoom(minZoom);
-  state.map.setMaxBounds(MAP_PAN_BOUNDS);
-  state.map.setView([29, -18], minZoom);
+  state.styleTheme = currentTheme();
+  state.usingFallbackBasemap = FORCE_FALLBACK_BASEMAP;
+  try {
+    state.map = new MapLibreMap({
+      container: els.map,
+      style: FORCE_FALLBACK_BASEMAP
+        ? createFallbackStyle(state.styleTheme, COUNTRY_GEOJSON_URL)
+        : basemapStyleUrl(state.styleTheme),
+      center: [-18, 29],
+      zoom: minZoom,
+      minZoom,
+      maxZoom: 19,
+      maxPitch: 0,
+      dragRotate: false,
+      pitchWithRotate: false,
+      touchPitch: false,
+      renderWorldCopies: true,
+      attributionControl: false,
+      fadeDuration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 180
+    });
+  } catch (error) {
+    console.info('Map renderer unavailable:', error.message);
+    showMapFallback('The interactive map could not start in this browser.', { fatal: true });
+    return;
+  }
 
-  window.L.control.zoom({ position: 'bottomright' }).addTo(state.map);
-  window.L.control.attribution({
-    position: 'bottomright',
-    prefix: false
-  }).addTo(state.map);
+  if (FORCE_FALLBACK_BASEMAP) {
+    showMapFallback('Detailed basemap disabled. Showing the resilient map.');
+  }
+
+  state.map.addControl(new NavigationControl({
+    showCompass: false,
+    showZoom: true,
+    visualizePitch: false
+  }), 'bottom-right');
+  state.map.addControl(new AttributionControl({ compact: true }), 'bottom-right');
   initLegendControl();
-
-  state.tileLayerTheme = currentTheme();
-  const tileUrls = tileLayerUrlsForTheme(state.tileLayerTheme);
-  state.tileLayers.noLabels = window.L.tileLayer(tileUrls.noLabels, {
-    maxZoom: 19,
-    attribution: TILE_ATTRIBUTION
-  }).addTo(state.map);
-  state.tileLayers.labels = window.L.tileLayer(tileUrls.labels, {
-    maxZoom: 19,
-    attribution: TILE_ATTRIBUTION,
-    opacity: 0
-  }).addTo(state.map);
-
   initLowZoomLabels();
-  state.markerLayer = window.L.layerGroup().addTo(state.map);
-  updateMarkerScale();
+
+  state.map.on('style.load', handleStyleLoad);
+  state.map.on('error', handleMapError);
   state.map.on('zoomend', () => {
-    syncMapTheme();
     updateMarkerScale();
-    const worldOffsets = visibleWorldOffsets();
-    renderLowZoomLabels(worldOffsets);
-    renderMap({ worldOffsets });
+    syncLowZoomLabels();
+    renderMap();
   });
   state.map.on('dragstart', () => {
     suppressNextMapClick();
@@ -431,63 +471,127 @@ function initMap() {
   window.addEventListener('resize', syncMapViewport, { passive: true });
 }
 
-function initLegendControl() {
-  const legend = window.L.control({ position: 'bottomleft' });
+function handleStyleLoad() {
+  state.styleReady = true;
+  ensureNodeLayers();
+  updateMarkerScale();
+  syncLowZoomLabels();
+  renderMap();
+  if (!state.usingFallbackBasemap) hideMapFallback();
+}
 
-  legend.onAdd = () => {
-    const container = window.L.DomUtil.create('section', 'map-legend');
-    container.setAttribute('aria-label', 'Legend');
-    container.innerHTML = `
-      <h2 class="legend-title">Legend</h2>
-      <div class="legend-grid">
-        ${LEGEND_KIND_IDS.map((kindId) => {
-          const kind = KIND_META[kindId];
-          return `
-            <span class="legend-item">
-              <span class="legend-marker"><span class="map-pin map-pin--${cssToken(kindId)}" aria-hidden="true"></span></span>
-              ${escapeHtml(kind.label)}
-            </span>
-          `;
-        }).join('')}
-      </div>
-    `;
-    window.L.DomEvent.disableClickPropagation(container);
-    window.L.DomEvent.disableScrollPropagation(container);
-    return container;
+function handleMapError(event) {
+  if (state.usingFallbackBasemap || !isProviderResourceError(event)) return;
+
+  const now = Date.now();
+  state.providerErrorTimes = state.providerErrorTimes
+    .filter((time) => now - time <= PROVIDER_ERROR_WINDOW_MS);
+  state.providerErrorTimes.push(now);
+  if (state.providerErrorTimes.length >= PROVIDER_ERROR_THRESHOLD) {
+    activateFallbackBasemap();
+  }
+}
+
+function activateFallbackBasemap() {
+  if (!state.map || state.usingFallbackBasemap) return;
+
+  state.usingFallbackBasemap = true;
+  state.styleReady = false;
+  showMapFallback('Detailed basemap unavailable. Showing the resilient map.');
+  state.map.setStyle(
+    createFallbackStyle(currentTheme(), COUNTRY_GEOJSON_URL),
+    { diff: false }
+  );
+}
+
+function showMapFallback(message, options = {}) {
+  els.fallback.querySelector('.map-fallback-text').textContent = message;
+  els.fallback.classList.toggle('is-fatal', Boolean(options.fatal));
+  els.fallback.hidden = false;
+  els.app.classList.toggle('map-unavailable', Boolean(options.fatal));
+  els.app.dataset.basemapMode = options.fatal ? 'unavailable' : 'fallback';
+}
+
+function hideMapFallback() {
+  els.fallback.hidden = true;
+  els.fallback.classList.remove('is-fatal');
+  els.app.classList.remove('map-unavailable');
+  els.app.dataset.basemapMode = 'provider';
+}
+
+function initLegendControl() {
+  if (!state.map) return;
+
+  const legend = {
+    container: null,
+    onAdd() {
+      const container = document.createElement('section');
+      container.className = 'map-legend maplibregl-ctrl';
+      container.setAttribute('aria-label', 'Legend');
+      container.innerHTML = `
+        <h2 class="legend-title">Legend</h2>
+        <div class="legend-grid">
+          ${LEGEND_KIND_IDS.map((kindId) => {
+            const kind = KIND_META[kindId];
+            return `
+              <span class="legend-item">
+                <span class="legend-marker"><span class="map-pin map-pin--${cssToken(kindId)}" aria-hidden="true"></span></span>
+                ${escapeHtml(kind.label)}
+              </span>
+            `;
+          }).join('')}
+        </div>
+      `;
+      container.addEventListener('click', (event) => event.stopPropagation());
+      container.addEventListener('wheel', (event) => event.stopPropagation(), { passive: true });
+      this.container = container;
+      return container;
+    },
+    onRemove() {
+      this.container?.remove();
+      this.container = null;
+    }
   };
 
-  legend.addTo(state.map);
+  state.map.addControl(legend, 'bottom-left');
 }
 
 function syncMapTheme() {
-  if (!state.tileLayers.labels || !state.tileLayers.noLabels) return;
+  if (!state.map) return;
   const nextTheme = currentTheme();
-  if (state.tileLayerTheme !== nextTheme) {
-    state.tileLayerTheme = nextTheme;
-    const tileUrls = tileLayerUrlsForTheme(nextTheme);
-    state.tileLayers.labels.setUrl(tileUrls.labels);
-    state.tileLayers.noLabels.setUrl(tileUrls.noLabels);
+  if (FORCE_FALLBACK_BASEMAP) {
+    state.styleTheme = nextTheme;
+    state.styleReady = false;
+    state.usingFallbackBasemap = true;
+    showMapFallback('Detailed basemap disabled. Showing the resilient map.');
+    state.map.setStyle(createFallbackStyle(nextTheme, COUNTRY_GEOJSON_URL), { diff: false });
+    return;
   }
-  syncTileLayerVisibility();
-  syncLowZoomLabels();
-}
 
-function tileLayerUrlsForTheme(theme) {
-  const styles = TILE_LAYER_STYLES[theme] || TILE_LAYER_STYLES.dark;
-  return {
-    labels: `${CARTO_TILE_BASE_URL}/${styles.labels}/{z}/{x}/{y}{r}.png`,
-    noLabels: `${CARTO_TILE_BASE_URL}/${styles.noLabels}/{z}/{x}/{y}{r}.png`
-  };
-}
+  if (state.styleTheme === nextTheme && !state.usingFallbackBasemap) {
+    updateMarkerPaint();
+    return;
+  }
 
-function syncTileLayerVisibility() {
-  const showLowZoomLabels = isLowZoomLabelMode();
-  state.tileLayers.noLabels?.setOpacity(showLowZoomLabels ? 1 : 0);
-  state.tileLayers.labels?.setOpacity(showLowZoomLabels ? 0 : 1);
+  state.styleTheme = nextTheme;
+  state.styleReady = false;
+  state.usingFallbackBasemap = false;
+  state.providerErrorTimes = [];
+  hideMapFallback();
+  state.map.setStyle(basemapStyleUrl(nextTheme), { diff: false });
 }
 
 function currentTheme() {
   return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+}
+
+function mapLibreSupported() {
+  const canvas = document.createElement('canvas');
+  try {
+    return Boolean(canvas.getContext('webgl2') || canvas.getContext('webgl'));
+  } catch {
+    return false;
+  }
 }
 
 function isLowZoomLabelMode() {
@@ -520,60 +624,40 @@ function sameWorldOffsets(a, b) {
 }
 
 function initLowZoomLabels() {
-  state.map.createPane('continentLabels');
-  const pane = state.map.getPane('continentLabels');
-  pane.classList.add('continent-label-pane');
-  pane.style.zIndex = 360;
-  pane.style.pointerEvents = 'none';
-  state.lowZoomLabelLayer = window.L.layerGroup().addTo(state.map);
-  renderLowZoomLabels();
+  if (!state.map || state.lowZoomLabelMarkers.length) return;
+
+  state.lowZoomLabelMarkers = LOW_ZOOM_LABELS.map((label) => {
+    const element = document.createElement('div');
+    element.className = 'continent-label-marker';
+    element.innerHTML = `<span class="continent-label">${escapeHtml(label.label)}</span>`;
+    const marker = new Marker({ element, anchor: 'center' })
+      .setLngLat([label.lon, label.lat])
+      .addTo(state.map);
+    return { element, marker };
+  });
+  syncLowZoomLabels();
 }
 
-function renderLowZoomLabels(worldOffsets = visibleWorldOffsets(), options = {}) {
-  if (!state.map || !state.lowZoomLabelLayer) return;
-
-  if (!options.force && sameWorldOffsets(worldOffsets, state.lowZoomLabelOffsets)) {
-    syncLowZoomLabels();
-    return;
-  }
-
-  state.lowZoomLabelLayer.clearLayers();
-  state.lowZoomLabelOffsets = [...worldOffsets];
-  LOW_ZOOM_LABELS.forEach((label) => {
-    worldOffsets.forEach((worldOffset) => {
-      window.L.marker([label.lat, label.lon + worldOffset], {
-        pane: 'continentLabels',
-        interactive: false,
-        keyboard: false,
-        icon: window.L.divIcon({
-          className: 'continent-label-icon',
-          html: `<span class="continent-label">${escapeHtml(label.label)}</span>`,
-          iconSize: [170, 24],
-          iconAnchor: [85, 12]
-        })
-      }).addTo(state.lowZoomLabelLayer);
-    });
-  });
+function renderLowZoomLabels() {
   syncLowZoomLabels();
 }
 
 function syncLowZoomLabels() {
   if (!state.map) return;
-  const pane = state.map.getPane('continentLabels');
-  pane?.classList.toggle('is-visible', isLowZoomLabelMode());
+  const visible = isLowZoomLabelMode();
+  state.lowZoomLabelMarkers.forEach(({ element }) => {
+    element.classList.toggle('is-visible', visible);
+  });
 }
 
 function syncMapViewport() {
   if (!state.map) return;
-  state.map.invalidateSize();
+  state.map.resize();
   const minZoom = viewportMinZoom();
   state.map.setMinZoom(minZoom);
   if (state.map.getZoom() < minZoom) state.map.setZoom(minZoom);
-  state.map.panInsideBounds(state.map.options.maxBounds, { animate: false });
-  syncMapTheme();
-  const worldOffsets = visibleWorldOffsets();
-  renderLowZoomLabels(worldOffsets);
-  renderMap({ worldOffsets });
+  renderLowZoomLabels();
+  renderMap();
 }
 
 function viewportMinZoom() {
@@ -581,7 +665,7 @@ function viewportMinZoom() {
 }
 
 function applyFilters() {
-  const nodes = state.snapshot.nodes || [];
+  const nodes = state.snapshot?.nodes || [];
   const expiryCutoff = Date.now() - NODE_MAX_AGE_MS;
   state.filteredNodes = nodes.filter((node) => {
     if (nodeIsExpired(node, expiryCutoff)) return false;
@@ -601,6 +685,9 @@ function applyFilters() {
     return matchesKind && matchesStatus && matchesQuery;
   });
 
+  els.app.dataset.visibleNodeCount = String(state.filteredNodes.length);
+  els.app.dataset.totalNodeCount = String(nodes.length);
+
   if (state.selectedId && !state.filteredNodes.some((node) => node.id === state.selectedId)) {
     state.selectedId = null;
   }
@@ -611,12 +698,8 @@ function applyFilters() {
 
 function renderWrappedOverlays() {
   const worldOffsets = visibleWorldOffsets();
-  const shouldRenderLabels = !sameWorldOffsets(worldOffsets, state.lowZoomLabelOffsets);
   const shouldRenderMarkers = !sameWorldOffsets(worldOffsets, state.renderedWorldOffsets);
-
-  if (shouldRenderLabels) renderLowZoomLabels(worldOffsets, { force: true });
-  else syncLowZoomLabels();
-
+  syncLowZoomLabels();
   if (shouldRenderMarkers) renderMap({ worldOffsets });
 }
 
@@ -696,45 +779,161 @@ function setDetailInfoOpen(button, open) {
 function renderMap(options = {}) {
   if (!state.map) return;
 
-  state.markerLayer.clearLayers();
-  state.markers.clear();
   const worldOffsets = options.worldOffsets || visibleWorldOffsets();
   state.renderedWorldOffsets = [...worldOffsets];
-  state.markerPlacements = getMarkerDisplayLayout(state.filteredNodes, worldOffsets);
+  state.markerPlacements = getMarkerDisplayLayout(state.filteredNodes);
   const denseNodeIds = getDenseNodeIds(state.filteredNodes);
 
-  state.filteredNodes.forEach((node) => {
-    const statusClass = cssToken(node.status);
-    const kindClass = cssToken(nodeKind(node));
-    const isSelected = node.id === state.selectedId ? ' is-selected' : '';
-    const isDense = denseNodeIds.has(node.id) ? ' is-dense' : '';
-    worldOffsets.forEach((worldOffset) => {
-      const key = markerKey(node, worldOffset);
-      const placement = state.markerPlacements.get(key) || ZERO_PLACEMENT;
-      const latLng = [node.location.lat, node.location.lon + worldOffset];
-      const icon = window.L.divIcon({
-        className: 'ratspeak-marker-icon',
-        html: `<span class="map-pin map-pin--${kindClass} map-pin--${statusClass}${isSelected}${isDense}" style="${markerSpreadStyle(placement)}" aria-hidden="true"></span>`,
-        iconSize: [MARKER_ICON_SIZE, MARKER_ICON_SIZE],
-        iconAnchor: [MARKER_ICON_SIZE / 2, MARKER_ICON_SIZE / 2]
-      });
+  const data = {
+    type: 'FeatureCollection',
+    features: state.filteredNodes.map((node) => {
+      const placement = state.markerPlacements.get(node.id) || ZERO_PLACEMENT;
+      return {
+        type: 'Feature',
+        id: String(node.id),
+        geometry: {
+          type: 'Point',
+          coordinates: displayedNodeCoordinates(node, placement)
+        },
+        properties: {
+          id: String(node.id),
+          kind: nodeKind(node),
+          status: stringValue(node.status) || 'unknown',
+          selected: node.id === state.selectedId,
+          dense: denseNodeIds.has(node.id),
+          label: nodeDisplayName(node)
+        }
+      };
+    })
+  };
 
-      const marker = window.L.marker(latLng, {
-        icon,
-        title: nodeDisplayName(node),
-        interactive: false,
-        keyboard: false,
-        zIndexOffset: node.id === state.selectedId ? 1000 : 0
-      }).addTo(state.markerLayer);
-
-      state.markers.set(`${node.id}:${worldOffset}`, marker);
-    });
-  });
+  const source = state.styleReady ? state.map.getSource(NODE_SOURCE_ID) : null;
+  source?.setData(data);
 }
 
 const ZERO_PLACEMENT = Object.freeze({ dx: 0, dy: 0, isSpread: false });
 
-function getMarkerDisplayLayout(nodes, worldOffsets = state.renderedWorldOffsets || DEFAULT_WORLD_OFFSETS) {
+function ensureNodeLayers() {
+  if (!state.map || !state.styleReady) return;
+
+  if (!state.map.getSource(NODE_SOURCE_ID)) {
+    state.map.addSource(NODE_SOURCE_ID, {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] }
+    });
+  }
+
+  if (!state.map.getLayer(NODE_GLOW_LAYER_ID)) {
+    state.map.addLayer({
+      id: NODE_GLOW_LAYER_ID,
+      type: 'circle',
+      source: NODE_SOURCE_ID,
+      paint: {}
+    });
+  }
+
+  if (!state.map.getLayer(NODE_SELECTION_LAYER_ID)) {
+    state.map.addLayer({
+      id: NODE_SELECTION_LAYER_ID,
+      type: 'circle',
+      source: NODE_SOURCE_ID,
+      filter: ['==', ['get', 'selected'], true],
+      paint: {}
+    });
+  }
+
+  if (!state.map.getLayer(NODE_CORE_LAYER_ID)) {
+    state.map.addLayer({
+      id: NODE_CORE_LAYER_ID,
+      type: 'circle',
+      source: NODE_SOURCE_ID,
+      paint: {}
+    });
+  }
+
+  updateMarkerPaint();
+}
+
+function updateMarkerPaint() {
+  if (!state.map || !state.styleReady || !state.map.getLayer(NODE_CORE_LAYER_ID)) return;
+
+  const scale = state.markerScale || MARKER_SCALE_BANDS[0];
+  const palette = NODE_PALETTES[currentTheme()] || NODE_PALETTES.dark;
+  const color = nodeColorExpression(palette);
+
+  state.map.setPaintProperty(NODE_GLOW_LAYER_ID, 'circle-radius', [
+    'case',
+    ['boolean', ['get', 'selected'], false],
+    (scale.selected / 2) + scale.selectedHalo,
+    (scale.size / 2) + (scale.ring * 2)
+  ]);
+  state.map.setPaintProperty(NODE_GLOW_LAYER_ID, 'circle-color', color);
+  state.map.setPaintProperty(NODE_GLOW_LAYER_ID, 'circle-opacity', [
+    'case',
+    ['boolean', ['get', 'selected'], false], 0.2,
+    ['boolean', ['get', 'dense'], false], 0.08,
+    0.14
+  ]);
+  state.map.setPaintProperty(NODE_GLOW_LAYER_ID, 'circle-blur', 0.7);
+
+  state.map.setPaintProperty(
+    NODE_SELECTION_LAYER_ID,
+    'circle-radius',
+    (scale.selectedCore / 2) + scale.selectedRing
+  );
+  state.map.setPaintProperty(NODE_SELECTION_LAYER_ID, 'circle-color', palette.accent);
+  state.map.setPaintProperty(NODE_SELECTION_LAYER_ID, 'circle-opacity', 0.78);
+  state.map.setPaintProperty(NODE_SELECTION_LAYER_ID, 'circle-blur', 0.12);
+
+  state.map.setPaintProperty(NODE_CORE_LAYER_ID, 'circle-radius', [
+    'case',
+    ['boolean', ['get', 'selected'], false], scale.selectedCore / 2,
+    scale.size / 2
+  ]);
+  state.map.setPaintProperty(NODE_CORE_LAYER_ID, 'circle-color', color);
+  state.map.setPaintProperty(NODE_CORE_LAYER_ID, 'circle-opacity', [
+    'match',
+    ['get', 'status'],
+    ['stale', 'unknown'], 0.9,
+    1
+  ]);
+  state.map.setPaintProperty(NODE_CORE_LAYER_ID, 'circle-stroke-color', palette.edge);
+  state.map.setPaintProperty(NODE_CORE_LAYER_ID, 'circle-stroke-opacity', currentTheme() === 'dark' ? 0.2 : 0.24);
+  state.map.setPaintProperty(NODE_CORE_LAYER_ID, 'circle-stroke-width', 1);
+}
+
+function nodeColorExpression(palette) {
+  return [
+    'match',
+    ['get', 'kind'],
+    'server-ipv4', palette['server-ipv4'],
+    'server-ipv6', palette['server-ipv6'],
+    'client-auto', palette['client-auto'],
+    'client-manual', palette['client-manual'],
+    'i2p', palette.i2p,
+    'yggdrasil', palette.yggdrasil,
+    palette['client-manual']
+  ];
+}
+
+function displayedNodeCoordinates(node, placement) {
+  const lat = Number(node.location?.lat);
+  const lon = normalizeLongitude(node.location?.lon);
+  if (!state.map || (!placement.dx && !placement.dy)) return [lon, lat];
+
+  const worldLon = lon + nearestWorldOffset(lon);
+  const point = state.map.project([worldLon, lat]);
+  const displayed = state.map.unproject([point.x + placement.dx, point.y + placement.dy]);
+  return [normalizeLongitude(displayed.lng), displayed.lat];
+}
+
+function nearestWorldOffset(lon) {
+  if (!state.map) return 0;
+  const center = state.map.getCenter();
+  return Math.round((center.lng - lon) / WORLD_LONGITUDE_SPAN) * WORLD_LONGITUDE_SPAN;
+}
+
+function getMarkerDisplayLayout(nodes) {
   const placements = new Map();
   if (!state.map) return placements;
 
@@ -742,20 +941,18 @@ function getMarkerDisplayLayout(nodes, worldOffsets = state.renderedWorldOffsets
   const sortedNodes = [...nodes].sort((a, b) => String(a.id).localeCompare(String(b.id)));
 
   sortedNodes.forEach((node) => {
-    worldOffsets.forEach((worldOffset) => {
-      const key = markerKey(node, worldOffset);
-      const point = state.map.latLngToContainerPoint([node.location.lat, node.location.lon + worldOffset]);
-      items.push({
-        key,
-        node,
-        x: point.x,
-        y: point.y,
-        dx: 0,
-        dy: 0,
-        nearestOriginalDistance: Infinity
-      });
-      placements.set(key, ZERO_PLACEMENT);
+    const lon = normalizeLongitude(node.location?.lon);
+    const point = state.map.project([lon + nearestWorldOffset(lon), node.location.lat]);
+    items.push({
+      key: node.id,
+      node,
+      x: point.x,
+      y: point.y,
+      dx: 0,
+      dy: 0,
+      nearestOriginalDistance: Infinity
     });
+    placements.set(node.id, ZERO_PLACEMENT);
   });
 
   const zoomStrength = declutterStrength();
@@ -837,9 +1034,8 @@ function guardSpreadOnLand(item, dx, dy) {
 
 function spreadPointIsOnLand(item, dx, dy) {
   if (!state.map) return true;
-  const point = window.L.point(item.x + dx, item.y + dy);
-  const latLng = state.map.containerPointToLatLng(point);
-  return pointIsOnLand(latLng.lat, normalizeLongitude(latLng.lng));
+  const lngLat = state.map.unproject([item.x + dx, item.y + dy]);
+  return pointIsOnLand(lngLat.lat, normalizeLongitude(lngLat.lng));
 }
 
 function declutterStrength() {
@@ -882,16 +1078,6 @@ function clampSpread(item) {
   item.dy *= scale;
 }
 
-function markerKey(node, worldOffset) {
-  return `${node.id}:${worldOffset}`;
-}
-
-function markerSpreadStyle(placement) {
-  const dx = placement?.dx || 0;
-  const dy = placement?.dy || 0;
-  return `--spread-x: ${dx}px; --spread-y: ${dy}px;`;
-}
-
 function roundPixel(value) {
   return Math.round(value * 10) / 10;
 }
@@ -899,7 +1085,7 @@ function roundPixel(value) {
 function handleMapClick(event) {
   if (Date.now() < state.suppressMapClickUntil) return;
 
-  const hit = pickNodeAt(event.containerPoint);
+  const hit = pickNodeAt(event.point);
   if (hit) {
     selectNode(hit.node.id, { pan: false });
     return;
@@ -1018,7 +1204,7 @@ function cleanupDetailSheetDragListeners() {
 }
 
 function syncNodeCursor(event) {
-  const active = Boolean(pickNodeAt(event.containerPoint));
+  const active = Boolean(pickNodeAt(event.point));
   if (active === state.nodeCursorActive) return;
 
   state.nodeCursorActive = active;
@@ -1046,9 +1232,9 @@ function pickNodeAt(containerPoint) {
     worldOffsets.forEach((worldOffset) => {
       const rank = visualRank;
       visualRank += 1;
-      const key = markerKey(node, worldOffset);
-      const placement = state.markerPlacements.get(key) || ZERO_PLACEMENT;
-      const center = state.map.latLngToContainerPoint([node.location.lat, node.location.lon + worldOffset]);
+      const key = `${node.id}:${worldOffset}`;
+      const placement = state.markerPlacements.get(node.id) || ZERO_PLACEMENT;
+      const center = state.map.project([node.location.lon + worldOffset, node.location.lat]);
       const dx = containerPoint.x - (center.x + placement.dx);
       const dy = containerPoint.y - (center.y + placement.dy);
       const distanceSq = (dx * dx) + (dy * dy);
@@ -1115,10 +1301,10 @@ function selectNode(id, options = {}) {
   renderMap();
 
   const node = selectedNode();
+  if (node && !nodeLocationLabel(node)) void ensureLocationIndexes();
   if (node && state.map && options.pan !== false) {
-    state.map.panTo([node.location.lat, node.location.lon], {
-      animate: true,
-      duration: 0.4
+    state.map.panTo([node.location.lon, node.location.lat], {
+      duration: 400
     });
   }
 }
@@ -1157,15 +1343,19 @@ function updateMarkerScale() {
   style.setProperty('--pin-ring-alpha', `${scale.ringAlpha}%`);
   style.setProperty('--pin-selected-ring', `${scale.selectedRing}px`);
   style.setProperty('--pin-selected-halo', `${scale.selectedHalo}px`);
+  updateMarkerPaint();
 }
 
 function getDenseNodeIds(nodes) {
   if (!state.map || nodes.length < 2) return new Set();
   const dense = new Set();
-  const points = nodes.map((node) => ({
-    id: node.id,
-    point: state.map.latLngToLayerPoint([node.location.lat, node.location.lon])
-  }));
+  const points = nodes.map((node) => {
+    const lon = normalizeLongitude(node.location?.lon);
+    return {
+      id: node.id,
+      point: state.map.project([lon + nearestWorldOffset(lon), node.location.lat])
+    };
+  });
   const thresholdSq = DENSE_MARKER_DISTANCE_PX * DENSE_MARKER_DISTANCE_PX;
 
   for (let i = 0; i < points.length; i++) {
@@ -1182,7 +1372,7 @@ function getDenseNodeIds(nodes) {
 }
 
 function selectedNode() {
-  return (state.snapshot.nodes || []).find((node) => node.id === state.selectedId) || null;
+  return (state.snapshot?.nodes || []).find((node) => node.id === state.selectedId) || null;
 }
 
 function nodeDisplayName(node) {

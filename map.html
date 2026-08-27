@@ -38,11 +38,10 @@
     <meta name="twitter:image:alt" content="Live Ratspeak network map with current node locations, updated daily.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://unpkg.com">
-    <link rel="preconnect" href="https://basemaps.cartocdn.com">
+    <link rel="preconnect" href="https://tiles.openfreemap.org">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Familjen+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <link rel="stylesheet" href="assets/map.css?v=map-11">
+    <link rel="stylesheet" href="assets/vendor/maplibre/maplibre-gl.css?v=6.3.0">
+    <link rel="stylesheet" href="assets/map.css?v=maplibre-1">
     <script>!function(){var t=localStorage.getItem('ratspeak-theme')||'dark';document.documentElement.setAttribute('data-theme',t);var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',t==='dark'?'#18171a':'#FAF7F3')}()</script>
     <script type="application/ld+json">
 {
@@ -105,8 +104,11 @@
 </div>
 
 <main class="map-app" id="mapApp" aria-label="Ratspeak Map">
-    <div class="map-canvas" id="map" aria-hidden="true"></div>
-    <div class="map-fallback" id="mapFallback" hidden>Map tiles are unavailable in this browser session.</div>
+    <div class="map-canvas" id="map" aria-label="Interactive Ratspeak network map"></div>
+    <div class="map-fallback" id="mapFallback" role="status" hidden>
+        <span class="map-fallback-dot" aria-hidden="true"></span>
+        <span class="map-fallback-text">Detailed basemap unavailable. Showing the resilient map.</span>
+    </div>
 
     <div class="map-left-stack" role="group" aria-label="Map controls">
         <aside class="map-rail" id="mapMenu" aria-label="Map filters">
@@ -156,8 +158,7 @@
     <section class="node-detail" id="nodeDetail" aria-live="polite" aria-label="Selected node details" hidden></section>
 </main>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="assets/map.js?v=map-12"></script>
+<script type="module" src="assets/map.js?v=maplibre-5"></script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
