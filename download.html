@@ -9090,7 +9090,7 @@ import { handheldRelease, verifyHandheldDownload, validateHandheldManifest } fro
                 rnodeSetupCompleted = true;
             } else {
                 setProgress(100, 'Complete');
-                logMessage((state.device === 'custom' ? 'Firmware flash complete.' : 'Ratspeak flash complete.') + ' Let the device finish rebooting before use.', 'log-green');
+                logMessage((state.device === 'custom' ? 'Firmware flash complete.' : 'Ratspeak flash complete.') + ' Please reboot the device.', 'log-green');
             }
 
             // 11. Hide flash button, show completion
