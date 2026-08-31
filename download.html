@@ -2259,6 +2259,42 @@
             box-shadow: none;
         }
 
+        .install-dialog {
+            width: min(480px, calc(100% - 32px));
+            max-height: calc(100dvh - 32px);
+            margin: auto;
+            padding: 28px;
+            overflow: auto;
+            color: var(--text-primary);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.25);
+            font-family: var(--font-sans);
+            text-align: left;
+        }
+        .install-dialog::backdrop { background: rgba(16, 14, 18, 0.65); }
+        .install-dialog__device {
+            margin-bottom: 10px;
+            color: var(--accent);
+            font: 500 13px var(--font-mono);
+        }
+        .install-dialog h2 { margin: 0 0 16px; font-size: 28px; line-height: 1.15; font-weight: 500; letter-spacing: -0.025em; }
+        .install-dialog p { margin: 0 0 14px; color: var(--text-secondary); font-size: 15px; line-height: 1.55; }
+        .install-dialog__backup { padding: 14px 16px; background: var(--bg-secondary); border-radius: 10px; }
+        .install-dialog .install-dialog__backup { color: var(--text-primary); }
+        .install-dialog__guide { color: var(--text-secondary); font-size: 13px; text-underline-offset: 3px; }
+        .install-dialog__actions { display: grid; grid-template-columns: 1fr 1.6fr; gap: 10px; margin-top: 24px; }
+        .install-dialog__actions button { min-height: 46px; padding: 12px 10px; border: 1px solid var(--border); border-radius: 10px; font: 500 14px var(--font-sans); cursor: pointer; }
+        .install-dialog__cancel { color: var(--text-primary); background: var(--bg-secondary); }
+        .install-dialog__continue { color: #fff; background: var(--accent-dark); }
+        .install-dialog__continue:hover { background: var(--accent); }
+        .install-dialog :focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+        @media (max-width: 380px) {
+            .install-dialog { padding: 22px; }
+            .install-dialog__actions { grid-template-columns: 1fr; }
+        }
+
         /* ── Erase Toggle ─────────────────────────────── */
 
         .erase-option {
@@ -4596,7 +4632,7 @@
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                 Download<span class="dl-cta-meta">.zip</span>
                             </a>
-                            <a href="https://github.com/ratspeak/rsCardputer/releases" class="nr-btn nr-btn-secondary dl-cta-secondary" target="_blank" rel="noopener noreferrer">
+                            <a href="https://github.com/ratspeak/rsCardputer" class="nr-btn nr-btn-secondary dl-cta-secondary" target="_blank" rel="noopener noreferrer">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
                                 Source
                             </a>
@@ -4711,7 +4747,7 @@
                     <div class="dl-custom__copy">
                         <span class="section-label dl-custom__eyebrow">Build your own</span>
                         <h2 class="dl-custom__title">Flash supported hardware.</h2>
-                        <p class="dl-custom__lede">Bring your own board, <a href="https://docs.ratspeak.org/docs/reference/building-from-source">build from source</a>, or upload a single <code>.bin</code>. The in-browser flasher handles the rest.</p>
+                        <p class="dl-custom__lede">Bring your own board, <a href="https://docs.ratspeak.org/docs/reference/building-from-source">build from source</a>, or upload a firmware <code>.zip</code> or <code>.bin</code>.</p>
                     </div>
                     <div class="dl-custom__chip" aria-hidden="true">
                         <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -5162,6 +5198,19 @@
 
 </div>
 
+<dialog class="install-dialog" id="installDialog" aria-labelledby="installDialogTitle" aria-describedby="installDialogIntro installDialogRisk installDialogBackup">
+    <div class="install-dialog__device" id="installDialogDevice"></div>
+    <h2 id="installDialogTitle">Before you flash</h2>
+    <p id="installDialogIntro"></p>
+    <p id="installDialogRisk">This is a fresh install. Your identity, messages and settings may be erased, even with Full Erase off.</p>
+    <p class="install-dialog__backup" id="installDialogBackup">Back up your identity and anything else you want to keep somewhere other than this device.</p>
+    <a class="install-dialog__guide" href="https://docs.ratspeak.org/docs/hardware/flashing-firmware#before-flashing" target="_blank" rel="noopener noreferrer">Flashing guide</a>
+    <div class="install-dialog__actions">
+        <button class="install-dialog__cancel" id="installDialogCancel" type="button" autofocus>Cancel</button>
+        <button class="install-dialog__continue" id="installDialogContinue" type="button">Continue to flash</button>
+    </div>
+</dialog>
+
 <!-- ── Footer ──────────────────────────────────────────── -->
 <footer class="footer">
     <div class="footer-inner">
@@ -5197,6 +5246,7 @@
 
 <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
 <script type="module">
+import { handheldRelease, verifyHandheldDownload, validateHandheldManifest } from './assets/js/handheld-release.js';
 (function() {
     'use strict';
 
@@ -5268,7 +5318,9 @@
         port: null,         // Web Serial port (unopened — esptool manages open/close)
         connected: false,
         firmwareReady: false,
+        firmwareError: null,
         firmwareZip: null,  // ArrayBuffer of ZIP from GitHub release
+        firmwareMetadata: null,
         selectedVersion: null,
         selectedPackage: null,
         releases: [],
@@ -5318,8 +5370,8 @@
             defaultPackage: 'full',
             packages: [
                 { id: 'full', label: 'Full', desc: 'Launcher + both modes' },
-                { id: 'standalone', label: 'Standalone', desc: 'On-device messenger' },
-                { id: 'rnode', label: 'RNode', desc: 'Advanced host radio' }
+                { id: 'standalone', label: 'Standalone', desc: 'All-in-one messenger' },
+                { id: 'rnode', label: 'RNode', desc: 'Radio only' }
             ]
         },
         cardputer: {
@@ -5332,8 +5384,8 @@
             defaultPackage: 'full',
             packages: [
                 { id: 'full', label: 'Full', desc: 'Launcher + both modes' },
-                { id: 'standalone', label: 'Standalone', desc: 'On-device messenger' },
-                { id: 'rnode', label: 'RNode', desc: 'Host-controlled radio' }
+                { id: 'standalone', label: 'Standalone', desc: 'All-in-one messenger' },
+                { id: 'rnode', label: 'RNode', desc: 'Radio only' }
             ]
         },
         tpager: {
@@ -5346,8 +5398,8 @@
             defaultPackage: 'full',
             packages: [
                 { id: 'full', label: 'Full', desc: 'Launcher + both modes' },
-                { id: 'standalone', label: 'Standalone', desc: 'On-device messenger' },
-                { id: 'rnode', label: 'RNode', desc: 'Host-controlled radio' }
+                { id: 'standalone', label: 'Standalone', desc: 'All-in-one messenger' },
+                { id: 'rnode', label: 'RNode', desc: 'Radio only' }
             ]
         },
         custom: {
@@ -5359,6 +5411,10 @@
             apiDevice: null
         }
     };
+
+    ['tdeck', 'tpager'].forEach(function(board) {
+        if (handheldRelease(board)) DEVICES[board].sub = 'ESP32-S3 \u00b7 Ratspeak Handheld';
+    });
 
     // Default flash options for custom single-bin uploads
     var CUSTOM_FLASH_DEFAULTS = { flashMode: 'dio', flashSize: 'detect', flashFreq: '80m' };
@@ -5411,6 +5467,7 @@
     // ── Device Selection ───────────────────────────────
     window.selectDevice = function(deviceId, opts) {
         opts = opts || {};
+        if (state.flashing) return;
         if (!('serial' in navigator)) {
             showSerialWarning();
             return;
@@ -5428,8 +5485,10 @@
         state.device = deviceId;
         state.connected = false;
         state.firmwareReady = false;
+        state.firmwareError = null;
         state.flashComplete = false;
         state.firmwareZip = null;
+        state.firmwareMetadata = null;
         state.selectedVersion = null;
         state.releases = [];
         state.customFile = null;
@@ -5532,12 +5591,33 @@
     }
 
     function firmwarePackageQuery() {
-        return state.selectedPackage ? '&package=' + encodeURIComponent(state.selectedPackage) : '';
+        var query = state.selectedPackage ? '&package=' + encodeURIComponent(state.selectedPackage) : '';
+        return query + (handheldRelease(state.device) ? '&source=handheld' : '');
     }
 
     function firmwareReadyText(dev, info, bytes) {
         var label = info && info.packageLabel ? info.packageLabel : selectedPackageLabel(dev);
+        if (info && info.product === 'ratspeak-handheld') {
+            return label + ' \u00b7 ' + formatBytes(bytes) + ' \u00b7 Fresh install. Back up your identity and messages first.';
+        }
         return label + ' \u00b7 ' + formatBytes(bytes) + ' \u00b7 Ready to flash';
+    }
+
+    async function validatePresetFirmware(dev, buffer, metadata) {
+        var selected = handheldRelease(dev.apiDevice);
+        if (!selected) {
+            if (metadata && metadata.product === 'ratspeak-handheld') throw new Error('Reload this page before installing handheld firmware.');
+            return;
+        }
+        if (!metadata || metadata.board !== selected.board || metadata.version !== selected.tag ||
+            metadata.package !== state.selectedPackage) {
+            throw new Error('Firmware does not match the selected device and release.');
+        }
+        await verifyHandheldDownload(buffer, metadata);
+        var zip = await window.JSZip.loadAsync(buffer, { checkCRC32: true });
+        var entry = zip.file('manifest.json');
+        if (!entry) throw new Error('Handheld firmware is missing its manifest.');
+        await validateHandheldManifest(zip, JSON.parse(await entry.async('string')), metadata);
     }
 
     function firmwareRequestIsCurrent(serial, dev) {
@@ -5584,7 +5664,9 @@
                 state.selectedVersion = null;
                 state.releases = [];
                 state.firmwareZip = null;
+                state.firmwareMetadata = null;
                 state.firmwareReady = false;
+                state.firmwareError = null;
                 updateFlashBtn();
                 closeVersionDropdown();
                 buildPackagePicker(dev);
@@ -5597,6 +5679,7 @@
 
     function fetchFirmwareFromRelease(dev) {
         var requestSerial = ++state.firmwareRequestSerial;
+        state.firmwareError = null;
         var packageQuery = firmwarePackageQuery();
         var nameEl = document.getElementById('presetName');
         nameEl.textContent = 'Loading...';
@@ -5604,13 +5687,14 @@
         closeVersionDropdown();
 
         var repoMap = { rsdeck: 'ratspeak/rsDeck', rscardputer: 'ratspeak/rsCardputer', rspager: 'ratspeak/rsPager' };
-        var repoPath = repoMap[dev.apiDevice] || '';
+        var unified = handheldRelease(dev.apiDevice);
+        var repoPath = unified ? unified.repo : repoMap[dev.apiDevice] || '';
         var downloadInfo = null;
 
         // Fetch latest info and download binary
         fetch('/api/firmware?device=' + encodeURIComponent(dev.apiDevice) + '&info=true' + packageQuery)
             .then(function(resp) {
-                if (!resp.ok) throw new Error('Release not found');
+                if (!resp.ok) throw new Error('Firmware is unavailable. Try again later.');
                 return resp.json();
             })
             .then(function(info) {
@@ -5619,25 +5703,29 @@
                 state.selectedVersion = info.version;
                 nameEl.textContent = info.version;
                 document.getElementById('presetSize').textContent = 'Downloading ' + formatBytes(info.size) + '...';
-                return fetch('/api/firmware?device=' + encodeURIComponent(dev.apiDevice) + packageQuery);
+                return fetch('/api/firmware?device=' + encodeURIComponent(dev.apiDevice) + '&version=' + encodeURIComponent(info.version) + packageQuery);
             })
             .then(function(resp) {
                 if (!firmwareRequestIsCurrent(requestSerial, dev)) throw { stale: true };
                 if (!resp.ok) throw new Error('Firmware download failed (HTTP ' + resp.status + ')');
                 return resp.arrayBuffer();
             })
-            .then(function(buffer) {
+            .then(async function(buffer) {
+                if (!firmwareRequestIsCurrent(requestSerial, dev)) return;
+                await validatePresetFirmware(dev, buffer, downloadInfo);
                 if (!firmwareRequestIsCurrent(requestSerial, dev)) return;
                 state.firmwareZip = buffer;
+                state.firmwareMetadata = downloadInfo;
                 state.firmwareReady = true;
                 document.getElementById('presetSize').textContent = firmwareReadyText(dev, downloadInfo, buffer.byteLength);
                 updateFlashBtn();
             })
             .catch(function(err) {
-                if (err && err.stale) return;
+                if ((err && err.stale) || !firmwareRequestIsCurrent(requestSerial, dev)) return;
                 nameEl.textContent = dev.firmware;
                 document.getElementById('presetSize').textContent = 'Download failed: ' + err.message;
                 state.firmwareReady = false;
+                state.firmwareError = err.message;
                 updateFlashBtn();
             });
 
@@ -5659,12 +5747,14 @@
 
     function selectVersion(dev, version) {
         var requestSerial = ++state.firmwareRequestSerial;
+        state.firmwareError = null;
         var packageQuery = firmwarePackageQuery();
         var nameEl = document.getElementById('presetName');
         nameEl.textContent = version;
         document.getElementById('presetSize').textContent = 'Downloading...';
         state.firmwareReady = false;
         state.firmwareZip = null;
+        state.firmwareMetadata = null;
         state.selectedVersion = version;
         updateFlashBtn();
         closeVersionDropdown();
@@ -5673,7 +5763,7 @@
 
         fetch('/api/firmware?device=' + encodeURIComponent(dev.apiDevice) + '&version=' + encodeURIComponent(version) + '&info=true' + packageQuery)
             .then(function(resp) {
-                if (!resp.ok) throw new Error('Release not found');
+                if (!resp.ok) throw new Error('Firmware is unavailable. Try again later.');
                 return resp.json();
             })
             .then(function(info) {
@@ -5687,17 +5777,21 @@
                 if (!resp.ok) throw new Error('Download failed');
                 return resp.arrayBuffer();
             })
-            .then(function(buffer) {
+            .then(async function(buffer) {
+                if (!firmwareRequestIsCurrent(requestSerial, dev)) return;
+                await validatePresetFirmware(dev, buffer, downloadInfo);
                 if (!firmwareRequestIsCurrent(requestSerial, dev)) return;
                 state.firmwareZip = buffer;
+                state.firmwareMetadata = downloadInfo;
                 state.firmwareReady = true;
                 document.getElementById('presetSize').textContent = firmwareReadyText(dev, downloadInfo, buffer.byteLength);
                 updateFlashBtn();
             })
             .catch(function(err) {
-                if (err && err.stale) return;
+                if ((err && err.stale) || !firmwareRequestIsCurrent(requestSerial, dev)) return;
                 document.getElementById('presetSize').textContent = 'Download failed: ' + err.message;
                 state.firmwareReady = false;
+                state.firmwareError = err.message;
                 updateFlashBtn();
             });
     }
@@ -5716,12 +5810,16 @@
             if (rel.version === state.selectedVersion) {
                 item.classList.add('firmware-version-item--active');
             }
-            var label = '<span class="firmware-version-item__tag">';
-            if (rel.version === state.selectedVersion) label += checkIcon;
-            label += rel.version + '</span>';
+            var label = document.createElement('span');
+            label.className = 'firmware-version-item__tag';
+            if (rel.version === state.selectedVersion) label.innerHTML = checkIcon;
+            label.appendChild(document.createTextNode(rel.version));
             var meta = rel.packageLabel ? rel.packageLabel + ' \u00b7 ' + formatBytes(rel.size) : formatBytes(rel.size);
-            var size = '<span class="firmware-version-item__size">' + meta + '</span>';
-            item.innerHTML = label + size;
+            var size = document.createElement('span');
+            size.className = 'firmware-version-item__size';
+            size.textContent = meta;
+            item.appendChild(label);
+            item.appendChild(size);
             if (rel.version !== state.selectedVersion) {
                 item.addEventListener('click', function() { selectVersion(dev, rel.version); });
             } else {
@@ -5783,6 +5881,7 @@
 
     window.goBack = function(opts) {
         opts = opts || {};
+        if (state.flashing) return;
         var sel = document.getElementById('deviceSelection');
         var fi = document.getElementById('flashInterface');
 
@@ -5817,6 +5916,11 @@
         }
         state.connected = false;
         state.device = null;
+        state.firmwareRequestSerial++;
+        state.firmwareReady = false;
+        state.firmwareError = null;
+        state.firmwareZip = null;
+        state.firmwareMetadata = null;
         state.eraseAll = false;
         state.rnodeProvision = false;
         state.rnodeSetupIssue = null;
@@ -5995,6 +6099,7 @@
             return;
         }
         state.customFile = file;
+        state.firmwareError = null;
         state.firmwareAppBytes = null;
         state.firmwareReady = true;
 
@@ -6025,6 +6130,7 @@
     var rnodeLoaded = false;
 
     function setCustomSource(source) {
+        state.firmwareError = null;
         sourceTabs.forEach(function (t) {
             var on = t.dataset.source === source;
             t.classList.toggle('is-active', on);
@@ -7982,12 +8088,14 @@
         }
 
         setFlowItem('flowConnect', state.connected ? 'is-done' : 'is-active', state.connected ? 'Selected' : 'Waiting');
-        setFlowItem('flowFirmware', state.firmwareReady ? 'is-done' : (state.connected ? 'is-active' : 'is-blocked'), state.firmwareReady ? 'Ready' : firmwareWaiting);
+        setFlowItem('flowFirmware', state.firmwareError ? 'is-warning' : state.firmwareReady ? 'is-done' : (state.connected ? 'is-active' : 'is-blocked'), state.firmwareError ? 'Unavailable' : state.firmwareReady ? 'Ready' : firmwareWaiting);
         setFlowItem('flowFlash', ready ? 'is-active' : 'is-blocked', ready ? 'Ready' : 'Preparing');
 
         if (noteEl) {
             if (note) {
                 noteEl.textContent = note;
+            } else if (state.firmwareError) {
+                noteEl.textContent = 'Firmware could not be loaded. Go back and select the device again to retry.';
             } else if (ready) {
                 noteEl.textContent = 'Ready to write firmware. Keep this tab open until flashing and reset finish.';
             } else if (!state.connected && !state.firmwareReady) {
@@ -8636,6 +8744,21 @@
         var manifestEntry = findManifestFile(zip);
         if (manifestEntry) {
             manifest = JSON.parse(await manifestEntry.file.async('string'));
+            if ((state.firmwareMetadata && state.firmwareMetadata.product === 'ratspeak-handheld') ||
+                manifest.product === 'ratspeak-handheld') {
+                if (manifestEntry.path !== 'manifest.json') throw new Error('Handheld manifest must be at the root of the ZIP.');
+                var expected = state.device === 'custom' ? {} : { board: state.device, package: state.selectedPackage };
+                var validated = await validateHandheldManifest(zip, manifest, expected);
+                state.firmwareAppBytes = validated.bytes;
+                logMessage('Verified factory image for ' + DEVICES[validated.board].name + ' @ 0x0', '');
+                return {
+                    fileArray: [{ data: uint8ToBstr(validated.bytes), address: validated.address }],
+                    flashOptions: manifestFlashOptions(manifest, manifest),
+                    installMode: validated.installMode,
+                    board: validated.board,
+                    package: validated.package
+                };
+            }
             var plan = manifestPlan(manifest);
             var manifestDir = zipDirname(manifestEntry.path);
             logMessage('Firmware manifest: ' + plan.parts.length + ' parts', '');
@@ -8648,6 +8771,10 @@
                 fileArray: fileArray,
                 flashOptions: manifestFlashOptions(manifest, plan.build)
             };
+        }
+
+        if (state.firmwareMetadata && state.firmwareMetadata.product === 'ratspeak-handheld') {
+            throw new Error('Handheld firmware is missing its manifest.');
         }
 
         // 2. Official RNode ESP32 release zips use rnodeconf-style filenames
@@ -8737,6 +8864,43 @@
         );
     }
 
+    async function confirmFactoryInstall(prepared) {
+        if (prepared.installMode !== 'factory') return true;
+        var dialog = document.getElementById('installDialog');
+        if (!dialog || typeof dialog.showModal !== 'function') {
+            throw new Error('This browser cannot show the installation notice. Use an up-to-date Chrome or Edge browser.');
+        }
+        document.getElementById('installDialogDevice').textContent = DEVICES[prepared.board].name;
+        document.getElementById('installDialogIntro').textContent = prepared.package === 'rnode'
+            ? 'You\'re installing the radio-only version of Ratspeak Handheld.'
+            : 'You\'re installing Ratspeak Handheld with our new Rust messaging backend.';
+        var cancel = document.getElementById('installDialogCancel');
+        var proceed = document.getElementById('installDialogContinue');
+        return new Promise(function(resolve, reject) {
+            var accepted = false;
+            function cleanup() {
+                dialog.removeEventListener('close', onClose);
+                dialog.removeEventListener('keydown', onKeyDown);
+                cancel.removeEventListener('click', onCancel);
+                proceed.removeEventListener('click', onContinue);
+            }
+            function onClose() { cleanup(); resolve(accepted); }
+            function onKeyDown(event) {
+                if (event.key === 'Escape') { event.preventDefault(); dialog.close(); }
+            }
+            function onCancel() { dialog.close(); }
+            function onContinue() { accepted = true; dialog.close(); }
+            dialog.addEventListener('close', onClose);
+            dialog.addEventListener('keydown', onKeyDown);
+            cancel.addEventListener('click', onCancel);
+            proceed.addEventListener('click', onContinue);
+            try {
+                dialog.showModal();
+                cancel.focus();
+            } catch (error) { cleanup(); reject(error); }
+        });
+    }
+
     // ── Flash Process (Real esptool-js) ────────────────
     window.startFlash = async function() {
         if (!state.connected || !state.firmwareReady || state.flashing) return;
@@ -8749,7 +8913,7 @@
         var btn = document.getElementById('flashBtn');
         btn.className = 'flash-btn flash-btn--flashing';
         btn.disabled = true;
-        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: spinSlow 1s linear infinite;"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> Flashing...';
+        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: spinSlow 1s linear infinite;"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> Preparing...';
         updateFlashFlow();
 
         var progress = document.getElementById('flashProgress');
@@ -8797,6 +8961,17 @@
                 // 2. Prepare firmware parts from ZIP (or single bin for custom)
                 setProgress(5, 'Preparing firmware...');
                 var prepared = await prepareFileArray(logMessage);
+                if (!await confirmFactoryInstall(prepared)) {
+                    logMessage('Installation cancelled. No device data was written.', '');
+                    setProgress(0, 'Installation cancelled');
+                    state.flashing = false;
+                    setFlashButtonIdleContent();
+                    updateFlashBtn();
+                    btn.focus();
+                    return;
+                }
+                if (!state.connected || !state.port) throw new Error('Device disconnected. Reconnect it before flashing.');
+                btn.textContent = 'Flashing...';
 
                 // 3. Create Transport from the raw serial port
                 setProgress(8, 'Connecting to bootloader...');
@@ -8822,10 +8997,10 @@
                 logMessage('Chip detected: ' + chipName, 'log-green');
 
                 // 6. Validate chip for known devices
-                if (state.device === 'tdeck' || state.device === 'cardputer' || state.device === 'tpager') {
+                if (prepared.board || state.device === 'tdeck' || state.device === 'cardputer' || state.device === 'tpager') {
                     var chipLower = chipName.toLowerCase();
                     if (!chipLower.includes('esp32-s3') && !chipLower.includes('esp32s3')) {
-                        throw new Error('Expected ESP32-S3 for ' + DEVICES[state.device].name + ', but detected ' + chipName + '. Please check your device.');
+                        throw new Error('Expected ESP32-S3 for ' + DEVICES[prepared.board || state.device].name + ', but detected ' + chipName + '. Please check your device.');
                     }
                     logMessage('Chip verified: ESP32-S3', 'log-green');
                 }
@@ -9171,7 +9346,8 @@
 </script>
 
 <!-- ── Download page tab logic ───────────────────────── -->
-<script>
+<script type="module">
+import { handheldRelease } from './assets/js/handheld-release.js';
 (function () {
     var picker = document.querySelector('.dl-picker');
     var spotlight = document.getElementById('dlSpotlight');
@@ -9240,6 +9416,19 @@
             { l: 'WiFi bridging*',           d: 'Reach remote Reticulum nodes.' }
         ]
     };
+    ['tdeck', 'tpager'].forEach(function(board) {
+        if (!handheldRelease(board)) return;
+        PLATFORM_FEATURES[board] = [
+            { l: 'Standalone messaging', d: 'Send and read LXMF messages on the device.' },
+            { l: 'LoRa + WiFi', d: 'Reach peers over radio or a network connection.' },
+            { l: 'Two modes', d: 'All-in-one messenger or radio only.' },
+            board === 'tdeck'
+                ? { l: 'Touch, trackball + keyboard', d: 'Navigate and type on the T-Deck.' }
+                : { l: 'Scroll-wheel + keyboard', d: 'Navigate and type on the T-Pager.' },
+            { l: 'Local storage', d: 'Messages stay on flash; SD storage is optional.' },
+            { l: 'Rust protocol core', d: 'Reticulum and LXMF built for constrained devices.' }
+        ];
+    });
     var MEDIA_SLIDES = {
         desktop: [
             {
@@ -9847,6 +10036,10 @@
     function resolveRsdeckReleaseTag() {
         var releaseTag = document.getElementById('rsdeckReleaseTag');
         if (!releaseTag || typeof fetch !== 'function') return;
+        if (handheldRelease('tdeck')) {
+            resolveHandheldCard('tdeck', releaseTag);
+            return;
+        }
 
         fetch('https://api.github.com/repos/ratspeak/rsDeck/releases/latest', {
             headers: { Accept: 'application/vnd.github+json' }
@@ -9865,6 +10058,10 @@
     function resolveRspagerReleaseTag() {
         var releaseTag = document.getElementById('rspagerReleaseTag');
         if (!releaseTag || typeof fetch !== 'function') return;
+        if (handheldRelease('tpager')) {
+            resolveHandheldCard('tpager', releaseTag);
+            return;
+        }
 
         fetch('https://api.github.com/repos/ratspeak/rsPager/releases/latest', {
             headers: { Accept: 'application/vnd.github+json' }
@@ -9878,6 +10075,33 @@
         }).catch(function () {
             // Keep the checked-in release label when GitHub metadata is unavailable.
         });
+    }
+
+    function resolveHandheldCard(board, releaseTag) {
+        var release = handheldRelease(board);
+        var panel = document.getElementById('dl-case-' + board);
+        var title = document.getElementById('dl-title-' + board);
+        title.textContent = 'Ratspeak for ' + (board === 'tdeck' ? 'T-Deck Plus.' : 'T-Pager.');
+        releaseTag.textContent = 'Ratspeak Handheld';
+        panel.querySelectorAll('a[href*="github.com/ratspeak/"]').forEach(function(link) {
+            if (link.href.indexOf('/download/') !== -1) {
+                link.href = '/api/firmware?source=handheld&device=' + board + '&package=full&version=' + encodeURIComponent(release.tag);
+            } else if (link.classList.contains('dl-release-link')) {
+                link.href = 'https://github.com/' + release.repo + '/releases/tag/' + encodeURIComponent(release.tag);
+            } else {
+                link.href = 'https://github.com/' + release.repo;
+            }
+        });
+        fetch('/api/firmware?source=handheld&device=' + board + '&info=true&package=full&version=' + encodeURIComponent(release.tag))
+            .then(function(response) {
+                if (!response.ok) throw new Error('Release unavailable');
+                return response.json();
+            }).then(function(info) {
+                if (info.board !== board || info.version !== release.tag) throw new Error('Release mismatch');
+                releaseTag.textContent = 'Ratspeak Handheld ' + info.version;
+            }).catch(function() {
+                releaseTag.textContent = 'Ratspeak Handheld (download unavailable)';
+            });
     }
 
     resolveRatspeakReleaseAssets();

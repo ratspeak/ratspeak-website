@@ -1,3 +1,5 @@
+import { handheldRelease, handheldPackage } from '../assets/js/handheld-release.js';
+
 export const config = { runtime: 'edge' };
 
 const ghHeaders = { 'Accept': 'application/vnd.github+json', 'User-Agent': 'ratspeak-flasher' };
@@ -137,6 +139,10 @@ export default async function handler(req) {
   if (source === 'rnode') {
     return handleRnode({ searchParams, version, asset });
   }
+  if (source === 'handheld') {
+    return handleHandheld({ searchParams, device, version, requestedPackage });
+  }
+  if (source !== 'ratspeak') return jsonResponse({ error: 'Unknown firmware source' }, 400);
 
   // ── Source: Ratspeak firmware (rsDeck / rsCardputer) ─────────────
   const repos = {
@@ -234,6 +240,51 @@ function packageAssetInfo(release, asset, packageId, firmwarePackage) {
   };
 }
 
+async function handleHandheld({ searchParams, device, version, requestedPackage }) {
+  const selected = handheldPackage(handheldRelease(device), requestedPackage || 'full');
+  // No authenticated GitHub requests: private or unpublished firmware must never
+  // be relayed through the public download endpoint.
+  if (!selected || (version && version !== selected.tag)) {
+    return jsonResponse({ error: 'This handheld release is not available.' }, 404);
+  }
+  try {
+    const response = await fetch(
+      `https://api.github.com/repos/${selected.repo}/releases/tags/${encodeURIComponent(selected.tag)}`,
+      { headers: ghHeaders }
+    );
+    if (!response.ok) return jsonResponse({ error: 'Handheld release is not available. Please try again later.' }, 503);
+    const release = await response.json();
+    if (release.draft !== false || !release.published_at || release.tag_name !== selected.tag || !Array.isArray(release.assets)) {
+      return jsonResponse({ error: 'Handheld release has not been published.' }, 503);
+    }
+    const candidates = release.assets.filter(candidate => candidate.name === selected.fileName);
+    const asset = candidates.length === 1 && candidates[0];
+    const assetUrl = `https://github.com/${selected.repo}/releases/download/${encodeURIComponent(selected.tag)}/${selected.fileName}`;
+    if (!asset || asset.state !== 'uploaded' || !Number.isSafeInteger(asset.size) ||
+        asset.size <= 0 || asset.size > 20 * 1024 * 1024 ||
+        !/^sha256:[0-9a-f]{64}$/.test(asset.digest || '') || asset.browser_download_url !== assetUrl) {
+      return jsonResponse({ error: 'A verified package for this device is not available.' }, 503);
+    }
+    const info = {
+      version: selected.tag,
+      repo: selected.repo,
+      product: 'ratspeak-handheld',
+      board: selected.board,
+      package: selected.package,
+      packageLabel: selected.packageLabel,
+      installMode: 'factory',
+      fileName: asset.name,
+      size: asset.size,
+      sha256: asset.digest.slice(7)
+    };
+    if (searchParams.get('releases') === 'true') return jsonResponse([info]);
+    if (searchParams.get('info') === 'true') return jsonResponse(info);
+    return await streamAsset(asset, 'no-store');
+  } catch {
+    return jsonResponse({ error: 'Handheld release could not be loaded. Please try again later.' }, 503);
+  }
+}
+
 async function handleRnode({ searchParams, version, asset }) {
   // List variants (assets) for a release
   if (searchParams.get('variants') === 'true') {
@@ -312,7 +363,7 @@ async function handleRnode({ searchParams, version, asset }) {
   return streamAsset(found);
 }
 
-async function streamAsset(asset) {
+async function streamAsset(asset, cacheControl = 'public, max-age=300') {
   const binResp = await fetch(asset.browser_download_url, {
     headers: { 'User-Agent': 'ratspeak-flasher' }
   });
@@ -321,7 +372,7 @@ async function streamAsset(asset) {
     headers: {
       'Content-Type': 'application/zip',
       'Content-Disposition': `attachment; filename="${asset.name}"`,
-      'Cache-Control': 'public, max-age=300'
+      'Cache-Control': cacheControl
     }
   });
 }
@@ -329,6 +380,6 @@ async function streamAsset(asset) {
 function jsonResponse(body, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json', ...extraHeaders }
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...extraHeaders }
   });
 }
