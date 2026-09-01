@@ -5,7 +5,7 @@
   "scripts": {
     "check:map": "node --check assets/map.js && node --check assets/map-basemap.js && node --test tests/map-basemap.test.mjs",
     "check:legal": "node --test tests/legal-policies.test.mjs",
-    "check:flasher": "node --check api/firmware.js && node --test tests/rnode-flasher.test.mjs",
+    "check:flasher": "node --check api/firmware.js && node --test tests/handheld-flasher.test.mjs tests/rnode-flasher.test.mjs",
     "check:poll": "node --check api/proposals.js && node --check api/snapshot.js && node --check api/votes.js && node --check lib/rate-limit.js && node --check lib/snapshot-rpc.js && node --check lib/vote-core.js && node --test tests/poll-core.test.mjs",
     "check:identity": "node --check api/identity.js && node --check lib/identity-core.js && node --check assets/js/portal-wallet.js && node --check assets/js/portal-identity.js && node --test tests/identity-core.test.mjs",
     "check:og-map": "node --check api/og-map.js && node --check api/map-nodes.js && node --check lib/og-map-render.js && node --check lib/map-live-snapshot.js && node --test tests/og-map.test.mjs"
