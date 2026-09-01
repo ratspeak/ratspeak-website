@@ -5202,7 +5202,7 @@
     <div class="install-dialog__device" id="installDialogDevice"></div>
     <h2 id="installDialogTitle">Before you flash</h2>
     <p id="installDialogIntro"></p>
-    <p id="installDialogRisk">This is a fresh install. Your identity, messages and settings may be erased, even with Full Erase off.</p>
+    <p id="installDialogRisk">This is a fresh install. Continuing resets the device's internal storage, including its identity, messages and settings.</p>
     <p class="install-dialog__backup" id="installDialogBackup">Back up your identity and anything else you want to keep somewhere other than this device.</p>
     <a class="install-dialog__guide" href="https://docs.ratspeak.org/docs/hardware/flashing-firmware#before-flashing" target="_blank" rel="noopener noreferrer">Flashing guide</a>
     <div class="install-dialog__actions">
@@ -8902,6 +8902,13 @@ import { handheldRelease, verifyHandheldDownload, validateHandheldManifest } fro
     }
 
     // ── Flash Process (Real esptool-js) ────────────────
+    function shouldEraseBeforeFlash(prepared) {
+        // Factory packages are fresh installs. The confirmation immediately
+        // before flashing authorizes a clean internal-flash reset, so an older
+        // incompatible filesystem is never left behind.
+        return !!(prepared && prepared.installMode === 'factory') || state.eraseAll;
+    }
+
     window.startFlash = async function() {
         if (!state.connected || !state.firmwareReady || state.flashing) return;
 
@@ -9007,7 +9014,10 @@ import { handheldRelease, verifyHandheldDownload, validateHandheldManifest } fro
 
                 // 7. Write flash — separate parts at individual addresses
                 setProgress(15, 'Writing firmware...');
-                if (state.eraseAll) {
+                var eraseBeforeFlash = shouldEraseBeforeFlash(prepared);
+                if (prepared.installMode === 'factory') {
+                    logMessage('Fresh install — resetting internal storage...', 'log-orange');
+                } else if (eraseBeforeFlash) {
                     logMessage('Full erase enabled — wiping all memory...', 'log-orange');
                 }
                 logMessage('Flashing ' + prepared.fileArray.length + ' part(s)...', '');
@@ -9017,7 +9027,7 @@ import { handheldRelease, verifyHandheldDownload, validateHandheldManifest } fro
                     flashSize: prepared.flashOptions.flashSize,
                     flashMode: prepared.flashOptions.flashMode,
                     flashFreq: prepared.flashOptions.flashFreq,
-                    eraseAll: state.eraseAll,
+                    eraseAll: eraseBeforeFlash,
                     compress: true,
                     reportProgress: function(fileIndex, written, total) {
                         var pct = 15 + (written / total) * 75;
