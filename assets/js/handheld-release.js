@@ -1,19 +1,26 @@
-// Pin automatic downloads to a reviewed release. Null restores legacy routes.
+// Pin automatic downloads to a reviewed public release. Null disables them.
 export const HANDHELD_RELEASE_TAG = 'v2.1.0';
 
 export const HANDHELD_REPOSITORY = 'ratspeak/ratspeak-handheld';
-const BOARDS = { tdeck: 'rsdeck', tpager: 'rspager' };
-const FACTORY_BOARDS = { ...BOARDS, cardputer: 'rscardputer' };
-const ALIASES = { rsdeck: 'tdeck', ratdeck: 'tdeck', rspager: 'tpager' };
+const BOARDS = { tdeck: 'rsdeck', tpager: 'rspager', cardputer: 'rscardputer' };
+const ALIASES = { rsdeck: 'tdeck', ratdeck: 'tdeck', rspager: 'tpager', rscardputer: 'cardputer', ratcom: 'cardputer' };
 const PACKAGES = { full: 'Full launcher', standalone: 'Standalone', rnode: 'RNode only' };
 const owns = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
 
-export function handheldRelease(device, tag = HANDHELD_RELEASE_TAG) {
+export function handheldBoard(device) {
   const board = owns(ALIASES, device) ? ALIASES[device] : device;
-  if (!tag || !owns(BOARDS, board)) return null;
+  return owns(BOARDS, board) ? board : null;
+}
+
+export function handheldRelease(device, tag = HANDHELD_RELEASE_TAG) {
+  const board = handheldBoard(device);
+  if (!tag || !board) return null;
   if (!/^v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(tag)) {
     throw new Error('Invalid handheld release tag');
   }
+  // v2.1.0 did not publish Cardputer assets. Capability is separate from release
+  // availability; an explicit candidate tag is used only by private fixtures.
+  if (board === 'cardputer' && tag === 'v2.1.0') return null;
   return { board, tag, repo: HANDHELD_REPOSITORY, prefix: BOARDS[board] };
 }
 
@@ -53,17 +60,20 @@ export async function validateHandheldManifest(zip, manifest, expected = {}) {
   const flashSize = board === 'cardputer' ? '8MB' : '16MB';
   const capacity = board === 'cardputer' ? 8 * 1024 * 1024 : 16 * 1024 * 1024;
   if (!manifest || manifest.schemaVersion !== 1 || manifest.product !== 'ratspeak-handheld' ||
-      !owns(FACTORY_BOARDS, board) || !owns(PACKAGES, packageId) || manifest.installMode !== 'factory' ||
+      !owns(BOARDS, board) || !owns(PACKAGES, packageId) || manifest.installMode !== 'factory' ||
       manifest.chipFamily !== 'ESP32-S3' || manifest.flashSize !== flashSize ||
-      manifest.flashMode !== 'dio' || manifest.flashFreq !== '80m' ||
+      manifest.flashMode !== 'dio' || !['40m', '80m'].includes(manifest.flashFreq) ||
       !Array.isArray(manifest.parts) || manifest.parts.length !== 1) {
     throw new Error('Unsupported handheld package. Use a factory ZIP built for your device.');
   }
   if ((expected.board && expected.board !== board) || (expected.package && expected.package !== packageId)) {
     throw new Error('This firmware package is for a different device or mode.');
   }
+  if (expected.version && expected.version !== 'v' + manifest.version) {
+    throw new Error('This firmware package is for a different release.');
+  }
   const part = manifest.parts[0];
-  const filename = FACTORY_BOARDS[board] + '-' + packageId + '.bin';
+  const filename = BOARDS[board] + '-' + packageId + '.bin';
   if (!part || part.path !== filename || ![0, '0x0000', '0x0'].includes(part.offset) ||
       !Number.isSafeInteger(part.size) || part.size < 0x10000 || part.size > capacity ||
       !/^[a-f0-9]{64}$/.test(part.sha256 || '')) {
@@ -74,6 +84,14 @@ export async function validateHandheldManifest(zip, manifest, expected = {}) {
   const bytes = await file.async('uint8array');
   if (bytes.length !== part.size || bytes[0] !== 0xe9 || await sha256Hex(bytes) !== part.sha256) {
     throw new Error('Handheld factory image failed size or SHA-256 verification.');
+  }
+  // ESP32-S3 merged bootloader fields, matching the release producer's
+  // release_images.flash_settings contract. RNode uses 40 MHz; other packages
+  // may use 80 MHz. Never rewrite a verified image using guessed flash settings.
+  const frequency = { 0: '40m', 15: '80m' }[bytes[3] & 15];
+  if (bytes[2] !== 2 || bytes[3] >> 4 !== (board === 'cardputer' ? 3 : 4) ||
+      bytes[12] !== 9 || bytes[13] !== 0 || frequency !== manifest.flashFreq) {
+    throw new Error('Factory image chip or flash settings do not match its manifest.');
   }
   return { board, package: packageId, bytes, address: 0, installMode: 'factory' };
 }
