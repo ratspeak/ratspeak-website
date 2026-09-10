@@ -1032,6 +1032,11 @@
             color: var(--text-muted);
             line-height: 1.55;
         }
+        #firmwarePreset .flash-connect-tips { color: var(--text-secondary); }
+        #firmwarePreset .flash-connect-tips a { color: var(--accent); text-underline-offset: 3px; }
+        #firmwarePreset summary { cursor: pointer; }
+        #firmwarePreset a:focus-visible,
+        #firmwarePreset summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
         .flash-connect-tips__head {
             font-family: var(--font-mono);
             font-size: 10.5px;
@@ -4486,17 +4491,17 @@
                             </span>
                         </button>
                         <div class="dl-cta-secondary-row">
-                            <a href="https://github.com/ratspeak/rsDeck/releases/latest/download/rsdeck-full.zip" class="nr-btn nr-btn-secondary dl-cta-secondary">
+                            <a href="/api/firmware?source=handheld&amp;device=tdeck&amp;package=full" class="nr-btn nr-btn-secondary dl-cta-secondary">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                 Download<span class="dl-cta-meta">.zip</span>
                             </a>
-                            <a href="https://github.com/ratspeak/rsDeck/releases" class="nr-btn nr-btn-secondary dl-cta-secondary" target="_blank" rel="noopener noreferrer">
+                            <a href="https://github.com/ratspeak/ratspeak-handheld/releases" class="nr-btn nr-btn-secondary dl-cta-secondary" target="_blank" rel="noopener noreferrer">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
                                 Source
                             </a>
                         </div>
                     </div>
-                    <a href="https://github.com/ratspeak/rsDeck/releases" target="_blank" rel="noopener noreferrer" class="dl-release-link">
+                    <a href="https://github.com/ratspeak/ratspeak-handheld/releases" target="_blank" rel="noopener noreferrer" class="dl-release-link">
                         Release notes
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                     </a>
@@ -4617,29 +4622,29 @@
                 </div>
                 <div class="dl-spotlight__panel">
                     <h2 class="dl-spotlight__title" id="dl-title-cardputer">Ratspeak for Cardputer.</h2>
-                    <p class="dl-spotlight__lede">M5Stack's pocket computer, running rsCardputer.</p>
+                    <p class="dl-spotlight__lede">Cardputer Adv with Cap LoRa-1262. Beta support; a unified package is not available in the current public release.</p>
                     <ul class="dl-panel-features" data-features="cardputer" role="list"></ul>
                     <div class="dl-cta-row">
                         <button type="button" class="nr-btn nr-btn-lg dl-cta-primary dl-cta-flash" data-flash="cardputer">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                             <span class="dl-cta-primary__text">
-                                <span class="dl-cta-primary__line">Flash in browser</span>
+                                <span class="dl-cta-primary__line">Check firmware availability</span>
                                 <span class="dl-cta-primary__meta">Web Serial &middot; Chrome / Edge 89+</span>
                             </span>
                         </button>
                         <div class="dl-cta-secondary-row">
-                            <a href="https://github.com/ratspeak/rsCardputer/releases/latest/download/rscardputer-full.zip" class="nr-btn nr-btn-secondary dl-cta-secondary">
+                            <a href="https://github.com/ratspeak/ratspeak-handheld/releases" data-handheld-download class="nr-btn nr-btn-secondary dl-cta-secondary">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                Download<span class="dl-cta-meta">.zip</span>
+                                <span data-handheld-download-label>Public releases</span>
                             </a>
-                            <a href="https://github.com/ratspeak/rsCardputer" class="nr-btn nr-btn-secondary dl-cta-secondary" target="_blank" rel="noopener noreferrer">
+                            <a href="https://github.com/ratspeak/ratspeak-handheld" class="nr-btn nr-btn-secondary dl-cta-secondary" target="_blank" rel="noopener noreferrer">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
                                 Source
                             </a>
                         </div>
                     </div>
-                    <a href="https://github.com/ratspeak/rsCardputer/releases" target="_blank" rel="noopener noreferrer" class="dl-release-link">
-                        Release notes
+                    <a href="https://github.com/ratspeak/ratspeak-handheld/releases" target="_blank" rel="noopener noreferrer" class="dl-release-link">
+                        <span id="rscardputerReleaseTag">Unified download unavailable</span>
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                     </a>
                 </div>
@@ -4717,17 +4722,17 @@
                             </span>
                         </button>
                         <div class="dl-cta-secondary-row">
-                            <a href="https://github.com/ratspeak/rsPager/releases/latest/download/rspager-full.zip" class="nr-btn nr-btn-secondary dl-cta-secondary">
+                            <a href="/api/firmware?source=handheld&amp;device=tpager&amp;package=full" class="nr-btn nr-btn-secondary dl-cta-secondary">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                 Download<span class="dl-cta-meta">.zip</span>
                             </a>
-                            <a href="https://github.com/ratspeak/rsPager/releases" class="nr-btn nr-btn-secondary dl-cta-secondary" target="_blank" rel="noopener noreferrer">
+                            <a href="https://github.com/ratspeak/ratspeak-handheld/releases" class="nr-btn nr-btn-secondary dl-cta-secondary" target="_blank" rel="noopener noreferrer">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
                                 Source
                             </a>
                         </div>
                     </div>
-                    <a href="https://github.com/ratspeak/rsPager/releases" target="_blank" rel="noopener noreferrer" class="dl-release-link">
+                    <a href="https://github.com/ratspeak/ratspeak-handheld/releases" target="_blank" rel="noopener noreferrer" class="dl-release-link">
                         Release notes
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                     </a>
@@ -4946,6 +4951,13 @@
                         </div>
                         <div class="firmware-packages" id="firmwarePackagePicker" style="display: none;"></div>
                         <div class="firmware-versions" id="versionDropdown" style="display: none;"></div>
+                        <p class="flash-connect-tips">All three packages are fresh installs that reset internal storage. App-only updates require the exact existing board and partition layout; use the <a href="https://docs.ratspeak.org/hardware/flashing-firmware">backup and update guide</a>.</p>
+                        <button type="button" class="nr-btn nr-btn-secondary" onclick="retryFirmware()">Reload firmware</button>
+                        <details class="flash-connect-tips">
+                            <summary>Legacy recovery downloads</summary>
+                            <p>Older firmware is separate from Ratspeak Handheld. Use only for deliberate recovery, with a backup and its original installation instructions. It is never selected automatically.</p>
+                            <p><a href="https://github.com/ratspeak/rsDeck/releases" target="_blank" rel="noopener noreferrer">T-Deck legacy recovery</a> &middot; <a href="https://github.com/ratspeak/rsPager/releases" target="_blank" rel="noopener noreferrer">T-Pager legacy recovery</a> &middot; <a href="https://github.com/ratspeak/rsCardputer/releases" target="_blank" rel="noopener noreferrer">Cardputer legacy recovery</a></p>
+                        </details>
                     </div>
 
                     <!-- Custom firmware: source picker + (upload | RNode) -->
@@ -5246,7 +5258,7 @@
 
 <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
 <script type="module">
-import { handheldRelease, verifyHandheldDownload, validateHandheldManifest } from './assets/js/handheld-release.js';
+import { handheldBoard, handheldRelease, HANDHELD_REPOSITORY, verifyHandheldDownload, validateHandheldManifest } from './assets/js/handheld-release.js';
 (function() {
     'use strict';
 
@@ -5412,8 +5424,8 @@ import { handheldRelease, verifyHandheldDownload, validateHandheldManifest } fro
         }
     };
 
-    ['tdeck', 'tpager'].forEach(function(board) {
-        if (handheldRelease(board)) DEVICES[board].sub = 'ESP32-S3 \u00b7 Ratspeak Handheld';
+    ['tdeck', 'tpager', 'cardputer'].forEach(function(board) {
+        DEVICES[board].sub = 'ESP32-S3 \u00b7 Ratspeak Handheld';
     });
 
     // Default flash options for custom single-bin uploads
@@ -5592,7 +5604,7 @@ import { handheldRelease, verifyHandheldDownload, validateHandheldManifest } fro
 
     function firmwarePackageQuery() {
         var query = state.selectedPackage ? '&package=' + encodeURIComponent(state.selectedPackage) : '';
-        return query + (handheldRelease(state.device) ? '&source=handheld' : '');
+        return query + (handheldBoard(state.device) ? '&source=handheld' : '');
     }
 
     function firmwareReadyText(dev, info, bytes) {
@@ -5605,10 +5617,7 @@ import { handheldRelease, verifyHandheldDownload, validateHandheldManifest } fro
 
     async function validatePresetFirmware(dev, buffer, metadata) {
         var selected = handheldRelease(dev.apiDevice);
-        if (!selected) {
-            if (metadata && metadata.product === 'ratspeak-handheld') throw new Error('Reload this page before installing handheld firmware.');
-            return;
-        }
+        if (!selected) throw new Error('No unified public release is available for this device.');
         if (!metadata || metadata.board !== selected.board || metadata.version !== selected.tag ||
             metadata.package !== state.selectedPackage) {
             throw new Error('Firmware does not match the selected device and release.');
@@ -5635,10 +5644,11 @@ import { handheldRelease, verifyHandheldDownload, validateHandheldManifest } fro
         }
 
         picker.style.display = '';
-        dev.packages.forEach(function(pkg) {
+        dev.packages.forEach(function(pkg, index) {
             var btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'firmware-package-option';
+            btn.setAttribute('aria-pressed', String(pkg.id === state.selectedPackage));
             if (pkg.id === state.selectedPackage) {
                 btn.classList.add('firmware-package-option--active');
             }
@@ -5670,6 +5680,7 @@ import { handheldRelease, verifyHandheldDownload, validateHandheldManifest } fro
                 updateFlashBtn();
                 closeVersionDropdown();
                 buildPackagePicker(dev);
+                picker.children[index].focus();
                 buildVersionDropdown(dev);
                 fetchFirmwareFromRelease(dev);
             });
@@ -5677,25 +5688,37 @@ import { handheldRelease, verifyHandheldDownload, validateHandheldManifest } fro
         });
     }
 
+    async function readFirmwareInfo(response) {
+        var info = await response.json();
+        if (!response.ok) throw new Error(info.error || 'Firmware is unavailable. Try again later.');
+        return info;
+    }
+
+    window.retryFirmware = function() {
+        if (state.flashing || !handheldBoard(state.device)) return;
+        fetchFirmwareFromRelease(DEVICES[state.device]);
+    };
+
     function fetchFirmwareFromRelease(dev) {
         var requestSerial = ++state.firmwareRequestSerial;
         state.firmwareError = null;
+        state.firmwareReady = false;
+        state.firmwareZip = null;
+        state.firmwareMetadata = null;
+        updateFlashBtn();
         var packageQuery = firmwarePackageQuery();
         var nameEl = document.getElementById('presetName');
         nameEl.textContent = 'Loading...';
         document.getElementById('presetSize').textContent = 'Fetching release info...';
         closeVersionDropdown();
 
-        var repoMap = { rsdeck: 'ratspeak/rsDeck', rscardputer: 'ratspeak/rsCardputer', rspager: 'ratspeak/rsPager' };
-        var unified = handheldRelease(dev.apiDevice);
-        var repoPath = unified ? unified.repo : repoMap[dev.apiDevice] || '';
+        var repoPath = HANDHELD_REPOSITORY;
         var downloadInfo = null;
 
         // Fetch latest info and download binary
         fetch('/api/firmware?device=' + encodeURIComponent(dev.apiDevice) + '&info=true' + packageQuery)
             .then(function(resp) {
-                if (!resp.ok) throw new Error('Firmware is unavailable. Try again later.');
-                return resp.json();
+                return readFirmwareInfo(resp);
             })
             .then(function(info) {
                 if (!firmwareRequestIsCurrent(requestSerial, dev)) throw { stale: true };
@@ -5748,6 +5771,10 @@ import { handheldRelease, verifyHandheldDownload, validateHandheldManifest } fro
     function selectVersion(dev, version) {
         var requestSerial = ++state.firmwareRequestSerial;
         state.firmwareError = null;
+        state.firmwareReady = false;
+        state.firmwareZip = null;
+        state.firmwareMetadata = null;
+        updateFlashBtn();
         var packageQuery = firmwarePackageQuery();
         var nameEl = document.getElementById('presetName');
         nameEl.textContent = version;
@@ -5763,8 +5790,7 @@ import { handheldRelease, verifyHandheldDownload, validateHandheldManifest } fro
 
         fetch('/api/firmware?device=' + encodeURIComponent(dev.apiDevice) + '&version=' + encodeURIComponent(version) + '&info=true' + packageQuery)
             .then(function(resp) {
-                if (!resp.ok) throw new Error('Firmware is unavailable. Try again later.');
-                return resp.json();
+                return readFirmwareInfo(resp);
             })
             .then(function(info) {
                 if (!firmwareRequestIsCurrent(requestSerial, dev)) throw { stale: true };
@@ -8095,7 +8121,9 @@ import { handheldRelease, verifyHandheldDownload, validateHandheldManifest } fro
             if (note) {
                 noteEl.textContent = note;
             } else if (state.firmwareError) {
-                noteEl.textContent = 'Firmware could not be loaded. Go back and select the device again to retry.';
+                noteEl.textContent = state.device === 'custom'
+                    ? 'Firmware could not be loaded. Select it again to retry.'
+                    : 'Firmware could not be loaded. Use Reload firmware to retry.';
             } else if (ready) {
                 noteEl.textContent = 'Ready to write firmware. Keep this tab open until flashing and reset finish.';
             } else if (!state.connected && !state.firmwareReady) {
@@ -9409,13 +9437,12 @@ import { handheldRelease } from './assets/js/handheld-release.js';
             { l: 'LittleFS + SD storage',    d: 'Atomic .tmp/.bak journaling.' }
         ],
         cardputer: [
-            { l: 'Dual-mode',                d: 'Standalone messenger or RNode radio.' },
-            { l: 'LoRa (w/ module)',         d: 'Snap-on M5 module, 915 MHz.' },
-            { l: 'Standalone LXMF',          d: 'No phone, no host. Just talk.' },
-            { l: 'RNode mode',               d: 'BLE or USB radio for host clients.' },
-            { l: 'M5Unified display',        d: 'Native ESP32-S3 driver.' },
-            { l: 'LittleFS + SD',            d: 'Local storage with SD expansion.' },
-            { l: 'Constrained-table stack',  d: 'Tuned microReticulum for 8 MB.' }
+            { l: 'Beta / work in progress', d: 'Check release availability before installing.' },
+            { l: 'Cap LoRa-1262 required', d: 'Use the module and antenna for your hardware band.' },
+            { l: 'Prepared unified support', d: 'Full launcher, Standalone and RNode packages.' },
+            { l: 'Keyboard navigation', d: 'Compact display with Fn navigation keys.' },
+            { l: '8 MB internal flash', d: 'Choose a package made specifically for Cardputer.' },
+            { l: 'Legacy recovery is separate', d: 'Older rsCardputer releases are labelled in the flasher.' }
         ],
         tpager: [
             { l: 'Dual-mode',                d: 'Standalone messenger or RNode radio.' },
@@ -10043,59 +10070,18 @@ import { handheldRelease } from './assets/js/handheld-release.js';
         });
     }
 
-    function resolveRsdeckReleaseTag() {
-        var releaseTag = document.getElementById('rsdeckReleaseTag');
-        if (!releaseTag || typeof fetch !== 'function') return;
-        if (handheldRelease('tdeck')) {
-            resolveHandheldCard('tdeck', releaseTag);
-            return;
-        }
-
-        fetch('https://api.github.com/repos/ratspeak/rsDeck/releases/latest', {
-            headers: { Accept: 'application/vnd.github+json' }
-        }).then(function (response) {
-            if (!response.ok) throw new Error('Release lookup failed');
-            return response.json();
-        }).then(function (release) {
-            if (!release.tag_name) return;
-            releaseTag.textContent = 'rsDeck ' + release.tag_name;
-            releaseTag.dataset.rsdeckReleaseResolved = 'true';
-        }).catch(function () {
-            // Keep the checked-in release label when GitHub metadata is unavailable.
-        });
-    }
-
-    function resolveRspagerReleaseTag() {
-        var releaseTag = document.getElementById('rspagerReleaseTag');
-        if (!releaseTag || typeof fetch !== 'function') return;
-        if (handheldRelease('tpager')) {
-            resolveHandheldCard('tpager', releaseTag);
-            return;
-        }
-
-        fetch('https://api.github.com/repos/ratspeak/rsPager/releases/latest', {
-            headers: { Accept: 'application/vnd.github+json' }
-        }).then(function (response) {
-            if (!response.ok) throw new Error('Release lookup failed');
-            return response.json();
-        }).then(function (release) {
-            if (!release.tag_name) return;
-            releaseTag.textContent = 'rsPager ' + release.tag_name;
-            releaseTag.dataset.rspagerReleaseResolved = 'true';
-        }).catch(function () {
-            // Keep the checked-in release label when GitHub metadata is unavailable.
-        });
-    }
-
     function resolveHandheldCard(board, releaseTag) {
         var release = handheldRelease(board);
         var panel = document.getElementById('dl-case-' + board);
         var title = document.getElementById('dl-title-' + board);
-        title.textContent = 'Ratspeak for ' + (board === 'tdeck' ? 'T-Deck Plus.' : 'T-Pager.');
+        title.textContent = 'Ratspeak for ' + PLATFORM_LABEL[board] + '.';
+        if (!release) { releaseTag.textContent = 'Unified download unavailable'; return; }
         releaseTag.textContent = 'Ratspeak Handheld';
-        panel.querySelectorAll('a[href*="github.com/ratspeak/"]').forEach(function(link) {
-            if (link.href.indexOf('/download/') !== -1) {
+        panel.querySelectorAll('a[href*="github.com/ratspeak/"], a[href^="/api/firmware"]').forEach(function(link) {
+            if (link.hasAttribute('data-handheld-download') || link.href.indexOf('/download/') !== -1 || link.href.indexOf('/api/firmware') !== -1) {
                 link.href = '/api/firmware?source=handheld&device=' + board + '&package=full&version=' + encodeURIComponent(release.tag);
+                var downloadLabel = link.querySelector('[data-handheld-download-label]');
+                if (downloadLabel) downloadLabel.textContent = 'Download ZIP';
             } else if (link.classList.contains('dl-release-link')) {
                 link.href = 'https://github.com/' + release.repo + '/releases/tag/' + encodeURIComponent(release.tag);
             } else {
@@ -10115,8 +10101,9 @@ import { handheldRelease } from './assets/js/handheld-release.js';
     }
 
     resolveRatspeakReleaseAssets();
-    resolveRsdeckReleaseTag();
-    resolveRspagerReleaseTag();
+    [['tdeck', 'rsdeckReleaseTag'], ['tpager', 'rspagerReleaseTag'], ['cardputer', 'rscardputerReleaseTag']].forEach(function(entry) {
+        resolveHandheldCard(entry[0], document.getElementById(entry[1]));
+    });
 
     initMediaViewers();
     renderAllPanelFeatures();

@@ -236,7 +236,8 @@ function packageAssetInfo(release, asset, packageId, firmwarePackage) {
     fileName: asset.name,
     size: asset.size,
     package: packageId,
-    packageLabel: asset.name.startsWith('ratcom-') ? 'Legacy Standalone' : firmwarePackage.label
+    product: 'legacy-handheld',
+    packageLabel: 'Legacy recovery: ' + (asset.name.startsWith('ratcom-') ? 'Standalone' : firmwarePackage.label)
   };
 }
 
@@ -245,7 +246,7 @@ async function handleHandheld({ searchParams, device, version, requestedPackage 
   // No authenticated GitHub requests: private or unpublished firmware must never
   // be relayed through the public download endpoint.
   if (!selected || (version && version !== selected.tag)) {
-    return jsonResponse({ error: 'This handheld release is not available.' }, 404);
+    return jsonResponse({ error: 'A unified package for this device is not available in the selected public release. Legacy recovery downloads are separate.' }, 404);
   }
   try {
     const response = await fetch(
