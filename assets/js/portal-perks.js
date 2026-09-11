@@ -21,7 +21,7 @@ const PERKS_ALERT_SENDER = '3d78560c72af48998e9eff6c24834cd3';
 const IDENTITY_URL = '/api/identity';
 const REG_STORE_KEY = 'ratspeak-portal-registered';
 const PERKS_STORE_KEY = 'ratspeak-portal-perks';
-const POLL_MS = 30000;
+const POLL_MS = 60000;
 const THRESHOLDS = [
   { min: 15, label: '15m' },
   { min: 30, label: '30m' },
@@ -54,6 +54,10 @@ export function initPerksTab(options) {
   });
 
   els.main.addEventListener('click', onClick);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) schedulePolling();
+    else if (currentAccount()) refresh().catch(() => {});
+  });
   render();
 }
 
@@ -84,7 +88,7 @@ async function refresh(options = {}) {
 }
 
 function schedulePolling() {
-  const active = Boolean(currentAccount() && perks?.enrolled);
+  const active = Boolean(currentAccount() && perks?.enrolled) && !document.hidden;
   if (active && !pollTimer) {
     pollTimer = window.setInterval(() => refresh().catch(() => {}), POLL_MS);
   } else if (!active && pollTimer) {

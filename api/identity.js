@@ -1,6 +1,7 @@
 import {
   CODE_LENGTH,
   CODE_TTL_MS,
+  MAX_CLOCK_SKEW_MS,
   REGISTRY_DOMAIN,
   REGISTRATION_TYPES,
   REGISTRY_ELIGIBILITY_RULE,
@@ -42,7 +43,8 @@ import { getAddress, isAddress, verifyTypedData } from 'viem';
 import {
   ROOT,
   badgePath,
-  fetchJson,
+  deleteBlobs,
+  fetchImmutableJson,
   listBlobs,
   openSealedValue,
   putSealed,
@@ -52,6 +54,7 @@ import {
   readVersioned,
   registrationPath,
   timingSafeEqual,
+  triageVersionedGroups,
   writeBadge,
   writeVersioned
 } from '../lib/registry-store.js';
@@ -524,29 +527,28 @@ async function claimBadge(body, blobToken, secret) {
 }
 
 // ------------------------------------------------------------- bridge -------
+// A queue group whose newest write is older than the code TTL (plus skew)
+// cannot hold a sendable job, so the bridge poll never reads it; groups a
+// day old are deleted so the listing stays one page. del() is free.
+const QUEUE_LIVE_MS = CODE_TTL_MS + MAX_CLOCK_SKEW_MS;
+const QUEUE_DEAD_MS = 24 * 60 * 60 * 1000;
+const QUEUE_GC_BATCH = 200;
+
 async function bridgeQueue(blobToken, secret) {
   // Queue records are versioned like pendings (resends must never hide
   // behind a stale tombstone read): newest version per id wins, the legacy
   // single-file form is a fallback.
-  const blobs = await listBlobs(blobToken, `${ROOT}/queue/`);
-  const groups = new Map();
-  for (const blob of blobs) {
-    const rel = blob.pathname.slice(`${ROOT}/queue/`.length);
-    const [head, version] = rel.split('/');
-    const vid = head.replace(/\.json$/, '');
-    const entry = groups.get(vid) || { legacy: null, versions: [] };
-    if (version) entry.versions.push(blob);
-    else entry.legacy = blob;
-    groups.set(vid, entry);
-  }
+  const prefix = `${ROOT}/queue/`;
+  const blobs = await listBlobs(blobToken, prefix);
+  const { live, dead } = triageVersionedGroups(blobs, prefix, { liveMs: QUEUE_LIVE_MS, deadMs: QUEUE_DEAD_MS });
   const jobs = [];
-  for (const entry of groups.values()) {
-    entry.versions.sort((a, b) => (a.pathname < b.pathname ? -1 : 1));
-    const newest = entry.versions[entry.versions.length - 1] || entry.legacy;
-    if (!newest) continue;
-    const job = await openSealedValue(secret, await fetchJson(newest.url));
+  for (const entry of live) {
+    if (!entry.newest) continue;
+    const job = await openSealedValue(secret, await fetchImmutableJson(entry.newest.url));
     if (job && !job.tombstone && (job.code || job.kind === 'probe')) jobs.push(job);
   }
+  const stale = dead.flatMap(entry => [...entry.versions, entry.legacy].filter(Boolean).map(b => b.url)).slice(0, QUEUE_GC_BATCH);
+  if (stale.length) await deleteBlobs(blobToken, stale).catch(() => {});
   return jsonResponse({ ok: true, jobs }, 200, NO_STORE);
 }
 

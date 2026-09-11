@@ -3,15 +3,17 @@ import { loadPublishedSnapshot, mapPathname, pruneExpiredNodes } from '../lib/ma
 
 export const config = { runtime: 'edge' };
 
-const JSON_HEADERS = {
-  'Content-Type': 'application/json; charset=utf-8',
-  'Cache-Control': 'no-store'
-};
+// The publisher writes once a minute; one CDN-cached copy per region serves
+// every open map tab instead of one Blob round-trip per tab per poll.
+const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8' };
+const CACHE_LIVE = 'public, max-age=0, s-maxage=60, stale-while-revalidate=300';
+const CACHE_NONE = 'no-store';
 
 export default async function handler(req) {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     return jsonResponse({ error: 'Method not allowed' }, 405, {
-      Allow: 'GET, HEAD'
+      Allow: 'GET, HEAD',
+      'Cache-Control': CACHE_NONE
     });
   }
 
@@ -21,7 +23,7 @@ export default async function handler(req) {
       buildMapSnapshot(new Date());
   } catch (error) {
     console.error('Map snapshot read failed', error);
-    return jsonResponse({ error: 'Map snapshot read failed' }, 502);
+    return jsonResponse({ error: 'Map snapshot read failed' }, 502, { 'Cache-Control': CACHE_NONE });
   }
 
   snapshot = pruneExpiredNodes(snapshot);
@@ -29,11 +31,11 @@ export default async function handler(req) {
   if (req.method === 'HEAD') {
     return new Response(null, {
       status: 200,
-      headers: JSON_HEADERS
+      headers: { ...JSON_HEADERS, 'Cache-Control': CACHE_LIVE }
     });
   }
 
-  return jsonResponse(snapshot);
+  return jsonResponse(snapshot, 200, { 'Cache-Control': CACHE_LIVE });
 }
 
 function jsonResponse(body, status = 200, extraHeaders = {}) {

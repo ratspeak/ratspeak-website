@@ -64,7 +64,8 @@ export default async function handler(req) {
       'x-vercel-blob-access': 'public',
       'x-content-type': 'application/json',
       'x-add-random-suffix': '0',
-      'x-allow-overwrite': '1'
+      'x-allow-overwrite': '1',
+      'x-cache-control-max-age': '60'
     },
     body
   });
