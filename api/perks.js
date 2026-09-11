@@ -229,7 +229,14 @@ async function authedEnrollment(body, blobToken, secret) {
 }
 
 // ----------------------------------------------------------- infra side -----
+// Three host units poll the badge list (120/300/900 s); each build is
+// 1 + 2N Blob lists. A warm isolate answers repeats from memory; enrollment
+// changes in this isolate invalidate, registry changes age out within the TTL.
+const SYNC_MEMO_MS = 120_000;
+let syncMemo = null;
+
 async function syncBadges(blobToken, secret) {
+  if (syncMemo && Date.now() - syncMemo.at < SYNC_MEMO_MS) return json(syncMemo.body);
   const enrollments = await allEnrollments(blobToken, secret);
   const badges = {};
   for (const record of enrollments) {
@@ -240,7 +247,9 @@ async function syncBadges(blobToken, secret) {
     if (tier === 'none') continue;
     badges[record.lxmfAddress] = { tier };
   }
-  return json({ version: 1, updated_at: new Date().toISOString(), badges });
+  const body = { version: 1, updated_at: new Date().toISOString(), badges };
+  syncMemo = { at: Date.now(), body };
+  return json(body);
 }
 
 async function mailboxReport(body, blobToken, secret) {
@@ -307,7 +316,10 @@ function enrollPrefix(wallet) {
 }
 
 const readEnrollment = (t, s, wallet) => readVersioned(t, s, enrollPrefix(wallet), null);
-const writeEnrollment = (t, s, wallet, value) => writeVersioned(t, s, enrollPrefix(wallet), value);
+const writeEnrollment = (t, s, wallet, value) => {
+  syncMemo = null;
+  return writeVersioned(t, s, enrollPrefix(wallet), value);
+};
 
 async function allEnrollments(blobToken, secret) {
   const blobs = await listBlobs(blobToken, ENROLL_PREFIX, 1000);
