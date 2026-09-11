@@ -46,7 +46,7 @@ import { getAddress, isAddress, verifyTypedData } from 'viem';
 import {
   ROOT,
   listBlobs,
-  fetchJson,
+  fetchImmutableJson,
   openSealedValue,
   randomHex,
   readBadge,
@@ -321,7 +321,7 @@ async function allEnrollments(blobToken, secret) {
   }
   const records = [];
   for (const blob of newestPerWallet.values()) {
-    const record = await openSealedValue(secret, await fetchJson(blob.url));
+    const record = await openSealedValue(secret, await fetchImmutableJson(blob.url));
     if (record && record.wallet) records.push(record);
   }
   return records;

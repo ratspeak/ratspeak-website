@@ -68,6 +68,10 @@ export function initIdentityTab(options) {
   els.main.addEventListener('input', onInput);
   els.main.addEventListener('keydown', onCodeKeydown);
   els.main.addEventListener('paste', onCodePaste);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) schedulePolling();
+    else if (currentAccount()) refreshStatus().catch(() => {});
+  });
   render();
 }
 
@@ -121,7 +125,7 @@ async function refreshStatus(options = {}) {
 function schedulePolling() {
   const probing = status.probe?.status === 'probing'
     && Date.now() - Date.parse(status.probe.checkedAt || 0) < 120_000;
-  const active = probing || (status.pending && !['registered'].includes(status.pending.status));
+  const active = (probing || (status.pending && !['registered'].includes(status.pending.status))) && !document.hidden;
   if (active && !pollTimer) {
     pollTimer = window.setInterval(() => refreshStatus().catch(() => {}), POLL_MS);
   } else if (!active && pollTimer) {

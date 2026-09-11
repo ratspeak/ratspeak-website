@@ -14,7 +14,9 @@ import {
 } from './map-basemap.js?v=maplibre-5';
 
 const API_URL = '/api/map-nodes';
-const SNAPSHOT_REFRESH_MS = 15_000;
+// /api/map-nodes is CDN-cached for 60s, so a fresh tab is current; open tabs
+// re-poll every 5 min and pause while hidden (refresh on return).
+const SNAPSHOT_REFRESH_MS = 5 * 60_000;
 const NODE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const LAND_MASK_URL = 'scripts/data/ne_110m_land.geojson';
 const PLACE_GAZETTEER_URL = 'scripts/data/ne_110m_populated_places_simple.geojson';
@@ -158,6 +160,7 @@ const state = {
   nodeCursorActive: false,
   detailSheetDrag: null,
   refreshTimer: null,
+  refreshInFlight: false,
   suppressMapClickUntil: 0
 };
 
@@ -185,6 +188,7 @@ function init() {
   bindChrome();
   bindControls();
   initMap();
+  document.addEventListener('visibilitychange', handleVisibilityChange);
   void loadInitialSnapshot();
   state.landMaskPromise = loadLandMask().then((landMask) => {
     state.landMask = landMask;
@@ -393,17 +397,33 @@ function ensureLocationIndexes() {
 
 function scheduleSnapshotRefresh() {
   if (state.refreshTimer) window.clearTimeout(state.refreshTimer);
+  state.refreshTimer = null;
+  if (document.hidden) return; // resumed by handleVisibilityChange
   state.refreshTimer = window.setTimeout(refreshSnapshot, SNAPSHOT_REFRESH_MS);
 }
 
-async function refreshSnapshot() {
-  const previousSelectedId = state.selectedId;
-  state.snapshot = await loadSnapshot();
-  if (previousSelectedId && !(state.snapshot.nodes || []).some((node) => node.id === previousSelectedId)) {
-    state.selectedId = null;
+function handleVisibilityChange() {
+  if (document.hidden) {
+    scheduleSnapshotRefresh();
+  } else if (state.snapshot && !state.refreshTimer && !state.refreshInFlight) {
+    void refreshSnapshot();
   }
-  applyFilters();
-  scheduleSnapshotRefresh();
+}
+
+async function refreshSnapshot() {
+  if (state.refreshInFlight) return;
+  state.refreshInFlight = true;
+  try {
+    const previousSelectedId = state.selectedId;
+    state.snapshot = await loadSnapshot();
+    if (previousSelectedId && !(state.snapshot.nodes || []).some((node) => node.id === previousSelectedId)) {
+      state.selectedId = null;
+    }
+    applyFilters();
+  } finally {
+    state.refreshInFlight = false;
+    scheduleSnapshotRefresh();
+  }
 }
 
 function initMap() {
