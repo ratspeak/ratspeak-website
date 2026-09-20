@@ -2,8 +2,9 @@
 export const HANDHELD_RELEASE_TAG = 'v2.2.0';
 
 export const HANDHELD_REPOSITORY = 'ratspeak/ratspeak-handheld';
-const BOARDS = { tdeck: 'rsdeck', tpager: 'rspager', cardputer: 'rscardputer' };
-const ALIASES = { rsdeck: 'tdeck', ratdeck: 'tdeck', rspager: 'tpager', rscardputer: 'cardputer', ratcom: 'cardputer' };
+const BOARDS = { tdeck: 'tdeck', tpager: 'pager', cardputer: 'cardputer' };
+const LEGACY_BOARDS = { tdeck: 'rsdeck', tpager: 'rspager', cardputer: 'rscardputer' };
+const ALIASES = { rsdeck: 'tdeck', ratdeck: 'tdeck', rspager: 'tpager', pager: 'tpager', rscardputer: 'cardputer', ratcom: 'cardputer' };
 const PACKAGES = { full: 'Full launcher', standalone: 'Standalone', rnode: 'RNode only' };
 const owns = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
 
@@ -21,7 +22,7 @@ export function handheldRelease(device, tag = HANDHELD_RELEASE_TAG) {
   // v2.1.0 did not publish Cardputer assets. Capability is separate from release
   // availability; retain this guard for links to that historical release.
   if (board === 'cardputer' && tag === 'v2.1.0') return null;
-  return { board, tag, repo: HANDHELD_REPOSITORY, prefix: BOARDS[board] };
+  return { board, tag, repo: HANDHELD_REPOSITORY, prefix: (tag === 'v2.1.0' ? LEGACY_BOARDS : BOARDS)[board] };
 }
 
 export function handheldPackage(release, packageId = 'full') {
@@ -42,7 +43,7 @@ export async function sha256Hex(bytes) {
 export async function verifyHandheldDownload(buffer, metadata) {
   if (!metadata || metadata.product !== 'ratspeak-handheld' || metadata.installMode !== 'factory' ||
       !owns(BOARDS, metadata.board) || !owns(PACKAGES, metadata.package) ||
-      metadata.fileName !== BOARDS[metadata.board] + '-' + metadata.package + '.zip' ||
+      ![BOARDS[metadata.board], LEGACY_BOARDS[metadata.board]].some(prefix => metadata.fileName === prefix + '-' + metadata.package + '.zip') ||
       !Number.isSafeInteger(metadata.size) || metadata.size <= 0 || metadata.size > 20 * 1024 * 1024 ||
       buffer.byteLength !== metadata.size || !/^[a-f0-9]{64}$/.test(metadata.sha256 || '')) {
     throw new Error('Incomplete handheld release metadata. Nothing has been flashed.');
@@ -73,8 +74,10 @@ export async function validateHandheldManifest(zip, manifest, expected = {}) {
     throw new Error('This firmware package is for a different release.');
   }
   const part = manifest.parts[0];
-  const filename = BOARDS[board] + '-' + packageId + '.bin';
-  if (!part || part.path !== filename || ![0, '0x0000', '0x0'].includes(part.offset) ||
+  // Keep previously downloaded packages usable after the filename cleanup.
+  const filename = part && part.path;
+  const names = [BOARDS[board], LEGACY_BOARDS[board]].map(prefix => prefix + '-' + packageId + '.bin');
+  if (!part || !names.includes(filename) || ![0, '0x0000', '0x0'].includes(part.offset) ||
       !Number.isSafeInteger(part.size) || part.size < 0x10000 || part.size > capacity ||
       !/^[a-f0-9]{64}$/.test(part.sha256 || '')) {
     throw new Error('Invalid handheld factory image layout.');
