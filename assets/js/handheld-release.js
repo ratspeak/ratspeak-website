@@ -1,5 +1,5 @@
 // Pin automatic downloads to a reviewed public release. Null disables them.
-export const HANDHELD_RELEASE_TAG = 'v2.1.0';
+export const HANDHELD_RELEASE_TAG = 'v2.2.0';
 
 export const HANDHELD_REPOSITORY = 'ratspeak/ratspeak-handheld';
 const BOARDS = { tdeck: 'rsdeck', tpager: 'rspager', cardputer: 'rscardputer' };
@@ -19,7 +19,7 @@ export function handheldRelease(device, tag = HANDHELD_RELEASE_TAG) {
     throw new Error('Invalid handheld release tag');
   }
   // v2.1.0 did not publish Cardputer assets. Capability is separate from release
-  // availability; an explicit candidate tag is used only by private fixtures.
+  // availability; retain this guard for links to that historical release.
   if (board === 'cardputer' && tag === 'v2.1.0') return null;
   return { board, tag, repo: HANDHELD_REPOSITORY, prefix: BOARDS[board] };
 }
