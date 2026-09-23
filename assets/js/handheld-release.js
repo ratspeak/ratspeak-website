@@ -1,5 +1,5 @@
 // Pin automatic downloads to a reviewed public release. Null disables them.
-export const HANDHELD_RELEASE_TAG = 'v2.2.0';
+export const HANDHELD_RELEASE_TAG = 'v2.2.1';
 
 export const HANDHELD_REPOSITORY = 'ratspeak/ratspeak-handheld';
 const BOARDS = { tdeck: 'tdeck', tpager: 'pager', cardputer: 'cardputer' };
