@@ -242,7 +242,7 @@ function packageAssetInfo(release, asset, packageId, firmwarePackage) {
 }
 
 async function handleHandheld({ searchParams, device, version, requestedPackage }) {
-  const selected = handheldPackage(handheldRelease(device), requestedPackage || 'full');
+  const selected = handheldPackage(handheldRelease(device), requestedPackage || undefined);
   // No authenticated GitHub requests: private or unpublished firmware must never
   // be relayed through the public download endpoint.
   if (!selected || (version && version !== selected.tag)) {
