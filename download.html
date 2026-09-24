@@ -5756,7 +5756,7 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
     function firmwareReadyText(dev, info, bytes) {
         var label = info && info.packageLabel ? info.packageLabel : selectedPackageLabel(dev);
         if (info && info.product === 'ratspeak-handheld') {
-            return label + ' \u00b7 ' + formatBytes(bytes) + ' \u00b7 Fresh install. Back up your identity and messages first.';
+            return label + ' \u00b7 ' + formatBytes(bytes);
         }
         return label + ' \u00b7 ' + formatBytes(bytes) + ' \u00b7 Ready to flash';
     }
