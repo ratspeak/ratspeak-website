@@ -687,6 +687,41 @@
         .flash-back:hover { color: var(--accent); gap: 10px; }
         .flash-back svg { transition: transform 0.2s; }
 
+        .flash-driver-note {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 0 20px;
+            padding: 8px 10px 8px 14px;
+            border: 1px solid var(--accent-a20);
+            border-radius: 10px;
+            background: var(--accent-a05);
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .flash-driver-note[hidden] { display: none; }
+        .flash-driver-note > svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--accent); }
+        .flash-driver-note p { flex: 1; min-width: 0; }
+        .flash-driver-note a { color: var(--accent-dark); text-underline-offset: 3px; }
+        [data-theme="dark"] .flash-driver-note a { color: var(--accent); }
+        .flash-driver-note__close {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
+            border: 0;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+        .flash-driver-note__close:hover { background: var(--accent-a12); color: var(--text-primary); }
+        .flash-driver-note a:focus-visible,
+        .flash-driver-note__close:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
         /* Match the spotlight card vocabulary: rounded-20px card, soft warm
            shadow, 36px padding. */
         .flash-panel {
@@ -4960,6 +4995,14 @@
             Back to devices
         </button>
 
+        <aside class="flash-driver-note" id="m9DriverNotice" aria-label="USB driver help" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg>
+            <p>Device not showing? You may need to install the <a href="https://learn.adafruit.com/how-to-install-drivers-for-wch-usb-to-serial-chips-ch9102f-ch9102/overview" target="_blank" rel="noopener noreferrer">driver</a>.</p>
+            <button type="button" class="flash-driver-note__close" id="dismissM9DriverNotice" aria-label="Dismiss driver note">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+            </button>
+        </aside>
+
         <div class="flash-flow flash-flow--standalone" aria-label="Flash progress">
             <div class="flash-flow__item is-active" id="flowConnect">
                 <span class="flash-flow__index">1</span>
@@ -5566,6 +5609,16 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
     }
 
     // ── Device Selection ───────────────────────────────
+    var m9DriverNoticeDismissed = false;
+    var m9DriverNotice = document.getElementById('m9DriverNotice');
+    var dismissM9DriverNotice = document.getElementById('dismissM9DriverNotice');
+    dismissM9DriverNotice.addEventListener('click', function() {
+        var hadFocus = document.activeElement === dismissM9DriverNotice;
+        m9DriverNoticeDismissed = true;
+        m9DriverNotice.hidden = true;
+        if (hadFocus) document.getElementById('connectBtn').focus();
+    });
+
     window.selectDevice = function(deviceId, opts) {
         opts = opts || {};
         if (state.flashing) return;
@@ -5622,8 +5675,9 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
         panel.classList.toggle('flash-panel--custom', deviceId === 'custom');
         document.getElementById('panelName').textContent = dev.name;
         document.getElementById('panelSub').textContent = dev.sub;
+        m9DriverNotice.hidden = deviceId !== 'm9' || m9DriverNoticeDismissed;
         document.getElementById('deviceConnectTips').innerHTML = deviceId === 'm9'
-            ? '<li>Keep the M9 powered on and connect it with a USB data cable.</li><li>Select its USB serial port. If it is missing, check the cable and your WCH USB serial driver.</li>'
+            ? '<li>Keep the M9 powered on and connect it with a USB data cable.</li><li>Select its USB serial port.</li>'
             : '<li>If the device isn\'t being recognized, try holding <code>BOOT</code> while plugging in your device.</li>';
         document.getElementById('legacyRecoveryDownloads').hidden = deviceId === 'm9';
 
