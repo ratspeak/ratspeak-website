@@ -2,15 +2,30 @@
 export const HANDHELD_RELEASE_TAG = 'v2.2.2';
 
 export const HANDHELD_REPOSITORY = 'ratspeak/ratspeak-handheld';
-const BOARDS = { tdeck: 'tdeck', tpager: 'pager', cardputer: 'cardputer' };
+const ALL_PACKAGES = ['full', 'standalone', 'rnode'];
+const BOARDS = {
+  tdeck: { prefix: 'tdeck', packages: ALL_PACKAGES },
+  tpager: { prefix: 'pager', packages: ALL_PACKAGES },
+  cardputer: { prefix: 'cardputer', packages: ALL_PACKAGES },
+  m9: { prefix: 'm9', packages: ['standalone'] }
+};
 const LEGACY_BOARDS = { tdeck: 'rsdeck', tpager: 'rspager', cardputer: 'rscardputer' };
-const ALIASES = { rsdeck: 'tdeck', ratdeck: 'tdeck', rspager: 'tpager', pager: 'tpager', rscardputer: 'cardputer', ratcom: 'cardputer' };
+const ALIASES = { rsdeck: 'tdeck', ratdeck: 'tdeck', rspager: 'tpager', pager: 'tpager', rscardputer: 'cardputer', ratcom: 'cardputer', thinknode_m9: 'm9' };
 const PACKAGES = { full: 'Full launcher', standalone: 'Standalone', rnode: 'RNode only' };
 const owns = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
+const supportsPackage = (board, packageId) => owns(BOARDS, board) && owns(PACKAGES, packageId) && BOARDS[board].packages.includes(packageId);
+const prefixes = board => [BOARDS[board].prefix, LEGACY_BOARDS[board]].filter(Boolean);
 
 export function handheldBoard(device) {
   const board = owns(ALIASES, device) ? ALIASES[device] : device;
   return owns(BOARDS, board) ? board : null;
+}
+
+export function handheldCapabilities(device) {
+  const board = handheldBoard(device);
+  if (!board) return null;
+  return { board, prefix: BOARDS[board].prefix,
+    packages: [...BOARDS[board].packages], defaultPackage: BOARDS[board].packages[0] };
 }
 
 export function handheldRelease(device, tag = HANDHELD_RELEASE_TAG) {
@@ -22,11 +37,15 @@ export function handheldRelease(device, tag = HANDHELD_RELEASE_TAG) {
   // v2.1.0 did not publish Cardputer assets. Capability is separate from release
   // availability; retain this guard for links to that historical release.
   if (board === 'cardputer' && tag === 'v2.1.0') return null;
-  return { board, tag, repo: HANDHELD_REPOSITORY, prefix: (tag === 'v2.1.0' ? LEGACY_BOARDS : BOARDS)[board] };
+  // M9 first shipped in 2.2.2. Do not invent packages for earlier releases.
+  const [major, minor, patch] = tag.slice(1).split(/[.-]/).map(Number);
+  if (board === 'm9' && (major < 2 || (major === 2 && (minor < 2 || (minor === 2 && patch < 2))))) return null;
+  return { ...handheldCapabilities(board), tag, repo: HANDHELD_REPOSITORY,
+    prefix: tag === 'v2.1.0' ? LEGACY_BOARDS[board] : BOARDS[board].prefix };
 }
 
-export function handheldPackage(release, packageId = 'full') {
-  if (!release || !owns(PACKAGES, packageId)) return null;
+export function handheldPackage(release, packageId = release?.defaultPackage) {
+  if (!release || !supportsPackage(release.board, packageId)) return null;
   return {
     ...release,
     package: packageId,
@@ -42,8 +61,8 @@ export async function sha256Hex(bytes) {
 
 export async function verifyHandheldDownload(buffer, metadata) {
   if (!metadata || metadata.product !== 'ratspeak-handheld' || metadata.installMode !== 'factory' ||
-      !owns(BOARDS, metadata.board) || !owns(PACKAGES, metadata.package) ||
-      ![BOARDS[metadata.board], LEGACY_BOARDS[metadata.board]].some(prefix => metadata.fileName === prefix + '-' + metadata.package + '.zip') ||
+      !supportsPackage(metadata.board, metadata.package) ||
+      !prefixes(metadata.board).some(prefix => metadata.fileName === prefix + '-' + metadata.package + '.zip') ||
       !Number.isSafeInteger(metadata.size) || metadata.size <= 0 || metadata.size > 20 * 1024 * 1024 ||
       buffer.byteLength !== metadata.size || !/^[a-f0-9]{64}$/.test(metadata.sha256 || '')) {
     throw new Error('Incomplete handheld release metadata. Nothing has been flashed.');
@@ -61,7 +80,7 @@ export async function validateHandheldManifest(zip, manifest, expected = {}) {
   const flashSize = board === 'cardputer' ? '8MB' : '16MB';
   const capacity = board === 'cardputer' ? 8 * 1024 * 1024 : 16 * 1024 * 1024;
   if (!manifest || manifest.schemaVersion !== 1 || manifest.product !== 'ratspeak-handheld' ||
-      !owns(BOARDS, board) || !owns(PACKAGES, packageId) || manifest.installMode !== 'factory' ||
+      !supportsPackage(board, packageId) || manifest.installMode !== 'factory' ||
       manifest.chipFamily !== 'ESP32-S3' || manifest.flashSize !== flashSize ||
       manifest.flashMode !== 'dio' || !['40m', '80m'].includes(manifest.flashFreq) ||
       !Array.isArray(manifest.parts) || manifest.parts.length !== 1) {
@@ -76,7 +95,7 @@ export async function validateHandheldManifest(zip, manifest, expected = {}) {
   const part = manifest.parts[0];
   // Keep previously downloaded packages usable after the filename cleanup.
   const filename = part && part.path;
-  const names = [BOARDS[board], LEGACY_BOARDS[board]].map(prefix => prefix + '-' + packageId + '.bin');
+  const names = prefixes(board).map(prefix => prefix + '-' + packageId + '.bin');
   if (!part || !names.includes(filename) || ![0, '0x0000', '0x0'].includes(part.offset) ||
       !Number.isSafeInteger(part.size) || part.size < 0x10000 || part.size > capacity ||
       !/^[a-f0-9]{64}$/.test(part.sha256 || '')) {

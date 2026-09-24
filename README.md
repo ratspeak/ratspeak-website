@@ -12,6 +12,14 @@ The legacy embedded docs app has been removed from this repo. The public
 `docs.html` page remains only as a redirect shim for old `ratspeak.org/docs.html`
 links and hash routes.
 
+## Local preview
+
+Run `npm run dev` with Node.js 22 or newer, then open
+[localhost:9847/download.html](http://127.0.0.1:9847/download.html).
+The flasher uses the published firmware downloads. Nothing is deployed;
+connecting and installing still require your browser's USB selection and confirmation.
+Run `npm run check:flasher` for the download and package checks.
+
 ## License
 
 This repository is dual-licensed:

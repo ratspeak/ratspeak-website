@@ -2748,6 +2748,12 @@
             }
 
             .footer-left { flex-direction: column; gap: 12px; }
+            .footer-links {
+                max-width: 100%;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 12px 22px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -2811,7 +2817,7 @@
         /* ── Platform picker ────────────────────────── */
         .dl-picker {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(6, minmax(0, 1fr));
             gap: 14px;
             margin: 8px 0 18px;
         }
@@ -2820,7 +2826,8 @@
             background: var(--bg-card);
             border: 1px solid var(--border-card);
             border-radius: 14px;
-            padding: 22px 18px 20px;
+            padding: 22px 10px 20px;
+            min-width: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -3266,6 +3273,7 @@
         .dl-mcu-illustration--tdeck { max-width: 280px; }
         .dl-mcu-illustration--cardputer { max-width: 440px; }
         .dl-mcu-illustration--tpager { max-width: 510px; }
+        .dl-mcu-illustration--m9 { max-width: 220px; max-height: 360px; }
 
         .dl-screen-mock {
             width: 100%;
@@ -3315,6 +3323,7 @@
             color: var(--text-primary);
             margin: 0;
         }
+        #dl-title-m9 { text-wrap: balance; }
         .dl-spotlight__lede {
             font-size: 15.5px;
             color: var(--text-secondary);
@@ -3761,8 +3770,8 @@
         }
 
         /* ── Responsive ─────────────────────────────── */
-        @media (max-width: 1024px) {
-            .dl-picker { grid-template-columns: repeat(3, 1fr); }
+        @media (max-width: 1079px) {
+            .dl-picker { grid-template-columns: repeat(3, minmax(0, 1fr)); }
             .dl-picker__tile.is-selected::after { display: none; }
             .dl-spotlight__case {
                 grid-template-columns: 1fr;
@@ -3856,15 +3865,14 @@
                 text-align: left;
             }
             .dl-picker {
-                grid-template-columns: repeat(5, minmax(0, 1fr));
+                grid-template-columns: repeat(3, minmax(0, 1fr));
                 gap: 6px;
                 margin: 0 0 10px;
             }
             .dl-picker__tile {
                 width: 100%;
                 min-width: 0;
-                aspect-ratio: 1;
-                min-height: 66px;
+                min-height: 92px;
                 flex-direction: column;
                 justify-content: center;
                 text-align: center;
@@ -3886,34 +3894,27 @@
                     0 0 0 5px var(--accent-a12);
             }
             .dl-picker__tile.is-selected::after {
-                display: block;
-                height: 24px;
+                display: none;
             }
             .dl-picker__visual {
                 width: 100%;
                 height: 42px;
-                margin-bottom: 0;
-                flex-shrink: 1;
+                margin-bottom: 8px;
+                flex-shrink: 0;
             }
             .dl-picker__visual svg.device {
                 max-height: 42px;
             }
             .dl-picker__name {
-                display: none;
+                display: block;
                 max-width: 100%;
                 margin-bottom: 0;
                 color: var(--text-primary);
-                font-size: 10.5px;
-                font-weight: 650;
-                line-height: 1.05;
+                font-size: 12px;
+                font-weight: 600;
+                line-height: 1.2;
                 letter-spacing: 0;
                 overflow-wrap: anywhere;
-            }
-            .dl-picker__tile.is-selected .dl-picker__visual {
-                margin-bottom: 5px;
-            }
-            .dl-picker__tile.is-selected .dl-picker__name {
-                display: block;
             }
             .dl-picker__sub {
                 display: none;
@@ -3971,10 +3972,15 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
             .dl-picker__tile,
-            .dl-cta-secondary {
+            .dl-picker__visual,
+            .dl-cta-secondary,
+            .fade-in {
                 transition: none;
             }
+            .device-selection,
+            .flash-interface { animation: none !important; }
         }
     </style>
     <script type="application/ld+json">
@@ -3995,6 +4001,52 @@
     </script>
 </head>
 <body>
+
+<!-- Shared device drawing: ThinkNode M9 front, matching the hardware proportions. -->
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true" focusable="false">
+    <defs>
+        <symbol id="thinknode-m9" viewBox="0 0 82 136">
+            <rect x="8" y="6" width="66" height="124" rx="11" fill="var(--bg-secondary)" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="9.5" y="7.5" width="63" height="121" rx="9.5" stroke="currentColor" stroke-width="0.45" opacity="0.45"/>
+            <!-- Landscape LCD above the separate navigation area. -->
+            <rect x="16" y="22" width="50" height="37.5" rx="0.6" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="0.8"/>
+            <path d="M20 27h8m28 0h6" stroke="var(--accent)" stroke-width="0.55" opacity="0.7"/>
+            <rect x="20" y="32" width="30" height="8" rx="2" stroke="var(--accent)" stroke-width="0.55"/>
+            <path d="M23 36h19" stroke="var(--accent)" stroke-width="0.55" opacity="0.7"/>
+            <rect x="32" y="44" width="30" height="8" rx="2" fill="var(--accent)" fill-opacity="0.12" stroke="var(--accent)" stroke-width="0.55"/>
+            <path d="M36 48h21" stroke="var(--accent)" stroke-width="0.55" opacity="0.7"/>
+            <path d="M10 66h62M10 85h62" stroke="currentColor" stroke-width="0.5" opacity="0.45"/>
+            <!-- Five-way pad, Home/Back and the four auxiliary icon keys. -->
+            <rect x="32" y="68" width="18" height="17" rx="5.5" stroke="currentColor" stroke-width="0.75"/>
+            <rect x="33.5" y="69.5" width="15" height="14" rx="4.2" fill="var(--bg-card)" stroke="var(--accent)" stroke-width="0.65"/>
+            <g stroke="currentColor" stroke-width="0.55">
+                <path d="m23 72 1.8-1.6 1.8 1.6v2h-3.6zM57 71l-1.5 1.3 1.5 1.2m-1.5-1.2h2a1 1 0 0 1 0 2h-1.7"/>
+                <rect x="12.5" y="73" width="7.3" height="7" rx="2.2"/>
+                <path d="M14.5 75.2h3.2v2h-1.1l-1 .8v-.8h-1.1z"/>
+                <rect x="62" y="73" width="7.3" height="7" rx="2.2"/>
+                <path d="m63.5 75 1.4-.5 1.4.7 1.4-.5v3l-1.4.5-1.4-.7-1.4.5zM64.9 74.5v3M66.3 75.2v3"/>
+                <rect x="23.2" y="79" width="3.4" height="2.5" rx="0.5"/>
+                <path d="M24.2 82.3h1.4M56.4 81.9s-1.7-1.7-1.7-2.7a1.7 1.7 0 1 1 3.4 0c0 1-1.7 2.7-1.7 2.7z"/>
+                <circle cx="56.4" cy="79" r="0.5"/>
+            </g>
+            <!-- Four rows, with the wide Space key and tall Enter key. -->
+            <path d="M10 86h62v29a7 7 0 0 1-7 7H17a7 7 0 0 1-7-7z" fill="var(--bg-card)" stroke="currentColor" stroke-width="0.6"/>
+            <g stroke="currentColor" stroke-width="0.45" opacity="0.68">
+                <path d="M10 95h62M10 104h62M10 113h55.8"/>
+                <path d="M16.2 86v27M22.4 86v36M28.6 86v36M34.8 86v36M41 86v27M47.2 86v36M53.4 86v36M59.6 86v18M65.8 86v18M16.2 113v8M55.8 104v18"/>
+            </g>
+            <g stroke="currentColor" stroke-width="0.55" opacity="0.55">
+                <path d="M12 90.5h2M18.2 90.5h2M24.4 90.5h2M30.6 90.5h2M36.8 90.5h2M43 90.5h2M49.2 90.5h2M55.4 90.5h2M61.6 90.5h2M67.8 90.5h2"/>
+                <path d="M12 99.5h2M18.2 99.5h2M24.4 99.5h2M30.6 99.5h2M36.8 99.5h2M43 99.5h2M49.2 99.5h2M55.4 99.5h2M61.6 99.5h2"/>
+                <path d="M18.2 108.5h2M24.4 108.5h2M30.6 108.5h2M36.8 108.5h2M43 108.5h2M49.2 108.5h2M24.4 117.5h2M49.2 117.5h2"/>
+            </g>
+            <path d="M37 118h8M65 108v3h-4m1.5-1.5L61 111l1.5 1.5M68.5 98h-2l-1.2 1.2 1.2 1.3h2" stroke="var(--accent)" stroke-width="0.65"/>
+            <path d="M74.2 76h1v6h-1" stroke="currentColor" stroke-width="0.7"/>
+            <circle cx="41" cy="125" r="0.55" fill="currentColor" stroke="none" opacity="0.55"/>
+        </symbol>
+    </defs>
+</svg>
+
 
 <!-- ── Navbar ──────────────────────────────────────────── -->
 <nav class="navbar" id="navbar">
@@ -4065,7 +4117,7 @@
         <div class="dl-picker fade-in" role="tablist" aria-label="Choose your platform">
 
             <!-- Desktop -->
-            <button class="dl-picker__tile" role="tab" aria-selected="true" aria-controls="dl-case-desktop" aria-label="Desktop" data-platform="desktop">
+            <button type="button" id="dl-tab-desktop" class="dl-picker__tile" role="tab" tabindex="0" aria-selected="true" aria-controls="dl-case-desktop" aria-label="Desktop" data-platform="desktop">
                 <span class="dl-picker__visual">
                     <svg class="device" viewBox="0 0 170 120" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <!-- desktop client with the same warm, device-native language as the MCU cards -->
@@ -4108,7 +4160,7 @@
             </button>
 
             <!-- Mobile -->
-            <button class="dl-picker__tile" role="tab" aria-selected="false" aria-controls="dl-case-mobile" aria-label="Mobile" data-platform="mobile">
+            <button type="button" id="dl-tab-mobile" class="dl-picker__tile" role="tab" tabindex="-1" aria-selected="false" aria-controls="dl-case-mobile" aria-label="Mobile" data-platform="mobile">
                 <span class="dl-picker__visual">
                     <svg class="device" viewBox="0 0 86 120" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <rect x="14" y="6" width="58" height="108" rx="9" fill="var(--bg-secondary)" stroke="currentColor"/>
@@ -4137,7 +4189,7 @@
             </button>
 
             <!-- T-Deck Plus -->
-            <button class="dl-picker__tile" role="tab" aria-selected="false" aria-controls="dl-case-tdeck" aria-label="T-Deck Plus" data-platform="tdeck">
+            <button type="button" id="dl-tab-tdeck" class="dl-picker__tile" role="tab" tabindex="-1" aria-selected="false" aria-controls="dl-case-tdeck" aria-label="T-Deck Plus" data-platform="tdeck">
                 <span class="dl-picker__visual">
                     <svg class="device" viewBox="0 0 100 130" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <!-- body -->
@@ -4211,7 +4263,7 @@
             </button>
 
             <!-- Cardputer Adv -->
-            <button class="dl-picker__tile" role="tab" aria-selected="false" aria-controls="dl-case-cardputer" aria-label="Cardputer Adv" data-platform="cardputer">
+            <button type="button" id="dl-tab-cardputer" class="dl-picker__tile" role="tab" tabindex="-1" aria-selected="false" aria-controls="dl-case-cardputer" aria-label="Cardputer Adv" data-platform="cardputer">
                 <span class="dl-picker__visual">
                     <svg class="device" viewBox="0 0 160 100" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <rect x="4" y="6" width="152" height="88" rx="6" fill="var(--bg-secondary)" stroke="currentColor"/>
@@ -4327,7 +4379,7 @@
             </button>
 
             <!-- T-Pager -->
-            <button class="dl-picker__tile" role="tab" aria-selected="false" aria-controls="dl-case-tpager" aria-label="T-Pager" data-platform="tpager">
+            <button type="button" id="dl-tab-tpager" class="dl-picker__tile" role="tab" tabindex="-1" aria-selected="false" aria-controls="dl-case-tpager" aria-label="T-Pager" data-platform="tpager">
                 <span class="dl-picker__visual">
                     <svg class="device" viewBox="-12 0 174 122" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <!-- body -->
@@ -4389,6 +4441,16 @@
                 <span class="dl-picker__sub">ESP32</span>
             </button>
 
+
+            <!-- ThinkNode M9 -->
+            <button type="button" id="dl-tab-m9" class="dl-picker__tile" role="tab" tabindex="-1" aria-selected="false" aria-controls="dl-case-m9" aria-label="ThinkNode M9" data-platform="m9">
+                <span class="dl-picker__visual">
+                    <svg class="device" viewBox="0 0 82 136" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#thinknode-m9"/></svg>
+                </span>
+                <span class="dl-picker__name">ThinkNode M9</span>
+                <span class="dl-picker__sub">ESP32</span>
+            </button>
+
         </div>
 
         <!-- ── Selected platform panel ───────────────── -->
@@ -4398,7 +4460,7 @@
         <section class="dl-spotlight" id="dlSpotlight" data-active-platform="desktop">
 
             <!-- Desktop case -->
-            <article class="dl-spotlight__case" id="dl-case-desktop" data-platform="desktop" role="tabpanel" aria-labelledby="dl-title-desktop">
+            <article class="dl-spotlight__case" id="dl-case-desktop" data-platform="desktop" role="tabpanel" aria-labelledby="dl-tab-desktop" tabindex="0">
                 <div class="dl-spotlight__visual" data-platform="desktop">
                     <div class="dl-screen-frame dl-screen-frame--desktop">
                         <img class="dl-screenshot-img" src="assets/devices/desktop-home-macos-light.png" data-src-light="assets/devices/desktop-home-macos-light.png" data-src-dark="assets/devices/desktop-home-macos-dark.png" alt="Ratspeak desktop home dashboard in a macOS window" width="2342" height="1592" loading="eager" decoding="async" draggable="false" />
@@ -4435,7 +4497,7 @@
             </article>
 
             <!-- Mobile case -->
-            <article class="dl-spotlight__case" id="dl-case-mobile" data-platform="mobile" role="tabpanel" aria-labelledby="dl-title-mobile" hidden>
+            <article class="dl-spotlight__case" id="dl-case-mobile" data-platform="mobile" role="tabpanel" aria-labelledby="dl-tab-mobile" tabindex="0" hidden>
                 <div class="dl-spotlight__visual" data-platform="mobile">
                     <div class="dl-screen-frame dl-screen-frame--mobile">
                         <img class="dl-screenshot-img" src="assets/devices/mobile-peers-light.png" data-src-light="assets/devices/mobile-peers-light.png" data-src-dark="assets/devices/mobile-peers-dark.png" alt="Ratspeak mobile peer directory" width="978" height="2100" loading="lazy" decoding="async" draggable="false" />
@@ -4472,7 +4534,7 @@
             </article>
 
             <!-- T-Deck Plus case -->
-            <article class="dl-spotlight__case" id="dl-case-tdeck" data-platform="tdeck" role="tabpanel" aria-labelledby="dl-title-tdeck" hidden>
+            <article class="dl-spotlight__case" id="dl-case-tdeck" data-platform="tdeck" role="tabpanel" aria-labelledby="dl-tab-tdeck" tabindex="0" hidden>
                 <div class="dl-spotlight__visual" data-platform="tdeck">
                     <div class="dl-screen-frame dl-screen-frame--tdeck">
                         <img class="dl-photo-img" src="assets/devices/tdeck-home.webp" alt="T-Deck Plus running Ratspeak — home dashboard" width="560" height="975" loading="lazy" decoding="async" draggable="false" />
@@ -4509,7 +4571,7 @@
             </article>
 
             <!-- Cardputer case -->
-            <article class="dl-spotlight__case" id="dl-case-cardputer" data-platform="cardputer" role="tabpanel" aria-labelledby="dl-title-cardputer" hidden>
+            <article class="dl-spotlight__case" id="dl-case-cardputer" data-platform="cardputer" role="tabpanel" aria-labelledby="dl-tab-cardputer" tabindex="0" hidden>
                 <div class="dl-spotlight__visual" data-platform="cardputer">
                     <svg class="dl-mcu-illustration dl-mcu-illustration--cardputer" viewBox="0 0 160 100" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <rect x="4" y="6" width="152" height="88" rx="6" fill="var(--bg-secondary)" stroke="currentColor"/>
@@ -4622,7 +4684,7 @@
                 </div>
                 <div class="dl-spotlight__panel">
                     <h2 class="dl-spotlight__title" id="dl-title-cardputer">Ratspeak for Cardputer.</h2>
-                    <p class="dl-spotlight__lede">Cardputer Adv with Cap LoRa-1262. Beta firmware with Standalone messaging and RNode radio modes.</p>
+                    <p class="dl-spotlight__lede">Cardputer Adv with Cap LoRa-1262. Standalone messaging or RNode radio.</p>
                     <ul class="dl-panel-features" data-features="cardputer" role="list"></ul>
                     <div class="dl-cta-row">
                         <button type="button" class="nr-btn nr-btn-lg dl-cta-primary dl-cta-flash" data-flash="cardputer">
@@ -4651,7 +4713,7 @@
             </article>
 
             <!-- T-Pager case -->
-            <article class="dl-spotlight__case" id="dl-case-tpager" data-platform="tpager" role="tabpanel" aria-labelledby="dl-title-tpager" hidden>
+            <article class="dl-spotlight__case" id="dl-case-tpager" data-platform="tpager" role="tabpanel" aria-labelledby="dl-tab-tpager" tabindex="0" hidden>
                 <div class="dl-spotlight__visual" data-platform="tpager">
                     <svg class="dl-mcu-illustration dl-mcu-illustration--tpager" viewBox="-12 0 174 122" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <!-- body -->
@@ -4723,6 +4785,41 @@
                         </button>
                         <div class="dl-cta-secondary-row">
                             <a href="/api/firmware?source=handheld&amp;device=tpager&amp;package=full" class="nr-btn nr-btn-secondary dl-cta-secondary">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                Download<span class="dl-cta-meta">.zip</span>
+                            </a>
+                            <a href="https://github.com/ratspeak/ratspeak-handheld/releases" class="nr-btn nr-btn-secondary dl-cta-secondary" target="_blank" rel="noopener noreferrer">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                                Source
+                            </a>
+                        </div>
+                    </div>
+                    <a href="https://github.com/ratspeak/ratspeak-handheld/releases" target="_blank" rel="noopener noreferrer" class="dl-release-link">
+                        Release notes
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </a>
+                </div>
+            </article>
+
+            <!-- ThinkNode M9 case -->
+            <article class="dl-spotlight__case" id="dl-case-m9" data-platform="m9" role="tabpanel" aria-labelledby="dl-tab-m9" tabindex="0" hidden>
+                <div class="dl-spotlight__visual" data-platform="m9">
+                    <svg class="dl-mcu-illustration dl-mcu-illustration--m9" viewBox="0 0 82 136" fill="none" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="ThinkNode M9 with a landscape screen, navigation pad and full keyboard"><use href="#thinknode-m9"/></svg>
+                </div>
+                <div class="dl-spotlight__panel">
+                    <h2 class="dl-spotlight__title" id="dl-title-m9">Ratspeak for ThinkNode M9.</h2>
+                    <p class="dl-spotlight__lede">Elecrow's full-keyboard handheld, running <span id="m9ReleaseTag">Ratspeak Handheld</span>.</p>
+                    <ul class="dl-panel-features" data-features="m9" role="list"></ul>
+                    <div class="dl-cta-row">
+                        <button type="button" class="nr-btn nr-btn-lg dl-cta-primary dl-cta-flash" data-flash="m9">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                            <span class="dl-cta-primary__text">
+                                <span class="dl-cta-primary__line">Flash in browser</span>
+                                <span class="dl-cta-primary__meta">Web Serial &middot; Chrome / Edge 89+</span>
+                            </span>
+                        </button>
+                        <div class="dl-cta-secondary-row">
+                            <a href="/api/firmware?source=handheld&amp;device=m9&amp;package=standalone" class="nr-btn nr-btn-secondary dl-cta-secondary">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                 Download<span class="dl-cta-meta">.zip</span>
                             </a>
@@ -4924,7 +5021,7 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                             Tip
                         </div>
-                        <ul>
+                        <ul id="deviceConnectTips">
                             <li>If the device isn't being recognized, try holding <code>BOOT</code> while plugging in your device.</li>
                         </ul>
                     </div>
@@ -4935,7 +5032,7 @@
                     <div class="flash-step__number">Step 02 &mdash; Firmware</div>
                     <div class="flash-step__title" id="firmwareTitle">Firmware Package</div>
 
-                    <!-- Pre-configured firmware (for tdeck/cardputer/tpager) -->
+                    <!-- Pre-configured handheld firmware -->
                     <div id="firmwarePreset" style="display: none;">
                         <div class="firmware-ready" id="firmwareReadyBox">
                             <div class="firmware-ready__icon">
@@ -4951,9 +5048,9 @@
                         </div>
                         <div class="firmware-packages" id="firmwarePackagePicker" style="display: none;"></div>
                         <div class="firmware-versions" id="versionDropdown" style="display: none;"></div>
-                        <p class="flash-connect-tips">All three packages are fresh installs that reset internal storage. App-only updates require the exact existing board and partition layout; use the <a href="https://docs.ratspeak.org/hardware/flashing-firmware">backup and update guide</a>.</p>
+                        <p class="flash-connect-tips">These packages are fresh installs that reset internal storage. App-only updates require the exact existing board and partition layout; use the <a href="https://docs.ratspeak.org/hardware/flashing-firmware">backup and update guide</a>.</p>
                         <button type="button" class="nr-btn nr-btn-secondary" onclick="retryFirmware()">Reload firmware</button>
-                        <details class="flash-connect-tips">
+                        <details class="flash-connect-tips" id="legacyRecoveryDownloads">
                             <summary>Legacy recovery downloads</summary>
                             <p>Older firmware is separate from Ratspeak Handheld. Use only for deliberate recovery, with a backup and its original installation instructions. It is never selected automatically.</p>
                             <p><a href="https://github.com/ratspeak/rsDeck/releases" target="_blank" rel="noopener noreferrer">T-Deck legacy recovery</a> &middot; <a href="https://github.com/ratspeak/rsPager/releases" target="_blank" rel="noopener noreferrer">T-Pager legacy recovery</a> &middot; <a href="https://github.com/ratspeak/rsCardputer/releases" target="_blank" rel="noopener noreferrer">Cardputer legacy recovery</a></p>
@@ -5258,7 +5355,7 @@
 
 <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
 <script type="module">
-import { handheldBoard, handheldRelease, HANDHELD_REPOSITORY, verifyHandheldDownload, validateHandheldManifest } from './assets/js/handheld-release.js';
+import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITORY, verifyHandheldDownload, validateHandheldManifest } from './assets/js/handheld-release.js';
 (function() {
     'use strict';
 
@@ -5326,7 +5423,7 @@ import { handheldBoard, handheldRelease, HANDHELD_REPOSITORY, verifyHandheldDown
 
     // ── State ──────────────────────────────────────────
     var state = {
-        device: null,       // 'tdeck' | 'cardputer' | 'custom'
+        device: null,       // Handheld board ID or 'custom'
         port: null,         // Web Serial port (unopened — esptool manages open/close)
         connected: false,
         firmwareReady: false,
@@ -5374,45 +5471,23 @@ import { handheldBoard, handheldRelease, HANDHELD_REPOSITORY, verifyHandheldDown
     var DEVICES = {
         tdeck: {
             name: 'T-Deck Plus',
-            sub: 'ESP32-S3 \u00b7 rsDeck Firmware',
             accent: 'green',
-            firmware: 'rsdeck-full.zip',
-            firmwareSize: 'Loading from GitHub...',
-            apiDevice: 'rsdeck',
-            defaultPackage: 'full',
-            packages: [
-                { id: 'full', label: 'Full', desc: 'Launcher + both modes' },
-                { id: 'standalone', label: 'Standalone', desc: 'All-in-one messenger' },
-                { id: 'rnode', label: 'RNode', desc: 'Radio only' }
-            ]
+            firmwareSize: 'Loading from GitHub...'
         },
         cardputer: {
             name: 'Cardputer Adv',
-            sub: 'ESP32-S3 \u00b7 Ratspeak Firmware',
             accent: 'blue',
-            firmware: 'rscardputer-full.zip',
-            firmwareSize: 'Loading from GitHub...',
-            apiDevice: 'rscardputer',
-            defaultPackage: 'full',
-            packages: [
-                { id: 'full', label: 'Full', desc: 'Launcher + both modes' },
-                { id: 'standalone', label: 'Standalone', desc: 'All-in-one messenger' },
-                { id: 'rnode', label: 'RNode', desc: 'Radio only' }
-            ]
+            firmwareSize: 'Loading from GitHub...'
         },
         tpager: {
             name: 'T-Pager',
-            sub: 'ESP32-S3 \u00b7 rsPager Firmware',
             accent: 'green',
-            firmware: 'rspager-full.zip',
-            firmwareSize: 'Loading from GitHub...',
-            apiDevice: 'rspager',
-            defaultPackage: 'full',
-            packages: [
-                { id: 'full', label: 'Full', desc: 'Launcher + both modes' },
-                { id: 'standalone', label: 'Standalone', desc: 'All-in-one messenger' },
-                { id: 'rnode', label: 'RNode', desc: 'Radio only' }
-            ]
+            firmwareSize: 'Loading from GitHub...'
+        },
+        m9: {
+            name: 'ThinkNode M9',
+            accent: 'green',
+            firmwareSize: 'Loading from GitHub...'
         },
         custom: {
             name: 'Custom Device',
@@ -5424,8 +5499,21 @@ import { handheldBoard, handheldRelease, HANDHELD_REPOSITORY, verifyHandheldDown
         }
     };
 
-    ['tdeck', 'tpager', 'cardputer'].forEach(function(board) {
-        DEVICES[board].sub = 'ESP32-S3 \u00b7 Ratspeak Handheld';
+    var PACKAGE_DESCRIPTIONS = {
+        full: { label: 'Full', desc: 'Launcher + both modes' },
+        standalone: { label: 'Standalone', desc: 'All-in-one messenger' },
+        rnode: { label: 'RNode', desc: 'Radio only' }
+    };
+    ['tdeck', 'tpager', 'cardputer', 'm9'].forEach(function(board) {
+        var release = handheldCapabilities(board);
+        var device = DEVICES[board];
+        device.sub = 'ESP32-S3 \u00b7 Ratspeak Handheld';
+        device.apiDevice = board;
+        device.defaultPackage = release.defaultPackage;
+        device.firmware = release.prefix + '-' + release.defaultPackage + '.zip';
+        device.packages = release.packages.map(function(id) {
+            return { id: id, label: PACKAGE_DESCRIPTIONS[id].label, desc: PACKAGE_DESCRIPTIONS[id].desc };
+        });
     });
 
     // Default flash options for custom single-bin uploads
@@ -5533,6 +5621,10 @@ import { handheldBoard, handheldRelease, HANDHELD_REPOSITORY, verifyHandheldDown
         panel.classList.toggle('flash-panel--custom', deviceId === 'custom');
         document.getElementById('panelName').textContent = dev.name;
         document.getElementById('panelSub').textContent = dev.sub;
+        document.getElementById('deviceConnectTips').innerHTML = deviceId === 'm9'
+            ? '<li>Keep the M9 powered on and connect it with a USB data cable.</li><li>Select its USB serial port. If it is missing, check the cable and your WCH USB serial driver.</li>'
+            : '<li>If the device isn\'t being recognized, try holding <code>BOOT</code> while plugging in your device.</li>';
+        document.getElementById('legacyRecoveryDownloads').hidden = deviceId === 'm9';
 
         // Firmware section
         var presetEl = document.getElementById('firmwarePreset');
@@ -5638,7 +5730,7 @@ import { handheldBoard, handheldRelease, HANDHELD_REPOSITORY, verifyHandheldDown
         if (!picker) return;
         picker.innerHTML = '';
 
-        if (!dev.packages || dev.packages.length === 0) {
+        if (!dev.packages || dev.packages.length < 2) {
             picker.style.display = 'none';
             return;
         }
@@ -9032,7 +9124,7 @@ import { handheldBoard, handheldRelease, HANDHELD_REPOSITORY, verifyHandheldDown
                 logMessage('Chip detected: ' + chipName, 'log-green');
 
                 // 6. Validate chip for known devices
-                if (prepared.board || state.device === 'tdeck' || state.device === 'cardputer' || state.device === 'tpager') {
+                if (prepared.board || handheldBoard(state.device)) {
                     var chipLower = chipName.toLowerCase();
                     if (!chipLower.includes('esp32-s3') && !chipLower.includes('esp32s3')) {
                         throw new Error('Expected ESP32-S3 for ' + DEVICES[prepared.board || state.device].name + ', but detected ' + chipName + '. Please check your device.');
@@ -9155,7 +9247,9 @@ import { handheldBoard, handheldRelease, HANDHELD_REPOSITORY, verifyHandheldDown
             if (errorMsg.includes('Failed to execute \'open\'') || errorMsg.includes('NetworkError')) {
                 logMessage('Error: Could not open serial port. Is another program using it?', 'log-red');
             } else if (errorMsg.includes('Timeout') || errorMsg.includes('timeout')) {
-                logMessage('Error: Bootloader connection timed out. Try holding BOOT button while clicking Flash, then release.', 'log-red');
+                logMessage(state.device === 'm9'
+                    ? 'Error: Bootloader connection timed out. Keep the M9 powered on, reconnect its USB data cable, select the USB serial port and try again.'
+                    : 'Error: Bootloader connection timed out. Try holding BOOT button while clicking Flash, then release.', 'log-red');
             } else if (errorMsg.includes('ESP32-S3') || errorMsg.includes('Expected')) {
                 logMessage('Error: ' + errorMsg, 'log-red');
             } else if (errorMsg.includes('disconnect') || errorMsg.includes('device has been lost')) {
@@ -9393,7 +9487,7 @@ import { handheldRelease } from './assets/js/handheld-release.js';
 
     var tiles = picker.querySelectorAll('.dl-picker__tile');
     var cases = spotlight.querySelectorAll('.dl-spotlight__case');
-    var validPlatforms = ['desktop', 'mobile', 'tdeck', 'cardputer', 'tpager'];
+    var validPlatforms = ['desktop', 'mobile', 'tdeck', 'cardputer', 'tpager', 'm9'];
 
     // ── Feature data ────────────────────────────────
     // Each feature: { l: label, d: description }
@@ -9413,7 +9507,8 @@ import { handheldRelease } from './assets/js/handheld-release.js';
         mobile:    'Mobile',
         tdeck:     'T-Deck Plus',
         cardputer: 'Cardputer Adv',
-        tpager:    'T-Pager'
+        tpager:    'T-Pager',
+        m9:        'ThinkNode M9'
     };
     var PLATFORM_FEATURES = {
         desktop: [
@@ -9437,12 +9532,20 @@ import { handheldRelease } from './assets/js/handheld-release.js';
             { l: 'LittleFS + SD storage',    d: 'Atomic .tmp/.bak journaling.' }
         ],
         cardputer: [
-            { l: 'Beta / work in progress', d: 'Check release availability before installing.' },
-            { l: 'Cap LoRa-1262 required', d: 'Use the module and antenna for your hardware band.' },
-            { l: 'Prepared unified support', d: 'Full launcher, Standalone and RNode packages.' },
-            { l: 'Keyboard navigation', d: 'Compact display with Fn navigation keys.' },
-            { l: '8 MB internal flash', d: 'Choose a package made specifically for Cardputer.' },
-            { l: 'Legacy recovery is separate', d: 'Older rsCardputer releases are labelled in the flasher.' }
+            { l: 'Standalone messaging', d: 'Send and read LXMF messages on the device.' },
+            { l: 'LoRa + WiFi', d: 'LoRa requires the Cap LoRa-1262 module and an antenna.' },
+            { l: 'Two modes', d: 'All-in-one messenger or radio only.' },
+            { l: 'Keyboard navigation', d: 'Navigate and type on the Cardputer.' },
+            { l: 'Local storage', d: 'Messages stay on the device.' },
+            { l: 'Reticulum + LXMF', d: 'Exchange messages with compatible clients.' }
+        ],
+        m9: [
+            { l: 'Standalone messaging', d: 'Send and read LXMF messages on the device.' },
+            { l: 'LoRa + WiFi', d: 'Reach peers over radio or a network connection.' },
+            { l: 'Full keyboard', d: 'Type messages with dedicated navigation and OK keys.' },
+            { l: 'Built-in battery', d: 'Carry your conversations with you.' },
+            { l: 'Local storage', d: 'Messages stay on the device.' },
+            { l: 'Reticulum + LXMF', d: 'Exchange messages with compatible clients.' }
         ],
         tpager: [
             { l: 'Dual-mode',                d: 'Standalone messenger or RNode radio.' },
@@ -9949,6 +10052,7 @@ import { handheldRelease } from './assets/js/handheld-release.js';
             var on = t.dataset.platform === id;
             t.classList.toggle('is-selected', on);
             t.setAttribute('aria-selected', on ? 'true' : 'false');
+            t.tabIndex = on ? 0 : -1;
         });
         cases.forEach(function (c) {
             var on = c.dataset.platform === id;
@@ -9972,17 +10076,19 @@ import { handheldRelease } from './assets/js/handheld-release.js';
         setPlatform(tile.dataset.platform);
     });
 
-    // Keyboard navigation: ArrowLeft/Right between tiles
+    // One tab stop; arrows follow the responsive grid, Home/End its bounds.
     picker.addEventListener('keydown', function (e) {
-        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].indexOf(e.key) === -1) return;
         var current = document.activeElement;
         if (!current || !current.classList || !current.classList.contains('dl-picker__tile')) return;
         e.preventDefault();
         var arr = Array.prototype.slice.call(tiles);
         var idx = arr.indexOf(current);
-        var next = e.key === 'ArrowRight' ? (idx + 1) % arr.length : (idx - 1 + arr.length) % arr.length;
-        arr[next].focus();
+        var columns = getComputedStyle(picker).gridTemplateColumns.split(' ').length;
+        var delta = e.key === 'ArrowDown' ? columns : e.key === 'ArrowUp' ? -columns : e.key === 'ArrowRight' ? 1 : -1;
+        var next = e.key === 'Home' ? 0 : e.key === 'End' ? arr.length - 1 : (idx + delta + arr.length) % arr.length;
         setPlatform(arr[next].dataset.platform);
+        arr[next].focus();
     });
 
     // Wire "Flash in browser" CTAs to the existing selectDevice() flow
@@ -9995,7 +10101,7 @@ import { handheldRelease } from './assets/js/handheld-release.js';
                 setTimeout(function () {
                     var fi = document.getElementById('flashInterface');
                     if (fi && fi.classList.contains('active')) {
-                        fi.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        fi.scrollIntoView({ behavior: mediaReduceMotion ? 'auto' : 'smooth', block: 'start' });
                     }
                 }, 480);
             } else {
@@ -10079,7 +10185,7 @@ import { handheldRelease } from './assets/js/handheld-release.js';
         releaseTag.textContent = 'Ratspeak Handheld';
         panel.querySelectorAll('a[href*="github.com/ratspeak/"], a[href^="/api/firmware"]').forEach(function(link) {
             if (link.hasAttribute('data-handheld-download') || link.href.indexOf('/download/') !== -1 || link.href.indexOf('/api/firmware') !== -1) {
-                link.href = '/api/firmware?source=handheld&device=' + board + '&package=full&version=' + encodeURIComponent(release.tag);
+                link.href = '/api/firmware?source=handheld&device=' + board + '&package=' + release.defaultPackage + '&version=' + encodeURIComponent(release.tag);
                 var downloadLabel = link.querySelector('[data-handheld-download-label]');
                 if (downloadLabel) downloadLabel.textContent = 'Download ZIP';
             } else if (link.classList.contains('dl-release-link')) {
@@ -10088,7 +10194,7 @@ import { handheldRelease } from './assets/js/handheld-release.js';
                 link.href = 'https://github.com/' + release.repo;
             }
         });
-        fetch('/api/firmware?source=handheld&device=' + board + '&info=true&package=full&version=' + encodeURIComponent(release.tag))
+        fetch('/api/firmware?source=handheld&device=' + board + '&info=true&package=' + release.defaultPackage + '&version=' + encodeURIComponent(release.tag))
             .then(function(response) {
                 if (!response.ok) throw new Error('Release unavailable');
                 return response.json();
@@ -10101,7 +10207,7 @@ import { handheldRelease } from './assets/js/handheld-release.js';
     }
 
     resolveRatspeakReleaseAssets();
-    [['tdeck', 'rsdeckReleaseTag'], ['tpager', 'rspagerReleaseTag'], ['cardputer', 'rscardputerReleaseTag']].forEach(function(entry) {
+    [['tdeck', 'rsdeckReleaseTag'], ['tpager', 'rspagerReleaseTag'], ['cardputer', 'rscardputerReleaseTag'], ['m9', 'm9ReleaseTag']].forEach(function(entry) {
         resolveHandheldCard(entry[0], document.getElementById(entry[1]));
     });
 
