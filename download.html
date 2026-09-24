@@ -5092,8 +5092,7 @@
                         </div>
                         <div class="firmware-packages" id="firmwarePackagePicker" style="display: none;"></div>
                         <div class="firmware-versions" id="versionDropdown" style="display: none;"></div>
-                        <p class="flash-connect-tips">These packages are fresh installs that reset internal storage. App-only updates require the exact existing board and partition layout; use the <a href="https://docs.ratspeak.org/hardware/flashing-firmware">backup and update guide</a>.</p>
-                        <button type="button" class="nr-btn nr-btn-secondary" onclick="retryFirmware()">Reload firmware</button>
+                        <p class="flash-connect-tips">These packages are fresh installs that reset internal storage. App-only updates require the exact existing board and partition layout; see the <a href="https://docs.ratspeak.org/docs/hardware/flashing-firmware#before-flashing" target="_blank" rel="noopener noreferrer">flashing guide</a>.</p>
                         <details class="flash-connect-tips" id="legacyRecoveryDownloads">
                             <summary>Legacy recovery downloads</summary>
                             <p>Older firmware is separate from Ratspeak Handheld. Use only for deliberate recovery, with a backup and its original installation instructions. It is never selected automatically.</p>
@@ -5840,11 +5839,6 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
         if (!response.ok) throw new Error(info.error || 'Firmware is unavailable. Try again later.');
         return info;
     }
-
-    window.retryFirmware = function() {
-        if (state.flashing || !handheldBoard(state.device)) return;
-        fetchFirmwareFromRelease(DEVICES[state.device]);
-    };
 
     function fetchFirmwareFromRelease(dev) {
         var requestSerial = ++state.firmwareRequestSerial;
@@ -8270,7 +8264,7 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
             } else if (state.firmwareError) {
                 noteEl.textContent = state.device === 'custom'
                     ? 'Firmware could not be loaded. Select it again to retry.'
-                    : 'Firmware could not be loaded. Use Reload firmware to retry.';
+                    : 'Firmware could not be loaded. Refresh the page to retry.';
             } else if (ready) {
                 noteEl.textContent = 'Ready to write firmware. Keep this tab open until flashing and reset finish.';
             } else if (!state.connected && !state.firmwareReady) {
