@@ -1,5 +1,5 @@
 // Pin automatic downloads to a reviewed public release. Null disables them.
-export const HANDHELD_RELEASE_TAG = 'v2.2.3';
+export const HANDHELD_RELEASE_TAG = 'v2.2.4';
 
 export const HANDHELD_REPOSITORY = 'ratspeak/ratspeak-handheld';
 const ALL_PACKAGES = ['full', 'standalone', 'rnode'];
