@@ -3,7 +3,8 @@ import { sha256Hex } from './handheld-release.js';
 const BOARDS = Object.freeze({
   'heltec-v3': { label: 'Heltec V3', flashSize: '8MB', capacity: 8 * 1024 * 1024 },
   'heltec-v4': { label: 'Heltec V4 · R2', flashSize: '16MB', capacity: 16 * 1024 * 1024 },
-  'heltec-v4-r8': { label: 'Heltec V4 · R8', flashSize: '16MB', capacity: 16 * 1024 * 1024 }
+  'heltec-v4-r8': { label: 'Heltec V4 · R8 (OLED)', flashSize: '16MB', capacity: 16 * 1024 * 1024 },
+  'heltec-v4-r8-tft': { label: 'Heltec V4 R8 · Expansion Kit V2', flashSize: '16MB', capacity: 16 * 1024 * 1024 }
 });
 const owns = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
 
@@ -36,7 +37,7 @@ export async function betaRequest(action, body, options = {}) {
 }
 
 export function validateBetaCatalog(catalog) {
-  if (!catalog || !Array.isArray(catalog.boards) || catalog.boards.length > 3) {
+  if (!catalog || !Array.isArray(catalog.boards) || catalog.boards.length > Object.keys(BOARDS).length) {
     throw new Error('The beta board list is unavailable. Try again.');
   }
   const seen = new Set();

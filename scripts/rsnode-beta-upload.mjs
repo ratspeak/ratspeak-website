@@ -28,11 +28,11 @@ export async function uploadBetaPackages(catalogArg, outputArg, {
   if (!token && !storeId) throw new Error('Set the dedicated RSNODE_BETA_BLOB_STORE_ID for project OIDC or RSNODE_BETA_BLOB_TOKEN.');
   const auth = storeId ? { storeId } : { token };
   const input = JSON.parse(await readFile(catalogPath, 'utf8'));
-  const requiredBoards = new Set(['heltec-v3', 'heltec-v4', 'heltec-v4-r8']);
-  if (!Array.isArray(input.boards) || input.boards.length !== 3) throw new Error('Expected all three beta boards.');
+  const availableBoards = new Set(['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft']);
+  if (!Array.isArray(input.boards) || input.boards.length < 1 || input.boards.length > availableBoards.size) throw new Error('Expected one to four beta board packages.');
   const prepared = [];
   for (const entry of input.boards) {
-    if (!requiredBoards.delete(entry.id) || !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,95}$/.test(entry.version || '') ||
+    if (!availableBoards.delete(entry.id) || !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,95}$/.test(entry.version || '') ||
         !/^[a-zA-Z0-9][a-zA-Z0-9._-]*\.zip$/.test(entry.fileName || '') ||
         !/^[a-f0-9]{64}$/.test(entry.sha256 || '') || !Number.isSafeInteger(entry.size) ||
         entry.size <= 0 || entry.size > 4 * 1024 * 1024) throw new Error('Invalid package catalog.');
