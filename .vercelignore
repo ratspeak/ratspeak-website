@@ -1,0 +1,8 @@
+.git
+.tmp
+.env*
+tests
+scripts/*.mjs
+scripts/map-server
+scripts/poll-dev
+seo-preview.html
