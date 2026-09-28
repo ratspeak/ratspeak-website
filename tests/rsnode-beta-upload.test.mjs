@@ -59,6 +59,21 @@ test('preflights every local hash before any remote write', async t => {
   assert.equal(uploads, 0);
 });
 
+test('a single TFT candidate can be uploaded without replacing the OLED packages', async t => {
+  const f = await fixture(t);
+  const board = { ...f.boards[0], id: 'heltec-v4-r8-tft', fileName: 'heltec-v4-r8-tft.zip' };
+  await writeFile(join(f.dir, board.fileName), f.bytes);
+  await writeFile(f.catalogPath, JSON.stringify({ boards: [board] }));
+  let uploads = 0;
+  const result = await uploadBetaPackages(f.catalogPath, f.output, {
+    token: 'fixture', report() {},
+    upload: async () => { uploads++; return { url: 'https://fixture.private.blob.vercel-storage.com/tft.zip' }; },
+    fetchAsset: async (_url, options) => options.headers ? new Response(f.bytes) : new Response(null, { status: 403 })
+  });
+  assert.equal(uploads, 1);
+  assert.equal(result.boards[0].id, 'heltec-v4-r8-tft');
+});
+
 test('rejects public Blob storage without sending its token to that URL', async t => {
   const f = await fixture(t);
   let fetches = 0;

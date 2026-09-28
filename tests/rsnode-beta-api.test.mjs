@@ -502,8 +502,8 @@ test('missing, weak, or incomplete configuration fails closed and hides configur
   }
 });
 
-test('catalog accepts all three beta boards and formatted JSON without leaking Blob URLs', async () => {
-  const boards = ['heltec-v3', 'heltec-v4', 'heltec-v4-r8'].map(id => ({ ...BOARD, id }));
+test('catalog accepts all four beta boards and formatted JSON without leaking Blob URLs', async () => {
+  const boards = ['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft'].map(id => ({ ...BOARD, id }));
   const f = fixture({ RSNODE_BETA_CATALOG: JSON.stringify({ boards }, null, 2) });
   const response = await f.request('catalog', { cookie: await f.ready() });
   assert.equal(response.status, 200);
@@ -511,7 +511,7 @@ test('catalog accepts all three beta boards and formatted JSON without leaking B
   assert.equal(serialized.includes('blob.vercel-storage.com'), false);
   assert.equal(serialized.includes('url'), false);
   const catalog = JSON.parse(serialized);
-  assert.deepEqual(catalog.boards.map(b => b.flashSize), ['8MB', '16MB', '16MB']);
+  assert.deepEqual(catalog.boards.map(b => b.flashSize), ['8MB', '16MB', '16MB', '16MB']);
 });
 
 test('invalid assets, unknown boards, duplicate targets, and unsafe metadata disable the catalog', async () => {

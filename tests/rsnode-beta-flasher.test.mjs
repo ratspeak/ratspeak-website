@@ -54,8 +54,8 @@ async function fixture(id = 'heltec-v4') {
   return { bytes, manifest, zip, metadata };
 }
 
-test('beta board catalog permits only the three reviewed Heltec targets', async () => {
-  for (const id of ['heltec-v3', 'heltec-v4', 'heltec-v4-r8']) {
+test('beta board catalog permits only the four reviewed Heltec targets', async () => {
+  for (const id of ['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft']) {
     const f = await fixture(id);
     assert.deepEqual(validateBetaCatalog({ boards: [f.metadata] }), [f.metadata]);
   }
@@ -78,8 +78,15 @@ test('download verification rejects changed bytes and truncated packages', async
   await assert.rejects(verifyBetaDownload(new Uint8Array([1, 2, 4]).buffer, metadata), /verification/);
 });
 
+test('variant confirmation distinguishes the kit from either OLED board', () => {
+  const describe = vm.runInNewContext('(' + extractFunction('rsnodeVariantDescription') + ')');
+  assert.match(describe('heltec-v4-r8-tft'), /Expansion Kit V2.*touchscreen/);
+  assert.match(describe('heltec-v4-r8'), /R8.*OLED/);
+  assert.match(describe('heltec-v4'), /R2/);
+});
+
 test('all reviewed images validate as offset-zero factory installs with their actual flash settings', async () => {
-  for (const id of ['heltec-v3', 'heltec-v4', 'heltec-v4-r8']) {
+  for (const id of ['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft']) {
     const f = await fixture(id);
     const result = await validateBetaManifest(f.zip, f.manifest, f.metadata);
     assert.equal(result.product, 'rsnode');
