@@ -1526,10 +1526,10 @@
             cursor: pointer;
         }
 
-        /* ── Custom source tabs (Upload / RNode) ─────── */
+        /* ── Custom source tabs ─────────────────────── */
         .custom-source-tabs {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             width: 100%;
             background: var(--bg-secondary);
             border: 1px solid var(--border-subtle);
@@ -1565,6 +1565,31 @@
         }
         .custom-source-tab svg { flex-shrink: 0; }
         .custom-source-pane { animation: fadeSlideUp 0.28s cubic-bezier(0.25, 0.1, 0.25, 1); }
+
+        .custom-source-tab:focus-visible,
+        .rsnode-beta input:focus-visible,
+        .rsnode-beta button:focus-visible,
+        .rsnode-beta select:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+        .rsnode-beta [hidden], .rsnode-beta[hidden] { display: none !important; }
+        .rsnode-beta__login { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+        .rsnode-beta__login label { grid-column: 1 / -1; font-size: 13px; color: var(--text-secondary); }
+        .rsnode-beta__password { min-width: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); font: inherit; }
+        .rsnode-beta__button { padding: 9px 15px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-tertiary); color: var(--text-primary); font: inherit; font-size: 13px; cursor: pointer; }
+        .rsnode-beta__button:disabled { opacity: .55; cursor: default; }
+        .rsnode-beta__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+        .rsnode-beta__head strong { font-size: 14px; font-weight: 500; }
+        .rsnode-beta__lock { border: 0; padding: 4px 0; background: none; color: var(--text-secondary); font: inherit; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+        .rsnode-beta__note { margin-top: 10px; color: var(--text-secondary); font-size: 12px; line-height: 1.5; }
+        .rsnode-beta__status { margin-top: 10px; font-size: 12px; color: var(--text-secondary); overflow-wrap: anywhere; }
+        .rsnode-beta__status:empty { display: none; }
+        .rsnode-beta__status.is-error { color: var(--red); }
+        .rsnode-beta__check { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.5; cursor: pointer; }
+        .rsnode-beta__check[hidden] { display: none; }
+        .rsnode-beta__check input { flex: 0 0 auto; width: 16px; height: 16px; margin-top: 2px; accent-color: var(--accent); }
+        .rsnode-beta__checks { display: grid; gap: 15px; margin: 18px 0; }
+        .rsnode-beta__variant { margin-top: 12px; }
+        .rsnode-beta__links { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 14px; font-size: 12px; }
+        .rsnode-beta__links a { color: var(--text-secondary); text-underline-offset: 3px; }
 
         /* ── RNode firmware picker ───────────────────── */
         /* Inset card on the secondary background so it doesn't read as
@@ -5100,21 +5125,25 @@
                         </details>
                     </div>
 
-                    <!-- Custom firmware: source picker + (upload | RNode) -->
+                    <!-- Custom firmware sources -->
                     <div id="firmwareCustom" style="display: none;">
-                        <div class="custom-source-tabs" role="tablist">
-                            <button type="button" class="custom-source-tab is-active" data-source="upload" role="tab" aria-selected="true">
+                        <div class="custom-source-tabs" role="tablist" aria-label="Firmware source">
+                            <button type="button" class="custom-source-tab is-active" id="sourceTabUpload" data-source="upload" role="tab" aria-controls="customSourceUpload" aria-selected="true" tabindex="0">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                                 Upload
                             </button>
-                            <button type="button" class="custom-source-tab" data-source="rnode" role="tab" aria-selected="false">
+                            <button type="button" class="custom-source-tab" id="sourceTabRsnode" data-source="rsnode" role="tab" aria-controls="customSourceRsnode" aria-selected="false" tabindex="-1">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="2"/><path d="M7 7a7 7 0 000 10M17 7a7 7 0 010 10M4 4a11 11 0 000 16M20 4a11 11 0 010 16"/></svg>
+                                rsNode
+                            </button>
+                            <button type="button" class="custom-source-tab" id="sourceTabRnode" data-source="rnode" role="tab" aria-controls="customSourceRnode" aria-selected="false" tabindex="-1">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
                                 RNode
                             </button>
                         </div>
 
                         <!-- Mode A: Upload your own -->
-                        <div class="custom-source-pane" id="customSourceUpload">
+                        <div class="custom-source-pane" id="customSourceUpload" role="tabpanel" aria-labelledby="sourceTabUpload">
                             <div class="drop-zone" id="dropZone">
                                 <div class="drop-zone__prompt">
                                     <div class="drop-zone__icon">
@@ -5132,8 +5161,35 @@
                             </div>
                         </div>
 
+                        <div class="custom-source-pane rsnode-beta" id="customSourceRsnode" role="tabpanel" aria-labelledby="sourceTabRsnode" hidden>
+                            <form class="rsnode-beta__login" id="rsnodeLoginForm">
+                                <label for="rsnodePassword">Private beta password</label>
+                                <input class="rsnode-beta__password" id="rsnodePassword" type="password" autocomplete="current-password" required maxlength="256" aria-describedby="rsnodeStatus">
+                                <button class="rsnode-beta__button" id="rsnodeUnlock" type="submit">Unlock</button>
+                            </form>
+                            <div id="rsnodeTermsPending" hidden>
+                                <button class="rsnode-beta__button" id="rsnodeReviewTerms" type="button">Review beta terms</button>
+                            </div>
+                            <div id="rsnodeBoardPicker" hidden>
+                                <div class="rsnode-beta__head"><strong>rsNode private beta</strong><button class="rsnode-beta__lock" id="rsnodeLock" type="button">Lock beta</button></div>
+                                <label class="rnode-source__field" for="rsnodeBoardSelect">
+                                    <span class="rnode-source__label">Board</span>
+                                    <select class="rnode-variant-select" id="rsnodeBoardSelect"><option value="">Choose your board</option></select>
+                                </label>
+                                <div id="rsnodeVariantCheck" hidden>
+                                    <p class="rsnode-beta__note">Check the chip marking or your order details: ESP32-S3R2 has 2 MB PSRAM; ESP32-S3R8 has 8 MB. Both V4s have 16 MB flash and need different firmware.</p>
+                                    <label class="rsnode-beta__check rsnode-beta__variant"><input type="checkbox" id="rsnodeVariantConfirmed"><span id="rsnodeVariantLabel">I checked my V4 variant.</span></label>
+                                </div>
+                                <p class="rsnode-beta__note">USB installation resets identity, settings and saved Wi-Fi. After setup, use signed OTA updates to keep them.</p>
+                                <div class="rsnode-beta__links"><a id="rsnodePackageDownload" hidden>Download package and source</a></div>
+                            </div>
+                            <p class="rsnode-beta__status" id="rsnodeStatus" role="status" aria-live="polite"></p>
+                            <button class="rsnode-beta__button" id="rsnodeLockRetry" type="button" hidden>Retry lock</button>
+                            <button class="rsnode-beta__button" id="rsnodeCatalogRetry" type="button" hidden>Reload boards</button>
+                        </div>
+
                         <!-- Mode B: RNode firmware (markqvist) -->
-                        <div class="custom-source-pane" id="customSourceRnode" style="display: none;">
+                        <div class="custom-source-pane" id="customSourceRnode" role="tabpanel" aria-labelledby="sourceTabRnode" style="display: none;">
                             <div class="rnode-source">
                                 <div class="rnode-source__head">
                                     <div>
@@ -5350,12 +5406,30 @@
 
 </div>
 
+<dialog class="install-dialog rsnode-beta" id="rsnodeTermsDialog" aria-labelledby="rsnodeTermsTitle" aria-describedby="rsnodeTermsIntro">
+    <h2 id="rsnodeTermsTitle">Before joining the beta</h2>
+    <p id="rsnodeTermsIntro">For this private beta, please confirm:</p>
+    <form id="rsnodeTermsForm">
+        <div class="rsnode-beta__checks">
+            <label class="rsnode-beta__check"><input type="checkbox" name="france" required><span>I am not a citizen or resident of France.</span></label>
+            <label class="rsnode-beta__check"><input type="checkbox" name="sanctions" required><span>I am outside countries and regions where U.S. sanctions prohibit this distribution, and I am not a restricted person or acting for one.</span></label>
+            <label class="rsnode-beta__check"><input type="checkbox" name="export" required><span>I will follow applicable encryption export and local radio rules.</span></label>
+            <label class="rsnode-beta__check"><input type="checkbox" name="privateBeta" required><span>I will keep the access password private and use this prerelease firmware for testing. I understand flashing can erase my device.</span></label>
+        </div>
+        <p class="rsnode-beta__note">Please keep beta builds within the tester group. Any rights granted by included open-source licenses still apply.</p>
+        <div class="rsnode-beta__links"><a href="https://ofac.treasury.gov/sanctions-programs-and-country-information" target="_blank" rel="noopener noreferrer">U.S. sanctions</a><a href="terms.html" target="_blank" rel="noopener">Terms</a><a href="privacy.html" target="_blank" rel="noopener">Privacy</a></div>
+        <p class="rsnode-beta__status" id="rsnodeTermsStatus" role="status"></p>
+        <div class="install-dialog__actions"><button class="install-dialog__cancel" id="rsnodeTermsCancel" type="button">Cancel</button><button class="install-dialog__continue" id="rsnodeTermsContinue" type="submit" disabled>Continue</button></div>
+    </form>
+</dialog>
+
 <dialog class="install-dialog" id="installDialog" aria-labelledby="installDialogTitle" aria-describedby="installDialogIntro installDialogRisk installDialogBackup">
     <div class="install-dialog__device" id="installDialogDevice"></div>
     <h2 id="installDialogTitle">Before you flash</h2>
     <p id="installDialogIntro"></p>
     <p id="installDialogRisk">This is a fresh install. Continuing resets the device's internal storage, including its identity, messages and settings.</p>
     <p class="install-dialog__backup" id="installDialogBackup">Back up your identity and anything else you want to keep somewhere other than this device.</p>
+    <label class="rsnode-beta__check rsnode-beta__variant" id="installDialogVariant" hidden><input type="checkbox" id="installDialogVariantConfirmed"><span id="installDialogVariantLabel"></span></label>
     <a class="install-dialog__guide" href="https://docs.ratspeak.org/docs/hardware/flashing-firmware#before-flashing" target="_blank" rel="noopener noreferrer">Flashing guide</a>
     <div class="install-dialog__actions">
         <button class="install-dialog__cancel" id="installDialogCancel" type="button" autofocus>Cancel</button>
@@ -5398,6 +5472,7 @@
 
 <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
 <script type="module">
+import { betaRequest, rsnodeBoard, validateBetaCatalog, verifyBetaDownload, validateBetaManifest } from './assets/js/rsnode-beta.js';
 import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITORY, verifyHandheldDownload, validateHandheldManifest } from './assets/js/handheld-release.js';
 (function() {
     'use strict';
@@ -5467,6 +5542,9 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
     // ── State ──────────────────────────────────────────
     var state = {
         device: null,       // Handheld board ID or 'custom'
+        customSource: 'upload',
+        rsnodeAsset: null,
+        rsnodeMetadata: null,
         port: null,         // Web Serial port (unopened — esptool manages open/close)
         connected: false,
         firmwareReady: false,
@@ -5504,7 +5582,7 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
 
     var FLASH_ICON_HTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>';
     function flashButtonLabel() {
-        return state.device === 'custom' ? 'Flash firmware' : 'Flash Ratspeak';
+        return isRsnodeSelected() ? 'Flash rsNode' : state.device === 'custom' ? 'Flash firmware' : 'Flash Ratspeak';
     }
     function setFlashButtonIdleContent() {
         var btn = document.getElementById('flashBtn');
@@ -5620,7 +5698,7 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
 
     window.selectDevice = function(deviceId, opts) {
         opts = opts || {};
-        if (state.flashing) return;
+        if (state.flashing || betaAuthBusy) return;
         if (!('serial' in navigator)) {
             showSerialWarning();
             return;
@@ -5635,6 +5713,9 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
             } catch (e) { /* ignore — older browsers */ }
         }
 
+        state.firmwareRequestSerial++;
+        clearRsnodeFirmware();
+        state.customSource = 'upload';
         state.device = deviceId;
         state.connected = false;
         state.firmwareReady = false;
@@ -5689,6 +5770,7 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
             customEl.style.display = 'block';
             state.firmwareReady = false;
             buildPackagePicker(dev);
+            setCustomSource('upload');
         } else {
             presetEl.style.display = 'block';
             customEl.style.display = 'none';
@@ -6082,6 +6164,7 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
             state.port = null;
         }
         state.connected = false;
+        clearRsnodeFirmware();
         state.device = null;
         state.firmwareRequestSerial++;
         state.firmwareReady = false;
@@ -6260,6 +6343,8 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
     }
 
     function handleFile(file) {
+        if (state.flashing || state.customSource !== 'upload' || state.device !== 'custom') return;
+        state.firmwareRequestSerial++;
         var ext = file.name.split('.').pop().toLowerCase();
         if (ext !== 'bin' && ext !== 'zip') {
             alert('Please select a .bin or .zip firmware file.');
@@ -6290,51 +6375,354 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
             .replace(/"/g, '&quot;');
     }
 
-    // ── Custom source tabs (Upload | RNode) ───────────
+    // ── Custom source tabs ────────────────────────────
     var sourceTabs = document.querySelectorAll('.custom-source-tab');
     var paneUpload = document.getElementById('customSourceUpload');
-    var paneRnode  = document.getElementById('customSourceRnode');
+    var paneRnode = document.getElementById('customSourceRnode');
+    var paneRsnode = document.getElementById('customSourceRsnode');
     var rnodeLoaded = false;
 
+    function isRsnodeSelected() {
+        return state.device === 'custom' && state.customSource === 'rsnode';
+    }
+
+    function customRequestIsCurrent(serial, source) {
+        return serial === state.firmwareRequestSerial && state.device === 'custom' && state.customSource === source;
+    }
+
+    function clearRsnodeFirmware() {
+        state.rsnodeAsset = null;
+        state.rsnodeMetadata = null;
+        var packageLink = document.getElementById('rsnodePackageDownload');
+        if (packageLink) { packageLink.hidden = true; packageLink.removeAttribute('href'); }
+        if (isRsnodeSelected()) {
+            state.firmwareReady = false;
+            state.firmwareAppBytes = null;
+            state.firmwareBytes = null;
+        }
+    }
+
     function setCustomSource(source) {
+        if (state.flashing || betaAuthBusy || !['upload', 'rsnode', 'rnode'].includes(source)) return;
+        state.firmwareRequestSerial++;
+        clearRsnodeFirmware();
+        state.customSource = source;
         state.firmwareError = null;
-        sourceTabs.forEach(function (t) {
+        state.firmwareReady = false;
+        state.firmwareZip = null;
+        state.firmwareMetadata = null;
+        state.firmwareAppBytes = null;
+        state.flashComplete = false;
+        state.rnodeAsset = null;
+        state.rnodeAssetName = null;
+        state.rnodeAssetLabel = null;
+        state.rnodeAssetSha256 = null;
+        state.rnodeFlashStrategy = null;
+        state.rnodePlatform = null;
+        state.rnodeBand = null;
+        state.rnodeProvision = false;
+        state.rnodeSetupIssue = null;
+        state.rnodeSetupIssueKind = null;
+        state.rnodeHostControlledMode = false;
+        if (provToggle) provToggle.checked = false;
+        sourceTabs.forEach(function(t) {
             var on = t.dataset.source === source;
             t.classList.toggle('is-active', on);
-            t.setAttribute('aria-selected', on ? 'true' : 'false');
+            t.setAttribute('aria-selected', String(on));
+            t.tabIndex = on ? 0 : -1;
         });
+        paneUpload.style.display = source === 'upload' ? '' : 'none';
+        paneRnode.style.display = source === 'rnode' ? '' : 'none';
+        paneRsnode.hidden = source !== 'rsnode';
+        populateRnodeBandSelect(null);
         if (source === 'upload') {
-            paneUpload.style.display = '';
-            paneRnode.style.display = 'none';
-            // Reset firmware state when switching back
-            state.rnodeAsset = null;
-            state.rnodeAssetName = null;
-            state.rnodeAssetLabel = null;
-            state.rnodeAssetSha256 = null;
-            state.rnodeFlashStrategy = null;
-            state.rnodePlatform = null;
-            state.rnodeBand = null;
-            state.firmwareAppBytes = null;
             state.firmwareReady = !!state.customFile;
-            state.rnodeHostControlledMode = false;
-            populateRnodeBandSelect(null);
         } else {
-            paneUpload.style.display = 'none';
-            paneRnode.style.display = '';
-            // Clear upload state when switching to RNode
             state.customFile = null;
-            state.firmwareAppBytes = null;
-            state.firmwareReady = !!state.rnodeAsset && !!state.rnodeAssetSha256;
-            state.rnodeHostControlledMode = false;
-            if (!state.rnodeAssetName) populateRnodeBandSelect(null);
-            if (!rnodeLoaded) loadRnodeVariants();
+            if (source === 'rnode') {
+                if (rnodeVariantSelect) rnodeVariantSelect.value = '';
+                loadRnodeVariants(state.rnodeVersion);
+            } else {
+                refreshBetaSession(true, true);
+            }
         }
+        if (source !== 'rsnode' && rsnodeTermsDialog.open) rsnodeTermsDialog.close();
+        document.getElementById('flashBtn').style.display = '';
+        document.getElementById('flashResult').classList.remove('active');
+        document.getElementById('flashProgress').classList.remove('active');
+        setFlashButtonIdleContent();
         updateProvisionVisibility();
         updateFlashBtn();
     }
-    sourceTabs.forEach(function (t) {
-        t.addEventListener('click', function () { setCustomSource(t.dataset.source); });
+    sourceTabs.forEach(function(tab, index) {
+        tab.addEventListener('click', function() { setCustomSource(tab.dataset.source); });
+        tab.addEventListener('keydown', function(event) {
+            if (state.flashing || betaAuthBusy) return;
+            var next;
+            if (event.key === 'ArrowRight') next = (index + 1) % sourceTabs.length;
+            else if (event.key === 'ArrowLeft') next = (index + sourceTabs.length - 1) % sourceTabs.length;
+            else if (event.key === 'Home') next = 0;
+            else if (event.key === 'End') next = sourceTabs.length - 1;
+            else return;
+            event.preventDefault();
+            sourceTabs[next].focus();
+            setCustomSource(sourceTabs[next].dataset.source);
+        });
     });
+
+    // The server owns both password and eligibility checks. No password or grant
+    // is stored in JavaScript storage; an HttpOnly cookie carries the session.
+    var betaAuthBusy = false;
+    var betaStage = 'locked';
+    var betaTermsVersion = null;
+    var betaSessionRequestSerial = 0;
+    var betaBoards = [];
+    var rsnodeLoginForm = document.getElementById('rsnodeLoginForm');
+    var rsnodePassword = document.getElementById('rsnodePassword');
+    var rsnodeUnlock = document.getElementById('rsnodeUnlock');
+    var rsnodeStatus = document.getElementById('rsnodeStatus');
+    var rsnodeBoardPicker = document.getElementById('rsnodeBoardPicker');
+    var rsnodeBoardSelect = document.getElementById('rsnodeBoardSelect');
+    var rsnodeVariantConfirmed = document.getElementById('rsnodeVariantConfirmed');
+    var rsnodeTermsPending = document.getElementById('rsnodeTermsPending');
+    var rsnodeTermsDialog = document.getElementById('rsnodeTermsDialog');
+    var rsnodeTermsForm = document.getElementById('rsnodeTermsForm');
+    var rsnodeTermsContinue = document.getElementById('rsnodeTermsContinue');
+    var rsnodeTermsStatus = document.getElementById('rsnodeTermsStatus');
+
+    function setBetaAuthBusy(busy) {
+        betaAuthBusy = busy;
+        rsnodeUnlock.disabled = busy;
+        rsnodeTermsContinue.disabled = busy || !rsnodeTermsForm.checkValidity();
+        document.getElementById('rsnodeLock').disabled = busy || state.flashing;
+        document.getElementById('rsnodeLockRetry').disabled = busy;
+        sourceTabs.forEach(function(tab) { tab.disabled = busy || state.flashing; });
+    }
+
+    function betaStatus(message, error) {
+        rsnodeStatus.textContent = message || '';
+        rsnodeStatus.classList.toggle('is-error', !!error);
+    }
+
+    function applyBetaSession(session) {
+        var next = session && session.stage;
+        if (!['locked', 'terms', 'ready'].includes(next)) throw new Error('The beta session could not be verified. Try again.');
+        betaStage = next;
+        betaTermsVersion = session.termsVersion;
+        rsnodeLoginForm.hidden = next !== 'locked';
+        rsnodeTermsPending.hidden = next !== 'terms';
+        rsnodeBoardPicker.hidden = next !== 'ready';
+        if (next !== 'ready') {
+            document.getElementById('rsnodeCatalogRetry').hidden = true;
+            state.firmwareRequestSerial++;
+            clearRsnodeFirmware();
+            betaBoards = [];
+            rsnodeBoardSelect.replaceChildren(new Option('Choose your board', ''));
+            rsnodeVariantConfirmed.checked = false;
+            document.getElementById('rsnodeVariantCheck').hidden = true;
+            if (isRsnodeSelected()) updateFlashBtn();
+        }
+        if (next === 'locked' && rsnodeTermsDialog.open) rsnodeTermsDialog.close();
+    }
+
+    function handleBetaError(error) {
+        if (error.status === 401 || error.status === 403) {
+            applyBetaSession({ stage: 'locked' });
+            betaStatus('Your beta access expired. Enter the password again.', true);
+        } else {
+            betaStatus(error.message || 'The beta could not be loaded. Try again.', true);
+        }
+    }
+
+    function openBetaTerms() {
+        if (betaStage !== 'terms' || !isRsnodeSelected() || rsnodeTermsDialog.open) return;
+        rsnodeTermsForm.reset();
+        rsnodeTermsContinue.disabled = true;
+        rsnodeTermsStatus.textContent = '';
+        rsnodeTermsDialog.showModal();
+        rsnodeTermsForm.elements.france.focus();
+    }
+
+    async function loadBetaCatalog() {
+        var serial = ++state.firmwareRequestSerial;
+        clearRsnodeFirmware();
+        var retry = document.getElementById('rsnodeCatalogRetry');
+        retry.hidden = true;
+        betaStatus('Loading beta boards…');
+        try {
+            var catalog = await betaRequest('catalog');
+            if (!customRequestIsCurrent(serial, 'rsnode') || betaStage !== 'ready') return;
+            betaBoards = validateBetaCatalog(catalog);
+            rsnodeBoardSelect.replaceChildren(new Option('Choose your board', ''));
+            betaBoards.forEach(function(board) {
+                rsnodeBoardSelect.add(new Option(board.label || rsnodeBoard(board.id).label, board.id));
+            });
+            rsnodeVariantConfirmed.checked = false;
+            document.getElementById('rsnodeVariantCheck').hidden = true;
+            betaStatus(betaBoards.length ? '' : 'No beta builds are available yet. Try again later.');
+            retry.hidden = betaBoards.length !== 0;
+        } catch (error) {
+            if (!customRequestIsCurrent(serial, 'rsnode')) return;
+            handleBetaError(error);
+            retry.hidden = betaStage !== 'ready';
+        }
+        updateFlashBtn();
+    }
+    document.getElementById('rsnodeCatalogRetry').addEventListener('click', function() {
+        if (!state.flashing && !betaAuthBusy && betaStage === 'ready') loadBetaCatalog();
+    });
+
+    async function refreshBetaSession(showTerms, loadCatalog) {
+        if (betaAuthBusy) return;
+        var serial = ++betaSessionRequestSerial;
+        try {
+            var session = await betaRequest('session');
+            if (serial !== betaSessionRequestSerial || !isRsnodeSelected() || state.flashing || betaAuthBusy) return;
+            applyBetaSession(session);
+            if (session.stage === 'terms' && showTerms) openBetaTerms();
+            if (session.stage === 'ready' && loadCatalog) await loadBetaCatalog();
+        } catch (error) {
+            if (serial === betaSessionRequestSerial && isRsnodeSelected()) handleBetaError(error);
+        }
+    }
+
+    rsnodeLoginForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        if (state.flashing || betaAuthBusy || !rsnodeLoginForm.reportValidity()) return;
+        var serial = ++betaSessionRequestSerial;
+        setBetaAuthBusy(true);
+        document.getElementById('rsnodeLockRetry').hidden = true;
+        betaStatus('Checking password…');
+        try {
+            var session = await betaRequest('login', { password: rsnodePassword.value });
+            if (serial !== betaSessionRequestSerial || !isRsnodeSelected()) return;
+            applyBetaSession(session);
+            betaStatus('');
+            if (session.stage === 'terms') openBetaTerms();
+            if (session.stage === 'ready') await loadBetaCatalog();
+        } catch (error) {
+            if (serial === betaSessionRequestSerial && isRsnodeSelected()) {
+                if (error.status === 401) betaStatus('That password did not match. Try again.', true);
+                else handleBetaError(error);
+                rsnodePassword.focus();
+            }
+        } finally {
+            rsnodePassword.value = '';
+            setBetaAuthBusy(false);
+        }
+    });
+
+    document.getElementById('rsnodeReviewTerms').addEventListener('click', openBetaTerms);
+    document.getElementById('rsnodeTermsCancel').addEventListener('click', function() { rsnodeTermsDialog.close(); });
+    rsnodeTermsDialog.addEventListener('close', function() {
+        if (betaStage === 'terms' && isRsnodeSelected()) document.getElementById('rsnodeReviewTerms').focus();
+    });
+    rsnodeTermsForm.addEventListener('change', function() {
+        rsnodeTermsContinue.disabled = betaAuthBusy || !rsnodeTermsForm.checkValidity();
+    });
+    rsnodeTermsForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        if (state.flashing || betaAuthBusy || !rsnodeTermsForm.reportValidity()) return;
+        var serial = ++betaSessionRequestSerial;
+        var confirmations = {};
+        ['france', 'sanctions', 'export', 'privateBeta'].forEach(function(key) {
+            confirmations[key] = rsnodeTermsForm.elements[key].checked;
+        });
+        setBetaAuthBusy(true);
+        rsnodeTermsStatus.textContent = 'Checking access…';
+        try {
+            var session = await betaRequest('accept', { termsVersion: betaTermsVersion, confirmations: confirmations });
+            if (serial !== betaSessionRequestSerial || !isRsnodeSelected()) return;
+            applyBetaSession(session);
+            if (session.stage !== 'ready') throw new Error('Beta terms have changed. Review them again.');
+            rsnodeTermsDialog.close();
+            await loadBetaCatalog();
+            rsnodeBoardSelect.focus();
+        } catch (error) {
+            if (serial === betaSessionRequestSerial && isRsnodeSelected()) {
+                if (error.status === 401 || error.status === 403) handleBetaError(error);
+                else rsnodeTermsStatus.textContent = error.message || 'Could not confirm access. Try again.';
+            }
+        } finally {
+            setBetaAuthBusy(false);
+        }
+    });
+
+    async function lockBeta() {
+        if (state.flashing || betaAuthBusy) return;
+        var serial = ++betaSessionRequestSerial;
+        setBetaAuthBusy(true);
+        applyBetaSession({ stage: 'locked' });
+        rsnodePassword.value = '';
+        document.getElementById('rsnodeLockRetry').hidden = true;
+        betaStatus('Locking beta…');
+        try {
+            await betaRequest('logout', {});
+            if (serial === betaSessionRequestSerial && isRsnodeSelected()) betaStatus('');
+        } catch (error) {
+            if (serial === betaSessionRequestSerial && isRsnodeSelected()) {
+                betaStatus('Firmware was cleared, but beta access could not be locked. Try again.', true);
+                document.getElementById('rsnodeLockRetry').hidden = false;
+            }
+        } finally {
+            setBetaAuthBusy(false);
+            if (isRsnodeSelected()) rsnodePassword.focus();
+        }
+    }
+    document.getElementById('rsnodeLock').addEventListener('click', lockBeta);
+    document.getElementById('rsnodeLockRetry').addEventListener('click', lockBeta);
+
+    function rsnodeVariantIsConfirmed() {
+        return state.rsnodeMetadata && (state.rsnodeMetadata.id === 'heltec-v3' || rsnodeVariantConfirmed.checked);
+    }
+
+    rsnodeBoardSelect.addEventListener('change', async function() {
+        if (state.flashing) return;
+        var serial = ++state.firmwareRequestSerial;
+        clearRsnodeFirmware();
+        rsnodeVariantConfirmed.checked = false;
+        var metadata = betaBoards.find(function(board) { return board.id === rsnodeBoardSelect.value; });
+        document.getElementById('rsnodeVariantCheck').hidden = !metadata || metadata.id === 'heltec-v3';
+        if (metadata) document.getElementById('rsnodeVariantLabel').textContent = 'I checked that my board is ' + (metadata.id === 'heltec-v4-r8' ? 'V4 R8 (ESP32-S3R8).' : 'V4 R2 (ESP32-S3R2).');
+        updateFlashBtn();
+        if (!metadata) { betaStatus(''); return; }
+        betaStatus('Downloading ' + metadata.label + '…');
+        try {
+            var buffer = await betaRequest('download', undefined, { binary: true, query: { board: metadata.id } });
+            if (!customRequestIsCurrent(serial, 'rsnode')) return;
+            await verifyBetaDownload(buffer, metadata);
+            var zip = await window.JSZip.loadAsync(buffer, { checkCRC32: true });
+            var entry = zip.file('manifest.json');
+            if (!entry) throw new Error('The beta package is missing its manifest.');
+            await validateBetaManifest(zip, JSON.parse(await entry.async('string')), metadata);
+            if (!customRequestIsCurrent(serial, 'rsnode') || betaStage !== 'ready') return;
+            state.rsnodeAsset = buffer;
+            state.rsnodeMetadata = metadata;
+            var packageLink = document.getElementById('rsnodePackageDownload');
+            packageLink.href = '/api/rsnode-beta?action=download&board=' + encodeURIComponent(metadata.id);
+            packageLink.download = metadata.fileName;
+            packageLink.hidden = false;
+            state.firmwareReady = rsnodeVariantIsConfirmed();
+            betaStatus(metadata.version + ' · ' + formatBytes(metadata.size) + ' · ' + (state.firmwareReady ? 'Ready to flash' : 'Confirm your V4 variant below.'));
+        } catch (error) {
+            if (!customRequestIsCurrent(serial, 'rsnode')) return;
+            clearRsnodeFirmware();
+            handleBetaError(error);
+        }
+        updateFlashBtn();
+    });
+    rsnodeVariantConfirmed.addEventListener('change', function() {
+        if (state.flashing || !isRsnodeSelected()) return;
+        state.firmwareReady = !!state.rsnodeAsset && betaStage === 'ready' && rsnodeVariantIsConfirmed();
+        if (state.rsnodeMetadata) betaStatus(state.rsnodeMetadata.version + ' · ' + (state.firmwareReady ? 'Ready to flash' : 'Confirm your V4 variant.'));
+        updateFlashBtn();
+    });
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden && isRsnodeSelected() && !state.flashing) refreshBetaSession(false, false);
+    });
+    setInterval(function() {
+        if (!document.hidden && isRsnodeSelected() && betaStage !== 'locked' && !state.flashing) refreshBetaSession(false, false);
+    }, 60000);
 
     // ── RNode firmware picker ─────────────────────────
     var rnodeReleaseSelect = document.getElementById('rnodeReleaseSelect');
@@ -6368,7 +6756,7 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
     }
 
     function shouldRunRnodeSetup() {
-        return state.device === 'custom' && (state.rnodeProvision || isOfficialRnodeFirmwareSelected());
+        return state.device === 'custom' && !isRsnodeSelected() && (state.rnodeProvision || isOfficialRnodeFirmwareSelected());
     }
 
     function selectedRnodeLabel() {
@@ -6465,6 +6853,8 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
     }
 
     async function loadRnodeVariants(version) {
+        if (state.flashing || state.customSource !== 'rnode') return;
+        var requestSerial = ++state.firmwareRequestSerial;
         rnodeLoaded = true;
         state.rnodeVersion = version || null;
         if (rnodeVariantSelect) {
@@ -6476,9 +6866,11 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
             var resp = await fetch('/api/firmware?source=rnode&variants=true' + rnodeVersionQuery());
             if (!resp.ok) throw new Error('HTTP ' + resp.status);
             var info = await resp.json();
+            if (!customRequestIsCurrent(requestSerial, 'rnode')) { rnodeLoaded = false; return; }
             state.rnodeVersion = info.version;
             rnodeReleaseSub.textContent = 'Release ' + info.version + ' · ' + info.variants.length + ' supported variants';
             await loadRnodeReleases(info.version);
+            if (!customRequestIsCurrent(requestSerial, 'rnode')) { rnodeLoaded = false; return; }
             if (rnodeReleaseSelect) rnodeReleaseSelect.value = info.version;
             var optHtml = '<option value="">Select a device&hellip;</option>';
             info.variants.forEach(function (v) {
@@ -6490,6 +6882,7 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
             rnodeStatus.classList.remove('is-error');
             rnodeStatus.textContent = 'Pick a supported RNode variant to continue.';
         } catch (e) {
+            if (!customRequestIsCurrent(requestSerial, 'rnode')) { rnodeLoaded = false; return; }
             rnodeReleaseSub.textContent = 'Could not load RNode releases';
             if (rnodeVariantSelect) rnodeVariantSelect.innerHTML = '<option>Error loading variants</option>';
             rnodeStatus.classList.add('is-error');
@@ -6506,6 +6899,8 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
 
     if (rnodeVariantSelect) {
         rnodeVariantSelect.addEventListener('change', async function () {
+            if (state.flashing || state.customSource !== 'rnode') return;
+            var requestSerial = ++state.firmwareRequestSerial;
             var name = rnodeVariantSelect.value;
             if (!name) {
                 resetRnodeSelection('Pick a device variant to continue.');
@@ -6528,6 +6923,7 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
                 var infoResp = await fetch('/api/firmware?source=rnode&info=true&asset=' + encodeURIComponent(name) + versionQuery);
                 if (!infoResp.ok) throw new Error('Info fetch failed');
                 var meta = await infoResp.json();
+                if (!customRequestIsCurrent(requestSerial, 'rnode')) return;
                 state.rnodeVersion = meta.version || state.rnodeVersion;
                 state.rnodeFlashStrategy = meta.flashStrategy || 'esp32-esptool';
                 state.rnodePlatform = meta.platform || 'esp32';
@@ -6535,8 +6931,10 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
                 var binResp = await fetch('/api/firmware?source=rnode&asset=' + encodeURIComponent(name) + rnodeVersionQuery());
                 if (!binResp.ok) throw new Error('Download failed');
                 var buf = await binResp.arrayBuffer();
+                if (!customRequestIsCurrent(requestSerial, 'rnode')) return;
                 rnodeStatus.textContent = 'Verifying publisher SHA-256 for ' + meta.label + '…';
                 var verifiedSha256 = await verifyOfficialRnodeReleaseAsset(buf, meta);
+                if (!customRequestIsCurrent(requestSerial, 'rnode')) return;
                 state.rnodeAsset = buf;
                 state.rnodeAssetName = name;
                 state.rnodeAssetLabel = meta.label;
@@ -6552,6 +6950,7 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
                     pTog.dispatchEvent(new Event('change'));
                 }
             } catch (err) {
+                if (!customRequestIsCurrent(requestSerial, 'rnode')) return;
                 rnodeStatus.classList.add('is-error');
                 rnodeStatus.textContent = 'Error: ' + (err.message || err);
                 state.rnodeAsset = null;
@@ -6570,6 +6969,7 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
 
     if (rnodeBandSelect) {
         rnodeBandSelect.addEventListener('change', function () {
+            if (state.flashing || state.customSource !== 'rnode') return;
             state.rnodeBand = rnodeBandSelect.value || null;
             var selectedName = state.rnodeAssetName || (rnodeVariantSelect && rnodeVariantSelect.value);
             if (!state.boardManual && selectedName) {
@@ -6930,7 +7330,7 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
         // The EEPROM pill and RNode tools are only meaningful on the custom
         // path; hide on rsdeck / cardputer presets where Ratspeak firmware
         // is self-contained.
-        var onCustom = state.device === 'custom';
+        var onCustom = state.device === 'custom' && !isRsnodeSelected();
         provOption.style.display = onCustom ? '' : 'none';
         if (flashRepair) flashRepair.style.display = onCustom ? '' : 'none';
         if (!onCustom) {
@@ -8218,6 +8618,10 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
     }
 
     function updateFlashFlow(note) {
+        sourceTabs.forEach(function(tab) { tab.disabled = state.flashing || betaAuthBusy; });
+        rsnodeBoardSelect.disabled = state.flashing;
+        rsnodeVariantConfirmed.disabled = state.flashing;
+        document.getElementById('rsnodeLock').disabled = state.flashing || betaAuthBusy;
         var ready = state.connected && state.firmwareReady;
         var firmwareWaiting = state.device === 'custom' ? 'Choose source' : 'Loading';
         var noteEl = document.getElementById('flashBtnNote');
@@ -8275,7 +8679,7 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
                 noteEl.textContent = 'Select a USB device to continue.';
             } else {
                 noteEl.textContent = state.device === 'custom'
-                    ? 'Upload a .bin or .zip, or choose an RNode firmware variant.'
+                    ? (isRsnodeSelected() ? 'Unlock the beta, choose your board and confirm its variant.' : 'Upload a .bin or .zip, or choose rsNode or RNode firmware.')
                     : 'Waiting for bundled firmware to finish loading.';
             }
         }
@@ -8866,6 +9270,21 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
     // "merged"/"combined"/"full" → 0x0, otherwise app-only at 0x10000.
     // Manual override via state.customOffsets[0] when set.
     async function prepareFileArray(logMessage) {
+        if (isRsnodeSelected()) {
+            if (!state.rsnodeAsset || !state.rsnodeMetadata || betaStage !== 'ready' || !rsnodeVariantIsConfirmed()) {
+                throw new Error('Choose and confirm your rsNode board before flashing.');
+            }
+            var betaZip = await window.JSZip.loadAsync(state.rsnodeAsset, { checkCRC32: true });
+            var betaEntry = betaZip.file('manifest.json');
+            if (!betaEntry) throw new Error('The beta package is missing its manifest.');
+            var betaPrepared = await validateBetaManifest(betaZip, JSON.parse(await betaEntry.async('string')), state.rsnodeMetadata);
+            state.firmwareAppBytes = betaPrepared.bytes;
+            logMessage('Verified rsNode factory image for ' + betaPrepared.boardLabel + ' @ 0x0', '');
+            return Object.assign({}, betaPrepared, {
+                fileArray: [{ data: uint8ToBstr(betaPrepared.bytes), address: 0 }]
+            });
+        }
+
         var isCustomSingleBin = state.device === 'custom' && state.customFile
             && state.customFile.name.toLowerCase().endsWith('.bin');
 
@@ -8913,6 +9332,13 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
         var manifestEntry = findManifestFile(zip);
         if (manifestEntry) {
             manifest = JSON.parse(await manifestEntry.file.async('string'));
+            if (manifest.product === 'rsnode') {
+                if (manifestEntry.path !== 'manifest.json') throw new Error('rsNode manifest must be at the root of the ZIP.');
+                var uploadedRsnode = await validateBetaManifest(zip, manifest, { id: manifest.board, version: manifest.version });
+                state.firmwareAppBytes = uploadedRsnode.bytes;
+                logMessage('Verified rsNode factory image for ' + uploadedRsnode.boardLabel + ' @ 0x0', '');
+                return Object.assign({}, uploadedRsnode, { fileArray: [{ data: uint8ToBstr(uploadedRsnode.bytes), address: 0 }] });
+            }
             if ((state.firmwareMetadata && state.firmwareMetadata.product === 'ratspeak-handheld') ||
                 manifest.product === 'ratspeak-handheld') {
                 if (manifestEntry.path !== 'manifest.json') throw new Error('Handheld manifest must be at the root of the ZIP.');
@@ -9039,12 +9465,22 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
         if (!dialog || typeof dialog.showModal !== 'function') {
             throw new Error('This browser cannot show the installation notice. Use an up-to-date Chrome or Edge browser.');
         }
-        document.getElementById('installDialogDevice').textContent = DEVICES[prepared.board].name;
-        document.getElementById('installDialogIntro').textContent = prepared.package === 'rnode'
+        document.getElementById('installDialogDevice').textContent = prepared.boardLabel || DEVICES[prepared.board].name;
+        document.getElementById('installDialogIntro').textContent = prepared.product === 'rsnode'
+            ? 'You are installing rsNode private beta firmware.'
+            : prepared.package === 'rnode'
             ? 'You\'re installing the radio-only version of Ratspeak Handheld.'
             : 'You\'re installing Ratspeak Handheld with our new Rust messaging backend.';
         var cancel = document.getElementById('installDialogCancel');
         var proceed = document.getElementById('installDialogContinue');
+        var variant = document.getElementById('installDialogVariant');
+        var variantConfirmed = document.getElementById('installDialogVariantConfirmed');
+        var needsVariant = prepared.product === 'rsnode' && prepared.board !== 'heltec-v3' && !isRsnodeSelected();
+        variant.hidden = !needsVariant;
+        variantConfirmed.checked = false;
+        document.getElementById('installDialogVariantLabel').textContent = 'I checked that my board is ' + prepared.boardLabel +
+            (prepared.board === 'heltec-v4-r8' ? ' (ESP32-S3R8, 8 MB PSRAM).' : ' (ESP32-S3R2, 2 MB PSRAM).');
+        proceed.disabled = needsVariant;
         return new Promise(function(resolve, reject) {
             var accepted = false;
             function cleanup() {
@@ -9052,17 +9488,21 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
                 dialog.removeEventListener('keydown', onKeyDown);
                 cancel.removeEventListener('click', onCancel);
                 proceed.removeEventListener('click', onContinue);
+                variantConfirmed.removeEventListener('change', onVariant);
+                proceed.disabled = false;
             }
             function onClose() { cleanup(); resolve(accepted); }
             function onKeyDown(event) {
                 if (event.key === 'Escape') { event.preventDefault(); dialog.close(); }
             }
             function onCancel() { dialog.close(); }
-            function onContinue() { accepted = true; dialog.close(); }
+            function onVariant() { proceed.disabled = needsVariant && !variantConfirmed.checked; }
+            function onContinue() { if (needsVariant && !variantConfirmed.checked) return; accepted = true; dialog.close(); }
             dialog.addEventListener('close', onClose);
             dialog.addEventListener('keydown', onKeyDown);
             cancel.addEventListener('click', onCancel);
             proceed.addEventListener('click', onContinue);
+            variantConfirmed.addEventListener('change', onVariant);
             try {
                 dialog.showModal();
                 cancel.focus();
@@ -9137,6 +9577,7 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
                 // 2. Prepare firmware parts from ZIP (or single bin for custom)
                 setProgress(5, 'Preparing firmware...');
                 var prepared = await prepareFileArray(logMessage);
+                if (prepared.product === 'rsnode') needsRnodeSetup = false;
                 if (!await confirmFactoryInstall(prepared)) {
                     logMessage('Installation cancelled. No device data was written.', '');
                     setProgress(0, 'Installation cancelled');
@@ -9145,6 +9586,13 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
                     updateFlashBtn();
                     btn.focus();
                     return;
+                }
+                if (prepared.product === 'rsnode' && isRsnodeSelected()) {
+                    var session = await betaRequest('session');
+                    if (session.stage !== 'ready') {
+                        applyBetaSession(session);
+                        throw new Error('Beta access expired. Unlock the beta again before flashing.');
+                    }
                 }
                 if (!state.connected || !state.port) throw new Error('Device disconnected. Reconnect it before flashing.');
                 btn.textContent = 'Flashing...';
@@ -9176,9 +9624,19 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
                 if (prepared.board || handheldBoard(state.device)) {
                     var chipLower = chipName.toLowerCase();
                     if (!chipLower.includes('esp32-s3') && !chipLower.includes('esp32s3')) {
-                        throw new Error('Expected ESP32-S3 for ' + DEVICES[prepared.board || state.device].name + ', but detected ' + chipName + '. Please check your device.');
+                        throw new Error('Expected ESP32-S3 for ' + (prepared.boardLabel || DEVICES[prepared.board || state.device].name) + ', but detected ' + chipName + '. Please check your device.');
                     }
                     logMessage('Chip verified: ESP32-S3', 'log-green');
+                }
+
+                if (prepared.product === 'rsnode') {
+                    var flashKiB = await esploader.getFlashSize();
+                    var expectedKiB = prepared.flashOptions.flashSize === '8MB' ? 8192 : 16384;
+                    if (flashKiB !== expectedKiB) {
+                        throw new Error('Expected ' + prepared.flashOptions.flashSize + ' flash for ' + prepared.boardLabel +
+                            ', but detected ' + (flashKiB ? (flashKiB / 1024) + 'MB' : 'an unknown size') + '. Check your board selection.');
+                    }
+                    logMessage('Flash capacity verified: ' + prepared.flashOptions.flashSize, 'log-green');
                 }
 
                 // 7. Write flash — separate parts at individual addresses
@@ -9206,7 +9664,11 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
 
                 // 8. Reboot only when RNode provisioning needs the flashed firmware
                 // running immediately. Otherwise leave reset/manual reconnect to the user.
-                if (needsRnodeSetup) {
+                if (prepared.product === 'rsnode') {
+                    setProgress(95, 'Starting rsNode…');
+                    await esploader.after('hard_reset');
+                    logMessage('rsNode installed. Let the board finish starting.', 'log-green');
+                } else if (needsRnodeSetup) {
                     setProgress(92, 'Booting RNode firmware...');
                     logMessage('Restarting into RNode firmware for setup...', 'log-orange');
                     await esploader.after('hard_reset');
@@ -9269,7 +9731,7 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
                 rnodeSetupCompleted = true;
             } else {
                 setProgress(100, 'Complete');
-                logMessage((state.device === 'custom' ? 'Firmware flash complete.' : 'Ratspeak flash complete.') + ' Please reboot the device.', 'log-green');
+                logMessage(prepared && prepared.product === 'rsnode' ? 'rsNode is installed and restarting.' : (state.device === 'custom' ? 'Firmware flash complete.' : 'Ratspeak flash complete.') + ' Please reboot the device.', 'log-green');
             }
 
             // 11. Hide flash button, show completion

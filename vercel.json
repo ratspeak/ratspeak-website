@@ -11,6 +11,9 @@
     { "source": "/assets/seo/og-map.png", "destination": "/api/og-map" }
   ],
   "functions": {
+    "api/rsnode-beta.js": {
+      "maxDuration": 30
+    },
     "api/firmware.js": {
       "maxDuration": 30
     },

@@ -1,7 +1,10 @@
 .DS_Store
 .tmp/
 node_modules/
+.vercel/
+.env*
 
 # Internal-only SEO/icon review page emitted by branding/generators/generate-seo-assets.py.
 # Not served, never linked, robots-disallowed; tracked locally for designers only.
 seo-preview.html
+.vercel
