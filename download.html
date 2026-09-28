@@ -5570,6 +5570,7 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
         rnodeProvisionInfo: null,
         rnodeSetupIssue: null,
         rnodeSetupIssueKind: null,
+        rnodeSetupVerified: false,
         rnodeHostControlledMode: false,
         firmwareBytes: null,
         firmwareAppBytes: null,
@@ -8640,9 +8641,9 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
             } else {
                 setFlowItem('flowFlash', 'is-done', 'Complete');
                 if (noteEl) {
-                    noteEl.textContent = shouldRunRnodeSetup()
+                    noteEl.textContent = state.rnodeSetupVerified
                         ? 'Firmware flash complete. RNode setup was verified.'
-                        : 'Flash complete. Let the device finish rebooting before using it on the mesh.';
+                        : 'Flash complete. Press RESET or turn the device off and on.';
                 }
             }
             updateAdvancedMeta();
@@ -8670,7 +8671,7 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
                     ? 'Firmware could not be loaded. Select it again to retry.'
                     : 'Firmware could not be loaded. Refresh the page to retry.';
             } else if (ready) {
-                noteEl.textContent = 'Ready to write firmware. Keep this tab open until flashing and reset finish.';
+                noteEl.textContent = 'Ready to write firmware. Keep this tab open until flashing finishes.';
             } else if (!state.connected && !state.firmwareReady) {
                 noteEl.textContent = state.device === 'custom'
                     ? 'Select a USB device and choose a firmware source to continue.'
@@ -9523,6 +9524,7 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
 
         state.flashing = true;
         state.flashComplete = false;
+        state.rnodeSetupVerified = false;
         state.rnodeSetupIssue = null;
         state.rnodeSetupIssueKind = null;
         state.rnodeHostControlledMode = false;
@@ -9664,17 +9666,12 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
 
                 // 8. Reboot only when RNode provisioning needs the flashed firmware
                 // running immediately. Otherwise leave reset/manual reconnect to the user.
-                if (prepared.product === 'rsnode') {
-                    setProgress(95, 'Starting rsNode…');
-                    await esploader.after('hard_reset');
-                    logMessage('rsNode installed. Let the board finish starting.', 'log-green');
-                } else if (needsRnodeSetup) {
+                if (needsRnodeSetup) {
                     setProgress(92, 'Booting RNode firmware...');
                     logMessage('Restarting into RNode firmware for setup...', 'log-orange');
                     await esploader.after('hard_reset');
                 } else {
                     setProgress(95, 'Flash written');
-                    logMessage('Flash write complete; skipping automatic reboot.', 'log-green');
                 }
 
                 // 9. Disconnect transport
@@ -9731,12 +9728,15 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
                 rnodeSetupCompleted = true;
             } else {
                 setProgress(100, 'Complete');
-                logMessage(prepared && prepared.product === 'rsnode' ? 'rsNode is installed and restarting.' : (state.device === 'custom' ? 'Firmware flash complete.' : 'Ratspeak flash complete.') + ' Please reboot the device.', 'log-green');
+                logMessage(prepared && prepared.product === 'rsnode'
+                    ? 'rsNode installed. Press RESET on the board, or turn it off and on.'
+                    : (state.device === 'custom' ? 'Firmware flash complete.' : 'Ratspeak flash complete.') + ' Restart the device before using it.', 'log-green');
             }
 
             // 11. Hide flash button, show completion
             state.flashing = false;
             state.flashComplete = true;
+            state.rnodeSetupVerified = rnodeSetupCompleted;
             btn.style.display = 'none';
             updateFlashFlow();
             if (rnodeSetupCompleted) showRnodeSetupComplete();
@@ -9815,6 +9815,7 @@ import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITO
     function showRnodeSetupComplete() {
         state.flashing = false;
         state.flashComplete = true;
+        state.rnodeSetupVerified = true;
         state.rnodeSetupIssue = null;
         state.rnodeSetupIssueKind = null;
 
