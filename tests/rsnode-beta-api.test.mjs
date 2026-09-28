@@ -17,6 +17,7 @@ const CONFIRMATIONS = { france: true, sanctions: true, export: true, privateBeta
 const OIDC_STORE_ID = 'store_BetaStore123';
 const OIDC_BOARD = { ...BOARD, url: 'https://betastore123.private.blob.vercel-storage.com/candidates/rsnode-heltec-v4.zip' };
 const OIDC_TOKEN = 'testHeader.testClaims.testSignature';
+const INVITATIONS = ['beta-invite-0001', 'beta-invite-0002', 'beta-invite-0003', 'beta-invite-0004', 'beta-invite-0005'];
 
 function fixture(overrides = {}, dependencies = {}) {
   const env = {
@@ -46,14 +47,14 @@ function fixture(overrides = {}, dependencies = {}) {
     }
     return handler(new Request((options.origin || ORIGIN) + '/api/rsnode-beta?action=' + action + (options.query || ''), { method, headers, body }));
   }
-  async function login() {
-    const response = await request('login', { body: { password: env.RSNODE_BETA_PASSWORD } });
+  async function login(password = env.RSNODE_BETA_PASSWORDS === undefined ? env.RSNODE_BETA_PASSWORD : JSON.parse(env.RSNODE_BETA_PASSWORDS)[0]) {
+    const response = await request('login', { body: { password } });
     assert.equal(response.status, 200);
     return response.headers.get('set-cookie').split(';')[0];
   }
-  async function ready() {
+  async function ready(password) {
     const response = await request('accept', {
-      cookie: await login(), body: { termsVersion: TERMS_VERSION, confirmations: CONFIRMATIONS }
+      cookie: await login(password), body: { termsVersion: TERMS_VERSION, confirmations: CONFIRMATIONS }
     });
     assert.equal(response.status, 200);
     return response.headers.get('set-cookie').split(';')[0];
@@ -82,16 +83,16 @@ function oidcFixture(overrides = {}, dependencies = {}) {
 test('production Node adapter exposes a Web Standard fetch handler and fails closed without configuration', async () => {
   const { default: api } = await import('../api/rsnode-beta.js');
   assert.equal(typeof api.fetch, 'function');
-  const saved = process.env.RSNODE_BETA_PASSWORD;
-  delete process.env.RSNODE_BETA_PASSWORD;
+  const saved = process.env.RSNODE_BETA_CATALOG;
+  delete process.env.RSNODE_BETA_CATALOG;
   try {
     const response = await api.fetch(new Request(ORIGIN + '/api/rsnode-beta?action=session'));
     assert.equal(response.status, 503);
     assert.deepEqual(await response.json(), { error: 'Private beta is not available yet.' });
     privateResponse(response);
   } finally {
-    if (saved === undefined) delete process.env.RSNODE_BETA_PASSWORD;
-    else process.env.RSNODE_BETA_PASSWORD = saved;
+    if (saved === undefined) delete process.env.RSNODE_BETA_CATALOG;
+    else process.env.RSNODE_BETA_CATALOG = saved;
   }
 });
 
@@ -145,6 +146,87 @@ test('session cookies are host-only, secure, HttpOnly, Strict, and eight hours l
   assert.equal(header.includes(f.env.RSNODE_BETA_PASSWORD), false);
   assert.equal(header.includes(f.env.RSNODE_BETA_SESSION_SECRET), false);
   privateResponse(response);
+});
+
+test('all five sixteen-character invitations reach terms and require acceptance before firmware access', async () => {
+  const f = fixture({ RSNODE_BETA_PASSWORDS: JSON.stringify(INVITATIONS) });
+  for (const password of INVITATIONS) {
+    assert.equal(password.length, 16);
+    const cookie = await f.login(password);
+    assert.equal((await (await f.request('session', { cookie })).json()).stage, 'terms');
+    assert.equal((await f.request('catalog', { cookie })).status, 403);
+    assert.equal((await f.request('download', { cookie, query: '&board=heltec-v4' })).status, 403);
+    const accepted = await f.request('accept', { cookie, body: { termsVersion: TERMS_VERSION, confirmations: CONFIRMATIONS } });
+    assert.equal(accepted.status, 200);
+    const readyCookie = accepted.headers.get('set-cookie').split(';')[0];
+    assert.equal((await f.request('catalog', { cookie: readyCookie })).status, 200);
+    const download = await f.request('download', { cookie: readyCookie, query: '&board=heltec-v4' });
+    assert.equal(download.status, 200);
+    assert.deepEqual(new Uint8Array(await download.arrayBuffer()), PAYLOAD);
+  }
+});
+
+test('a configured invitation list takes precedence over the legacy password, including when invalid', async () => {
+  const f = fixture({ RSNODE_BETA_PASSWORDS: JSON.stringify(INVITATIONS) });
+  assert.equal((await f.request('login', { body: { password: f.env.RSNODE_BETA_PASSWORD } })).status, 401);
+  assert.equal((await f.request('login', { body: { password: INVITATIONS[0] } })).status, 200);
+  f.env.RSNODE_BETA_PASSWORDS = '[]';
+  assert.equal((await f.request('login', { body: { password: f.env.RSNODE_BETA_PASSWORD } })).status, 503);
+  delete f.env.RSNODE_BETA_PASSWORDS;
+  assert.equal((await f.request('login', { body: { password: f.env.RSNODE_BETA_PASSWORD } })).status, 200);
+});
+
+test('invitation lists reject malformed JSON, wrong types, controls, duplicates, invalid lengths, and shared session secrets', async () => {
+  const secret = fixture().env.RSNODE_BETA_SESSION_SECRET;
+  const invalid = [
+    '', '{', null, 1, INVITATIONS, 'null', 'true', '42', '{}', JSON.stringify(INVITATIONS[0]),
+    JSON.stringify([]), JSON.stringify([...INVITATIONS, 'beta-invite-0006']),
+    JSON.stringify([INVITATIONS[0], INVITATIONS[0]]),
+    ...[null, true, 123, {}, [], 'a'.repeat(15), 'a'.repeat(257), 'a'.repeat(16) + '\n',
+      'a'.repeat(16) + '\u007f', 'a'.repeat(16) + '\u0085', secret].map(value => JSON.stringify([INVITATIONS[0], value]))
+  ];
+  for (const value of invalid) {
+    const f = fixture({ RSNODE_BETA_PASSWORDS: value });
+    const response = await f.request('session');
+    assert.equal(response.status, 503);
+    assert.deepEqual(await response.json(), { error: 'Private beta is not available yet.' });
+    privateResponse(response);
+    assert.equal(f.runtime.fetches.length, 0);
+  }
+  for (const password of [INVITATIONS[0], 'a'.repeat(256)]) {
+    const f = fixture({ RSNODE_BETA_PASSWORDS: JSON.stringify([password]), RSNODE_BETA_PASSWORD: undefined });
+    assert.equal((await f.request('login', { body: { password } })).status, 200);
+  }
+});
+
+test('removing any invitation revokes all existing sessions while reordering preserves them', async () => {
+  const f = fixture({ RSNODE_BETA_PASSWORDS: JSON.stringify(INVITATIONS) });
+  const cookies = await Promise.all(INVITATIONS.map(password => f.ready(password)));
+  f.env.RSNODE_BETA_PASSWORDS = JSON.stringify([...INVITATIONS].reverse(), null, 2);
+  for (const cookie of cookies) assert.equal((await f.request('catalog', { cookie })).status, 200);
+  f.env.RSNODE_BETA_PASSWORDS = JSON.stringify(INVITATIONS.slice(1));
+  for (const cookie of cookies) assert.equal((await f.request('catalog', { cookie })).status, 401);
+  assert.equal((await f.request('login', { body: { password: INVITATIONS[0] } })).status, 401);
+  assert.equal((await f.request('catalog', { cookie: await f.ready(INVITATIONS[1]) })).status, 200);
+});
+
+test('invitation checks perform a cryptographic comparison for every configured password, without an early match exit', async () => {
+  let comparisons = 0;
+  const cryptoApi = {
+    getRandomValues: values => webcrypto.getRandomValues(values),
+    subtle: {
+      importKey: (...args) => webcrypto.subtle.importKey(...args),
+      sign: (...args) => webcrypto.subtle.sign(...args),
+      verify: (...args) => { comparisons += 1; return webcrypto.subtle.verify(...args); }
+    }
+  };
+  const f = fixture({ RSNODE_BETA_PASSWORDS: JSON.stringify(INVITATIONS) }, { cryptoApi });
+  for (const password of [...INVITATIONS, 'not-an-invitation']) {
+    comparisons = 0;
+    const response = await f.request('login', { body: { password } });
+    assert.equal(response.status, INVITATIONS.includes(password) ? 200 : 401);
+    assert.equal(comparisons, INVITATIONS.length);
+  }
 });
 
 test('OIDC downloads use the current request token only after password and terms acceptance', async () => {
