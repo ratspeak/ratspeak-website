@@ -2346,8 +2346,6 @@
         }
         .install-dialog h2 { margin: 0 0 16px; font-size: 28px; line-height: 1.15; font-weight: 500; letter-spacing: -0.025em; }
         .install-dialog p { margin: 0 0 14px; color: var(--text-secondary); font-size: 15px; line-height: 1.55; }
-        .install-dialog__backup { padding: 14px 16px; background: var(--bg-secondary); border-radius: 10px; }
-        .install-dialog .install-dialog__backup { color: var(--text-primary); }
         .install-dialog__guide { color: var(--text-secondary); font-size: 13px; text-underline-offset: 3px; }
         .install-dialog__actions { display: grid; grid-template-columns: 1fr 1.6fr; gap: 10px; margin-top: 24px; }
         .install-dialog__actions button { min-height: 46px; padding: 12px 10px; border: 1px solid var(--border); border-radius: 10px; font: 500 14px var(--font-sans); cursor: pointer; }
@@ -5423,17 +5421,16 @@
     </form>
 </dialog>
 
-<dialog class="install-dialog" id="installDialog" aria-labelledby="installDialogTitle" aria-describedby="installDialogIntro installDialogRisk installDialogBackup">
+<dialog class="install-dialog" id="installDialog" aria-labelledby="installDialogTitle" aria-describedby="installDialogIntro installDialogRisk">
     <div class="install-dialog__device" id="installDialogDevice"></div>
-    <h2 id="installDialogTitle">Before you flash</h2>
+    <h2 id="installDialogTitle">Erase and install</h2>
     <p id="installDialogIntro"></p>
-    <p id="installDialogRisk">This is a fresh install. Continuing resets the device's internal storage, including its identity, messages and settings.</p>
-    <p class="install-dialog__backup" id="installDialogBackup">Back up your identity and anything else you want to keep somewhere other than this device.</p>
+    <p id="installDialogRisk"></p>
     <label class="rsnode-beta__check rsnode-beta__variant" id="installDialogVariant" hidden><input type="checkbox" id="installDialogVariantConfirmed"><span id="installDialogVariantLabel"></span></label>
     <a class="install-dialog__guide" href="https://docs.ratspeak.org/docs/hardware/flashing-firmware#before-flashing" target="_blank" rel="noopener noreferrer">Flashing guide</a>
     <div class="install-dialog__actions">
         <button class="install-dialog__cancel" id="installDialogCancel" type="button" autofocus>Cancel</button>
-        <button class="install-dialog__continue" id="installDialogContinue" type="button">Continue to flash</button>
+        <button class="install-dialog__continue" id="installDialogContinue" type="button">Erase and install</button>
     </div>
 </dialog>
 
@@ -9493,10 +9490,9 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
             throw new Error('This browser cannot show the installation notice. Use an up-to-date Chrome or Edge browser.');
         }
         document.getElementById('installDialogDevice').textContent = prepared.boardLabel || DEVICES[prepared.board].name;
-        document.getElementById('installDialogTitle').textContent = review ? review.title : 'Before you flash';
+        document.getElementById('installDialogTitle').textContent = review ? review.title : 'Erase and install';
         document.getElementById('installDialogRisk').textContent = review ? review.detail
-            : "This is a fresh install. Continuing resets the device's internal storage, including its identity, messages and settings.";
-        document.getElementById('installDialogBackup').hidden = !!review;
+            : 'All data in internal storage will be lost, including your identity, settings and messages.';
         document.getElementById('installDialogIntro').textContent = review ? review.intro : prepared.product === 'rsnode'
             ? 'You are installing rsNode private beta firmware.'
             : prepared.package === 'rnode'
@@ -9504,7 +9500,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
             : 'You are installing Ratspeak Handheld.';
         var cancel = document.getElementById('installDialogCancel');
         var proceed = document.getElementById('installDialogContinue');
-        proceed.textContent = review ? review.action : 'Continue to flash';
+        proceed.textContent = review ? review.action : 'Erase and install';
         var variant = document.getElementById('installDialogVariant');
         var variantConfirmed = document.getElementById('installDialogVariantConfirmed');
         var needsVariant = prepared.product === 'rsnode' && prepared.board !== 'heltec-v3' && !isRsnodeSelected();

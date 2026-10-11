@@ -37,8 +37,9 @@ test('custom firmware keeps the explicit full-erase choice', () => {
   assert.equal(shouldErase({}), true);
 });
 
-test('fresh-install warning matches the automatic erase behavior', () => {
-  assert.match(downloadHtml, /Continuing resets the device's internal storage/);
+test('erase confirmation uses conditional data-loss copy', () => {
+  assert.match(extractFunction('confirmFactoryInstall'), /All data in internal storage will be lost/);
+  assert.doesNotMatch(downloadHtml, /These packages are fresh installs|new Rust messaging backend|Before you flash|This is a fresh install|installDialogBackup/);
   assert.match(downloadHtml, /eraseAll: eraseBeforeFlash/);
   assert.match(downloadHtml, /<span class="flash-option-pill__label">Full Erase<\/span>/);
 });
