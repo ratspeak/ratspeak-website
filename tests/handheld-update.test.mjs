@@ -45,10 +45,19 @@ function fixture(layoutId = 'tdeck/full') {
   }
   index.packages[hash(target)] = { layout: layoutId, parts };
   const calls = [];
+  const digests = [];
   const loader = {
     getFlashSize: async () => capacity / 1024,
-    readFlash: async (address, size) => { calls.push([address, size]); return memory.slice(address, address + size); },
-    flushInput: async () => {},
+    readFlash: async (address, size) => {
+      calls.push([address, size]);
+      const result = memory.slice(address, address + size);
+      digests.push(new Uint8Array(createHash('md5').update(result).digest()));
+      return result;
+    },
+    transport: {
+      async *read() { assert.equal(digests.length, 1); yield digests.shift(); },
+      async disconnect() {}
+    },
     flashMd5sum: async (address, size) => hash(memory.subarray(address, address + size), 'md5')
   };
   const prepared = { board: layout.board, package: layout.package, version: index.version, bytes: target };
