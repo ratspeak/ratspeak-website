@@ -672,7 +672,7 @@
             position: relative; z-index: 1;
         }
         .forms-grid {
-            display: grid; grid-template-columns: repeat(5, 1fr);
+            display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
             gap: 16px;
             margin-top: 8px;
         }
@@ -711,6 +711,7 @@
             font-size: 12.5px; color: var(--text-muted);
             margin-bottom: 14px; line-height: 1.45;
         }
+        .form-card > .form-status { margin-top: auto; }
         .form-status {
             display: inline-flex; align-items: center; gap: 6px;
             font-family: var(--font-mono);
@@ -1042,9 +1043,11 @@
         }
 
         /* ── Responsive ──────────────────────────────── */
+        @media (max-width: 1200px) {
+            .forms-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
         @media (max-width: 1024px) {
             .why-grid { grid-template-columns: repeat(2, 1fr); }
-            .forms-grid { grid-template-columns: repeat(3, 1fr); }
         }
         @media (max-width: 768px) {
             .navbar { padding: 0 18px; }
@@ -1657,6 +1660,16 @@
                 <div class="form-card__name">T-Pager</div>
                 <div class="form-card__sub">Handheld LoRa pager / MCU</div>
                 <a href="download.html#tpager" class="form-status form-status--download">Flash</a>
+            </div>
+
+            <!-- ThinkNode M9 -->
+            <div class="form-card fade-in">
+                <div class="form-card__visual">
+                    <svg class="device" viewBox="0 0 82 136" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="assets/devices/thinknode-m9.svg#thinknode-m9"/></svg>
+                </div>
+                <div class="form-card__name">ThinkNode M9</div>
+                <div class="form-card__sub">Full-keyboard LoRa device / MCU</div>
+                <a href="download.html#m9" class="form-status form-status--download">Flash</a>
             </div>
         </div>
 
