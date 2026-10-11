@@ -1,5 +1,6 @@
 import { handheldImages } from './handheld-images.js';
 import { sha256Hex } from './handheld-release.js';
+import { readFlashMetadata as read, serialTimeout, closeFlashTransport } from './esp-serial.js';
 
 const UNKNOWN = 'The installed firmware could not be identified.';
 const u32 = (bytes, offset) => new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getUint32(offset, true);
@@ -25,39 +26,36 @@ export function bootSlot(ota, count) {
   throw new Error('Boot selection could not be verified');
 }
 
-async function read(loader, address, size) {
-  const bytes = await loader.readFlash(address, size);
-  // readFlash in esptool-js 0.5.7 leaves the stub's final digest on the wire.
-  await loader.flushInput();
-  if (!(bytes instanceof Uint8Array) || bytes.length !== size) throw new Error('Incomplete device read');
-  return bytes;
-}
-
-export async function inspectHandheld(loader, board, index = handheldImages) {
+export async function inspectHandheld(loader, board, index = handheldImages, progress = () => {}) {
   const capacity = board === 'cardputer' ? 8192 : 16384;
-  if (await loader.getFlashSize() !== capacity) {
-    throw new HandheldMismatch('Flash capacity does not match the selected handheld. Check your device selection.');
-  }
   try {
+    progress('Checking flash capacity...');
+    if (await serialTimeout(loader.getFlashSize()) !== capacity) {
+      throw new HandheldMismatch('Flash capacity does not match the selected handheld. Check your device selection.');
+    }
+    progress('Reading storage layout...');
     const table = await read(loader, 0x8000, 0xc00);
     const hash = await sha256Hex(table);
     const layout = Object.values(index.layouts).find(item => item.board === board && item.tableSha256 === hash);
     if (!layout) return { status: 'unknown', reason: 'The installed firmware or storage layout could not be identified.' };
-    if (await loader.flashMd5sum(0, 0x8000) !== layout.bootMd5) {
+    progress('Checking bootloader...');
+    if (await serialTimeout(loader.flashMd5sum(0, 0x8000)) !== layout.bootMd5) {
       return { status: 'unknown', reason: 'The installed bootloader is not supported for updates.' };
     }
     const slots = [];
     for (const slot of layout.slots) {
+      progress(`Verifying installed applications (${slots.length + 1}/${layout.slots.length})...`);
       const probe = await read(loader, slot.offset, 288);
       if (erased(probe)) { slots.push({ ...slot, image: null }); continue; }
       const image = index.components[await sha256Hex(probe)];
-      if (!image || image.size > slot.capacity || await loader.flashMd5sum(slot.offset, image.size) !== image.md5) {
+      if (!image || image.size > slot.capacity || await serialTimeout(loader.flashMd5sum(slot.offset, image.size), 60000) !== image.md5) {
         return { status: 'unknown', reason: UNKNOWN };
       }
       if (image.board !== board) throw new HandheldMismatch('Installed firmware belongs to a different handheld. Check your device selection.');
       if (image.role !== slot.role) return { status: 'unknown', reason: UNKNOWN };
       slots.push({ ...slot, image });
     }
+    progress('Checking startup selection...');
     const active = bootSlot(await read(loader, 0xe000, 0x2000), slots.length);
     if (!slots[active].image || (layout.package === 'full' && slots.some(slot => !slot.image))) {
       return { status: 'unknown', reason: 'The installed firmware is incomplete.' };
@@ -66,6 +64,7 @@ export async function inspectHandheld(loader, board, index = handheldImages) {
     return { status: 'recognized', board, package: layout.package, layout, slots, active, version };
   } catch (error) {
     if (error instanceof HandheldMismatch) throw error;
+    await closeFlashTransport(loader.transport);
     return { status: 'unknown', reason: 'The installed firmware could not be read.', reconnect: true };
   }
 }
