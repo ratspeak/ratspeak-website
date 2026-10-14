@@ -169,7 +169,7 @@ test('reviewed image index stays aligned with the download pin and covers all su
   assert.equal(Object.keys(handheldImages.layouts).length, 10);
   assert.equal(Object.keys(handheldImages.packages).length, 10);
   assert.deepEqual([...new Set(Object.values(handheldImages.components).map(image => image.version))].sort(),
-    ['2.2.0', '2.2.1', '2.2.2', '2.2.3', '2.2.4', '2.3.0']);
+    ['2.2.0', '2.2.1', '2.2.2', '2.2.3', '2.2.4', '2.3.0', '2.3.1']);
   for (const target of Object.values(handheldImages.packages)) {
     const layout = handheldImages.layouts[target.layout];
     assert.ok(layout);
