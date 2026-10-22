@@ -9170,9 +9170,16 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     //   4. user-supplied manual offsets via state.customOffsets
     //   5. otherwise throw with a helpful message
     //
-    // Single .bin upload follows similar detection: filename containing
-    // "merged"/"combined"/"full" → 0x0, otherwise app-only at 0x10000.
-    // Manual override via state.customOffsets[0] when set.
+    // Single .bin upload follows similar detection: a partition table at 0x8000
+    // or a filename containing "merged"/"combined"/"full" → 0x0, otherwise
+    // app-only at 0x10000. Manual override via state.customOffsets[0] when set.
+    function isMergedImage(bytes) {
+        if (bytes.length < 0x8020 || bytes[0] !== 0xE9) return false;
+        if (bytes[0x8000] !== 0xAA || bytes[0x8001] !== 0x50) return false;
+        var offset = bytes[0x8004] + bytes[0x8005] * 0x100 + bytes[0x8006] * 0x10000 + bytes[0x8007] * 0x1000000;
+        return offset >= 0x9000 && offset % 0x1000 === 0;
+    }
+
     async function prepareFileArray(logMessage) {
         if (isRsnodeSelected()) {
             if (!state.rsnodeAsset || !state.rsnodeMetadata || betaStage !== 'ready' || !rsnodeVariantIsConfirmed()) {
@@ -9198,7 +9205,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
             var nameLower = state.customFile.name.toLowerCase();
             var addr = (state.customOffsets && state.customOffsets[0] != null)
                 ? state.customOffsets[0]
-                : (/(merged|combined|full)/.test(nameLower) ? 0x0 : 0x10000);
+                : (isMergedImage(u8) || /(merged|combined|full)/.test(nameLower) ? 0x0 : 0x10000);
             logMessage('Custom firmware: ' + state.customFile.name + ' @ 0x' + addr.toString(16) +
                        ' (' + formatBytes(buf.byteLength) + ')', '');
             state.firmwareAppBytes = u8;

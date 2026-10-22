@@ -103,3 +103,25 @@ test('default package follows the installed arrangement, explicit selection does
     plan: { installMode: undefined }, accept: false });
   assert.equal(await explicit.run(), null); assert.deepEqual(explicit.calls, ['confirm']);
 });
+
+function espImage(size, entryOffset) {
+  const bytes = new Uint8Array(size);
+  bytes[0] = 0xE9;
+  if (entryOffset != null) bytes.set([0xAA, 0x50, 0x01, 0x02, entryOffset & 0xFF, (entryOffset >> 8) & 0xFF, entryOffset >> 16, 0], 0x8000);
+  return bytes;
+}
+
+async function singleBinAddress(name, bytes, customOffsets = null) {
+  const state = { device: 'custom', customOffsets, customFile: { name, arrayBuffer: async () => bytes.buffer } };
+  const context = { state, isRsnodeSelected: () => false, uint8ToBstr: () => 'image', formatBytes: String, CUSTOM_FLASH_DEFAULTS: {} };
+  const prepare = vm.runInNewContext(`${extractFunction('isMergedImage')}; (async ${extractFunction('prepareFileArray')})`, context);
+  return (await prepare(() => {})).fileArray[0].address;
+}
+
+test('a complete handheld .bin uploaded under Build your own is written at 0x0', async () => {
+  assert.equal(await singleBinAddress('tdeck-standalone.bin', espImage(0x9000, 0x9000)), 0);
+  assert.equal(await singleBinAddress('firmware.bin', espImage(0x9000)), 0x10000);
+  assert.equal(await singleBinAddress('firmware.bin', espImage(0x9000, 0x1234)), 0x10000);
+  assert.equal(await singleBinAddress('firmware-merged.bin', espImage(0x100)), 0);
+  assert.equal(await singleBinAddress('tdeck-standalone.bin', espImage(0x9000, 0x9000), [0x10000]), 0x10000);
+});
