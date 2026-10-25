@@ -61,6 +61,8 @@
             --accent-dark:   #B85829;
             --accent-fill:   #B85829;
             --accent-fill-hover: #A24D24;
+            --accent-text:   #A24D24;
+            --accent-text-hover: #8A4120;
             --accent-a05:    rgba(210, 105, 59, 0.05);
             --accent-a12:    rgba(210, 105, 59, 0.12);
             --accent-a15:    rgba(210, 105, 59, 0.15);
@@ -109,6 +111,8 @@
             --accent-dark:   #B85829;
             --accent-fill:   #B85829;
             --accent-fill-hover: #A24D24;
+            --accent-text:   #DB7445;
+            --accent-text-hover: #E8875A;
             --accent-a05:    rgba(210, 105, 59, 0.05);
             --accent-a12:    rgba(210, 105, 59, 0.12);
             --accent-a15:    rgba(210, 105, 59, 0.15);
@@ -356,7 +360,7 @@
         }
         [data-theme="dark"] .navbar-menu a:hover { background: var(--bg-secondary); }
         .navbar-menu a.menu-active {
-            color: var(--accent);
+            color: var(--accent-text);
         }
 
         /* ── Hero ──────────────────────────────────────── */
@@ -375,7 +379,7 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 2px;
-            color: var(--accent);
+            color: var(--accent-text);
             margin-bottom: 16px;
             display: block;
         }
@@ -626,11 +630,11 @@
             letter-spacing: 2.5px;
             display: block;
             margin-bottom: 4px;
-            color: var(--accent);
+            color: var(--accent-text);
             opacity: 0.5;
         }
-        .download-section__label.--blue { color: var(--accent); }
-        .download-section__label.--green { color: var(--accent); }
+        .download-section__label.--blue { color: var(--accent-text); }
+        .download-section__label.--green { color: var(--accent-text); }
 
         .download-section__title {
             font-family: var(--font-sans);
@@ -688,7 +692,7 @@
             transition: color 0.2s, gap 0.2s;
         }
 
-        .flash-back:hover { color: var(--accent); gap: 10px; }
+        .flash-back:hover { color: var(--accent-text); gap: 10px; }
         .flash-back svg { transition: transform 0.2s; }
 
         .flash-driver-note {
@@ -707,8 +711,7 @@
         .flash-driver-note[hidden] { display: none; }
         .flash-driver-note > svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--accent); }
         .flash-driver-note p { flex: 1; min-width: 0; }
-        .flash-driver-note a { color: var(--accent-dark); text-underline-offset: 3px; }
-        [data-theme="dark"] .flash-driver-note a { color: var(--accent); }
+        .flash-driver-note a { color: var(--accent-text); text-underline-offset: 3px; }
         .flash-driver-note__close {
             display: flex;
             align-items: center;
@@ -787,7 +790,7 @@
             font-family: var(--font-mono);
             font-size: 11px;
             font-weight: 500;
-            color: var(--accent);
+            color: var(--accent-text);
             letter-spacing: 0.18em;
             text-transform: uppercase;
             opacity: 0.92;
@@ -929,7 +932,7 @@
             box-shadow: 0 0 0 4px var(--accent-a15);
         }
         .flash-flow--standalone .flash-flow__item.is-active .flash-flow__state {
-            color: var(--accent);
+            color: var(--accent-text);
         }
         .flash-flow--standalone .flash-flow__item.is-done .flash-flow__index {
             border-color: var(--success);
@@ -1044,7 +1047,7 @@
             font-size: 11px;
             font-weight: 500;
             letter-spacing: 0.18em;
-            color: var(--accent);
+            color: var(--accent-text);
             opacity: 0.92;
             text-transform: uppercase;
             margin-bottom: 9px;
@@ -1072,7 +1075,7 @@
             line-height: 1.55;
         }
         #firmwarePreset .flash-connect-tips { color: var(--text-secondary); }
-        #firmwarePreset .flash-connect-tips a { color: var(--accent); text-underline-offset: 3px; }
+        #firmwarePreset .flash-connect-tips a { color: var(--accent-text); text-underline-offset: 3px; }
         #firmwarePreset summary { cursor: pointer; }
         #firmwarePreset a:focus-visible,
         #firmwarePreset summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
@@ -1115,7 +1118,7 @@
             border: 1px solid var(--border-subtle);
             padding: 1px 5px;
             border-radius: 4px;
-            color: var(--accent);
+            color: var(--accent-text);
         }
 
         /* Connection section — use the newer secondary CTA treatment while
@@ -1268,7 +1271,7 @@
             display: inline-block;
         }
         a.firmware-ready__name:hover {
-            color: var(--accent);
+            color: var(--accent-text);
         }
 
         .firmware-ready__size {
@@ -1350,7 +1353,7 @@
             cursor: pointer;
         }
         .firmware-version-btn:hover {
-            color: var(--accent);
+            color: var(--accent-text);
         }
         .firmware-version-btn[aria-disabled="true"] {
             cursor: default;
@@ -1504,7 +1507,7 @@
             font-family: var(--font-mono);
             font-size: 13.5px;
             font-weight: 500;
-            color: var(--accent-dark);
+            color: var(--accent-text);
             margin-bottom: 3px;
             word-break: break-all;
         }
@@ -1646,7 +1649,7 @@
             flex-shrink: 0;
         }
         .rnode-source__repo:hover {
-            color: var(--accent);
+            color: var(--accent-text);
             border-color: var(--accent);
         }
         .rnode-source__field {
@@ -1966,7 +1969,7 @@
             cursor: default;
         }
         .flash-option-pill:has(input:disabled) .flash-option-pill__hint {
-            color: var(--accent);
+            color: var(--accent-text);
         }
         #eraseOption.flash-option-pill:focus-within {
             outline-color: var(--red);
@@ -2064,11 +2067,11 @@
             transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
         }
         .provision-board__change:hover {
-            color: var(--accent);
+            color: var(--accent-text);
             border-color: var(--accent);
         }
         .provision-board[data-mode="manual"] .provision-board__change {
-            color: var(--accent);
+            color: var(--accent-text);
             border-color: var(--accent);
         }
         .provision-board__manual {
@@ -2461,7 +2464,7 @@
             font-family: var(--font-mono);
             font-size: 11px;
             font-weight: 500;
-            color: var(--accent);
+            color: var(--accent-text);
             letter-spacing: 0.18em;
             text-transform: uppercase;
             margin-bottom: 4px;
@@ -2520,7 +2523,7 @@
 
         .flash-btn--flashing {
             background: var(--accent-light);
-            color: var(--accent);
+            color: var(--accent-text);
             border-color: var(--accent-a25);
             cursor: wait;
             box-shadow: none;
@@ -2543,7 +2546,7 @@
         .install-dialog::backdrop { background: rgba(16, 14, 18, 0.65); }
         .install-dialog__device {
             margin-bottom: 10px;
-            color: var(--accent);
+            color: var(--accent-text);
             font: 500 13px var(--font-mono);
         }
         .install-dialog h2 { margin: 0 0 16px; font-size: 28px; line-height: 1.15; font-weight: 500; letter-spacing: -0.025em; }
@@ -2671,7 +2674,7 @@
             font-family: var(--font-mono);
             font-size: 14px;
             font-weight: 600;
-            color: var(--accent);
+            color: var(--accent-text);
         }
 
         .progress-bar-track {
@@ -2816,7 +2819,7 @@
             border: 1px solid rgba(210, 105, 59, 0.25);
             border-radius: 10px;
             background: var(--accent-light);
-            color: var(--accent-dark);
+            color: var(--accent-text);
             cursor: pointer;
             transition: all 0.25s;
         }
@@ -2903,7 +2906,7 @@
             transition: opacity 0.2s ease;
         }
         .footer-brand:hover {
-            color: var(--accent);
+            color: var(--accent-text);
         }
         .footer-brand:hover svg {
             opacity: 1;
@@ -2912,12 +2915,12 @@
             color: var(--text-muted);
         }
         .footer-built a {
-            color: var(--accent);
+            color: var(--accent-text);
             text-decoration: none;
             transition: color 0.2s;
         }
         .footer-built a:hover {
-            color: var(--accent-dark);
+            color: var(--accent-text-hover);
         }
         .footer-links {
             display: flex;
@@ -3054,7 +3057,7 @@
             color: var(--text-muted);
         }
         .dl-hero__meta a {
-            color: var(--accent);
+            color: var(--accent-text);
             text-decoration: none;
             border-bottom: 1px dotted var(--accent-a40);
             transition: border-color 0.2s ease;
@@ -3669,7 +3672,7 @@
             font-family: var(--font-mono);
             font-size: 12px;
             font-weight: 500;
-            color: var(--accent);
+            color: var(--accent-text);
             text-decoration: none;
             letter-spacing: 0.04em;
             transition: gap 0.2s ease;
@@ -3845,10 +3848,10 @@
             border: 1px solid var(--border-subtle);
             padding: 1px 6px;
             border-radius: 5px;
-            color: var(--accent);
+            color: var(--accent-text);
         }
         .dl-custom__lede a {
-            color: var(--accent);
+            color: var(--accent-text);
             text-decoration: none;
             border-bottom: 1px dotted var(--accent-a40);
         }
@@ -4005,7 +4008,7 @@
             transition: color 0.2s ease, background 0.2s ease;
         }
         .dl-verify__copy:hover {
-            color: var(--accent);
+            color: var(--accent-text);
             background: var(--accent-light);
         }
         .dl-verify__copy.is-copied {
@@ -4018,7 +4021,7 @@
             line-height: 1.5;
         }
         .dl-verify__note a {
-            color: var(--accent);
+            color: var(--accent-text);
             text-decoration: none;
             border-bottom: 1px dotted var(--accent-a40);
         }

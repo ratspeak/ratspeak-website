@@ -73,6 +73,7 @@
             --accent-dark:   #B85829;
             --accent-fill:   #B85829;
             --accent-fill-hover: #A24D24;
+            --accent-text:   #A24D24;
             --blue:          #3A76F0;
             --blue-light:    #ebf2fe;
             --red:           #CF222E;
@@ -145,6 +146,7 @@
             --accent-dark:   #E08A5A;
             --accent-fill:   #B85829;
             --accent-fill-hover: #A24D24;
+            --accent-text:   #DB7445;
             --blue:          #5b93f5;
             --blue-light:    #1a2236;
             --red:           #e5534b;
@@ -268,7 +270,7 @@
         }
         .nav-btn:hover { color: var(--text-primary); background: var(--bg-secondary); }
         .nav-btn svg { width: 16px; height: 16px; }
-        .nav-btn--toggled { color: var(--accent); border-color: var(--border-subtle); background: var(--accent-light); }
+        .nav-btn--toggled { color: var(--accent-text); border-color: var(--border-subtle); background: var(--accent-light); }
 
         .theme-icon-sun { display: none; }
         .theme-icon-moon { display: block; }
@@ -286,7 +288,7 @@
             font-family: var(--font-mono);
             font-size: 12px;
             font-weight: 600;
-            color: var(--accent);
+            color: var(--accent-text);
             letter-spacing: 0.06em;
             text-transform: uppercase;
             display: block;
@@ -653,7 +655,7 @@
         }
         .column__add:hover {
             border-color: var(--accent);
-            color: var(--accent);
+            color: var(--accent-text);
             background: var(--accent-light);
         }
         .column__add svg { width: 14px; height: 14px; }
@@ -961,7 +963,7 @@
             color: var(--text-primary);
             flex-shrink: 0;
         }
-        .footer-built a { color: var(--accent); text-decoration: none; }
+        .footer-built a { color: var(--accent-text); text-decoration: none; }
         .footer-brand { display: inline-flex; line-height: 0; }
         .footer-brand svg { transition: color 0.2s, opacity 0.2s; opacity: 0.75; }
         .footer-brand:hover svg { color: var(--accent); opacity: 1; }

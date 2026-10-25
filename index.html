@@ -74,6 +74,7 @@
             --accent-dark:   #B85829;
             --accent-fill:   #B85829;
             --accent-fill-hover: #A24D24;
+            --accent-text:   #A24D24;
             /* Alpha-scaled accent — used in shadows, borders, and animation
                endpoints. Theme-aware via the dark-mode override below. */
             --accent-a05:    rgba(210, 105, 59, 0.05);
@@ -117,6 +118,7 @@
             --accent-dark:   #B85829;
             --accent-fill:   #B85829;
             --accent-fill-hover: #A24D24;
+            --accent-text:   #DB7445;
             --accent-a05:    rgba(210, 105, 59, 0.05);
             --accent-a12:    rgba(210, 105, 59, 0.12);
             --accent-a15:    rgba(210, 105, 59, 0.15);
@@ -260,7 +262,7 @@
         }
         [data-theme="dark"] .navbar-menu a:hover { background: var(--bg-secondary); }
         .navbar-menu a.menu-active {
-            color: var(--accent);
+            color: var(--accent-text);
         }
 
         .theme-icon-sun { display: none; }
@@ -347,7 +349,7 @@
             margin-bottom: 32px;
         }
         .hero-built-on a {
-            color: var(--accent); text-decoration: none;
+            color: var(--accent-text); text-decoration: none;
             border-bottom: 1px dotted var(--accent-a40);
             transition: border-color 0.2s;
         }
@@ -435,7 +437,7 @@
         .section-label {
             font-family: var(--font-mono);
             font-size: 11.5px; font-weight: 500;
-            color: var(--accent);
+            color: var(--accent-text);
             letter-spacing: 0.18em;
             text-transform: uppercase;
             text-align: center; display: block;
@@ -736,7 +738,7 @@
         }
         .form-status--download {
             background: var(--accent-light);
-            color: var(--accent-dark);
+            color: var(--accent-text);
             border: 1px solid var(--accent-a20);
         }
 
@@ -754,7 +756,7 @@
             border-radius: 999px;
         }
         .forms-note svg { width: 14px; height: 14px; color: var(--accent); flex-shrink: 0; }
-        .forms-note a { color: var(--accent); text-decoration: none; }
+        .forms-note a { color: var(--accent-text); text-decoration: none; }
         .forms-note a:hover { text-decoration: underline; }
 
         /* ── How It Works ────────────────────────────── */
@@ -870,7 +872,7 @@
             font-family: var(--font-mono);
             font-size: 11px;
             letter-spacing: 0.14em;
-            color: var(--accent);
+            color: var(--accent-text);
             text-transform: uppercase;
             font-weight: 500;
             line-height: 1;
@@ -1000,7 +1002,7 @@
             color: var(--text-primary); /* "just black" — readable, not faded */
             flex-shrink: 0;
         }
-        .footer-built a { color: var(--accent); text-decoration: none; }
+        .footer-built a { color: var(--accent-text); text-decoration: none; }
         .footer-brand { display: inline-flex; line-height: 0; }
         .footer-brand svg { transition: color 0.2s, opacity 0.2s; opacity: 0.75; }
         .footer-brand:hover svg { color: var(--accent); opacity: 1; }
