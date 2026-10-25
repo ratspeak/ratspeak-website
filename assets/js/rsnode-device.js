@@ -219,13 +219,14 @@ export function managementLine(status) {
   return `${status.keySet ? 'Key set' : 'No key'} · ${status.pskSet ? 'AP password set' : 'no AP password'}`;
 }
 
+// The web flasher's names: the primary is the owner, helpers are admins.
 function ownersLine(node) {
   if (node === null) return 'Not supported by this firmware';
   if (node.destination === null) return 'None yet';
-  const helpers = node.owners.filter(owner => owner.role === ROLE_HELPER).length;
+  const admins = node.owners.filter(owner => owner.role === ROLE_HELPER).length;
   const parts = [];
-  if (node.owners.some(owner => owner.role === ROLE_PRIMARY)) parts.push('Primary');
-  if (helpers) parts.push(`${helpers} helper${helpers === 1 ? '' : 's'}`);
+  if (node.owners.some(owner => owner.role === ROLE_PRIMARY)) parts.push('Owner');
+  if (admins) parts.push(`${admins} admin${admins === 1 ? '' : 's'}`);
   return parts.length ? parts.join(' and ') : 'None';
 }
 
