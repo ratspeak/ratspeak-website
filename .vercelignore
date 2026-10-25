@@ -3,6 +3,7 @@
 .env*
 tests
 scripts/*.mjs
+scripts/*.py
 scripts/map-server
 scripts/poll-dev
 seo-preview.html

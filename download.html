@@ -8677,9 +8677,10 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     var RSNODE_OWNER_KINDS = { 1: 'LXMF address', 2: 'identity hash' };
     var RSNODE_OWNER_ROLES = { 1: 'Primary', 2: 'Helper' };
 
+    // Private beta: owner tools need an unlocked session, for uploaded packages too.
     function updateRsnodeOwnerVisibility() {
         var panel = document.getElementById('rsnodeOwner');
-        if (panel) panel.hidden = !(state.device === 'custom' && (state.rsnodeInstalled || (isRsnodeSelected() && betaStage === 'ready')));
+        if (panel) panel.hidden = !(state.device === 'custom' && betaStage === 'ready' && (isRsnodeSelected() || state.rsnodeInstalled));
     }
 
     function rsnodeOwnerLines(id) {

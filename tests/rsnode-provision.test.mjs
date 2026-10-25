@@ -206,7 +206,7 @@ test('owner work checks its input before asking for a port and always closes the
   assert.deepEqual(calls, [['busy', true], ['port'], ['message', true], ['close', 'port'], ['busy', false]]);
 });
 
-test('the owner step appears for the unlocked beta and after an rsNode install', () => {
+test('the owner step appears only with beta access, before and after an rsNode install', () => {
   const panel = { hidden: true, open: false }, notice = { hidden: true };
   const context = { state: { device: 'custom', rsnodeInstalled: false }, betaStage: 'locked',
     isRsnodeSelected: () => true, document: { getElementById: id => id === 'rsnodeOwner' ? panel : notice } };
@@ -216,12 +216,13 @@ test('the owner step appears for the unlocked beta and after an rsNode install',
   context.betaStage = 'ready';
   updateRsnodeOwnerVisibility();
   assert.equal(panel.hidden, false);
+  // An uploaded rsNode package gets the owner step, but only while the beta is unlocked.
   Object.assign(context, { betaStage: 'locked', isRsnodeSelected: () => false });
-  updateRsnodeOwnerVisibility();
-  assert.equal(panel.hidden, true);
-  // An uploaded rsNode package needs no beta session for its owner step.
   showRsnodeOwnerStep();
-  assert.deepEqual([context.state.rsnodeInstalled, panel.hidden, panel.open, notice.hidden], [true, false, true, false]);
+  assert.deepEqual([context.state.rsnodeInstalled, panel.hidden], [true, true]);
+  context.betaStage = 'ready';
+  showRsnodeOwnerStep();
+  assert.deepEqual([panel.hidden, panel.open, notice.hidden], [false, true, false]);
   context.state.device = 'tdeck';
   updateRsnodeOwnerVisibility();
   assert.equal(panel.hidden, true);
