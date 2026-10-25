@@ -184,6 +184,16 @@ async function nodeExchange(session, payload, what) {
   try { return parseNodeStatus(frame.payload); } catch (error) { throw new Error(`${what}: ${error.message}`); }
 }
 
+/** READ_MGMT as --read asks it. */
+export function readManagementStatus(session) {
+  return managementExchange(session, [READ_MGMT], 'READ_MGMT');
+}
+
+/** READ_NODE as --read asks it; null on firmware that predates owners. */
+export function readNodeStatus(session) {
+  return nodeExchange(session, [READ_NODE], 'READ_NODE');
+}
+
 async function waitForDevice(session, timeoutMs, log) {
   const deadline = Date.now() + timeoutMs;
   let hinted = false;
@@ -213,10 +223,10 @@ export async function provisionRsnode(session, options, { log = () => {}, saveKe
     throw new Error(`no KISS response within ${KISS_TIMEOUT_MS / 1000} s: EXIT Repeater if active; ` +
       'in RNode, hold USB on the home menu to take over from another host, then try again');
   }
-  let status = await managementExchange(session, [READ_MGMT], 'READ_MGMT');
+  let status = await readManagementStatus(session);
   logStatus(log, status);
   if (options.read) {
-    const node = await nodeExchange(session, [READ_NODE], 'READ_NODE');
+    const node = await readNodeStatus(session);
     await session.send(CMD_LEAVE, [0xff]);
     renderNode(node).forEach(line => log(line));
     return { status, node };
@@ -238,9 +248,9 @@ export async function provisionRsnode(session, options, { log = () => {}, saveKe
   }
   for (const hash of removals) await nodeExchange(session, [REMOVE_OWNER, ...hash], 'REMOVE_OWNER');
   for (const [kind, role, hash, what] of owners) await nodeExchange(session, [ADD_OWNER, kind, role, ...hash], what);
-  const node = await nodeExchange(session, [READ_NODE], 'READ_NODE');
+  const node = await readNodeStatus(session);
   if (node === null && (removals.length || owners.length)) throw new Error('this firmware predates owners');
-  status = await managementExchange(session, [READ_MGMT], 'READ_MGMT');
+  status = await readManagementStatus(session);
   await session.send(CMD_LEAVE, [0xff]);
   logStatus(log, status);
   renderNode(node).forEach(line => log(line));
