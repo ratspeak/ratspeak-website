@@ -214,6 +214,11 @@ function radioLine(radio) {
     `SF${radio.spreadingFactor} · CR 4/${radio.codingRate} · ${radio.txPower} dBm`;
 }
 
+/** The management key and AP password as both rsNode tools show them. */
+export function managementLine(status) {
+  return `${status.keySet ? 'Key set' : 'No key'} · ${status.pskSet ? 'AP password set' : 'no AP password'}`;
+}
+
 function ownersLine(node) {
   if (node === null) return 'Not supported by this firmware';
   if (node.destination === null) return 'None yet';
@@ -238,7 +243,7 @@ export function rsnodeSummary(facts, radio) {
     node: `RNode ${facts.status.nodeId}`,
     board: `${BOARDS[facts.board] || `Board ${hexByte(facts.board)}`} · ${PLATFORMS[facts.platform] || hexByte(facts.platform)}`,
     firmware: `RNode ${version(facts.firmware)} · image ${facts.firmwareHash.slice(0, 8)}`,
-    management: `${facts.status.keySet ? 'Key set' : 'No key'} · ${facts.status.pskSet ? 'AP password set' : 'no AP password'}`,
+    management: managementLine(facts.status),
     owners: ownersLine(facts.node),
     repeater: repeaterLine(facts.transport),
     radio: radioLine(radio),

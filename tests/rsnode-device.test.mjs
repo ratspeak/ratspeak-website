@@ -251,7 +251,7 @@ const PANEL = ['rsnodeDevice', 'rsnodeDeviceFacts', 'rsnodeDeviceRadio', 'rsnode
   'RSNODE_SCREEN_INTERVAL_MS', 'RSNODE_RADIO_INTERVAL_MS', 'RSNODE_SCREEN_MISSES', 'RSNODE_PIXEL_ON', 'RSNODE_PIXEL_OFF',
   'RSNODE_TAKEOVER', 'rsnodeToolsUnlocked', 'updateRsnodeDeviceVisibility', 'rsnodeDeviceMessage', 'syncRsnodeDevice',
   'setRsnodeScreenState', 'clearRsnodeScreen', 'paintRsnodeScreen', 'showRsnodeDeviceFacts', 'rsnodeDeviceError',
-  'rsnodeDeviceWatched', 'streamRsnodeDevice', 'runRsnodeDevice', 'stopRsnodeDevice', 'releaseRsnodeDevice'];
+  'rsnodePortError', 'rsnodeDeviceWatched', 'streamRsnodeDevice', 'runRsnodeDevice', 'stopRsnodeDevice', 'releaseRsnodeDevice'];
 
 function devicePage(port, overrides = {}) {
   const document = panelDocument();
@@ -398,7 +398,7 @@ test('the device panel appears only with beta access, like the owner panel, and 
   }
   assert.equal(page.context.rsnodeDevice, null);
   assert.equal(page.document.elements.rsnodeDevice.hidden, true);
-  assert.match(html, /<details class="flash-cta__repair rsnode-device" id="rsnodeDevice" hidden>/);
+  assert.match(html, /<details class="flash-cta__repair rsnode-device" id="rsnodeDevice" name="rsnode-tools" hidden>/);
 });
 
 test('every other USB task takes the port only after the live view has left the node', () => {
