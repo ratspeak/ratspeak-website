@@ -54,10 +54,12 @@
             --border-card:   #E1D5C6;
             --text-primary:  #2A2522;
             --text-secondary:#6F675F;
-            --text-muted:    #9A9086;
+            --text-muted:    #746C64;
             --accent:        #D2693B;
             --accent-light:  #FBEFE6;
             --accent-dark:   #B85829;
+            --accent-fill:   #B85829;
+            --accent-fill-hover: #A24D24;
             --accent-a05:    rgba(210, 105, 59, 0.05);
             --accent-a12:    rgba(210, 105, 59, 0.12);
             --accent-a15:    rgba(210, 105, 59, 0.15);
@@ -93,10 +95,12 @@
             --border-card:   #2a2629;
             --text-primary:  #e8e4e0;
             --text-secondary:#a89f96;
-            --text-muted:    #7a7068;
+            --text-muted:    #8c837a;
             --accent:        #D2693B;
             --accent-light:  #2a1f18;
             --accent-dark:   #B85829;
+            --accent-fill:   #B85829;
+            --accent-fill-hover: #A24D24;
             --accent-a05:    rgba(210, 105, 59, 0.05);
             --accent-a12:    rgba(210, 105, 59, 0.12);
             --accent-a15:    rgba(210, 105, 59, 0.15);
@@ -268,7 +272,7 @@
         /* ── Buttons ─────────────────────────────────── */
         .nr-btn {
             display: inline-flex; align-items: center; gap: 8px;
-            background: var(--accent); color: #ffffff;
+            background: var(--accent-fill); color: #ffffff;
             border: none; border-radius: 10px;
             padding: 12px 22px;
             font-size: 15px; font-weight: 600;
@@ -279,7 +283,7 @@
             transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
         }
         .nr-btn:hover {
-            background: var(--accent-dark);
+            background: var(--accent-fill-hover);
             color: #ffffff;
             transform: translateY(-1px);
             box-shadow: 0 2px 4px var(--accent-a25), 0 8px 20px var(--accent-a25);
@@ -298,8 +302,8 @@
             transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
         }
         .nr-btn-secondary:hover {
-            background: var(--accent);
-            border-color: var(--accent);
+            background: var(--accent-fill);
+            border-color: var(--accent-fill);
             color: #ffffff;
             transform: translateY(-1px);
             box-shadow: 0 2px 4px var(--accent-a25), 0 8px 20px var(--accent-a25);
