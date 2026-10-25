@@ -185,7 +185,7 @@ test('summarizes the node for the panel and for a bug report', async () => {
   }
   assert.deepEqual(lines['heltec-v4'], {
     node: 'RNode 887A', board: 'Heltec V4 · ESP32', firmware: `RNode 1.86 · image ${v4.device.firmwareHash.slice(0, 8)}`,
-    management: 'Key set · AP password set', owners: 'Primary and 1 helper', repeater: 'Not set up',
+    management: 'Key set · AP password set', owners: 'Owner and 1 admin', repeater: 'Not set up',
     radio: 'Off · not configured', packets: 'RX 0 · TX 0', channel: null, battery: '84% · discharging'
   });
   assert.deepEqual(lines['heltec-v3'], {
@@ -251,7 +251,8 @@ const PANEL = ['rsnodeDevice', 'rsnodeDeviceFacts', 'rsnodeDeviceRadio', 'rsnode
   'RSNODE_SCREEN_INTERVAL_MS', 'RSNODE_RADIO_INTERVAL_MS', 'RSNODE_SCREEN_MISSES', 'RSNODE_PIXEL_ON', 'RSNODE_PIXEL_OFF',
   'RSNODE_TAKEOVER', 'rsnodeToolsUnlocked', 'updateRsnodeDeviceVisibility', 'rsnodeDeviceMessage', 'syncRsnodeDevice',
   'setRsnodeScreenState', 'clearRsnodeScreen', 'paintRsnodeScreen', 'showRsnodeDeviceFacts', 'rsnodeDeviceError',
-  'rsnodePortError', 'rsnodeDeviceWatched', 'streamRsnodeDevice', 'runRsnodeDevice', 'stopRsnodeDevice', 'releaseRsnodeDevice'];
+  'rsnodePortError', 'rsnodeDeviceWatched', 'streamRsnodeDevice', 'runRsnodeDevice', 'stopRsnodeDevice', 'releaseRsnodeDevice',
+  'syncRsnodePort'];
 
 function devicePage(port, overrides = {}) {
   const document = panelDocument();
@@ -260,7 +261,8 @@ function devicePage(port, overrides = {}) {
     document, betaStage: 'ready', rsnodeOwnerBusy: false, navigator: { serial: {} },
     state: { flashing: false, device: 'custom', rsnodeInstalled: false }, isRsnodeSelected: () => true,
     showSerialWarning: () => calls.push('serial warning'),
-    requestFreshRnodePortFromUser: async () => calls.push('port'),
+    rsnodeToolPortFromUser: async () => calls.push('port'),
+    rsnodeOtherPorts: async () => [],
     openRnodeSerialPort: async (log, settleMs) => { calls.push(['open', settleMs]); return port; },
     createRnodeSession, closeRnodeSession,
     sleepMs: () => new Promise(resolve => setTimeout(resolve, 0)),
@@ -293,7 +295,7 @@ test('the panel streams the screen and status, then leaves the node when disconn
     assert.deepEqual(page.calls, ['port', ['open', 0]]);
     assert.deepEqual(page.document.painted.slice(0, v4.screens.length).map(screenOf), v4.screens.map(screen => screen.rows));
     assert.equal(page.document.fact('node').dd.textContent, 'RNode 887A');
-    assert.equal(page.document.fact('owners').dd.textContent, 'Primary and 1 helper');
+    assert.equal(page.document.fact('owners').dd.textContent, 'Owner and 1 admin');
     assert.equal(page.document.fact('channel').hidden, true);
     assert.equal(page.document.fact('firmware').dd.title, v4.device.firmwareHash);
     assert.deepEqual([elements.rsnodeFacts.hidden, elements.rsnodeFactsEmpty.hidden, elements.rsnodeScreenEmpty.hidden], [false, true, true]);
@@ -362,7 +364,7 @@ test('the panel says why it stopped: no answer, or not rsNode', async () => {
   const page = devicePage(stock);
   await page.runRsnodeDevice();
   assert.equal(page.document.elements.rsnodeDeviceStatus.textContent,
-    'This node answers as an RNode but not as rsNode. The device view needs rsNode firmware.');
+    'This node answers as an RNode but not as rsNode. The live view needs rsNode firmware.');
   assert.deepEqual(stock.written, ['detect', 'read_mgmt', 'leave']);
 
   const opened = devicePage(null, { openRnodeSerialPort: async () => { throw new Error('Failed to open serial port.'); } });
@@ -403,6 +405,8 @@ test('the device panel appears only with beta access, like the owner panel, and 
 
 test('every other USB task takes the port only after the live view has left the node', () => {
   assert.match(extract('requestFreshRnodePortFromUser'), /^async function requestFreshRnodePortFromUser\(\) \{\s+await releaseRsnodeDevice\(\);/);
+  // The rsNode tools reuse the selected port, and ask for one only when there is none.
+  assert.match(extract('rsnodeToolPortFromUser'), /if \(!state\.port\) return requestFreshRnodePortFromUser\(\);\s+await releaseRsnodeDevice\(\);/);
   const connect = html.slice(html.indexOf('window.connectDevice = async function()'), html.indexOf('function applySelectedSerialPort'));
   assert.ok(connect.indexOf('await releaseRsnodeDevice();') > 0 && connect.indexOf('await releaseRsnodeDevice();') < connect.indexOf('requestPort('));
   const flash = html.slice(html.indexOf('window.startFlash = async function()'), html.indexOf('function isRnodeReconnectSetupIssue'));

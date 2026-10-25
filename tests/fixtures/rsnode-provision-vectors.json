@@ -1,24 +1,8 @@
 {
  "source": {
   "scripts/provision-rsnode.py": "cdbc9fb920b121a6f06151966c7696c44b3fc81277e54215e01fbeb5920db133",
-  "scripts/tests/test_provision_rsnode.py": "88c2875a9f671f84bc079fb5aadcda89d9de6005b0dfba50e02e434030a061ef",
-  "docs/guides/ownership.md": "6ae69b98053674fd32e449af885a81d66d5e619a31c1e602d6204008f7212418"
+  "scripts/tests/test_provision_rsnode.py": "88c2875a9f671f84bc079fb5aadcda89d9de6005b0dfba50e02e434030a061ef"
  },
- "guide": [
-  "Owners manage a Repeater over the mesh.",
-  "A node can have owners, a management key, or both.",
-  "With neither, nobody updates it remotely; USB and the MANAGE window still work.",
-  "Helpers read status, open windows and update.",
-  "The primary changes only over USB.",
-  "The node stores only public hashes: an owner's LXMF address, as Ratspeak shows it, or an identity hash.",
-  "An entry matches by either name.",
-  "The first enrollment creates the node's identity, so the node needs its Bluetooth or Wi-Fi radio running for entropy (a normal RNode-persona boot has one).",
-  "EXIT a running Repeater first.",
-  "A new primary replaces the previous one, which is removed.",
-  "LAN management and updates that need it switch off with it.",
-  "The changes take effect when the Repeater next starts.",
-  "A lost primary needs USB."
- ],
  "scenarios": [
   {
    "name": "read a fresh node",

@@ -4,8 +4,7 @@
 Runs rsNode's scripts/provision-rsnode.py against the device model in its own
 tests (scripts/tests/test_provision_rsnode.py) and records every frame the
 script writes and the model answers, with the script's own readings of them.
-No device is touched. It also checks that the sentences the page mirrors are
-still in docs/guides/ownership.md. Regenerate when any of the three changes:
+No device is touched. Regenerate when either changes:
 
   python3 -B scripts/rsnode-provision-vectors.py --rsnode-source ../rsNode \\
       --output tests/fixtures/rsnode-provision-vectors.json
@@ -25,23 +24,6 @@ from unittest import mock
 
 TESTS = "scripts/tests/test_provision_rsnode.py"
 SCRIPT = "scripts/provision-rsnode.py"
-GUIDE = "docs/guides/ownership.md"
-GUIDE_SENTENCES = [
-    "Owners manage a Repeater over the mesh.",
-    "A node can have owners, a management key, or both.",
-    "With neither, nobody updates it remotely; USB and the MANAGE window still work.",
-    "Helpers read status, open windows and update.",
-    "The primary changes only over USB.",
-    "The node stores only public hashes: an owner's LXMF address, as Ratspeak shows it, or an identity hash.",
-    "An entry matches by either name.",
-    "The first enrollment creates the node's identity, so the node needs its Bluetooth or Wi-Fi radio "
-    "running for entropy (a normal RNode-persona boot has one).",
-    "EXIT a running Repeater first.",
-    "A new primary replaces the previous one, which is removed.",
-    "LAN management and updates that need it switch off with it.",
-    "The changes take effect when the Repeater next starts.",
-    "A lost primary needs USB.",
-]
 
 # Hashes and keys hold FEND/FESC bytes so every frame exercises KISS escaping.
 PRIMARY = bytes.fromhex("c0db" + "11" * 14)
@@ -62,14 +44,6 @@ def load(name, path):
     sys.modules[name] = module
     spec.loader.exec_module(module)
     return module
-
-
-def guide_sentences(path):
-    prose = re.sub(r"\s+", " ", re.sub(r"\*\*|`", "", path.read_text(encoding="utf-8")))
-    missing = [sentence for sentence in GUIDE_SENTENCES if sentence not in prose]
-    if missing:
-        raise SystemExit(f"{GUIDE} no longer says {missing}: update the page copy and this list")
-    return GUIDE_SENTENCES
 
 
 def scenarios(p):
@@ -262,8 +236,7 @@ def main():
     with tempfile.TemporaryDirectory() as directory:
         scratch = Path(directory)
         fixture = {
-            "source": {path: hashlib.sha256((root / path).read_bytes()).hexdigest() for path in (SCRIPT, TESTS, GUIDE)},
-            "guide": guide_sentences(root / GUIDE),
+            "source": {path: hashlib.sha256((root / path).read_bytes()).hexdigest() for path in (SCRIPT, TESTS)},
             "scenarios": [run_scenario(model, scratch, *scenario) for scenario in scenarios(model.provision)],
             "replies": reply_vectors(model.provision),
             "hashes": hash_vectors(model.provision),

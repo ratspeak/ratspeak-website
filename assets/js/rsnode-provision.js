@@ -217,6 +217,7 @@ function logStatus(log, status) {
  * Options mirror its flags: read, managementKey (bytes), noKey, clearKey, owner,
  * ownerIdentity, helper, helperIdentity, removeOwner (hashes). Without managementKey,
  * noKey or clearKey a new key is generated; saveKey receives it once the node confirms it.
+ * nodeId, the page's own option, stops before any change on another node.
  */
 export async function provisionRsnode(session, options, { log = () => {}, saveKey = () => {} } = {}) {
   if (!await waitForDevice(session, KISS_TIMEOUT_MS, log)) {
@@ -225,6 +226,10 @@ export async function provisionRsnode(session, options, { log = () => {}, saveKe
   }
   let status = await readManagementStatus(session);
   logStatus(log, status);
+  if (options.nodeId && options.nodeId !== status.nodeId) {
+    await session.send(CMD_LEAVE, [0xff]);
+    throw new Error(`this is RNode ${status.nodeId}, not RNode ${options.nodeId}`);
+  }
   if (options.read) {
     const node = await readNodeStatus(session);
     await session.send(CMD_LEAVE, [0xff]);

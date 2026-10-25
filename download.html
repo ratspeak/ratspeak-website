@@ -1594,6 +1594,7 @@
         .rsnode-beta__variant { margin-top: 12px; }
         .rsnode-beta__links { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 14px; font-size: 12px; }
         .rsnode-beta__links a { color: var(--text-secondary); text-underline-offset: 3px; }
+        .rsnode-beta__note a { color: var(--text-primary); text-underline-offset: 3px; }
 
         /* ── RNode firmware picker ───────────────────── */
         /* Inset card on the secondary background so it doesn't read as
@@ -2272,11 +2273,11 @@
             overflow-wrap: anywhere;
         }
 
-        /* rsNode owners: enrollment and the management key */
+        /* rsNode device management: managers and the management key */
         .rsnode-owner__fields { min-width: 0; margin: 0; padding: 0; border: 0; }
-        .rsnode-owner__grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px 24px; }
-        .rsnode-owner__field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-        .rsnode-owner__pair { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; }
+        .rsnode-owner__grid { display: grid; gap: 20px; }
+        .rsnode-owner__field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+        .rsnode-owner__field--key { max-width: 440px; }
         .rsnode-owner__input {
             width: 100%;
             min-width: 0;
@@ -2288,7 +2289,6 @@
             border: 1px solid var(--border-card);
             border-radius: 8px;
         }
-        textarea.rsnode-owner__input { min-height: 60px; line-height: 1.5; resize: vertical; }
         .rsnode-owner__input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
         .rsnode-owner__input[aria-invalid="true"] { border-color: var(--red); }
         .rsnode-owner__input:disabled { color: var(--text-muted); cursor: default; }
@@ -2304,21 +2304,53 @@
             font: 500 12.5px var(--font-sans);
             cursor: pointer;
         }
-        .rsnode-owner__more { margin-top: 16px; }
-        .rsnode-owner__more > summary { width: fit-content; color: var(--text-secondary); font-size: 12.5px; font-weight: 600; cursor: pointer; }
-        .rsnode-owner__more[open] > summary { margin-bottom: 8px; color: var(--text-primary); }
-        .rsnode-owner__lists { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
-        .rsnode-owner__removal { display: grid; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-subtle); }
         .rsnode-owner__result { display: grid; gap: 8px; margin-top: 16px; }
         .rsnode-owner__destination { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
         .rsnode-owner__destination code { color: var(--text-primary); letter-spacing: 0.02em; overflow-wrap: anywhere; }
-        .rsnode-owner__owners { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
-        .rsnode-owner__owners code { overflow-wrap: anywhere; }
         .rsnode-owner__key { display: grid; justify-items: start; gap: 10px; margin: 12px 0 0; }
         .rsnode-owner__key p { margin: 0; }
+        .rsnode-tools__help.is-error { color: var(--red); }
+        .rsnode-tools__port { margin: 10px 0 0; color: var(--text-secondary); font-size: 12px; line-height: 1.5; }
+
+        /* One row per manager: role tag, hash, then its actions */
+        .rsnode-managers { display: grid; margin: 0; padding: 0; list-style: none; border: 1px solid var(--border-subtle); border-radius: 10px; }
+        .rsnode-managers:empty { display: none; }
+        .rsnode-managers__row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px 12px; padding: 10px 12px; }
+        .rsnode-managers__row + .rsnode-managers__row { border-top: 1px solid var(--border-subtle); }
+        .rsnode-managers__row.is-editing { background: var(--accent-a05); }
+        .rsnode-managers__role {
+            min-width: 64px;
+            padding: 3px 8px;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 999px;
+            font: 500 10.5px/1.4 var(--font-mono);
+            letter-spacing: 0.08em;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        .rsnode-managers__role.is-owner { color: var(--text-primary); background: var(--accent-a15); border-color: var(--accent-a20); }
+        .rsnode-managers__who { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; min-width: 0; }
+        .rsnode-managers__who code { color: var(--text-primary); font-size: 12.5px; overflow-wrap: anywhere; }
+        .rsnode-managers__meta { color: var(--text-secondary); font-size: 12px; }
+        .rsnode-managers__row.is-removed code { color: var(--text-secondary); text-decoration: line-through; }
+        .rsnode-managers__actions { display: flex; gap: 14px; }
+        .rsnode-managers__editor {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto auto;
+            gap: 8px;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+        }
+        .rsnode-managers__editor > .rsnode-tools__help, .rsnode-managers__editor-actions { grid-column: 1 / -1; }
+        .rsnode-managers__editor-actions { display: flex; gap: 8px; }
+        .rsnode-managers__add { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 0; }
 
         @media (max-width: 760px) {
-            .rsnode-device__layout, .rsnode-owner__grid, .rsnode-owner__lists { grid-template-columns: 1fr; }
+            .rsnode-device__layout { grid-template-columns: 1fr; }
         }
         @media (max-width: 600px) {
             .rsnode-tools__actions { display: grid; grid-template-columns: 1fr 1fr; }
@@ -2326,9 +2358,13 @@
             #rsnodeScreenshot:not([hidden]), #rsnodeScreenshot:not([hidden]) + #rsnodeCopyDetails { grid-column: auto; }
             .rsnode-tools__end { margin-left: 0; }
             .rsnode-tools__summary { order: 1; }
+            .rsnode-managers__row { grid-template-columns: auto minmax(0, 1fr); align-items: start; }
+            .rsnode-managers__actions { grid-column: 2; }
+            .rsnode-managers__editor { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .rsnode-managers__editor > .rsnode-owner__input { grid-column: 1 / -1; }
         }
         @media (max-width: 420px) {
-            .rsnode-owner__pair { grid-template-columns: 1fr; }
+            .rsnode-managers__editor { grid-template-columns: 1fr; }
         }
         @media (prefers-reduced-motion: reduce) {
             .rsnode-tools__dot.is-live, .rsnode-tools__dot.is-busy { animation: none; }
@@ -5279,8 +5315,9 @@
                             <form class="rsnode-beta__login" id="rsnodeLoginForm">
                                 <p class="rsnode-beta__note">rsNode is LoRa repeater and radio firmware for Heltec V3 and V4 boards, in private beta.</p>
                                 <label for="rsnodePassword">Private beta password</label>
-                                <input class="rsnode-beta__password" id="rsnodePassword" type="password" autocomplete="current-password" required maxlength="256" aria-describedby="rsnodeStatus">
+                                <input class="rsnode-beta__password" id="rsnodePassword" type="password" autocomplete="current-password" required maxlength="256" aria-describedby="rsnodeStatus rsnodePasswordHelp">
                                 <button class="rsnode-beta__button" id="rsnodeUnlock" type="submit">Unlock</button>
+                                <p class="rsnode-beta__note" id="rsnodePasswordHelp">For a beta password, send a message to <a href="mailto:mail@ratspeak.org">mail@ratspeak.org</a>.</p>
                             </form>
                             <div id="rsnodeTermsPending" hidden>
                                 <p class="rsnode-beta__note">Accept the beta terms to see the boards.</p>
@@ -5462,7 +5499,7 @@
                 <summary class="flash-cta__repair-summary">
                     <span class="flash-cta__repair-label">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8"/><path d="M12 16v4"/></svg>
-                        rsNode device
+                        rsNode live view
                     </span>
                     <span class="flash-cta__repair-meta">Live screen and status over USB &middot; no re-flash required</span>
                     <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
@@ -5490,7 +5527,7 @@
                                 <div data-fact="board"><dt>Board</dt><dd></dd></div>
                                 <div data-fact="firmware"><dt>Firmware</dt><dd></dd></div>
                                 <div data-fact="management"><dt>Management</dt><dd></dd></div>
-                                <div data-fact="owners"><dt>Owners</dt><dd></dd></div>
+                                <div data-fact="owners"><dt>Managers</dt><dd></dd></div>
                                 <div data-fact="repeater"><dt>Repeater</dt><dd></dd></div>
                                 <div data-fact="radio"><dt>Radio</dt><dd></dd></div>
                                 <div data-fact="packets"><dt>Packets</dt><dd></dd></div>
@@ -5505,6 +5542,7 @@
                         <button class="rsnode-beta__button" id="rsnodeCopyDetails" type="button" disabled hidden>Copy details</button>
                         <button class="rsnode-beta__button rsnode-tools__end" id="rsnodeRestart" type="button" disabled hidden>Restart node…</button>
                     </div>
+                    <p class="rsnode-tools__port" hidden>Using <span class="rsnode-tools__port-label"></span> &middot; <button class="rsnode-beta__lock" type="button" data-change-port>Change port</button></p>
                     <p class="rsnode-beta__status" id="rsnodeDeviceStatus" role="status" aria-live="polite"></p>
                     <pre class="rsnode-device__details" id="rsnodeDetailsText" tabindex="0" aria-label="Node details" hidden></pre>
                 </div>
@@ -5514,30 +5552,40 @@
                 <summary class="flash-cta__repair-summary">
                     <span class="flash-cta__repair-label">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
-                        rsNode owners
+                        rsNode device management
                     </span>
-                    <span class="flash-cta__repair-meta">Owners and management key over USB &middot; no re-flash required</span>
+                    <span class="flash-cta__repair-meta">Owner, admins and management key over USB &middot; no re-flash required</span>
                     <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
                 </summary>
                 <div class="flash-cta__repair-body">
-                    <p class="rsnode-tools__notice" id="rsnodeOwnerNotice" tabindex="-1" hidden>Next: press RESET on the board, or turn it off and on, then enroll the primary owner.</p>
-                    <p class="rsnode-tools__lede">Owners manage a Repeater over the mesh. A node can have owners, a management key, or both. With neither, nobody updates it remotely; USB and the MANAGE window still work.</p>
+                    <p class="rsnode-tools__notice" id="rsnodeOwnerNotice" tabindex="-1" hidden>Next: press RESET on the board, or turn it off and on, then add yourself as the owner.</p>
+                    <p class="rsnode-tools__lede">Choose who can manage this node over the mesh, and set its management key.</p>
                     <form id="rsnodeOwnerForm" novalidate>
                         <fieldset class="rsnode-owner__fields" id="rsnodeOwnerFields">
                             <div class="rsnode-owner__grid">
                                 <div class="rsnode-owner__field">
-                                    <label class="rnode-source__label" for="rsnodeOwnerHash">Primary owner</label>
-                                    <div class="rsnode-owner__pair">
-                                        <select class="rnode-variant-select" id="rsnodeOwnerKind" aria-label="Primary owner format">
+                                    <span class="rnode-source__label" id="rsnodeManagersLabel">Managers</span>
+                                    <ul class="rsnode-managers" id="rsnodeManagers" aria-labelledby="rsnodeManagersLabel"></ul>
+                                    <p class="rsnode-tools__help" id="rsnodeManagersEmpty">Add yourself as the owner with your LXMF address, or read the node to see its managers.</p>
+                                    <div class="rsnode-managers__editor" id="rsnodeManagerEditor" hidden>
+                                        <input class="rsnode-owner__input" id="rsnodeOwnerHash" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="LXMF address or identity hash" aria-label="Manager's LXMF address or identity hash" aria-describedby="rsnodeManagerNote">
+                                        <select class="rnode-variant-select" id="rsnodeOwnerKind" aria-label="Hash type">
                                             <option value="lxmf">LXMF address</option>
                                             <option value="identity">Identity hash</option>
                                         </select>
-                                        <input class="rsnode-owner__input" id="rsnodeOwnerHash" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="32 hexadecimal characters" aria-describedby="rsnodeOwnerHelp rsnodeOwnerRoles">
+                                        <select class="rnode-variant-select" id="rsnodeOwnerRole" aria-label="Role">
+                                            <option value="owner">Owner</option>
+                                            <option value="admin">Admin</option>
+                                        </select>
+                                        <div class="rsnode-managers__editor-actions">
+                                            <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeManagerDone" type="button">Add</button>
+                                            <button class="rsnode-beta__button" id="rsnodeManagerCancel" type="button">Cancel</button>
+                                        </div>
+                                        <p class="rsnode-tools__help" id="rsnodeManagerNote" hidden></p>
                                     </div>
-                                    <p class="rsnode-tools__help" id="rsnodeOwnerHelp">The node stores only public hashes: an owner's LXMF address, as Ratspeak shows it, or an identity hash. An entry matches by either name.</p>
-                                    <p class="rsnode-tools__help" id="rsnodeOwnerRoles">A new primary replaces the previous one, which is removed. The primary changes only over USB.</p>
+                                    <p class="rsnode-managers__add"><button class="rsnode-beta__lock" id="rsnodeManagerAdd" type="button">Add manager</button><span class="rsnode-tools__help" id="rsnodeManagersFull" hidden>A node holds up to 4 managers.</span></p>
                                 </div>
-                                <div class="rsnode-owner__field">
+                                <div class="rsnode-owner__field rsnode-owner__field--key">
                                     <label class="rnode-source__label" for="rsnodeKeyMode">Management key</label>
                                     <select class="rnode-variant-select" id="rsnodeKeyMode" aria-describedby="rsnodeKeyHelp">
                                         <option value="keep">Keep the current key</option>
@@ -5554,31 +5602,20 @@
                                     </div>
                                 </div>
                             </div>
-                            <details class="rsnode-owner__more" id="rsnodeOwnerMore">
-                                <summary>Helpers and removal</summary>
-                                <p class="rsnode-tools__help">Helpers read status, open windows and update. The primary can also add or remove them over the mesh.</p>
-                                <div class="rsnode-owner__lists">
-                                    <label class="rsnode-owner__field"><span class="rnode-source__label">Helpers by LXMF address</span><textarea class="rsnode-owner__input" id="rsnodeHelpers" rows="2" spellcheck="false" placeholder="One per line"></textarea></label>
-                                    <label class="rsnode-owner__field"><span class="rnode-source__label">Helpers by identity hash</span><textarea class="rsnode-owner__input" id="rsnodeHelperIdentities" rows="2" spellcheck="false" placeholder="One per line"></textarea></label>
-                                </div>
-                                <div class="rsnode-owner__removal">
-                                    <label class="rsnode-owner__field"><span class="rnode-source__label">Remove owners</span><textarea class="rsnode-owner__input" id="rsnodeRemoveOwners" rows="2" spellcheck="false" placeholder="One hash per line"></textarea></label>
-                                    <p class="rsnode-tools__help">Removal takes any entry, primary included, and runs before enrollment. A lost primary needs USB.</p>
-                                </div>
-                            </details>
                             <div class="flash-connect-tips rsnode-tools__tips">
                                 <div class="flash-connect-tips__head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Before you save</div>
                                 <ul>
                                     <li>Plug the node in over USB. Close other apps that use its port, such as Ratspeak or a serial monitor.</li>
                                     <li>EXIT a running Repeater first. In RNode, hold USB on the home menu to take over from another host.</li>
-                                    <li>The first enrollment creates the node's identity, so the node needs its Bluetooth or Wi-Fi radio running for entropy (a normal RNode-persona boot has one).</li>
+                                    <li>Adding the first manager creates the node's identity, so its Bluetooth or Wi-Fi radio must be running (a normal RNode boot has one).</li>
                                 </ul>
                             </div>
                             <div class="rsnode-tools__actions">
                                 <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeOwnerSave" type="submit" aria-describedby="rsnodeOwnerSummary" disabled>Save to rsNode</button>
-                                <button class="rsnode-beta__button" id="rsnodeOwnerRead" type="button">Read owners and key</button>
-                                <p class="rsnode-tools__summary" id="rsnodeOwnerSummary">Nothing to save yet. Enter an owner or choose a key change.</p>
+                                <button class="rsnode-beta__button" id="rsnodeOwnerRead" type="button">Read from node</button>
+                                <p class="rsnode-tools__summary" id="rsnodeOwnerSummary">Nothing to save yet. Add a manager or choose a key change.</p>
                             </div>
+                            <p class="rsnode-tools__port" hidden>Using <span class="rsnode-tools__port-label"></span> &middot; <button class="rsnode-beta__lock" type="button" data-change-port>Change port</button></p>
                         </fieldset>
                     </form>
                     <div id="rsnodeOwnerActivity">
@@ -5593,7 +5630,6 @@
                                 <div><dt>Node</dt><dd id="rsnodeResultNode"></dd></div>
                                 <div><dt>Management</dt><dd id="rsnodeResultKey"></dd></div>
                                 <div id="rsnodeResultIdentity"><dt>Destination</dt><dd><span class="rsnode-owner__destination"><code id="rsnodeResultDestination"></code><button class="rsnode-beta__lock" id="rsnodeCopyDestination" type="button">Copy</button><span class="rsnode-tools__help" id="rsnodeCopyNote" hidden>Press Ctrl+C or ⌘C to copy.</span></span><span class="rsnode-tools__help">Clients pin this destination.</span></dd></div>
-                                <div><dt>Owners</dt><dd><ul class="rsnode-owner__owners" id="rsnodeResultOwners"></ul></dd></div>
                             </dl>
                             <p class="rsnode-tools__help" id="rsnodeResultNote"></p>
                             <p class="rsnode-tools__help" id="rsnodeResultEffect" hidden>The changes take effect when the Repeater next starts.</p>
@@ -5680,7 +5716,7 @@
         <p class="rsnode-beta__note">Please keep beta builds within the tester group. Any rights granted by included open-source licenses still apply.</p>
         <div class="rsnode-beta__links"><a href="https://ofac.treasury.gov/sanctions-programs-and-country-information" target="_blank" rel="noopener noreferrer">U.S. sanctions</a><a href="terms.html" target="_blank" rel="noopener">Terms</a><a href="privacy.html" target="_blank" rel="noopener">Privacy</a></div>
         <p class="rsnode-beta__status" id="rsnodeTermsStatus" role="status"></p>
-        <div class="install-dialog__actions"><button class="install-dialog__cancel" id="rsnodeTermsCancel" type="button">Cancel</button><button class="install-dialog__continue" id="rsnodeTermsContinue" type="submit" disabled>Continue</button></div>
+        <div class="install-dialog__actions"><button class="install-dialog__cancel" id="rsnodeTermsCancel" type="button">Cancel</button><button class="install-dialog__continue" id="rsnodeTermsContinue" type="submit" disabled>Agree and continue</button></div>
     </form>
 </dialog>
 
@@ -6511,14 +6547,9 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
                 btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Device Selected';
 
                 // Show serial device name in the info box with status indicator
-                var portInfo = port.getInfo();
-                var vendor = portInfo.usbVendorId ? '0x' + portInfo.usbVendorId.toString(16).toUpperCase().padStart(4, '0') : '';
-                var product = portInfo.usbProductId ? '0x' + portInfo.usbProductId.toString(16).toUpperCase().padStart(4, '0') : '';
-                var deviceLabel = 'USB Serial Device';
-                if (vendor && product) deviceLabel += ' (' + vendor + ':' + product + ')';
                 dot.className = 'connect-status__dot connect-status__dot--on';
                 txt.className = 'connect-status__text connect-status__text--on';
-                txt.textContent = deviceLabel;
+                txt.textContent = usbDeviceLabel(port);
 
                 updateFlashBtn();
             })
@@ -6547,25 +6578,25 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
             btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Device Selected';
         }
         if (dot && txt) {
-            var portInfo = port && port.getInfo ? port.getInfo() : {};
-            var vendor = portInfo.usbVendorId ? '0x' + portInfo.usbVendorId.toString(16).toUpperCase().padStart(4, '0') : '';
-            var product = portInfo.usbProductId ? '0x' + portInfo.usbProductId.toString(16).toUpperCase().padStart(4, '0') : '';
-            var deviceLabel = 'USB Serial Device';
-            if (vendor && product) deviceLabel += ' (' + vendor + ':' + product + ')';
             dot.className = 'connect-status__dot connect-status__dot--on';
             txt.className = 'connect-status__text connect-status__text--on';
             txt.style.color = '';
-            txt.textContent = deviceLabel;
+            txt.textContent = usbDeviceLabel(port);
         }
         updateFlashBtn();
     }
 
+    function usbDeviceLabel(port) {
+        var info = port && port.getInfo ? port.getInfo() : {};
+        var id = function(value) { return '0x' + value.toString(16).toUpperCase().padStart(4, '0'); };
+        return 'USB Serial Device' + (info.usbVendorId && info.usbProductId ? ' (' + id(info.usbVendorId) + ':' + id(info.usbProductId) + ')' : '');
+    }
+
     async function requestFreshRnodePortFromUser() {
         await releaseRsnodeDevice();
+        // A cancelled picker leaves the selected port in place.
         if (state.port) {
             try { await state.port.close(); } catch (e) { /* may already be closed */ }
-            state.port = null;
-            state.connected = false;
         }
         var port = await navigator.serial.requestPort({ filters: [] });
         applySelectedSerialPort(port);
@@ -8832,16 +8863,27 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         }
     }
 
-    // ── rsNode owners: provision-rsnode.py over Web Serial ──
+    // ── rsNode device management: provision-rsnode.py over Web Serial ──
     var rsnodeOwnerBusy = false;
     var rsnodeOwnerReading = false;
     var rsnodeOwnerSaved = false;
     var rsnodeSavedKey = null;
+    // Rows are { hash, kind, role, node, added, removed }; node is the entry as the node reported it. Rows added
+    // here stay through the next read, so another node can get the same managers.
+    var rsnodeManagers = [];
+    var rsnodeManagersFrom = null;
+    var rsnodeManagerEditing = null;
+    var RSNODE_MANAGERS_MAX = 4;
     var RSNODE_KEY_CHANGES = { generate: 'generate a new management key', file: 'set the management key from the file',
         clear: 'remove the management key' };
-    var RSNODE_OWNER_LISTS = { helper: 'rsnodeHelpers', helperIdentity: 'rsnodeHelperIdentities', removeOwner: 'rsnodeRemoveOwners' };
-    var RSNODE_OWNER_KINDS = { 1: 'LXMF address', 2: 'identity hash' };
-    var RSNODE_OWNER_ROLES = { 1: 'Primary', 2: 'Helper' };
+    var RSNODE_KINDS = { 1: 'lxmf', 2: 'identity' };
+    var RSNODE_ROLES = { 1: 'owner', 2: 'admin' };
+    var RSNODE_KIND_NAMES = { lxmf: 'LXMF address', identity: 'Identity hash' };
+    var RSNODE_ROLE_NAMES = { owner: 'Owner', admin: 'Admin' };
+    // rsnode-provision.js words errors as the CLI does; the page says owner, admin and manager, as its list does.
+    var RSNODE_CLI_WORDS = [[/^device /, 'the node '], [/\bthe device\b/g, 'the node'], [/the primary owner/g, 'the owner'],
+        [/a helper/g, 'an admin'], [/REMOVE_OWNER/g, 'a removal'], [/the owner table is full/g, 'the manager list is full'],
+        [/no such owner/g, 'no such manager'], [/predates owners/g, 'predates managers']];
 
     // Private beta: the rsNode USB tools need an unlocked session, for uploaded packages too.
     function rsnodeToolsUnlocked() {
@@ -8853,43 +8895,238 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         if (panel) panel.hidden = !rsnodeToolsUnlocked();
     }
 
-    function rsnodeOwnerLines(id) {
-        return document.getElementById(id).value.split('\n').filter(function(line) { return line.trim(); });
+    // Both rsNode tools use the page's selected port; the picker opens only when there is none.
+    async function rsnodeToolPortFromUser() {
+        if (!state.port) return requestFreshRnodePortFromUser();
+        await releaseRsnodeDevice();
+        return state.port;
+    }
+
+    // A reused port can come back under a new handle; only a port of the same USB device stands in for it.
+    async function rsnodeOtherPorts() {
+        var info = portUsbInfo(state.port);
+        return (await authorizedSerialPorts()).filter(function(port) {
+            return port !== state.port && !sameUsbInfo(portUsbInfo(port), info);
+        });
+    }
+
+    function syncRsnodePort() {
+        var idle = !rsnodeOwnerBusy && !rsnodeDevice && !state.flashing;
+        document.querySelectorAll('.rsnode-tools__port').forEach(function(line) {
+            line.hidden = !state.port;
+            line.querySelector('.rsnode-tools__port-label').textContent = state.port ? usbDeviceLabel(state.port) : '';
+            line.querySelector('[data-change-port]').disabled = !idle;
+        });
+    }
+
+    function rsnodeActive(rows) {
+        return rows.filter(function(row) { return !row.removed; });
+    }
+
+    function rsnodeCount(count, noun) {
+        return count + ' ' + noun + (count === 1 ? '' : 's');
+    }
+
+    // The list as provision-rsnode.py flags: removals, then the owner, then admins. Rows that match the node are
+    // left alone; fromNode marks a plan that only fits the node the list was read from.
+    function rsnodeManagersPlan(rows) {
+        var plan = { removeOwner: [], owner: null, ownerIdentity: null, helper: [], helperIdentity: [],
+            setOwner: false, added: 0, changed: 0, removed: 0, fromNode: false };
+        rows.forEach(function(row) {
+            var node = row.node, kept = !!node && !row.removed && row.hash === node.hash;
+            if (kept && row.kind === node.kind && row.role === node.role) return;
+            if (node) plan.fromNode = true;
+            if (node && !kept) {
+                plan.removeOwner.push(node.hash);
+                plan.removed++;
+            }
+            if (row.removed) return;
+            if (row.role === 'owner') {
+                plan[row.kind === 'identity' ? 'ownerIdentity' : 'owner'] = row.hash;
+                plan.setOwner = true;
+            } else {
+                plan[row.kind === 'identity' ? 'helperIdentity' : 'helper'].push(row.hash);
+                if (kept) plan.changed++;
+                else plan.added++;
+            }
+        });
+        return plan;
     }
 
     // What a save would change, worded for the summary beside Save.
-    function rsnodeOwnerChanges() {
+    function rsnodeOwnerChanges(plan, keyMode) {
         var changes = [];
-        if (document.getElementById('rsnodeOwnerHash').value.trim()) changes.push('set the primary owner');
-        var helpers = rsnodeOwnerLines('rsnodeHelpers').length + rsnodeOwnerLines('rsnodeHelperIdentities').length;
-        if (helpers) changes.push(helpers === 1 ? 'add 1 helper' : 'add ' + helpers + ' helpers');
-        var removals = rsnodeOwnerLines('rsnodeRemoveOwners').length;
-        if (removals) changes.push(removals === 1 ? 'remove 1 owner' : 'remove ' + removals + ' owners');
-        var key = RSNODE_KEY_CHANGES[document.getElementById('rsnodeKeyMode').value];
-        if (key) changes.push(key);
+        if (plan.setOwner) changes.push('set the owner');
+        if (plan.added) changes.push('add ' + rsnodeCount(plan.added, 'admin'));
+        if (plan.changed) changes.push('change ' + rsnodeCount(plan.changed, 'admin'));
+        if (plan.removed) changes.push('remove ' + rsnodeCount(plan.removed, 'manager'));
+        if (RSNODE_KEY_CHANGES[keyMode]) changes.push(RSNODE_KEY_CHANGES[keyMode]);
         return changes;
     }
 
     function rsnodeOwnerSummary(changes) {
         if (state.flashing) return 'Available when flashing finishes.';
-        if (!changes.length) return 'Nothing to save yet. Enter an owner or choose a key change.';
+        if (!changes.length) return 'Nothing to save yet. Add a manager or choose a key change.';
         var last = changes[changes.length - 1];
         return 'Saving will ' + (changes.length > 1 ? changes.slice(0, -1).join(', ') + ' and ' + last : last) + '.';
     }
 
-    function syncRsnodeOwnerForm() {
-        var mode = document.getElementById('rsnodeKeyMode').value;
-        var idle = !rsnodeOwnerBusy && !state.flashing;
-        var changes = rsnodeOwnerChanges();
-        document.getElementById('rsnodeKeyFile').hidden = mode !== 'file';
-        document.querySelectorAll('#rsnodeKeyHelp [data-key-mode]').forEach(function(help) { help.hidden = help.dataset.keyMode !== mode; });
-        document.getElementById('rsnodeOwnerFields').disabled = !idle;
-        document.getElementById('rsnodeOwnerSave').disabled = !idle || !changes.length;
-        document.getElementById('rsnodeOwnerSave').textContent = rsnodeOwnerBusy && !rsnodeOwnerReading ? 'Saving…' : 'Save to rsNode';
-        document.getElementById('rsnodeOwnerRead').textContent = rsnodeOwnerBusy && rsnodeOwnerReading ? 'Reading…' : 'Read owners and key';
-        if (!rsnodeOwnerBusy) document.getElementById('rsnodeOwnerSummary').textContent = rsnodeOwnerSaved
-            ? (changes.length ? 'Saved. Plug in another node and save again to enroll the same owners.' : '')
-            : rsnodeOwnerSummary(changes);
+    // rows with entry in place of editing, or added when editing is null. One owner per node: a new owner makes
+    // the previous one an admin.
+    function rsnodeManagersWith(rows, entry, editing) {
+        var next = rows.map(function(row) {
+            if (row === editing) return Object.assign({}, row, entry);
+            if (entry.role === 'owner' && !row.removed && row.role === 'owner') return Object.assign({}, row, { role: 'admin' });
+            return row;
+        });
+        if (!editing) next.push(Object.assign({ node: null, added: true, removed: false }, entry));
+        return next;
+    }
+
+    // After a read or save: the node's managers, then rows added here that it lacks.
+    function rsnodeManagersFromNode(node, rows) {
+        var next = (node ? node.owners : []).map(function(owner) {
+            var entry = { hash: owner.hash, kind: RSNODE_KINDS[owner.kind], role: RSNODE_ROLES[owner.role] };
+            return Object.assign({ node: entry, added: false, removed: false }, entry);
+        });
+        rows.forEach(function(row) {
+            if (!row.added || row.removed) return;
+            var entry = { hash: row.hash, kind: row.kind, role: row.role };
+            var known = next.find(function(other) { return other.hash === row.hash; });
+            if (known) Object.assign(known, entry, { added: true });
+            else next.push(Object.assign({ node: null, added: true, removed: false }, entry));
+        });
+        var owner = next.find(function(row) { return row.added && row.role === 'owner'; });
+        if (owner) next.forEach(function(row) { if (row !== owner && row.role === 'owner') row.role = 'admin'; });
+        return next;
+    }
+
+    // The editor's entry, if it has one; Save puts it in the list first.
+    function rsnodeManagerDraft() {
+        var text = document.getElementById('rsnodeOwnerHash').value.trim();
+        if (!rsnodeManagerEditing || !text) return null;
+        var hash = text;
+        try { hash = bytesToHex(parseHash(text)); } catch (error) { /* checked when it is added */ }
+        return { hash: hash, kind: document.getElementById('rsnodeOwnerKind').value, role: document.getElementById('rsnodeOwnerRole').value };
+    }
+
+    function rsnodeManagersPreview() {
+        var draft = rsnodeManagerDraft();
+        return draft ? rsnodeManagersWith(rsnodeManagers, draft, rsnodeManagerEditing === 'new' ? null : rsnodeManagerEditing) : rsnodeManagers;
+    }
+
+    function rsnodeFieldError(field, message) {
+        field.setAttribute('aria-invalid', 'true');
+        var error = new Error(message);
+        error.field = field;
+        return error;
+    }
+
+    // Puts the editor's entry in the list and returns its place there.
+    function applyRsnodeManagerEdit() {
+        var input = document.getElementById('rsnodeOwnerHash');
+        var editing = rsnodeManagerEditing === 'new' ? null : rsnodeManagerEditing;
+        var hash;
+        try { hash = bytesToHex(parseHash(input.value)); } catch (error) { throw rsnodeFieldError(input, error.message); }
+        if (rsnodeManagers.some(function(row) { return row !== editing && row.hash === hash; })) {
+            throw rsnodeFieldError(input, 'This manager is already in the list.');
+        }
+        if (!editing && rsnodeActive(rsnodeManagers).length >= RSNODE_MANAGERS_MAX) {
+            throw rsnodeFieldError(input, 'A node holds up to 4 managers.');
+        }
+        var index = editing ? rsnodeManagers.indexOf(editing) : rsnodeManagers.length;
+        rsnodeManagers = rsnodeManagersWith(rsnodeManagers, { hash: hash, kind: document.getElementById('rsnodeOwnerKind').value,
+            role: document.getElementById('rsnodeOwnerRole').value }, editing);
+        rsnodeManagerEditing = null;
+        rsnodeOwnerSaved = false;
+        return index;
+    }
+
+    function prepareRsnodeManagerEditor(row) {
+        rsnodeManagerEditing = row || 'new';
+        var hash = document.getElementById('rsnodeOwnerHash');
+        hash.value = row ? row.hash : '';
+        hash.removeAttribute('aria-invalid');
+        document.getElementById('rsnodeOwnerKind').value = row ? row.kind : 'lxmf';
+        document.getElementById('rsnodeOwnerRole').value = row ? row.role
+            : rsnodeActive(rsnodeManagers).some(function(other) { return other.role === 'owner'; }) ? 'admin' : 'owner';
+        document.getElementById('rsnodeManagerDone').textContent = row ? 'Done' : 'Add';
+        document.getElementById('rsnodeManagerNote').hidden = true;
+    }
+
+    function rsnodeManagerState(row) {
+        if (row.removed) return 'Removed';
+        if (!row.node || row.hash !== row.node.hash) return 'New';
+        return row.kind !== row.node.kind || row.role !== row.node.role ? 'Changed' : '';
+    }
+
+    function rsnodeManagerButton(text, action, label) {
+        var button = Object.assign(document.createElement('button'), { type: 'button', className: 'rsnode-beta__lock', textContent: text });
+        button.dataset.manager = action;
+        button.setAttribute('aria-label', label);
+        return button;
+    }
+
+    function rsnodeManagerItem(row) {
+        var item = document.createElement('li');
+        item.className = 'rsnode-managers__row' + (row.removed ? ' is-removed' : '') + (row === rsnodeManagerEditing ? ' is-editing' : '');
+        var role = Object.assign(document.createElement('span'), { className: 'rsnode-managers__role' + (row.role === 'owner' ? ' is-owner' : ''),
+            textContent: RSNODE_ROLE_NAMES[row.role] });
+        var who = Object.assign(document.createElement('span'), { className: 'rsnode-managers__who' });
+        who.append(Object.assign(document.createElement('code'), { textContent: row.hash }), Object.assign(document.createElement('span'), {
+            className: 'rsnode-managers__meta', textContent: [RSNODE_KIND_NAMES[row.kind], rsnodeManagerState(row)].filter(Boolean).join(' · ') }));
+        var actions = Object.assign(document.createElement('span'), { className: 'rsnode-managers__actions' });
+        var name = RSNODE_ROLE_NAMES[row.role].toLowerCase() + ' ' + row.hash.slice(0, 8);
+        if (row.removed) actions.append(rsnodeManagerButton('Undo', 'undo', 'Undo removing ' + name));
+        else actions.append(rsnodeManagerButton('Edit', 'edit', 'Edit ' + name), rsnodeManagerButton('Remove', 'remove', 'Remove ' + name));
+        item.append(role, who, actions);
+        return item;
+    }
+
+    function renderRsnodeManagers() {
+        var addable = !rsnodeManagersFrom || rsnodeManagersFrom.supported;
+        if (!addable && rsnodeManagerEditing === 'new') rsnodeManagerEditing = null;
+        // With nobody listed the editor stays open: adding someone is the one thing to do.
+        if (!rsnodeManagers.length && addable && !rsnodeManagerEditing) prepareRsnodeManagerEditor(null);
+        var list = document.getElementById('rsnodeManagers');
+        list.replaceChildren.apply(list, rsnodeManagers.map(rsnodeManagerItem));
+        var empty = document.getElementById('rsnodeManagersEmpty');
+        empty.hidden = addable && rsnodeManagers.length > 0;
+        empty.textContent = !rsnodeManagersFrom ? 'Add yourself as the owner with your LXMF address, or read the node to see its managers.'
+            : addable ? 'No managers yet.' : 'This firmware does not support managers.';
+        var full = rsnodeActive(rsnodeManagers).length >= RSNODE_MANAGERS_MAX;
+        document.getElementById('rsnodeManagerEditor').hidden = !rsnodeManagerEditing;
+        document.getElementById('rsnodeManagerCancel').hidden = !rsnodeManagers.length;
+        document.getElementById('rsnodeManagerAdd').disabled = full;
+        document.getElementById('rsnodeManagerAdd').parentElement.hidden = !!rsnodeManagerEditing || !addable;
+        document.getElementById('rsnodeManagersFull').hidden = !full;
+    }
+
+    // Focus stays at the same place in the list after a change.
+    function focusRsnodeManager(index) {
+        var items = document.getElementById('rsnodeManagers').children;
+        var item = items[Math.min(index, items.length - 1)];
+        var target = item ? item.querySelector('button') : document.getElementById(rsnodeManagerEditing ? 'rsnodeOwnerHash' : 'rsnodeManagerAdd');
+        if (target) target.focus();
+    }
+
+    function refreshRsnodeManagers(index) {
+        renderRsnodeManagers();
+        syncRsnodeOwnerForm();
+        if (index != null) focusRsnodeManager(index);
+    }
+
+    function finishRsnodeManagerEdit() {
+        var note = document.getElementById('rsnodeManagerNote');
+        try {
+            var index = applyRsnodeManagerEdit();
+        } catch (error) {
+            note.textContent = error.message;
+            note.hidden = false;
+            document.getElementById('rsnodeOwnerHash').focus();
+            return;
+        }
+        refreshRsnodeManagers(index);
     }
 
     function setRsnodeOwnerBusy(busy, read) {
@@ -8898,6 +9135,24 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         document.getElementById('rsnodeOwnerDot').classList.toggle('is-busy', busy);
         syncRsnodeOwnerForm();
         updateFlashBtn();
+    }
+
+    function syncRsnodeOwnerForm() {
+        var mode = document.getElementById('rsnodeKeyMode').value;
+        var idle = !rsnodeOwnerBusy && !state.flashing;
+        var rows = rsnodeManagersPreview();
+        var crowded = rsnodeActive(rows).length > RSNODE_MANAGERS_MAX;
+        var changes = rsnodeOwnerChanges(rsnodeManagersPlan(rows), mode);
+        document.getElementById('rsnodeKeyFile').hidden = mode !== 'file';
+        document.querySelectorAll('#rsnodeKeyHelp [data-key-mode]').forEach(function(help) { help.hidden = help.dataset.keyMode !== mode; });
+        document.getElementById('rsnodeOwnerFields').disabled = !idle;
+        document.getElementById('rsnodeOwnerSave').disabled = !idle || !changes.length || crowded;
+        document.getElementById('rsnodeOwnerSave').textContent = rsnodeOwnerBusy && !rsnodeOwnerReading ? 'Saving…' : 'Save to rsNode';
+        document.getElementById('rsnodeOwnerRead').textContent = rsnodeOwnerBusy && rsnodeOwnerReading ? 'Reading…' : 'Read from node';
+        if (!rsnodeOwnerBusy) document.getElementById('rsnodeOwnerSummary').textContent = crowded
+            ? 'A node holds up to 4 managers. Remove one to save.'
+            : rsnodeOwnerSaved && !changes.length ? '' : rsnodeOwnerSummary(changes);
+        syncRsnodePort();
     }
 
     // The owner row's one status line; its dot shows working, done or failed, and a hint says what to do next.
@@ -8918,43 +9173,29 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         return null;
     }
 
-    // rsnode-provision.js texts mirror the CLI; a failed save also gets a hint for what to do next.
+    // A failed save also gets a hint for what to do next.
     function rsnodeOwnerError(error, stage, read) {
         var port = rsnodePortError(error, stage, 'try again');
         if (port) return { text: port };
-        var text = error.message || String(error);
+        var text = RSNODE_CLI_WORDS.reduce(function(words, swap) { return words.replace(swap[0], swap[1]); }, error.message || String(error));
         text = text.charAt(0).toUpperCase() + text.slice(1);
         if (read || stage !== 'protocol' || /^no KISS response/.test(error.message)) return { text: text };
-        var full = /owner table is full/.test(text) ? 'A node holds up to 4 owners. Remove one under Helpers and removal, then save again. ' : '';
-        return { text: text, hint: full + 'Read owners and key to see what the node has now.' };
+        var full = /manager list is full/.test(text) ? 'A node holds up to 4 managers. ' : '';
+        return { text: text, hint: full + 'Read from node to see what it has now.' };
     }
 
-    function rsnodeFieldError(field, message) {
-        field.setAttribute('aria-invalid', 'true');
-        var more = field.closest('details.rsnode-owner__more');
-        if (more) more.open = true;
-        var error = new Error(message);
-        error.field = field;
-        return error;
-    }
-
-    function rsnodeHashes(field, values) {
-        try { return values.map(parseHash); } catch (error) { throw rsnodeFieldError(field, error.message); }
-    }
-
-    // The form as provision-rsnode.py flags; the management-AP password is never touched.
+    // The list and key choice as provision-rsnode.py flags; the management-AP password is never touched.
     async function rsnodeOwnerOptions() {
-        var options = { read: false, managementKey: null, noKey: false, clearKey: false, owner: null,
-            ownerIdentity: null, helper: [], helperIdentity: [], removeOwner: [] };
-        var primary = document.getElementById('rsnodeOwnerHash');
-        if (primary.value.trim()) {
-            options[document.getElementById('rsnodeOwnerKind').value === 'identity' ? 'ownerIdentity' : 'owner'] =
-                rsnodeHashes(primary, [primary.value])[0];
+        if (rsnodeManagerDraft()) {
+            applyRsnodeManagerEdit();
+            renderRsnodeManagers();
         }
-        Object.keys(RSNODE_OWNER_LISTS).forEach(function(name) {
-            var field = document.getElementById(RSNODE_OWNER_LISTS[name]);
-            options[name] = rsnodeHashes(field, rsnodeOwnerLines(field.id));
-        });
+        var plan = rsnodeManagersPlan(rsnodeManagers);
+        var options = { read: false, managementKey: null, noKey: false, clearKey: false,
+            owner: plan.owner && parseHash(plan.owner), ownerIdentity: plan.ownerIdentity && parseHash(plan.ownerIdentity),
+            helper: plan.helper.map(parseHash), helperIdentity: plan.helperIdentity.map(parseHash),
+            removeOwner: plan.removeOwner.map(parseHash) };
+        if (plan.fromNode) options.nodeId = rsnodeManagersFrom.nodeId;
         var mode = document.getElementById('rsnodeKeyMode').value;
         var keyFile = document.getElementById('rsnodeKeyFile');
         if (mode === 'keep') options.noKey = true;
@@ -8993,28 +9234,20 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         downloadRsnodeKey();
     }
 
-    // What the node reported, laid out like the live view's facts.
+    // What the node reported: its managers in the list, the rest laid out like the live view's facts.
     function showRsnodeOwnerResult(result, read) {
         var node = result.node, status = result.status;
+        if (rsnodeManagerEditing !== 'new' || !rsnodeManagerDraft()) rsnodeManagerEditing = null;
+        rsnodeManagers = rsnodeManagersFromNode(node, rsnodeManagers);
+        rsnodeManagersFrom = { nodeId: status.nodeId, supported: node !== null };
+        renderRsnodeManagers();
         document.getElementById('rsnodeResultNode').textContent = 'RNode ' + status.nodeId;
         document.getElementById('rsnodeResultKey').textContent = managementLine(status);
         document.getElementById('rsnodeResultIdentity').hidden = !(node && node.destination);
         if (node && node.destination) document.getElementById('rsnodeResultDestination').textContent = node.destination;
-        var list = document.getElementById('rsnodeResultOwners');
-        list.replaceChildren();
-        var none = node === null ? 'Not supported by this firmware' : !node.destination ? 'None yet'
-            : node.owners.length ? '' : 'None. The management Link stays off.';
-        if (none) list.append(Object.assign(document.createElement('li'), { textContent: none }));
-        else node.owners.forEach(function(owner) {
-            var item = document.createElement('li');
-            var hash = document.createElement('code');
-            hash.textContent = owner.hash;
-            item.append(RSNODE_OWNER_ROLES[owner.role] + ' · ' + RSNODE_OWNER_KINDS[owner.kind] + ' ', hash);
-            list.append(item);
-        });
         document.getElementById('rsnodeResultNote').textContent = node && !node.destination
-            ? 'No node identity yet. The first owner enrollment creates it.'
-            : node && node.nearbyOnly ? 'Updates only from nearby.' : '';
+            ? 'No node identity yet. Adding the first manager creates it.'
+            : node && node.nearbyOnly ? 'Updates only from nearby managers.' : '';
         document.getElementById('rsnodeResultEffect').hidden = read;
         document.getElementById('rsnodeOwnerResult').hidden = false;
         // The key file stays on offer only while it is this node's current key.
@@ -9050,12 +9283,12 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         try {
             var options = read ? { read: true } : await rsnodeOwnerOptions();
             stage = 'port';
-            await requestFreshRnodePortFromUser();
+            await rsnodeToolPortFromUser();
             document.getElementById('rsnodeOwnerResult').hidden = true;
             document.getElementById('rsnodeKeySaved').hidden = true;
             ui = openProgressLog(read ? 'Reading rsNode…' : 'Saving to rsNode…', document.getElementById('rsnodeOwnerActivity'));
             stage = 'open';
-            session = createRnodeSession(await openRnodeSerialPort(ui.log, RNODE_REPAIR_SETTLE_MS));
+            session = createRnodeSession(await openRnodeSerialPort(ui.log, RNODE_REPAIR_SETTLE_MS, await rsnodeOtherPorts()));
             stage = 'protocol';
             ui.setStatus('Waiting for rsNode…');
             var named = false;
@@ -9077,14 +9310,13 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
             showRsnodeOwnerResult(result, read);
             document.getElementById('rsnodeOwnerNotice').hidden = true;
             if (!read) {
-                // Key changes and removals are one-shot: saving again must not rotate the key just saved.
+                // A key change is one-shot: saving again must not rotate the key just saved.
                 document.getElementById('rsnodeKeyMode').value = 'keep';
                 document.getElementById('rsnodeKeyFile').value = '';
-                document.getElementById('rsnodeRemoveOwners').value = '';
                 rsnodeOwnerSaved = true;
             }
-            rsnodeOwnerMessage(read ? 'Owners and key read. The node is back on its home menu.'
-                : 'Saved. The node is back on its home menu.' + (keyName ? ' Back up the new key file below.' : ''), false, true);
+            rsnodeOwnerMessage((read ? 'Showing RNode ' : 'Saved to RNode ') + result.status.nodeId + '. The node is back on its home menu.'
+                + (keyName ? ' Back up the new key file below.' : ''), false, true);
         } catch (error) {
             field = error.field || null;
             if (ui) ui.log('Error: ' + error.message, 'log-red');
@@ -9105,15 +9337,60 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         runRsnodeOwnerTask(false);
     });
     document.getElementById('rsnodeOwnerRead').addEventListener('click', function() { runRsnodeOwnerTask(true); });
-    document.getElementById('rsnodeOwnerForm').addEventListener('input', function(event) {
-        event.target.removeAttribute('aria-invalid');
-        rsnodeOwnerSaved = false;
-        syncRsnodeOwnerForm();
+    ['input', 'change'].forEach(function(type) {
+        document.getElementById('rsnodeOwnerForm').addEventListener(type, function(event) {
+            event.target.removeAttribute('aria-invalid');
+            if (event.target.id === 'rsnodeOwnerHash') document.getElementById('rsnodeManagerNote').hidden = true;
+            rsnodeOwnerSaved = false;
+            syncRsnodeOwnerForm();
+        });
     });
-    document.getElementById('rsnodeOwnerForm').addEventListener('change', function(event) {
-        event.target.removeAttribute('aria-invalid');
+    document.getElementById('rsnodeManagers').addEventListener('click', function(event) {
+        var button = event.target.closest('button[data-manager]');
+        if (!button) return;
+        var index = Array.prototype.indexOf.call(this.children, button.closest('li'));
+        var row = rsnodeManagers[index];
+        if (button.dataset.manager === 'edit') {
+            prepareRsnodeManagerEditor(row);
+            refreshRsnodeManagers();
+            document.getElementById('rsnodeOwnerHash').focus();
+            return;
+        }
+        if (row === rsnodeManagerEditing) rsnodeManagerEditing = null;
+        if (button.dataset.manager === 'undo') {
+            row.removed = false;
+            if (row.role === 'owner' && rsnodeActive(rsnodeManagers).some(function(other) { return other !== row && other.role === 'owner'; })) row.role = 'admin';
+        } else if (row.node) row.removed = true;
+        else rsnodeManagers.splice(index, 1);
         rsnodeOwnerSaved = false;
-        syncRsnodeOwnerForm();
+        refreshRsnodeManagers(index);
+    });
+    document.getElementById('rsnodeManagerAdd').addEventListener('click', function() {
+        prepareRsnodeManagerEditor(null);
+        refreshRsnodeManagers();
+        document.getElementById('rsnodeOwnerHash').focus();
+    });
+    document.getElementById('rsnodeManagerDone').addEventListener('click', finishRsnodeManagerEdit);
+    document.getElementById('rsnodeManagerCancel').addEventListener('click', function() {
+        var index = rsnodeManagers.indexOf(rsnodeManagerEditing);
+        rsnodeManagerEditing = null;
+        refreshRsnodeManagers(index >= 0 ? index : null);
+        if (index < 0) document.getElementById('rsnodeManagerAdd').focus();
+    });
+    document.getElementById('rsnodeManagerEditor').addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' && event.target.id === 'rsnodeOwnerHash') {
+            event.preventDefault();
+            finishRsnodeManagerEdit();
+        } else if (event.key === 'Escape' && rsnodeManagers.length) {
+            event.preventDefault();
+            document.getElementById('rsnodeManagerCancel').click();
+        }
+    });
+    document.querySelectorAll('[data-change-port]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            if (rsnodeOwnerBusy || rsnodeDevice || state.flashing) return;
+            requestFreshRnodePortFromUser().catch(function() { /* a cancelled picker keeps the selected port */ });
+        });
     });
     document.getElementById('rsnodeSaveKeyAgain').addEventListener('click', downloadRsnodeKey);
     document.getElementById('rsnodeCopyDestination').addEventListener('click', async function() {
@@ -9130,8 +9407,9 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
             setTimeout(function() { note.hidden = true; }, 6000);
         }
     });
+    renderRsnodeManagers();
 
-    // ── rsNode device: the node's screen and status over Web Serial ──
+    // ── rsNode live view: the node's screen and status over Web Serial ──
     var rsnodeDevice = null;
     var rsnodeDeviceFacts = null;
     var rsnodeDeviceRadio = null;
@@ -9172,6 +9450,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         var restart = document.getElementById('rsnodeRestart');
         restart.disabled = restart.hidden = !live;
         document.getElementById('rsnodeFacts').classList.toggle('is-stale', !!rsnodeDeviceFacts && !live);
+        syncRsnodePort();
     }
 
     function setRsnodeScreenState(text, live, busy) {
@@ -9222,7 +9501,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     function rsnodeDeviceError(error, stage) {
         var port = rsnodePortError(error, stage, 'connect again');
         if (port) return port;
-        if (error.notRsnode) return 'This node answers as an RNode but not as rsNode. The device view needs rsNode firmware.';
+        if (error.notRsnode) return 'This node answers as an RNode but not as rsNode. The live view needs rsNode firmware.';
         if (/^no answer/.test(error.message)) return 'The node stopped answering over USB. It may have restarted or started its Repeater.';
         return error.message || String(error);
     }
@@ -9274,7 +9553,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         }
         rsnodeDeviceMessage('');
         try {
-            await requestFreshRnodePortFromUser();
+            await rsnodeToolPortFromUser();
         } catch (error) {
             if (error.name === 'NotFoundError') rsnodeDeviceMessage('Select the rsNode serial port to continue.');
             else rsnodeDeviceMessage(error.message || String(error), true);
@@ -9291,7 +9570,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         document.getElementById('rsnodeLiveDot').classList.toggle('is-error', false);
         setRsnodeScreenState('Connecting…', false, true);
         try {
-            device.session = createRnodeSession(await openRnodeSerialPort(null, 0));
+            device.session = createRnodeSession(await openRnodeSerialPort(null, 0, await rsnodeOtherPorts()));
             device.stage = 'wait';
             var answered = await waitForRsnode(device.session, {
                 stopped: function() { return device.stopping; },
@@ -9461,7 +9740,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
                     noteEl.textContent = state.rnodeSetupVerified
                         ? 'Firmware flash complete. RNode setup was verified.'
                         : state.rsnodeInstalled
-                        ? (rsnodeToolsUnlocked() ? 'rsNode is installed. Next, enroll its owner below.'
+                        ? (rsnodeToolsUnlocked() ? 'rsNode is installed. Next, add its owner below.'
                             : 'rsNode is installed. Press RESET on the board, or turn it off and on.')
                         : 'Flash complete. Press RESET or turn the device off and on.';
                 }
