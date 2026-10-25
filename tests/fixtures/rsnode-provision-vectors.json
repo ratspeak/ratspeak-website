@@ -1,0 +1,1765 @@
+{
+ "source": {
+  "scripts/provision-rsnode.py": "cdbc9fb920b121a6f06151966c7696c44b3fc81277e54215e01fbeb5920db133",
+  "scripts/tests/test_provision_rsnode.py": "88c2875a9f671f84bc079fb5aadcda89d9de6005b0dfba50e02e434030a061ef",
+  "docs/guides/ownership.md": "6ae69b98053674fd32e449af885a81d66d5e619a31c1e602d6204008f7212418"
+ },
+ "guide": [
+  "Owners manage a Repeater over the mesh.",
+  "A node can have owners, a management key, or both.",
+  "With neither, nobody updates it remotely; USB and the MANAGE window still work.",
+  "Helpers read status, open windows and update.",
+  "The primary changes only over USB.",
+  "The node stores only public hashes: an owner's LXMF address, as Ratspeak shows it, or an identity hash.",
+  "An entry matches by either name.",
+  "The first enrollment creates the node's identity, so the node needs its Bluetooth or Wi-Fi radio running for entropy (a normal RNode-persona boot has one).",
+  "EXIT a running Repeater first.",
+  "A new primary replaces the previous one, which is removed.",
+  "LAN management and updates that need it switch off with it.",
+  "The changes take effect when the Repeater next starts.",
+  "A lost primary needs USB."
+ ],
+ "scenarios": [
+  {
+   "name": "read a fresh node",
+   "argv": [
+    "--read"
+   ],
+   "options": {
+    "read": true,
+    "managementKey": null,
+    "noKey": false,
+    "clearKey": false,
+    "owner": null,
+    "ownerIdentity": null,
+    "helper": [],
+    "helperIdentity": [],
+    "removeOwner": []
+   },
+   "transcript": [
+    {
+     "host": "c00873c0"
+    },
+    {
+     "device": "c00846c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c06f07c0"
+    },
+    {
+     "device": "c06f0700000000000000000000000000000000000000c0"
+    },
+    {
+     "host": "c00affc0"
+    }
+   ],
+   "exitCode": 0,
+   "stdout": [
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0",
+    "node identity: none yet (the first owner enrolment creates it)"
+   ],
+   "stderr": "",
+   "keyFile": null,
+   "status": {
+    "value": {
+     "pskSet": false,
+     "keySet": false,
+     "nodeId": "887A",
+     "floor": 0
+    },
+    "line": "status: ap_psk=not set management_key=not set"
+   },
+   "node": {
+    "value": {
+     "destination": null,
+     "nearbyOnly": false,
+     "owners": []
+    },
+    "lines": [
+     "node identity: none yet (the first owner enrolment creates it)"
+    ]
+   }
+  },
+  {
+   "name": "read a provisioned node",
+   "argv": [
+    "--read"
+   ],
+   "options": {
+    "read": true,
+    "managementKey": null,
+    "noKey": false,
+    "clearKey": false,
+    "owner": null,
+    "ownerIdentity": null,
+    "helper": [],
+    "helperIdentity": [],
+    "removeOwner": []
+   },
+   "transcript": [
+    {
+     "host": "c00873c0"
+    },
+    {
+     "device": "c00846c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0501013838374100000007c0"
+    },
+    {
+     "host": "c06f07c0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d000020101dbdcdbdd11111111111111111111111111110202333333333333333333333333333333dbdcc0"
+    },
+    {
+     "host": "c00affc0"
+    }
+   ],
+   "exitCode": 0,
+   "stdout": [
+    "node id: RNode 887A",
+    "status: ap_psk=set management_key=set",
+    "poke floor: 7",
+    "management destination: d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+    "owner: primary lxmf c0db1111111111111111111111111111",
+    "owner: helper identity 333333333333333333333333333333c0"
+   ],
+   "stderr": "",
+   "keyFile": null,
+   "status": {
+    "value": {
+     "pskSet": true,
+     "keySet": true,
+     "nodeId": "887A",
+     "floor": 7
+    },
+    "line": "status: ap_psk=set management_key=set"
+   },
+   "node": {
+    "value": {
+     "destination": "d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+     "nearbyOnly": false,
+     "owners": [
+      {
+       "kind": 1,
+       "role": 1,
+       "hash": "c0db1111111111111111111111111111"
+      },
+      {
+       "kind": 2,
+       "role": 2,
+       "hash": "333333333333333333333333333333c0"
+      }
+     ]
+    },
+    "lines": [
+     "management destination: d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+     "owner: primary lxmf c0db1111111111111111111111111111",
+     "owner: helper identity 333333333333333333333333333333c0"
+    ]
+   }
+  },
+  {
+   "name": "read firmware that predates owners",
+   "argv": [
+    "--read"
+   ],
+   "options": {
+    "read": true,
+    "managementKey": null,
+    "noKey": false,
+    "clearKey": false,
+    "owner": null,
+    "ownerIdentity": null,
+    "helper": [],
+    "helperIdentity": [],
+    "removeOwner": []
+   },
+   "transcript": [
+    {
+     "host": "c00873c0"
+    },
+    {
+     "device": "c00846c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c06f07c0"
+    },
+    {
+     "device": "c09007c0"
+    },
+    {
+     "host": "c00affc0"
+    }
+   ],
+   "exitCode": 0,
+   "stdout": [
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0",
+    "node identity: not supported by this firmware"
+   ],
+   "stderr": "",
+   "keyFile": null,
+   "status": {
+    "value": {
+     "pskSet": false,
+     "keySet": false,
+     "nodeId": "887A",
+     "floor": 0
+    },
+    "line": "status: ap_psk=not set management_key=not set"
+   },
+   "node": {
+    "value": null,
+    "lines": [
+     "node identity: not supported by this firmware"
+    ]
+   }
+  },
+  {
+   "name": "enroll the primary by LXMF address without a key",
+   "argv": [
+    "--no-psk",
+    "--no-key",
+    "--owner",
+    "<c0db1111111111111111111111111111>"
+   ],
+   "options": {
+    "read": false,
+    "managementKey": null,
+    "noKey": true,
+    "clearKey": false,
+    "owner": "c0db1111111111111111111111111111",
+    "ownerIdentity": null,
+    "helper": [],
+    "helperIdentity": [],
+    "removeOwner": []
+   },
+   "transcript": [
+    {
+     "host": "c00873c0"
+    },
+    {
+     "device": "c00846c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c06f080101dbdcdbdd1111111111111111111111111111c0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d000010101dbdcdbdd1111111111111111111111111111c0"
+    },
+    {
+     "host": "c06f07c0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d000010101dbdcdbdd1111111111111111111111111111c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c00affc0"
+    }
+   ],
+   "exitCode": 0,
+   "stdout": [
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0",
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0",
+    "management destination: d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+    "owner: primary lxmf c0db1111111111111111111111111111"
+   ],
+   "stderr": "",
+   "keyFile": null,
+   "status": {
+    "value": {
+     "pskSet": false,
+     "keySet": false,
+     "nodeId": "887A",
+     "floor": 0
+    },
+    "line": "status: ap_psk=not set management_key=not set"
+   },
+   "node": {
+    "value": {
+     "destination": "d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+     "nearbyOnly": false,
+     "owners": [
+      {
+       "kind": 1,
+       "role": 1,
+       "hash": "c0db1111111111111111111111111111"
+      }
+     ]
+    },
+    "lines": [
+     "management destination: d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+     "owner: primary lxmf c0db1111111111111111111111111111"
+    ]
+   }
+  },
+  {
+   "name": "enroll the primary by identity hash with a generated key",
+   "argv": [
+    "--no-psk",
+    "--owner-identity",
+    "C0DB1111111111111111111111111111"
+   ],
+   "options": {
+    "read": false,
+    "managementKey": null,
+    "noKey": false,
+    "clearKey": false,
+    "owner": null,
+    "ownerIdentity": "c0db1111111111111111111111111111",
+    "helper": [],
+    "helperIdentity": [],
+    "removeOwner": []
+   },
+   "transcript": [
+    {
+     "host": "c00873c0"
+    },
+    {
+     "device": "c00846c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c06f04dbdcdbdddcdd0405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fc0"
+    },
+    {
+     "device": "c06f0500013838374100000000c0"
+    },
+    {
+     "host": "c06f080201dbdcdbdd1111111111111111111111111111c0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d000010201dbdcdbdd1111111111111111111111111111c0"
+    },
+    {
+     "host": "c06f07c0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d000010201dbdcdbdd1111111111111111111111111111c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500013838374100000000c0"
+    },
+    {
+     "host": "c00affc0"
+    }
+   ],
+   "exitCode": 0,
+   "stdout": [
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0",
+    "node id: RNode 887A",
+    "management key: {scratch}/enroll-the-primary-by-identity-hash-with-a-generated-key/rsnode-887A.key",
+    "status: ap_psk=not set management_key=set",
+    "poke floor: 0",
+    "management destination: d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+    "owner: primary identity c0db1111111111111111111111111111"
+   ],
+   "stderr": "",
+   "keyFile": {
+    "name": "rsnode-887A.key",
+    "text": "c0dbdcdd0405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f\n"
+   },
+   "status": {
+    "value": {
+     "pskSet": false,
+     "keySet": true,
+     "nodeId": "887A",
+     "floor": 0
+    },
+    "line": "status: ap_psk=not set management_key=set"
+   },
+   "node": {
+    "value": {
+     "destination": "d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+     "nearbyOnly": false,
+     "owners": [
+      {
+       "kind": 2,
+       "role": 1,
+       "hash": "c0db1111111111111111111111111111"
+      }
+     ]
+    },
+    "lines": [
+     "management destination: d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+     "owner: primary identity c0db1111111111111111111111111111"
+    ]
+   }
+  },
+  {
+   "name": "enroll the primary with an existing key file",
+   "argv": [
+    "--no-psk",
+    "--management-key",
+    "{existing.key}",
+    "--owner",
+    "c0db1111111111111111111111111111"
+   ],
+   "options": {
+    "read": false,
+    "managementKey": "c0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedf",
+    "noKey": false,
+    "clearKey": false,
+    "owner": "c0db1111111111111111111111111111",
+    "ownerIdentity": null,
+    "helper": [],
+    "helperIdentity": [],
+    "removeOwner": []
+   },
+   "transcript": [
+    {
+     "host": "c00873c0"
+    },
+    {
+     "device": "c00846c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c06f04dbdcc1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdddcdddedfc0"
+    },
+    {
+     "device": "c06f0500013838374100000000c0"
+    },
+    {
+     "host": "c06f080101dbdcdbdd1111111111111111111111111111c0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d000010101dbdcdbdd1111111111111111111111111111c0"
+    },
+    {
+     "host": "c06f07c0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d000010101dbdcdbdd1111111111111111111111111111c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500013838374100000000c0"
+    },
+    {
+     "host": "c00affc0"
+    }
+   ],
+   "exitCode": 0,
+   "stdout": [
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0",
+    "node id: RNode 887A",
+    "management key: {scratch}/existing.key",
+    "status: ap_psk=not set management_key=set",
+    "poke floor: 0",
+    "management destination: d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+    "owner: primary lxmf c0db1111111111111111111111111111"
+   ],
+   "stderr": "",
+   "keyFile": null,
+   "status": {
+    "value": {
+     "pskSet": false,
+     "keySet": true,
+     "nodeId": "887A",
+     "floor": 0
+    },
+    "line": "status: ap_psk=not set management_key=set"
+   },
+   "node": {
+    "value": {
+     "destination": "d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+     "nearbyOnly": false,
+     "owners": [
+      {
+       "kind": 1,
+       "role": 1,
+       "hash": "c0db1111111111111111111111111111"
+      }
+     ]
+    },
+    "lines": [
+     "management destination: d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+     "owner: primary lxmf c0db1111111111111111111111111111"
+    ]
+   }
+  },
+  {
+   "name": "enroll the primary and helpers",
+   "argv": [
+    "--no-psk",
+    "--no-key",
+    "--owner",
+    "c0db1111111111111111111111111111",
+    "--helper",
+    "dbdc2222222222222222222222222222",
+    "--helper-identity",
+    "333333333333333333333333333333c0"
+   ],
+   "options": {
+    "read": false,
+    "managementKey": null,
+    "noKey": true,
+    "clearKey": false,
+    "owner": "c0db1111111111111111111111111111",
+    "ownerIdentity": null,
+    "helper": [
+     "dbdc2222222222222222222222222222"
+    ],
+    "helperIdentity": [
+     "333333333333333333333333333333c0"
+    ],
+    "removeOwner": []
+   },
+   "transcript": [
+    {
+     "host": "c00873c0"
+    },
+    {
+     "device": "c00846c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c06f080101dbdcdbdd1111111111111111111111111111c0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d000010101dbdcdbdd1111111111111111111111111111c0"
+    },
+    {
+     "host": "c06f080102dbdddc2222222222222222222222222222c0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d000020101dbdcdbdd11111111111111111111111111110102dbdddc2222222222222222222222222222c0"
+    },
+    {
+     "host": "c06f080202333333333333333333333333333333dbdcc0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d000030101dbdcdbdd11111111111111111111111111110102dbdddc22222222222222222222222222220202333333333333333333333333333333dbdcc0"
+    },
+    {
+     "host": "c06f07c0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d000030101dbdcdbdd11111111111111111111111111110102dbdddc22222222222222222222222222220202333333333333333333333333333333dbdcc0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c00affc0"
+    }
+   ],
+   "exitCode": 0,
+   "stdout": [
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0",
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0",
+    "management destination: d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+    "owner: primary lxmf c0db1111111111111111111111111111",
+    "owner: helper lxmf dbdc2222222222222222222222222222",
+    "owner: helper identity 333333333333333333333333333333c0"
+   ],
+   "stderr": "",
+   "keyFile": null,
+   "status": {
+    "value": {
+     "pskSet": false,
+     "keySet": false,
+     "nodeId": "887A",
+     "floor": 0
+    },
+    "line": "status: ap_psk=not set management_key=not set"
+   },
+   "node": {
+    "value": {
+     "destination": "d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+     "nearbyOnly": false,
+     "owners": [
+      {
+       "kind": 1,
+       "role": 1,
+       "hash": "c0db1111111111111111111111111111"
+      },
+      {
+       "kind": 1,
+       "role": 2,
+       "hash": "dbdc2222222222222222222222222222"
+      },
+      {
+       "kind": 2,
+       "role": 2,
+       "hash": "333333333333333333333333333333c0"
+      }
+     ]
+    },
+    "lines": [
+     "management destination: d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+     "owner: primary lxmf c0db1111111111111111111111111111",
+     "owner: helper lxmf dbdc2222222222222222222222222222",
+     "owner: helper identity 333333333333333333333333333333c0"
+    ]
+   }
+  },
+  {
+   "name": "a new primary replaces the previous one",
+   "argv": [
+    "--no-psk",
+    "--no-key",
+    "--owner",
+    "55555555555555555555555555555555"
+   ],
+   "options": {
+    "read": false,
+    "managementKey": null,
+    "noKey": true,
+    "clearKey": false,
+    "owner": "55555555555555555555555555555555",
+    "ownerIdentity": null,
+    "helper": [],
+    "helperIdentity": [],
+    "removeOwner": []
+   },
+   "transcript": [
+    {
+     "host": "c00873c0"
+    },
+    {
+     "device": "c00846c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c06f08010155555555555555555555555555555555c0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d00001010155555555555555555555555555555555c0"
+    },
+    {
+     "host": "c06f07c0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d00001010155555555555555555555555555555555c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c00affc0"
+    }
+   ],
+   "exitCode": 0,
+   "stdout": [
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0",
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0",
+    "management destination: d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+    "owner: primary lxmf 55555555555555555555555555555555"
+   ],
+   "stderr": "",
+   "keyFile": null,
+   "status": {
+    "value": {
+     "pskSet": false,
+     "keySet": false,
+     "nodeId": "887A",
+     "floor": 0
+    },
+    "line": "status: ap_psk=not set management_key=not set"
+   },
+   "node": {
+    "value": {
+     "destination": "d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+     "nearbyOnly": false,
+     "owners": [
+      {
+       "kind": 1,
+       "role": 1,
+       "hash": "55555555555555555555555555555555"
+      }
+     ]
+    },
+    "lines": [
+     "management destination: d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+     "owner: primary lxmf 55555555555555555555555555555555"
+    ]
+   }
+  },
+  {
+   "name": "remove the primary, clear the key and enroll a new primary",
+   "argv": [
+    "--no-psk",
+    "--clear-key",
+    "--remove-owner",
+    "44444444444444444444444444444444",
+    "--owner",
+    "55555555555555555555555555555555"
+   ],
+   "options": {
+    "read": false,
+    "managementKey": null,
+    "noKey": false,
+    "clearKey": true,
+    "owner": "55555555555555555555555555555555",
+    "ownerIdentity": null,
+    "helper": [],
+    "helperIdentity": [],
+    "removeOwner": [
+     "44444444444444444444444444444444"
+    ]
+   },
+   "transcript": [
+    {
+     "host": "c00873c0"
+    },
+    {
+     "device": "c00846c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500013838374100000000c0"
+    },
+    {
+     "host": "c06f06c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c06f0944444444444444444444444444444444c0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d00000c0"
+    },
+    {
+     "host": "c06f08010155555555555555555555555555555555c0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d00001010155555555555555555555555555555555c0"
+    },
+    {
+     "host": "c06f07c0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d00001010155555555555555555555555555555555c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c00affc0"
+    }
+   ],
+   "exitCode": 0,
+   "stdout": [
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=set",
+    "poke floor: 0",
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0",
+    "management destination: d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+    "owner: primary lxmf 55555555555555555555555555555555"
+   ],
+   "stderr": "",
+   "keyFile": null,
+   "status": {
+    "value": {
+     "pskSet": false,
+     "keySet": false,
+     "nodeId": "887A",
+     "floor": 0
+    },
+    "line": "status: ap_psk=not set management_key=not set"
+   },
+   "node": {
+    "value": {
+     "destination": "d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+     "nearbyOnly": false,
+     "owners": [
+      {
+       "kind": 1,
+       "role": 1,
+       "hash": "55555555555555555555555555555555"
+      }
+     ]
+    },
+    "lines": [
+     "management destination: d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+     "owner: primary lxmf 55555555555555555555555555555555"
+    ]
+   }
+  },
+  {
+   "name": "remove a helper",
+   "argv": [
+    "--no-psk",
+    "--no-key",
+    "--remove-owner",
+    "333333333333333333333333333333c0"
+   ],
+   "options": {
+    "read": false,
+    "managementKey": null,
+    "noKey": true,
+    "clearKey": false,
+    "owner": null,
+    "ownerIdentity": null,
+    "helper": [],
+    "helperIdentity": [],
+    "removeOwner": [
+     "333333333333333333333333333333c0"
+    ]
+   },
+   "transcript": [
+    {
+     "host": "c00873c0"
+    },
+    {
+     "device": "c00846c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c06f09333333333333333333333333333333dbdcc0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d000010101dbdcdbdd1111111111111111111111111111c0"
+    },
+    {
+     "host": "c06f07c0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d000010101dbdcdbdd1111111111111111111111111111c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c00affc0"
+    }
+   ],
+   "exitCode": 0,
+   "stdout": [
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0",
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0",
+    "management destination: d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+    "owner: primary lxmf c0db1111111111111111111111111111"
+   ],
+   "stderr": "",
+   "keyFile": null,
+   "status": {
+    "value": {
+     "pskSet": false,
+     "keySet": false,
+     "nodeId": "887A",
+     "floor": 0
+    },
+    "line": "status: ap_psk=not set management_key=not set"
+   },
+   "node": {
+    "value": {
+     "destination": "d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+     "nearbyOnly": false,
+     "owners": [
+      {
+       "kind": 1,
+       "role": 1,
+       "hash": "c0db1111111111111111111111111111"
+      }
+     ]
+    },
+    "lines": [
+     "management destination: d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+     "owner: primary lxmf c0db1111111111111111111111111111"
+    ]
+   }
+  },
+  {
+   "name": "remove every owner",
+   "argv": [
+    "--no-psk",
+    "--no-key",
+    "--remove-owner",
+    "333333333333333333333333333333c0",
+    "--remove-owner",
+    "c0db1111111111111111111111111111"
+   ],
+   "options": {
+    "read": false,
+    "managementKey": null,
+    "noKey": true,
+    "clearKey": false,
+    "owner": null,
+    "ownerIdentity": null,
+    "helper": [],
+    "helperIdentity": [],
+    "removeOwner": [
+     "333333333333333333333333333333c0",
+     "c0db1111111111111111111111111111"
+    ]
+   },
+   "transcript": [
+    {
+     "host": "c00873c0"
+    },
+    {
+     "device": "c00846c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c06f09333333333333333333333333333333dbdcc0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d000010101dbdcdbdd1111111111111111111111111111c0"
+    },
+    {
+     "host": "c06f09dbdcdbdd1111111111111111111111111111c0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d00000c0"
+    },
+    {
+     "host": "c06f07c0"
+    },
+    {
+     "device": "c06f0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d00000c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c00affc0"
+    }
+   ],
+   "exitCode": 0,
+   "stdout": [
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0",
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0",
+    "management destination: d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+    "owners: none (the management Link stays off)"
+   ],
+   "stderr": "",
+   "keyFile": null,
+   "status": {
+    "value": {
+     "pskSet": false,
+     "keySet": false,
+     "nodeId": "887A",
+     "floor": 0
+    },
+    "line": "status: ap_psk=not set management_key=not set"
+   },
+   "node": {
+    "value": {
+     "destination": "d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+     "nearbyOnly": false,
+     "owners": []
+    },
+    "lines": [
+     "management destination: d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+     "owners: none (the management Link stays off)"
+    ]
+   }
+  },
+  {
+   "name": "generate a key without owners",
+   "argv": [
+    "--no-psk"
+   ],
+   "options": {
+    "read": false,
+    "managementKey": null,
+    "noKey": false,
+    "clearKey": false,
+    "owner": null,
+    "ownerIdentity": null,
+    "helper": [],
+    "helperIdentity": [],
+    "removeOwner": []
+   },
+   "transcript": [
+    {
+     "host": "c00873c0"
+    },
+    {
+     "device": "c00846c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c06f04dbdcdbdddcdd0405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fc0"
+    },
+    {
+     "device": "c06f0500013838374100000000c0"
+    },
+    {
+     "host": "c06f07c0"
+    },
+    {
+     "device": "c06f0700000000000000000000000000000000000000c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500013838374100000000c0"
+    },
+    {
+     "host": "c00affc0"
+    }
+   ],
+   "exitCode": 0,
+   "stdout": [
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0",
+    "node id: RNode 887A",
+    "management key: {scratch}/generate-a-key-without-owners/rsnode-887A.key",
+    "status: ap_psk=not set management_key=set",
+    "poke floor: 0",
+    "node identity: none yet (the first owner enrolment creates it)"
+   ],
+   "stderr": "",
+   "keyFile": {
+    "name": "rsnode-887A.key",
+    "text": "c0dbdcdd0405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f\n"
+   },
+   "status": {
+    "value": {
+     "pskSet": false,
+     "keySet": true,
+     "nodeId": "887A",
+     "floor": 0
+    },
+    "line": "status: ap_psk=not set management_key=set"
+   },
+   "node": {
+    "value": {
+     "destination": null,
+     "nearbyOnly": false,
+     "owners": []
+    },
+    "lines": [
+     "node identity: none yet (the first owner enrolment creates it)"
+    ]
+   }
+  },
+  {
+   "name": "clear the key",
+   "argv": [
+    "--no-psk",
+    "--clear-key"
+   ],
+   "options": {
+    "read": false,
+    "managementKey": null,
+    "noKey": false,
+    "clearKey": true,
+    "owner": null,
+    "ownerIdentity": null,
+    "helper": [],
+    "helperIdentity": [],
+    "removeOwner": []
+   },
+   "transcript": [
+    {
+     "host": "c00873c0"
+    },
+    {
+     "device": "c00846c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500013838374100000000c0"
+    },
+    {
+     "host": "c06f06c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c06f07c0"
+    },
+    {
+     "device": "c06f0700000000000000000000000000000000000000c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c00affc0"
+    }
+   ],
+   "exitCode": 0,
+   "stdout": [
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=set",
+    "poke floor: 0",
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0",
+    "node identity: none yet (the first owner enrolment creates it)"
+   ],
+   "stderr": "",
+   "keyFile": null,
+   "status": {
+    "value": {
+     "pskSet": false,
+     "keySet": false,
+     "nodeId": "887A",
+     "floor": 0
+    },
+    "line": "status: ap_psk=not set management_key=not set"
+   },
+   "node": {
+    "value": {
+     "destination": null,
+     "nearbyOnly": false,
+     "owners": []
+    },
+    "lines": [
+     "node identity: none yet (the first owner enrolment creates it)"
+    ]
+   }
+  },
+  {
+   "name": "set a key on firmware that predates owners",
+   "argv": [
+    "--no-psk"
+   ],
+   "options": {
+    "read": false,
+    "managementKey": null,
+    "noKey": false,
+    "clearKey": false,
+    "owner": null,
+    "ownerIdentity": null,
+    "helper": [],
+    "helperIdentity": [],
+    "removeOwner": []
+   },
+   "transcript": [
+    {
+     "host": "c00873c0"
+    },
+    {
+     "device": "c00846c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c06f04dbdcdbdddcdd0405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fc0"
+    },
+    {
+     "device": "c06f0500013838374100000000c0"
+    },
+    {
+     "host": "c06f07c0"
+    },
+    {
+     "device": "c09007c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500013838374100000000c0"
+    },
+    {
+     "host": "c00affc0"
+    }
+   ],
+   "exitCode": 0,
+   "stdout": [
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0",
+    "node id: RNode 887A",
+    "management key: {scratch}/set-a-key-on-firmware-that-predates-owners/rsnode-887A.key",
+    "status: ap_psk=not set management_key=set",
+    "poke floor: 0",
+    "node identity: not supported by this firmware"
+   ],
+   "stderr": "",
+   "keyFile": {
+    "name": "rsnode-887A.key",
+    "text": "c0dbdcdd0405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f\n"
+   },
+   "status": {
+    "value": {
+     "pskSet": false,
+     "keySet": true,
+     "nodeId": "887A",
+     "floor": 0
+    },
+    "line": "status: ap_psk=not set management_key=set"
+   },
+   "node": {
+    "value": null,
+    "lines": [
+     "node identity: not supported by this firmware"
+    ]
+   }
+  },
+  {
+   "name": "enrollment without entropy",
+   "argv": [
+    "--no-psk",
+    "--no-key",
+    "--owner",
+    "c0db1111111111111111111111111111"
+   ],
+   "options": {
+    "read": false,
+    "managementKey": null,
+    "noKey": true,
+    "clearKey": false,
+    "owner": "c0db1111111111111111111111111111",
+    "ownerIdentity": null,
+    "helper": [],
+    "helperIdentity": [],
+    "removeOwner": []
+   },
+   "transcript": [
+    {
+     "host": "c00873c0"
+    },
+    {
+     "device": "c00846c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c06f080101dbdcdbdd1111111111111111111111111111c0"
+    },
+    {
+     "device": "c09001c0"
+    }
+   ],
+   "exitCode": 2,
+   "stdout": [
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0"
+   ],
+   "stderr": "provision-rsnode: device rejected the primary owner: error 0x01 (no entropy source: start Bluetooth or Wi-Fi and retry)",
+   "keyFile": null
+  },
+  {
+   "name": "remove an owner that is not enrolled",
+   "argv": [
+    "--no-psk",
+    "--no-key",
+    "--remove-owner",
+    "55555555555555555555555555555555"
+   ],
+   "options": {
+    "read": false,
+    "managementKey": null,
+    "noKey": true,
+    "clearKey": false,
+    "owner": null,
+    "ownerIdentity": null,
+    "helper": [],
+    "helperIdentity": [],
+    "removeOwner": [
+     "55555555555555555555555555555555"
+    ]
+   },
+   "transcript": [
+    {
+     "host": "c00873c0"
+    },
+    {
+     "device": "c00846c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c06f0955555555555555555555555555555555c0"
+    },
+    {
+     "device": "c09007c0"
+    }
+   ],
+   "exitCode": 2,
+   "stdout": [
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0"
+   ],
+   "stderr": "provision-rsnode: device rejected REMOVE_OWNER: error 0x07 (no such owner, or this firmware predates owners)",
+   "keyFile": null
+  },
+  {
+   "name": "enroll on firmware that predates owners",
+   "argv": [
+    "--no-psk",
+    "--no-key",
+    "--owner",
+    "c0db1111111111111111111111111111"
+   ],
+   "options": {
+    "read": false,
+    "managementKey": null,
+    "noKey": true,
+    "clearKey": false,
+    "owner": "c0db1111111111111111111111111111",
+    "ownerIdentity": null,
+    "helper": [],
+    "helperIdentity": [],
+    "removeOwner": []
+   },
+   "transcript": [
+    {
+     "host": "c00873c0"
+    },
+    {
+     "device": "c00846c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c06f080101dbdcdbdd1111111111111111111111111111c0"
+    },
+    {
+     "device": "c09007c0"
+    }
+   ],
+   "exitCode": 2,
+   "stdout": [
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0"
+   ],
+   "stderr": "provision-rsnode: device rejected the primary owner: error 0x07 (the owner table is full, or this firmware predates owners)",
+   "keyFile": null
+  },
+  {
+   "name": "enroll a helper into a full owner table",
+   "argv": [
+    "--no-psk",
+    "--no-key",
+    "--helper",
+    "dbdc2222222222222222222222222222"
+   ],
+   "options": {
+    "read": false,
+    "managementKey": null,
+    "noKey": true,
+    "clearKey": false,
+    "owner": null,
+    "ownerIdentity": null,
+    "helper": [
+     "dbdc2222222222222222222222222222"
+    ],
+    "helperIdentity": [],
+    "removeOwner": []
+   },
+   "transcript": [
+    {
+     "host": "c00873c0"
+    },
+    {
+     "device": "c00846c0"
+    },
+    {
+     "host": "c06f05c0"
+    },
+    {
+     "device": "c06f0500003838374100000000c0"
+    },
+    {
+     "host": "c06f080102dbdddc2222222222222222222222222222c0"
+    },
+    {
+     "device": "c09007c0"
+    }
+   ],
+   "exitCode": 2,
+   "stdout": [
+    "node id: RNode 887A",
+    "status: ap_psk=not set management_key=not set",
+    "poke floor: 0"
+   ],
+   "stderr": "provision-rsnode: device rejected a helper: error 0x07 (the owner table is full, or this firmware predates owners)",
+   "keyFile": null
+  }
+ ],
+ "replies": [
+  {
+   "payload": "0501003838374168a14740",
+   "value": {
+    "pskSet": true,
+    "keySet": false,
+    "nodeId": "887A",
+    "floor": 1755400000
+   },
+   "line": "status: ap_psk=set management_key=not set"
+  },
+  {
+   "payload": "0500013046334300000000",
+   "value": {
+    "pskSet": false,
+    "keySet": true,
+    "nodeId": "0F3C",
+    "floor": 0
+   },
+   "line": "status: ap_psk=not set management_key=set"
+  },
+  {
+   "payload": "0501003838374168a147",
+   "error": "malformed management status payload length=10"
+  },
+  {
+   "payload": "0501003838374168a1474000",
+   "error": "malformed management status payload length=12"
+  },
+  {
+   "payload": "0001003838374168a14740",
+   "error": "malformed management status payload length=11"
+  },
+  {
+   "payload": "0502003838374168a14740",
+   "error": "malformed management status boolean field"
+  },
+  {
+   "payload": "05010038387a4168a14740",
+   "error": "malformed node id in management status"
+  },
+  {
+   "payload": "0501003838376168a14740",
+   "error": "malformed node id in management status"
+  },
+  {
+   "payload": "0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d001020101c0db11111111111111111111111111110202333333333333333333333333333333c0",
+   "value": {
+    "destination": "d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+    "nearbyOnly": true,
+    "owners": [
+     {
+      "kind": 1,
+      "role": 1,
+      "hash": "c0db1111111111111111111111111111"
+     },
+     {
+      "kind": 2,
+      "role": 2,
+      "hash": "333333333333333333333333333333c0"
+     }
+    ]
+   },
+   "lines": [
+    "management destination: d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+    "owner: primary lxmf c0db1111111111111111111111111111",
+    "owner: helper identity 333333333333333333333333333333c0",
+    "policy: updates only from nearby"
+   ]
+  },
+  {
+   "payload": "0700000000000000000000000000000000000000",
+   "value": {
+    "destination": null,
+    "nearbyOnly": false,
+    "owners": []
+   },
+   "lines": [
+    "node identity: none yet (the first owner enrolment creates it)"
+   ]
+  },
+  {
+   "payload": "0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d00000",
+   "value": {
+    "destination": "d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+    "nearbyOnly": false,
+    "owners": []
+   },
+   "lines": [
+    "management destination: d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0",
+    "owners: none (the management Link stays off)"
+   ]
+  },
+  {
+   "payload": "0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d001020101c0db11111111111111111111111111110202333333333333333333333333333333",
+   "error": "malformed node status owner list"
+  },
+  {
+   "payload": "0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d001020101c0db11111111111111111111111111110202333333333333333333333333333333c000",
+   "error": "malformed node status owner list"
+  },
+  {
+   "payload": "0501d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d001020101c0db11111111111111111111111111110202333333333333333333333333333333c0",
+   "error": "malformed management status payload length=56"
+  },
+  {
+   "payload": "0702d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d001020101c0db11111111111111111111111111110202333333333333333333333333333333c0",
+   "error": "malformed node status boolean field"
+  },
+  {
+   "payload": "0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d002020101c0db11111111111111111111111111110202333333333333333333333333333333c0",
+   "error": "malformed node status boolean field"
+  },
+  {
+   "payload": "0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d001050101c0db11111111111111111111111111110202333333333333333333333333333333c0",
+   "error": "malformed node status owner list"
+  },
+  {
+   "payload": "0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d001020901c0db11111111111111111111111111110202333333333333333333333333333333c0",
+   "error": "malformed owner entry"
+  },
+  {
+   "payload": "0701d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d001020103c0db11111111111111111111111111110202333333333333333333333333333333c0",
+   "error": "malformed owner entry"
+  }
+ ],
+ "hashes": [
+  {
+   "text": "c0db1111111111111111111111111111",
+   "hash": "c0db1111111111111111111111111111"
+  },
+  {
+   "text": "<c0db1111111111111111111111111111>",
+   "hash": "c0db1111111111111111111111111111"
+  },
+  {
+   "text": "  <C0DB1111111111111111111111111111>\n",
+   "hash": "c0db1111111111111111111111111111"
+  },
+  {
+   "text": "c0 db 11 11 11 11 11 11 11 11 11 11 11 11 11 11",
+   "hash": "c0db1111111111111111111111111111"
+  },
+  {
+   "text": "<<c0db1111111111111111111111111111>>",
+   "error": "not a hexadecimal hash: '<<c0db1111111111111111111111111111>>'"
+  },
+  {
+   "text": "c0db11111111111111111111111111",
+   "error": "a hash is 32 hexadecimal characters, got 30: 'c0db11111111111111111111111111'"
+  },
+  {
+   "text": "c0db111111111111111111111111111100",
+   "error": "a hash is 32 hexadecimal characters, got 34: 'c0db111111111111111111111111111100'"
+  },
+  {
+   "text": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+   "error": "not a hexadecimal hash: 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'"
+  },
+  {
+   "text": "",
+   "error": "a hash is 32 hexadecimal characters, got 0: ''"
+  },
+  {
+   "text": "<>",
+   "error": "a hash is 32 hexadecimal characters, got 0: '<>'"
+  },
+  {
+   "text": "c 0db1111111111111111111111111111",
+   "error": "not a hexadecimal hash: 'c 0db1111111111111111111111111111'"
+  },
+  {
+   "text": "　c0db1111111111111111111111111111 ",
+   "hash": "c0db1111111111111111111111111111"
+  },
+  {
+   "text": "c0db111111111111 1111111111111111",
+   "error": "not a hexadecimal hash: 'c0db111111111111\\xa01111111111111111'"
+  },
+  {
+   "text": "c0db111111111111\u000b1111111111111111",
+   "hash": "c0db1111111111111111111111111111"
+  },
+  {
+   "text": "\u001cc0db1111111111111111111111111111",
+   "hash": "c0db1111111111111111111111111111"
+  },
+  {
+   "text": "﻿c0db1111111111111111111111111111",
+   "error": "not a hexadecimal hash: '\\ufeffc0db1111111111111111111111111111'"
+  }
+ ],
+ "keyFiles": [
+  {
+   "bytes": "633063316332633363346335633663376338633963616362636363646365636664306431643264336434643564366437643864396461646264636464646564660a",
+   "key": "c0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedf"
+  },
+  {
+   "bytes": "43304331433243334334433543364337433843394341434243434344434543464430443144324433443444354436443744384439444144424443444444454446",
+   "key": "c0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedf"
+  },
+  {
+   "bytes": "2020633063316332633363346335633663376338633963616362636363646365636664306431643264336434643564366437643864396461646264636464646564660d0a",
+   "error": "management key file is unexpectedly large"
+  },
+  {
+   "bytes": "c0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedf",
+   "key": "c0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedf"
+  },
+  {
+   "bytes": "6330633163326333633463356336633763386339636163626363636463656366",
+   "key": "6330633163326333633463356336633763386339636163626363636463656366"
+  },
+  {
+   "bytes": "6330633163326333633463356336633763386339636163626363636463656366643064316432643364346435643664376438643964616462646364646465",
+   "error": "management key must be 32 raw bytes or 64 hexadecimal characters"
+  },
+  {
+   "bytes": "633063316332633363346335633663376338633963616362636363646365636664306431643264336434643564366437643864396461646264636464646564663030",
+   "error": "management key must be 32 raw bytes or 64 hexadecimal characters"
+  },
+  {
+   "bytes": "3030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030",
+   "error": "management key file is unexpectedly large"
+  },
+  {
+   "bytes": "0000000000000000000000000000000000000000000000000000000000000000",
+   "error": "management key must not be all zero"
+  },
+  {
+   "bytes": "7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+   "error": "management key is not raw bytes or hexadecimal"
+  },
+  {
+   "bytes": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+   "error": "management key is not raw bytes or hexadecimal"
+  },
+  {
+   "bytes": "633063316332633363346335633663376338633963616362636363646365636664306431643264336434643564366437643864396461646264636464646564660a0a0a",
+   "error": "management key file is unexpectedly large"
+  },
+  {
+   "bytes": "63306331633263336334633563366337633863396361636263636364636520636664306431643264336434643564366437643864396461646264636464206465",
+   "key": "c0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcddde"
+  },
+  {
+   "bytes": "0b633063316332633363346335633663376338633963616362636363646365636664306431643264336434643564366437643864396461646264636464646564660c",
+   "key": "c0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedf"
+  }
+ ]
+}
