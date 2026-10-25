@@ -5573,17 +5573,18 @@
                                 <div class="rsnode-owner__field">
                                     <span class="rnode-source__label" id="rsnodeManagersLabel">Managers</span>
                                     <ul class="rsnode-managers" id="rsnodeManagers" aria-labelledby="rsnodeManagersLabel"></ul>
-                                    <p class="rsnode-tools__help" id="rsnodeManagersEmpty">Add yourself as the owner with your LXMF address, or read the node to see its managers.</p>
+                                    <p class="rsnode-tools__help" id="rsnodeManagersEmpty">Add yourself as the owner with the LXMF address <code>rsnode-client whoami</code> prints, or read the node to see its managers.</p>
                                     <div class="rsnode-managers__editor" id="rsnodeManagerEditor" hidden>
                                         <input class="rsnode-owner__input" id="rsnodeOwnerHash" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="LXMF address or identity hash" aria-label="Manager's LXMF address or identity hash" aria-describedby="rsnodeManagerNote">
                                         <select class="rnode-variant-select" id="rsnodeOwnerKind" aria-label="Hash type">
                                             <option value="lxmf">LXMF address</option>
                                             <option value="identity">Identity hash</option>
                                         </select>
-                                        <select class="rnode-variant-select" id="rsnodeOwnerRole" aria-label="Role">
+                                        <select class="rnode-variant-select" id="rsnodeOwnerRole" aria-label="Role" aria-describedby="rsnodeRoleHelp">
                                             <option value="owner">Owner</option>
                                             <option value="admin">Admin</option>
                                         </select>
+                                        <p class="rsnode-tools__help" id="rsnodeRoleHelp">The owner adds and removes admins over the mesh. Admins check status and install updates.</p>
                                         <div class="rsnode-managers__editor-actions">
                                             <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeManagerDone" type="button">Add</button>
                                             <button class="rsnode-beta__button" id="rsnodeManagerCancel" type="button">Cancel</button>
@@ -8978,12 +8979,12 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         return 'Saving will ' + (changes.length > 1 ? changes.slice(0, -1).join(', ') + ' and ' + last : last) + '.';
     }
 
-    // rows with entry in place of editing, or added when editing is null. One owner per node: a new owner makes
-    // the previous one an admin.
+    // rows with entry in place of editing, or added when editing is null. As on the node, a new owner replaces
+    // the old one; Undo keeps the old one as an admin.
     function rsnodeManagersWith(rows, entry, editing) {
         var next = rows.map(function(row) {
             if (row === editing) return Object.assign({}, row, entry);
-            if (entry.role === 'owner' && !row.removed && row.role === 'owner') return Object.assign({}, row, { role: 'admin' });
+            if (entry.role === 'owner' && !row.removed && row.role === 'owner') return Object.assign({}, row, { removed: true });
             return row;
         });
         if (!editing) next.push(Object.assign({ node: null, added: true, removed: false }, entry));
@@ -9003,8 +9004,9 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
             if (known) Object.assign(known, entry, { added: true });
             else next.push(Object.assign({ node: null, added: true, removed: false }, entry));
         });
+        // An owner added here replaces the node's own, as saving would.
         var owner = next.find(function(row) { return row.added && row.role === 'owner'; });
-        if (owner) next.forEach(function(row) { if (row !== owner && row.role === 'owner') row.role = 'admin'; });
+        if (owner) next.forEach(function(row) { if (row !== owner && row.role === 'owner') row.removed = true; });
         return next;
     }
 
@@ -9099,8 +9101,11 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         list.replaceChildren.apply(list, rsnodeManagers.map(rsnodeManagerItem));
         var empty = document.getElementById('rsnodeManagersEmpty');
         empty.hidden = addable && rsnodeManagers.length > 0;
-        empty.textContent = !rsnodeManagersFrom ? 'Add yourself as the owner with your LXMF address, or read the node to see its managers.'
-            : addable ? 'No managers yet.' : 'This firmware does not support managers.';
+        var whoami = Object.assign(document.createElement('code'), { textContent: 'rsnode-client whoami' });
+        empty.replaceChildren.apply(empty, !rsnodeManagersFrom
+            ? ['Add yourself as the owner with the LXMF address ', whoami, ' prints, or read the node to see its managers.']
+            : addable ? ['No managers yet. Add yourself as the owner with the LXMF address ', whoami, ' prints.']
+            : ['This firmware does not support managers.']);
         var full = rsnodeActive(rsnodeManagers).length >= RSNODE_MANAGERS_MAX;
         document.getElementById('rsnodeManagerEditor').hidden = !rsnodeManagerEditing;
         document.getElementById('rsnodeManagerCancel').hidden = !rsnodeManagers.length;

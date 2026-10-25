@@ -191,20 +191,23 @@ test('an entry left in the editor is checked, then saved with the list', async (
 const OWNER = 'aa'.repeat(16), ADMIN = 'bb'.repeat(16), OTHER = 'cc'.repeat(16);
 const onNode = (hash, kind, role) => ({ hash, kind, role, node: { hash, kind, role }, added: false, removed: false });
 
-test('one owner per node: a new owner keeps the previous one as an admin', () => {
+test('one owner per node: a new owner replaces the old one, which stays only by choice', () => {
   const { rsnodeManagersPlan, rsnodeManagersWith, rsnodeOwnerChanges, rsnodeManagersFromNode } = pageFunctions(['RSNODE_KEY_CHANGES',
     'RSNODE_KINDS', 'RSNODE_ROLES', 'rsnodeCount', 'rsnodeManagersPlan', 'rsnodeManagersWith', 'rsnodeOwnerChanges', 'rsnodeManagersFromNode']);
   const node = [onNode(OWNER, 'lxmf', 'owner'), onNode(ADMIN, 'identity', 'admin')];
   assert.deepEqual(plain(rsnodeManagersPlan(node)).fromNode, false);
   assert.deepEqual(plain(rsnodeOwnerChanges(rsnodeManagersPlan(node), 'keep')), []);
 
-  // Promoting the admin: the node replaces its owner, then takes the old one back as an admin.
+  // Promoting the admin replaces the owner, as the node itself does.
   const promoted = rsnodeManagersWith(node, { hash: ADMIN, kind: 'identity', role: 'owner' }, node[1]);
-  assert.deepEqual(plain(promoted).map(row => row.role), ['admin', 'owner']);
+  assert.deepEqual(plain(promoted).map(row => [row.role, row.removed]), [['owner', true], ['owner', false]]);
   const plan = plain(rsnodeManagersPlan(promoted));
-  assert.deepEqual([plan.ownerIdentity, plan.helper, plan.removeOwner, plan.fromNode], [ADMIN, [OWNER], [], true]);
+  assert.deepEqual([plan.ownerIdentity, plan.helper, plan.removeOwner, plan.fromNode], [ADMIN, [], [OWNER], true]);
   assert.deepEqual(plain(rsnodeOwnerChanges(rsnodeManagersPlan(promoted), 'generate')),
-    ['set the owner', 'change 1 admin', 'generate a new management key']);
+    ['set the owner', 'remove 1 manager', 'generate a new management key']);
+  // Undo keeps the old owner as an admin, enrolled again after the new owner replaced it.
+  const kept = plain(rsnodeManagersPlan(promoted.map((row, index) => index ? row : { ...row, removed: false, role: 'admin' })));
+  assert.deepEqual([kept.ownerIdentity, kept.helper, kept.removeOwner, kept.changed], [ADMIN, [OWNER], [], 1]);
 
   // A new hash for a listed manager removes the old one; a removed row is only removed.
   const edited = rsnodeManagersWith(node, { hash: OTHER, kind: 'lxmf', role: 'admin' }, node[1]);
@@ -212,11 +215,11 @@ test('one owner per node: a new owner keeps the previous one as an admin', () =>
   const replaced = plain(rsnodeManagersPlan(edited));
   assert.deepEqual([replaced.removeOwner, replaced.helper, replaced.owner, replaced.removed, replaced.added], [[OWNER, ADMIN], [OTHER], null, 2, 1]);
 
-  // A read keeps rows added here; an owner added here outranks the node's own.
+  // A read keeps rows added here; an owner added here replaces the node's own, as saving would.
   const read = plain(rsnodeManagersFromNode({ destination: OWNER, nearbyOnly: false, owners: [{ kind: 1, role: 1, hash: OWNER }] },
     [{ hash: OTHER, kind: 'identity', role: 'owner', node: null, added: true, removed: false }, onNode(ADMIN, 'lxmf', 'admin')]));
   assert.deepEqual(read, [
-    { node: { hash: OWNER, kind: 'lxmf', role: 'owner' }, added: false, removed: false, hash: OWNER, kind: 'lxmf', role: 'admin' },
+    { node: { hash: OWNER, kind: 'lxmf', role: 'owner' }, added: false, removed: true, hash: OWNER, kind: 'lxmf', role: 'owner' },
     { node: null, added: true, removed: false, hash: OTHER, kind: 'identity', role: 'owner' }]);
   assert.deepEqual(plain(rsnodeManagersFromNode(null, [])), []);
 });
@@ -240,7 +243,8 @@ test('the editor rejects a repeated manager and a fifth one', () => {
   elements.rsnodeOwnerHash.value = ADMIN;
   elements.rsnodeOwnerRole.value = 'owner';
   assert.equal(page.applyRsnodeManagerEdit(), 1);
-  assert.deepEqual(plain(context.rsnodeManagers).map(row => row.role), ['admin', 'owner', 'admin', 'admin', 'admin']);
+  assert.deepEqual(plain(context.rsnodeManagers).map(row => [row.role, row.removed]),
+    [['owner', true], ['owner', false], ['admin', true], ['admin', false], ['admin', false]]);
 });
 
 test('a save meant for one node stops on another before changing anything', async () => {
