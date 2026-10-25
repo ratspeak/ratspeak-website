@@ -190,7 +190,7 @@ test('owner work checks its input before asking for a port and always closes the
     showRsnodeOwnerResult: () => calls.push(['result']),
     closeRnodeSession: async session => calls.push(['close', session && session.port])
   };
-  const run = pageFunctions(['runRsnodeOwnerTask'], context).runRsnodeOwnerTask;
+  const run = pageFunctions(['rsnodePortError', 'rsnodeOwnerError', 'runRsnodeOwnerTask'], context).runRsnodeOwnerTask;
   await run(false);
   assert.deepEqual(calls, [['busy', true], ['message', true], ['close', null], ['busy', false], ['focus']]);
 
@@ -204,6 +204,48 @@ test('owner work checks its input before asking for a port and always closes the
   context.provisionRsnode = async () => { throw new Error('device rejected the primary owner: error 0x01'); };
   await run(false);
   assert.deepEqual(calls, [['busy', true], ['port'], ['message', true], ['close', 'port'], ['busy', false]]);
+});
+
+test('the owner row says what a save changes and what to do after a failure', () => {
+  const state = { flashing: false };
+  const { rsnodeOwnerSummary, rsnodeOwnerError } = pageFunctions(['rsnodeOwnerSummary', 'rsnodePortError', 'rsnodeOwnerError'], { state });
+  assert.equal(rsnodeOwnerSummary([]), 'Nothing to save yet. Enter an owner or choose a key change.');
+  assert.equal(rsnodeOwnerSummary(['set the primary owner']), 'Saving will set the primary owner.');
+  assert.equal(rsnodeOwnerSummary(['set the primary owner', 'add 2 helpers', 'generate a new management key']),
+    'Saving will set the primary owner, add 2 helpers and generate a new management key.');
+  state.flashing = true;
+  assert.equal(rsnodeOwnerSummary(['set the primary owner']), 'Available when flashing finishes.');
+
+  const failure = scenario => new Error(vectors.scenarios.find(s => s.name === scenario).stderr.replace(/^provision-rsnode: /, ''));
+  const READ_BACK = 'Read owners and key to see what the node has now.';
+  assert.deepEqual(plain(rsnodeOwnerError(failure('enrollment without entropy'), 'protocol', false)), {
+    text: 'Device rejected the primary owner: error 0x01 (no entropy source: start Bluetooth or Wi-Fi and retry)', hint: READ_BACK });
+  assert.deepEqual(plain(rsnodeOwnerError(failure('enroll a helper into a full owner table'), 'protocol', false)), {
+    text: 'Device rejected a helper: error 0x07 (the owner table is full, or this firmware predates owners)',
+    hint: 'A node holds up to 4 owners. Remove one under Helpers and removal, then save again. ' + READ_BACK });
+  assert.deepEqual(plain(rsnodeOwnerError(failure('enrollment without entropy'), 'protocol', true)),
+    { text: 'Device rejected the primary owner: error 0x01 (no entropy source: start Bluetooth or Wi-Fi and retry)' });
+  assert.deepEqual(plain(rsnodeOwnerError(new Error('no KISS response within 30 s: EXIT Repeater if active'), 'protocol', false)),
+    { text: 'No KISS response within 30 s: EXIT Repeater if active' });
+  assert.deepEqual(plain(rsnodeOwnerError(new Error('Failed to open serial port.'), 'open', false)),
+    { text: 'Could not open the serial port. Close other apps that use it, such as Ratspeak or a serial monitor, then try again.' });
+  assert.deepEqual(plain(rsnodeOwnerError(Object.assign(new Error('The device has been lost.'), { name: 'NetworkError' }), 'protocol', false)),
+    { text: 'The node disconnected from USB.' });
+});
+
+test('the Step 03 hint names the first rsNode step still open', () => {
+  const context = { betaStage: 'locked', state: {}, rsnodeBoardSelect: { value: '' }, rsnodeVariantIsConfirmed: () => false };
+  const { rsnodeFlowNote } = pageFunctions(['rsnodeFlowNote'], context);
+  const notes = [];
+  for (const step of [{}, { betaStage: 'terms' }, { betaStage: 'ready' }, { rsnodeBoardSelect: { value: 'heltec-v4' }, state: { rsnodeLoading: true } },
+    { state: { rsnodeLoadFailed: true } }, { state: {} }, { rsnodeVariantIsConfirmed: () => true }]) {
+    Object.assign(context, step);
+    notes.push(rsnodeFlowNote());
+  }
+  assert.deepEqual(notes, ['Unlock the rsNode beta to continue.', 'Accept the beta terms to continue.',
+    'Choose your board to flash. To manage a node that already runs rsNode, use the tools below.',
+    'Loading the firmware for your board…', 'Firmware could not be loaded. Choose the board again to retry.',
+    'Confirm the V4 variant to continue.', 'Select a USB device to continue.']);
 });
 
 test('the owner step appears only with beta access, before and after an rsNode install', () => {
