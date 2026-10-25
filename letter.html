@@ -34,10 +34,12 @@
             --border-card:   #E1D5C6;
             --text-primary:  #2A2522;
             --text-secondary:#6F675F;
-            --text-muted:    #9A9086;
+            --text-muted:    #746C64;
             --accent:        #D2693B;
             --accent-light:  #FBEFE6;
             --accent-dark:   #B85829;
+            --accent-fill:   #B85829;
+            --accent-fill-hover: #A24D24;
             --accent-a12:    rgba(210, 105, 59, 0.12);
             --accent-a25:    rgba(210, 105, 59, 0.25);
             --font-mono:     'Familjen Grotesk', system-ui, -apple-system, sans-serif;
@@ -56,10 +58,12 @@
             --border-card:   #2a2629;
             --text-primary:  #e8e4e0;
             --text-secondary:#a89f96;
-            --text-muted:    #7a7068;
+            --text-muted:    #8c837a;
             --accent:        #D2693B;
             --accent-light:  #2a1f18;
             --accent-dark:   #B85829;
+            --accent-fill:   #B85829;
+            --accent-fill-hover: #A24D24;
             --accent-a12:    rgba(210, 105, 59, 0.12);
             --accent-a25:    rgba(210, 105, 59, 0.25);
         }
@@ -136,12 +140,12 @@
         [data-theme="dark"] .theme-icon-sun { display: block; }
         [data-theme="dark"] .theme-icon-moon { display: none; }
         .nr-btn {
-            background: var(--accent); color: #ffffff; border: none; border-radius: 8px;
+            background: var(--accent-fill); color: #ffffff; border: none; border-radius: 8px;
             padding: 8px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
             font-family: var(--font-sans); transition: all 0.2s ease;
             white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
         }
-        .nr-btn:hover { background: var(--accent-dark); color: #ffffff; transform: translateY(-1px); box-shadow: 0 4px 12px var(--accent-a25); }
+        .nr-btn:hover { background: var(--accent-fill-hover); color: #ffffff; transform: translateY(-1px); box-shadow: 0 4px 12px var(--accent-a25); }
         .nr-btn-sm { padding: 6px 14px; font-size: 13px; border-radius: 6px; }
         .navbar-hamburger {
             display: none; align-items: center; justify-content: center;

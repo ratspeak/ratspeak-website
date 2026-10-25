@@ -67,10 +67,12 @@
             --border-subtle: #E6DDD2;
             --text-primary:  #2A2522;
             --text-secondary:#6F675F;
-            --text-muted:    #9A9086;
+            --text-muted:    #746C64;
             --accent:        #D2693B;
             --accent-light:  #FBEFE6;
             --accent-dark:   #B85829;
+            --accent-fill:   #B85829;
+            --accent-fill-hover: #A24D24;
             --blue:          #3A76F0;
             --blue-light:    #ebf2fe;
             --red:           #CF222E;
@@ -137,10 +139,12 @@
             --border-subtle: #2a262a;
             --text-primary:  #e8e4e0;
             --text-secondary:#a89f96;
-            --text-muted:    #7a7068;
+            --text-muted:    #8c837a;
             --accent:        #D2693B;
             --accent-light:  #2a1d15;
             --accent-dark:   #E08A5A;
+            --accent-fill:   #B85829;
+            --accent-fill-hover: #A24D24;
             --blue:          #5b93f5;
             --blue-light:    #1a2236;
             --red:           #e5534b;
@@ -784,11 +788,11 @@
         }
         .compose__btn:hover { color: var(--text-primary); }
         .compose__btn--primary {
-            color: var(--bg-primary);
-            background: var(--accent);
-            border-color: var(--accent);
+            color: #ffffff;
+            background: var(--accent-fill);
+            border-color: var(--accent-fill);
         }
-        .compose__btn--primary:hover { color: var(--bg-primary); background: var(--accent-dark); border-color: var(--accent-dark); }
+        .compose__btn--primary:hover { color: #ffffff; background: var(--accent-fill-hover); border-color: var(--accent-fill-hover); }
 
         /* ── Card ──────────────────────────────────────── */
         .card {
@@ -1050,11 +1054,11 @@
         }
         .auth-modal__btn:hover { border-color: var(--text-muted); }
         .auth-modal__btn--primary {
-            background: var(--accent);
-            color: var(--bg-primary);
-            border-color: var(--accent);
+            background: var(--accent-fill);
+            color: #ffffff;
+            border-color: var(--accent-fill);
         }
-        .auth-modal__btn--primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+        .auth-modal__btn--primary:hover { background: var(--accent-fill-hover); border-color: var(--accent-fill-hover); }
         .auth-modal__btn[disabled] { opacity: 0.5; cursor: not-allowed; }
 
         .admin-badge {
@@ -1062,8 +1066,8 @@
             position: fixed;
             top: 72px;
             right: 16px;
-            background: var(--accent);
-            color: var(--bg-primary);
+            background: var(--accent-fill);
+            color: #ffffff;
             font-family: var(--font-mono);
             font-size: 10px;
             font-weight: 600;

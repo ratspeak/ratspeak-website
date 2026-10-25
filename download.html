@@ -55,10 +55,12 @@
             --border-card:   #E1D5C6;
             --text-primary:  #2A2522;
             --text-secondary:#6F675F;
-            --text-muted:    #9A9086;
+            --text-muted:    #746C64;
             --accent:        #D2693B;
             --accent-light:  #FBEFE6;
             --accent-dark:   #B85829;
+            --accent-fill:   #B85829;
+            --accent-fill-hover: #A24D24;
             --accent-a05:    rgba(210, 105, 59, 0.05);
             --accent-a12:    rgba(210, 105, 59, 0.12);
             --accent-a15:    rgba(210, 105, 59, 0.15);
@@ -101,10 +103,12 @@
             --border-card:   #2a2629;
             --text-primary:  #e8e4e0;
             --text-secondary:#a89f96;
-            --text-muted:    #7a7068;
+            --text-muted:    #8c837a;
             --accent:        #D2693B;
             --accent-light:  #2a1f18;
             --accent-dark:   #B85829;
+            --accent-fill:   #B85829;
+            --accent-fill-hover: #A24D24;
             --accent-a05:    rgba(210, 105, 59, 0.05);
             --accent-a12:    rgba(210, 105, 59, 0.12);
             --accent-a15:    rgba(210, 105, 59, 0.15);
@@ -268,7 +272,7 @@
         /* ── Buttons ─────────────────────────────────── */
         .nr-btn {
             display: inline-flex; align-items: center; gap: 8px;
-            background: var(--accent); color: #ffffff;
+            background: var(--accent-fill); color: #ffffff;
             border: none; border-radius: 10px;
             padding: 12px 22px;
             font-size: 15px; font-weight: 600;
@@ -279,7 +283,7 @@
             transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
         }
         .nr-btn:hover {
-            background: var(--accent-dark);
+            background: var(--accent-fill-hover);
             color: #ffffff;
             transform: translateY(-1px);
             box-shadow: 0 2px 4px var(--accent-a25), 0 8px 20px var(--accent-a25);
@@ -299,8 +303,8 @@
             transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
         }
         .nr-btn-secondary:hover {
-            background: var(--accent);
-            border-color: var(--accent);
+            background: var(--accent-fill);
+            border-color: var(--accent-fill);
             color: #ffffff;
             transform: translateY(-1px);
             box-shadow: 0 2px 4px var(--accent-a25), 0 8px 20px var(--accent-a25);
@@ -919,8 +923,8 @@
             border: none;
         }
         .flash-flow--standalone .flash-flow__item.is-active .flash-flow__index {
-            border-color: var(--accent);
-            background: var(--accent);
+            border-color: var(--accent-fill);
+            background: var(--accent-fill);
             color: #fff;
             box-shadow: 0 0 0 4px var(--accent-a15);
         }
@@ -992,8 +996,8 @@
             background: var(--accent-light);
         }
         .flash-flow__item.is-active .flash-flow__index {
-            border-color: var(--accent);
-            background: var(--accent);
+            border-color: var(--accent-fill);
+            background: var(--accent-fill);
             color: #fff;
         }
         .flash-flow__item.is-done {
@@ -1139,15 +1143,15 @@
         }
 
         .connect-btn--idle {
-            background: var(--accent);
+            background: var(--accent-fill);
             color: #ffffff;
-            border-color: var(--accent);
+            border-color: var(--accent-fill);
             box-shadow: 0 1px 2px var(--accent-a20), 0 4px 12px var(--accent-a18);
         }
         .connect-btn--idle:hover {
-            background: var(--accent-dark);
+            background: var(--accent-fill-hover);
             color: #ffffff;
-            border-color: var(--accent-dark);
+            border-color: var(--accent-fill-hover);
             box-shadow: 0 2px 4px var(--accent-a25), 0 8px 20px var(--accent-a25);
             transform: translateY(-1px);
         }
@@ -1575,8 +1579,8 @@
         .rsnode-beta__login label { grid-column: 1 / -1; font-size: 13px; color: var(--text-secondary); }
         .rsnode-beta__password { min-width: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); font: inherit; }
         .rsnode-beta__button { min-height: 38px; padding: 0 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-tertiary); color: var(--text-primary); font: 500 13px var(--font-sans); cursor: pointer; }
-        .rsnode-beta__button--primary { background: var(--accent-dark); border-color: var(--accent-dark); color: #fff; font-weight: 600; }
-        .rsnode-beta__button--primary:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); }
+        .rsnode-beta__button--primary { background: var(--accent-fill); border-color: var(--accent-fill); color: #fff; font-weight: 600; }
+        .rsnode-beta__button--primary:hover:not(:disabled) { background: var(--accent-fill-hover); border-color: var(--accent-fill-hover); }
         .rsnode-beta__button:disabled { background: var(--bg-secondary); border-color: var(--border-subtle); color: var(--text-muted); cursor: not-allowed; }
         .rsnode-beta__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
         .rsnode-beta__head strong { font-size: 14px; font-weight: 500; }
@@ -2493,15 +2497,15 @@
         }
 
         .flash-btn--ready {
-            background: var(--accent);
+            background: var(--accent-fill);
             color: #ffffff;
-            border-color: var(--accent);
+            border-color: var(--accent-fill);
             box-shadow: 0 1px 2px var(--accent-a20), 0 4px 12px var(--accent-a18);
         }
 
         .flash-btn--ready:hover {
-            background: var(--accent-dark);
-            border-color: var(--accent-dark);
+            background: var(--accent-fill-hover);
+            border-color: var(--accent-fill-hover);
             box-shadow: 0 2px 4px var(--accent-a25), 0 8px 20px var(--accent-a25);
             transform: translateY(-1px);
         }
@@ -2548,8 +2552,8 @@
         .install-dialog__actions { display: grid; grid-template-columns: 1fr 1.6fr; gap: 10px; margin-top: 24px; }
         .install-dialog__actions button { min-height: 46px; padding: 12px 10px; border: 1px solid var(--border); border-radius: 10px; font: 500 14px var(--font-sans); cursor: pointer; }
         .install-dialog__cancel { color: var(--text-primary); background: var(--bg-secondary); }
-        .install-dialog__continue { color: #fff; background: var(--accent-dark); }
-        .install-dialog__continue:hover { background: var(--accent); }
+        .install-dialog__continue { color: #fff; background: var(--accent-fill); }
+        .install-dialog__continue:hover { background: var(--accent-fill-hover); }
         .install-dialog :focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
         @media (max-width: 380px) {
             .install-dialog { padding: 22px; }
@@ -3640,8 +3644,8 @@
             transition: all 0.2s ease;
         }
         .dl-cta-secondary:hover {
-            background: var(--accent);
-            border-color: var(--accent);
+            background: var(--accent-fill);
+            border-color: var(--accent-fill);
             color: #ffffff;
             transform: translateY(-1px);
             box-shadow: 0 2px 4px var(--accent-a25), 0 8px 20px var(--accent-a25);
