@@ -210,7 +210,8 @@ test('the owner step appears only with beta access, before and after an rsNode i
   const panel = { hidden: true, open: false }, notice = { hidden: true };
   const context = { state: { device: 'custom', rsnodeInstalled: false }, betaStage: 'locked',
     isRsnodeSelected: () => true, document: { getElementById: id => id === 'rsnodeOwner' ? panel : notice } };
-  const { updateRsnodeOwnerVisibility, showRsnodeOwnerStep } = pageFunctions(['updateRsnodeOwnerVisibility', 'showRsnodeOwnerStep'], context);
+  const { updateRsnodeOwnerVisibility, showRsnodeOwnerStep } = pageFunctions(['rsnodeToolsUnlocked',
+    'updateRsnodeOwnerVisibility', 'showRsnodeOwnerStep'], context);
   updateRsnodeOwnerVisibility();
   assert.equal(panel.hidden, true);
   context.betaStage = 'ready';
