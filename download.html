@@ -5530,6 +5530,7 @@
                         <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeConnect" type="button">Connect</button>
                         <button class="rsnode-beta__button" id="rsnodeScreenshot" type="button" disabled hidden>Save screenshot</button>
                         <button class="rsnode-beta__button" id="rsnodeCopyDetails" type="button" disabled hidden>Copy details</button>
+                        <button class="rsnode-beta__button" id="rsnodePair" type="button" disabled hidden>Start Bluetooth pairing</button>
                         <button class="rsnode-beta__button rsnode-tools__end" id="rsnodeRestart" type="button" disabled hidden>Restart node…</button>
                     </div>
                     <p class="rsnode-tools__port" hidden>Using <span class="rsnode-tools__port-label"></span> &middot; <button class="rsnode-beta__lock" type="button" data-change-port>Change port</button></p>
@@ -5741,7 +5742,7 @@
 import { betaRequest, rsnodeBoard, validateBetaCatalog, verifyBetaDownload, validateBetaManifest } from './assets/js/rsnode-beta.js';
 import { parseHash, provisionRsnode } from './assets/js/rsnode-provision.js';
 import { SCREEN_HEIGHT, SCREEN_WIDTH, leaveRsnode, readRsnodeFacts, readRsnodeRadio, readRsnodeScreen,
-    restartRsnode, rsnodeDetails, rsnodeSummary, screenSupported, waitForRsnode } from './assets/js/rsnode-device.js';
+    restartRsnode, rsnodeDetails, rsnodeSummary, screenSupported, startRsnodePairing, waitForRsnode } from './assets/js/rsnode-device.js';
 import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITORY, verifyHandheldDownload, validateHandheldManifest } from './assets/js/handheld-release.js';
 import { md5Bytes } from './assets/js/md5.js';
 import { closeFlashTransport } from './assets/js/esp-serial.js';
@@ -9376,6 +9377,9 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         copy.disabled = copy.hidden = !rsnodeDeviceFacts;
         var restart = document.getElementById('rsnodeRestart');
         restart.disabled = restart.hidden = !live;
+        // Pairing only where the screen mirror can show its code.
+        var pair = document.getElementById('rsnodePair');
+        pair.disabled = pair.hidden = !live || !screenSupported(device.facts.board);
         document.getElementById('rsnodeFacts').classList.toggle('is-stale', !!rsnodeDeviceFacts && !live);
         syncRsnodePort();
     }
@@ -9552,6 +9556,20 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         return stopRsnodeDevice('Disconnected so another USB task could use the port. Connect again to resume.');
     }
 
+    // rsNode's Heltec firmware holds the pairing window two minutes (PAIRING_TIMEOUT_MS).
+    async function pairRsnodeDevice() {
+        var device = rsnodeDevice;
+        if (!device || !device.facts || device.stopping) return;
+        try {
+            await startRsnodePairing(device.session);
+        } catch (error) {
+            rsnodeDeviceMessage(rsnodeDeviceError(error, device.stage), true);
+            return;
+        }
+        rsnodeDeviceMessage('Pairing started. Within 2 minutes, choose RNode ' + device.facts.status.nodeId +
+            ' in your app\'s Bluetooth list and enter the code shown on its screen. Bluetooth stays on.');
+    }
+
     document.getElementById('rsnodeConnect').addEventListener('click', function() {
         if (rsnodeDevice) stopRsnodeDevice('');
         else runRsnodeDevice();
@@ -9564,6 +9582,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         if (!window.confirm('Restart ' + name + '?\n\nIt starts again ' + back + ' after a few seconds.')) return;
         stopRsnodeDevice('Restarting ' + name + '. Connect again in a few seconds.', true);
     });
+    document.getElementById('rsnodePair').addEventListener('click', pairRsnodeDevice);
     document.getElementById('rsnodeScreenshot').addEventListener('click', function() {
         if (!rsnodeScreenPixels) return;
         var scale = 4;

@@ -4,7 +4,7 @@ import test from 'node:test';
 import vm from 'node:vm';
 import { SCREEN_HEIGHT, SCREEN_WIDTH, leaveRsnode, parseTransportStatus, readRsnodeFacts, readRsnodeRadio,
   readRsnodeScreen, renderTransport, restartRsnode, rsnodeDetails, rsnodeSummary, screenPixels, screenSupported,
-  waitForRsnode } from '../assets/js/rsnode-device.js';
+  startRsnodePairing, waitForRsnode } from '../assets/js/rsnode-device.js';
 import { renderNode, renderStatus } from '../assets/js/rsnode-provision.js';
 
 // rsNode's own answers, recorded from its code by scripts/rsnode-device-vectors.py.
@@ -210,6 +210,19 @@ test('ends a session with LEAVE, and a restart with LEAVE then the reset configu
   assert.deepEqual(port.written, ['leave', 'leave', 'reset']);
 });
 
+test('starts pairing with the frame probe-heltec-v4.py --bt-pair sends, which rsNode answers with nothing', async () => {
+  for (const entry of vectors.scenarios) {
+    assert.equal(entry.requests.bt_pair.device, '', entry.name);
+    // Bluetooth on and kept on, with the pairing window open.
+    assert.deepEqual([entry.device.bluetoothPairing, entry.requests.bt_pair.bluetooth], [false, { enabled: true, pairing: true }], entry.name);
+  }
+  const port = nodePort(v4);
+  const session = createRnodeSession(port);
+  await startRsnodePairing(session);
+  await closeRnodeSession(session);
+  assert.deepEqual(port.written, ['bt_pair']);
+});
+
 test('a silent node, such as a running Repeater, is given up on after the wait with one hint', async () => {
   const port = nodePort(v4, { silent: true });
   const session = createRnodeSession(port);
@@ -233,7 +246,7 @@ function panelDocument() {
   };
   const facts = [...html.matchAll(/data-fact="(\w+)"/g)].map(match => match[1]);
   const rows = facts.map(fact => ({ dataset: { fact }, hidden: false, dd: element(), querySelector() { return this.dd; } }));
-  const elements = Object.fromEntries(['rsnodeConnect', 'rsnodeScreenshot', 'rsnodeCopyDetails', 'rsnodeRestart',
+  const elements = Object.fromEntries(['rsnodeConnect', 'rsnodeScreenshot', 'rsnodeCopyDetails', 'rsnodePair', 'rsnodeRestart',
     'rsnodeScreenState', 'rsnodeLiveDot', 'rsnodeScreenBezel', 'rsnodeScreenEmpty', 'rsnodeFactsEmpty', 'rsnodeFacts',
     'rsnodeDeviceStatus', 'rsnodeDetailsText'].map(id => [id, element()]));
   elements.rsnodeDevice = element({ open: true });
@@ -252,7 +265,7 @@ const PANEL = ['rsnodeDevice', 'rsnodeDeviceFacts', 'rsnodeDeviceRadio', 'rsnode
   'RSNODE_TAKEOVER', 'rsnodeToolsUnlocked', 'updateRsnodeDeviceVisibility', 'rsnodeDeviceMessage', 'syncRsnodeDevice',
   'setRsnodeScreenState', 'clearRsnodeScreen', 'paintRsnodeScreen', 'showRsnodeDeviceFacts', 'rsnodeDeviceError',
   'rsnodePortError', 'rsnodeDeviceWatched', 'streamRsnodeDevice', 'runRsnodeDevice', 'stopRsnodeDevice', 'releaseRsnodeDevice',
-  'syncRsnodePort'];
+  'pairRsnodeDevice', 'syncRsnodePort'];
 
 function devicePage(port, overrides = {}) {
   const document = panelDocument();
@@ -267,7 +280,7 @@ function devicePage(port, overrides = {}) {
     createRnodeSession, closeRnodeSession,
     sleepMs: () => new Promise(resolve => setTimeout(resolve, 0)),
     SCREEN_WIDTH, SCREEN_HEIGHT, leaveRsnode, readRsnodeFacts, readRsnodeRadio, readRsnodeScreen, restartRsnode,
-    rsnodeSummary, screenSupported, waitForRsnode, ...overrides
+    rsnodeSummary, screenSupported, startRsnodePairing, waitForRsnode, ...overrides
   };
   return { ...pageFunctions(PANEL, context), context, document, calls };
 }
@@ -328,14 +341,34 @@ test('a restart leaves the node, then resets it', async () => {
   assert.equal(page.document.elements.rsnodeDeviceStatus.textContent, 'Restarting RNode 0F3C. Connect again in a few seconds.');
 });
 
+test('pairing starts in one frame, says which node to choose, and the screen keeps streaming its code', async () => {
+  const port = nodePort(v4);
+  const page = await withPanel(port, async page => {
+    const { elements } = page.document;
+    await until(() => page.document.painted.length >= 1);
+    assert.deepEqual([elements.rsnodePair.hidden, elements.rsnodePair.disabled], [false, false]);
+    await page.pairRsnodeDevice();
+    assert.equal(elements.rsnodeDeviceStatus.textContent, 'Pairing started. Within 2 minutes, choose RNode 887A in ' +
+      "your app's Bluetooth list and enter the code shown on its screen. Bluetooth stays on.");
+    const painted = page.document.painted.length;
+    await until(() => page.document.painted.length > painted);
+  });
+  assert.equal(port.written.filter(name => name === 'bt_pair').length, 1);
+  assert.ok(port.written.indexOf('disp_read', port.written.indexOf('bt_pair')) > 0);
+  assert.deepEqual([page.document.elements.rsnodePair.hidden, page.document.elements.rsnodePair.disabled], [true, true]);
+});
+
 test('a board without a whole-screen mirror gets its status only', async () => {
   const port = nodePort(echo);
   await withPanel(port, async page => {
     await until(() => page.document.elements.rsnodeScreenState.textContent === 'Status only');
     assert.equal(page.document.elements.rsnodeScreenEmpty.textContent, 'No screen view for this board');
     assert.equal(page.document.fact('owners').dd.textContent, 'Not supported by this firmware');
+    // No mirror to read a pairing code from.
+    assert.equal(page.document.elements.rsnodePair.hidden, true);
   });
   assert.ok(!port.written.includes('disp_read'));
+  assert.ok(!port.written.includes('bt_pair'));
   assert.equal(port.written.at(-1), 'leave');
 });
 

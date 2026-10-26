@@ -18,6 +18,7 @@ const CMD_STAT_RSSI = 0x23;
 const CMD_STAT_SNR = 0x24;
 const CMD_STAT_CHTM = 0x25;
 const CMD_STAT_BAT = 0x27;
+const CMD_BT_CTRL = 0x46;
 const CMD_BOARD = 0x47;
 const CMD_PLATFORM = 0x48;
 const CMD_MCU = 0x49;
@@ -29,6 +30,7 @@ const CMD_TRANSPORT_CFG = 0x6f;
 const DETECT_REQ = 0x73;
 const DETECT_RESP = 0x46;
 const HASH_FIRMWARE = 0x02;
+const BT_PAIRING = 0x02;
 const TRANSPORT_READ = 0x00;
 const RESET_BYTE = 0xf8;
 const RSSI_OFFSET = 157;
@@ -196,6 +198,11 @@ export async function readRsnodeScreen(session) {
 
 export function leaveRsnode(session) {
   return session.send(CMD_LEAVE, [0xff]);
+}
+
+/** probe-heltec-v4.py --bt-pair: Bluetooth on and kept on, with a pairing window whose code the screen shows. No answer comes. */
+export function startRsnodePairing(session) {
+  return session.send(CMD_BT_CTRL, [BT_PAIRING]);
 }
 
 /** LEAVE first so the node is out of host mode, then configure-saved-radio.py's reset. */
