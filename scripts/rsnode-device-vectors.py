@@ -288,6 +288,8 @@ impl Device {
         field("interference", channel.interference_dbm.map_or("null".into(), |dbm| dbm.to_string()));
         field("batteryState", stats.battery.state.to_string());
         field("batteryPercent", stats.battery.percent.to_string());
+        field("bluetoothEnabled", state.bluetooth_enabled.to_string());
+        field("bluetoothPairing", state.bluetooth_pairing.to_string());
     }
 
     fn command(&mut self, line: &str, out: &mut impl Write) {
@@ -482,7 +484,7 @@ def requests(probe, provision, ifac, saved):
     """Every frame the page writes, encoded as the named rsNode script writes it."""
     encode = probe.encode
     return {
-        # probe-heltec-v4.py: its probe and --extended checks, --display-read and --leave.
+        # probe-heltec-v4.py: its probe and --extended checks, --display-read, --bt-pair and --leave.
         "detect": encode(probe.CMD_DETECT, bytes([probe.DETECT_REQ])),
         "board": encode(probe.CMD_BOARD),
         "platform": encode(probe.CMD_PLATFORM),
@@ -502,6 +504,7 @@ def requests(probe, provision, ifac, saved):
         "stat_chtm": encode(probe.CMD_STAT_CHTM),
         "stat_bat": encode(probe.CMD_STAT_BAT),
         "disp_read": encode(probe.CMD_DISP_READ, b"\x01"),
+        "bt_pair": encode(probe.CMD_BT_CTRL, b"\x02"),
         "leave": encode(probe.CMD_LEAVE, b"\xff"),
         # provision-rsnode.py --read.
         "read_mgmt": provision.encode(provision.CMD_TRANSPORT_CFG, bytes([provision.TRANSPORT_CFG_READ_MGMT])),
@@ -589,7 +592,7 @@ def run_scenario(model, modules, scratch, name, board, node_id, setup, screens):
     table = requests(probe, provision, ifac, saved)
     replies = {}
     for request, frame in table.items():
-        if request in ("disp_read", "leave", "reset"):
+        if request in ("disp_read", "bt_pair", "leave", "reset"):
             continue
         reply = model.ask(frame)
         replies[request] = {"host": frame.hex(), "device": reply.hex()}
@@ -607,6 +610,10 @@ def run_scenario(model, modules, scratch, name, board, node_id, setup, screens):
         command, payload = frame_payload(probe, reply)
         assert command == probe.CMD_DISP_READ
         rendered.append({"name": screen_name, "device": reply.hex(), "rows": screen_rows(probe, scratch, payload, device["board"])})
+    # --bt-pair changes the node, so it is asked after every read, with what it left behind.
+    replies["bt_pair"] = {"host": table["bt_pair"].hex(), "device": model.ask(table["bt_pair"]).hex()}
+    after = model.state()
+    replies["bt_pair"]["bluetooth"] = {"enabled": after["bluetoothEnabled"], "pairing": after["bluetoothPairing"]}
     for request in ("leave", "reset"):
         replies[request] = {"host": table[request].hex(), "device": model.ask(table[request]).hex()}
     replies["disp_read"] = {"host": table["disp_read"].hex(), "device": None}
