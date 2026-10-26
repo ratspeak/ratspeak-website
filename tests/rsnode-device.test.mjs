@@ -185,12 +185,12 @@ test('summarizes the node for the panel and for a bug report', async () => {
   }
   assert.deepEqual(lines['heltec-v4'], {
     node: 'RNode 887A', board: 'Heltec V4 · ESP32', firmware: `RNode 1.86 · image ${v4.device.firmwareHash.slice(0, 8)}`,
-    management: 'Key set · AP password set', owners: 'Owner and 1 admin', repeater: 'Not set up',
+    owners: 'Owner and 1 admin', repeater: 'Not set up',
     radio: 'Off · not configured', packets: 'RX 0 · TX 0', channel: null, battery: '84% · discharging'
   });
   assert.deepEqual(lines['heltec-v3'], {
     node: 'RNode 0F3C', board: 'Heltec V3 · ESP32', firmware: `RNode 1.86 · image ${v3.device.firmwareHash.slice(0, 8)}`,
-    management: 'No key · AP password set', owners: 'None yet', repeater: 'Not set up · IFAC on (8)',
+    owners: 'None yet', repeater: 'Not set up · IFAC on (8)',
     radio: 'On · 915.000 MHz · 250 kHz · SF9 · CR 4/5 · 14 dBm', packets: 'RX 2 · TX 3 · last -117 dBm, -4.5 dB',
     channel: 'Airtime 1.2% · load 2.3% · noise -121 dBm', battery: '76% · charging'
   });
