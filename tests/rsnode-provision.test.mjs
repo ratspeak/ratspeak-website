@@ -139,8 +139,8 @@ test('owner hashes and key files are accepted exactly when provision-rsnode.py a
 
 const plain = options => JSON.parse(JSON.stringify(options, (key, value) => value instanceof Uint8Array ? hex(value) : value));
 
-// The managers list and key choice as each recorded command line asks: removals are rows read from the node.
-function managersPage(argv, keyText) {
+// The managers list as each recorded command line asks: removals are rows read from the node.
+function managersPage(argv) {
   const values = flag => argv.flatMap((value, index) => value === flag ? [argv[index + 1]] : []);
   const row = (text, kind, role, removed) => {
     const entry = { hash: hex(parseHash(text)), kind, role };
@@ -148,13 +148,10 @@ function managersPage(argv, keyText) {
   };
   const field = value => ({ value, setAttribute(name, setting) { this[name] = setting; } });
   const elements = {
-    rsnodeOwnerHash: field(''), rsnodeOwnerKind: field('lxmf'), rsnodeOwnerRole: field('admin'),
-    rsnodeKeyMode: field(argv.includes('--no-key') ? 'keep' : argv.includes('--clear-key') ? 'clear'
-      : argv.includes('--management-key') ? 'file' : 'generate'),
-    rsnodeKeyFile: { ...field(''), files: keyText ? [new Blob([keyText])] : [] }
+    rsnodeOwnerHash: field(''), rsnodeOwnerKind: field('lxmf'), rsnodeOwnerRole: field('admin')
   };
   const context = {
-    document: { getElementById: id => elements[id] }, parseHash, parseKeyFile, KEY_FILE_READ_MAX, bytesToHex: hex,
+    document: { getElementById: id => elements[id] }, parseHash, bytesToHex: hex,
     rsnodeManagersFrom: { nodeId: 'ABCD', supported: true }, rsnodeManagerEditing: null, rsnodeOwnerSaved: false,
     renderRsnodeManagers: () => {},
     rsnodeManagers: [...values('--remove-owner').map(text => row(text, 'lxmf', 'admin', true)),
@@ -166,9 +163,10 @@ function managersPage(argv, keyText) {
   return { ...page, context, elements };
 }
 
+// The page never changes the management key, so it matches the script's --no-key runs.
 test('the managers list gives provision-rsnode.py the options its command line does', async () => {
-  for (const scenario of vectors.scenarios.filter(scenario => !scenario.options.read)) {
-    const page = managersPage(scenario.argv, scenario.options.managementKey && scenario.options.managementKey + '\n');
+  for (const scenario of vectors.scenarios.filter(scenario => scenario.options.noKey)) {
+    const page = managersPage(scenario.argv);
     // Removals only fit the node the list was read from.
     const expected = scenario.options.removeOwner.length ? { ...scenario.options, nodeId: 'ABCD' } : scenario.options;
     assert.deepEqual(plain(await page.rsnodeOwnerOptions()), expected, scenario.name);
@@ -192,19 +190,18 @@ const OWNER = 'aa'.repeat(16), ADMIN = 'bb'.repeat(16), OTHER = 'cc'.repeat(16);
 const onNode = (hash, kind, role) => ({ hash, kind, role, node: { hash, kind, role }, added: false, removed: false });
 
 test('one owner per node: a new owner replaces the old one, which stays only by choice', () => {
-  const { rsnodeManagersPlan, rsnodeManagersWith, rsnodeOwnerChanges, rsnodeManagersFromNode } = pageFunctions(['RSNODE_KEY_CHANGES',
+  const { rsnodeManagersPlan, rsnodeManagersWith, rsnodeOwnerChanges, rsnodeManagersFromNode } = pageFunctions([
     'RSNODE_KINDS', 'RSNODE_ROLES', 'rsnodeCount', 'rsnodeManagersPlan', 'rsnodeManagersWith', 'rsnodeOwnerChanges', 'rsnodeManagersFromNode']);
   const node = [onNode(OWNER, 'lxmf', 'owner'), onNode(ADMIN, 'identity', 'admin')];
   assert.deepEqual(plain(rsnodeManagersPlan(node)).fromNode, false);
-  assert.deepEqual(plain(rsnodeOwnerChanges(rsnodeManagersPlan(node), 'keep')), []);
+  assert.deepEqual(plain(rsnodeOwnerChanges(rsnodeManagersPlan(node))), []);
 
   // Promoting the admin replaces the owner, as the node itself does.
   const promoted = rsnodeManagersWith(node, { hash: ADMIN, kind: 'identity', role: 'owner' }, node[1]);
   assert.deepEqual(plain(promoted).map(row => [row.role, row.removed]), [['owner', true], ['owner', false]]);
   const plan = plain(rsnodeManagersPlan(promoted));
   assert.deepEqual([plan.ownerIdentity, plan.helper, plan.removeOwner, plan.fromNode], [ADMIN, [], [OWNER], true]);
-  assert.deepEqual(plain(rsnodeOwnerChanges(rsnodeManagersPlan(promoted), 'generate')),
-    ['set the owner', 'remove 1 manager', 'generate a new management key']);
+  assert.deepEqual(plain(rsnodeOwnerChanges(rsnodeManagersPlan(promoted))), ['set the owner', 'remove 1 manager']);
   // Undo keeps the old owner as an admin, enrolled again after the new owner replaced it.
   const kept = plain(rsnodeManagersPlan(promoted.map((row, index) => index ? row : { ...row, removed: false, role: 'admin' })));
   assert.deepEqual([kept.ownerIdentity, kept.helper, kept.removeOwner, kept.changed], [ADMIN, [OWNER], [], 1]);
@@ -269,7 +266,7 @@ test('owner work checks its input before asking for a port and always closes the
   const invalid = Object.assign(new Error('A hash is 32 hexadecimal characters'), { field: { focus: () => calls.push(['focus']) } });
   const context = {
     state: { flashing: false }, navigator: { serial: {} }, rsnodeOwnerBusy: false, RNODE_REPAIR_SETTLE_MS: 0,
-    document: { getElementById: () => ({}) }, saveRsnodeKey: () => {},
+    document: { getElementById: () => ({}) },
     setRsnodeOwnerBusy: busy => { context.rsnodeOwnerBusy = busy; calls.push(['busy', busy]); },
     rsnodeOwnerMessage: (message, error) => { if (message) calls.push(['message', !!error]); },
     rsnodeOwnerOptions: async () => { throw invalid; },
@@ -302,10 +299,10 @@ test('the owner row says what a save changes and what to do after a failure, in 
   const state = { flashing: false };
   const { rsnodeOwnerSummary, rsnodeOwnerError } = pageFunctions(['RSNODE_CLI_WORDS', 'rsnodeOwnerSummary', 'rsnodePortError',
     'rsnodeOwnerError'], { state });
-  assert.equal(rsnodeOwnerSummary([]), 'Nothing to save yet. Add a manager or choose a key change.');
+  assert.equal(rsnodeOwnerSummary([]), 'Nothing to save yet. Add a manager.');
   assert.equal(rsnodeOwnerSummary(['set the owner']), 'Saving will set the owner.');
-  assert.equal(rsnodeOwnerSummary(['set the owner', 'add 2 admins', 'generate a new management key']),
-    'Saving will set the owner, add 2 admins and generate a new management key.');
+  assert.equal(rsnodeOwnerSummary(['set the owner', 'add 2 admins', 'remove 1 manager']),
+    'Saving will set the owner, add 2 admins and remove 1 manager.');
   state.flashing = true;
   assert.equal(rsnodeOwnerSummary(['set the owner']), 'Available when flashing finishes.');
 
