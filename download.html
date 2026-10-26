@@ -5565,7 +5565,7 @@
                     <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
                 </summary>
                 <div class="flash-cta__repair-body">
-                    <p class="rsnode-tools__notice" id="rsnodeOwnerNotice" tabindex="-1" hidden>Next: press RESET on the board, or turn it off and on, then add yourself as the owner.</p>
+                    <p class="rsnode-tools__notice" id="rsnodeOwnerNotice" tabindex="-1" hidden>Next: reset the device, then add yourself as the owner.</p>
                     <p class="rsnode-tools__lede">Choose who can manage this node over the mesh, and set its management key.</p>
                     <form id="rsnodeOwnerForm" novalidate>
                         <fieldset class="rsnode-owner__fields" id="rsnodeOwnerFields">
@@ -9753,8 +9753,8 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
                         ? 'Firmware flash complete. RNode setup was verified.'
                         : state.rsnodeInstalled
                         ? (rsnodeToolsUnlocked() ? 'rsNode is installed. Next, add its owner below.'
-                            : 'rsNode is installed. Press RESET on the board, or turn it off and on.')
-                        : 'Flash complete. Press RESET or turn the device off and on.';
+                            : 'rsNode is installed. Reset the device.')
+                        : 'Flash complete. Reset the device.';
                 }
             }
             updateAdvancedMeta();
@@ -10943,7 +10943,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
             } else {
                 setProgress(100, 'Complete');
                 logMessage(prepared && prepared.product === 'rsnode'
-                    ? 'rsNode installed. Press RESET on the board, or turn it off and on.'
+                    ? 'rsNode installed. Reset the device.'
                     : (state.device === 'custom' ? 'Firmware flash complete.' : 'Ratspeak flash complete.') + ' Restart the device before using it.', 'log-green');
             }
 
