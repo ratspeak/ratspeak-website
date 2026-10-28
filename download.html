@@ -5743,7 +5743,7 @@ import { betaRequest, rsnodeBoard, validateBetaCatalog, verifyBetaDownload, vali
 import { parseHash, provisionRsnode } from './assets/js/rsnode-provision.js';
 import { SCREEN_HEIGHT, SCREEN_WIDTH, leaveRsnode, readRsnodeFacts, readRsnodeRadio, readRsnodeScreen,
     restartRsnode, rsnodeDetails, rsnodeSummary, screenSupported, startRsnodePairing, waitForRsnode } from './assets/js/rsnode-device.js';
-import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITORY, verifyHandheldDownload, validateHandheldManifest } from './assets/js/handheld-release.js';
+import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITORY, verifyHandheldDownload, validateHandheldManifest, identifyHandheldImage, validateHandheldImage } from './assets/js/handheld-release.js';
 import { md5Bytes } from './assets/js/md5.js';
 import { closeFlashTransport } from './assets/js/esp-serial.js';
 import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './assets/js/handheld-update.js';
@@ -6135,6 +6135,10 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
             throw new Error('Firmware does not match the selected device and release.');
         }
         await verifyHandheldDownload(buffer, metadata);
+        if (metadata.fileName.endsWith('.bin')) {
+            validateHandheldImage(new Uint8Array(buffer), metadata);
+            return;
+        }
         var zip = await window.JSZip.loadAsync(buffer, { checkCRC32: true });
         var entry = zip.file('manifest.json');
         if (!entry) throw new Error('Handheld firmware is missing its manifest.');
@@ -10355,12 +10359,35 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
             });
         }
 
+        var handheldImage = function (validated) {
+            state.firmwareAppBytes = validated.bytes;
+            logMessage('Verified factory image for ' + DEVICES[validated.board].name + ' @ 0x0', '');
+            return {
+                fileArray: [{ data: uint8ToBstr(validated.bytes), address: validated.address }],
+                product: 'ratspeak-handheld',
+                bytes: validated.bytes,
+                version: validated.version,
+                flashOptions: { flashMode: validated.flashMode, flashSize: validated.flashSize, flashFreq: validated.flashFreq },
+                installMode: validated.installMode,
+                board: validated.board,
+                package: validated.package
+            };
+        };
+
+        if (state.device !== 'custom' && state.firmwareMetadata && state.firmwareMetadata.product === 'ratspeak-handheld' &&
+            state.firmwareMetadata.fileName.endsWith('.bin')) {
+            return handheldImage(validateHandheldImage(new Uint8Array(state.firmwareZip),
+                { board: state.device, package: state.selectedPackage }));
+        }
+
         var isCustomSingleBin = state.device === 'custom' && state.customFile
             && state.customFile.name.toLowerCase().endsWith('.bin');
 
         if (isCustomSingleBin) {
             var buf = await state.customFile.arrayBuffer();
             var u8 = new Uint8Array(buf);
+            // Release images identify themselves; flash them like the preset download.
+            if (identifyHandheldImage(u8)) return handheldImage(validateHandheldImage(u8));
             var nameLower = state.customFile.name.toLowerCase();
             var addr = (state.customOffsets && state.customOffsets[0] != null)
                 ? state.customOffsets[0]
