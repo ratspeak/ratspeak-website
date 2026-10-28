@@ -12,7 +12,7 @@ test('M9 defaults to Standalone and has no older or unsupported packages', () =>
     const release = handheldRelease(name);
     assert.equal(release.board, 'm9');
     assert.deepEqual(release.packages, ['standalone']);
-    assert.equal(handheldPackage(release).fileName, 'm9-standalone.zip');
+    assert.equal(handheldPackage(release).fileName, 'm9-standalone.bin');
     for (const mode of ['full', 'rnode', 'constructor']) assert.equal(handheldPackage(release, mode), null);
     for (const tag of ['v1.9.9', 'v2.1.0', 'v2.2.0', 'v2.2.1']) assert.equal(handheldRelease(name, tag), null);
   }
@@ -23,7 +23,7 @@ test('M9 defaults to Standalone and has no older or unsupported packages', () =>
 
 test('M9 API serves the pinned Standalone asset and rejects unavailable modes before fetching', async () => {
   const previous = globalThis.fetch;
-  const name = 'm9-standalone.zip';
+  const name = 'm9-standalone.bin';
   const base = 'https://github.com/ratspeak/ratspeak-handheld/releases/download/';
   const assetUrl = base + HANDHELD_RELEASE_TAG + '/' + name;
   let calls = 0;
