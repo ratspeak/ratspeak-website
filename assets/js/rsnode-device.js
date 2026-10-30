@@ -26,6 +26,7 @@ const CMD_FW_VERSION = 0x50;
 const CMD_RESET = 0x55;
 const CMD_HASHES = 0x60;
 const CMD_DISP_READ = 0x66;
+const CMD_ERROR = 0x90;
 const CMD_TRANSPORT_CFG = 0x6f;
 const DETECT_REQ = 0x73;
 const DETECT_RESP = 0x46;
@@ -51,6 +52,8 @@ const ROLE_HELPER = 2;
 const DETECT_POLL_MS = 1000;
 const EXCHANGE_TIMEOUT_MS = 2000;
 const WAIT_TIMEOUT_MS = 30000;
+// A refusal comes straight back; an accepted pairing or reset sends nothing.
+const REFUSAL_WAIT_MS = 500;
 
 const hex = bytes => Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
 const hexByte = byte => '0x' + byte.toString(16).padStart(2, '0');
@@ -200,15 +203,24 @@ export function leaveRsnode(session) {
   return session.send(CMD_LEAVE, [0xff]);
 }
 
-/** probe-heltec-v4.py --bt-pair: Bluetooth on and kept on, with a pairing window whose code the screen shows. No answer comes. */
+/**
+ * Sends a command that changes the node; false when it refuses with CMD_ERROR, as a Repeater
+ * or a node another app is using does, since they answer only reads.
+ */
+async function command(session, code, payload) {
+  await session.send(code, payload);
+  return !(await session.readFrame(frame => frame.command === CMD_ERROR, REFUSAL_WAIT_MS));
+}
+
+/** probe-heltec-v4.py --bt-pair: Bluetooth on and kept on, with a pairing window whose code the screen shows. */
 export function startRsnodePairing(session) {
-  return session.send(CMD_BT_CTRL, [BT_PAIRING]);
+  return command(session, CMD_BT_CTRL, [BT_PAIRING]);
 }
 
 /** LEAVE first so the node is out of host mode, then configure-saved-radio.py's reset. */
 export async function restartRsnode(session) {
   await leaveRsnode(session);
-  await session.send(CMD_RESET, [RESET_BYTE]);
+  return command(session, CMD_RESET, [RESET_BYTE]);
 }
 
 const radioConfigured = radio => radio.frequency !== 0 && radio.bandwidth !== 0 && radio.txPower !== 0xff &&

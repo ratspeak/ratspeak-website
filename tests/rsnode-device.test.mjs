@@ -13,7 +13,7 @@ const html = readFileSync(new URL('../download.html', import.meta.url), 'utf8');
 const bytes = value => Uint8Array.from(Buffer.from(value, 'hex'));
 const hex = value => Buffer.from(value).toString('hex');
 const scenario = name => vectors.scenarios.find(entry => entry.name.startsWith(name));
-const [v4, v3, echo] = ['Heltec V4', 'Heltec V3', 'T-Echo'].map(scenario);
+const [v4, v3, echo, repeater] = ['Heltec V4 on', 'Heltec V3', 'T-Echo', 'Heltec V4 running as a Repeater'].map(scenario);
 const PRESET_BOARDS = { 'heltec-v3': 'Heltec V3', 'heltec-v4': 'Heltec V4', 't-echo': 'T-Echo' };
 
 function extract(name) {
@@ -51,20 +51,26 @@ function pageFunctions(names, context = {}) {
 const { createRnodeSession, closeRnodeSession } = pageFunctions(['KISS', 'RNODE_READ_TIMEOUT_MS', 'kissEscape',
   'kissFrame', 'decodeKissPayload', 'createKissReadPump', 'createRnodeSession', 'closeRnodeSession']);
 
+// An all-dark screen, as rsNode mirrors a sleeping panel.
+const DARK_SCREEN = 'c066' + '00'.repeat(1024) + 'c0';
+
 // A port that answers as the recorded node. Every frame the page writes must be one of the frames
-// rsNode's scripts write; the screen steps through the node's recorded screens.
-function nodePort(entry, { silent = false, early = [], unanswered = [] } = {}) {
+// rsNode's scripts write; the screen steps through the node's recorded screens. port.restart(entry)
+// reboots it into entry: quiet for restartMs, then answering as entry, with USB never dropped.
+function nodePort(entry, { silent = false, early = [], unanswered = [], dark = false, restartMs = 1500 } = {}) {
   const names = new Map(Object.entries(entry.requests).map(([name, request]) => [request.host, name]));
-  let controller, screen = 0;
+  let controller, screen = 0, quietUntil = 0;
   const port = {
     written: [],
     closed: false,
+    restart(next) { quietUntil = Date.now() + restartMs; entry = next; screen = 0; },
     readable: new ReadableStream({ start(value) { controller = value; } }),
     writable: new WritableStream({ write(chunk) {
       const name = names.get(hex(chunk));
       assert.ok(name, `the page wrote a frame rsNode's scripts never send: ${hex(chunk)}`);
       port.written.push(name);
-      if (silent || unanswered.includes(name)) return;
+      if (silent || unanswered.includes(name) || Date.now() < quietUntil) return;
+      if (dark && name === 'disp_read') return controller.enqueue(bytes(DARK_SCREEN));
       // What the node sent unasked arrives ahead of the first answer.
       for (const frame of early.splice(0)) controller.enqueue(bytes(frame));
       const answer = name === 'disp_read' ? entry.screens[screen++ % entry.screens.length]?.device : entry.requests[name].device;
@@ -205,22 +211,34 @@ test('ends a session with LEAVE, and a restart with LEAVE then the reset configu
   const port = nodePort(v4);
   const session = createRnodeSession(port);
   await leaveRsnode(session);
-  await restartRsnode(session);
+  assert.equal(await restartRsnode(session), true);
   await closeRnodeSession(session);
   assert.deepEqual(port.written, ['leave', 'leave', 'reset']);
 });
 
 test('starts pairing with the frame probe-heltec-v4.py --bt-pair sends, which rsNode answers with nothing', async () => {
-  for (const entry of vectors.scenarios) {
+  for (const entry of vectors.scenarios.filter(entry => entry !== repeater)) {
     assert.equal(entry.requests.bt_pair.device, '', entry.name);
     // Bluetooth on and kept on, with the pairing window open.
     assert.deepEqual([entry.device.bluetoothPairing, entry.requests.bt_pair.bluetooth], [false, { enabled: true, pairing: true }], entry.name);
   }
   const port = nodePort(v4);
   const session = createRnodeSession(port);
-  await startRsnodePairing(session);
+  assert.equal(await startRsnodePairing(session), true);
   await closeRnodeSession(session);
   assert.deepEqual(port.written, ['bt_pair']);
+});
+
+test('a Repeater answers only reads: pairing and a reset are refused and change nothing', async () => {
+  for (const request of ['bt_pair', 'reset']) assert.equal(repeater.requests[request].device, 'c09007c0', request);
+  assert.deepEqual(repeater.requests.bt_pair.bluetooth,
+    { enabled: repeater.device.bluetoothEnabled, pairing: repeater.device.bluetoothPairing });
+  const port = nodePort(repeater);
+  const session = createRnodeSession(port);
+  assert.equal(await startRsnodePairing(session), false);
+  assert.equal(await restartRsnode(session), false);
+  await closeRnodeSession(session);
+  assert.deepEqual(port.written, ['bt_pair', 'leave', 'reset']);
 });
 
 test('a silent node, such as a running Repeater, is given up on after the wait with one hint', async () => {
@@ -261,10 +279,10 @@ function panelDocument() {
 }
 
 const PANEL = ['rsnodeDevice', 'rsnodeDeviceFacts', 'rsnodeDeviceRadio', 'rsnodeScreenPixels', 'rsnodeScreenImage',
-  'RSNODE_SCREEN_INTERVAL_MS', 'RSNODE_RADIO_INTERVAL_MS', 'RSNODE_SCREEN_MISSES', 'RSNODE_PIXEL_ON', 'RSNODE_PIXEL_OFF',
+  'RSNODE_SCREEN_INTERVAL_MS', 'RSNODE_RADIO_INTERVAL_MS', 'RSNODE_RESUME_MS', 'RSNODE_PIXEL_ON', 'RSNODE_PIXEL_OFF',
   'RSNODE_TAKEOVER', 'rsnodeToolsUnlocked', 'updateRsnodeDeviceVisibility', 'rsnodeDeviceMessage', 'syncRsnodeDevice',
   'setRsnodeScreenState', 'clearRsnodeScreen', 'paintRsnodeScreen', 'showRsnodeDeviceFacts', 'rsnodeDeviceError',
-  'rsnodePortError', 'rsnodeDeviceWatched', 'streamRsnodeDevice', 'runRsnodeDevice', 'stopRsnodeDevice', 'releaseRsnodeDevice',
+  'rsnodePortError', 'rsnodeDeviceWatched', 'streamRsnodeDevice', 'resumeRsnodeDevice', 'runRsnodeDevice', 'stopRsnodeDevice', 'releaseRsnodeDevice',
   'pairRsnodeDevice', 'syncRsnodePort'];
 
 function devicePage(port, overrides = {}) {
@@ -358,6 +376,83 @@ test('pairing starts in one frame, says which node to choose, and the screen kee
   assert.deepEqual([page.document.elements.rsnodePair.hidden, page.document.elements.rsnodePair.disabled], [true, true]);
 });
 
+test('a Repeater streams its own screen and radio, and offers neither Pair nor Restart', async () => {
+  const port = nodePort(repeater);
+  await withPanel(port, async page => {
+    const { elements } = page.document;
+    await until(() => page.document.painted.length >= 1);
+    assert.deepEqual(screenOf(page.document.painted[0]), repeater.screens[0].rows);
+    assert.match(page.document.fact('radio').dd.textContent, /^On · 869\.525 MHz · 125 kHz · SF9 · CR 4\/6 · 14 dBm$/);
+    assert.equal(page.document.fact('packets').dd.textContent, 'RX 1234 · TX 56');
+    assert.match(page.document.fact('repeater').dd.textContent, /starts as Repeater$/);
+    assert.match(elements.rsnodeScreenState.textContent, /^Live/);
+    assert.deepEqual([elements.rsnodePair.hidden, elements.rsnodeRestart.hidden, elements.rsnodeCopyDetails.hidden],
+      [true, true, false]);
+  });
+  assert.ok(!port.written.includes('bt_pair') && !port.written.includes('reset'));
+  assert.equal(port.written.at(-1), 'leave');
+});
+
+test('the panel follows a node through its restart into a Repeater, without disconnecting', async () => {
+  const port = nodePort(v4);
+  const page = await withPanel(port, async page => {
+    const { elements } = page.document;
+    await until(() => page.document.painted.length >= 1);
+    assert.equal(elements.rsnodePair.hidden, false);
+    const states = [];
+    const watch = setInterval(() => states.push(elements.rsnodeScreenState.textContent), 5);
+    port.restart(repeater);
+    try {
+      await until(() => /starts as Repeater$/.test(page.document.fact('repeater').dd.textContent), 10000);
+      await until(() => page.document.painted.some(image => screenOf(image).join() === repeater.screens[0].rows.join()), 4000);
+    } finally {
+      clearInterval(watch);
+    }
+    assert.ok(states.includes('Restarting…'));
+    assert.match(elements.rsnodeScreenState.textContent, /^Live/);
+    assert.equal(page.document.fact('node').dd.textContent, 'RNode B44E');
+    assert.deepEqual([elements.rsnodePair.hidden, elements.rsnodeRestart.hidden], [true, true]);
+    assert.equal(elements.rsnodeDeviceStatus.textContent, '');
+  });
+  assert.ok(port.written.lastIndexOf('detect') > port.written.indexOf('disp_read'));
+  assert.equal(port.written.at(-1), 'leave');
+  assert.equal(page.document.elements.rsnodeLiveDot.classList.contains('is-error'), false);
+});
+
+test('a node that never answers after going quiet is given up on with the update hint', async () => {
+  const port = nodePort(v4, { restartMs: 60000 });
+  const page = devicePage(port, {
+    waitForRsnode: (session, options) => waitForRsnode(session, { ...options, timeoutMs: Math.min(options.timeoutMs ?? 300, 300) })
+  });
+  const run = page.runRsnodeDevice();
+  await until(() => page.document.painted.length >= 1);
+  port.restart(v4);
+  await run;
+  assert.equal(page.document.elements.rsnodeDeviceStatus.textContent,
+    'The node stopped answering over USB. Older firmware goes quiet as a Repeater or while another app uses it: update it, then connect again.');
+});
+
+test('pairing and a restart that another app refuses say so instead of claiming success', async () => {
+  const port = nodePort(repeater);
+  const page = await withPanel(port, async page => {
+    await until(() => page.document.painted.length >= 1);
+    await page.pairRsnodeDevice();
+    assert.equal(page.document.elements.rsnodeDeviceStatus.textContent,
+      'RNode B44E did not start pairing: another app is using it. Disconnect that app, or pair from the device.');
+    await page.stopRsnodeDevice('Restarting RNode B44E. Connect again in a few seconds.', true);
+  });
+  assert.deepEqual(port.written.slice(-2), ['leave', 'reset']);
+  assert.equal(page.document.elements.rsnodeDeviceStatus.textContent,
+    'RNode B44E did not restart: another app is using it. Restart it from the device.');
+});
+
+test('a sleeping screen reads as screen off, not as a frozen frame', async () => {
+  await withPanel(nodePort(v4, { dark: true }), async page => {
+    await until(() => page.document.elements.rsnodeScreenState.textContent === 'Live · screen off');
+    assert.ok(screenOf(page.document.painted.at(-1)).every(row => /^0+$/.test(row)));
+  });
+});
+
 test('a board without a whole-screen mirror gets its status only', async () => {
   const port = nodePort(echo);
   await withPanel(port, async page => {
@@ -377,7 +472,7 @@ test('a silent node keeps the panel waiting with the takeover hint, and Disconne
   const page = await withPanel(port, async page => {
     const status = page.document.elements.rsnodeDeviceStatus;
     await until(() => status.textContent.startsWith('Waiting for rsNode.'));
-    assert.equal(status.textContent, 'Waiting for rsNode. EXIT a running Repeater first. In RNode, hold USB on the home menu to take over from another host.');
+    assert.equal(status.textContent, 'Waiting for rsNode. Older firmware stays quiet as a Repeater or while another app uses it: EXIT the Repeater, or hold USB on the home menu.');
   });
   assert.ok(port.written.slice(0, -1).every(name => name === 'detect'));
   assert.equal(port.written.at(-1), 'leave');
@@ -390,7 +485,7 @@ test('the panel says why it stopped: no answer, or not rsNode', async () => {
   });
   await silent.runRsnodeDevice();
   const status = silent.document.elements.rsnodeDeviceStatus;
-  assert.equal(status.textContent, 'No answer over USB. EXIT a running Repeater first. In RNode, hold USB on the home menu to take over from another host. Then connect again.');
+  assert.equal(status.textContent, 'No answer over USB. Older firmware stays quiet as a Repeater or while another app uses it: EXIT the Repeater, or hold USB on the home menu. Then connect again.');
   assert.ok(status.classList.contains('is-error'));
 
   const stock = nodePort(v4, { unanswered: ['read_mgmt'] });

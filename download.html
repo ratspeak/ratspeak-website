@@ -9349,10 +9349,10 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     var rsnodeScreenImage = null;
     var RSNODE_SCREEN_INTERVAL_MS = 250;
     var RSNODE_RADIO_INTERVAL_MS = 2000;
-    var RSNODE_SCREEN_MISSES = 3;
+    var RSNODE_RESUME_MS = 20000;
     var RSNODE_PIXEL_ON = [226, 236, 246, 255];
     var RSNODE_PIXEL_OFF = [11, 12, 14, 255];
-    var RSNODE_TAKEOVER = 'EXIT a running Repeater first. In RNode, hold USB on the home menu to take over from another host.';
+    var RSNODE_TAKEOVER = 'Older firmware stays quiet as a Repeater or while another app uses it: EXIT the Repeater, or hold USB on the home menu.';
 
     function updateRsnodeDeviceVisibility() {
         var panel = document.getElementById('rsnodeDevice');
@@ -9379,11 +9379,13 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         screenshot.disabled = screenshot.hidden = !rsnodeScreenPixels;
         var copy = document.getElementById('rsnodeCopyDetails');
         copy.disabled = copy.hidden = !rsnodeDeviceFacts;
+        // A Repeater refuses both: it is restarted and paired from the device.
+        var repeater = live && device.facts.transport.bootMode;
         var restart = document.getElementById('rsnodeRestart');
-        restart.disabled = restart.hidden = !live;
+        restart.disabled = restart.hidden = !live || repeater;
         // Pairing only where the screen mirror can show its code.
         var pair = document.getElementById('rsnodePair');
-        pair.disabled = pair.hidden = !live || !screenSupported(device.facts.board);
+        pair.disabled = pair.hidden = !live || repeater || !screenSupported(device.facts.board);
         document.getElementById('rsnodeFacts').classList.toggle('is-stale', !!rsnodeDeviceFacts && !live);
         syncRsnodePort();
     }
@@ -9437,7 +9439,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         var port = rsnodePortError(error, stage, 'connect again');
         if (port) return port;
         if (error.notRsnode) return 'This node answers as an RNode but not as rsNode. The live view needs rsNode firmware.';
-        if (/^no answer/.test(error.message)) return 'The node stopped answering over USB. It may have restarted or started its Repeater.';
+        if (/^no answer/.test(error.message)) return 'The node stopped answering over USB. Older firmware goes quiet as a Repeater or while another app uses it: update it, then connect again.';
         return error.message || String(error);
     }
 
@@ -9446,38 +9448,74 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     }
 
     // Screens as fast as the node answers, at most four a second, while the panel is in view;
-    // the radio every two seconds.
+    // the radio every two seconds. A node that goes quiet is followed through its restart.
     async function streamRsnodeDevice(device) {
-        var session = device.session, screen = screenSupported(device.facts.board);
-        var misses = 0, nextRadio = Date.now() + RSNODE_RADIO_INTERVAL_MS, shown = [];
-        if (!screen) clearRsnodeScreen('No screen view for this board');
-        document.getElementById('rsnodeScreenBezel').classList.toggle('is-none', !screen);
-        setRsnodeScreenState(screen ? 'Live' : 'Status only', true);
+        var session = device.session, screen, nextRadio, shown;
+        function begin() {
+            screen = screenSupported(device.facts.board);
+            nextRadio = Date.now() + RSNODE_RADIO_INTERVAL_MS;
+            shown = [];
+            if (!screen) clearRsnodeScreen('No screen view for this board');
+            document.getElementById('rsnodeScreenBezel').classList.toggle('is-none', !screen);
+            setRsnodeScreenState(screen ? 'Live' : 'Status only', true);
+        }
+        begin();
         while (!device.stopping) {
             var started = Date.now();
             var watched = rsnodeDeviceWatched();
+            var quiet = false, dark = false, radio = null;
             if (screen && watched) {
                 var pixels = await readRsnodeScreen(session);
                 if (device.stopping) return;
                 if (pixels) {
-                    misses = 0;
                     paintRsnodeScreen(pixels);
+                    dark = pixels.every(function(on) { return !on; });
                     shown.push(Date.now());
-                } else if (++misses >= RSNODE_SCREEN_MISSES) {
-                    throw new Error('no answer to disp_read');
+                } else {
+                    quiet = true;
                 }
             }
-            if (Date.now() >= nextRadio) {
-                var radio = await readRsnodeRadio(session);
+            if (!quiet && Date.now() >= nextRadio) {
+                try {
+                    radio = await readRsnodeRadio(session);
+                } catch (error) {
+                    if (!/^no answer/.test(error.message)) throw error;
+                    quiet = true;
+                }
                 if (device.stopping) return;
-                showRsnodeDeviceFacts(device.facts, radio);
-                nextRadio = Date.now() + RSNODE_RADIO_INTERVAL_MS;
+                if (radio) {
+                    showRsnodeDeviceFacts(device.facts, radio);
+                    nextRadio = Date.now() + RSNODE_RADIO_INTERVAL_MS;
+                }
+            }
+            if (quiet) {
+                await resumeRsnodeDevice(device);
+                if (device.stopping) return;
+                begin();
+                continue;
             }
             shown = shown.filter(function(at) { return at > Date.now() - 2000; });
-            if (screen) setRsnodeScreenState(watched ? 'Live · ' + Math.round(shown.length / 2) + ' fps' : 'Paused', watched);
+            if (screen) {
+                setRsnodeScreenState(!watched ? 'Paused' : dark ? 'Live · screen off' :
+                    'Live · ' + Math.round(shown.length / 2) + ' fps', watched);
+            }
             syncRsnodeDevice();
             await sleepMs(Math.max(0, RSNODE_SCREEN_INTERVAL_MS - (Date.now() - started)));
         }
+    }
+
+    // A restart or a switch between RNode and Repeater reboots the node without dropping USB:
+    // wait for it to answer again, then read it afresh, since its mode may have changed.
+    async function resumeRsnodeDevice(device) {
+        setRsnodeScreenState('Restarting…', false, true);
+        var answered = await waitForRsnode(device.session, {
+            timeoutMs: RSNODE_RESUME_MS,
+            stopped: function() { return device.stopping; }
+        });
+        if (device.stopping) return;
+        if (!answered) throw new Error('no answer after a restart');
+        device.facts = await readRsnodeFacts(device.session);
+        showRsnodeDeviceFacts(device.facts, await readRsnodeRadio(device.session));
     }
 
     async function runRsnodeDevice() {
@@ -9524,7 +9562,11 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         } finally {
             if (device.session) {
                 try {
-                    await (device.restart ? restartRsnode(device.session) : leaveRsnode(device.session));
+                    if (!device.restart) await leaveRsnode(device.session);
+                    else if (!await restartRsnode(device.session)) {
+                        device.reason = 'RNode ' + device.facts.status.nodeId + ' did not restart: another app is using it. ' +
+                            'Restart it from the device.';
+                    }
                 } catch (error) { /* the port is already gone */ }
             }
             await closeRnodeSession(device.session);
@@ -9565,7 +9607,11 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         var device = rsnodeDevice;
         if (!device || !device.facts || device.stopping) return;
         try {
-            await startRsnodePairing(device.session);
+            if (!await startRsnodePairing(device.session)) {
+                rsnodeDeviceMessage('RNode ' + device.facts.status.nodeId + ' did not start pairing: another app is using it. ' +
+                    'Disconnect that app, or pair from the device.', true);
+                return;
+            }
         } catch (error) {
             rsnodeDeviceMessage(rsnodeDeviceError(error, device.stage), true);
             return;
