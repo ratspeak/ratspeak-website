@@ -79,7 +79,10 @@ use std::io::{self, BufRead, Write};
 use display::{DISPLAY_BYTES, Display, DisplayError, Panel};
 use rsnode_core::airtime::AirtimeStats;
 use rsnode_core::constants::*;
-use rsnode_core::host::{BoardIdentity, DisplayAction, HostAction, RNodeHostAdapter};
+use rsnode_core::RadioProfile;
+use rsnode_core::host::{
+    BoardIdentity, DisplayAction, HostAction, RNodeHostAdapter, RadioReadout, ReadOnlyReply,
+};
 use rsnode_core::kiss::{FeedResult, Frame, KissDecoder, encode_frame};
 use rsnode_core::rssi::RssiStats;
 use rsnode_core::ui::{
@@ -121,6 +124,7 @@ struct Device {
     owners: bool,
     record: Option<NodeIdentityRecord>,
     entropy: [u8; NODE_PRIVATE_KEY_LEN],
+    repeater: Option<RadioReadout>,
 }
 
 fn hex(bytes: &[u8]) -> String {
@@ -156,6 +160,7 @@ impl Device {
             owners: true,
             record: None,
             entropy: [0; NODE_PRIVATE_KEY_LEN],
+            repeater: None,
         };
         let mut device_name = *b"RNode 0000";
         device_name[6..].copy_from_slice(name.as_bytes());
@@ -164,8 +169,18 @@ impl Device {
     }
 
     // The firmware's USB frame path: owner subcommands go to the identity sector
-    // (manage_service::usb_owner_command), everything else to the host adapter.
+    // (manage_service::usb_owner_command), everything else to the host adapter. A
+    // Repeater answers read-only, as its main loop does.
     fn route(&mut self, command: u8, payload: &[u8]) -> Vec<u8> {
+        if let Some(readout) = self.repeater {
+            let mut response = [0u8; 2300];
+            let frame = Frame { command, payload };
+            return match self.host.handle_read_only_frame(frame, &mut response, readout) {
+                ReadOnlyReply::Respond(len) => response[..len].to_vec(),
+                ReadOnlyReply::NodeRead => self.owner_command(payload),
+                ReadOnlyReply::Silent => Vec::new(),
+            };
+        }
         if command == CMD_TRANSPORT_CFG && owner_subcommand(payload) {
             return if self.owners {
                 self.owner_command(payload)
@@ -217,6 +232,7 @@ impl Device {
             "pairing" => UiScreen::Pairing,
             "usb-ready" => UiScreen::UsbReady,
             "link" => UiScreen::Link,
+            "repeater" => UiScreen::Transport,
             other => panic!("unknown screen {other}"),
         };
         let selected = match args[1] {
@@ -236,7 +252,7 @@ impl Device {
         let pairing_code: u32 = args[4].parse().unwrap();
         let mut pairing_id = [0u8; 4];
         pairing_id.copy_from_slice(&self.host.device_name()[6..10]);
-        let frame = UiFrame {
+        let mut frame = UiFrame {
             screen,
             selected,
             home_notice: HomeNotice::None,
@@ -253,13 +269,21 @@ impl Device {
             repeater_ui: rsnode_core::repeater_ui::RepeaterUi::new(),
             transport_stats: TransportUiStats::default(),
         };
+        if let Some(readout) = self.repeater {
+            frame.repeater_ui.set_running();
+            frame.transport_stats.active = readout.radio_online;
+            frame.transport_stats.accepted = readout.rx_packets;
+            frame.transport_stats.transmitted = readout.tx_packets;
+        }
         self.display.render_ui(&mut self.host, frame).unwrap();
     }
 
     fn state(&self, out: &mut impl Write) {
         let state = self.host.state();
         let stats = &state.stats;
-        let channel = &stats.channel;
+        // The radio as a USB host reads it: a Repeater's own, else the RNode host state.
+        let radio = self.repeater.unwrap_or_else(|| self.host.radio_readout());
+        let channel = &radio.channel;
         let identity = self.identity;
         let mut field = |key: &str, value: String| writeln!(out, "state {key} {value}").unwrap();
         field("board", identity.board.to_string());
@@ -269,16 +293,16 @@ impl Device {
         field("firmwareMinor", identity.firmware_minor.to_string());
         field("deviceName", String::from_utf8_lossy(self.host.device_name()).replace(' ', "_"));
         field("firmwareHash", hex(self.host.firmware_hash()));
-        field("frequency", state.frequency_hz.to_string());
-        field("bandwidth", state.bandwidth_hz.to_string());
-        field("txPower", state.tx_power_dbm.to_string());
-        field("spreadingFactor", state.spreading_factor.to_string());
-        field("codingRate", state.coding_rate_denominator.to_string());
-        field("online", state.radio_online.to_string());
-        field("rx", stats.rx.to_string());
-        field("tx", stats.tx.to_string());
-        field("lastRssi", stats.last_rssi_dbm.to_string());
-        field("lastSnrRaw", stats.last_snr_raw.to_string());
+        field("frequency", radio.frequency_hz.to_string());
+        field("bandwidth", radio.bandwidth_hz.to_string());
+        field("txPower", radio.tx_power_dbm.to_string());
+        field("spreadingFactor", radio.spreading_factor.to_string());
+        field("codingRate", radio.coding_rate_denominator.to_string());
+        field("online", radio.radio_online.to_string());
+        field("rx", radio.rx_packets.to_string());
+        field("tx", radio.tx_packets.to_string());
+        field("lastRssi", radio.last_rssi_dbm.to_string());
+        field("lastSnrRaw", radio.last_snr_raw.to_string());
         field("airtimeShort", channel.short_airtime_bps.to_string());
         field("airtimeLong", channel.long_airtime_bps.to_string());
         field("loadShort", channel.short_channel_load_bps.to_string());
@@ -302,6 +326,28 @@ impl Device {
                 self.host
                     .ensure_transport_config(unhex(parts[1]).try_into().unwrap())
                     .unwrap();
+            }
+            // The Repeater persona on a saved profile: frequency bandwidth sf cr power, online, RX, TX.
+            "repeater" => {
+                let value = |index: usize| parts[index].parse::<u32>().unwrap();
+                let profile = RadioProfile {
+                    frequency_hz: value(1),
+                    bandwidth_hz: value(2),
+                    spreading_factor: value(3) as u8,
+                    coding_rate_denominator: value(4) as u8,
+                    tx_power_dbm: value(5) as i8,
+                    ..RadioProfile::RATSPEAK_LONG_FAST_915
+                };
+                let mut config = self.host.transport_config().expect("transport first");
+                config.boot_mode = true;
+                config.radio_profile = Some(profile);
+                self.host.store_transport_config(config).unwrap();
+                self.repeater = Some(RadioReadout::repeater(
+                    Some(profile),
+                    parts[6] == "1",
+                    value(7),
+                    value(8),
+                ));
             }
             "host" => {
                 for byte in unhex(parts[1]) {
@@ -545,6 +591,12 @@ SCENARIOS = [
     ], [
         ("Bluetooth link", "link transport ble 1 0 0"),
         ("Bluetooth pairing", "pairing bluetooth ble 0 482913 0"),
+    ]),
+    ("Heltec V4 running as a Repeater", "heltec-v4", "B44E", [
+        ("frame", "set_psk"), ("frame", "add_primary"), ("model", "transport " + "6b" * 16),
+        ("model", "repeater 869525000 125000 9 6 14 1 1234 56"), ("model", "battery 1 84"),
+    ], [
+        ("Repeater running", "repeater transport usb 1 0 0"),
     ]),
     ("T-Echo without a screen mirror", "t-echo", "5D21", [
         ("model", "owners off"),
