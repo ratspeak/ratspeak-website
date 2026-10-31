@@ -34,8 +34,8 @@ const ERROR_NAMES = {
 const DETECT_POLL_MS = 1000;
 const EXCHANGE_TIMEOUT_MS = 3000;
 const KISS_TIMEOUT_MS = 30000;
-const WAIT_HINT = 'waiting for USB KISS: idle RNode devices connect automatically; ' +
-  'hold USB to take over from another host (EXIT Repeater first)';
+const WAIT_HINT = 'waiting for USB KISS: if you just installed, press RESET on the board; ' +
+  'in RNode, hold USB to take over from another app';
 
 // Typed hashes strip as str.strip() does; bytes.fromhex() and bytes.strip() skip ASCII whitespace only.
 const TEXT_SPACE = '\\t-\\r\\x1c-\\x20\\x85\\xa0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000';
@@ -221,8 +221,8 @@ function logStatus(log, status) {
  */
 export async function provisionRsnode(session, options, { log = () => {}, saveKey = () => {} } = {}) {
   if (!await waitForDevice(session, KISS_TIMEOUT_MS, log)) {
-    throw new Error(`no KISS response within ${KISS_TIMEOUT_MS / 1000} s: EXIT Repeater if active; ` +
-      'in RNode, hold USB on the home menu to take over from another host, then try again');
+    throw new Error(`no KISS response within ${KISS_TIMEOUT_MS / 1000} s: if you just installed, press RESET on the board; ` +
+      'in RNode, hold USB on the home menu to take over from another app, then try again');
   }
   let status = await readManagementStatus(session);
   logStatus(log, status);

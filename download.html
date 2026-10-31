@@ -5304,7 +5304,7 @@
 
                         <div class="custom-source-pane rsnode-beta" id="customSourceRsnode" role="tabpanel" aria-labelledby="sourceTabRsnode" hidden>
                             <form class="rsnode-beta__login" id="rsnodeLoginForm">
-                                <p class="rsnode-beta__note">rsNode is LoRa repeater and radio firmware for Heltec V3 and V4 boards, in private beta.</p>
+                                <p class="rsnode-beta__note">rsNode is LoRa firmware for Heltec V3 and V4 boards, in private beta. It runs in one of two modes, chosen on the device. As an <strong>RNode</strong>, it is the radio for one app, over USB, Bluetooth or Wi-Fi. As a <strong>Repeater</strong>, it forwards traffic on its own. Bluetooth is off while Wi-Fi is on. Managers are optional and only manage a Repeater.</p>
                                 <label for="rsnodePassword">Private beta password</label>
                                 <input class="rsnode-beta__password" id="rsnodePassword" type="password" autocomplete="current-password" required maxlength="256" aria-describedby="rsnodeStatus rsnodePasswordHelp">
                                 <button class="rsnode-beta__button" id="rsnodeUnlock" type="submit">Unlock</button>
@@ -5324,7 +5324,7 @@
                                     <p class="rsnode-beta__note">Check the chip marking or your order details: ESP32-S3R2 has 2 MB PSRAM; ESP32-S3R8 has 8 MB. Both V4s have 16 MB flash and need different firmware.</p>
                                     <label class="rsnode-beta__check rsnode-beta__variant"><input type="checkbox" id="rsnodeVariantConfirmed"><span id="rsnodeVariantLabel">I checked my V4 variant.</span></label>
                                 </div>
-                                <p class="rsnode-beta__note">Installing over USB erases the node, including its identity, owners and saved Wi-Fi. After setup, use signed OTA updates to keep them.</p>
+                                <p class="rsnode-beta__note">Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings. From the next beta, Update keeps them.</p>
                                 <div class="rsnode-beta__links"><a id="rsnodePackageDownload" hidden>Download package and source</a></div>
                             </div>
                             <p class="rsnode-beta__status" id="rsnodeStatus" role="status" aria-live="polite"></p>
@@ -5510,7 +5510,8 @@
                                 <div class="flash-connect-tips__head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Before you connect</div>
                                 <ul>
                                     <li>Plug the node in over USB. Close other apps that use its port, such as Ratspeak or a serial monitor.</li>
-                                    <li>EXIT a running Repeater first. In RNode, hold USB on the home menu to take over from another host.</li>
+                                    <li>If you just installed, press RESET on the board first.</li>
+                                    <li>A Repeater answers status over USB, and so does an RNode that another app is using.</li>
                                 </ul>
                             </div>
                             <dl class="rsnode-tools__facts" id="rsnodeFacts" hidden>
@@ -5545,19 +5546,19 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
                         rsNode device management
                     </span>
-                    <span class="flash-cta__repair-meta">Owner and admins over USB &middot; no re-flash required</span>
+                    <span class="flash-cta__repair-meta">Optional &middot; Owner and Admins of a Repeater, over USB</span>
                     <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
                 </summary>
                 <div class="flash-cta__repair-body">
-                    <p class="rsnode-tools__notice" id="rsnodeOwnerNotice" tabindex="-1" hidden>Next: reset the device, then add yourself as the owner.</p>
-                    <p class="rsnode-tools__lede">Choose who can manage this node over the mesh.</p>
+                    <p class="rsnode-tools__notice" id="rsnodeOwnerNotice" tabindex="-1" hidden>Next: press RESET on the board. Optional: add managers if this node will run as a Repeater you manage remotely.</p>
+                    <p class="rsnode-tools__lede">Managers are optional. They manage this node over the mesh while it runs as a Repeater; an RNode ignores them.</p>
                     <form id="rsnodeOwnerForm" novalidate>
                         <fieldset class="rsnode-owner__fields" id="rsnodeOwnerFields">
                             <div class="rsnode-owner__grid">
                                 <div class="rsnode-owner__field">
                                     <span class="rnode-source__label" id="rsnodeManagersLabel">Managers</span>
                                     <ul class="rsnode-managers" id="rsnodeManagers" aria-labelledby="rsnodeManagersLabel"></ul>
-                                    <p class="rsnode-tools__help" id="rsnodeManagersEmpty">Add yourself as the owner with the LXMF address <code>rsnode-client whoami</code> prints, or read the node to see its managers.</p>
+                                    <p class="rsnode-tools__help" id="rsnodeManagersEmpty">Add yourself as the Owner with your Ratspeak LXMF address, or read the node to see its managers.</p>
                                     <div class="rsnode-managers__editor" id="rsnodeManagerEditor" hidden>
                                         <input class="rsnode-owner__input" id="rsnodeOwnerHash" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="LXMF address or identity hash" aria-label="Manager's LXMF address or identity hash" aria-describedby="rsnodeManagerNote">
                                         <select class="rnode-variant-select" id="rsnodeOwnerKind" aria-label="Hash type">
@@ -5568,7 +5569,7 @@
                                             <option value="owner">Owner</option>
                                             <option value="admin">Admin</option>
                                         </select>
-                                        <p class="rsnode-tools__help" id="rsnodeRoleHelp">The owner adds and removes admins over the mesh. Admins check status and install updates.</p>
+                                        <p class="rsnode-tools__help" id="rsnodeRoleHelp">The Owner changes settings and managers. Admins read status and settings and install updates.</p>
                                         <div class="rsnode-managers__editor-actions">
                                             <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeManagerDone" type="button">Add</button>
                                             <button class="rsnode-beta__button" id="rsnodeManagerCancel" type="button">Cancel</button>
@@ -5582,7 +5583,8 @@
                                 <div class="flash-connect-tips__head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Before you save</div>
                                 <ul>
                                     <li>Plug the node in over USB. Close other apps that use its port, such as Ratspeak or a serial monitor.</li>
-                                    <li>EXIT a running Repeater first. In RNode, hold USB on the home menu to take over from another host.</li>
+                                    <li>If you just installed, press RESET on the board first.</li>
+                                    <li>A running Repeater takes manager changes over USB. In RNode, hold USB on the home menu to take over from another app.</li>
                                     <li>Adding the first manager creates the node's identity, so its Bluetooth or Wi-Fi radio must be running (a normal RNode boot has one).</li>
                                 </ul>
                             </div>
@@ -5603,7 +5605,7 @@
                                 <div id="rsnodeResultIdentity"><dt>Destination</dt><dd><span class="rsnode-owner__destination"><code id="rsnodeResultDestination"></code><button class="rsnode-beta__lock" id="rsnodeCopyDestination" type="button">Copy</button><span class="rsnode-tools__help" id="rsnodeCopyNote" hidden>Press Ctrl+C or ⌘C to copy.</span></span><span class="rsnode-tools__help">Clients pin this destination.</span></dd></div>
                             </dl>
                             <p class="rsnode-tools__help" id="rsnodeResultNote"></p>
-                            <p class="rsnode-tools__help" id="rsnodeResultEffect" hidden>The changes take effect when the Repeater next starts.</p>
+                            <p class="rsnode-tools__help" id="rsnodeResultEffect" hidden>Managers act only while the node runs as a Repeater.</p>
                         </div>
                         <details class="rsnode-tools__log"><summary>USB log</summary><div class="progress-log"></div></details>
                     </div>
@@ -6968,7 +6970,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     document.getElementById('rsnodeLockRetry').addEventListener('click', lockBeta);
 
     function rsnodeVariantDescription(id) {
-        if (id === 'heltec-v4-r8-tft') return 'the V4-R8 Expansion Kit V2 with the 2.8-inch touchscreen';
+        if (id === 'heltec-v4-r8-tft') return 'V4 R8 TFT, the Expansion Kit V2 with the 2.8-inch touchscreen';
         if (id === 'heltec-v4-r8') return 'V4 R8 (ESP32-S3R8) with the small OLED display';
         return 'V4 R2 (ESP32-S3R2)';
     }
@@ -9064,11 +9066,10 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         list.replaceChildren.apply(list, rsnodeManagers.map(rsnodeManagerItem));
         var empty = document.getElementById('rsnodeManagersEmpty');
         empty.hidden = addable && rsnodeManagers.length > 0;
-        var whoami = Object.assign(document.createElement('code'), { textContent: 'rsnode-client whoami' });
-        empty.replaceChildren.apply(empty, !rsnodeManagersFrom
-            ? ['Add yourself as the owner with the LXMF address ', whoami, ' prints, or read the node to see its managers.']
-            : addable ? ['No managers yet. Add yourself as the owner with the LXMF address ', whoami, ' prints.']
-            : ['This firmware does not support managers.']);
+        empty.textContent = !rsnodeManagersFrom
+            ? 'Add yourself as the Owner with your Ratspeak LXMF address, or read the node to see its managers.'
+            : addable ? 'No managers yet. Add yourself as the Owner with your Ratspeak LXMF address.'
+            : 'This firmware does not support managers.';
         var full = rsnodeActive(rsnodeManagers).length >= RSNODE_MANAGERS_MAX;
         document.getElementById('rsnodeManagerEditor').hidden = !rsnodeManagerEditing;
         document.getElementById('rsnodeManagerCancel').hidden = !rsnodeManagers.length;
@@ -9151,7 +9152,10 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         if (port) return { text: port };
         var text = RSNODE_CLI_WORDS.reduce(function(words, swap) { return words.replace(swap[0], swap[1]); }, error.message || String(error));
         text = text.charAt(0).toUpperCase() + text.slice(1);
-        if (read || stage !== 'protocol' || /^no KISS response/.test(error.message)) return { text: text };
+        if (/^no KISS response/.test(error.message)) {
+            return { text: 'No answer over USB within 30 s. ' + RSNODE_TAKEOVER.replace(/\.$/, ', then try again.') };
+        }
+        if (read || stage !== 'protocol') return { text: text };
         var full = /manager list is full/.test(text) ? 'A node holds up to 4 managers. ' : '';
         return { text: text, hint: full + 'Read from node to see what it has now.' };
     }
@@ -9248,8 +9252,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
             showRsnodeOwnerResult(result, read);
             document.getElementById('rsnodeOwnerNotice').hidden = true;
             if (!read) rsnodeOwnerSaved = true;
-            rsnodeOwnerMessage((read ? 'Showing RNode ' : 'Saved to RNode ') + result.status.nodeId + '. The node is back on its home menu.',
-                false, true);
+            rsnodeOwnerMessage((read ? 'Showing RNode ' : 'Saved to RNode ') + result.status.nodeId + '.', false, true);
         } catch (error) {
             field = error.field || null;
             if (ui) ui.log('Error: ' + error.message, 'log-red');
@@ -9352,7 +9355,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     var RSNODE_RESUME_MS = 20000;
     var RSNODE_PIXEL_ON = [226, 236, 246, 255];
     var RSNODE_PIXEL_OFF = [11, 12, 14, 255];
-    var RSNODE_TAKEOVER = 'Older firmware stays quiet as a Repeater or while another app uses it: EXIT the Repeater, or hold USB on the home menu.';
+    var RSNODE_TAKEOVER = 'If you just installed, press RESET on the board first.';
 
     function updateRsnodeDeviceVisibility() {
         var panel = document.getElementById('rsnodeDevice');
@@ -9439,7 +9442,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         var port = rsnodePortError(error, stage, 'connect again');
         if (port) return port;
         if (error.notRsnode) return 'This node answers as an RNode but not as rsNode. The live view needs rsNode firmware.';
-        if (/^no answer/.test(error.message)) return 'The node stopped answering over USB. Older firmware goes quiet as a Repeater or while another app uses it: update it, then connect again.';
+        if (/^no answer/.test(error.message)) return 'The node stopped answering over USB. Check the cable, or press RESET on the board, then connect again.';
         return error.message || String(error);
     }
 
@@ -9550,7 +9553,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
                 waiting: function() { rsnodeDeviceMessage('Waiting for rsNode. ' + RSNODE_TAKEOVER); }
             });
             if (device.stopping) return;
-            if (!answered) throw new Error('No answer over USB. ' + RSNODE_TAKEOVER + ' Then connect again.');
+            if (!answered) throw new Error('No answer over USB. ' + RSNODE_TAKEOVER.replace(/\.$/, ', then connect again.'));
             rsnodeDeviceMessage('');
             device.stage = 'facts';
             device.facts = await readRsnodeFacts(device.session);
@@ -9736,8 +9739,8 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
                     noteEl.textContent = state.rnodeSetupVerified
                         ? 'Firmware flash complete. RNode setup was verified.'
                         : state.rsnodeInstalled
-                        ? (rsnodeToolsUnlocked() ? 'rsNode is installed. Next, add its owner below.'
-                            : 'rsNode is installed. Reset the device.')
+                        ? (rsnodeToolsUnlocked() ? 'rsNode is installed. Press RESET on the board; the tools below read and set it up.'
+                            : 'rsNode is installed. Press RESET on the board.')
                         : 'Flash complete. Reset the device.';
                 }
             }
@@ -10614,7 +10617,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         document.getElementById('installDialogDevice').textContent = prepared.boardLabel || DEVICES[prepared.board].name;
         document.getElementById('installDialogTitle').textContent = review ? review.title : 'Erase and install';
         document.getElementById('installDialogRisk').textContent = review ? review.detail : prepared.product === 'rsnode'
-            ? 'Everything on the node is erased, including its identity, owners and saved Wi-Fi.'
+            ? 'Everything on the node is erased: identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings.'
             : 'All data in internal storage will be lost, including your identity, settings and messages.';
         document.getElementById('installDialogIntro').textContent = review ? review.intro : prepared.product === 'rsnode'
             ? 'You are installing rsNode private beta firmware.'
@@ -10950,7 +10953,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
             } else {
                 setProgress(100, 'Complete');
                 logMessage(prepared && prepared.product === 'rsnode'
-                    ? 'rsNode installed. Reset the device.'
+                    ? 'rsNode installed. Press RESET on the board.'
                     : (state.device === 'custom' ? 'Firmware flash complete.' : 'Ratspeak flash complete.') + ' Restart the device before using it.', 'log-green');
             }
 

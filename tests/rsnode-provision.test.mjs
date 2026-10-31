@@ -279,7 +279,7 @@ test('owner work checks its input before asking for a port and always closes the
     showRsnodeOwnerResult: () => calls.push(['result']),
     closeRnodeSession: async session => calls.push(['close', session && session.port])
   };
-  const run = pageFunctions(['RSNODE_CLI_WORDS', 'rsnodePortError', 'rsnodeOwnerError', 'runRsnodeOwnerTask'], context).runRsnodeOwnerTask;
+  const run = pageFunctions(['RSNODE_CLI_WORDS', 'RSNODE_TAKEOVER', 'rsnodePortError', 'rsnodeOwnerError', 'runRsnodeOwnerTask'], context).runRsnodeOwnerTask;
   await run(false);
   assert.deepEqual(calls, [['busy', true], ['message', true], ['close', null], ['busy', false], ['focus']]);
 
@@ -297,8 +297,8 @@ test('owner work checks its input before asking for a port and always closes the
 
 test('the owner row says what a save changes and what to do after a failure, in its own words', () => {
   const state = { flashing: false };
-  const { rsnodeOwnerSummary, rsnodeOwnerError } = pageFunctions(['RSNODE_CLI_WORDS', 'rsnodeOwnerSummary', 'rsnodePortError',
-    'rsnodeOwnerError'], { state });
+  const { rsnodeOwnerSummary, rsnodeOwnerError } = pageFunctions(['RSNODE_CLI_WORDS', 'RSNODE_TAKEOVER', 'rsnodeOwnerSummary',
+    'rsnodePortError', 'rsnodeOwnerError'], { state });
   assert.equal(rsnodeOwnerSummary([]), 'Nothing to save yet. Add a manager.');
   assert.equal(rsnodeOwnerSummary(['set the owner']), 'Saving will set the owner.');
   assert.equal(rsnodeOwnerSummary(['set the owner', 'add 2 admins', 'remove 1 manager']),
@@ -321,8 +321,8 @@ test('the owner row says what a save changes and what to do after a failure, in 
     { text: 'The node rejected the owner: error 0x01 (no entropy source: start Bluetooth or Wi-Fi and retry)' });
   assert.deepEqual(plain(rsnodeOwnerError(new Error('timed out waiting for the device to answer the primary owner'), 'protocol', false)),
     { text: 'Timed out waiting for the node to answer the owner', hint: READ_BACK });
-  assert.deepEqual(plain(rsnodeOwnerError(new Error('no KISS response within 30 s: EXIT Repeater if active'), 'protocol', false)),
-    { text: 'No KISS response within 30 s: EXIT Repeater if active' });
+  assert.deepEqual(plain(rsnodeOwnerError(new Error('no KISS response within 30 s: if you just installed'), 'protocol', false)),
+    { text: 'No answer over USB within 30 s. If you just installed, press RESET on the board first, then try again.' });
   assert.deepEqual(plain(rsnodeOwnerError(new Error('Failed to open serial port.'), 'open', false)),
     { text: 'Could not open the serial port. Close other apps that use it, such as Ratspeak or a serial monitor, then try again.' });
   assert.deepEqual(plain(rsnodeOwnerError(Object.assign(new Error('The device has been lost.'), { name: 'NetworkError' }), 'protocol', false)),
@@ -376,4 +376,16 @@ test('the device management row says owner and admin, as the docs define them', 
   const panel = /id="rsnodeOwner"[\s\S]*?id="flashRepair"/.exec(html);
   assert.ok(panel, 'missing device management panel');
   assert.doesNotMatch(panel[0].replace(/<[^>]+>/g, ' '), /helper|primary/i);
+});
+
+test('the tools ask for a Ratspeak LXMF address, say managers are optional, and never send testers to EXIT the Repeater', () => {
+  const tools = /id="rsnodeDevice"[\s\S]*?id="flashRepair"/.exec(html)[0];
+  assert.doesNotMatch(html, /rsnode-client whoami/);
+  assert.doesNotMatch(tools, /EXIT a running Repeater/);
+  const text = tools.replace(/<[^>]+>/g, ' ');
+  assert.match(text, /your Ratspeak LXMF address/);
+  assert.match(text, /The Owner changes settings and managers\. Admins read status and settings and install updates\./);
+  assert.match(text, /Optional: add managers if this node will run as a Repeater you manage remotely\./);
+  assert.match(text, /A Repeater answers status over USB/);
+  assert.match(text, /If you just installed, press RESET on the board first\./);
 });

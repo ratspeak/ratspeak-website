@@ -419,7 +419,7 @@ test('the panel follows a node through its restart into a Repeater, without disc
   assert.equal(page.document.elements.rsnodeLiveDot.classList.contains('is-error'), false);
 });
 
-test('a node that never answers after going quiet is given up on with the update hint', async () => {
+test('a node that never answers after going quiet is given up on with the reset hint', async () => {
   const port = nodePort(v4, { restartMs: 60000 });
   const page = devicePage(port, {
     waitForRsnode: (session, options) => waitForRsnode(session, { ...options, timeoutMs: Math.min(options.timeoutMs ?? 300, 300) })
@@ -429,7 +429,7 @@ test('a node that never answers after going quiet is given up on with the update
   port.restart(v4);
   await run;
   assert.equal(page.document.elements.rsnodeDeviceStatus.textContent,
-    'The node stopped answering over USB. Older firmware goes quiet as a Repeater or while another app uses it: update it, then connect again.');
+    'The node stopped answering over USB. Check the cable, or press RESET on the board, then connect again.');
 });
 
 test('pairing and a restart that another app refuses say so instead of claiming success', async () => {
@@ -467,12 +467,12 @@ test('a board without a whole-screen mirror gets its status only', async () => {
   assert.equal(port.written.at(-1), 'leave');
 });
 
-test('a silent node keeps the panel waiting with the takeover hint, and Disconnect still leaves it', async () => {
+test('a silent node keeps the panel waiting with the reset hint, and Disconnect still leaves it', async () => {
   const port = nodePort(v4, { silent: true });
   const page = await withPanel(port, async page => {
     const status = page.document.elements.rsnodeDeviceStatus;
     await until(() => status.textContent.startsWith('Waiting for rsNode.'));
-    assert.equal(status.textContent, 'Waiting for rsNode. Older firmware stays quiet as a Repeater or while another app uses it: EXIT the Repeater, or hold USB on the home menu.');
+    assert.equal(status.textContent, 'Waiting for rsNode. If you just installed, press RESET on the board first.');
   });
   assert.ok(port.written.slice(0, -1).every(name => name === 'detect'));
   assert.equal(port.written.at(-1), 'leave');
@@ -485,7 +485,7 @@ test('the panel says why it stopped: no answer, or not rsNode', async () => {
   });
   await silent.runRsnodeDevice();
   const status = silent.document.elements.rsnodeDeviceStatus;
-  assert.equal(status.textContent, 'No answer over USB. Older firmware stays quiet as a Repeater or while another app uses it: EXIT the Repeater, or hold USB on the home menu. Then connect again.');
+  assert.equal(status.textContent, 'No answer over USB. If you just installed, press RESET on the board first, then connect again.');
   assert.ok(status.classList.contains('is-error'));
 
   const stock = nodePort(v4, { unanswered: ['read_mgmt'] });

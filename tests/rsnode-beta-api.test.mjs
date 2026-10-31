@@ -118,7 +118,7 @@ test('locked -> terms -> ready protects both catalog and exact firmware bytes', 
   const catalog = await response.json();
   assert.equal(catalog.boards.length, 1);
   assert.deepEqual(catalog.boards[0], {
-    id: 'heltec-v4', board: 'heltec-v4', label: 'Heltec LoRa 32 V4 · R2', flashSize: '16MB',
+    id: 'heltec-v4', board: 'heltec-v4', label: 'Heltec V4 · R2', flashSize: '16MB',
     version: BOARD.version, fileName: BOARD.fileName, size: BOARD.size, sha256: HASH,
     product: 'rsnode', installMode: 'factory', chipFamily: 'ESP32-S3', platform: 'esp32', flashStrategy: 'esp32-esptool'
   });
