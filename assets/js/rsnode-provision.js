@@ -20,7 +20,7 @@ const OWNER_KIND_IDENTITY = 2;
 const OWNER_KINDS = { 1: 'lxmf', 2: 'identity' };
 const ROLE_PRIMARY = 1;
 const ROLE_HELPER = 2;
-const ROLES = { 1: 'primary', 2: 'helper' };
+const ROLES = { 1: 'owner', 2: 'admin' };
 const ERROR_INVALID_CONFIG = 0x07;
 const ERROR_NAMES = {
   0x01: 'no entropy source: start Bluetooth or Wi-Fi and retry',
@@ -75,7 +75,7 @@ export function parseManagementStatus(payload) {
   return { nodeId: String.fromCharCode(...nodeId) };
 }
 
-/** The identity sector: the management destination, policy and owners. */
+/** The identity sector: the management destination, policy and managers. */
 export function parseNodeStatus(payload) {
   if (payload.length < NODE_STATUS_HEADER_LEN || payload[0] !== READ_NODE) {
     throw new Error(`malformed node status payload length=${payload.length}`);
@@ -96,21 +96,21 @@ export function parseNodeStatus(payload) {
 /** provision-rsnode.py's lines for a node; null is firmware without the identity sector. */
 export function renderNode(node) {
   if (node === null) return ['node identity: not supported by this firmware'];
-  if (node.destination === null) return ['node identity: none yet (the first owner enrolment creates it)'];
+  if (node.destination === null) return ['node identity: none yet (the first manager creates it)'];
   const lines = [`management destination: ${node.destination}`];
-  for (const owner of node.owners) lines.push(`owner: ${ROLES[owner.role]} ${OWNER_KINDS[owner.kind]} ${owner.hash}`);
-  if (!node.owners.length) lines.push('owners: none (the management Link stays off)');
-  if (node.nearbyOnly) lines.push('policy: updates only from nearby');
+  for (const owner of node.owners) lines.push(`${ROLES[owner.role]}: ${OWNER_KINDS[owner.kind]} ${owner.hash}`);
+  if (!node.owners.length) lines.push('managers: none (the management Link stays off)');
+  if (node.nearbyOnly) lines.push('nearby-only: on');
   return lines;
 }
 
-/** The primary first, then helpers: [kind, role, hash, description]. */
+/** The Owner first, then Admins (helper options): [kind, role, hash, description]. */
 export function ownersToEnrol({ owner = null, ownerIdentity = null, helper = [], helperIdentity = [] }) {
   const owners = [];
-  if (owner) owners.push([OWNER_KIND_LXMF, ROLE_PRIMARY, owner, 'the primary owner']);
-  if (ownerIdentity) owners.push([OWNER_KIND_IDENTITY, ROLE_PRIMARY, ownerIdentity, 'the primary owner']);
-  for (const value of helper) owners.push([OWNER_KIND_LXMF, ROLE_HELPER, value, 'a helper']);
-  for (const value of helperIdentity) owners.push([OWNER_KIND_IDENTITY, ROLE_HELPER, value, 'a helper']);
+  if (owner) owners.push([OWNER_KIND_LXMF, ROLE_PRIMARY, owner, 'the owner']);
+  if (ownerIdentity) owners.push([OWNER_KIND_IDENTITY, ROLE_PRIMARY, ownerIdentity, 'the owner']);
+  for (const value of helper) owners.push([OWNER_KIND_LXMF, ROLE_HELPER, value, 'an admin']);
+  for (const value of helperIdentity) owners.push([OWNER_KIND_IDENTITY, ROLE_HELPER, value, 'an admin']);
   return owners;
 }
 
@@ -143,8 +143,8 @@ async function nodeExchange(session, payload, what) {
     const code = frame.payload.length ? frame.payload[0] : 0xff;
     if (payload[0] === READ_NODE && code === ERROR_INVALID_CONFIG) return null;
     let reason = ERROR_NAMES[code] || 'unknown error';
-    if (payload[0] === ADD_OWNER && code === ERROR_INVALID_CONFIG) reason = 'the owner table is full, or this firmware predates owners';
-    else if (payload[0] === REMOVE_OWNER && code === ERROR_INVALID_CONFIG) reason = 'no such owner, or this firmware predates owners';
+    if (payload[0] === ADD_OWNER && code === ERROR_INVALID_CONFIG) reason = 'the manager list is full, or this firmware predates managers';
+    else if (payload[0] === REMOVE_OWNER && code === ERROR_INVALID_CONFIG) reason = 'no such manager, or this firmware predates managers';
     throw rejected(what, code, reason, payload[0]);
   }
   try { return parseNodeStatus(frame.payload); } catch (error) { throw new Error(`${what}: ${error.message}`); }
@@ -155,7 +155,7 @@ export function readManagementStatus(session) {
   return managementExchange(session, [READ_MGMT], 'READ_MGMT');
 }
 
-/** READ_NODE as --read asks it; null on firmware that predates owners. */
+/** READ_NODE as --read asks it; null on firmware that predates managers. */
 export function readNodeStatus(session) {
   return nodeExchange(session, [READ_NODE], 'READ_NODE');
 }
@@ -178,7 +178,7 @@ function logStatus(log, status) {
 
 /**
  * Run provision-rsnode.py's manager sequence over an open KISS session ({ send, readFrame }).
- * Options mirror its flags: read, owner, ownerIdentity, helper, helperIdentity, removeOwner
+ * Options mirror its flags: read, owner, ownerIdentity, helper (--admin), helperIdentity (--admin-identity), removeOwner (--remove-manager)
  * (hashes). nodeId, the page's own option, stops before any change on another node;
  * identified(status), the page's own hook, runs once the node is named, before any change.
  */
@@ -202,10 +202,10 @@ export async function provisionRsnode(session, options, { log = () => {}, identi
   }
   const removals = options.removeOwner || [];
   const owners = ownersToEnrol(options);
-  for (const hash of removals) await nodeExchange(session, [REMOVE_OWNER, ...hash], 'REMOVE_OWNER');
+  for (const hash of removals) await nodeExchange(session, [REMOVE_OWNER, ...hash], 'the removal of a manager');
   for (const [kind, role, hash, what] of owners) await nodeExchange(session, [ADD_OWNER, kind, role, ...hash], what);
   const node = await readNodeStatus(session);
-  if (node === null && (removals.length || owners.length)) throw new Error('this firmware predates owners');
+  if (node === null && (removals.length || owners.length)) throw new Error('this firmware predates managers');
   status = await readManagementStatus(session);
   await session.send(CMD_LEAVE, [0xff]);
   logStatus(log, status);

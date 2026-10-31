@@ -19,23 +19,19 @@ import json
 from pathlib import Path
 import re
 import sys
-import tempfile
 from unittest import mock
 
 TESTS = "scripts/tests/test_provision_rsnode.py"
 SCRIPT = "scripts/provision-rsnode.py"
 
-# Hashes and keys hold FEND/FESC bytes so every frame exercises KISS escaping.
-PRIMARY = bytes.fromhex("c0db" + "11" * 14)
-HELPER = bytes.fromhex("dbdc" + "22" * 14)
-HELPER_IDENTITY = bytes.fromhex("33" * 15 + "c0")
-OLD_PRIMARY = bytes.fromhex("44" * 16)
-NEW_PRIMARY = bytes.fromhex("55" * 16)
+# Hashes hold FEND/FESC bytes so every frame exercises KISS escaping.
+OWNER = bytes.fromhex("c0db" + "11" * 14)
+ADMIN = bytes.fromhex("dbdc" + "22" * 14)
+ADMIN_IDENTITY = bytes.fromhex("33" * 15 + "c0")
+OLD_OWNER = bytes.fromhex("44" * 16)
+NEW_OWNER = bytes.fromhex("55" * 16)
 DESTINATION = bytes([0xD0]) * 16
-GENERATED_KEY = bytes([0xC0, 0xDB, 0xDC, 0xDD]) + bytes(range(4, 32))
-FILE_KEY = bytes(range(0xC0, 0xE0))
 PORT = "/dev/rsnode"
-KEY_FILE = "{existing.key}"
 
 
 def load(name, path):
@@ -47,40 +43,32 @@ def load(name, path):
 
 
 def scenarios(p):
-    lxmf, identity, primary, helper = p.OWNER_KIND_LXMF, p.OWNER_KIND_IDENTITY, p.ROLE_PRIMARY, p.ROLE_HELPER
-    enrolled = {"destination": DESTINATION, "owners": [(lxmf, primary, OLD_PRIMARY)]}
+    lxmf, identity, owner, admin = p.OWNER_KIND_LXMF, p.OWNER_KIND_IDENTITY, p.ROLE_PRIMARY, p.ROLE_HELPER
+    enrolled = {"destination": DESTINATION, "owners": [(lxmf, owner, OLD_OWNER)]}
     provisioned = {"destination": DESTINATION,
-                   "owners": [(lxmf, primary, PRIMARY), (identity, helper, HELPER_IDENTITY)]}
+                   "owners": [(lxmf, owner, OWNER), (identity, admin, ADMIN_IDENTITY)]}
+    nearby = {**provisioned, "nearby_only": True}
     full = {"destination": DESTINATION, "owners": enrolled["owners"] +
-            [(lxmf, helper, bytes([index]) * 16) for index in (1, 2, 3)]}
-    keyless = ["--no-psk", "--no-key"]
+            [(lxmf, admin, bytes([index]) * 16) for index in (1, 2, 3)]}
     return [
         ("read a fresh node", ["--read"], {}, {}),
-        ("read a provisioned node", ["--read"], {"psk": b"set-already", "key": b"\x11" * 32, "floor": 7},
-         provisioned),
-        ("read firmware that predates owners", ["--read"], {"owners_supported": False}, {}),
-        ("enroll the primary by LXMF address without a key", [*keyless, "--owner", f"<{PRIMARY.hex()}>"], {}, {}),
-        ("enroll the primary by identity hash with a generated key",
-         ["--no-psk", "--owner-identity", PRIMARY.hex().upper()], {}, {}),
-        ("enroll the primary with an existing key file",
-         ["--no-psk", "--management-key", KEY_FILE, "--owner", PRIMARY.hex()], {}, {}),
-        ("enroll the primary and helpers", [*keyless, "--owner", PRIMARY.hex(), "--helper", HELPER.hex(),
-                                            "--helper-identity", HELPER_IDENTITY.hex()], {}, {}),
-        ("a new primary replaces the previous one", [*keyless, "--owner", NEW_PRIMARY.hex()], {}, enrolled),
-        ("remove the primary, clear the key and enroll a new primary",
-         ["--no-psk", "--clear-key", "--remove-owner", OLD_PRIMARY.hex(), "--owner", NEW_PRIMARY.hex()],
-         {"key": b"\x33" * 32}, enrolled),
-        ("remove a helper", [*keyless, "--remove-owner", HELPER_IDENTITY.hex()], {}, provisioned),
-        ("remove every owner", [*keyless, "--remove-owner", HELPER_IDENTITY.hex(), "--remove-owner", PRIMARY.hex()],
-         {}, provisioned),
-        ("generate a key without owners", ["--no-psk"], {}, {}),
-        ("clear the key", ["--no-psk", "--clear-key"], {"key": b"\x22" * 32}, {}),
-        ("set a key on firmware that predates owners", ["--no-psk"], {"owners_supported": False}, {}),
-        ("enrollment without entropy", [*keyless, "--owner", PRIMARY.hex()], {"entropy": False}, {}),
-        ("remove an owner that is not enrolled", [*keyless, "--remove-owner", NEW_PRIMARY.hex()], {}, {}),
-        ("enroll on firmware that predates owners", [*keyless, "--owner", PRIMARY.hex()],
-         {"owners_supported": False}, {}),
-        ("enroll a helper into a full owner table", [*keyless, "--helper", HELPER.hex()], {}, full),
+        ("read a node with managers", ["--read"], {}, provisioned),
+        ("read a nearby-only node", ["--read"], {}, nearby),
+        ("read firmware that predates managers", ["--read"], {"owners_supported": False}, {}),
+        ("add the owner by LXMF address", ["--owner", f"<{OWNER.hex()}>"], {}, {}),
+        ("add the owner by identity hash", ["--owner-identity", OWNER.hex().upper()], {}, {}),
+        ("add the owner and admins", ["--owner", OWNER.hex(), "--admin", ADMIN.hex(),
+                                      "--admin-identity", ADMIN_IDENTITY.hex()], {}, {}),
+        ("a new owner replaces the previous one", ["--owner", NEW_OWNER.hex()], {}, enrolled),
+        ("remove the owner and add a new one",
+         ["--remove-manager", OLD_OWNER.hex(), "--owner", NEW_OWNER.hex()], {}, enrolled),
+        ("remove an admin", ["--remove-manager", ADMIN_IDENTITY.hex()], {}, provisioned),
+        ("remove every manager",
+         ["--remove-manager", ADMIN_IDENTITY.hex(), "--remove-manager", OWNER.hex()], {}, provisioned),
+        ("adding without entropy", ["--owner", OWNER.hex()], {"entropy": False}, {}),
+        ("remove a manager that is not on the node", ["--remove-manager", NEW_OWNER.hex()], {}, {}),
+        ("add on firmware that predates managers", ["--owner", OWNER.hex()], {"owners_supported": False}, {}),
+        ("add an admin to a full manager list", ["--admin", ADMIN.hex()], {}, full),
     ]
 
 
@@ -104,35 +92,29 @@ def reading(p, payload):
         return {"error": str(error)}
     if isinstance(value, p.NodeStatus):
         return {"value": as_json(value), "lines": p.render_node(value)}
-    return {"value": as_json(value), "line": p.render_status(value)}
+    return {"value": as_json(value)}
 
 
 def options(p, argv):
-    """The parsed command line, as the page's form supplies it."""
+    """The parsed command line, under the page's option names (helper is an Admin)."""
     args = p.build_parser().parse_args(["--port", PORT, *argv])
     hashed = lambda value: p.parse_hash(value).hex() if value is not None else None
     return {
         "read": args.read,
-        "managementKey": p.read_key_file(args.management_key).hex() if args.management_key else None,
-        "noKey": args.no_key,
-        "clearKey": args.clear_key,
         "owner": hashed(args.owner),
         "ownerIdentity": hashed(args.owner_identity),
-        "helper": [hashed(value) for value in args.helper],
-        "helperIdentity": [hashed(value) for value in args.helper_identity],
-        "removeOwner": [hashed(value) for value in args.remove_owner],
+        "helper": [hashed(value) for value in args.admin],
+        "helperIdentity": [hashed(value) for value in args.admin_identity],
+        "removeOwner": [hashed(value) for value in args.remove_manager],
     }
 
 
-def run_scenario(model, scratch, name, argv, device_args, preset):
+def run_scenario(model, name, argv, device_args, preset):
     p = model.provision
-    key_file = scratch / "existing.key"
-    if not key_file.exists():
-        model.rsnode_keys.write_owner_only_key_file(key_file, FILE_KEY)
-    argv_used = [str(key_file) if value == KEY_FILE else value for value in argv]
     device = model.FakeDevice(**device_args)
     device.destination = preset.get("destination")
     device.owners = list(preset.get("owners", []))
+    device.nearby_only = preset.get("nearby_only", False)
     transcript, replies = [], []
     write, reply = device.write, device._reply
 
@@ -146,24 +128,18 @@ def run_scenario(model, scratch, name, argv, device_args, preset):
         reply(command, payload)
 
     device.write, device._reply = record_write, record_reply
-    key_dir = scratch / re.sub(r"\W+", "-", name)
     stdout, stderr = io.StringIO(), io.StringIO()
     with mock.patch.object(p, "open_esp_serial", return_value=device), \
-            mock.patch.object(p, "DEFAULT_KEY_DIR", key_dir), \
-            mock.patch.object(p, "generate_management_key", return_value=GENERATED_KEY), \
             contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
-        code = p.main(["--port", PORT, "--timeout", "2", *argv_used])
-    written = sorted(key_dir.glob("*.key")) if key_dir.exists() else []
+        code = p.main(["--port", PORT, "--timeout", "2", *argv])
     scenario = {
         "name": name,
         "argv": argv,
-        "options": options(p, argv_used),
+        "options": options(p, argv),
         "transcript": transcript,
         "exitCode": code,
-        "stdout": [re.sub(rf"(?:/private)?{re.escape(str(scratch))}", "{scratch}", line)
-                   for line in stdout.getvalue().splitlines()],
+        "stdout": stdout.getvalue().splitlines(),
         "stderr": stderr.getvalue().strip(),
-        "keyFile": {"name": written[0].name, "text": written[0].read_text()} if written else None,
     }
     if code == 0:
         status = [payload for _, command, payload in replies
@@ -179,7 +155,7 @@ def run_scenario(model, scratch, name, argv, device_args, preset):
 
 def reply_vectors(p):
     management = bytes([0x05, 1, 0]) + b"887A" + (1755400000).to_bytes(4, "big")
-    node = bytes([0x07, 1]) + DESTINATION + bytes([1, 2, 1, 1]) + PRIMARY + bytes([2, 2]) + HELPER_IDENTITY
+    node = bytes([0x07, 1]) + DESTINATION + bytes([1, 2, 1, 1]) + OWNER + bytes([2, 2]) + ADMIN_IDENTITY
     payloads = [
         management, bytes([0x05, 0, 1]) + b"0F3C" + bytes(4), management[:-1], management + b"\0",
         bytes([0x00]) + management[1:], bytes([0x05, 2, 0]) + management[3:],
@@ -193,7 +169,7 @@ def reply_vectors(p):
 
 
 def hash_vectors(p):
-    text = PRIMARY.hex()
+    text = OWNER.hex()
     texts = [text, f"<{text}>", f"  <{text.upper()}>\n", " ".join(text[i:i + 2] for i in range(0, 32, 2)),
              f"<<{text}>>", text[:30], text + "00", "zz" * 16, "", "<>", text[:1] + " " + text[1:],
              f"　{text} ", text[:16] + " " + text[16:], text[:16] + "\x0b" + text[16:],
@@ -207,24 +183,6 @@ def hash_vectors(p):
     return vectors
 
 
-def key_file_vectors(model, scratch):
-    text = FILE_KEY.hex()
-    contents = [text.encode() + b"\n", text.upper().encode(), b"  " + text.encode() + b"\r\n", FILE_KEY,
-                text[:32].encode(), text[:-2].encode(), text.encode() + b"00", bytes(64).hex().encode(),
-                bytes(32), b"zz" * 32, b"\xff" * 64, text.encode() + b"\n" * 3,
-                (text[:30] + " " + text[30:60] + " " + text[60:62]).encode(), b"\x0b" + text.encode() + b"\x0c"]
-    vectors = []
-    for index, content in enumerate(contents):
-        path = scratch / f"key-{index}.key"
-        path.write_bytes(content)
-        path.chmod(0o600)
-        try:
-            vectors.append({"bytes": content.hex(), "key": model.provision.read_key_file(path).hex()})
-        except model.rsnode_keys.KeyFileError as error:
-            vectors.append({"bytes": content.hex(), "error": str(error)})
-    return vectors
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--rsnode-source", type=Path, required=True)
@@ -233,15 +191,12 @@ def main():
     sys.dont_write_bytecode = True
     root = args.rsnode_source.resolve()
     model = load("rsnode_provision_model", root / TESTS)
-    with tempfile.TemporaryDirectory() as directory:
-        scratch = Path(directory)
-        fixture = {
-            "source": {path: hashlib.sha256((root / path).read_bytes()).hexdigest() for path in (SCRIPT, TESTS)},
-            "scenarios": [run_scenario(model, scratch, *scenario) for scenario in scenarios(model.provision)],
-            "replies": reply_vectors(model.provision),
-            "hashes": hash_vectors(model.provision),
-            "keyFiles": key_file_vectors(model, scratch),
-        }
+    fixture = {
+        "source": {path: hashlib.sha256((root / path).read_bytes()).hexdigest() for path in (SCRIPT, TESTS)},
+        "scenarios": [run_scenario(model, *scenario) for scenario in scenarios(model.provision)],
+        "replies": reply_vectors(model.provision),
+        "hashes": hash_vectors(model.provision),
+    }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(fixture, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
 

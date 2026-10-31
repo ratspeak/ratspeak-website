@@ -4,15 +4,8 @@ import test from 'node:test';
 import vm from 'node:vm';
 import { parseHash, parseManagementStatus, parseNodeStatus, provisionRsnode, renderNode } from '../assets/js/rsnode-provision.js';
 
-// Generated from rsNode's provision-rsnode.py by scripts/rsnode-provision-vectors.py. The page no longer
-// sets or clears a management key (rsNode ADR 0015), so only the script's --no-key and --read runs apply.
-const recorded = JSON.parse(readFileSync(new URL('./fixtures/rsnode-provision-vectors.json', import.meta.url), 'utf8'));
-const keyless = scenario => !scenario.keyFile && !scenario.options.managementKey && !scenario.options.clearKey &&
-  (scenario.options.read || scenario.options.noKey);
-const vectors = { ...recorded, scenarios: recorded.scenarios.filter(keyless) };
-// Lines the script prints about the retired key, AP password and poke floor.
-const RETIRED_LINE = /^(AP password|management key|status|poke floor):/;
-const withoutRetired = options => Object.fromEntries(Object.entries(options).filter(([key]) => !['managementKey', 'noKey', 'clearKey'].includes(key)));
+// Generated from rsNode's provision-rsnode.py by scripts/rsnode-provision-vectors.py.
+const vectors = JSON.parse(readFileSync(new URL('./fixtures/rsnode-provision-vectors.json', import.meta.url), 'utf8'));
 const html = readFileSync(new URL('../download.html', import.meta.url), 'utf8');
 const bytes = value => Uint8Array.from(Buffer.from(value, 'hex'));
 const hex = value => Buffer.from(value).toString('hex');
@@ -71,14 +64,14 @@ function replayPort(transcript) {
 
 function formOptions(options) {
   const hash = value => value === null ? null : bytes(value);
-  return { ...withoutRetired(options), owner: hash(options.owner),
+  return { ...options, owner: hash(options.owner),
     ownerIdentity: hash(options.ownerIdentity), helper: options.helper.map(hash),
     helperIdentity: options.helperIdentity.map(hash), removeOwner: options.removeOwner.map(hash) };
 }
 
-test('every keyless provision-rsnode.py run is replayed', () => {
-  assert.equal(vectors.scenarios.length, 12);
-  assert.ok(vectors.scenarios.some(scenario => scenario.name === 'enroll a helper into a full owner table'));
+test('every provision-rsnode.py run is replayed', () => {
+  assert.equal(vectors.scenarios.length, 15);
+  assert.ok(vectors.scenarios.some(scenario => scenario.name === 'add an admin to a full manager list'));
 });
 
 for (const scenario of vectors.scenarios) {
@@ -109,8 +102,8 @@ for (const scenario of vectors.scenarios) {
     assert.equal(`node id: RNode ${identified?.nodeId}`, scenario.stdout[0]);
     const code = /error 0x([0-9a-f]{2})/.exec(failure?.message || '');
     if (code) assert.equal(failure.code, parseInt(code[1], 16));
-    // The page logs the script's output, without the retired key and password lines.
-    assert.deepEqual(lines, scenario.stdout.filter(line => !RETIRED_LINE.test(line)));
+    // The page logs the script's output.
+    assert.deepEqual(lines, scenario.stdout);
   });
 }
 
@@ -163,9 +156,9 @@ function managersPage(argv) {
     document: { getElementById: id => elements[id] }, parseHash, bytesToHex: hex,
     rsnodeManagersFrom: { nodeId: 'ABCD', supported: true }, rsnodeManagerEditing: null, rsnodeOwnerSaved: false,
     renderRsnodeManagers: () => {},
-    rsnodeManagers: [...values('--remove-owner').map(text => row(text, 'lxmf', 'admin', true)),
+    rsnodeManagers: [...values('--remove-manager').map(text => row(text, 'lxmf', 'admin', true)),
       ...values('--owner').map(text => row(text, 'lxmf', 'owner')), ...values('--owner-identity').map(text => row(text, 'identity', 'owner')),
-      ...values('--helper').map(text => row(text, 'lxmf', 'admin')), ...values('--helper-identity').map(text => row(text, 'identity', 'admin'))]
+      ...values('--admin').map(text => row(text, 'lxmf', 'admin')), ...values('--admin-identity').map(text => row(text, 'identity', 'admin'))]
   };
   const page = pageFunctions(['RSNODE_MANAGERS_MAX', 'rsnodeActive', 'rsnodeManagersPlan', 'rsnodeManagersWith', 'rsnodeManagerDraft',
     'rsnodeFieldError', 'applyRsnodeManagerEdit', 'rsnodeOwnerOptions'], context);
@@ -173,17 +166,17 @@ function managersPage(argv) {
 }
 
 test('the managers list gives provision-rsnode.py the options its command line does', async () => {
-  for (const scenario of vectors.scenarios.filter(scenario => scenario.options.noKey)) {
+  for (const scenario of vectors.scenarios.filter(scenario => !scenario.options.read)) {
     const page = managersPage(scenario.argv);
     // Removals only fit the node the list was read from.
-    const options = withoutRetired(scenario.options);
+    const options = scenario.options;
     const expected = scenario.options.removeOwner.length ? { ...options, nodeId: 'ABCD' } : options;
     assert.deepEqual(plain(await page.rsnodeOwnerOptions()), expected, scenario.name);
   }
 });
 
 test('an entry left in the editor is checked, then saved with the list', async () => {
-  const page = managersPage(['--no-key']);
+  const page = managersPage([]);
   const { elements } = page;
   page.context.rsnodeManagerEditing = 'new';
   elements.rsnodeOwnerHash.value = 'not-a-hash';
@@ -231,7 +224,7 @@ test('one owner per node: a new owner replaces the old one, which stays only by 
 });
 
 test('the editor rejects a repeated manager and a fifth one', () => {
-  const page = managersPage(['--no-key']);
+  const page = managersPage([]);
   const { elements, context } = page;
   context.rsnodeManagers = [onNode(OWNER, 'lxmf', 'owner'), onNode(ADMIN, 'lxmf', 'admin'), { ...onNode(OTHER, 'lxmf', 'admin'), removed: true }];
   context.rsnodeManagerEditing = 'new';
@@ -254,7 +247,7 @@ test('the editor rejects a repeated manager and a fifth one', () => {
 });
 
 test('a save meant for one node stops on another before changing anything', async () => {
-  const scenario = vectors.scenarios.find(s => s.name === 'remove a helper');
+  const scenario = vectors.scenarios.find(s => s.name === 'remove an admin');
   const read = scenario.transcript.findIndex(frame => frame.host === 'c06f05c0');
   const transcript = [...scenario.transcript.slice(0, read + 2), { host: 'c00affc0' }];
   const port = replayPort(transcript);
@@ -319,11 +312,11 @@ test('the owner row says what a save changes and what to do after a failure, in 
 
   const failure = scenario => new Error(vectors.scenarios.find(s => s.name === scenario).stderr.replace(/^provision-rsnode: /, ''));
   const READ_BACK = 'Read from node to see what it has now.';
-  assert.deepEqual(plain(rsnodeOwnerError(failure('enrollment without entropy'), 'protocol', false)), {
+  assert.deepEqual(plain(rsnodeOwnerError(failure('adding without entropy'), 'protocol', false)), {
     text: 'The node rejected the owner: error 0x01 (no entropy source: start Bluetooth or Wi-Fi and retry)', hint: READ_BACK });
   // ERROR_INVALID_CONFIG to a manager write is read with what STATUS said about the node.
-  const full = Object.assign(failure('enroll a helper into a full owner table'), { code: 7, subcommand: 8 });
-  const absent = Object.assign(failure('remove an owner that is not enrolled'), { code: 7, subcommand: 9 });
+  const full = Object.assign(failure('add an admin to a full manager list'), { code: 7, subcommand: 8 });
+  const absent = Object.assign(failure('remove a manager that is not on the node'), { code: 7, subcommand: 9 });
   const node = (repeater, hostOwner) => ({ node: { repeater, bluetoothAvailable: true, bluetoothEnabled: true, hostOwner } });
   const at = (rsnode, managers = 2) => ({ nodeId: '887A', rsnode, managers });
   assert.deepEqual([full.code, full.subcommand, absent.code, absent.subcommand], [7, 8, 7, 9]);
@@ -344,7 +337,7 @@ test('the owner row says what a save changes and what to do after a failure, in 
   assert.doesNotMatch(rsnodeOwnerError(full, 'protocol', false, at(null)).text, /full/);
   assert.deepEqual(plain(rsnodeOwnerError(new Error('this firmware predates owners'), 'protocol', false)),
     { text: 'This firmware predates managers', hint: READ_BACK });
-  assert.deepEqual(plain(rsnodeOwnerError(failure('enrollment without entropy'), 'protocol', true)),
+  assert.deepEqual(plain(rsnodeOwnerError(failure('adding without entropy'), 'protocol', true)),
     { text: 'The node rejected the owner: error 0x01 (no entropy source: start Bluetooth or Wi-Fi and retry)' });
   assert.deepEqual(plain(rsnodeOwnerError(new Error('timed out waiting for the device to answer the primary owner'), 'protocol', false)),
     { text: 'Timed out waiting for the node to answer the owner', hint: READ_BACK });
@@ -418,7 +411,7 @@ test('the tools ask for a Ratspeak LXMF address, say managers are optional, and 
 });
 
 test('a node another app holds is left untouched: the save stops once STATUS says so', async () => {
-  const scenario = vectors.scenarios.find(s => s.name === 'enroll the primary by LXMF address without a key');
+  const scenario = vectors.scenarios.find(s => s.name === 'add the owner by LXMF address');
   const read = scenario.transcript.findIndex(frame => frame.host === 'c06f05c0');
   const port = replayPort(scenario.transcript.slice(0, read + 2));
   const session = createRnodeSession(port);
