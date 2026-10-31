@@ -2233,6 +2233,7 @@
         .rsnode-tools__facts dd { margin: 0; color: var(--text-primary); font-size: 12.5px; line-height: 1.5; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
         .rsnode-tools__facts.is-stale dd { color: var(--text-secondary); }
         .rsnode-device .rsnode-beta__status:not(:empty) { margin-top: 8px; }
+        .rsnode-tools__pair-note { margin-top: 10px; }
 
         /* rsNode device: the node's screen and status */
         .rsnode-device__layout { display: grid; grid-template-columns: minmax(0, 412px) minmax(0, 1fr); gap: 16px 24px; align-items: start; }
@@ -5520,6 +5521,7 @@
                                 <div data-fact="firmware"><dt>Firmware</dt><dd></dd></div>
                                 <div data-fact="owners"><dt>Managers</dt><dd></dd></div>
                                 <div data-fact="repeater"><dt>Repeater</dt><dd></dd></div>
+                                <div data-fact="wifi"><dt>Wi-Fi</dt><dd></dd></div>
                                 <div data-fact="radio"><dt>Radio</dt><dd></dd></div>
                                 <div data-fact="packets"><dt>Packets</dt><dd></dd></div>
                                 <div data-fact="channel"><dt>Channel</dt><dd></dd></div>
@@ -5531,9 +5533,10 @@
                         <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeConnect" type="button">Connect</button>
                         <button class="rsnode-beta__button" id="rsnodeScreenshot" type="button" disabled hidden>Save screenshot</button>
                         <button class="rsnode-beta__button" id="rsnodeCopyDetails" type="button" disabled hidden>Copy details</button>
-                        <button class="rsnode-beta__button" id="rsnodePair" type="button" disabled hidden>Start Bluetooth pairing</button>
+                        <button class="rsnode-beta__button" id="rsnodePair" type="button" aria-describedby="rsnodePairNote" disabled hidden>Start Bluetooth pairing</button>
                         <button class="rsnode-beta__button rsnode-tools__end" id="rsnodeRestart" type="button" disabled hidden>Restart node…</button>
                     </div>
+                    <p class="rsnode-tools__help rsnode-tools__pair-note" id="rsnodePairNote" hidden>Bluetooth is off while Wi-Fi is on. Turn Wi-Fi off in Settings to pair.</p>
                     <p class="rsnode-tools__port" hidden>Using <span class="rsnode-tools__port-label"></span> &middot; <button class="rsnode-beta__lock" type="button" data-change-port>Change port</button></p>
                     <p class="rsnode-beta__status" id="rsnodeDeviceStatus" role="status" aria-live="polite"></p>
                     <pre class="rsnode-device__details" id="rsnodeDetailsText" tabindex="0" aria-label="Node details" hidden></pre>
@@ -5743,8 +5746,9 @@
 <script type="module">
 import { betaRequest, rsnodeBoard, validateBetaCatalog, verifyBetaDownload, validateBetaManifest } from './assets/js/rsnode-beta.js';
 import { parseHash, provisionRsnode } from './assets/js/rsnode-provision.js';
-import { SCREEN_HEIGHT, SCREEN_WIDTH, leaveRsnode, readRsnodeFacts, readRsnodeRadio, readRsnodeScreen,
-    restartRsnode, rsnodeDetails, rsnodeSummary, screenSupported, startRsnodePairing, waitForRsnode } from './assets/js/rsnode-device.js';
+import { HOST_OWNERS, SCREEN_HEIGHT, SCREEN_WIDTH, leaveRsnode, readRsnodeFacts, readRsnodeRadio, readRsnodeScreen,
+    readRsnodeStatus, restartRsnode, rsnodeBluetoothOff, rsnodeDetails, rsnodeSummary, screenSupported, startRsnodePairing,
+    waitForRsnode } from './assets/js/rsnode-device.js';
 import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITORY, verifyHandheldDownload, validateHandheldManifest, identifyHandheldImage, validateHandheldImage } from './assets/js/handheld-release.js';
 import { md5Bytes } from './assets/js/md5.js';
 import { closeFlashTransport } from './assets/js/esp-serial.js';
@@ -9146,28 +9150,55 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         return null;
     }
 
-    // A failed save also gets a hint for what to do next.
-    function rsnodeOwnerError(error, stage, read) {
+    // The app holding an RNode over Bluetooth or Wi-Fi, from STATUS; a Repeater takes USB changes itself.
+    function rsnodeHeldElsewhere(rsnode) {
+        var node = rsnode && rsnode.node;
+        return node && !node.repeater && node.hostOwner >= 2 ? HOST_OWNERS[node.hostOwner] : null;
+    }
+
+    function rsnodeHeldMessage(nodeId, owner) {
+        return 'Another app is using RNode ' + nodeId + ' over ' + owner + '. Disconnect it, or hold USB on the node, then save again.';
+    }
+
+    // A failed save also gets a hint for what to do next. context: { nodeId, rsnode (STATUS or null), managers }.
+    function rsnodeOwnerError(error, stage, read, context) {
         var port = rsnodePortError(error, stage, 'try again');
         if (port) return { text: port };
-        var text = RSNODE_CLI_WORDS.reduce(function(words, swap) { return words.replace(swap[0], swap[1]); }, error.message || String(error));
-        text = text.charAt(0).toUpperCase() + text.slice(1);
         if (/^no KISS response/.test(error.message)) {
             return { text: 'No answer over USB within 30 s. ' + RSNODE_TAKEOVER.replace(/\.$/, ', then try again.') };
         }
+        if (error.held) return { text: error.message };
+        var READ_BACK = 'Read from node to see what it has now.';
+        // ERROR_INVALID_CONFIG to a manager write: STATUS, or its absence, says why.
+        if (error.code === 0x07 && (error.subcommand === 0x08 || error.subcommand === 0x09) && context) {
+            var name = 'RNode ' + context.nodeId, rsnode = context.rsnode, held = rsnodeHeldElsewhere(rsnode);
+            if (held) return { text: rsnodeHeldMessage(context.nodeId, held) };
+            if (rsnode && rsnode.node && rsnode.node.repeater) {
+                return { text: name + ' is busy finishing an update or saving its identity. Try again in a minute.' };
+            }
+            if (error.subcommand === 0x08 && context.managers >= RSNODE_MANAGERS_MAX) {
+                return { text: name + '\'s manager list is full.', hint: 'A node holds up to 4 managers. ' + READ_BACK };
+            }
+            if (!rsnode) {
+                return { text: name + ' refused the change. This beta takes manager changes only in RNode: exit the Repeater on the device, then save again.',
+                    hint: READ_BACK };
+            }
+            return { text: name + (error.subcommand === 0x08 ? ' refused the manager.' : ' has no such manager.'), hint: READ_BACK };
+        }
+        var text = RSNODE_CLI_WORDS.reduce(function(words, swap) { return words.replace(swap[0], swap[1]); }, error.message || String(error));
+        text = text.charAt(0).toUpperCase() + text.slice(1);
         if (read || stage !== 'protocol') return { text: text };
-        var full = /manager list is full/.test(text) ? 'A node holds up to 4 managers. ' : '';
-        return { text: text, hint: full + 'Read from node to see what it has now.' };
+        return { text: text, hint: READ_BACK };
     }
 
-    // The list as provision-rsnode.py flags; the management key and the AP password are never touched.
+    // The list as provision-rsnode.py flags.
     async function rsnodeOwnerOptions() {
         if (rsnodeManagerDraft()) {
             applyRsnodeManagerEdit();
             renderRsnodeManagers();
         }
         var plan = rsnodeManagersPlan(rsnodeManagers);
-        var options = { read: false, managementKey: null, noKey: true, clearKey: false,
+        var options = { read: false,
             owner: plan.owner && parseHash(plan.owner), ownerIdentity: plan.ownerIdentity && parseHash(plan.ownerIdentity),
             helper: plan.helper.map(parseHash), helperIdentity: plan.helperIdentity.map(parseHash),
             removeOwner: plan.removeOwner.map(parseHash) };
@@ -9186,6 +9217,14 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         setTimeout(function() { URL.revokeObjectURL(url); }, 10000);
     }
 
+    // Where a USB task left the node, when STATUS says.
+    function rsnodePersonaNote(rsnode) {
+        var node = rsnode && rsnode.node;
+        if (!node) return '';
+        if (node.repeater) return ' The node keeps running as a Repeater.';
+        return node.hostOwner >= 2 ? '' : ' The node is back on its home menu.';
+    }
+
     // What the node reported: its managers in the list, the rest laid out like the live view's facts.
     function showRsnodeOwnerResult(result, read) {
         var node = result.node, status = result.status;
@@ -9199,6 +9238,9 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         document.getElementById('rsnodeResultNote').textContent = node && !node.destination
             ? 'No node identity yet. Adding the first manager creates it.'
             : node && node.nearbyOnly ? 'Updates only from nearby managers.' : '';
+        var repeater = !!(result.rsnode && result.rsnode.node && result.rsnode.node.repeater);
+        document.getElementById('rsnodeResultEffect').textContent = repeater
+            ? 'The running Repeater uses the new managers now.' : 'Managers act only while the node runs as a Repeater.';
         document.getElementById('rsnodeResultEffect').hidden = read;
         document.getElementById('rsnodeOwnerResult').hidden = false;
     }
@@ -9226,7 +9268,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         }
         setRsnodeOwnerBusy(true, read);
         rsnodeOwnerMessage('');
-        var ui = null, session = null, field = null, stage = 'input';
+        var ui = null, session = null, field = null, stage = 'input', context = null;
         try {
             var options = read ? { read: true } : await rsnodeOwnerOptions();
             stage = 'port';
@@ -9239,6 +9281,13 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
             ui.setStatus('Waiting for rsNode…');
             var named = false;
             var result = await provisionRsnode(session, options, {
+                // STATUS before any change: an RNode another app holds refuses it.
+                identified: async function(status) {
+                    context = { nodeId: status.nodeId, rsnode: await readRsnodeStatus(session),
+                        managers: rsnodeActive(rsnodeManagers).length };
+                    var held = rsnodeHeldElsewhere(context.rsnode);
+                    if (held && !read) throw Object.assign(new Error(rsnodeHeldMessage(status.nodeId, held)), { held: true });
+                },
                 // The USB log keeps the script's lines; the status line follows them.
                 log: function(line) {
                     ui.log(line);
@@ -9249,16 +9298,18 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
                     }
                 }
             });
+            result.rsnode = context && context.rsnode;
             showRsnodeOwnerResult(result, read);
             document.getElementById('rsnodeOwnerNotice').hidden = true;
             if (!read) rsnodeOwnerSaved = true;
-            rsnodeOwnerMessage((read ? 'Showing RNode ' : 'Saved to RNode ') + result.status.nodeId + '.', false, true);
+            rsnodeOwnerMessage((read ? 'Showing RNode ' : 'Saved to RNode ') + result.status.nodeId + '.' +
+                rsnodePersonaNote(result.rsnode), false, true);
         } catch (error) {
             field = error.field || null;
             if (ui) ui.log('Error: ' + error.message, 'log-red');
             if (stage === 'port' && error.name === 'NotFoundError') rsnodeOwnerMessage('Select the rsNode serial port to continue.');
             else {
-                var failure = field ? { text: error.message } : rsnodeOwnerError(error, stage, read);
+                var failure = field ? { text: error.message } : rsnodeOwnerError(error, stage, read, context);
                 rsnodeOwnerMessage(failure.text, true, false, failure.hint);
             }
         } finally {
@@ -9383,14 +9434,22 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         var copy = document.getElementById('rsnodeCopyDetails');
         copy.disabled = copy.hidden = !rsnodeDeviceFacts;
         // A Repeater refuses both: it is restarted and paired from the device.
-        var repeater = live && device.facts.transport.bootMode;
+        var repeater = live && rsnodeIsRepeater(device.facts);
         var restart = document.getElementById('rsnodeRestart');
         restart.disabled = restart.hidden = !live || repeater;
-        // Pairing only where the screen mirror can show its code.
+        // Pairing only where the screen mirror can show its code, and not while Wi-Fi keeps Bluetooth off.
         var pair = document.getElementById('rsnodePair');
-        pair.disabled = pair.hidden = !live || repeater || !screenSupported(device.facts.board);
+        pair.hidden = !live || repeater || !screenSupported(device.facts.board);
+        var bluetoothOff = !pair.hidden && rsnodeBluetoothOff(device.facts);
+        pair.disabled = pair.hidden || bluetoothOff;
+        document.getElementById('rsnodePairNote').hidden = !bluetoothOff;
         document.getElementById('rsnodeFacts').classList.toggle('is-stale', !!rsnodeDeviceFacts && !live);
         syncRsnodePort();
+    }
+
+    // STATUS says whether it runs as a Repeater; older betas only say whether it starts as one.
+    function rsnodeIsRepeater(facts) {
+        return facts.rsnode && facts.rsnode.node ? facts.rsnode.node.repeater : facts.transport.bootMode;
     }
 
     function setRsnodeScreenState(text, live, busy) {
@@ -9611,7 +9670,8 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         if (!device || !device.facts || device.stopping) return;
         try {
             if (!await startRsnodePairing(device.session)) {
-                rsnodeDeviceMessage('RNode ' + device.facts.status.nodeId + ' did not start pairing: another app is using it. ' +
+                rsnodeDeviceMessage(rsnodeBluetoothOff(device.facts) ? document.getElementById('rsnodePairNote').textContent
+                    : 'RNode ' + device.facts.status.nodeId + ' did not start pairing: another app is using it. ' +
                     'Disconnect that app, or pair from the device.', true);
                 return;
             }
@@ -9631,7 +9691,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         var device = rsnodeDevice;
         if (!device || !device.facts || device.stopping) return;
         var name = 'RNode ' + device.facts.status.nodeId;
-        var back = device.facts.transport.bootMode ? 'as a Repeater' : 'in RNode';
+        var back = rsnodeIsRepeater(device.facts) ? 'as a Repeater' : 'in RNode';
         if (!window.confirm('Restart ' + name + '?\n\nIt starts again ' + back + ' after a few seconds.')) return;
         stopRsnodeDevice('Restarting ' + name + '. Connect again in a few seconds.', true);
     });

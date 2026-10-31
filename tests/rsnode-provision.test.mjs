@@ -2,11 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
-import { KEY_FILE_READ_MAX, parseHash, parseKeyFile, parseManagementStatus, parseNodeStatus, provisionRsnode,
-  renderNode, renderStatus } from '../assets/js/rsnode-provision.js';
+import { parseHash, parseManagementStatus, parseNodeStatus, provisionRsnode, renderNode } from '../assets/js/rsnode-provision.js';
 
-// Generated from rsNode's provision-rsnode.py by scripts/rsnode-provision-vectors.py.
-const vectors = JSON.parse(readFileSync(new URL('./fixtures/rsnode-provision-vectors.json', import.meta.url), 'utf8'));
+// Generated from rsNode's provision-rsnode.py by scripts/rsnode-provision-vectors.py. The page no longer
+// sets or clears a management key (rsNode ADR 0015), so only the script's --no-key and --read runs apply.
+const recorded = JSON.parse(readFileSync(new URL('./fixtures/rsnode-provision-vectors.json', import.meta.url), 'utf8'));
+const keyless = scenario => !scenario.keyFile && !scenario.options.managementKey && !scenario.options.clearKey &&
+  (scenario.options.read || scenario.options.noKey);
+const vectors = { ...recorded, scenarios: recorded.scenarios.filter(keyless) };
+// Lines the script prints about the retired key, AP password and poke floor.
+const RETIRED_LINE = /^(AP password|management key|status|poke floor):/;
+const withoutRetired = options => Object.fromEntries(Object.entries(options).filter(([key]) => !['managementKey', 'noKey', 'clearKey'].includes(key)));
 const html = readFileSync(new URL('../download.html', import.meta.url), 'utf8');
 const bytes = value => Uint8Array.from(Buffer.from(value, 'hex'));
 const hex = value => Buffer.from(value).toString('hex');
@@ -65,31 +71,25 @@ function replayPort(transcript) {
 
 function formOptions(options) {
   const hash = value => value === null ? null : bytes(value);
-  return { ...options, managementKey: hash(options.managementKey), owner: hash(options.owner),
+  return { ...withoutRetired(options), owner: hash(options.owner),
     ownerIdentity: hash(options.ownerIdentity), helper: options.helper.map(hash),
     helperIdentity: options.helperIdentity.map(hash), removeOwner: options.removeOwner.map(hash) };
 }
 
-async function withRandom(key, callback) {
-  const original = Object.getOwnPropertyDescriptor(globalThis, 'crypto');
-  Object.defineProperty(globalThis, 'crypto', { configurable: true, value: { getRandomValues(target) {
-    assert.ok(key, 'no key is generated in this scenario');
-    target.set(key);
-    return target;
-  } } });
-  try { return await callback(); } finally { Object.defineProperty(globalThis, 'crypto', original); }
-}
+test('every keyless provision-rsnode.py run is replayed', () => {
+  assert.equal(vectors.scenarios.length, 12);
+  assert.ok(vectors.scenarios.some(scenario => scenario.name === 'enroll a helper into a full owner table'));
+});
 
 for (const scenario of vectors.scenarios) {
   test(`writes the frames provision-rsnode.py writes: ${scenario.name}`, async () => {
     const port = replayPort(scenario.transcript);
     const session = createRnodeSession(port);
-    const lines = [], saved = [];
-    let result, failure;
-    const key = scenario.keyFile ? bytes(scenario.keyFile.text.trim()) : null;
+    const lines = [];
+    let result, failure, identified = null;
     try {
-      result = await withRandom(key, () => provisionRsnode(session, formOptions(scenario.options),
-        { log: line => lines.push(line), saveKey: file => saved.push(file) }));
+      result = await provisionRsnode(session, formOptions(scenario.options),
+        { log: line => lines.push(line), identified: async status => { identified = status; } });
     } catch (error) {
       if (error instanceof assert.AssertionError) throw error;
       failure = error;
@@ -100,14 +100,17 @@ for (const scenario of vectors.scenarios) {
     assert.equal(port.remaining(), 0, 'every recorded frame was exchanged');
     if (scenario.exitCode === 0) {
       assert.equal(failure, undefined);
-      assert.deepEqual(result.status, scenario.status.value);
+      assert.deepEqual(result.status, { nodeId: scenario.status.value.nodeId });
       assert.deepEqual(result.node, scenario.node.value);
     } else {
       assert.equal(failure?.message, scenario.stderr.replace(/^provision-rsnode: /, ''));
     }
-    // The page logs the script's output, without the password and key-path lines it never prints.
-    assert.deepEqual(lines, scenario.stdout.filter(line => !/^(AP password|management key):/.test(line)));
-    assert.deepEqual(saved, scenario.keyFile ? [scenario.keyFile] : []);
+    // The node is named, and checked, before anything changes; a refusal says which code answered which step.
+    assert.equal(`node id: RNode ${identified?.nodeId}`, scenario.stdout[0]);
+    const code = /error 0x([0-9a-f]{2})/.exec(failure?.message || '');
+    if (code) assert.equal(failure.code, parseInt(code[1], 16));
+    // The page logs the script's output, without the retired key and password lines.
+    assert.deepEqual(lines, scenario.stdout.filter(line => !RETIRED_LINE.test(line)));
   });
 }
 
@@ -120,21 +123,27 @@ test('reply payloads read as provision-rsnode.py reads them', () => {
       continue;
     }
     const value = parse(payload);
-    assert.deepEqual(value, vector.value);
-    if (vector.lines) assert.deepEqual(renderNode(value), vector.lines);
-    else assert.equal(renderStatus(value), vector.line);
+    if (vector.lines) {
+      assert.deepEqual(value, vector.value);
+      assert.deepEqual(renderNode(value), vector.lines);
+    } else {
+      // READ_MGMT keeps its shape; only the node id is read from it.
+      assert.deepEqual(value, { nodeId: vector.value.nodeId });
+    }
   }
 });
 
-test('owner hashes and key files are accepted exactly when provision-rsnode.py accepts them', () => {
+test('owner hashes are accepted exactly when provision-rsnode.py accepts them', () => {
   for (const vector of vectors.hashes) {
     if (vector.error) assert.throws(() => parseHash(vector.text), undefined, JSON.stringify(vector.text));
     else assert.equal(hex(parseHash(vector.text)), vector.hash, JSON.stringify(vector.text));
   }
-  for (const vector of vectors.keyFiles) {
-    if (vector.error) assert.throws(() => parseKeyFile(bytes(vector.bytes)), { message: vector.error }, vector.bytes);
-    else assert.equal(hex(parseKeyFile(bytes(vector.bytes))), vector.key, vector.bytes);
-  }
+});
+
+test('the page has no management key paths left', async () => {
+  const module = await import('../assets/js/rsnode-provision.js');
+  for (const name of ['parseKeyFile', 'generateManagementKey', 'KEY_FILE_READ_MAX', 'renderStatus']) assert.equal(module[name], undefined, name);
+  assert.doesNotMatch(html, /managementKey|noKey|clearKey|saveKey/);
 });
 
 const plain = options => JSON.parse(JSON.stringify(options, (key, value) => value instanceof Uint8Array ? hex(value) : value));
@@ -163,12 +172,12 @@ function managersPage(argv) {
   return { ...page, context, elements };
 }
 
-// The page never changes the management key, so it matches the script's --no-key runs.
 test('the managers list gives provision-rsnode.py the options its command line does', async () => {
   for (const scenario of vectors.scenarios.filter(scenario => scenario.options.noKey)) {
     const page = managersPage(scenario.argv);
     // Removals only fit the node the list was read from.
-    const expected = scenario.options.removeOwner.length ? { ...scenario.options, nodeId: 'ABCD' } : scenario.options;
+    const options = withoutRetired(scenario.options);
+    const expected = scenario.options.removeOwner.length ? { ...options, nodeId: 'ABCD' } : options;
     assert.deepEqual(plain(await page.rsnodeOwnerOptions()), expected, scenario.name);
   }
 });
@@ -279,7 +288,8 @@ test('owner work checks its input before asking for a port and always closes the
     showRsnodeOwnerResult: () => calls.push(['result']),
     closeRnodeSession: async session => calls.push(['close', session && session.port])
   };
-  const run = pageFunctions(['RSNODE_CLI_WORDS', 'RSNODE_TAKEOVER', 'rsnodePortError', 'rsnodeOwnerError', 'runRsnodeOwnerTask'], context).runRsnodeOwnerTask;
+  const run = pageFunctions(['RSNODE_CLI_WORDS', 'RSNODE_TAKEOVER', 'rsnodePortError', 'rsnodeOwnerError', 'rsnodePersonaNote',
+    'runRsnodeOwnerTask'], context).runRsnodeOwnerTask;
   await run(false);
   assert.deepEqual(calls, [['busy', true], ['message', true], ['close', null], ['busy', false], ['focus']]);
 
@@ -297,8 +307,9 @@ test('owner work checks its input before asking for a port and always closes the
 
 test('the owner row says what a save changes and what to do after a failure, in its own words', () => {
   const state = { flashing: false };
-  const { rsnodeOwnerSummary, rsnodeOwnerError } = pageFunctions(['RSNODE_CLI_WORDS', 'RSNODE_TAKEOVER', 'rsnodeOwnerSummary',
-    'rsnodePortError', 'rsnodeOwnerError'], { state });
+  const { rsnodeOwnerSummary, rsnodeOwnerError } = pageFunctions(['RSNODE_CLI_WORDS', 'RSNODE_TAKEOVER', 'RSNODE_MANAGERS_MAX',
+    'rsnodeOwnerSummary', 'rsnodePortError', 'rsnodeHeldElsewhere', 'rsnodeHeldMessage', 'rsnodeOwnerError'],
+    { state, HOST_OWNERS: { 0: null, 1: 'USB', 2: 'Bluetooth', 3: 'Wi-Fi' } });
   assert.equal(rsnodeOwnerSummary([]), 'Nothing to save yet. Add a manager.');
   assert.equal(rsnodeOwnerSummary(['set the owner']), 'Saving will set the owner.');
   assert.equal(rsnodeOwnerSummary(['set the owner', 'add 2 admins', 'remove 1 manager']),
@@ -310,11 +321,27 @@ test('the owner row says what a save changes and what to do after a failure, in 
   const READ_BACK = 'Read from node to see what it has now.';
   assert.deepEqual(plain(rsnodeOwnerError(failure('enrollment without entropy'), 'protocol', false)), {
     text: 'The node rejected the owner: error 0x01 (no entropy source: start Bluetooth or Wi-Fi and retry)', hint: READ_BACK });
-  assert.deepEqual(plain(rsnodeOwnerError(failure('enroll a helper into a full owner table'), 'protocol', false)), {
-    text: 'The node rejected an admin: error 0x07 (the manager list is full, or this firmware predates managers)',
-    hint: 'A node holds up to 4 managers. ' + READ_BACK });
-  assert.deepEqual(plain(rsnodeOwnerError(failure('remove an owner that is not enrolled'), 'protocol', false)), {
-    text: 'The node rejected a removal: error 0x07 (no such manager, or this firmware predates managers)', hint: READ_BACK });
+  // ERROR_INVALID_CONFIG to a manager write is read with what STATUS said about the node.
+  const full = Object.assign(failure('enroll a helper into a full owner table'), { code: 7, subcommand: 8 });
+  const absent = Object.assign(failure('remove an owner that is not enrolled'), { code: 7, subcommand: 9 });
+  const node = (repeater, hostOwner) => ({ node: { repeater, bluetoothAvailable: true, bluetoothEnabled: true, hostOwner } });
+  const at = (rsnode, managers = 2) => ({ nodeId: '887A', rsnode, managers });
+  assert.deepEqual([full.code, full.subcommand, absent.code, absent.subcommand], [7, 8, 7, 9]);
+  assert.deepEqual(plain(rsnodeOwnerError(full, 'protocol', false, at(node(false, 1), 4))),
+    { text: 'RNode 887A\'s manager list is full.', hint: 'A node holds up to 4 managers. ' + READ_BACK });
+  assert.deepEqual(plain(rsnodeOwnerError(full, 'protocol', false, at(node(false, 1)))),
+    { text: 'RNode 887A refused the manager.', hint: READ_BACK });
+  assert.deepEqual(plain(rsnodeOwnerError(absent, 'protocol', false, at(node(false, 0)))),
+    { text: 'RNode 887A has no such manager.', hint: READ_BACK });
+  assert.deepEqual(plain(rsnodeOwnerError(full, 'protocol', false, at(node(true, 0)))),
+    { text: 'RNode 887A is busy finishing an update or saving its identity. Try again in a minute.' });
+  assert.deepEqual(plain(rsnodeOwnerError(full, 'protocol', false, at(node(false, 3)))),
+    { text: 'Another app is using RNode 887A over Wi-Fi. Disconnect it, or hold USB on the node, then save again.' });
+  // An older beta reports no STATUS and refuses manager writes as a Repeater.
+  assert.deepEqual(plain(rsnodeOwnerError(full, 'protocol', false, at(null))), {
+    text: 'RNode 887A refused the change. This beta takes manager changes only in RNode: exit the Repeater on the device, then save again.',
+    hint: READ_BACK });
+  assert.doesNotMatch(rsnodeOwnerError(full, 'protocol', false, at(null)).text, /full/);
   assert.deepEqual(plain(rsnodeOwnerError(new Error('this firmware predates owners'), 'protocol', false)),
     { text: 'This firmware predates managers', hint: READ_BACK });
   assert.deepEqual(plain(rsnodeOwnerError(failure('enrollment without entropy'), 'protocol', true)),
@@ -388,4 +415,20 @@ test('the tools ask for a Ratspeak LXMF address, say managers are optional, and 
   assert.match(text, /Optional: add managers if this node will run as a Repeater you manage remotely\./);
   assert.match(text, /A Repeater answers status over USB/);
   assert.match(text, /If you just installed, press RESET on the board first\./);
+});
+
+test('a node another app holds is left untouched: the save stops once STATUS says so', async () => {
+  const scenario = vectors.scenarios.find(s => s.name === 'enroll the primary by LXMF address without a key');
+  const read = scenario.transcript.findIndex(frame => frame.host === 'c06f05c0');
+  const port = replayPort(scenario.transcript.slice(0, read + 2));
+  const session = createRnodeSession(port);
+  const held = Object.assign(new Error('Another app is using RNode 887A over Bluetooth.'), { held: true });
+  try {
+    await assert.rejects(provisionRsnode(session, formOptions(scenario.options), { identified: async () => { throw held; } }),
+      error => error === held);
+  } finally {
+    session.pump.stop();
+    await session.reader.cancel();
+  }
+  assert.equal(port.remaining(), 0, 'nothing after READ_MGMT was written');
 });

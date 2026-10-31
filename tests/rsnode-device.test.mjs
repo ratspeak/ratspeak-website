@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
-import { SCREEN_HEIGHT, SCREEN_WIDTH, leaveRsnode, parseTransportStatus, readRsnodeFacts, readRsnodeRadio,
-  readRsnodeScreen, renderTransport, restartRsnode, rsnodeDetails, rsnodeSummary, screenPixels, screenSupported,
-  startRsnodePairing, waitForRsnode } from '../assets/js/rsnode-device.js';
-import { renderNode, renderStatus } from '../assets/js/rsnode-provision.js';
+import { HOST_OWNERS, SCREEN_HEIGHT, SCREEN_WIDTH, leaveRsnode, parseRsnodeStatus, parseTransportStatus, readRsnodeFacts,
+  readRsnodeRadio, readRsnodeScreen, readRsnodeStatus, renderTransport, restartRsnode, rsnodeBluetoothOff, rsnodeDetails,
+  rsnodeSummary, screenPixels, screenSupported, startRsnodePairing, waitForRsnode } from '../assets/js/rsnode-device.js';
+import { renderNode } from '../assets/js/rsnode-provision.js';
 
 // rsNode's own answers, recorded from its code by scripts/rsnode-device-vectors.py.
 const vectors = JSON.parse(readFileSync(new URL('./fixtures/rsnode-device-vectors.json', import.meta.url), 'utf8'));
@@ -54,11 +54,42 @@ const { createRnodeSession, closeRnodeSession } = pageFunctions(['KISS', 'RNODE_
 // An all-dark screen, as rsNode mirrors a sleeping panel.
 const DARK_SCREEN = 'c066' + '00'.repeat(1024) + 'c0';
 
+// rsNode's STATUS (CMD_RSNODE 0x7A, sub 0x01), written by hand from link_commands.rs ManageStatus::encode and
+// firmware/common/src/usb_board.rs: tag len value entries, then tag 0x10 node facts.
+const STATUS_REQUEST = 'c07a01c0';
+const tlv = (tag, value) => [tag, value.length, ...value];
+const be32 = value => [value >>> 24, (value >>> 16) & 0xff, (value >>> 8) & 0xff, value & 0xff];
+function statusBody({ board = 0x3f, release = '1.0.0-beta.20261101.1', keyId = '0011223344556677', sequence = 2026110101,
+  flags = 0, wifi = null, node = [0, 1, 1, 1], extra = [] } = {}) {
+  return [
+    ...tlv(0x01, [0x80, 0x81, board]),
+    ...tlv(0x02, [0, 1, 0, 0, 0, 0]),
+    ...tlv(0x03, Array.from(Buffer.from(keyId, 'hex'))),
+    ...tlv(0x04, [...be32(sequence), ...be32(0x1e0000), flags]),
+    ...tlv(0x06, [0, 0]),
+    ...tlv(0x08, [1]),
+    ...tlv(0x09, be32(42)),
+    ...(wifi ? tlv(0x0c, wifi) : []),
+    ...tlv(0x0e, [...be32(0x180000), ...Array(32).fill(0xab)]),
+    ...extra,
+    ...(release ? tlv(0x0f, Array.from(Buffer.from(release))) : []),
+    ...tlv(0x10, node)
+  ];
+}
+function kissHex(command, payload) {
+  const escaped = [command, ...payload].flatMap(byte => byte === 0xc0 ? [0xdb, 0xdc] : byte === 0xdb ? [0xdb, 0xdd] : [byte]);
+  return hex([0xc0, ...escaped, 0xc0]);
+}
+const statusReply = options => kissHex(0x7a, [0x01, 0x00, ...statusBody(options)]);
+// What a beta before STATUS answers as a Repeater; as an RNode it says nothing.
+const OLDER_BETA = 'c09007c0';
+
 // A port that answers as the recorded node. Every frame the page writes must be one of the frames
 // rsNode's scripts write; the screen steps through the node's recorded screens. port.restart(entry)
 // reboots it into entry: quiet for restartMs, then answering as entry, with USB never dropped.
-function nodePort(entry, { silent = false, early = [], unanswered = [], dark = false, restartMs = 1500 } = {}) {
+function nodePort(entry, { silent = false, early = [], unanswered = [], dark = false, restartMs = 1500, status = OLDER_BETA } = {}) {
   const names = new Map(Object.entries(entry.requests).map(([name, request]) => [request.host, name]));
+  names.set(STATUS_REQUEST, 'status');
   let controller, screen = 0, quietUntil = 0;
   const port = {
     written: [],
@@ -71,6 +102,10 @@ function nodePort(entry, { silent = false, early = [], unanswered = [], dark = f
       port.written.push(name);
       if (silent || unanswered.includes(name) || Date.now() < quietUntil) return;
       if (dark && name === 'disp_read') return controller.enqueue(bytes(DARK_SCREEN));
+      if (name === 'status') {
+        const answer = typeof status === 'function' ? status(entry) : status;
+        return answer ? controller.enqueue(bytes(answer)) : undefined;
+      }
       // What the node sent unasked arrives ahead of the first answer.
       for (const frame of early.splice(0)) controller.enqueue(bytes(frame));
       const answer = name === 'disp_read' ? entry.screens[screen++ % entry.screens.length]?.device : entry.requests[name].device;
@@ -116,7 +151,9 @@ for (const entry of vectors.scenarios) {
     const state = entry.device;
     assert.equal(port.written[0], 'detect');
     assert.equal(`RNode ${facts.status.nodeId}`, state.deviceName);
-    assert.deepEqual(facts.status, entry.management);
+    assert.deepEqual(facts.status, { nodeId: entry.management.nodeId });
+    // These recordings predate STATUS.
+    assert.equal(facts.rsnode, null);
     assert.deepEqual(facts.node, entry.node);
     assert.equal(renderTransport(facts.transport), entry.transport);
     assert.deepEqual([facts.board, facts.platform, facts.mcu, facts.firmware, facts.firmwareHash],
@@ -183,20 +220,21 @@ test('summarizes the node for the panel and for a bug report', async () => {
     lines[entry.preset] = rsnodeSummary(facts, radio);
     const details = rsnodeDetails(facts, radio).trimEnd().split('\n');
     assert.equal(details[0], entry.device.deviceName);
-    // provision-rsnode.py's status and owner lines, configure-transport-ifac.py's status.
-    assert.ok(details.includes(renderStatus(entry.management)));
+    // No retired key lines; an older beta says it reports no version.
+    assert.ok(!details.some(line => /ap_psk|management_key/.test(line)));
+    assert.ok(details.includes('version: not reported (a beta before 2026-11)'));
     for (const line of renderNode(entry.node)) assert.ok(details.includes(line), line);
     assert.ok(details.includes(`transport: ${entry.transport}`));
     assert.ok(details.some(line => line.endsWith(`image ${entry.device.firmwareHash}`)));
   }
   assert.deepEqual(lines['heltec-v4'], {
     node: 'RNode 887A', board: 'Heltec V4 · ESP32', firmware: `RNode 1.86 · image ${v4.device.firmwareHash.slice(0, 8)}`,
-    owners: 'Owner and 1 admin', repeater: 'Not set up',
+    owners: 'Owner and 1 admin', repeater: 'Not set up', wifi: null,
     radio: 'Off · not configured', packets: 'RX 0 · TX 0', channel: null, battery: '84% · discharging'
   });
   assert.deepEqual(lines['heltec-v3'], {
     node: 'RNode 0F3C', board: 'Heltec V3 · ESP32', firmware: `RNode 1.86 · image ${v3.device.firmwareHash.slice(0, 8)}`,
-    owners: 'None yet', repeater: 'Not set up · IFAC on (8)',
+    owners: 'None yet', repeater: 'Not set up · IFAC on (8)', wifi: null,
     radio: 'On · 915.000 MHz · 250 kHz · SF9 · CR 4/5 · 14 dBm', packets: 'RX 2 · TX 3 · last -117 dBm, -4.5 dB',
     channel: 'Airtime 1.2% · load 2.3% · noise -121 dBm', battery: '76% · charging'
   });
@@ -264,7 +302,7 @@ function panelDocument() {
   };
   const facts = [...html.matchAll(/data-fact="(\w+)"/g)].map(match => match[1]);
   const rows = facts.map(fact => ({ dataset: { fact }, hidden: false, dd: element(), querySelector() { return this.dd; } }));
-  const elements = Object.fromEntries(['rsnodeConnect', 'rsnodeScreenshot', 'rsnodeCopyDetails', 'rsnodePair', 'rsnodeRestart',
+  const elements = Object.fromEntries(['rsnodeConnect', 'rsnodeScreenshot', 'rsnodeCopyDetails', 'rsnodePair', 'rsnodePairNote', 'rsnodeRestart',
     'rsnodeScreenState', 'rsnodeLiveDot', 'rsnodeScreenBezel', 'rsnodeScreenEmpty', 'rsnodeFactsEmpty', 'rsnodeFacts',
     'rsnodeDeviceStatus', 'rsnodeDetailsText'].map(id => [id, element()]));
   elements.rsnodeDevice = element({ open: true });
@@ -280,7 +318,7 @@ function panelDocument() {
 
 const PANEL = ['rsnodeDevice', 'rsnodeDeviceFacts', 'rsnodeDeviceRadio', 'rsnodeScreenPixels', 'rsnodeScreenImage',
   'RSNODE_SCREEN_INTERVAL_MS', 'RSNODE_RADIO_INTERVAL_MS', 'RSNODE_RESUME_MS', 'RSNODE_PIXEL_ON', 'RSNODE_PIXEL_OFF',
-  'RSNODE_TAKEOVER', 'rsnodeToolsUnlocked', 'updateRsnodeDeviceVisibility', 'rsnodeDeviceMessage', 'syncRsnodeDevice',
+  'RSNODE_TAKEOVER', 'rsnodeToolsUnlocked', 'updateRsnodeDeviceVisibility', 'rsnodeIsRepeater', 'rsnodeDeviceMessage', 'syncRsnodeDevice',
   'setRsnodeScreenState', 'clearRsnodeScreen', 'paintRsnodeScreen', 'showRsnodeDeviceFacts', 'rsnodeDeviceError',
   'rsnodePortError', 'rsnodeDeviceWatched', 'streamRsnodeDevice', 'resumeRsnodeDevice', 'runRsnodeDevice', 'stopRsnodeDevice', 'releaseRsnodeDevice',
   'pairRsnodeDevice', 'syncRsnodePort'];
@@ -289,7 +327,7 @@ function devicePage(port, overrides = {}) {
   const document = panelDocument();
   const calls = [];
   const context = {
-    document, betaStage: 'ready', rsnodeOwnerBusy: false, navigator: { serial: {} },
+    document, betaStage: 'ready', rsnodeOwnerBusy: false, rsnodeSettingsBusy: false, navigator: { serial: {} },
     state: { flashing: false, device: 'custom', rsnodeInstalled: false }, isRsnodeSelected: () => true,
     showSerialWarning: () => calls.push('serial warning'),
     rsnodeToolPortFromUser: async () => calls.push('port'),
@@ -298,7 +336,7 @@ function devicePage(port, overrides = {}) {
     createRnodeSession, closeRnodeSession,
     sleepMs: () => new Promise(resolve => setTimeout(resolve, 0)),
     SCREEN_WIDTH, SCREEN_HEIGHT, leaveRsnode, readRsnodeFacts, readRsnodeRadio, readRsnodeScreen, restartRsnode,
-    rsnodeSummary, screenSupported, startRsnodePairing, waitForRsnode, ...overrides
+    rsnodeSummary, rsnodeBluetoothOff, screenSupported, startRsnodePairing, waitForRsnode, ...overrides
   };
   return { ...pageFunctions(PANEL, context), context, document, calls };
 }
@@ -399,15 +437,14 @@ test('the panel follows a node through its restart into a Repeater, without disc
     const { elements } = page.document;
     await until(() => page.document.painted.length >= 1);
     assert.equal(elements.rsnodePair.hidden, false);
+    // Every state the caption shows, however briefly.
     const states = [];
-    const watch = setInterval(() => states.push(elements.rsnodeScreenState.textContent), 5);
+    let caption = elements.rsnodeScreenState.textContent;
+    Object.defineProperty(elements.rsnodeScreenState, 'textContent', {
+      get: () => caption, set: value => { caption = value; states.push(value); } });
     port.restart(repeater);
-    try {
-      await until(() => /starts as Repeater$/.test(page.document.fact('repeater').dd.textContent), 10000);
-      await until(() => page.document.painted.some(image => screenOf(image).join() === repeater.screens[0].rows.join()), 4000);
-    } finally {
-      clearInterval(watch);
-    }
+    await until(() => /starts as Repeater$/.test(page.document.fact('repeater').dd.textContent), 10000);
+    await until(() => page.document.painted.some(image => screenOf(image).join() === repeater.screens[0].rows.join()), 4000);
     assert.ok(states.includes('Restarting…'));
     assert.match(elements.rsnodeScreenState.textContent, /^Live/);
     assert.equal(page.document.fact('node').dd.textContent, 'RNode B44E');
@@ -539,4 +576,77 @@ test('every other USB task takes the port only after the live view has left the 
   assert.ok(connect.indexOf('await releaseRsnodeDevice();') > 0 && connect.indexOf('await releaseRsnodeDevice();') < connect.indexOf('requestPort('));
   const flash = html.slice(html.indexOf('window.startFlash = async function()'), html.indexOf('function isRnodeReconnectSetupIssue'));
   assert.ok(flash.indexOf('await releaseRsnodeDevice();') > 0 && flash.indexOf('await releaseRsnodeDevice();') < flash.indexOf('await loadEsptool()'));
+});
+
+test('STATUS reads as ManageStatus decodes it: unknown tags skipped, a known tag of another length refused', () => {
+  const body = statusBody({ board: 0xc0, flags: 0x04 | 0x02, wifi: [1, 0x01, 192, 168, 1, 23], node: [0, 0, 0, 3],
+    extra: [0x11, 3, 9, 9, 9, ...tlv(0x05, be32(2026110102))] });
+  const status = parseRsnodeStatus(body);
+  assert.deepEqual(status.board, { platform: 0x80, mcu: 0x81, board: 0xc0 });
+  assert.deepEqual(status.firmware, { major: 1, minor: 0, patch: 0 });
+  assert.equal(status.releaseKeyId, '0011223344556677');
+  assert.deepEqual(status.ota, { acceptedSequence: 2026110101, slotLen: 0x1e0000, nearbyOnly: true, trialPending: true });
+  assert.equal(status.pendingSequence, 2026110102);
+  assert.deepEqual(status.wifi, { mode: 1, ready: true, ip: '192.168.1.23' });
+  assert.deepEqual(status.image, { len: 0x180000, sha256: 'ab'.repeat(32) });
+  assert.equal(status.release, '1.0.0-beta.20261101.1');
+  assert.deepEqual(status.node, { repeater: false, bluetoothAvailable: false, bluetoothEnabled: false, hostOwner: 3 });
+  assert.equal(HOST_OWNERS[status.node.hostOwner], 'Wi-Fi');
+  assert.deepEqual(parseRsnodeStatus(tlv(0x0c, [2, 0, 0, 0, 0, 0])).wifi, { mode: 2, ready: false, ip: null });
+  assert.throws(() => parseRsnodeStatus(tlv(0x0c, [1, 1, 10, 0, 0])), /tag 0x0c length 5/);
+  assert.throws(() => parseRsnodeStatus([0x10, 4, 0, 1]), /truncated/);
+  assert.throws(() => parseRsnodeStatus(tlv(0x0f, Array.from(Buffer.from('1 0')))), /release/);
+});
+
+test('STATUS is null on a beta that predates it, whether it refuses or says nothing', async () => {
+  for (const [status, expected] of [[OLDER_BETA, null], [null, null], [statusReply({ release: '1.0.1' }), '1.0.1']]) {
+    const port = nodePort(v4, { status });
+    const session = createRnodeSession(port);
+    try {
+      const reply = await readRsnodeStatus(session);
+      assert.equal(reply && reply.release, expected);
+    } finally {
+      await closeRnodeSession(session);
+    }
+    assert.deepEqual(port.written, ['status']);
+  }
+});
+
+test('a node with STATUS shows its release, variant and Wi-Fi, and Copy details carries the build', async () => {
+  const { facts, radio } = await readNode(v4, { status: statusReply({ board: 0xbf, wifi: [1, 1, 192, 168, 1, 23] }) });
+  const summary = rsnodeSummary(facts, radio);
+  assert.equal(summary.firmware, `1.0.0-beta.20261101.1 · image ${v4.device.firmwareHash.slice(0, 8)}`);
+  assert.equal(summary.board, 'Heltec V4 · R8 · ESP32');
+  assert.equal(summary.wifi, 'Joined a network · 192.168.1.23');
+  const details = rsnodeDetails(facts, radio).trimEnd().split('\n');
+  for (const line of ['version: 1.0.0-beta.20261101.1', 'variant: Heltec V4 · R8 (target 0x80:0x81:0xbf)',
+    'update key: 0011223344556677', 'ota sequence: 2026110101', 'mode: RNode, held over USB, Bluetooth on',
+    'wi-fi: Joined a network · 192.168.1.23']) assert.ok(details.includes(line), line);
+  assert.ok(!details.some(line => /ap_psk|management_key/.test(line)));
+  // Wi-Fi off, starting, and the node's own network.
+  const wifi = async value => rsnodeSummary((await readNode(v4, { status: statusReply({ wifi: value }) })).facts, radio).wifi;
+  assert.equal(await wifi(null), 'Off');
+  assert.equal(await wifi([1, 0, 0, 0, 0, 0]), 'Joining a network…');
+  assert.equal(await wifi([2, 1, 10, 0, 0, 1]), 'Own network · 10.0.0.1');
+});
+
+test('with Wi-Fi on, pairing is offered disabled with the reason instead of failing quietly', async () => {
+  const port = nodePort(v4, { status: statusReply({ wifi: [1, 1, 192, 168, 1, 23], node: [0, 0, 0, 1] }) });
+  await withPanel(port, async page => {
+    const { elements } = page.document;
+    await until(() => page.document.painted.length >= 1);
+    assert.deepEqual([elements.rsnodePair.hidden, elements.rsnodePair.disabled, elements.rsnodePairNote.hidden], [false, true, false]);
+    assert.ok(rsnodeBluetoothOff(page.context.rsnodeDeviceFacts));
+    assert.equal(page.document.fact('wifi').dd.textContent, 'Joined a network · 192.168.1.23');
+  });
+  assert.ok(!port.written.includes('bt_pair'));
+  assert.match(html, /id="rsnodePairNote"[^>]*>Bluetooth is off while Wi-Fi is on\. Turn Wi-Fi off in Settings to pair\.</);
+});
+
+test('STATUS decides Repeater: a running Repeater offers neither Pair nor Restart even before its record says so', async () => {
+  const port = nodePort(v4, { status: statusReply({ node: [1, 1, 1, 0] }) });
+  await withPanel(port, async page => {
+    await until(() => page.document.painted.length >= 1);
+    assert.deepEqual([page.document.elements.rsnodePair.hidden, page.document.elements.rsnodeRestart.hidden], [true, true]);
+  });
 });

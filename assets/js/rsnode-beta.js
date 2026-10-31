@@ -1,15 +1,22 @@
 import { sha256Hex } from './handheld-release.js';
 
+// otaBoard is the board byte of the image's update target, which the node's status reports.
 const BOARDS = Object.freeze({
-  'heltec-v3': { label: 'Heltec V3', flashSize: '8MB', capacity: 8 * 1024 * 1024 },
-  'heltec-v4': { label: 'Heltec V4 · R2', flashSize: '16MB', capacity: 16 * 1024 * 1024 },
-  'heltec-v4-r8': { label: 'Heltec V4 · R8', flashSize: '16MB', capacity: 16 * 1024 * 1024 },
-  'heltec-v4-r8-tft': { label: 'Heltec V4 · R8 TFT', flashSize: '16MB', capacity: 16 * 1024 * 1024 }
+  'heltec-v3': { label: 'Heltec V3', flashSize: '8MB', capacity: 8 * 1024 * 1024, otaBoard: 0x3a },
+  'heltec-v4': { label: 'Heltec V4 · R2', flashSize: '16MB', capacity: 16 * 1024 * 1024, otaBoard: 0x3f },
+  'heltec-v4-r8': { label: 'Heltec V4 · R8', flashSize: '16MB', capacity: 16 * 1024 * 1024, otaBoard: 0xbf },
+  'heltec-v4-r8-tft': { label: 'Heltec V4 · R8 TFT', flashSize: '16MB', capacity: 16 * 1024 * 1024, otaBoard: 0xc0 }
 });
 const owns = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
 
 export function rsnodeBoard(id) {
   return owns(BOARDS, id) ? { id, ...BOARDS[id] } : null;
+}
+
+/** The board a node's status names by its update target, or null. */
+export function rsnodeBoardForTarget(board) {
+  const id = Object.keys(BOARDS).find(key => BOARDS[key].otaBoard === board);
+  return id ? rsnodeBoard(id) : null;
 }
 
 export async function betaRequest(action, body, options = {}) {

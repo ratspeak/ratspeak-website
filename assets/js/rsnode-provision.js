@@ -1,5 +1,5 @@
-// rsNode owners and management key over USB KISS, step for step as rsNode's
-// scripts/provision-rsnode.py runs them; the management-AP password is left as is.
+// rsNode managers over USB KISS, step for step as rsNode's scripts/provision-rsnode.py runs them.
+// The management key and AP password are retired (rsNode ADR 0015); READ_MGMT names the node.
 // tests/fixtures/rsnode-provision-vectors.json records that script's frames.
 const CMD_DETECT = 0x08;
 const CMD_LEAVE = 0x0a;
@@ -7,9 +7,7 @@ const CMD_TRANSPORT_CFG = 0x6f;
 const CMD_ERROR = 0x90;
 const DETECT_REQ = 0x73;
 const DETECT_RESP = 0x46;
-const SET_MGMT_KEY = 0x04;
 const READ_MGMT = 0x05;
-const CLEAR_MGMT_KEY = 0x06;
 const READ_NODE = 0x07;
 const ADD_OWNER = 0x08;
 const REMOVE_OWNER = 0x09;
@@ -17,8 +15,6 @@ const MANAGEMENT_STATUS_LEN = 11;
 const NODE_STATUS_HEADER_LEN = 20;
 const OWNER_ENTRY_LEN = 18;
 const OWNERS_MAX = 4;
-const KEY_LEN = 32;
-export const KEY_FILE_READ_MAX = KEY_LEN * 2 + 2;
 const OWNER_KIND_LXMF = 1;
 const OWNER_KIND_IDENTITY = 2;
 const OWNER_KINDS = { 1: 'lxmf', 2: 'identity' };
@@ -68,30 +64,7 @@ export function parseHash(text) {
   return value;
 }
 
-/** A management key file as rsnode-manage.py and update-rsnode-ota.py accept it. */
-export function parseKeyFile(bytes) {
-  if (bytes.length > KEY_FILE_READ_MAX) throw new Error('management key file is unexpectedly large');
-  let key = Uint8Array.from(bytes);
-  if (bytes.length !== KEY_LEN) {
-    let start = 0, end = bytes.length;
-    while (start < end && ASCII_SPACE.includes(String.fromCharCode(bytes[start]))) start++;
-    while (end > start && ASCII_SPACE.includes(String.fromCharCode(bytes[end - 1]))) end--;
-    if (end - start !== KEY_LEN * 2) throw new Error('management key must be 32 raw bytes or 64 hexadecimal characters');
-    const text = key.slice(start, end);
-    key = text.every(byte => byte < 0x80) ? fromHex(String.fromCharCode(...text)) : null;
-    if (!key) throw new Error('management key is not raw bytes or hexadecimal');
-  }
-  if (key.length === KEY_LEN && key.every(byte => byte === 0)) throw new Error('management key must not be all zero');
-  return key;
-}
-
-export function generateManagementKey() {
-  const key = new Uint8Array(KEY_LEN);
-  // The device rejects the all-zero sentinel.
-  do crypto.getRandomValues(key); while (key.every(byte => byte === 0));
-  return key;
-}
-
+/** READ_MGMT's 11-byte reply, kept for the node id; its retired key and AP flags are not reported. */
 export function parseManagementStatus(payload) {
   if (payload.length !== MANAGEMENT_STATUS_LEN || payload[0] !== READ_MGMT) {
     throw new Error(`malformed management status payload length=${payload.length}`);
@@ -99,12 +72,7 @@ export function parseManagementStatus(payload) {
   if (payload[1] > 1 || payload[2] > 1) throw new Error('malformed management status boolean field');
   const nodeId = Array.from(payload.slice(3, 7));
   if (nodeId.some(byte => !UPPER_HEX.includes(byte))) throw new Error('malformed node id in management status');
-  return {
-    pskSet: payload[1] === 1,
-    keySet: payload[2] === 1,
-    nodeId: String.fromCharCode(...nodeId),
-    floor: ((payload[7] << 24) | (payload[8] << 16) | (payload[9] << 8) | payload[10]) >>> 0
-  };
+  return { nodeId: String.fromCharCode(...nodeId) };
 }
 
 /** The identity sector: the management destination, policy and owners. */
@@ -123,10 +91,6 @@ export function parseNodeStatus(payload) {
     owners.push({ kind: entry[0], role: entry[1], hash: hex(entry.slice(2)) });
   }
   return { destination: payload[1] === 1 ? hex(payload.slice(2, 18)) : null, nearbyOnly: payload[18] === 1, owners };
-}
-
-export function renderStatus(status) {
-  return `status: ap_psk=${status.pskSet ? 'set' : 'not set'} management_key=${status.keySet ? 'set' : 'not set'}`;
 }
 
 /** provision-rsnode.py's lines for a node; null is firmware without the identity sector. */
@@ -155,8 +119,10 @@ async function exchange(session, command, payload, timeoutMs, accept) {
   return session.readFrame(frame => accept.includes(frame.command), timeoutMs);
 }
 
-function rejected(what, code, reason) {
-  return new Error(`device rejected ${what}: error 0x${code.toString(16).padStart(2, '0')} (${reason})`);
+/** code is the KISS error; subcommand the TRANSPORT_CFG step it answered. */
+function rejected(what, code, reason, subcommand) {
+  return Object.assign(new Error(`device rejected ${what}: error 0x${code.toString(16).padStart(2, '0')} (${reason})`),
+    { code, subcommand });
 }
 
 async function managementExchange(session, payload, what) {
@@ -164,7 +130,7 @@ async function managementExchange(session, payload, what) {
   if (!frame) throw new Error(`timed out waiting for the device to answer ${what}`);
   if (frame.command === CMD_ERROR) {
     const code = frame.payload.length ? frame.payload[0] : 0xff;
-    throw rejected(what, code, ERROR_NAMES[code] || 'unknown error');
+    throw rejected(what, code, ERROR_NAMES[code] || 'unknown error', payload[0]);
   }
   try { return parseManagementStatus(frame.payload); } catch (error) { throw new Error(`${what}: ${error.message}`); }
 }
@@ -179,7 +145,7 @@ async function nodeExchange(session, payload, what) {
     let reason = ERROR_NAMES[code] || 'unknown error';
     if (payload[0] === ADD_OWNER && code === ERROR_INVALID_CONFIG) reason = 'the owner table is full, or this firmware predates owners';
     else if (payload[0] === REMOVE_OWNER && code === ERROR_INVALID_CONFIG) reason = 'no such owner, or this firmware predates owners';
-    throw rejected(what, code, reason);
+    throw rejected(what, code, reason, payload[0]);
   }
   try { return parseNodeStatus(frame.payload); } catch (error) { throw new Error(`${what}: ${error.message}`); }
 }
@@ -208,18 +174,15 @@ async function waitForDevice(session, timeoutMs, log) {
 
 function logStatus(log, status) {
   log(`node id: RNode ${status.nodeId}`);
-  log(renderStatus(status));
-  log(`poke floor: ${status.floor}`);
 }
 
 /**
- * Run provision-rsnode.py's sequence over an open KISS session ({ send, readFrame }).
- * Options mirror its flags: read, managementKey (bytes), noKey, clearKey, owner,
- * ownerIdentity, helper, helperIdentity, removeOwner (hashes). Without managementKey,
- * noKey or clearKey a new key is generated; saveKey receives it once the node confirms it.
- * nodeId, the page's own option, stops before any change on another node.
+ * Run provision-rsnode.py's manager sequence over an open KISS session ({ send, readFrame }).
+ * Options mirror its flags: read, owner, ownerIdentity, helper, helperIdentity, removeOwner
+ * (hashes). nodeId, the page's own option, stops before any change on another node;
+ * identified(status), the page's own hook, runs once the node is named, before any change.
  */
-export async function provisionRsnode(session, options, { log = () => {}, saveKey = () => {} } = {}) {
+export async function provisionRsnode(session, options, { log = () => {}, identified = async () => {} } = {}) {
   if (!await waitForDevice(session, KISS_TIMEOUT_MS, log)) {
     throw new Error(`no KISS response within ${KISS_TIMEOUT_MS / 1000} s: if you just installed, press RESET on the board; ` +
       'in RNode, hold USB on the home menu to take over from another app, then try again');
@@ -230,6 +193,7 @@ export async function provisionRsnode(session, options, { log = () => {}, saveKe
     await session.send(CMD_LEAVE, [0xff]);
     throw new Error(`this is RNode ${status.nodeId}, not RNode ${options.nodeId}`);
   }
+  await identified(status);
   if (options.read) {
     const node = await readNodeStatus(session);
     await session.send(CMD_LEAVE, [0xff]);
@@ -238,19 +202,6 @@ export async function provisionRsnode(session, options, { log = () => {}, saveKe
   }
   const removals = options.removeOwner || [];
   const owners = ownersToEnrol(options);
-  const generated = !options.managementKey && !options.noKey && !options.clearKey ? generateManagementKey() : null;
-  const key = options.managementKey || generated;
-  if (key) {
-    if (key.length !== KEY_LEN || key.every(byte => byte === 0)) throw new Error('management key must be 32 non-zero bytes');
-    status = await managementExchange(session, [SET_MGMT_KEY, ...key], 'the management key (SET_MGMT_KEY)');
-    if (!status.keySet) throw new Error('device did not report the management key as set');
-    // Only a device-confirmed key is worth keeping.
-    if (generated) saveKey({ name: `rsnode-${status.nodeId}.key`, text: hex(generated) + '\n' });
-  }
-  if (options.clearKey) {
-    status = await managementExchange(session, [CLEAR_MGMT_KEY], 'clearing the management key');
-    if (status.keySet) throw new Error('device still reports a management key');
-  }
   for (const hash of removals) await nodeExchange(session, [REMOVE_OWNER, ...hash], 'REMOVE_OWNER');
   for (const [kind, role, hash, what] of owners) await nodeExchange(session, [ADD_OWNER, kind, role, ...hash], what);
   const node = await readNodeStatus(session);
