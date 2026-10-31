@@ -2185,10 +2185,11 @@
             .flash-cta__repair-meta { display: none; }
         }
 
-        /* rsNode tools: the live device view and owners share these parts and one USB session at a time */
-        .rsnode-owner [hidden], .rsnode-owner[hidden], .rsnode-device [hidden], .rsnode-device[hidden] { display: none !important; }
-        .rsnode-owner :focus-visible, .rsnode-device :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-        .rsnode-owner > .flash-cta__repair-body, .rsnode-device > .flash-cta__repair-body { padding: 8px 0 16px; }
+        /* rsNode tools: the live device view, settings and owners share these parts and one USB session at a time */
+        .rsnode-owner [hidden], .rsnode-owner[hidden], .rsnode-device [hidden], .rsnode-device[hidden],
+        .rsnode-settings [hidden], .rsnode-settings[hidden] { display: none !important; }
+        .rsnode-owner :focus-visible, .rsnode-device :focus-visible, .rsnode-settings :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .rsnode-owner > .flash-cta__repair-body, .rsnode-device > .flash-cta__repair-body, .rsnode-settings > .flash-cta__repair-body { padding: 8px 0 16px; }
         .rsnode-tools__lede { margin: 0 0 16px; max-width: 76ch; color: var(--text-secondary); font-size: 13px; line-height: 1.55; }
         .rsnode-tools__notice {
             margin: 0 0 16px;
@@ -2202,10 +2203,11 @@
             scroll-margin-top: 96px;
         }
         .rsnode-tools__help { margin: 0; color: var(--text-secondary); font-size: 12px; line-height: 1.5; }
-        .rsnode-owner code, .rsnode-device code { font-family: var(--font-code); font-size: .9em; }
+        .rsnode-owner code, .rsnode-device code, .rsnode-settings code { font-family: var(--font-code); font-size: .9em; }
         .rsnode-tools__tips { margin-top: 16px; color: var(--text-secondary); }
         .rsnode-tools__tips .flash-connect-tips__head,
-        .rsnode-beta .rnode-source__label, .rsnode-owner .rnode-source__label, .rsnode-device .rnode-source__label { color: var(--text-secondary); }
+        .rsnode-beta .rnode-source__label, .rsnode-owner .rnode-source__label, .rsnode-device .rnode-source__label,
+        .rsnode-settings .rnode-source__label { color: var(--text-secondary); }
         .rsnode-tools__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; }
         .rsnode-tools__end { margin-left: auto; }
         .rsnode-tools__summary { flex: 1 1 240px; margin: 0; color: var(--text-secondary); font-size: 12px; line-height: 1.5; }
@@ -2341,8 +2343,28 @@
         .rsnode-managers__editor-actions { display: flex; gap: 8px; }
         .rsnode-managers__add { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 0; }
 
+        /* rsNode settings: one group per job, fields two to a row */
+        .rsnode-settings__persona { margin: 0 0 16px; color: var(--text-primary); font-size: 13px; line-height: 1.5; }
+        .rsnode-settings__group { display: grid; gap: 10px; min-width: 0; margin: 0 0 20px; padding: 0 0 20px; border: 0; border-bottom: 1px solid var(--border-subtle); }
+        .rsnode-settings__group > legend { float: left; width: 100%; margin-bottom: 10px; padding: 0; }
+        .rsnode-settings__group > legend + * { clear: both; }
+        .rsnode-settings__choices { display: flex; flex-wrap: wrap; gap: 8px; }
+        .rsnode-settings__choice { position: relative; display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border: 1px solid var(--border-card); border-radius: 8px; background: var(--bg-card); color: var(--text-secondary); font-size: 13px; cursor: pointer; }
+        .rsnode-settings__choice input { position: absolute; opacity: 0; pointer-events: none; }
+        .rsnode-settings__choice:has(input:checked) { color: var(--text-primary); background: var(--accent-a15); border-color: var(--accent); }
+        .rsnode-settings__choice:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .rsnode-settings__choice:has(input:disabled) { cursor: default; opacity: .6; }
+        .rsnode-settings__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; }
+        .rsnode-settings__wide { grid-column: 1 / -1; }
+        .rsnode-settings__field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+        .rsnode-settings__label { color: var(--text-secondary); font-size: 12px; line-height: 1.4; }
+        .rsnode-settings__secret { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; min-height: 38px; margin: 0; color: var(--text-primary); font-size: 13px; }
+
         @media (max-width: 760px) {
             .rsnode-device__layout { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 520px) {
+            .rsnode-settings__grid { grid-template-columns: 1fr; }
         }
         @media (max-width: 600px) {
             .rsnode-tools__actions { display: grid; grid-template-columns: 1fr 1fr; }
@@ -5543,6 +5565,103 @@
                 </div>
             </details>
 
+            <details class="flash-cta__repair rsnode-settings" id="rsnodeSettings" name="rsnode-tools" hidden>
+                <summary class="flash-cta__repair-summary">
+                    <span class="flash-cta__repair-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+                        rsNode settings
+                    </span>
+                    <span class="flash-cta__repair-meta">Wi-Fi, peers and uplink over USB &middot; saving restarts the node</span>
+                    <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </summary>
+                <div class="flash-cta__repair-body">
+                    <p class="rsnode-tools__lede">Read the node's settings, change them here, and save. Saving restarts the node. Region, LIMITS and the radio are set on the device.</p>
+                    <form id="rsnodeSettingsForm" novalidate hidden>
+                        <fieldset class="rsnode-owner__fields" id="rsnodeSettingsFields">
+                            <p class="rsnode-settings__persona" id="rsnodeSettingsPersona"></p>
+                            <fieldset class="rsnode-settings__group">
+                                <legend class="rnode-source__label">Wi-Fi</legend>
+                                <div class="rsnode-settings__choices">
+                                    <label class="rsnode-settings__choice"><input type="radio" name="rsnodeWifiMode" value="off"><span>Off</span></label>
+                                    <label class="rsnode-settings__choice"><input type="radio" name="rsnodeWifiMode" value="join"><span>Join a network</span></label>
+                                    <label class="rsnode-settings__choice"><input type="radio" name="rsnodeWifiMode" value="own"><span>Own network</span></label>
+                                </div>
+                                <p class="rsnode-tools__help" id="rsnodeWifiNote"></p>
+                                <div class="rsnode-settings__grid" id="rsnodeWifiFields">
+                                    <label class="rsnode-settings__field" for="rsnodeWifiName"><span class="rsnode-settings__label" id="rsnodeWifiNameLabel">Network name</span>
+                                        <input class="rsnode-owner__input" id="rsnodeWifiName" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+                                    <div class="rsnode-settings__field">
+                                        <span class="rsnode-settings__label" id="rsnodeWifiPasswordLabel">Wi-Fi password</span>
+                                        <p class="rsnode-settings__secret" id="rsnodeWifiPasswordStored"><span id="rsnodeWifiPasswordState"></span><button class="rsnode-beta__lock" id="rsnodeWifiPasswordChange" type="button" aria-describedby="rsnodeWifiPasswordLabel">Change</button></p>
+                                        <input class="rsnode-owner__input" id="rsnodeWifiPassword" type="password" autocomplete="new-password" aria-labelledby="rsnodeWifiPasswordLabel" aria-describedby="rsnodeWifiPasswordHelp" hidden>
+                                        <p class="rsnode-tools__help" id="rsnodeWifiPasswordHelp"></p>
+                                    </div>
+                                    <label class="rsnode-settings__field" for="rsnodeWifiChannel" id="rsnodeWifiChannelField"><span class="rsnode-settings__label">Channel</span>
+                                        <select class="rnode-variant-select" id="rsnodeWifiChannel"></select></label>
+                                    <label class="rsnode-beta__check rsnode-settings__wide" id="rsnodeWifiFixedField"><input type="checkbox" id="rsnodeWifiFixed"><span>Use a fixed address</span></label>
+                                    <div class="rsnode-settings__grid rsnode-settings__wide" id="rsnodeWifiFixedFields">
+                                        <label class="rsnode-settings__field" for="rsnodeWifiAddress"><span class="rsnode-settings__label">Address</span>
+                                            <input class="rsnode-owner__input" id="rsnodeWifiAddress" type="text" inputmode="decimal" autocomplete="off" placeholder="192.168.1.50"></label>
+                                        <label class="rsnode-settings__field" for="rsnodeWifiNetmask"><span class="rsnode-settings__label">Subnet mask</span>
+                                            <input class="rsnode-owner__input" id="rsnodeWifiNetmask" type="text" inputmode="decimal" autocomplete="off" placeholder="255.255.255.0"></label>
+                                        <label class="rsnode-settings__field" for="rsnodeWifiGateway"><span class="rsnode-settings__label">Gateway (optional)</span>
+                                            <input class="rsnode-owner__input" id="rsnodeWifiGateway" type="text" inputmode="decimal" autocomplete="off" placeholder="192.168.1.1"></label>
+                                        <label class="rsnode-settings__field" for="rsnodeWifiDns"><span class="rsnode-settings__label">DNS (optional)</span>
+                                            <input class="rsnode-owner__input" id="rsnodeWifiDns" type="text" inputmode="decimal" autocomplete="off" placeholder="192.168.1.1"></label>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset class="rsnode-settings__group" id="rsnodePeersGroup">
+                                <legend class="rnode-source__label">Accept peers</legend>
+                                <label class="rsnode-beta__check"><input type="checkbox" id="rsnodePeersEnabled"><span>Accept Reticulum peers over TCP</span></label>
+                                <div class="rsnode-settings__grid">
+                                    <label class="rsnode-settings__field" for="rsnodePeersPort"><span class="rsnode-settings__label">Port</span>
+                                        <input class="rsnode-owner__input" id="rsnodePeersPort" type="text" inputmode="numeric" autocomplete="off" aria-describedby="rsnodePeersHelp"></label>
+                                </div>
+                                <p class="rsnode-tools__help" id="rsnodePeersHelp">Reticulum apps add a TCP client to the node's Wi-Fi address on this port. Up to 2 peers.</p>
+                            </fieldset>
+                            <fieldset class="rsnode-settings__group" id="rsnodeUplinkGroup">
+                                <legend class="rnode-source__label">Uplink</legend>
+                                <label class="rsnode-beta__check"><input type="checkbox" id="rsnodeUplinkEnabled"><span>Connect to a Reticulum node over TCP</span></label>
+                                <div class="rsnode-settings__grid">
+                                    <label class="rsnode-settings__field" for="rsnodeUplinkHost"><span class="rsnode-settings__label">Host</span>
+                                        <input class="rsnode-owner__input" id="rsnodeUplinkHost" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="rns.example.org"></label>
+                                    <label class="rsnode-settings__field" for="rsnodeUplinkPort"><span class="rsnode-settings__label">Port</span>
+                                        <input class="rsnode-owner__input" id="rsnodeUplinkPort" type="text" inputmode="numeric" autocomplete="off" placeholder="4242"></label>
+                                </div>
+                            </fieldset>
+                            <div class="rsnode-settings__group" id="rsnodeRadioGroup">
+                                <span class="rnode-source__label">Set on the device</span>
+                                <dl class="rsnode-tools__facts">
+                                    <div><dt>Region</dt><dd id="rsnodeSettingsRegion"></dd></div>
+                                    <div><dt>Radio</dt><dd id="rsnodeSettingsRadio"></dd></div>
+                                    <div><dt>LoRa IFAC</dt><dd id="rsnodeSettingsIfac"></dd></div>
+                                </dl>
+                                <p class="rsnode-tools__help">Change the region, LIMITS and radio on the Repeater's own menus; they carry legal confirmations only the device asks for.</p>
+                            </div>
+                        </fieldset>
+                    </form>
+                    <div class="flash-connect-tips rsnode-tools__tips" id="rsnodeSettingsTips">
+                        <div class="flash-connect-tips__head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Before you read</div>
+                        <ul>
+                            <li>Plug the node in over USB. Close other apps that use its port, such as Ratspeak or a serial monitor.</li>
+                            <li>If you just installed, press RESET on the board first.</li>
+                            <li>An RNode another app is using over Bluetooth or Wi-Fi shows its settings but saves none: disconnect that app, or hold USB on the node.</li>
+                        </ul>
+                    </div>
+                    <div class="rsnode-tools__actions">
+                        <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeSettingsSave" type="submit" form="rsnodeSettingsForm" aria-describedby="rsnodeSettingsSummary" hidden>Save and restart</button>
+                        <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeSettingsRead" type="button">Read settings</button>
+                        <p class="rsnode-tools__summary" id="rsnodeSettingsSummary"></p>
+                    </div>
+                    <p class="rsnode-tools__port" hidden>Using <span class="rsnode-tools__port-label"></span> &middot; <button class="rsnode-beta__lock" type="button" data-change-port>Change port</button></p>
+                    <div id="rsnodeSettingsActivity">
+                        <p class="rsnode-tools__state"><span class="rsnode-tools__dot" id="rsnodeSettingsDot" aria-hidden="true"></span><span class="rsnode-beta__status progress-status" id="rsnodeSettingsStatus" role="status" aria-live="polite"></span></p>
+                        <details class="rsnode-tools__log"><summary>USB log</summary><div class="progress-log"></div></details>
+                    </div>
+                </div>
+            </details>
+
             <details class="flash-cta__repair rsnode-owner" id="rsnodeOwner" name="rsnode-tools" hidden>
                 <summary class="flash-cta__repair-summary">
                     <span class="flash-cta__repair-label">
@@ -5745,7 +5864,9 @@
 <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
 <script type="module">
 import { betaRequest, rsnodeBoard, validateBetaCatalog, verifyBetaDownload, validateBetaManifest } from './assets/js/rsnode-beta.js';
-import { parseHash, provisionRsnode } from './assets/js/rsnode-provision.js';
+import { parseHash, provisionRsnode, readManagementStatus } from './assets/js/rsnode-provision.js';
+import { APP_PORT as RSNODE_APP_PORT, WIFI_MODES, checkSettingsForm, readRsnodeSettings, settingsChanges, settingsForm,
+    settingsRadioLines, settingsSavedMessage, writeRsnodeSettings } from './assets/js/rsnode-settings.js';
 import { HOST_OWNERS, SCREEN_HEIGHT, SCREEN_WIDTH, leaveRsnode, readRsnodeFacts, readRsnodeRadio, readRsnodeScreen,
     readRsnodeStatus, restartRsnode, rsnodeBluetoothOff, rsnodeDetails, rsnodeSummary, screenSupported, startRsnodePairing,
     waitForRsnode } from './assets/js/rsnode-device.js';
@@ -6793,7 +6914,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         betaAuthBusy = busy;
         rsnodeUnlock.disabled = busy;
         rsnodeTermsContinue.disabled = busy || !rsnodeTermsForm.checkValidity();
-        document.getElementById('rsnodeLock').disabled = busy || state.flashing || rsnodeOwnerBusy;
+        document.getElementById('rsnodeLock').disabled = busy || state.flashing || rsnodeOwnerBusy || rsnodeSettingsBusy;
         document.getElementById('rsnodeLockRetry').disabled = busy;
         sourceTabs.forEach(function(tab) { tab.disabled = busy || state.flashing; });
     }
@@ -8889,7 +9010,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     }
 
     function syncRsnodePort() {
-        var idle = !rsnodeOwnerBusy && !rsnodeDevice && !state.flashing;
+        var idle = !rsnodeOwnerBusy && !rsnodeSettingsBusy && !rsnodeDevice && !state.flashing;
         document.querySelectorAll('.rsnode-tools__port').forEach(function(line) {
             line.hidden = !state.port;
             line.querySelector('.rsnode-tools__port-label').textContent = state.port ? usbDeviceLabel(state.port) : '';
@@ -9118,7 +9239,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     }
 
     function syncRsnodeOwnerForm() {
-        var idle = !rsnodeOwnerBusy && !state.flashing;
+        var idle = !rsnodeOwnerBusy && !rsnodeSettingsBusy && !state.flashing;
         var rows = rsnodeManagersPreview();
         var crowded = rsnodeActive(rows).length > RSNODE_MANAGERS_MAX;
         var changes = rsnodeOwnerChanges(rsnodeManagersPlan(rows));
@@ -9261,7 +9382,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
 
     // Inputs are checked before a port is requested, as the script checks its flags.
     async function runRsnodeOwnerTask(read) {
-        if (rsnodeOwnerBusy || state.flashing) return;
+        if (rsnodeOwnerBusy || rsnodeSettingsBusy || state.flashing) return;
         if (!('serial' in navigator)) {
             showSerialWarning();
             return;
@@ -9375,7 +9496,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     });
     document.querySelectorAll('[data-change-port]').forEach(function(button) {
         button.addEventListener('click', function() {
-            if (rsnodeOwnerBusy || rsnodeDevice || state.flashing) return;
+            if (rsnodeOwnerBusy || rsnodeSettingsBusy || rsnodeDevice || state.flashing) return;
             requestFreshRnodePortFromUser().catch(function() { /* a cancelled picker keeps the selected port */ });
         });
     });
@@ -9394,6 +9515,289 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         }
     });
     renderRsnodeManagers();
+
+    // ── rsNode settings: Wi-Fi, peers and uplink over USB (CMD_RSNODE SETTINGS_GET / SETTINGS_SET) ──
+    var rsnodeSettingsBusy = false;
+    var rsnodeSettingsSaving = false;
+    // { nodeId, repeater, settings }: what the node last reported; the form edits a copy.
+    var rsnodeSettingsNode = null;
+    // The password editor is open; auto when a switch between joining and hosting opened it.
+    var rsnodeSettingsPassword = false;
+    var rsnodeSettingsPasswordAuto = false;
+    var RSNODE_WIFI_MODE_NAMES = ['off', 'join', 'own'];
+    var RSNODE_SETTINGS_RESTART_MS = 1000;
+    var RSNODE_WIFI_WAIT_MS = 30000;
+    var RSNODE_WIFI_POLL_MS = 2000;
+    var RSNODE_SETTINGS_FIELDS = { wifiMode: 'rsnodeWifiModeOff', name: 'rsnodeWifiName', password: 'rsnodeWifiPassword',
+        channel: 'rsnodeWifiChannel', address: 'rsnodeWifiAddress', netmask: 'rsnodeWifiNetmask', gateway: 'rsnodeWifiGateway',
+        dns: 'rsnodeWifiDns', peersEnabled: 'rsnodePeersEnabled', peersPort: 'rsnodePeersPort', uplinkEnabled: 'rsnodeUplinkEnabled',
+        uplinkHost: 'rsnodeUplinkHost', uplinkPort: 'rsnodeUplinkPort' };
+
+    function updateRsnodeSettingsVisibility() {
+        var panel = document.getElementById('rsnodeSettings');
+        if (panel) panel.hidden = !rsnodeToolsUnlocked();
+    }
+
+    function rsnodeSettingsField(key) {
+        if (key === 'wifiMode') return document.querySelector('input[name="rsnodeWifiMode"]:checked') || document.querySelector('input[name="rsnodeWifiMode"]');
+        return document.getElementById(RSNODE_SETTINGS_FIELDS[key]);
+    }
+
+    // The form as checkSettingsForm and settingsChanges read it.
+    function readRsnodeSettingsForm() {
+        var value = function(id) { return document.getElementById(id).value; };
+        var checked = function(id) { return document.getElementById(id).checked; };
+        var mode = document.querySelector('input[name="rsnodeWifiMode"]:checked');
+        return {
+            wifiMode: mode ? mode.value : 'off', name: value('rsnodeWifiName'),
+            password: rsnodeSettingsPassword ? value('rsnodeWifiPassword') : null, channel: Number(value('rsnodeWifiChannel')),
+            fixed: checked('rsnodeWifiFixed'), address: value('rsnodeWifiAddress'), netmask: value('rsnodeWifiNetmask'),
+            gateway: value('rsnodeWifiGateway'), dns: value('rsnodeWifiDns'),
+            peersEnabled: checked('rsnodePeersEnabled'), peersPort: value('rsnodePeersPort'),
+            uplinkEnabled: checked('rsnodeUplinkEnabled'), uplinkHost: value('rsnodeUplinkHost'), uplinkPort: value('rsnodeUplinkPort')
+        };
+    }
+
+    // Fills the form with what the node reported; a typed password is dropped.
+    function renderRsnodeSettings() {
+        var node = rsnodeSettingsNode;
+        document.getElementById('rsnodeSettingsForm').hidden = !node;
+        document.getElementById('rsnodeSettingsSave').hidden = !node;
+        document.getElementById('rsnodeSettingsTips').hidden = !!node;
+        document.getElementById('rsnodeSettingsRead').textContent = node ? 'Read again' : 'Read settings';
+        document.getElementById('rsnodeSettingsRead').classList.toggle('rsnode-beta__button--primary', !node);
+        if (!node) return;
+        var form = settingsForm(node.settings);
+        document.getElementById('rsnodeSettingsPersona').textContent = 'RNode ' + node.nodeId + (node.repeater
+            ? ' runs as a Repeater. Wi-Fi carries its uplink and the peers it accepts.'
+            : ' runs as an RNode. Wi-Fi carries the app link: apps connect over TCP port ' + RSNODE_APP_PORT + '.');
+        document.querySelectorAll('input[name="rsnodeWifiMode"]').forEach(function(input) { input.checked = input.value === form.wifiMode; });
+        var channel = document.getElementById('rsnodeWifiChannel');
+        if (!channel.options.length) for (var c = 1; c <= 13; c++) channel.add(new Option(String(c), String(c)));
+        channel.value = String(form.channel);
+        document.getElementById('rsnodeWifiName').value = form.name;
+        document.getElementById('rsnodeWifiPassword').value = '';
+        rsnodeSettingsPassword = rsnodeSettingsPasswordAuto = false;
+        document.getElementById('rsnodeWifiFixed').checked = form.fixed;
+        ['address', 'netmask', 'gateway', 'dns'].forEach(function(key) { document.getElementById(RSNODE_SETTINGS_FIELDS[key]).value = form[key]; });
+        document.getElementById('rsnodePeersEnabled').checked = form.peersEnabled;
+        document.getElementById('rsnodePeersPort').value = form.peersPort;
+        document.getElementById('rsnodeUplinkEnabled').checked = form.uplinkEnabled;
+        document.getElementById('rsnodeUplinkHost').value = form.uplinkHost;
+        document.getElementById('rsnodeUplinkPort').value = form.uplinkPort;
+        var radio = settingsRadioLines(node.settings);
+        document.getElementById('rsnodeSettingsRegion').textContent = radio.region;
+        document.getElementById('rsnodeSettingsRadio').textContent = radio.radio;
+        document.getElementById('rsnodeSettingsIfac').textContent = radio.ifac;
+        document.querySelectorAll('#rsnodeSettingsForm [aria-invalid]').forEach(function(field) { field.removeAttribute('aria-invalid'); });
+        syncRsnodeSettingsForm();
+    }
+
+    // Shows the fields the chosen Wi-Fi mode uses and says what Save would do.
+    function syncRsnodeSettingsForm() {
+        var node = rsnodeSettingsNode;
+        var idle = !rsnodeSettingsBusy && !rsnodeOwnerBusy && !state.flashing;
+        document.getElementById('rsnodeSettingsRead').disabled = !idle;
+        document.getElementById('rsnodeSettingsRead').textContent = rsnodeSettingsBusy && !rsnodeSettingsSaving ? 'Reading…'
+            : node ? 'Read again' : 'Read settings';
+        document.getElementById('rsnodeSettingsSave').textContent = rsnodeSettingsBusy && rsnodeSettingsSaving ? 'Saving…' : 'Save and restart';
+        syncRsnodePort();
+        if (!node) return;
+        document.getElementById('rsnodeSettingsFields').disabled = !idle;
+        var form = readRsnodeSettingsForm(), mode = form.wifiMode, repeater = node.repeater;
+        var stored = RSNODE_WIFI_MODE_NAMES[node.settings.wifi.mode];
+        // Switching between joining and hosting needs the other network's password; switching back
+        // closes an editor that opened itself and is still empty, so the stored password stays.
+        if (mode !== 'off' && stored !== 'off' && mode !== stored && !rsnodeSettingsPassword) {
+            showRsnodePasswordEditor(false);
+            rsnodeSettingsPasswordAuto = true;
+            form.password = '';
+        } else if (rsnodeSettingsPasswordAuto && (mode === stored || mode === 'off') && !document.getElementById('rsnodeWifiPassword').value) {
+            rsnodeSettingsPassword = rsnodeSettingsPasswordAuto = false;
+            form.password = null;
+        }
+        document.getElementById('rsnodeWifiFields').hidden = mode === 'off';
+        document.getElementById('rsnodeWifiNameLabel').textContent = mode === 'own' ? 'Network name (optional)' : 'Network name';
+        document.getElementById('rsnodeWifiName').placeholder = mode === 'own' ? 'RNode ' + node.nodeId : '';
+        document.getElementById('rsnodeWifiChannelField').hidden = mode !== 'own';
+        document.getElementById('rsnodeWifiFixedField').hidden = mode !== 'join';
+        document.getElementById('rsnodeWifiFixedFields').hidden = mode !== 'join' || !form.fixed;
+        document.getElementById('rsnodeWifiNote').textContent = mode === 'off'
+            ? (repeater ? 'Without Wi-Fi the Repeater forwards over LoRa only.' : 'Apps connect over USB or Bluetooth.')
+            : repeater ? 'The Repeater\'s uplink and peers use this network.'
+            : 'Bluetooth is off while Wi-Fi is on. Apps connect over TCP port ' + RSNODE_APP_PORT + '.' +
+              (mode === 'own' ? ' The node\'s network offers no internet, so a laptop keeps its own.' : '');
+        document.getElementById('rsnodeWifiPasswordStored').hidden = rsnodeSettingsPassword;
+        document.getElementById('rsnodeWifiPassword').hidden = !rsnodeSettingsPassword;
+        document.getElementById('rsnodeWifiPasswordHelp').hidden = !rsnodeSettingsPassword;
+        document.getElementById('rsnodeWifiPasswordState').textContent = node.settings.wifi.passwordSet ? 'Set' : 'Not set';
+        document.getElementById('rsnodeWifiPasswordHelp').textContent = mode === 'own'
+            ? '8 to 32 characters. Devices joining the node\'s network need it.'
+            : '8 to 32 characters, or empty for an open network.';
+        ['rsnodePeersGroup', 'rsnodeUplinkGroup', 'rsnodeRadioGroup'].forEach(function(id) { document.getElementById(id).hidden = !repeater; });
+        document.getElementById('rsnodePeersPort').disabled = !form.peersEnabled;
+        document.getElementById('rsnodeUplinkHost').disabled = !form.uplinkEnabled;
+        document.getElementById('rsnodeUplinkPort').disabled = !form.uplinkEnabled;
+        var changes = settingsChanges(form, node.settings, repeater);
+        document.getElementById('rsnodeSettingsSave').disabled = !idle || !changes.length;
+        if (!rsnodeSettingsBusy) {
+            document.getElementById('rsnodeSettingsSummary').textContent = state.flashing ? 'Available when flashing finishes.'
+                : changes.length ? 'Saving restarts RNode ' + node.nodeId + ' with the new settings.' : 'Nothing to save yet.';
+        }
+    }
+    function showRsnodePasswordEditor(focus) {
+        rsnodeSettingsPassword = true;
+        rsnodeSettingsPasswordAuto = false;
+        var input = document.getElementById('rsnodeWifiPassword');
+        input.hidden = false;
+        document.getElementById('rsnodeWifiPasswordStored').hidden = true;
+        if (focus) input.focus();
+    }
+
+    function setRsnodeSettingsBusy(busy, saving) {
+        rsnodeSettingsBusy = busy;
+        rsnodeSettingsSaving = !!saving;
+        document.getElementById('rsnodeSettingsDot').classList.toggle('is-busy', busy);
+        syncRsnodeSettingsForm();
+        syncRsnodeOwnerForm();
+        syncRsnodeDevice();
+        updateFlashBtn();
+    }
+
+    function rsnodeSettingsMessage(message, error, done) {
+        var status = document.getElementById('rsnodeSettingsStatus');
+        status.textContent = message || '';
+        status.classList.toggle('is-error', !!error);
+        var dot = document.getElementById('rsnodeSettingsDot');
+        dot.classList.toggle('is-error', !!error);
+        dot.classList.toggle('is-ok', !!done);
+    }
+
+    // What a failed read or save says, in the panel's words.
+    function rsnodeSettingsError(error, stage) {
+        var port = rsnodePortError(error, stage, 'try again');
+        if (port) return port;
+        if (error.notRsnode) return 'This node answers as an RNode but not as rsNode. Settings need rsNode firmware.';
+        return error.message || String(error);
+    }
+
+    // Polls STATUS until Wi-Fi is up, or gives up after timeoutMs with the last STATUS.
+    async function waitForRsnodeWifi(session, mode, timeoutMs) {
+        var deadline = Date.now() + timeoutMs, status = null;
+        for (;;) {
+            status = await readRsnodeStatus(session);
+            var wifi = status && status.wifi;
+            if (mode === 0 || (wifi && wifi.mode === mode && wifi.ready) || Date.now() >= deadline) return status;
+            await sleepMs(RSNODE_WIFI_POLL_MS);
+        }
+    }
+
+    // Reads the node, or saves the form and follows the node through its restart.
+    async function runRsnodeSettingsTask(save) {
+        if (rsnodeSettingsBusy || rsnodeOwnerBusy || state.flashing) return;
+        if (!('serial' in navigator)) {
+            showSerialWarning();
+            return;
+        }
+        var ui = null, session = null, field = null, stage = 'input', outcome = null, entries = null, before = rsnodeSettingsNode;
+        setRsnodeSettingsBusy(true, save);
+        rsnodeSettingsMessage('');
+        try {
+            if (save) {
+                var form = readRsnodeSettingsForm();
+                var problem = checkSettingsForm(form, before.settings, before.repeater);
+                if (problem) throw rsnodeFieldError(rsnodeSettingsField(problem.field), problem.message);
+                entries = settingsChanges(form, before.settings, before.repeater);
+                if (!entries.length) {
+                    rsnodeSettingsMessage('Nothing to save yet.');
+                    return;
+                }
+            }
+            stage = 'port';
+            await rsnodeToolPortFromUser();
+            ui = openProgressLog(save ? 'Saving settings…' : 'Reading settings…', document.getElementById('rsnodeSettingsActivity'));
+            stage = 'open';
+            session = createRnodeSession(await openRnodeSerialPort(ui.log, RNODE_REPAIR_SETTLE_MS, await rsnodeOtherPorts()));
+            stage = 'protocol';
+            ui.setStatus('Waiting for rsNode…');
+            var answered = await waitForRsnode(session, { waiting: function() { ui.setStatus('Waiting for rsNode. ' + RSNODE_TAKEOVER); } });
+            if (!answered) throw new Error('No answer over USB within 30 s. ' + RSNODE_TAKEOVER.replace(/\.$/, ', then try again.'));
+            var nodeId;
+            try {
+                nodeId = (await readManagementStatus(session)).nodeId;
+            } catch (error) {
+                throw Object.assign(error, { notRsnode: true });
+            }
+            ui.log('node id: RNode ' + nodeId);
+            if (save && nodeId !== before.nodeId) throw new Error('This is RNode ' + nodeId + ', not RNode ' + before.nodeId + '. Read its settings first.');
+            var status = await readRsnodeStatus(session);
+            if (!status || !status.node) {
+                throw new Error('RNode ' + nodeId + ' runs a beta without USB settings. Install the latest beta to change settings here.');
+            }
+            if (save) {
+                var held = rsnodeHeldElsewhere(status);
+                if (held) throw new Error(rsnodeHeldMessage(nodeId, held));
+                ui.setStatus('Saving to RNode ' + nodeId + '…');
+                ui.log('settings: ' + entries.map(function(entry) { return '0x' + entry[0].toString(16).padStart(2, '0'); }).join(' '));
+                outcome = await writeRsnodeSettings(session, entries, form.wifiMode);
+                ui.log('result: ' + outcome.kind);
+                if (outcome.kind === 'invalid') {
+                    var target = outcome.field && rsnodeSettingsField(outcome.field);
+                    throw target ? rsnodeFieldError(target, outcome.message) : new Error(outcome.message);
+                }
+                if (outcome.kind === 'refused') throw new Error(rsnodeHeldMessage(nodeId, 'Bluetooth or Wi-Fi'));
+                if (outcome.kind === 'busy') throw new Error('RNode ' + nodeId + ' is busy finishing an update or saving. Try again in a minute.');
+                if (outcome.kind === 'storage') throw new Error('RNode ' + nodeId + ' could not save the settings. Nothing changed.');
+                if (outcome.kind === 'unsupported') throw new Error('RNode ' + nodeId + ' cannot change these settings over USB.');
+                if (outcome.kind === 'failed') throw new Error('RNode ' + nodeId + ' refused the settings (result ' + outcome.result + ').');
+                if (outcome.kind === 'restart') {
+                    rsnodeSettingsMessage('Restarting…');
+                    ui.setStatus('Restarting…');
+                    await sleepMs(outcome.restartMs + RSNODE_SETTINGS_RESTART_MS);
+                    if (!await waitForRsnode(session, { timeoutMs: RSNODE_RESUME_MS })) {
+                        throw new Error('RNode ' + nodeId + ' saved the settings but did not answer after restarting. Press RESET on the board, then read again.');
+                    }
+                    ui.setStatus('Waiting for Wi-Fi…');
+                    status = await waitForRsnodeWifi(session, WIFI_MODES[form.wifiMode], RSNODE_WIFI_WAIT_MS);
+                }
+            }
+            var settings = await readRsnodeSettings(session);
+            if (!settings) throw new Error('RNode ' + nodeId + ' did not report its settings.');
+            await leaveRsnode(session);
+            var repeater = !!(status && status.node ? status.node.repeater : before && before.repeater);
+            rsnodeSettingsNode = { nodeId: nodeId, repeater: repeater, settings: settings };
+            renderRsnodeSettings();
+            rsnodeSettingsMessage(!save ? 'Showing RNode ' + nodeId + '.' + rsnodePersonaNote(status)
+                : outcome.kind === 'unchanged' ? 'Nothing changed: RNode ' + nodeId + ' already had these settings.'
+                : settingsSavedMessage(nodeId, settings, status, repeater), false, true);
+        } catch (error) {
+            field = error.field || null;
+            if (ui) ui.log('Error: ' + error.message, 'log-red');
+            if (stage === 'port' && error.name === 'NotFoundError') rsnodeSettingsMessage('Select the rsNode serial port to continue.');
+            else rsnodeSettingsMessage(field ? error.message : rsnodeSettingsError(error, stage), true);
+        } finally {
+            await closeRnodeSession(session);
+            setRsnodeSettingsBusy(false);
+        }
+        if (field) field.focus();
+    }
+
+    document.getElementById('rsnodeSettingsForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        runRsnodeSettingsTask(true);
+    });
+    document.getElementById('rsnodeSettingsRead').addEventListener('click', function() { runRsnodeSettingsTask(false); });
+    document.getElementById('rsnodeWifiPasswordChange').addEventListener('click', function() {
+        showRsnodePasswordEditor(true);
+        syncRsnodeSettingsForm();
+    });
+    ['input', 'change'].forEach(function(type) {
+        document.getElementById('rsnodeSettingsForm').addEventListener(type, function(event) {
+            event.target.removeAttribute('aria-invalid');
+            syncRsnodeSettingsForm();
+        });
+    });
+    renderRsnodeSettings();
 
     // ── rsNode live view: the node's screen and status over Web Serial ──
     var rsnodeDevice = null;
@@ -9428,7 +9832,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         var connect = document.getElementById('rsnodeConnect');
         connect.textContent = device ? (device.facts ? 'Disconnect' : 'Cancel') : 'Connect';
         connect.classList.toggle('rsnode-beta__button--primary', !device);
-        connect.disabled = device ? device.stopping : rsnodeOwnerBusy || state.flashing;
+        connect.disabled = device ? device.stopping : rsnodeOwnerBusy || rsnodeSettingsBusy || state.flashing;
         var screenshot = document.getElementById('rsnodeScreenshot');
         screenshot.disabled = screenshot.hidden = !rsnodeScreenPixels;
         var copy = document.getElementById('rsnodeCopyDetails');
@@ -9581,7 +9985,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     }
 
     async function runRsnodeDevice() {
-        if (rsnodeDevice || rsnodeOwnerBusy || state.flashing) return;
+        if (rsnodeDevice || rsnodeOwnerBusy || rsnodeSettingsBusy || state.flashing) return;
         if (!('serial' in navigator)) {
             showSerialWarning();
             return;
@@ -9771,13 +10175,15 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     function updateFlashFlow(note) {
         updateRsnodeOwnerVisibility();
         syncRsnodeOwnerForm();
+        updateRsnodeSettingsVisibility();
+        syncRsnodeSettingsForm();
         updateRsnodeDeviceVisibility();
         syncRsnodeDevice();
         document.getElementById('eraseToggle').disabled = state.flashing;
         sourceTabs.forEach(function(tab) { tab.disabled = state.flashing || betaAuthBusy; });
         rsnodeBoardSelect.disabled = state.flashing;
         rsnodeVariantConfirmed.disabled = state.flashing;
-        document.getElementById('rsnodeLock').disabled = state.flashing || betaAuthBusy || rsnodeOwnerBusy;
+        document.getElementById('rsnodeLock').disabled = state.flashing || betaAuthBusy || rsnodeOwnerBusy || rsnodeSettingsBusy;
         var ready = state.connected && state.firmwareReady;
         var firmwareWaiting = state.device === 'custom' ? 'Choose source' : 'Loading';
         var noteEl = document.getElementById('flashBtnNote');
@@ -9867,7 +10273,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         if (!btn) return;
         var ready = state.connected && state.firmwareReady;
 
-        if (ready && !state.flashing && !state.flashComplete && !rsnodeOwnerBusy) {
+        if (ready && !state.flashing && !state.flashComplete && !rsnodeOwnerBusy && !rsnodeSettingsBusy) {
             btn.className = 'flash-btn flash-btn--ready';
             btn.disabled = false;
         } else {
@@ -10763,7 +11169,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     }
 
     window.startFlash = async function() {
-        if (!state.connected || !state.firmwareReady || state.flashing || rsnodeOwnerBusy) return;
+        if (!state.connected || !state.firmwareReady || state.flashing || rsnodeOwnerBusy || rsnodeSettingsBusy) return;
 
         state.flashing = true;
         await releaseRsnodeDevice();

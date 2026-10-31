@@ -274,7 +274,7 @@ test('owner work checks its input before asking for a port and always closes the
   const options = { owner: new Uint8Array(16) };
   const invalid = Object.assign(new Error('A hash is 32 hexadecimal characters'), { field: { focus: () => calls.push(['focus']) } });
   const context = {
-    state: { flashing: false }, navigator: { serial: {} }, rsnodeOwnerBusy: false, RNODE_REPAIR_SETTLE_MS: 0,
+    state: { flashing: false }, navigator: { serial: {} }, rsnodeOwnerBusy: false, rsnodeSettingsBusy: false, RNODE_REPAIR_SETTLE_MS: 0,
     document: { getElementById: () => ({}) },
     setRsnodeOwnerBusy: busy => { context.rsnodeOwnerBusy = busy; calls.push(['busy', busy]); },
     rsnodeOwnerMessage: (message, error) => { if (message) calls.push(['message', !!error]); },
@@ -395,7 +395,7 @@ test('the owner step appears only with beta access, before and after an rsNode i
 
   const start = html.indexOf('window.startFlash = async function()');
   const flash = html.slice(start, html.indexOf('function isRnodeReconnectSetupIssue', start));
-  assert.match(flash, /state\.flashing \|\| rsnodeOwnerBusy\) return;/);
+  assert.match(flash, /state\.flashing \|\| rsnodeOwnerBusy \|\| rsnodeSettingsBusy\) return;/);
   assert.ok(flash.indexOf("if (prepared && prepared.product === 'rsnode') showRsnodeOwnerStep();") > flash.indexOf('await esploader.writeFlash('));
 });
 
