@@ -139,3 +139,65 @@ test('project OIDC rejects an upload URL belonging to a different private store'
   }), /private Blob URL/);
   assert.equal(fetched, false);
 });
+
+// An .rsota laid out as rsNode's package_ota.py writes it; the signature is opaque here.
+function rsota(target = '80813f', sequence = 2026110201) {
+  const image = Buffer.alloc(600, 0xe9);
+  const manifest = Buffer.alloc(128);
+  manifest.write('RSOT', 0, 'latin1');
+  manifest[4] = 1;
+  Buffer.from(target, 'hex').copy(manifest, 5);
+  manifest.writeUInt32BE(sequence, 8);
+  manifest.writeUInt32BE(image.length, 12);
+  createHash('sha256').update(image).digest().copy(manifest, 24);
+  return Buffer.concat([manifest, image]);
+}
+
+async function withUpdate(t, bundle = rsota(), change = {}) {
+  const f = await fixture(t);
+  const update = { fileName: 'heltec-v4.rsota', size: bundle.length, sha256: createHash('sha256').update(bundle).digest('hex'),
+    sequence: 2026110201, otaTarget: '80:81:3f', releaseKeyId: '0011223344556677', version: '1.0.0-beta.20261102.1', ...change };
+  await writeFile(join(f.dir, 'heltec-v4.rsota'), bundle);
+  const boards = f.boards.map(board => board.id === 'heltec-v4' ? { ...board, update } : board);
+  await writeFile(f.catalogPath, JSON.stringify({ boards }));
+  return { ...f, bundle, update };
+}
+
+test('a signed update uploads beside its factory package and lands in the deployment catalog', async t => {
+  const f = await withUpdate(t);
+  const uploaded = new Map();
+  const types = [];
+  const result = await uploadBetaPackages(f.catalogPath, f.output, {
+    token: 'fixture', report() {},
+    async upload(path, bytes, options) {
+      types.push([path.split('/').pop(), options.contentType, options.access]);
+      const url = 'https://fixture.private.blob.vercel-storage.com/' + path;
+      uploaded.set(url, bytes);
+      return { url };
+    },
+    fetchAsset: async (url, options) => options.headers ? new Response(uploaded.get(String(url))) : new Response(null, { status: 403 })
+  });
+  assert.deepEqual(types.find(([name]) => name === 'heltec-v4.rsota'), ['heltec-v4.rsota', 'application/octet-stream', 'private']);
+  assert.equal(types.length, 4);
+  const written = JSON.parse(await readFile(f.output, 'utf8'));
+  const board = written.boards.find(entry => entry.id === 'heltec-v4');
+  assert.deepEqual(board.update, { ...f.update,
+    url: `https://fixture.private.blob.vercel-storage.com/rsnode-beta/beta-test/${f.update.sha256}/heltec-v4.rsota` });
+  assert.deepEqual(uploaded.get(board.update.url), f.bundle);
+  assert.equal(written.boards.filter(entry => entry.update).length, 1);
+  assert.deepEqual(result, written);
+});
+
+test('an update whose manifest or entry disagrees is refused before any remote write', async t => {
+  const cases = [
+    [rsota('8081bf'), {}], [rsota('80813f', 7), {}], [rsota(), { otaTarget: '80:81:bf' }], [rsota(), { releaseKeyId: 'xyz' }],
+    [rsota(), { version: '' }], [rsota(), { fileName: 'heltec-v4.bin' }], [Buffer.from('RSOT'), {}]
+  ];
+  for (const [bundle, change] of cases) {
+    const f = await withUpdate(t, bundle, change);
+    let uploads = 0;
+    await assert.rejects(uploadBetaPackages(f.catalogPath, f.output, { token: 'fixture', upload() { uploads++; }, report() {} }),
+      /Invalid update entry|Update manifest does not match/, JSON.stringify(change));
+    assert.equal(uploads, 0);
+  }
+});

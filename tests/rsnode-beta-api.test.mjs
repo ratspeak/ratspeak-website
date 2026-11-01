@@ -616,3 +616,58 @@ test('neither successful nor failed JSON responses reflect passwords, secrets, t
     }
   }
 });
+
+const BUNDLE = new TextEncoder().encode('signed update bundle fixture: manifest and image, larger than a manifest alone'.repeat(2));
+const UPDATE = {
+  fileName: 'rsnode-heltec-v4.rsota', size: BUNDLE.length, sha256: createHash('sha256').update(BUNDLE).digest('hex'),
+  sequence: 2026110201, otaTarget: '80:81:3f', releaseKeyId: '0011223344556677', version: '1.0.0-beta.20261102.1',
+  url: 'https://test-store.private.blob.vercel-storage.com/candidates/rsnode-heltec-v4.rsota'
+};
+
+test('a signed update is listed without its URL and served through the same lock and checks', async () => {
+  const f = fixture({ RSNODE_BETA_CATALOG: JSON.stringify({ boards: [{ ...BOARD, update: UPDATE }] }) });
+  f.runtime.fetchResponse = url => new Response(url === UPDATE.url ? BUNDLE : PAYLOAD);
+  assert.equal((await f.request('download', { query: '&board=heltec-v4&kind=update' })).status, 401);
+  const cookie = await f.ready();
+  const serialized = await (await f.request('catalog', { cookie })).text();
+  assert.equal(serialized.includes('blob.vercel-storage.com'), false);
+  const { url: _url, ...listed } = UPDATE;
+  assert.deepEqual(JSON.parse(serialized).boards[0].update, listed);
+  const update = await f.request('download', { cookie, query: '&board=heltec-v4&kind=update' });
+  assert.equal(update.status, 200);
+  privateResponse(update);
+  assert.equal(update.headers.get('content-type'), 'application/octet-stream');
+  assert.equal(update.headers.get('content-disposition'), 'attachment; filename="rsnode-heltec-v4.rsota"');
+  assert.deepEqual(new Uint8Array(await update.arrayBuffer()), BUNDLE);
+  assert.equal(f.runtime.fetches.at(-1)[0], UPDATE.url);
+  const factory = await f.request('download', { cookie, query: '&board=heltec-v4' });
+  assert.deepEqual(new Uint8Array(await factory.arrayBuffer()), PAYLOAD);
+  assert.equal(f.runtime.fetches.at(-1)[0], BOARD.url);
+  f.runtime.fetchResponse = () => new Response(PAYLOAD);
+  assert.equal((await f.request('download', { cookie, query: '&board=heltec-v4&kind=update' })).status, 502);
+  assert.equal((await f.request('download', { cookie, query: '&board=heltec-v4&kind=factory' })).status, 400);
+  assert.equal((await f.request('download', { cookie, query: '&board=heltec-v4&kind=update&kind=update' })).status, 400);
+});
+
+test('a board without an update has none to download, and a malformed update disables the catalog', async () => {
+  const f = fixture();
+  const cookie = await f.ready();
+  assert.equal((await (await f.request('catalog', { cookie })).json()).boards[0].update, undefined);
+  const missing = await f.request('download', { cookie, query: '&board=heltec-v4&kind=update' });
+  assert.equal(missing.status, 404);
+  assert.deepEqual(await missing.json(), { error: 'That beta board has no update package.' });
+  assert.equal(f.runtime.fetches.length, 0);
+  const badUpdates = [
+    null, [], { fileName: 'rsnode.zip' }, { fileName: '../x.rsota' }, { size: 128 }, { size: MAX_ASSET_BYTES + 1 },
+    { sha256: 'A'.repeat(64) }, { sequence: 0 }, { sequence: 2 ** 32 }, { otaTarget: '80:81:bf' }, { otaTarget: '80813f' },
+    { releaseKeyId: 'abc' }, { version: '' }, { version: 'two words' }, { version: 'x'.repeat(25) },
+    { url: 'https://example.com/x.rsota' }, { url: 'https://a.private.blob.vercel-storage.com/x.rsota?x=1' }
+  ];
+  for (const bad of badUpdates) {
+    const update = bad === null || Array.isArray(bad) ? bad : { ...UPDATE, ...bad };
+    const config = fixture({ RSNODE_BETA_CATALOG: JSON.stringify({ boards: [{ ...BOARD, update }] }) });
+    assert.equal((await config.request()).status, 503, JSON.stringify(bad));
+  }
+  const oidc = oidcFixture({ RSNODE_BETA_CATALOG: JSON.stringify({ boards: [{ ...OIDC_BOARD, update: UPDATE }] }) });
+  assert.equal((await oidc.request()).status, 503);
+});

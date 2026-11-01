@@ -43,6 +43,19 @@ export async function betaRequest(action, body, options = {}) {
   return options.binary ? response.arrayBuffer() : response.json();
 }
 
+/** A board's optional signed update (.rsota): true when absent or well formed for that board. */
+export function validUpdateMetadata(update, board) {
+  if (update === undefined) return true;
+  const target = /^([a-f0-9]{2}):([a-f0-9]{2}):([a-f0-9]{2})$/.exec(update && update.otaTarget || '');
+  return !!(update && typeof update === 'object' && target && parseInt(target[3], 16) === board.otaBoard &&
+    typeof update.fileName === 'string' && /^[a-zA-Z0-9][a-zA-Z0-9._-]*\.rsota$/.test(update.fileName) &&
+    Number.isSafeInteger(update.size) && update.size > 128 && update.size <= 4 * 1024 * 1024 &&
+    /^[a-f0-9]{64}$/.test(update.sha256 || '') &&
+    Number.isSafeInteger(update.sequence) && update.sequence >= 1 && update.sequence <= 0xffffffff &&
+    /^[a-f0-9]{16}$/.test(update.releaseKeyId || '') &&
+    typeof update.version === 'string' && /^[\x21-\x7e]{1,24}$/.test(update.version));
+}
+
 export function validateBetaCatalog(catalog) {
   if (!catalog || !Array.isArray(catalog.boards) || catalog.boards.length > Object.keys(BOARDS).length) {
     throw new Error('The beta board list is unavailable. Try again.');
@@ -55,7 +68,7 @@ export function validateBetaCatalog(catalog) {
         !metadata.version || typeof metadata.fileName !== 'string' ||
         !/^[a-zA-Z0-9._-]+\.zip$/.test(metadata.fileName) ||
         !Number.isSafeInteger(metadata.size) || metadata.size <= 0 || metadata.size > 4 * 1024 * 1024 ||
-        !/^[a-f0-9]{64}$/.test(metadata.sha256 || '')) {
+        !/^[a-f0-9]{64}$/.test(metadata.sha256 || '') || !validUpdateMetadata(metadata.update, board)) {
       throw new Error('The beta package details are incomplete. Nothing has been flashed.');
     }
     seen.add(board.id);

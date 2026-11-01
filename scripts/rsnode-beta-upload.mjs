@@ -7,6 +7,29 @@ import { get, put } from '@vercel/blob';
 
 const siteRoot = await realpath(resolve(dirname(fileURLToPath(import.meta.url)), '..'));
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
+// The board byte of each image's signed update target, as lib/rsnode-beta.js checks it.
+const OTA_BOARDS = { 'heltec-v3': '3a', 'heltec-v4': '3f', 'heltec-v4-r8': 'bf', 'heltec-v4-r8-tft': 'c0' };
+
+// A signed .rsota: its catalog entry, its bytes, and a manifest that names the same target and sequence.
+async function updateBundle(entry, local) {
+  const update = entry.update;
+  if (!update || typeof update !== 'object' || !/^[a-zA-Z0-9][a-zA-Z0-9._-]*\.rsota$/.test(update.fileName || '') ||
+      !Number.isSafeInteger(update.size) || update.size <= 128 || update.size > 4 * 1024 * 1024 ||
+      !/^[a-f0-9]{64}$/.test(update.sha256 || '') ||
+      !Number.isSafeInteger(update.sequence) || update.sequence < 1 || update.sequence > 0xffffffff ||
+      !/^[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}$/.test(update.otaTarget || '') || update.otaTarget.slice(6) !== OTA_BOARDS[entry.id] ||
+      !/^[a-f0-9]{16}$/.test(update.releaseKeyId || '') || !/^[\x21-\x7e]{1,24}$/.test(update.version || '')) {
+    throw new Error(`Invalid update entry: ${entry.id}`);
+  }
+  const bytes = await local(update.fileName, update.size, update.sha256, entry.id + ' update');
+  if (bytes.subarray(0, 5).toString('latin1') !== 'RSOT\x01' || bytes.subarray(5, 8).toString('hex') !== update.otaTarget.replaceAll(':', '') ||
+      bytes.readUInt32BE(8) !== update.sequence || bytes.readUInt32BE(12) !== bytes.length - 128 ||
+      digest(bytes.subarray(128)) !== bytes.subarray(24, 56).toString('hex')) {
+    throw new Error(`Update manifest does not match its entry: ${entry.id}`);
+  }
+  return bytes;
+}
+
 export async function uploadBetaPackages(catalogArg, outputArg, {
   token = process.env.RSNODE_BETA_BLOB_TOKEN,
   storeId = process.env.RSNODE_BETA_BLOB_STORE_ID,
@@ -31,23 +54,27 @@ export async function uploadBetaPackages(catalogArg, outputArg, {
   const availableBoards = new Set(['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft']);
   if (!Array.isArray(input.boards) || input.boards.length < 1 || input.boards.length > availableBoards.size) throw new Error('Expected one to four beta board packages.');
   const prepared = [];
+  const local = async (fileName, size, sha256, id) => {
+    const path = await realpath(resolve(dirname(catalogPath), fileName));
+    if (!path.startsWith(dirname(catalogPath) + sep)) throw new Error('Package escapes its catalog directory.');
+    const bytes = await readFile(path);
+    if (bytes.length !== size || digest(bytes) !== sha256) throw new Error(`Package integrity failed: ${id}`);
+    return bytes;
+  };
   for (const entry of input.boards) {
     if (!availableBoards.delete(entry.id) || !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,95}$/.test(entry.version || '') ||
         !/^[a-zA-Z0-9][a-zA-Z0-9._-]*\.zip$/.test(entry.fileName || '') ||
         !/^[a-f0-9]{64}$/.test(entry.sha256 || '') || !Number.isSafeInteger(entry.size) ||
         entry.size <= 0 || entry.size > 4 * 1024 * 1024) throw new Error('Invalid package catalog.');
-    const path = await realpath(resolve(dirname(catalogPath), entry.fileName));
-    if (!path.startsWith(dirname(catalogPath) + sep)) throw new Error('Package escapes its catalog directory.');
-    const bytes = await readFile(path);
-    if (bytes.length !== entry.size || digest(bytes) !== entry.sha256) throw new Error(`Package integrity failed: ${entry.id}`);
-    prepared.push({ entry, bytes });
+    const bytes = await local(entry.fileName, entry.size, entry.sha256, entry.id);
+    const update = entry.update === undefined ? null : await updateBundle(entry, local);
+    prepared.push({ entry, bytes, update });
   }
   // Validate every local package before beginning any remote writes.
-  const boards = [];
-  for (const { entry, bytes } of prepared) {
-    const path = `rsnode-beta/${entry.version}/${entry.sha256}/${entry.fileName}`;
+  const store = async (version, meta, bytes, contentType) => {
+    const path = `rsnode-beta/${version}/${meta.sha256}/${meta.fileName}`;
     const blob = await upload(path, bytes, { ...auth, access: 'private',
-      addRandomSuffix: true, allowOverwrite: false, contentType: 'application/zip' });
+      addRandomSuffix: true, allowOverwrite: false, contentType });
     const url = new URL(blob.url);
     if (url.protocol !== 'https:' || !/^[a-z0-9-]+\.private\.blob\.vercel-storage\.com$/.test(url.hostname) ||
         url.username || url.password || url.port || url.search || url.hash || url.pathname === '/' ||
@@ -67,10 +94,21 @@ export async function uploadBetaPackages(catalogArg, outputArg, {
         redirect: 'error', signal: AbortSignal.timeout(30_000) });
     if (!download.ok) throw new Error('Private download verification failed.');
     const verified = Buffer.from(await download.arrayBuffer());
-    if (verified.length !== entry.size || digest(verified) !== entry.sha256) throw new Error('Uploaded package integrity failed.');
-    boards.push({ id: entry.id, version: entry.version, fileName: entry.fileName,
-      size: entry.size, sha256: entry.sha256, url: url.href });
-    report(`Verified private package: ${entry.id}`);
+    if (verified.length !== meta.size || digest(verified) !== meta.sha256) throw new Error('Uploaded package integrity failed.');
+    return url.href;
+  };
+  const boards = [];
+  for (const { entry, bytes, update } of prepared) {
+    const url = await store(entry.version, entry, bytes, 'application/zip');
+    const board = { id: entry.id, version: entry.version, fileName: entry.fileName,
+      size: entry.size, sha256: entry.sha256, url };
+    if (update) {
+      const { fileName, size, sha256, sequence, otaTarget, releaseKeyId, version } = entry.update;
+      board.update = { fileName, size, sha256, sequence, otaTarget, releaseKeyId, version,
+        url: await store(entry.version, entry.update, update, 'application/octet-stream') };
+    }
+    boards.push(board);
+    report(`Verified private package${update ? 's' : ''}: ${entry.id}`);
   }
   await writeFile(outputPath, JSON.stringify({ boards }, null, 2) + '\n', { mode: 0o600, flag: 'wx' });
   report(`Deployment catalog written: ${outputPath}`);
