@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { webcrypto } from 'node:crypto';
 import vm from 'node:vm';
 import test from 'node:test';
-import { betaRequest, rsnodeBoard, validateBetaCatalog, verifyBetaDownload, validateBetaManifest } from '../assets/js/rsnode-beta.js';
+import { betaRequest, rsnodeBoard, validUpdateMetadata, validateBetaCatalog, verifyBetaDownload, validateBetaManifest } from '../assets/js/rsnode-beta.js';
 import { sha256Hex } from '../assets/js/handheld-release.js';
 
 globalThis.crypto ||= webcrypto;
@@ -66,6 +66,27 @@ test('beta board catalog permits only the four reviewed Heltec targets', async (
     assert.throws(() => validateBetaCatalog({ boards: [{ ...metadata, ...change }] }));
   }
   assert.throws(() => validateBetaCatalog({ boards: [metadata, metadata] }));
+});
+
+test('a board may carry a signed update for its own target; boards without one are unchanged', async () => {
+  const targets = { 'heltec-v3': '3a', 'heltec-v4': '3f', 'heltec-v4-r8': 'bf', 'heltec-v4-r8-tft': 'c0' };
+  for (const [id, board] of Object.entries(targets)) {
+    const { metadata } = await fixture(id);
+    const update = { fileName: `rsnode-${id}.rsota`, size: 1_500_000, sha256: 'b'.repeat(64), sequence: 2026110201,
+      otaTarget: `80:81:${board}`, releaseKeyId: '0011223344556677', version: '1.0.0-beta.20261102.1' };
+    assert.deepEqual(validateBetaCatalog({ boards: [{ ...metadata, update }] }), [{ ...metadata, update }]);
+    assert.equal(validUpdateMetadata(undefined, rsnodeBoard(id)), true);
+  }
+  const { metadata } = await fixture();
+  const update = { fileName: 'rsnode-heltec-v4.rsota', size: 1_500_000, sha256: 'b'.repeat(64), sequence: 2026110201,
+    otaTarget: '80:81:3f', releaseKeyId: '0011223344556677', version: '1.0.0-beta.20261102.1' };
+  for (const change of [{ fileName: 'rsnode-heltec-v4.zip' }, { fileName: '../x.rsota' }, { size: 128 }, { size: 4 * 1024 * 1024 + 1 },
+    { size: 1.5 }, { sha256: 'B'.repeat(64) }, { sequence: 0 }, { sequence: 2 ** 32 }, { otaTarget: '80:81:bf' },
+    { otaTarget: '80813f' }, { releaseKeyId: '00112233' }, { releaseKeyId: null }, { version: '' }, { version: 'has space' },
+    { version: 'x'.repeat(25) }]) {
+    assert.throws(() => validateBetaCatalog({ boards: [{ ...metadata, update: { ...update, ...change } }] }), JSON.stringify(change));
+  }
+  for (const bad of [null, 'update', []]) assert.throws(() => validateBetaCatalog({ boards: [{ ...metadata, update: bad }] }));
 });
 
 test('download verification rejects changed bytes and truncated packages', async () => {
@@ -152,11 +173,13 @@ test('late firmware responses cannot become current after a source, board, or de
 test('locking clears private bytes, readiness, and package URL without corrupting another source', () => {
   const link = { hidden: false, href: '/private', removeAttribute(name) { delete this[name]; } };
   const state = { rsnodeAsset: new ArrayBuffer(10), rsnodeMetadata: {}, firmwareReady: true,
-    firmwareAppBytes: new Uint8Array(10), firmwareBytes: new Uint8Array(10) };
+    firmwareAppBytes: new Uint8Array(10), firmwareBytes: new Uint8Array(10),
+    rsnodeBundle: { bytes: new Uint8Array(10) }, rsnodeChoice: { kind: 'update', update: true }, rsnodeMode: 'update' };
   const context = { state, document: { getElementById: () => link }, isRsnodeSelected: () => true };
   const clear = vm.runInNewContext('(' + extractFunction('clearRsnodeFirmware') + ')', context);
   clear();
-  for (const key of ['rsnodeAsset', 'rsnodeMetadata', 'firmwareAppBytes', 'firmwareBytes']) assert.equal(state[key], null);
+  for (const key of ['rsnodeAsset', 'rsnodeMetadata', 'firmwareAppBytes', 'firmwareBytes', 'rsnodeBundle', 'rsnodeChoice']) assert.equal(state[key], null);
+  assert.equal(state.rsnodeMode, 'install');
   assert.equal(state.firmwareReady, false);
   assert.equal(link.hidden, true);
   assert.equal(link.href, undefined);
@@ -237,4 +260,66 @@ test('the rsNode pane says what Install erases, what the two modes are, and that
   assert.match(pane, /Bluetooth is off while Wi-Fi is on\. Managers are optional and only manage a Repeater\./);
   assert.doesNotMatch(pane, /signed OTA/);
   assert.match(extractFunction('confirmFactoryInstall'), /identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings/);
+});
+
+test('Update sends the signed bundle over USB and never runs esptool or erases; Install keeps its path', () => {
+  const update = extractFunction('runRsnodeUpdate');
+  assert.doesNotMatch(update, /esploader|esptool|writeFlash|eraseAll|shouldEraseBeforeFlash/);
+  assert.match(update, /await verifyRsnodeBundle\(bytes, bundle\)/);
+  assert.match(update, /streamRsnodeUpdate\(session, bytes,/);
+  assert.match(update, /title: 'Update'/);
+  assert.ok(update.indexOf('confirmFactoryInstall(') < update.indexOf("betaRequest('session')"));
+  assert.ok(update.indexOf("betaRequest('session')") < update.indexOf('openRnodeSerialPort('));
+  const start = html.indexOf('window.startFlash = async function()');
+  const flash = html.slice(start, html.indexOf('function isRnodeReconnectSetupIssue', start));
+  assert.ok(flash.indexOf('rsnodeUpdateChosen()') < flash.indexOf('loadEsptool()'));
+  assert.match(extractFunction('shouldEraseBeforeFlash'), /installMode === 'factory'/);
+  assert.match(extractFunction('confirmFactoryInstall'), /review \? review\.title : 'Erase and install'/);
+});
+
+test('the pane offers Update only for a board with an update, and the flash button follows the choice', () => {
+  const elements = {};
+  const element = id => elements[id] ||= { id, hidden: false, disabled: false, textContent: '', innerHTML: '',
+    classList: { toggle() {} } };
+  const radios = ['update', 'install'].map(value => ({ value, checked: false }));
+  const state = { flashing: false, rsnodeMetadata: { id: 'heltec-v4', label: 'Heltec V4 · R2' }, rsnodeChoice: null,
+    rsnodeMode: 'install', rsnodeBundle: null };
+  const context = { state, betaStage: 'ready', rsnodeChecking: false, rsnodeOwnerBusy: false, rsnodeSettingsBusy: false,
+    FLASH_ICON_HTML: '', isRsnodeSelected: () => true,
+    document: { getElementById: element, querySelectorAll: () => radios } };
+  const constant = name => new RegExp(`var ${name} = '(?:[^'\\\\]|\\\\.)*';`).exec(html)[0];
+  const source = [constant('RSNODE_INSTALL_NOTE'), constant('RSNODE_UPDATE_NOTE'),
+    ...['rsnodeUpdateChosen', 'flashButtonLabel', 'setFlashButtonIdleContent', 'renderRsnodeUpdate'].map(extractFunction),
+    '({ renderRsnodeUpdate })'].join('\n');
+  const { renderRsnodeUpdate } = vm.runInNewContext(source, context);
+  element('flashBtn').textContent = 'Flash rsNode';
+  renderRsnodeUpdate();
+  assert.equal(elements.rsnodeUpdate.hidden, true);
+  assert.match(elements.rsnodeInstallNote.textContent, /^Install erases the node: .* From the next beta, Update keeps them\.$/);
+  state.rsnodeMetadata.update = { version: '1.0.0-beta.20261102.1' };
+  renderRsnodeUpdate();
+  assert.equal(elements.rsnodeUpdate.hidden, false);
+  assert.match(elements.rsnodeInstallNote.textContent, /^Update keeps the node's identity, managers, .*; Install erases them\./);
+  assert.equal(elements.rsnodeUpdateCheck.textContent, 'Check the node');
+  assert.equal(elements.rsnodeUpdateModes.hidden, true);
+  state.rsnodeNotice = { text: 'Select the rsNode serial port to check it.', error: false };
+  renderRsnodeUpdate();
+  assert.equal(elements.rsnodeUpdateStatus.textContent, 'Select the rsNode serial port to check it.');
+  Object.assign(state, { rsnodeChoice: { kind: 'update', update: true, message: 'Update to 1.0.0-beta.20261102.1.' }, rsnodeMode: 'update',
+    rsnodeBundle: { bytes: new Uint8Array(1) } });
+  renderRsnodeUpdate();
+  assert.equal(elements.rsnodeUpdateStatus.textContent, 'Update to 1.0.0-beta.20261102.1.');
+  assert.equal(elements.rsnodeUpdateModes.hidden, false);
+  assert.deepEqual(radios.map(radio => radio.checked), [true, false]);
+  assert.match(elements.flashBtn.innerHTML, /Update rsNode/);
+  assert.equal(elements.rsnodeUpdateCheck.textContent, 'Check again');
+  state.rsnodeMode = 'install';
+  elements.flashBtn.textContent = 'Update rsNode';
+  renderRsnodeUpdate();
+  assert.match(elements.flashBtn.innerHTML, /Flash rsNode/);
+  Object.assign(state, { rsnodeChoice: { kind: 'current', update: false }, rsnodeMode: 'install' });
+  elements.flashBtn.textContent = 'Flash rsNode';
+  renderRsnodeUpdate();
+  assert.equal(elements.rsnodeUpdateModes.hidden, true);
+  assert.match(elements.flashBtn.innerHTML, /Erase and reinstall/);
 });

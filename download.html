@@ -1602,6 +1602,18 @@
         .rsnode-beta__links { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 14px; font-size: 12px; }
         .rsnode-beta__links a { color: var(--text-secondary); text-underline-offset: 3px; }
         .rsnode-beta__note a { color: var(--text-primary); text-underline-offset: 3px; }
+        /* rsNode Update (keeps settings) or Install (erases) */
+        .rsnode-update { display: grid; gap: 10px; margin-top: 12px; }
+        .rsnode-update__check { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+        .rsnode-update__check .rsnode-beta__status { flex: 1 1 220px; margin: 0; }
+        .rsnode-update__modes { display: grid; gap: 8px; min-width: 0; margin: 0; padding: 0; border: 0; }
+        .rsnode-update__modes > legend { margin-bottom: 4px; padding: 0; font-size: 13px; }
+        .rsnode-update__mode { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; line-height: 1.45; cursor: pointer; }
+        .rsnode-update__mode:has(input:checked) { border-color: var(--accent); background: var(--accent-a15); }
+        .rsnode-update__mode:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .rsnode-update__mode input { flex: 0 0 auto; width: 16px; height: 16px; margin: 2px 0 0; accent-color: var(--accent); }
+        .rsnode-update__mode strong { display: block; color: var(--text-primary); font-weight: 600; }
+        .rsnode-update__mode span span { display: block; color: var(--text-secondary); }
 
         /* ── RNode firmware picker ───────────────────── */
         /* Inset card on the secondary background so it doesn't read as
@@ -5347,7 +5359,18 @@
                                     <p class="rsnode-beta__note">Check the chip marking or your order details: ESP32-S3R2 has 2 MB PSRAM; ESP32-S3R8 has 8 MB. Both V4s have 16 MB flash and need different firmware.</p>
                                     <label class="rsnode-beta__check rsnode-beta__variant"><input type="checkbox" id="rsnodeVariantConfirmed"><span id="rsnodeVariantLabel">I checked my V4 variant.</span></label>
                                 </div>
-                                <p class="rsnode-beta__note">Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings. From the next beta, Update keeps them.</p>
+                                <p class="rsnode-beta__note" id="rsnodeInstallNote">Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings. From the next beta, Update keeps them.</p>
+                                <div class="rsnode-update" id="rsnodeUpdate" hidden>
+                                    <div class="rsnode-update__check">
+                                        <button class="rsnode-beta__button" id="rsnodeUpdateCheck" type="button" aria-describedby="rsnodeUpdateStatus">Check the node</button>
+                                        <p class="rsnode-beta__status" id="rsnodeUpdateStatus" role="status" aria-live="polite"></p>
+                                    </div>
+                                    <fieldset class="rsnode-update__modes" id="rsnodeUpdateModes" hidden>
+                                        <legend class="rnode-source__label">Update or install</legend>
+                                        <label class="rsnode-update__mode"><input type="radio" name="rsnodeInstallMode" value="update"><span><strong>Update</strong><span>Keeps identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings.</span></span></label>
+                                        <label class="rsnode-update__mode"><input type="radio" name="rsnodeInstallMode" value="install"><span><strong>Erase and install</strong><span>Erases everything on the node first.</span></span></label>
+                                    </fieldset>
+                                </div>
                                 <div class="rsnode-beta__links"><a id="rsnodePackageDownload" hidden>Download package and source</a></div>
                             </div>
                             <p class="rsnode-beta__status" id="rsnodeStatus" role="status" aria-live="polite"></p>
@@ -5870,6 +5893,7 @@ import { APP_PORT as RSNODE_APP_PORT, WIFI_MODES, checkSettingsForm, readRsnodeS
 import { HOST_OWNERS, SCREEN_HEIGHT, SCREEN_WIDTH, leaveRsnode, readRsnodeFacts, readRsnodeRadio, readRsnodeScreen,
     readRsnodeStatus, restartRsnode, rsnodeBluetoothOff, rsnodeDetails, rsnodeSummary, screenSupported, startRsnodePairing,
     waitForRsnode } from './assets/js/rsnode-device.js';
+import { chooseRsnodeInstall, streamRsnodeUpdate, verifyRsnodeBundle } from './assets/js/rsnode-update.js';
 import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITORY, verifyHandheldDownload, validateHandheldManifest, identifyHandheldImage, validateHandheldImage } from './assets/js/handheld-release.js';
 import { md5Bytes } from './assets/js/md5.js';
 import { closeFlashTransport } from './assets/js/esp-serial.js';
@@ -5948,6 +5972,11 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         rsnodeLoading: false,
         rsnodeLoadFailed: false,
         rsnodeInstalled: false,
+        rsnodeUpdated: null,
+        rsnodeBundle: null,
+        rsnodeChoice: null,
+        rsnodeNotice: null,
+        rsnodeMode: 'install',
         port: null,         // Web Serial port (unopened — esptool manages open/close)
         connected: false,
         firmwareReady: false,
@@ -5988,7 +6017,10 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
 
     var FLASH_ICON_HTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>';
     function flashButtonLabel() {
-        return isRsnodeSelected() ? 'Flash rsNode' : state.device === 'custom' ? 'Flash firmware' : 'Flash Ratspeak';
+        if (isRsnodeSelected()) {
+            return rsnodeUpdateChosen() ? 'Update rsNode' : state.rsnodeChoice && state.rsnodeChoice.kind === 'current' ? 'Erase and reinstall' : 'Flash rsNode';
+        }
+        return state.device === 'custom' ? 'Flash firmware' : 'Flash Ratspeak';
     }
     function setFlashButtonIdleContent() {
         var btn = document.getElementById('flashBtn');
@@ -6644,6 +6676,8 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
             .then(function(port) {
                 state.port = port;
                 state.connected = true;
+                state.rsnodeChoice = state.rsnodeNotice = null;
+                state.rsnodeMode = 'install';
 
                 btn.className = 'connect-btn connect-btn--connected';
                 btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Device Selected';
@@ -6671,6 +6705,8 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     function applySelectedSerialPort(port) {
         state.port = port;
         state.connected = true;
+        state.rsnodeChoice = state.rsnodeNotice = null;
+        state.rsnodeMode = 'install';
 
         var btn = document.getElementById('connectBtn');
         var dot = document.getElementById('statusDot');
@@ -6813,6 +6849,9 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         state.rsnodeMetadata = null;
         state.rsnodeLoading = false;
         state.rsnodeLoadFailed = false;
+        state.rsnodeBundle = null;
+        state.rsnodeChoice = state.rsnodeNotice = null;
+        state.rsnodeMode = 'install';
         var packageLink = document.getElementById('rsnodePackageDownload');
         if (packageLink) { packageLink.hidden = true; packageLink.removeAttribute('href'); }
         if (isRsnodeSelected()) {
@@ -7154,6 +7193,158 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         if (state.rsnodeMetadata) betaStatus(rsnodeReadyText());
         updateFlashBtn();
     });
+
+    // ── rsNode Update (CMD_RSNODE BEGIN/CHUNK/FINISH over USB, keeps settings) or Install (esptool, erases) ──
+    var rsnodeChecking = false;
+    var RSNODE_CHECK_MS = 10000;
+    var RSNODE_INSTALL_NOTE = 'Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings. From the next beta, Update keeps them.';
+    var RSNODE_UPDATE_NOTE = 'Update keeps the node\'s identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings; Install erases them. Check the node to see whether it can update.';
+
+    function rsnodeUpdateChosen() {
+        return !!(state.rsnodeChoice && state.rsnodeChoice.update && state.rsnodeMode === 'update' && state.rsnodeBundle);
+    }
+
+    // What the check found, or a note of its own while it runs or after it fails.
+    function rsnodeUpdateMessage(message, error) {
+        state.rsnodeNotice = message ? { text: message, error: !!error } : null;
+        renderRsnodeUpdate();
+    }
+
+    function renderRsnodeUpdate() {
+        var metadata = state.rsnodeMetadata;
+        var offered = !!(isRsnodeSelected() && betaStage === 'ready' && metadata && metadata.update);
+        document.getElementById('rsnodeInstallNote').textContent = offered ? RSNODE_UPDATE_NOTE : RSNODE_INSTALL_NOTE;
+        document.getElementById('rsnodeUpdate').hidden = !offered;
+        var flashBtn = document.getElementById('flashBtn');
+        if (!state.flashing && flashBtn && flashBtn.textContent.trim() !== flashButtonLabel()) setFlashButtonIdleContent();
+        if (!offered) return;
+        var choice = state.rsnodeChoice;
+        var check = document.getElementById('rsnodeUpdateCheck');
+        check.disabled = rsnodeChecking || state.flashing || rsnodeOwnerBusy || rsnodeSettingsBusy;
+        check.textContent = rsnodeChecking ? 'Checking…' : choice ? 'Check again' : 'Check the node';
+        var notice = choice ? { text: choice.message, error: false } : state.rsnodeNotice;
+        var status = document.getElementById('rsnodeUpdateStatus');
+        if (status.textContent !== (notice ? notice.text : '')) status.textContent = notice ? notice.text : '';
+        status.classList.toggle('is-error', !!(notice && notice.error));
+        var modes = document.getElementById('rsnodeUpdateModes');
+        modes.hidden = !(choice && choice.update && state.rsnodeBundle);
+        modes.disabled = state.flashing || rsnodeChecking;
+        document.querySelectorAll('input[name="rsnodeInstallMode"]').forEach(function(input) { input.checked = input.value === state.rsnodeMode; });
+    }
+
+    // Reads STATUS over the selected port and offers Update or Install per rsnode-update.js.
+    async function checkRsnodeNode() {
+        var metadata = state.rsnodeMetadata;
+        if (!metadata || !metadata.update || rsnodeChecking || state.flashing || rsnodeOwnerBusy || rsnodeSettingsBusy) return;
+        if (!('serial' in navigator)) {
+            showSerialWarning();
+            return;
+        }
+        var stage = 'port', session = null, choice = null;
+        rsnodeUpdateMessage('');
+        try {
+            await rsnodeToolPortFromUser();
+            rsnodeChecking = true;
+            state.rsnodeChoice = null;
+            state.rsnodeMode = 'install';
+            updateFlashBtn();
+            rsnodeUpdateMessage('Reading the node…');
+            stage = 'open';
+            session = createRnodeSession(await openRnodeSerialPort(null, RNODE_REPAIR_SETTLE_MS, await rsnodeOtherPorts()));
+            stage = 'protocol';
+            if (!await waitForRsnode(session, { timeoutMs: RSNODE_CHECK_MS })) {
+                choice = { kind: 'install', update: false,
+                    message: 'No rsNode answered over USB. If it runs rsNode, press RESET on the board and check again; Install works either way.' };
+            } else {
+                choice = chooseRsnodeInstall(await readRsnodeStatus(session), metadata, metadata.update);
+            }
+            await closeRnodeSession(session);
+            session = null;
+            if (choice.update && (!state.rsnodeBundle || state.rsnodeBundle.metadata !== metadata.update)) {
+                stage = 'download';
+                rsnodeUpdateMessage('Downloading the update…');
+                var bytes = new Uint8Array(await betaRequest('download', undefined, { binary: true, query: { board: metadata.id, kind: 'update' } }));
+                await verifyRsnodeBundle(bytes, metadata.update);
+                if (state.rsnodeMetadata !== metadata) return;
+                state.rsnodeBundle = { bytes: bytes, metadata: metadata.update };
+            }
+            if (state.rsnodeMetadata !== metadata) return;
+            state.rsnodeNotice = null;
+            state.rsnodeChoice = choice;
+            state.rsnodeMode = choice.update ? 'update' : 'install';
+        } catch (error) {
+            if (stage === 'port' && error.name === 'NotFoundError') rsnodeUpdateMessage('Select the rsNode serial port to check it.');
+            else if (stage === 'download') rsnodeUpdateMessage((error.message || String(error)) + ' Install is still available.', true);
+            else rsnodeUpdateMessage(rsnodePortError(error, stage, 'check again') || error.message || String(error), true);
+        } finally {
+            if (session) await closeRnodeSession(session);
+            rsnodeChecking = false;
+            updateFlashBtn();
+        }
+    }
+
+    document.getElementById('rsnodeUpdateCheck').addEventListener('click', checkRsnodeNode);
+    document.getElementById('rsnodeUpdateModes').addEventListener('change', function(event) {
+        if (state.flashing || event.target.name !== 'rsnodeInstallMode') return;
+        state.rsnodeMode = event.target.value;
+        updateFlashBtn();
+    });
+
+    // The Update path: no esptool and no erase; the node verifies the signed image and restarts into it.
+    async function runRsnodeUpdate(logMessage, setProgress, btn) {
+        var metadata = state.rsnodeMetadata, bundle = metadata.update, bytes = state.rsnodeBundle.bytes;
+        setProgress(2, 'Preparing update...');
+        await verifyRsnodeBundle(bytes, bundle);
+        logMessage('Verified signed update ' + bundle.version + ' for ' + metadata.label, 'log-green');
+        if (!await confirmFactoryInstall({ product: 'rsnode', installMode: 'update', board: metadata.id, boardLabel: metadata.label }, {
+            title: 'Update',
+            intro: 'You are updating this node to rsNode ' + bundle.version + '.',
+            detail: 'Identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings stay. The node restarts, checks the new firmware and keeps it, or goes back to the firmware it runs now.',
+            action: 'Update'
+        })) return null;
+        var access = await betaRequest('session');
+        if (access.stage !== 'ready') {
+            applyBetaSession(access);
+            throw new Error('Beta access expired. Unlock the beta again before updating.');
+        }
+        if (!state.connected || !state.port) throw new Error('Device disconnected. Reconnect it before updating.');
+        btn.textContent = 'Checking device...';
+        setProgress(5, 'Connecting to rsNode...');
+        var session = createRnodeSession(await openRnodeSerialPort(logMessage, RNODE_REPAIR_SETTLE_MS, await rsnodeOtherPorts()));
+        var result;
+        try {
+            if (!await waitForRsnode(session, { timeoutMs: RSNODE_CHECK_MS })) {
+                throw new Error('The node did not answer over USB. Check the cable, or press RESET on the board, then update again.');
+            }
+            state.flashStage = 'writing';
+            btn.textContent = 'Updating...';
+            updateFlashFlow();
+            var shown = -1;
+            result = await streamRsnodeUpdate(session, bytes, function(event) {
+                if (event.stage === 'writing') {
+                    var percent = Math.floor(event.sent * 100 / event.total);
+                    setProgress(8 + percent * 0.8, 'Sending update... ' + percent + '%');
+                    if (Math.floor(percent / 10) !== shown) {
+                        shown = Math.floor(percent / 10);
+                        logMessage('Sent ' + event.sent + ' of ' + event.total + ' bytes', '');
+                    }
+                } else if (event.stage === 'restarting') {
+                    setProgress(90, 'Restarting into the new firmware...');
+                    logMessage('Update staged. The node restarts into the new firmware.', 'log-orange');
+                } else if (event.stage === 'trial') {
+                    setProgress(94, 'The node is checking the new firmware...');
+                } else {
+                    setProgress(97, 'Confirming...');
+                }
+            }, bundle);
+        } finally {
+            await closeRnodeSession(session);
+        }
+        if (result.kind !== 'updated') throw new Error(result.message);
+        setProgress(100, 'Updated');
+        logMessage(result.message, 'log-green');
+        return result;
+    }
     document.addEventListener('visibilitychange', function() {
         if (!document.hidden && isRsnodeSelected() && !state.flashing) refreshBetaSession(false, false);
     });
@@ -9010,7 +9201,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     }
 
     function syncRsnodePort() {
-        var idle = !rsnodeOwnerBusy && !rsnodeSettingsBusy && !rsnodeDevice && !state.flashing;
+        var idle = !rsnodeOwnerBusy && !rsnodeSettingsBusy && !rsnodeChecking && !rsnodeDevice && !state.flashing;
         document.querySelectorAll('.rsnode-tools__port').forEach(function(line) {
             line.hidden = !state.port;
             line.querySelector('.rsnode-tools__port-label').textContent = state.port ? usbDeviceLabel(state.port) : '';
@@ -9239,7 +9430,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     }
 
     function syncRsnodeOwnerForm() {
-        var idle = !rsnodeOwnerBusy && !rsnodeSettingsBusy && !state.flashing;
+        var idle = !rsnodeOwnerBusy && !rsnodeSettingsBusy && !rsnodeChecking && !state.flashing;
         var rows = rsnodeManagersPreview();
         var crowded = rsnodeActive(rows).length > RSNODE_MANAGERS_MAX;
         var changes = rsnodeOwnerChanges(rsnodeManagersPlan(rows));
@@ -9382,7 +9573,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
 
     // Inputs are checked before a port is requested, as the script checks its flags.
     async function runRsnodeOwnerTask(read) {
-        if (rsnodeOwnerBusy || rsnodeSettingsBusy || state.flashing) return;
+        if (rsnodeOwnerBusy || rsnodeSettingsBusy || rsnodeChecking || state.flashing) return;
         if (!('serial' in navigator)) {
             showSerialWarning();
             return;
@@ -9596,7 +9787,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     // Shows the fields the chosen Wi-Fi mode uses and says what Save would do.
     function syncRsnodeSettingsForm() {
         var node = rsnodeSettingsNode;
-        var idle = !rsnodeSettingsBusy && !rsnodeOwnerBusy && !state.flashing;
+        var idle = !rsnodeSettingsBusy && !rsnodeOwnerBusy && !rsnodeChecking && !state.flashing;
         document.getElementById('rsnodeSettingsRead').disabled = !idle;
         document.getElementById('rsnodeSettingsRead').textContent = rsnodeSettingsBusy && !rsnodeSettingsSaving ? 'Reading…'
             : node ? 'Read again' : 'Read settings';
@@ -9694,7 +9885,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
 
     // Reads the node, or saves the form and follows the node through its restart.
     async function runRsnodeSettingsTask(save) {
-        if (rsnodeSettingsBusy || rsnodeOwnerBusy || state.flashing) return;
+        if (rsnodeSettingsBusy || rsnodeOwnerBusy || rsnodeChecking || state.flashing) return;
         if (!('serial' in navigator)) {
             showSerialWarning();
             return;
@@ -9832,7 +10023,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         var connect = document.getElementById('rsnodeConnect');
         connect.textContent = device ? (device.facts ? 'Disconnect' : 'Cancel') : 'Connect';
         connect.classList.toggle('rsnode-beta__button--primary', !device);
-        connect.disabled = device ? device.stopping : rsnodeOwnerBusy || rsnodeSettingsBusy || state.flashing;
+        connect.disabled = device ? device.stopping : rsnodeOwnerBusy || rsnodeSettingsBusy || rsnodeChecking || state.flashing;
         var screenshot = document.getElementById('rsnodeScreenshot');
         screenshot.disabled = screenshot.hidden = !rsnodeScreenPixels;
         var copy = document.getElementById('rsnodeCopyDetails');
@@ -9985,7 +10176,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     }
 
     async function runRsnodeDevice() {
-        if (rsnodeDevice || rsnodeOwnerBusy || rsnodeSettingsBusy || state.flashing) return;
+        if (rsnodeDevice || rsnodeOwnerBusy || rsnodeSettingsBusy || rsnodeChecking || state.flashing) return;
         if (!('serial' in navigator)) {
             showSerialWarning();
             return;
@@ -10173,6 +10364,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     }
 
     function updateFlashFlow(note) {
+        renderRsnodeUpdate();
         updateRsnodeOwnerVisibility();
         syncRsnodeOwnerForm();
         updateRsnodeSettingsVisibility();
@@ -10204,6 +10396,8 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
                 if (noteEl) {
                     noteEl.textContent = state.rnodeSetupVerified
                         ? 'Firmware flash complete. RNode setup was verified.'
+                        : state.rsnodeUpdated
+                        ? state.rsnodeUpdated.message
                         : state.rsnodeInstalled
                         ? (rsnodeToolsUnlocked() ? 'rsNode is installed. Press RESET on the board; the tools below read and set it up.'
                             : 'rsNode is installed. Press RESET on the board.')
@@ -10238,6 +10432,8 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
                     : 'Firmware could not be loaded. Refresh the page to retry.';
             } else if (isRsnodeSelected() && !ready) {
                 noteEl.textContent = rsnodeFlowNote();
+            } else if (ready && isRsnodeSelected() && rsnodeUpdateChosen()) {
+                noteEl.textContent = 'Ready to update. Identity, managers and settings stay. Keep this tab open until the node confirms the update.';
             } else if (ready) {
                 noteEl.textContent = handheldBoard(state.device)
                     ? 'Compatible firmware updates preserve your data. Erasing requires confirmation.'
@@ -10273,7 +10469,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         if (!btn) return;
         var ready = state.connected && state.firmwareReady;
 
-        if (ready && !state.flashing && !state.flashComplete && !rsnodeOwnerBusy && !rsnodeSettingsBusy) {
+        if (ready && !state.flashing && !state.flashComplete && !rsnodeOwnerBusy && !rsnodeSettingsBusy && !rsnodeChecking) {
             btn.className = 'flash-btn flash-btn--ready';
             btn.disabled = false;
         } else {
@@ -11169,13 +11365,14 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     }
 
     window.startFlash = async function() {
-        if (!state.connected || !state.firmwareReady || state.flashing || rsnodeOwnerBusy || rsnodeSettingsBusy) return;
+        if (!state.connected || !state.firmwareReady || state.flashing || rsnodeOwnerBusy || rsnodeSettingsBusy || rsnodeChecking) return;
 
         state.flashing = true;
         await releaseRsnodeDevice();
         state.flashStage = 'preparing';
         state.flashComplete = false;
         state.rsnodeInstalled = false;
+        state.rsnodeUpdated = null;
         document.getElementById('rsnodeOwnerNotice').hidden = true;
         state.rnodeSetupVerified = false;
         state.rnodeSetupIssue = null;
@@ -11219,6 +11416,25 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         var rnodeSetupCompleted = false;
 
         try {
+            if (isRsnodeSelected() && rsnodeUpdateChosen()) {
+                var updated = await runRsnodeUpdate(logMessage, setProgress, btn);
+                state.flashing = false;
+                if (!updated) {
+                    logMessage('Update cancelled. Nothing was sent to the node.', '');
+                    setProgress(0, 'Update cancelled');
+                    setFlashButtonIdleContent();
+                    updateFlashBtn();
+                    btn.focus();
+                    return;
+                }
+                state.flashComplete = true;
+                state.rsnodeUpdated = updated;
+                state.rsnodeChoice = state.rsnodeNotice = null;
+                state.rsnodeMode = 'install';
+                btn.style.display = 'none';
+                updateFlashFlow();
+                return;
+            }
             var flashStrategy = selectedFlashStrategy();
             if (flashStrategy === 'nrf52-dfu') {
                 await runNrf52DfuFlash(logMessage, setProgress);
