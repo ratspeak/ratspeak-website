@@ -1,7 +1,7 @@
-// Makes the map's world view cheap. Below DETAIL_ZOOM both styles draw land and
-// borders from a small self-hosted Natural Earth file instead of the provider's
-// low-zoom vector tiles (~6 MB for the opening view), and labels use Latin script
-// only (native-script names pulled ~770 KB of extra glyph ranges). Idempotent.
+// Uses local Natural Earth land and borders below DETAIL_ZOOM. Label fields
+// referencing name:nonlatin prefer English, then Latin, then the original name.
+// Rewrites world-110m.geojson and both theme styles under assets/map-styles;
+// review the generated diff before using it.
 // Run from the website root: node scripts/map-world-view.mjs
 import { readFileSync, writeFileSync } from 'node:fs';
 

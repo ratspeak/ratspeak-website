@@ -1,14 +1,91 @@
 {
   "redirects": [
-    { "source": "/discord", "destination": "https://discord.gg/mvS6adBEdW", "statusCode": 302 },
-    { "source": "/telegram", "destination": "https://t.me/ratspeak", "statusCode": 302 },
-    { "source": "/docs", "destination": "https://docs.ratspeak.org/", "statusCode": 308 },
-    { "source": "/docs/:path*", "destination": "https://docs.ratspeak.org/docs/:path*", "statusCode": 308 },
-    { "source": "/poll.html", "destination": "/portal.html", "statusCode": 308 },
-    { "source": "/portal", "destination": "/portal.html", "statusCode": 308 }
+    {
+      "source": "/discord",
+      "destination": "https://discord.gg/mvS6adBEdW",
+      "statusCode": 302
+    },
+    {
+      "source": "/telegram",
+      "destination": "https://t.me/ratspeak",
+      "statusCode": 302
+    },
+    {
+      "source": "/docs",
+      "destination": "https://docs.ratspeak.org/",
+      "statusCode": 308
+    },
+    {
+      "source": "/docs/getting-started/building-from-source",
+      "destination": "https://docs.ratspeak.org/docs/reference/building-from-source",
+      "statusCode": 308
+    },
+    {
+      "source": "/docs/introduction/faq",
+      "destination": "https://docs.ratspeak.org/docs/reference/faq",
+      "statusCode": 308
+    },
+    {
+      "source": "/docs/introduction/ratspeak-ecosystem",
+      "destination": "https://docs.ratspeak.org/docs/concepts/ratspeak-ecosystem",
+      "statusCode": 308
+    },
+    {
+      "source": "/docs/introduction/what-is-ratspeak",
+      "destination": "https://docs.ratspeak.org/docs/",
+      "statusCode": 308
+    },
+    {
+      "source": "/docs/products/ratdeck",
+      "destination": "https://docs.ratspeak.org/docs/products/rsdeck",
+      "statusCode": 308
+    },
+    {
+      "source": "/docs/understanding/cryptography-and-protection",
+      "destination": "https://docs.ratspeak.org/docs/concepts/cryptography-and-protection",
+      "statusCode": 308
+    },
+    {
+      "source": "/docs/understanding/key-concepts-and-glossary",
+      "destination": "https://docs.ratspeak.org/docs/concepts/key-concepts-and-glossary",
+      "statusCode": 308
+    },
+    {
+      "source": "/docs/understanding/links-and-lxmf",
+      "destination": "https://docs.ratspeak.org/docs/concepts/links-and-lxmf",
+      "statusCode": 308
+    },
+    {
+      "source": "/docs/understanding/protocol-architecture",
+      "destination": "https://docs.ratspeak.org/docs/concepts/protocol-architecture",
+      "statusCode": 308
+    },
+    {
+      "source": "/docs/understanding/what-is-reticulum",
+      "destination": "https://docs.ratspeak.org/docs/concepts/what-is-reticulum",
+      "statusCode": 308
+    },
+    {
+      "source": "/docs/:path*",
+      "destination": "https://docs.ratspeak.org/docs/:path*",
+      "statusCode": 308
+    },
+    {
+      "source": "/poll.html",
+      "destination": "/portal.html",
+      "statusCode": 308
+    },
+    {
+      "source": "/portal",
+      "destination": "/portal.html",
+      "statusCode": 308
+    }
   ],
   "rewrites": [
-    { "source": "/assets/seo/og-map.png", "destination": "/api/og-map" }
+    {
+      "source": "/assets/seo/og-map.png",
+      "destination": "/api/og-map"
+    }
   ],
   "functions": {
     "api/rsnode-beta.js": {
@@ -50,12 +127,30 @@
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "Referrer-Policy", "value": "no-referrer" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "X-XSS-Protection", "value": "0" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
-        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" }
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "0"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        }
       ]
     }
   ]

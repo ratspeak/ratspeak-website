@@ -4,10 +4,14 @@
 Builds a host model of rsNode from its own code: the RNode host adapter
 (crates/rsnode-core), the owner status the firmware returns over USB
 (crates/rsnode-management, crates/rsnode-transport) and the Heltec screen
-renderer (firmware/common/src/display.rs). Each request the page sends is
-encoded as rsNode's scripts encode it and answered by that model; screens are
+renderer (firmware/common/src/display.rs). The fixture requests are
+encoded with rsNode's scripts and answered by that model; screens are
 read back with probe-heltec-v4.py's own PNG export. No device is touched and
-rsNode is only read. Needs cargo. Regenerate when those sources change:
+rsNode is only read. Requires Cargo, pyserial and access to the rsNode source
+checkout. Cargo first tries an offline build, then retries with network access
+if that fails. Build files and PNGs use a temporary directory; the JSON output
+is overwritten. These fixtures do not establish physical-device behavior.
+Regenerate when those sources change:
 
   python3 -B scripts/rsnode-device-vectors.py --rsnode-source ../rsNode \\
       --output tests/fixtures/rsnode-device-vectors.json
@@ -527,7 +531,7 @@ def screen_rows(probe, scratch, payload, board):
 
 
 def requests(probe, provision, ifac, saved):
-    """Every frame the page writes, encoded as the named rsNode script writes it."""
+    """Fixture request frames encoded by the corresponding rsNode scripts."""
     encode = probe.encode
     return {
         # probe-heltec-v4.py: its probe and --extended checks, --display-read, --bt-pair and --leave.
@@ -718,8 +722,8 @@ def as_json(value):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--rsnode-source", type=Path, required=True)
-    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--rsnode-source", type=Path, required=True, help="rsNode source checkout containing the imported scripts and test/model dependencies")
+    parser.add_argument("--output", type=Path, required=True, help="JSON fixture to write or overwrite; parent directories are created")
     args = parser.parse_args()
     sys.dont_write_bytecode = True
     root = args.rsnode_source.resolve()

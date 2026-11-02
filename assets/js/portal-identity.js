@@ -483,14 +483,14 @@ const VIEWS = {
   welcome: () => flowCard({
     tags: [],
     title: 'Pair your wallet',
-    desc: 'Pair your wallet to a Ratspeak identity for future perks or services. See our docs for more information and best privacy practices.',
+    desc: 'Pair your wallet to an LXMF address to use holder services. This is optional; you do not need a wallet to use the Ratspeak app.',
     body: `
       <div class="id-steps-preview">
         ${previewStep('hash', 'Your address', 'Paste the LXMF address from the Ratspeak app.')}
         ${previewArrow()}
         ${previewStep('shield', 'Verify code', 'Receive a one-time code over Ratspeak')}
         ${previewArrow()}
-        ${previewStep('pen', 'Sign onchain', 'Sign the pairing onchain, gas-free.')}
+        ${previewStep('pen', 'Sign a message', 'Confirm the pairing with a gas-free wallet signature.')}
       </div>
       <div class="id-btn-row">
         <button class="primary-btn" type="button" data-id-action="connect">${icon('wallet')}Connect wallet</button>
@@ -501,7 +501,7 @@ const VIEWS = {
   enter: () => {
     const p = probeFor(lastAddressInput);
     const reachBanner = p.reachable
-      ? `<div class="id-banner good">${icon('check')}<div><strong>Reachable.</strong> Your identity answered on the mesh &mdash; send the code.</div></div>`
+      ? `<div class="id-banner good">${icon('check')}<div><strong>Path found.</strong> The verification node found a route to your address. Send the code to check delivery.</div></div>`
       : p.unreachable
         ? `<div class="id-banner warn">${icon('alert')}<div><strong>Not reachable right now.</strong> Open Ratspeak, make sure you’re connected (the Ruby or Emerald server in Ratspeak work well for this), tap Announce, then check again.</div></div>`
         : p.probing
@@ -523,7 +523,7 @@ const VIEWS = {
           ${icon('hash')}
           <input id="idAddressInput" type="text" inputmode="text" autocomplete="off" spellcheck="false" maxlength="64" placeholder="32 hex characters" value="${escapeHtml(lastAddressInput)}">
         </div>
-        <p class="id-field-help">In the app: <strong>Ratspeak &rarr; Identity &rarr; Copy LXMF address</strong>.</p>
+        <p class="id-field-help">In the app: <strong>Settings &rarr; Identity</strong>, then copy the <strong>LXMF Address</strong>.</p>
         ${reachBanner}
         <div class="id-btn-row">
           ${primary}
@@ -552,7 +552,7 @@ const VIEWS = {
           <button class="secondary-btn" type="button" data-id-action="resend" ${canResend(pending) && !busy ? '' : 'disabled'}>${icon('refresh')}Resend</button>
           <button class="secondary-btn" type="button" data-id-action="cancel" ${busyAttr()}>Cancel</button>
         </div>
-        <p class="id-btn-note"><span id="idCodeCountdown"></span>${pending.status === 'propagated' ? ' Your device looked offline — open Ratspeak and sync your Offline Inbox.' : ''}</p>
+        <p class="id-btn-note"><span id="idCodeCountdown"></span>${pending.status === 'propagated' ? ' An inbox node accepted the code; delivery to your device is not confirmed. If it does not arrive, reconnect to the verification network and resend.' : ''}</p>
         ${errorBanner()}`
     });
   },
@@ -562,7 +562,7 @@ const VIEWS = {
     title: status.pending.status === 'undelivered' ? 'Delivery wasn’t confirmed' : 'We couldn’t reach your identity',
     desc: status.pending.status === 'undelivered'
       ? `${escapeHtml(status.pending.lxmfAddress)} was found on the mesh, but the code wasn’t confirmed as received.`
-      : `${escapeHtml(status.pending.lxmfAddress)} didn’t answer on the mesh.`,
+      : `${escapeHtml(status.pending.lxmfAddress)} could not be reached by the verification node.`,
     body: `
       ${deliveryTimeline(status.pending)}
       ${status.pending.status === 'undelivered'
@@ -590,7 +590,7 @@ const VIEWS = {
   sign: () => flowCard({
     tags: [],
     title: 'Confirm with your wallet',
-    desc: 'Bind your wallet to Ratspeak. This can be changed or removed any time, and is stored by the portal privately.',
+    desc: 'Confirm the pairing with a wallet signature. The portal stores it privately; this does not submit a blockchain transaction. You can unlink the identity later.',
     body: `
       <label class="id-field-label">You are signing</label>
       <div class="id-kv-card">
@@ -639,7 +639,7 @@ function deliveryTimeline(pending) {
     {
       key: 'resolving',
       label: 'Finding your device',
-      sub: pending.status === 'unreachable' ? 'No answer on the mesh yet.' : ''
+      sub: pending.status === 'unreachable' ? 'No route found by the verification node yet.' : ''
     },
     {
       key: 'sending',
@@ -648,8 +648,8 @@ function deliveryTimeline(pending) {
     },
     {
       key: 'arrived',
-      label: pending.status === 'propagated' ? 'In your Offline Inbox' : 'Delivered',
-      sub: pending.status === 'propagated' ? 'Open Ratspeak and sync to receive it.' : ''
+      label: pending.status === 'propagated' ? 'Stored on an inbox node' : 'Delivered',
+      sub: pending.status === 'propagated' ? 'Delivery to your device is not confirmed.' : ''
     }
   ];
   const order = ['queued', 'resolving', 'sending', 'delivered', 'propagated'];

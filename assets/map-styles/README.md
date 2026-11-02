@@ -6,8 +6,8 @@ vector tiles, sprites, glyphs, and Natural Earth raster source while keeping
 style changes under this repository's control.
 
 The styles intentionally simplify the world view: most labels appear after the
-initial zoom, road detail begins at street-level zooms, and attribution remains
-enabled. If the provider resources fail repeatedly, `assets/map.js` replaces the
+initial zoom, detail increases as you zoom in, and attribution remains enabled.
+If the provider resources fail repeatedly, `assets/map.js` replaces the
 style with a provider-independent Natural Earth country outline instead of
 losing the map or its node layer.
 
@@ -22,10 +22,14 @@ zoom 3 alongside major cities in both themes. State-name layers ignore placement
 so they cannot displace major-city labels as zoom detail changes.
 
 Below zoom 3 the world view draws from `world-110m.geojson` (Natural Earth
-countries, about 50 KB gzipped) instead of the provider's low-zoom vector tiles,
-which cost about 6 MB for the opening view. Labels use Latin script only, which
-keeps glyph downloads to a few ranges. `node scripts/map-world-view.mjs` writes
-the world file and applies both rules to the two styles; it is safe to re-run.
+countries) instead of the provider's low-zoom vector tiles. Name labels prefer
+English, then Latin-script names, then the original name when those are missing.
+This reduces glyph downloads but does not guarantee Latin-only text.
+
+From the repository root, `node scripts/map-world-view.mjs` regenerates
+`world-110m.geojson` and rewrites both style files with the low-zoom layers and
+label rules. Review the resulting diff before keeping changes; the script
+replaces the generated world layers and may raise vector-layer minimum zooms.
 
 After changing either style, run `npm run check:map`. The fallback can be tested
 deterministically with `map.html?basemap=fallback`.

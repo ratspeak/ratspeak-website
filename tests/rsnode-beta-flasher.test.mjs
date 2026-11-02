@@ -255,7 +255,8 @@ test('the picker, the install dialog and the package name each board the same wa
 
 test('the rsNode pane says what Install erases, what the two modes are, and that managers are optional', () => {
   const pane = /id="customSourceRsnode"[\s\S]*?<!-- Mode B/.exec(html)[0].replace(/<[^>]+>/g, '');
-  assert.match(pane, /Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings\. From the next beta, Update keeps them\./);
+  assert.match(pane, /Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings\./);
+  assert.match(pane, /Update requires a compatible package and firmware that supports USB updates\./);
   assert.match(pane, /As an RNode, it is the radio for one app, over USB, Bluetooth or Wi-Fi\. As a Repeater, it forwards traffic on its own\./);
   assert.match(pane, /Bluetooth is off while Wi-Fi is on\. Managers are optional and only manage a Repeater\./);
   assert.doesNotMatch(pane, /signed OTA/);
@@ -295,7 +296,8 @@ test('the pane offers Update only for a board with an update, and the flash butt
   element('flashBtn').textContent = 'Flash rsNode';
   renderRsnodeUpdate();
   assert.equal(elements.rsnodeUpdate.hidden, true);
-  assert.match(elements.rsnodeInstallNote.textContent, /^Install erases the node: .* From the next beta, Update keeps them\.$/);
+  assert.match(elements.rsnodeInstallNote.textContent, /^Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings\./);
+  assert.match(elements.rsnodeInstallNote.textContent, /Update requires a compatible package and firmware that supports USB updates\./);
   state.rsnodeMetadata.update = { version: '1.0.0-beta.20261102.1' };
   renderRsnodeUpdate();
   assert.equal(elements.rsnodeUpdate.hidden, false);

@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Index verified public release images for browser updates; firmware bytes stay in releases."""
+"""Build the browser-update index from local handheld factory images.
+
+Requires a ratspeak-handheld source checkout and esptool 5.2.0. Its release
+helpers validate image contents, component identities and partition layouts.
+The output is a JavaScript index; writing it overwrites an existing file.
+"""
 
 import argparse
 import hashlib
@@ -51,10 +56,10 @@ def release_images(directory, component_prefix):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--firmware-source", type=Path, required=True)
-    parser.add_argument("--target-version", required=True)
-    parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("directories", nargs="+", type=Path)
+    parser.add_argument("--firmware-source", type=Path, required=True, help="ratspeak-handheld checkout supplying tools/release_images.py and partition layouts")
+    parser.add_argument("--target-version", required=True, help="release version to select for update packages; other input versions contribute known components/layouts")
+    parser.add_argument("--output", type=Path, required=True, help="JavaScript index to write or overwrite; parent directory must exist")
+    parser.add_argument("directories", nargs="+", type=Path, help="local release directories; each uses factory ZIPs when present, otherwise bare factory .bin files")
     args = parser.parse_args()
     sys.path.insert(0, str(args.firmware_source.resolve() / "tools"))
     from release_images import COMPONENT_PREFIX, factory_partitions, verify_factory

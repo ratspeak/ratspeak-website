@@ -41,8 +41,8 @@ const updateStaged = status => !!(status.ota && status.ota.trialPending) || stat
  */
 export function chooseRsnodeInstall(status, board, bundle) {
   const install = message => ({ kind: 'install', update: false, message });
-  if (!bundle) return install(`No update package for ${board ? board.label : 'this board'} yet; installing erases the node.`);
-  if (!status || !status.ota) return install('This node runs an older beta; installing erases it. Later betas update in place.');
+  if (!bundle) return install(`No update package is available for ${board ? board.label : 'this board'}. The Install action erases the node.`);
+  if (!status || !status.ota) return install('This node did not report support for USB updates. The Install action erases the node.');
   if (rsnodeOtaTarget(status) !== bundle.otaTarget) return install('This node is a different board or variant.');
   if (status.releaseKeyId !== bundle.releaseKeyId) return install('This node trusts a different update key.');
   if (updateStaged(status)) return { kind: 'wait', update: false, message: 'Finishing its last update; try again in a minute.' };
@@ -85,9 +85,9 @@ const REFUSALS = {
   [RSNODE_RESULT.denied]: 'The node refused the update.',
   [RSNODE_RESULT.invalid]: 'The node did not accept the update request.',
   [RSNODE_RESULT.busy]: 'The node is taking another update. Try again in a few minutes.',
-  [RSNODE_RESULT.unsupported]: 'This node cannot update over USB. Use Install.',
+  [RSNODE_RESULT.unsupported]: 'USB update support was not confirmed. Check the connection and firmware version. The Install action erases the node.',
   [RSNODE_RESULT.storage]: 'The node could not write the update to its flash. Its current firmware keeps running.',
-  [RSNODE_RESULT.rejected]: 'The node rejected the update: its signature, board or sequence does not match. Nothing changed.',
+  [RSNODE_RESULT.rejected]: 'The node rejected the update. Check the package signature, board and sequence.',
   [RSNODE_RESULT.refused]: 'Another app is using the node over Bluetooth or Wi-Fi. Disconnect it, then update again.',
   [RSNODE_RESULT.unavailable]: 'The node is finishing its last update. Try again in a minute.'
 };
@@ -170,7 +170,7 @@ async function confirm(session, bundle, previous, onProgress) {
     }
     await sleep(Math.min(CONFIRM_POLL_MS, Math.max(0, deadline - Date.now())));
   }
-  throw new Error('The node did not confirm the update within 3 minutes. Check its screen; it keeps the new firmware or goes back on its own.');
+  throw new Error('The node did not confirm the update within 3 minutes. Keep power connected and read its status before retrying.');
 }
 
 /**

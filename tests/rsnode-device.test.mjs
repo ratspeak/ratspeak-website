@@ -220,9 +220,9 @@ test('summarizes the node for the panel and for a bug report', async () => {
     lines[entry.preset] = rsnodeSummary(facts, radio);
     const details = rsnodeDetails(facts, radio).trimEnd().split('\n');
     assert.equal(details[0], entry.device.deviceName);
-    // No retired key lines; an older beta says it reports no version.
+    // No retired key lines; absent STATUS cannot establish a firmware version or age.
     assert.ok(!details.some(line => /ap_psk|management_key/.test(line)));
-    assert.ok(details.includes('version: not reported (a beta before 2026-11)'));
+    assert.ok(details.includes('version: not reported by this firmware'));
     for (const line of renderNode(entry.node)) assert.ok(details.includes(line), line);
     assert.ok(details.includes(`transport: ${entry.transport}`));
     assert.ok(details.some(line => line.endsWith(`image ${entry.device.firmwareHash}`)));

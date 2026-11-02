@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#18171a">
     <title>Download — Ratspeak</title>
-    <meta name="description" content="Download Ratspeak for desktop, mobile, and supported mesh hardware. Private communication across every form factor.">
+    <meta name="description" content="Download the Ratspeak app for desktop and mobile, or firmware for supported handhelds and radio boards.">
     <link rel="canonical" href="https://ratspeak.org/download.html">
     <!-- Favicons -->
     <link rel="icon" href="/favicon.ico" sizes="any">
@@ -24,20 +24,20 @@
     <meta property="og:locale" content="en_US">
     <meta property="og:site_name" content="Ratspeak">
     <meta property="og:title" content="Download — Ratspeak">
-    <meta property="og:description" content="Download Ratspeak for desktop, mobile, and supported mesh hardware. Private communication across every form factor.">
+    <meta property="og:description" content="Download the Ratspeak app for desktop and mobile, or firmware for supported handhelds and radio boards.">
     <meta property="og:url" content="https://ratspeak.org/download.html">
     <meta property="og:image" content="https://ratspeak.org/assets/seo/og-download.png">
     <meta property="og:image:secure_url" content="https://ratspeak.org/assets/seo/og-download.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Download Ratspeak — Private communication across every form factor.">
+    <meta property="og:image:alt" content="Download Ratspeak for desktop, mobile and supported hardware.">
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@ratspeakorg">
     <meta name="twitter:title" content="Download — Ratspeak">
-    <meta name="twitter:description" content="Download Ratspeak for desktop, mobile, and supported mesh hardware. Private communication across every form factor.">
+    <meta name="twitter:description" content="Download the Ratspeak app for desktop and mobile, or firmware for supported handhelds and radio boards.">
     <meta name="twitter:image" content="https://ratspeak.org/assets/seo/og-download.png">
-    <meta name="twitter:image:alt" content="Download Ratspeak — Private communication across every form factor.">
+    <meta name="twitter:image:alt" content="Download Ratspeak for desktop, mobile and supported hardware.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Familjen+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
@@ -3804,7 +3804,7 @@
         /* ── Build + Verify side-by-side cards ──────── */
         .dl-bottom-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 24px;
             margin: 0;
             align-items: stretch;
@@ -3984,7 +3984,7 @@
         }
         .dl-verify__grid {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: minmax(0, 1fr);
             gap: 14px;
             margin-bottom: 12px;
         }
@@ -4065,7 +4065,7 @@
             .dl-spotlight__visual { min-height: 220px; }
             .dl-screen-frame--desktop { max-width: 760px; }
             .dl-screen-frame--mobile { max-width: 200px; }
-            .dl-bottom-grid { grid-template-columns: 1fr; gap: 24px; }
+            .dl-bottom-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
             .dl-custom__inner { padding: 28px; }
             .dl-custom__head { grid-template-columns: minmax(0, 1fr) 82px; }
             .dl-custom__chip { width: 82px; border-radius: 14px; }
@@ -4271,8 +4271,8 @@
       "@type": "SoftwareApplication",
       "name": "Ratspeak",
       "applicationCategory": "CommunicationApplication",
-      "operatingSystem": "macOS, Windows, Linux, iOS, Android, GrapheneOS, ESP32",
-      "description": "Download Ratspeak for desktop, mobile, and supported mesh hardware. Private communication across every form factor.",
+      "operatingSystem": "macOS, Windows, Linux, iOS, Android",
+      "description": "Download the Ratspeak app for desktop and mobile, or firmware for supported handhelds and radio boards.",
       "url": "https://ratspeak.org/download.html",
       "offers": {
         "@type": "Offer",
@@ -4334,7 +4334,7 @@
 <section class="flash-hero dl-hero">
     <span class="flash-hero__eyebrow">Download</span>
     <h1 class="flash-hero__title dl-hero__title">Pick your entry.</h1>
-    <p class="dl-hero__sub">One protocol, any form factor. Download the app or flash the firmware directly to your device in the browser.</p>
+    <p class="dl-hero__sub">Download the app, or connect a supported device by USB to flash its firmware in the browser.</p>
     <p class="flash-hero__sub dl-hero__meta"><span id="ratspeakReleaseTag">Latest release</span> &middot; Built with <a href="https://docs.ratspeak.org/docs/concepts/what-is-reticulum" target="_blank" rel="noopener noreferrer">Reticulum</a></p>
 </section>
 
@@ -4347,7 +4347,7 @@
         <!-- Browser warning (only visible on non-WebSerial browsers) -->
         <div class="browser-warning" id="browserWarning">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            <span>In-browser firmware flashing requires <strong>Chrome</strong> or <strong>Edge</strong> 89+. The app downloads still work in any browser.</span>
+            <span>For USB flashing, use a current desktop version of <strong>Chrome</strong> or <strong>Edge</strong> with Web Serial available. You can download the app without Web Serial.</span>
         </div>
 
         <!-- ── Platform Picker ─────────────────────────── -->
@@ -4422,7 +4422,7 @@
                     </svg>
                 </span>
                 <span class="dl-picker__name">Mobile</span>
-                <span class="dl-picker__sub">iOS, Android, GrapheneOS</span>
+                <span class="dl-picker__sub">iOS TestFlight, Android</span>
             </button>
 
             <!-- T-Deck Plus -->
@@ -4722,7 +4722,7 @@
                             </a>
                             <a href="https://github.com/ratspeak/Ratspeak/releases/latest" class="nr-btn nr-btn-secondary dl-cta-secondary">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd" aria-hidden="true"><path d="M12 1.5c-2.21 0-4 1.79-4 4 0 .68.18 1.31.48 1.87C7 8.27 5.5 10.32 5.5 12.7c0 1.4.51 2.69 1.36 3.69-.65.46-1.21 1.16-1.55 2.05-.31.81-.83 1.45-1.49 1.81-.4.21-.4.78-.01 1 .29.16.63.18.94.06l1.92-.74c.42-.16.89.05 1.06.45.18.4.55.66.97.66h6.6c.42 0 .79-.26.97-.66.17-.4.64-.61 1.06-.45l1.92.74c.31.12.65.1.94-.06.39-.22.39-.79-.01-1-.66-.36-1.18-1-1.49-1.81-.34-.89-.9-1.59-1.55-2.05.85-1 1.36-2.29 1.36-3.69 0-2.38-1.5-4.43-2.98-5.33.3-.56.48-1.19.48-1.87 0-2.21-1.79-4-4-4zm-1.5 4c.55 0 1 .56 1 1.25s-.45 1.25-1 1.25-1-.56-1-1.25.45-1.25 1-1.25zm3 0c.55 0 1 .56 1 1.25s-.45 1.25-1 1.25-1-.56-1-1.25.45-1.25 1-1.25z"/></svg>
-                                Linux<span class="dl-cta-meta">.AppImage / .deb</span>
+                                Linux<span class="dl-cta-meta">.AppImage / .deb / .rpm</span>
                             </a>
                         </div>
                     </div>
@@ -4749,21 +4749,21 @@
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
                             <span class="dl-cta-primary__text">
                                 <span class="dl-cta-primary__line">Download Android APK</span>
-                                <span class="dl-cta-primary__meta">Choose variant &middot; 4 APKs</span>
+                                <span class="dl-cta-primary__meta">Choose your device architecture</span>
                             </span>
                         </a>
                         <div class="dl-cta-secondary-row">
-                            <button type="button" class="nr-btn nr-btn-secondary dl-cta-secondary" data-store-future="App Store">
+                            <a href="https://testflight.apple.com/join/AzzW4Jg6" class="nr-btn nr-btn-secondary dl-cta-secondary" target="_blank" rel="noopener noreferrer">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
-                                App Store<span class="dl-cta-meta">Soon</span>
-                            </button>
-                            <button type="button" class="nr-btn nr-btn-secondary dl-cta-secondary" data-store-future="Play Store">
+                                iOS<span class="dl-cta-meta">TestFlight beta</span>
+                            </a>
+                            <a href="https://docs.ratspeak.org/docs/getting-started/install-and-platform-setup#android" class="nr-btn nr-btn-secondary dl-cta-secondary">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 3 21 12 3 21 3 3" fill="currentColor"/></svg>
-                                Play Store<span class="dl-cta-meta">Soon</span>
-                            </button>
+                                Android<span class="dl-cta-meta">Install guide</span>
+                            </a>
                         </div>
                     </div>
-                    <a href="https://docs.ratspeak.org/" class="dl-release-link">
+                    <a href="https://docs.ratspeak.org/docs/getting-started/install-and-platform-setup" class="dl-release-link">
                         Mobile setup guide
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                     </a>
@@ -4778,15 +4778,15 @@
                     </div>
                 </div>
                 <div class="dl-spotlight__panel">
-                    <h2 class="dl-spotlight__title" id="dl-title-tdeck">rsDeck for T-Deck Plus.</h2>
-                    <p class="dl-spotlight__lede">LilyGo's pocket radio, running <span id="rsdeckReleaseTag">rsDeck v2.0.0</span>.</p>
+                    <h2 class="dl-spotlight__title" id="dl-title-tdeck">Ratspeak for T-Deck Plus.</h2>
+                    <p class="dl-spotlight__lede">LilyGo's pocket radio, running <span id="rsdeckReleaseTag">Ratspeak Handheld</span>.</p>
                     <ul class="dl-panel-features" data-features="tdeck" role="list"></ul>
                     <div class="dl-cta-row">
                         <button type="button" class="nr-btn nr-btn-lg dl-cta-primary dl-cta-flash" data-flash="tdeck">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                             <span class="dl-cta-primary__text">
                                 <span class="dl-cta-primary__line">Flash in browser</span>
-                                <span class="dl-cta-primary__meta">Web Serial &middot; Chrome / Edge 89+</span>
+                                <span class="dl-cta-primary__meta">Web Serial &middot; desktop Chrome / Edge</span>
                             </span>
                         </button>
                         <div class="dl-cta-secondary-row">
@@ -4928,7 +4928,7 @@
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                             <span class="dl-cta-primary__text">
                                 <span class="dl-cta-primary__line">Flash in browser</span>
-                                <span class="dl-cta-primary__meta">Web Serial &middot; Chrome / Edge 89+</span>
+                                <span class="dl-cta-primary__meta">Web Serial &middot; desktop Chrome / Edge</span>
                             </span>
                         </button>
                         <div class="dl-cta-secondary-row">
@@ -5009,15 +5009,15 @@
                     </svg>
                 </div>
                 <div class="dl-spotlight__panel">
-                    <h2 class="dl-spotlight__title" id="dl-title-tpager">rsPager for T-Pager.</h2>
-                    <p class="dl-spotlight__lede">LilyGo's LoRa pager, running <span id="rspagerReleaseTag">rsPager v1.0.0</span>.</p>
+                    <h2 class="dl-spotlight__title" id="dl-title-tpager">Ratspeak for T-Pager.</h2>
+                    <p class="dl-spotlight__lede">LilyGo's LoRa pager, running <span id="rspagerReleaseTag">Ratspeak Handheld</span>.</p>
                     <ul class="dl-panel-features" data-features="tpager" role="list"></ul>
                     <div class="dl-cta-row">
                         <button type="button" class="nr-btn nr-btn-lg dl-cta-primary dl-cta-flash" data-flash="tpager">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                             <span class="dl-cta-primary__text">
                                 <span class="dl-cta-primary__line">Flash in browser</span>
-                                <span class="dl-cta-primary__meta">Web Serial &middot; Chrome / Edge 89+</span>
+                                <span class="dl-cta-primary__meta">Web Serial &middot; desktop Chrome / Edge</span>
                             </span>
                         </button>
                         <div class="dl-cta-secondary-row">
@@ -5052,7 +5052,7 @@
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                             <span class="dl-cta-primary__text">
                                 <span class="dl-cta-primary__line">Flash in browser</span>
-                                <span class="dl-cta-primary__meta">Web Serial &middot; Chrome / Edge 89+</span>
+                                <span class="dl-cta-primary__meta">Web Serial &middot; desktop Chrome / Edge</span>
                             </span>
                         </button>
                         <div class="dl-cta-secondary-row">
@@ -5086,7 +5086,7 @@
                     <div class="dl-custom__copy">
                         <span class="section-label dl-custom__eyebrow">Build your own</span>
                         <h2 class="dl-custom__title">Flash supported hardware.</h2>
-                        <p class="dl-custom__lede">Bring your own board, <a href="https://docs.ratspeak.org/docs/reference/building-from-source">build from source</a>, or upload a firmware <code>.zip</code> or <code>.bin</code>.</p>
+                        <p class="dl-custom__lede">Use firmware built for your exact board. <a href="https://docs.ratspeak.org/docs/hardware/flashing-firmware#build-from-source">Build from source</a> or upload a firmware <code>.zip</code> or <code>.bin</code>, following its author’s flash-offset instructions.</p>
                     </div>
                     <div class="dl-custom__chip" aria-hidden="true">
                         <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -5156,33 +5156,33 @@
             <header class="dl-verify__head">
                 <span class="section-label">Verify</span>
                 <h2 class="dl-verify__title" id="dl-verify-heading">Verify your download.</h2>
-                <p class="dl-verify__sub">Verify the signed checksum file, then check the release file you downloaded against it.</p>
+                <p class="dl-verify__sub">Download the checksums file for your platform from the same release as the app. Calculate your file’s SHA-256 hash and compare it with the entry for that exact filename.</p>
             </header>
             <div class="dl-verify__grid">
                 <div class="dl-verify__col">
-                    <div class="dl-verify__col-label">Signed checksum file</div>
+                    <div class="dl-verify__col-label">macOS terminal</div>
                     <div class="dl-verify__code-row">
-                        <pre class="dl-verify__code"><code>minisign -Vm Ratspeak.sha256 -P RAT&hellip;</code></pre>
-                        <button type="button" class="dl-verify__copy" data-copy="minisign -Vm Ratspeak.sha256 -P RAT" aria-label="Copy command">
+                        <pre class="dl-verify__code"><code>shasum -a 256 &quot;YOUR_DOWNLOADED_FILE&quot;</code></pre>
+                        <button type="button" class="dl-verify__copy" data-copy="shasum -a 256 &quot;YOUR_DOWNLOADED_FILE&quot;" aria-label="Copy command">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                         </button>
                     </div>
                 </div>
                 <div class="dl-verify__col">
-                    <div class="dl-verify__col-label">Downloaded release file</div>
+                    <div class="dl-verify__col-label">Windows PowerShell</div>
                     <div class="dl-verify__code-row">
-                        <pre class="dl-verify__code"><code>shasum -a 256 -c Ratspeak.sha256</code></pre>
-                        <button type="button" class="dl-verify__copy" data-copy="shasum -a 256 -c Ratspeak.sha256" aria-label="Copy command">
+                        <pre class="dl-verify__code"><code>Get-FileHash -Algorithm SHA256 &quot;YOUR_DOWNLOADED_FILE&quot;</code></pre>
+                        <button type="button" class="dl-verify__copy" data-copy="Get-FileHash -Algorithm SHA256 &quot;YOUR_DOWNLOADED_FILE&quot;" aria-label="Copy command">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                         </button>
                     </div>
                 </div>
             </div>
-            <p class="dl-verify__note">Stable releases publish release-file hashes, a signed checksum file, and a pinned public key in the <a href="https://github.com/ratspeak/Ratspeak#release-signing" target="_blank" rel="noopener noreferrer">Ratspeak</a> README and docs.</p>
-            <button type="button" class="nr-btn nr-btn-secondary dl-verify__link" data-verify-alpha>
+            <p class="dl-verify__note">Replace YOUR_DOWNLOADED_FILE with the actual path. On Linux, use <code>sha256sum &quot;YOUR_DOWNLOADED_FILE&quot;</code>. App releases include <code>checksums-macos.txt</code>, <code>checksums-windows.txt</code>, <code>checksums-linux.txt</code> and <code>checksums-android.txt</code>. A matching checksum confirms agreement with that file; it is not an independent signature of its publisher. Handheld releases provide <code>SHA256SUMS</code>.</p>
+            <a href="https://github.com/ratspeak/Ratspeak/releases/latest" class="nr-btn nr-btn-secondary dl-verify__link" target="_blank" rel="noopener noreferrer">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                Verify
-            </button>
+                Release checksums
+            </a>
         </section>
 
         </div><!-- /dl-bottom-grid -->
@@ -5327,6 +5327,7 @@
                                     </div>
                                     <div class="drop-zone__text">Drop firmware file here</div>
                                     <div class="drop-zone__hint">or click to browse &middot; .bin or .zip</div>
+                                    <div class="drop-zone__hint">Back up first. Confirm the board and write offsets; custom firmware may overwrite your identity and data.</div>
                                 </div>
                                 <div class="drop-zone__file-info">
                                     <div class="drop-zone__file-name" id="fileName"></div>
@@ -5359,7 +5360,7 @@
                                     <p class="rsnode-beta__note">Check the chip marking or your order details: ESP32-S3R2 has 2 MB PSRAM; ESP32-S3R8 has 8 MB. Both V4s have 16 MB flash and need different firmware.</p>
                                     <label class="rsnode-beta__check rsnode-beta__variant"><input type="checkbox" id="rsnodeVariantConfirmed"><span id="rsnodeVariantLabel">I checked my V4 variant.</span></label>
                                 </div>
-                                <p class="rsnode-beta__note" id="rsnodeInstallNote">Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings. From the next beta, Update keeps them.</p>
+                                <p class="rsnode-beta__note" id="rsnodeInstallNote">Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings. Update requires a compatible package and firmware that supports USB updates.</p>
                                 <div class="rsnode-update" id="rsnodeUpdate" hidden>
                                     <div class="rsnode-update__check">
                                         <button class="rsnode-beta__button" id="rsnodeUpdateCheck" type="button" aria-describedby="rsnodeUpdateStatus">Check the node</button>
@@ -5598,7 +5599,7 @@
                     <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
                 </summary>
                 <div class="flash-cta__repair-body">
-                    <p class="rsnode-tools__lede">Read the node's settings, change them here, and save. Saving restarts the node. Region, LIMITS and the radio are set on the device.</p>
+                    <p class="rsnode-tools__lede">Requires firmware with USB settings support. Read the node's settings, change them here, and save. Saving restarts the node. Region, LIMITS and the radio are set on the device.</p>
                     <form id="rsnodeSettingsForm" novalidate hidden>
                         <fieldset class="rsnode-owner__fields" id="rsnodeSettingsFields">
                             <p class="rsnode-settings__persona" id="rsnodeSettingsPersona"></p>
@@ -5660,7 +5661,7 @@
                                     <div><dt>Radio</dt><dd id="rsnodeSettingsRadio"></dd></div>
                                     <div><dt>LoRa IFAC</dt><dd id="rsnodeSettingsIfac"></dd></div>
                                 </dl>
-                                <p class="rsnode-tools__help">Change the region, LIMITS and radio on the Repeater's own menus; they carry legal confirmations only the device asks for.</p>
+                                <p class="rsnode-tools__help">Change the region, LIMITS and radio on the Repeater's own menus; these changes require confirmation on the device.</p>
                             </div>
                         </fieldset>
                     </form>
@@ -5714,7 +5715,7 @@
                                             <option value="owner">Owner</option>
                                             <option value="admin">Admin</option>
                                         </select>
-                                        <p class="rsnode-tools__help" id="rsnodeRoleHelp">The Owner changes settings and managers. Admins read status and settings and install updates.</p>
+                                        <p class="rsnode-tools__help" id="rsnodeRoleHelp">The Owner changes settings and managers. Admins read status and settings and install updates. Settings access requires firmware that supports it.</p>
                                         <div class="rsnode-managers__editor-actions">
                                             <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeManagerDone" type="button">Add</button>
                                             <button class="rsnode-beta__button" id="rsnodeManagerCancel" type="button">Cancel</button>
@@ -5729,7 +5730,7 @@
                                 <ul>
                                     <li>Plug the node in over USB. Close other apps that use its port, such as Ratspeak or a serial monitor.</li>
                                     <li>If you just installed, press RESET on the board first.</li>
-                                    <li>A running Repeater takes manager changes over USB. In RNode, hold USB on the home menu to take over from another app.</li>
+                                    <li>Some betas require RNode mode for manager changes: stop and exit the Repeater first if a change is refused. In RNode, hold USB on the home menu to take over from another app.</li>
                                     <li>Adding the first manager creates the node's identity, so its Bluetooth or Wi-Fi radio must be running (a normal RNode boot has one).</li>
                                 </ul>
                             </div>
@@ -5792,7 +5793,7 @@
                             </span>
                             <span class="flash-repair__copy">
                                 <span class="flash-repair__label">Adopt running hash</span>
-                                <span class="flash-repair__sub">Use this for &ldquo;Firmware Corrupt&rdquo; when the board still answers USB.</span>
+                                <span class="flash-repair__sub">Trusts the firmware currently running on the board. Use only with a known-good installation; this does not repair corrupted firmware.</span>
                             </span>
                         </button>
                         <button type="button" class="flash-repair__action" id="inspectHashBtn">
@@ -5881,7 +5882,7 @@
 <!-- ── Coming Soon Toast ──────────────────────────────── -->
 <div class="coming-soon-toast" id="comingSoonToast">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    <span>Coming soon</span>
+    <span>USB flashing needs Web Serial. Try desktop Chrome or Edge.</span>
 </div>
 
 <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -7197,7 +7198,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
     // ── rsNode Update (CMD_RSNODE BEGIN/CHUNK/FINISH over USB, keeps settings) or Install (esptool, erases) ──
     var rsnodeChecking = false;
     var RSNODE_CHECK_MS = 10000;
-    var RSNODE_INSTALL_NOTE = 'Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings. From the next beta, Update keeps them.';
+    var RSNODE_INSTALL_NOTE = 'Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings. Update requires a compatible package and firmware that supports USB updates.';
     var RSNODE_UPDATE_NOTE = 'Update keeps the node\'s identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings; Install erases them. Check the node to see whether it can update.';
 
     function rsnodeUpdateChosen() {
@@ -7295,7 +7296,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
         var metadata = state.rsnodeMetadata, bundle = metadata.update, bytes = state.rsnodeBundle.bytes;
         setProgress(2, 'Preparing update...');
         await verifyRsnodeBundle(bytes, bundle);
-        logMessage('Verified signed update ' + bundle.version + ' for ' + metadata.label, 'log-green');
+        logMessage('Verified update package hash and metadata: ' + bundle.version + ' for ' + metadata.label, 'log-green');
         if (!await confirmFactoryInstall({ product: 'rsnode', installMode: 'update', board: metadata.id, boardLabel: metadata.label }, {
             title: 'Update',
             intro: 'You are updating this node to rsNode ' + bundle.version + '.',
@@ -9004,7 +9005,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
 
     async function runReprovisionOnly() {
         if (!('serial' in navigator)) {
-            alert('RNode setup requires Web Serial (Chrome / Edge 89+).');
+            alert('RNode setup requires Web Serial (desktop Chrome / Edge).');
             return;
         }
         if (resolveBoardIdentity() == null) {
@@ -9049,7 +9050,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
 
     async function runSetHashOnly() {
         if (!('serial' in navigator)) {
-            alert('This requires Web Serial (Chrome / Edge 89+).');
+            alert('This requires Web Serial (desktop Chrome / Edge).');
             return;
         }
         if (!state.firmwareAppBytes || !state.firmwareAppBytes.length) {
@@ -9081,7 +9082,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
 
     async function runAdoptRunningHashOnly() {
         if (!('serial' in navigator)) {
-            alert('This requires Web Serial (Chrome / Edge 89+).');
+            alert('This requires Web Serial (desktop Chrome / Edge).');
             return;
         }
         try { await requestFreshRnodePortFromUser(); } catch (e) { return; }
@@ -9100,11 +9101,11 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
             if (adoptionSent) {
                 ui.log('Waiting for the RNode reboot, then verifying persistence...', 'log-orange');
                 await ensureRnodeFirmwareHashMatches(ui.log, rnodePostResetSettleMs(), { quiet: true });
-                ui.log('Running firmware hash adopted and verified.', 'log-green');
+                ui.log('Running firmware hash stored and matched after reboot.', 'log-green');
             } else {
                 ui.log('Target hash already matches running firmware.', 'log-green');
             }
-            ui.setStatus('Running hash verified.');
+            ui.setStatus('Stored hash matches the running firmware.');
         } catch (err) {
             ui.log('Error: ' + (err.message || err), 'log-red');
             ui.setStatus('Adopt hash failed.');
@@ -9113,7 +9114,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
 
     async function runInspectHashesOnly() {
         if (!('serial' in navigator)) {
-            alert('This requires Web Serial (Chrome / Edge 89+).');
+            alert('This requires Web Serial (desktop Chrome / Edge).');
             return;
         }
         try { await requestFreshRnodePortFromUser(); } catch (e) { return; }
@@ -9132,7 +9133,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
 
     async function runSetNormalModeOnly() {
         if (!('serial' in navigator)) {
-            alert('This requires Web Serial (Chrome / Edge 89+).');
+            alert('This requires Web Serial (desktop Chrome / Edge).');
             return;
         }
         var message = 'Keep this RNode idle until Ratspeak configures it?\n\n' +
@@ -9817,7 +9818,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
             ? (repeater ? 'Without Wi-Fi the Repeater forwards over LoRa only.' : 'Apps connect over USB or Bluetooth.')
             : repeater ? 'The Repeater\'s uplink and peers use this network.'
             : 'Bluetooth is off while Wi-Fi is on. Apps connect over TCP port ' + RSNODE_APP_PORT + '.' +
-              (mode === 'own' ? ' The node\'s network offers no internet, so a laptop keeps its own.' : '');
+              (mode === 'own' ? ' The node\'s network does not provide Internet access.' : '');
         document.getElementById('rsnodeWifiPasswordStored').hidden = rsnodeSettingsPassword;
         document.getElementById('rsnodeWifiPassword').hidden = !rsnodeSettingsPassword;
         document.getElementById('rsnodeWifiPasswordHelp').hidden = !rsnodeSettingsPassword;
@@ -9923,7 +9924,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
             if (save && nodeId !== before.nodeId) throw new Error('This is RNode ' + nodeId + ', not RNode ' + before.nodeId + '. Read its settings first.');
             var status = await readRsnodeStatus(session);
             if (!status || !status.node) {
-                throw new Error('RNode ' + nodeId + ' runs a beta without USB settings. Install the latest beta to change settings here.');
+                throw new Error('RNode ' + nodeId + ' did not report USB settings support. Check the connection and use the instructions for its firmware version. The Install action erases the node.');
             }
             if (save) {
                 var held = rsnodeHeldElsewhere(status);
@@ -9938,7 +9939,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
                 }
                 if (outcome.kind === 'refused') throw new Error(rsnodeHeldMessage(nodeId, 'Bluetooth or Wi-Fi'));
                 if (outcome.kind === 'busy') throw new Error('RNode ' + nodeId + ' is busy finishing an update or saving. Try again in a minute.');
-                if (outcome.kind === 'storage') throw new Error('RNode ' + nodeId + ' could not save the settings. Nothing changed.');
+                if (outcome.kind === 'storage') throw new Error('RNode ' + nodeId + ' could not confirm that the settings were saved. Read its settings before retrying.');
                 if (outcome.kind === 'unsupported') throw new Error('RNode ' + nodeId + ' cannot change these settings over USB.');
                 if (outcome.kind === 'failed') throw new Error('RNode ' + nodeId + ' refused the settings (result ' + outcome.result + ').');
                 if (outcome.kind === 'restart') {
@@ -11548,7 +11549,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from './ass
                 if (prepared.installMode === 'factory') {
                     logMessage('Fresh install — resetting internal storage...', 'log-orange');
                 } else if (eraseBeforeFlash) {
-                    logMessage('Full erase enabled — wiping all memory...', 'log-orange');
+                    logMessage('Full erase enabled — wiping internal flash...', 'log-orange');
                 }
                 logMessage('Flashing ' + prepared.fileArray.length + ' part(s)...', '');
                 var totalFlashBytes = prepared.fileArray.reduce(function(sum, part) { return sum + part.data.length; }, 0);
@@ -11913,14 +11914,14 @@ import { handheldRelease } from './assets/js/handheld-release.js';
     // ── Feature data ────────────────────────────────
     // Each feature: { l: label, d: description }
     var SHARED_FEATURES = [
-        { l: 'End-to-end encrypted',  d: 'Every packet, every link.' },
-        { l: 'No account required',   d: 'No email, no phone, ever.' },
-        { l: 'Offline messaging',     d: 'Works without Internet.' },
-        { l: 'Open source',           d: 'Verify the binary, line by line.' },
-        { l: 'Cryptographic identity', d: 'Recoverable, PIN-protectable, yours alone.' },
-        { l: 'Mesh-native routing',   d: 'Self-healing across any transport.' },
-        { l: 'Zero servers',          d: 'No backend. No telemetry. No tokens.' },
-        { l: 'LXMF interop',          d: 'Sideband, NomadNet, MeshChat.' },
+        { l: 'Private LXMF messages', d: 'End-to-end encrypted between sender and recipient.' },
+        { l: 'No account required', d: 'Use your own identity without an email address or phone number.' },
+        { l: 'Off-grid connections', d: 'Use working local or radio links without Internet access.' },
+        { l: 'Open source', d: 'Read the app, protocol library and firmware source.' },
+        { l: 'Cryptographic identity', d: 'Keep a backup of the key that controls your address.' },
+        { l: 'Reticulum routing', d: 'Connect through supported interfaces and reachable transport nodes.' },
+        { l: 'No required central server', d: 'Choose your connections; optional hubs and inbox nodes provide services.' },
+        { l: 'LXMF interop', d: 'Private messages with compatible LXMF clients.' },
         { l: 'Built on Reticulum',    d: 'Open protocol stack.' }
     ];
     var PLATFORM_LABEL = {
@@ -11933,24 +11934,24 @@ import { handheldRelease } from './assets/js/handheld-release.js';
     };
     var PLATFORM_FEATURES = {
         desktop: [
-            { l: 'Play games',                       d: 'Chess and Tic-tac-toe over LXMF.' },
-            { l: 'File & image sharing',             d: 'Attach anything, sealed end-to-end.' },
-            { l: 'Mesh networking',                  d: 'Self-healing, up to 128 hops.' },
-            { l: 'Radio, WiFi, Bluetooth, & more',   d: 'Any transport, all at once.' }
+            { l: 'Play games', d: 'Chess, Tic-Tac-Toe and Four in a Row over LXMF.' },
+            { l: 'File & image sharing', d: 'Send encrypted attachments within the recipient’s size limit.' },
+            { l: 'Voice', d: 'Recorded voice messages and experimental one-to-one calls.' },
+            { l: 'Channels', d: 'Live group conversations through a hub that can read their content.' }
         ],
         mobile: [
-            { l: 'Play games',                       d: 'Chess and Tic-tac-toe over LXMF.' },
-            { l: 'File & image sharing',             d: 'Attach anything, sealed end-to-end.' },
-            { l: 'Mesh networking',                  d: 'Self-healing, up to 128 hops.' },
-            { l: 'Radio, WiFi, Bluetooth, & more',   d: 'Any transport, all at once.' }
+            { l: 'Play games', d: 'Chess, Tic-Tac-Toe and Four in a Row over LXMF.' },
+            { l: 'File & image sharing', d: 'Send encrypted attachments within the recipient’s size limit.' },
+            { l: 'Voice', d: 'Recorded voice messages and experimental one-to-one calls.' },
+            { l: 'Channels', d: 'Live group conversations through a hub that can read their content.' }
         ],
         tdeck: [
-            { l: 'All-in-one',               d: 'No phone, no host. Just talk.' },
-            { l: 'LoRa capable',             d: 'SF7-SF11, 125 / 250 / 500 kHz BW.' },
-            { l: 'Touchscreen',              d: 'Tap to navigate, no keys required.' },
-            { l: 'WiFi + GPS*',              d: 'Connect online; locate with GPS.' },
-            { l: '16 MB flash w/ OTA',       d: 'Updatable over the air.' },
-            { l: 'LittleFS + SD storage',    d: 'Atomic .tmp/.bak journaling.' }
+            { l: 'Standalone messaging', d: 'Send and read LXMF messages on the device.' },
+            { l: 'LoRa + WiFi', d: 'Reach peers over radio or a network connection.' },
+            { l: 'Touch, trackball + keyboard', d: 'Navigate and type on the T-Deck.' },
+            { l: 'Two modes', d: 'All-in-one messenger or RNode radio.' },
+            { l: 'USB firmware updates', d: 'Check the installed firmware before choosing update or install.' },
+            { l: 'Local storage', d: 'Messages stay on flash; SD storage is optional.' }
         ],
         cardputer: [
             { l: 'Standalone messaging', d: 'Send and read LXMF messages on the device.' },
@@ -11970,11 +11971,11 @@ import { handheldRelease } from './assets/js/handheld-release.js';
         ],
         tpager: [
             { l: 'Dual-mode',                d: 'Standalone messenger or RNode radio.' },
-            { l: 'LoRa built-in',            d: 'SX1262, 850–950 MHz, Long Fast default.' },
-            { l: 'Standalone LXMF',          d: 'No phone, no host. Just talk.' },
+            { l: 'LoRa built-in', d: 'Use settings allowed for your board and region.' },
+            { l: 'Standalone LXMF', d: 'Send and read messages on the device.' },
             { l: 'RNode mode',               d: 'BLE or USB radio for host clients.' },
             { l: 'Scroll-wheel + QWERTY',    d: 'Encoder and keyboard navigation.' },
-            { l: 'WiFi bridging*',           d: 'Reach remote Reticulum nodes.' }
+            { l: 'WiFi connections', d: 'Reach remote Reticulum nodes through a working network.' }
         ]
     };
     ['tdeck', 'tpager'].forEach(function(board) {
@@ -12545,21 +12546,6 @@ import { handheldRelease } from './assets/js/handheld-release.js';
                 btn.classList.add('is-copied');
                 setTimeout(function () { btn.classList.remove('is-copied'); }, 1400);
             });
-        });
-    });
-
-    document.querySelectorAll('[data-verify-alpha]').forEach(function (btn) {
-        btn.addEventListener('click', function (e) {
-            if (typeof window.showComingSoon === 'function') {
-                window.showComingSoon(e, "This isn't supported in alpha, but we plan to support this for the first stable release.");
-            }
-        });
-    });
-    document.querySelectorAll('[data-store-future]').forEach(function (btn) {
-        btn.addEventListener('click', function (e) {
-            if (typeof window.showComingSoon === 'function') {
-                window.showComingSoon(e, btn.dataset.storeFuture + ' distribution is coming soon.');
-            }
         });
     });
 

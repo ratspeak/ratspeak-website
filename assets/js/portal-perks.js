@@ -168,7 +168,7 @@ async function enroll() {
   await withBusy(async () => {
     await signEnrollment(true, address);
     modalOpen = false;
-    toast('Enrolled — your network perks are live.');
+    toast('Enrollment saved. Configure your VIP Inbox below.');
   });
 }
 
@@ -255,9 +255,9 @@ function perkCard(icon, name, sub) {
 
 function perkGrid() {
   return `<div class="pk-grid">
-    ${perkCard('database', 'Priority Storage', 'Eviction priority on your VIP Inbox — your messages are last to be culled, up to the 30-day ceiling.')}
+    ${perkCard('database', 'Holder storage', 'Your badge tier is shared with inbox infrastructure for its holder storage policy. Capacity and expiry limits apply.')}
     ${perkCard('mail', 'Mailbox Status', 'See how much mail is waiting for you, right here in the portal.')}
-    ${perkCard('inbox', 'VIP Inbox', 'A private offline-inbox for holders only — 10 MB messages, 5× the public limit.')}
+    ${perkCard('inbox', 'VIP Inbox', 'An offline inbox for enrolled holders. Message size and access limits follow the node’s policy.')}
     ${perkCard('bell', 'Arrival Alerts', 'A message over the mesh nudges you when mail waits too long.')}
   </div>`;
 }
@@ -305,19 +305,19 @@ function consentModal() {
 function mailboxCard() {
   const box = perks.mailbox || { waiting: 0 };
   const reported = box.reportedAt ? new Date(box.reportedAt) : null;
-  const asOf = reported ? `as of ${reported.toISOString().slice(11, 16)} UTC` : 'no report received yet';
+  const asOf = reported ? `as of ${reported.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, ' UTC')}` : 'no report received yet';
   if (!box.waiting) {
     return `<div class="pk-mailbox clear">
-      <span class="pk-mailbox-count">0</span>
+      <span class="pk-mailbox-count">${reported ? '0' : '—'}</span>
       <div><div class="pk-mailbox-label">Messages waiting</div>
-      <div class="pk-mailbox-meta">All clear — ${asOf}.</div></div>
+      <div class="pk-mailbox-meta">${reported ? 'No messages reported — ' : 'Status unknown — '}${asOf}.</div></div>
     </div>`;
   }
-  const since = box.oldestTs ? new Date(box.oldestTs * 1000).toISOString().slice(11, 16) + ' UTC' : '';
+  const since = box.oldestTs ? new Date(box.oldestTs * 1000).toISOString().slice(0, 16).replace('T', ' ') + ' UTC' : '';
   return `<div class="pk-mailbox has-mail">
     <span class="pk-mailbox-count">${box.waiting}</span>
     <div><div class="pk-mailbox-label">Message${box.waiting === 1 ? '' : 's'} waiting</div>
-    <div class="pk-mailbox-meta">On your inbox${since ? ` since ${since}` : ''} — open Ratspeak and sync to receive.</div></div>
+    <div class="pk-mailbox-meta">On your inbox${since ? ` since ${since}` : ''} — open Ratspeak and choose Check Now in Offline Inbox to receive. Report ${asOf}.</div></div>
   </div>`;
 }
 
@@ -346,7 +346,7 @@ function goldRelayRow() {
   if (perks.goldRelay) {
     return `<div class="pk-row" style="display: block">
       <div class="pk-row-label">VIP Inbox</div>
-      <div class="pk-row-sub" style="margin-bottom: 8px">Your private offline-inbox. In Ratspeak: Settings &rarr; Propagation node &rarr; paste, then Announce once and Sync.</div>
+      <div class="pk-row-sub" style="margin-bottom: 8px">Your holder inbox. In Ratspeak: Settings &rarr; Offline Inbox &rarr; Manual. Paste this hash, choose Set, announce your identity, then choose Check Now.</div>
       <div class="pk-hash">${escapeHtml(perks.goldRelay)}</div>
       <div class="id-btn-row" style="margin-top: 10px">
         <button class="secondary-btn" type="button" data-pk-action="copy-relay">Copy relay address</button>
@@ -355,7 +355,7 @@ function goldRelayRow() {
   }
   return `<div class="pk-row">
     <div><div class="pk-row-label">VIP Inbox</div>
-    <div class="pk-row-sub">Your private inbox is coming online — the address will appear here.</div></div>
+    <div class="pk-row-sub">No VIP Inbox address is configured in the portal. Check again later or contact support.</div></div>
   </div>`;
 }
 
@@ -403,7 +403,7 @@ function render() {
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px">
         ${badgeTile(perks.tier)}
         <div><div class="pk-row-label">${badgeName(perks.tier)} holder &middot; ${escapeHtml(perks.lxmfAddress || '')}</div>
-        <div class="pk-row-sub">Eviction priority is active on your VIP Inbox.</div></div>
+        <div class="pk-row-sub">Enrollment is saved for your VIP Inbox.</div></div>
       </div>
       ${mailboxCard()}
       <div style="margin-top: 18px">${alertsRows()}${goldRelayRow()}</div>

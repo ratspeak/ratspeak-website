@@ -320,11 +320,14 @@ test('Save stops before writing when the form, the node or another app says no',
   task = settingsTask({ nodeId: 'FFFF', form: join, status: [statusOf(false, 1)] });
   await task.runRsnodeSettingsTask(true);
   assert.equal(task.calls.filter(call => call[0] === 'message').at(-1)[1], 'This is RNode FFFF, not RNode 887A. Read its settings first.');
-  // A beta without STATUS.
+  // Missing STATUS prevents a settings write and cannot identify a firmware version.
   task = settingsTask({ nodeId: '887A', form: join, status: [null] });
   await task.runRsnodeSettingsTask(true);
-  assert.equal(task.calls.filter(call => call[0] === 'message').at(-1)[1],
-    'RNode 887A runs a beta without USB settings. Install the latest beta to change settings here.');
+  assert.ok(!task.calls.some(call => call[0] === 'write'));
+  const unsupported = task.calls.filter(call => call[0] === 'message').at(-1)[1];
+  assert.match(unsupported, /^RNode 887A did not report USB settings support\./);
+  assert.match(unsupported, /use the instructions for its firmware version\./);
+  assert.match(unsupported, /The Install action erases the node\./);
 });
 
 test('a refusal from the node lands on the field it names, and Unchanged says so', async () => {

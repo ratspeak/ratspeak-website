@@ -4,7 +4,9 @@
 Runs rsNode's scripts/provision-rsnode.py against the device model in its own
 tests (scripts/tests/test_provision_rsnode.py) and records every frame the
 script writes and the model answers, with the script's own readings of them.
-No device is touched. Regenerate when either changes:
+No device is touched. Requires pyserial and access to the rsNode source
+checkout. The JSON output is overwritten; these model transcripts do not
+establish physical-device behavior. Regenerate when either changes:
 
   python3 -B scripts/rsnode-provision-vectors.py --rsnode-source ../rsNode \\
       --output tests/fixtures/rsnode-provision-vectors.json
@@ -185,8 +187,8 @@ def hash_vectors(p):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--rsnode-source", type=Path, required=True)
-    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--rsnode-source", type=Path, required=True, help="rsNode source checkout containing the imported scripts and test/model dependencies")
+    parser.add_argument("--output", type=Path, required=True, help="JSON fixture to write or overwrite; parent directories are created")
     args = parser.parse_args()
     sys.dont_write_bytecode = True
     root = args.rsnode_source.resolve()

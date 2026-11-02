@@ -366,7 +366,7 @@ export function rsnodeSummary(facts, radio) {
 
 /** The build lines of a bug report, from STATUS. */
 function buildLines(rsnode) {
-  if (!rsnode) return ['version: not reported (a beta before 2026-11)'];
+  if (!rsnode) return ['version: not reported by this firmware'];
   const target = rsnode.board;
   const variant = target && rsnodeBoardForTarget(target.board);
   return [

@@ -14,7 +14,8 @@ links and hash routes.
 
 ## Local preview
 
-Run `npm run dev` with Node.js 22 or newer, then open
+With Node.js 22 or newer, run `npm ci` to install the pinned dependencies,
+then `npm run dev` and open
 [localhost:9847/download.html](http://127.0.0.1:9847/download.html).
 The flasher uses the published firmware downloads. Nothing is deployed;
 connecting and installing still require your browser's USB selection and confirmation.

@@ -12,5 +12,8 @@ panels.
 dataset, used to show country-only location labels when a node cannot be matched
 to a nearby populated place.
 
-Source: https://github.com/nvkelso/natural-earth-vector
-License: public domain.
+Source: [Natural Earth vector data](https://github.com/nvkelso/natural-earth-vector).
+Natural Earth distributes these datasets in the [public domain](https://www.naturalearthdata.com/about/terms-of-use/).
+
+These are coarse world-scale datasets. Coastal filtering and nearby-city labels
+are approximate; they do not verify a node’s reported location.

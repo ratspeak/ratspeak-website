@@ -82,10 +82,13 @@ const BUNDLE = bundleFor();
 const BOARD = { id: 'heltec-v4', label: 'Heltec V4 · R2' };
 const status = options => parseRsnodeStatus(statusBody(options));
 
-test('the decision table: older beta, other board, other key, trial, up to date, update', () => {
+test('the decision table: unreported USB update support, other board, other key, trial, up to date, update', () => {
   const meta = BUNDLE.meta;
-  assert.deepEqual(chooseRsnodeInstall(null, BOARD, meta), { kind: 'install', update: false,
-    message: 'This node runs an older beta; installing erases it. Later betas update in place.' });
+  const unreported = chooseRsnodeInstall(null, BOARD, meta);
+  assert.equal(unreported.kind, 'install');
+  assert.equal(unreported.update, false);
+  assert.match(unreported.message, /This node did not report support for USB updates\./);
+  assert.match(unreported.message, /The Install action erases the node\./);
   assert.equal(chooseRsnodeInstall(status({ board: 0xbf }), BOARD, meta).message, 'This node is a different board or variant.');
   assert.equal(chooseRsnodeInstall(status({ keyId: 'ffeeddccbbaa9988' }), BOARD, meta).message, 'This node trusts a different update key.');
   assert.equal(chooseRsnodeInstall(status({ keyId: null }), BOARD, meta).kind, 'install');
@@ -240,7 +243,7 @@ describe('the USB update', { concurrency: true }, () => {
 
   test('refusals at BEGIN, during the transfer and at FINISH name their cause', async () => {
     const begins = {
-      9: /Another app is using the node over Bluetooth or Wi-Fi/, 8: /signature, board or sequence does not match/,
+      9: /Another app is using the node over Bluetooth or Wi-Fi/, 8: /rejected the update\. Check the package signature, board and sequence/,
       10: /finishing its last update/, 5: /taking another update/, 2: /did not accept the update request/
     };
     for (const [code, message] of Object.entries(begins)) {

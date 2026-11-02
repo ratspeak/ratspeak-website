@@ -138,6 +138,7 @@ const DEFAULT_WORLD_OFFSETS = [-WORLD_LONGITUDE_SPAN, 0, WORLD_LONGITUDE_SPAN];
 
 const state = {
   snapshot: null,
+  snapshotUnavailable: false,
   filteredNodes: [],
   selectedId: null,
   kindFilter: 'all',
@@ -175,6 +176,7 @@ const els = {
   searchInput: document.getElementById('nodeSearch'),
   kindSelect: document.getElementById('kindFilter'),
   statusSelect: document.getElementById('statusFilter'),
+  snapshotStatus: document.getElementById('mapSnapshotStatus'),
   navbar: document.getElementById('navbar'),
   themeToggle: document.getElementById('themeToggle'),
   navHamburger: document.getElementById('navHamburger'),
@@ -318,8 +320,10 @@ async function loadSnapshot() {
     if (!response.ok) throw new Error(`${API_URL} returned ${response.status}`);
     const payload = await response.json();
     if (!Array.isArray(payload.nodes)) throw new Error(`${API_URL} response missing nodes`);
+    state.snapshotUnavailable = false;
     return payload;
   } catch (error) {
+    state.snapshotUnavailable = true;
     console.info('Map snapshot unavailable:', error.message);
   }
 
@@ -460,7 +464,7 @@ function initMap() {
   }
 
   if (FORCE_FALLBACK_BASEMAP) {
-    showMapFallback('Detailed basemap disabled. Showing the resilient map.');
+    showMapFallback('Detailed basemap disabled. Showing the basic map.');
   }
 
   state.map.addControl(new NavigationControl({
@@ -517,7 +521,7 @@ function activateFallbackBasemap() {
 
   state.usingFallbackBasemap = true;
   state.styleReady = false;
-  showMapFallback('Detailed basemap unavailable. Showing the resilient map.');
+  showMapFallback('Detailed basemap unavailable. Showing the basic map.');
   state.map.setStyle(
     createFallbackStyle(currentTheme(), COUNTRY_GEOJSON_URL),
     { diff: false }
@@ -583,7 +587,7 @@ function syncMapTheme() {
     state.styleTheme = nextTheme;
     state.styleReady = false;
     state.usingFallbackBasemap = true;
-    showMapFallback('Detailed basemap disabled. Showing the resilient map.');
+    showMapFallback('Detailed basemap disabled. Showing the basic map.');
     state.map.setStyle(createFallbackStyle(nextTheme, COUNTRY_GEOJSON_URL), { diff: false });
     return;
   }
@@ -687,11 +691,13 @@ function viewportMinZoom() {
 function applyFilters() {
   const nodes = state.snapshot?.nodes || [];
   const expiryCutoff = Date.now() - NODE_MAX_AGE_MS;
-  state.filteredNodes = nodes.filter((node) => {
-    if (nodeIsExpired(node, expiryCutoff)) return false;
+  const currentNodes = nodes.filter((node) => !nodeIsExpired(node, expiryCutoff));
+  state.filteredNodes = currentNodes.filter((node) => {
     const kind = nodeKind(node);
     const matchesKind = state.kindFilter === 'all' || kind === state.kindFilter;
-    const matchesStatus = state.statusFilter === 'all' || node.status === state.statusFilter;
+    const matchesStatus = state.statusFilter === 'all' || (state.statusFilter === 'available'
+      ? ['available', 'seen', 'recent'].includes(node.status)
+      : node.status === state.statusFilter);
     const queryBlob = [
       nodeDisplayName(node),
       kind,
@@ -707,6 +713,7 @@ function applyFilters() {
 
   els.app.dataset.visibleNodeCount = String(state.filteredNodes.length);
   els.app.dataset.totalNodeCount = String(nodes.length);
+  renderSnapshotStatus(currentNodes.length);
 
   if (state.selectedId && !state.filteredNodes.some((node) => node.id === state.selectedId)) {
     state.selectedId = null;
@@ -714,6 +721,35 @@ function applyFilters() {
 
   renderDetail();
   renderMap();
+}
+
+function renderSnapshotStatus(currentNodeCount) {
+  if (!els.snapshotStatus) return;
+  if (state.snapshotUnavailable) {
+    els.snapshotStatus.textContent = 'Node records are unavailable. Reload to retry.';
+    return;
+  }
+  const snapshot = state.snapshot;
+  if (!snapshot) {
+    els.snapshotStatus.textContent = 'Loading node records…';
+    return;
+  }
+  let summary;
+  if (!currentNodeCount) {
+    summary = snapshot.nodes?.length
+      ? 'No nodes seen within the last seven days.'
+      : 'No node records in this snapshot.';
+  } else if (!state.filteredNodes.length) {
+    summary = 'No nodes match these filters. Clear the search or change a filter.';
+  } else {
+    const shown = state.filteredNodes.length;
+    summary = `${shown} of ${currentNodeCount} node${currentNodeCount === 1 ? '' : 's'} shown.`;
+  }
+  const generatedAt = Date.parse(snapshot.generatedAt || '');
+  const timestamp = Number.isFinite(generatedAt)
+    ? ` Snapshot: ${new Date(generatedAt).toISOString().slice(0, 16).replace('T', ' ')} UTC.`
+    : ' Snapshot time unavailable.';
+  els.snapshotStatus.textContent = summary + timestamp + ' Last seen does not confirm reachability.';
 }
 
 function renderWrappedOverlays() {

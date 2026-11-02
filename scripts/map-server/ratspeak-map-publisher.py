@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-"""Publish sanitized Python RNS discovery data to the Ratspeak map ingest API.
+"""Build and publish Ratspeak map snapshots from Python RNS discovery data.
 
 This script is intentionally standalone. It is meant to run on the dedicated
 Linux Reticulum host without cloning the website repo. Copy this file and the
-Natural Earth land GeoJSON next to it, point it at the single `deadbeef*` RNS
+Natural Earth land GeoJSON next to it, point it at the selected observer RNS
 config directory, and give it MAP_INGEST_TOKEN.
+
+Snapshots retain node labels, coordinates and advertised network addresses.
+--dry-run skips the HTTP publication but still reads discovery data and writes
+--out when nonempty. Existing snapshot files are overwritten.
 """
 
 from __future__ import annotations
@@ -489,21 +493,21 @@ def print_status(action: str, snapshot: dict[str, Any]) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Publish Python RNS discovery data to Ratspeak map ingest")
-    parser.add_argument("--rns-config", default=os.environ.get("RNS_CONFIG_DIR"), help="RNS config directory for the deadbeef node")
-    parser.add_argument("--rnstatus-bin", default=os.environ.get("RNSTATUS_BIN", "rnstatus"), help="rnstatus executable")
+    parser = argparse.ArgumentParser(description="Build and publish map snapshots from Python RNS discovery data, including node labels, coordinates and advertised network addresses.")
+    parser.add_argument("--rns-config", default=os.environ.get("RNS_CONFIG_DIR"), help="observer RNS config directory (or RNS_CONFIG_DIR); required unless --rnstatus-json is supplied")
+    parser.add_argument("--rnstatus-bin", default=os.environ.get("RNSTATUS_BIN", "rnstatus"), help="Python Reticulum rnstatus executable (RNSTATUS_BIN, default: rnstatus)")
     parser.add_argument("--rnstatus-json", default=None, help="read existing rnstatus -d --json output instead of invoking rnstatus")
-    parser.add_argument("--land-geojson", default=os.environ.get("MAP_LAND_GEOJSON", default_land_geojson()), help="Natural Earth land GeoJSON")
-    parser.add_argument("--include-water", action="store_true", help="do not filter points outside land polygons")
+    parser.add_argument("--land-geojson", default=os.environ.get("MAP_LAND_GEOJSON", default_land_geojson()), help="Natural Earth land GeoJSON (MAP_LAND_GEOJSON or a discovered local ne_110m_land.geojson)")
+    parser.add_argument("--include-water", action="store_true", help="skip land-mask loading and water filtering, including --require-land-mask")
     parser.add_argument("--require-land-mask", action="store_true", help="fail if the land mask is unavailable")
-    parser.add_argument("--max-age", type=int, default=int(os.environ.get("MAP_MAX_AGE_SECONDS", DEFAULT_MAX_AGE_SECONDS)), help="max last_heard age in seconds")
-    parser.add_argument("--ingest-url", default=os.environ.get("MAP_INGEST_URL", "https://ratspeak.org/api/map-ingest"), help="Vercel map ingest URL")
-    parser.add_argument("--ingest-token", default=os.environ.get("MAP_INGEST_TOKEN"), help="Vercel map ingest bearer token")
-    parser.add_argument("--vercel-bypass", default=os.environ.get("VERCEL_PROTECTION_BYPASS"), help="optional Vercel Preview protection bypass secret")
-    parser.add_argument("--out", default=os.environ.get("MAP_SNAPSHOT_OUT", "/var/lib/ratspeak-map/map-live.json"), help="write snapshot copy to this path")
-    parser.add_argument("--interval", type=int, default=int(os.environ.get("MAP_PUBLISH_INTERVAL", "0")), help="repeat every N seconds")
-    parser.add_argument("--timeout", type=int, default=int(os.environ.get("MAP_PUBLISH_TIMEOUT", "30")), help="subprocess and HTTP timeout")
-    parser.add_argument("--dry-run", action="store_true", help="build snapshot but do not publish")
+    parser.add_argument("--max-age", type=int, default=int(os.environ.get("MAP_MAX_AGE_SECONDS", DEFAULT_MAX_AGE_SECONDS)), help="maximum last_heard age in seconds (MAP_MAX_AGE_SECONDS, default: 604800)")
+    parser.add_argument("--ingest-url", default=os.environ.get("MAP_INGEST_URL", "https://ratspeak.org/api/map-ingest"), help="HTTP POST destination (MAP_INGEST_URL, default: https://ratspeak.org/api/map-ingest)")
+    parser.add_argument("--ingest-token", default=os.environ.get("MAP_INGEST_TOKEN"), help="ingest bearer token; normally set MAP_INGEST_TOKEN; required unless --dry-run")
+    parser.add_argument("--vercel-bypass", default=os.environ.get("VERCEL_PROTECTION_BYPASS"), help="optional Vercel Preview bypass secret; may be set with VERCEL_PROTECTION_BYPASS")
+    parser.add_argument("--out", default=os.environ.get("MAP_SNAPSHOT_OUT", "/var/lib/ratspeak-map/map-live.json"), help="write or overwrite snapshot JSON, creating parent directories, even in dry-run; empty string disables it (MAP_SNAPSHOT_OUT, default: /var/lib/ratspeak-map/map-live.json)")
+    parser.add_argument("--interval", type=int, default=int(os.environ.get("MAP_PUBLISH_INTERVAL", "0")), help="seconds to wait after each cycle; 0 runs once, otherwise at least 10 (MAP_PUBLISH_INTERVAL, default: 0)")
+    parser.add_argument("--timeout", type=int, default=int(os.environ.get("MAP_PUBLISH_TIMEOUT", "30")), help="subprocess and HTTP timeout in seconds (MAP_PUBLISH_TIMEOUT, default: 30)")
+    parser.add_argument("--dry-run", action="store_true", help="skip HTTP publication; still invoke rnstatus unless --rnstatus-json is supplied, and write --out when nonempty")
 
     args = parser.parse_args()
     if not args.rnstatus_json and not args.rns_config:

@@ -95,13 +95,23 @@
     <script>
         (function() {
             var routes = {
-                'getting-started/building-from-source': 'docs/reference/building-from-source',
-                'introduction/what-is-ratspeak': 'docs/',
-                'introduction/faq': 'docs/reference/faq'
+                "getting-started/building-from-source": "docs/reference/building-from-source",
+                "introduction/faq": "docs/reference/faq",
+                "introduction/ratspeak-ecosystem": "docs/concepts/ratspeak-ecosystem",
+                "introduction/what-is-ratspeak": "docs/",
+                "products/ratdeck": "docs/products/rsdeck",
+                "understanding/cryptography-and-protection": "docs/concepts/cryptography-and-protection",
+                "understanding/key-concepts-and-glossary": "docs/concepts/key-concepts-and-glossary",
+                "understanding/links-and-lxmf": "docs/concepts/links-and-lxmf",
+                "understanding/protocol-architecture": "docs/concepts/protocol-architecture",
+                "understanding/what-is-reticulum": "docs/concepts/what-is-reticulum"
             };
             var hash = window.location.hash.replace(/^#\/?/, '');
-            var targetPath = hash ? (routes[hash] || 'docs/' + hash) : '';
-            var target = 'https://docs.ratspeak.org/' + targetPath;
+            var sectionIndex = hash.indexOf('#');
+            var section = sectionIndex < 0 ? '' : hash.slice(sectionIndex);
+            var route = sectionIndex < 0 ? hash : hash.slice(0, sectionIndex);
+            var targetPath = route ? (routes[route] || 'docs/' + route) : '';
+            var target = 'https://docs.ratspeak.org/' + targetPath + section;
             window.location.replace(target);
         })();
     </script>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#18171a">
     <title>Tasks — Ratspeak</title>
-    <meta name="description" content="What we&#x27;re working on across every Ratspeak project — a live board of features, fixes, and research in progress.">
+    <meta name="description" content="Public Ratspeak tasks: features, fixes, and research shared by the project.">
     <link rel="canonical" href="https://ratspeak.org/tasks.html">
     <!-- Favicons -->
     <link rel="icon" href="/favicon.ico" sizes="any">
@@ -24,20 +24,20 @@
     <meta property="og:locale" content="en_US">
     <meta property="og:site_name" content="Ratspeak">
     <meta property="og:title" content="Tasks — Ratspeak">
-    <meta property="og:description" content="What we&#x27;re working on across every Ratspeak project — a live board of features, fixes, and research in progress.">
+    <meta property="og:description" content="Public Ratspeak tasks: features, fixes, and research shared by the project.">
     <meta property="og:url" content="https://ratspeak.org/tasks.html">
     <meta property="og:image" content="https://ratspeak.org/assets/seo/og-tasks.png">
     <meta property="og:image:secure_url" content="https://ratspeak.org/assets/seo/og-tasks.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Ratspeak Tasks — A live board of what we&#x27;re building across every Ratspeak project.">
+    <meta property="og:image:alt" content="Ratspeak Tasks — Public features, fixes, and research.">
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@ratspeakorg">
     <meta name="twitter:title" content="Tasks — Ratspeak">
-    <meta name="twitter:description" content="What we&#x27;re working on across every Ratspeak project — a live board of features, fixes, and research in progress.">
+    <meta name="twitter:description" content="Public Ratspeak tasks: features, fixes, and research shared by the project.">
     <meta name="twitter:image" content="https://ratspeak.org/assets/seo/og-tasks.png">
-    <meta name="twitter:image:alt" content="Ratspeak Tasks — A live board of what we&#x27;re building across every Ratspeak project.">
+    <meta name="twitter:image:alt" content="Ratspeak Tasks — Public features, fixes, and research.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -48,7 +48,7 @@
       "@type": "WebPage",
       "name": "Tasks \u2014 Ratspeak",
       "url": "https://ratspeak.org/tasks.html",
-      "description": "What we're working on across every Ratspeak project \u2014 a live board of features, fixes, and research in progress.",
+      "description": "Public Ratspeak tasks: features, fixes, and research shared by the project.",
       "isPartOf": {
         "@type": "WebSite",
         "name": "Ratspeak",
@@ -1216,14 +1216,14 @@
     // ═══════════════════════════════════════════════════════
 
     var PROJECTS = [
-        { id: 'ratspeak',    name: 'Ratspeak',         desc: 'Native desktop & mobile client for E2EE conversations over Reticulum.',          repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/Ratspeak' }],         color: 'var(--proj-ratspeak)' },
-        { id: 'rsdeck',     name: 'rsDeck',          desc: 'Dual-mode Ratspeak firmware for the LilyGo T-Deck Plus.',                        repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/rsDeck' }],          color: 'var(--proj-rsdeck)' },
-        { id: 'rscardputer', name: 'rsCardputer',      desc: 'Dual-mode Ratspeak firmware for the M5Stack Cardputer Adv.',                    repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/rsCardputer' }],     color: 'var(--proj-rscardputer)' },
-        { id: 'rspager',     name: 'rsPager',          desc: 'Dual-mode Ratspeak firmware for the LilyGo T-Pager.',                           repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/rsPager' }],         color: 'var(--proj-rspager)' },
+        { id: 'ratspeak',    name: 'Ratspeak',         desc: 'Desktop and mobile messaging over Reticulum; private LXMF messages and hub-based Channels.',          repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/Ratspeak' }],         color: 'var(--proj-ratspeak)' },
+        { id: 'rsdeck',     name: 'rsDeck (legacy)',          desc: 'Legacy T-Deck Plus firmware. Current firmware is Ratspeak Handheld.',                        repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/rsDeck' }],          color: 'var(--proj-rsdeck)' },
+        { id: 'rscardputer', name: 'rsCardputer (legacy)',      desc: 'Legacy Cardputer Adv firmware. Current firmware is Ratspeak Handheld.',                    repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/rsCardputer' }],     color: 'var(--proj-rscardputer)' },
+        { id: 'rspager',     name: 'rsPager (legacy)',          desc: 'Legacy T-Pager firmware. Current firmware is Ratspeak Handheld.',                           repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/rsPager' }],         color: 'var(--proj-rspager)' },
         { id: 'rsreticulum', name: 'rsReticulum',      desc: 'Rust implementation of the Reticulum networking stack.',                          repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/rsReticulum' }],      color: 'var(--proj-rsreticulum)' },
         { id: 'rslxmf',      name: 'rsLXMF',           desc: 'Rust implementation of LXMF for Reticulum.',                                      repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/rsLXMF' }],           color: 'var(--proj-rslxmf)' },
-        { id: 'website',     name: 'Ratspeak Website', desc: 'Source for ratspeak.org — public site & documentation.',                          repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/ratspeak-website' }], color: 'var(--proj-website)' },
-        { id: 'rathole',     name: 'Rathole',          desc: 'Security suite + transport node for Reticulum — easy, private home gateway with I2P.', repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/rathole' }],          color: 'var(--proj-rathole)' },
+        { id: 'website',     name: 'Ratspeak Website', desc: 'Source for ratspeak.org; the documentation site has its own repository.',                          repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/ratspeak-website' }], color: 'var(--proj-website)' },
+        { id: 'rathole',     name: 'Rathole',          desc: 'Python Reticulum gateway with packet filters and optional I2P.', repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/rathole' }],          color: 'var(--proj-rathole)' },
         { id: 'lrgp',        name: 'LRGP',             desc: 'Lightweight Reticulum Gaming Protocol — multiplayer games over LXMF / Reticulum.',
             repos: [
                 { label: 'Python', url: 'https://github.com/ratspeak/lrgp-py' },
@@ -1231,7 +1231,7 @@
             ],
             color: 'var(--proj-lrgp)'
         },
-        { id: 'lxmface',     name: 'LXMFace',          desc: 'Deterministic visual identities for LXMF / Reticulum addresses.',                 repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/LXMFace' }],          color: 'var(--proj-lxmface)' },
+        { id: 'lxmface',     name: 'LXMFace',          desc: 'Identicons derived from LXMF / Reticulum addresses.',                 repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/LXMFace' }],          color: 'var(--proj-lxmface)' },
         { id: 'ratkey',      name: 'Ratkey',           desc: 'Hardware-backed identity protection for Reticulum using YubiKey.',                repos: [{ label: 'GitHub', url: 'https://github.com/ratspeak/ratkey' }],           color: 'var(--proj-ratkey)' }
     ];
 

@@ -154,7 +154,7 @@ function render() {
     <section class="ballot id-flow">
       <div class="ballot-head${earned ? ' id-flow-head-good' : ''}">
         <h2 class="ballot-title id-flow-title">${earned ? `${badgeName(badge)} holder` : 'Claim your badge'}</h2>
-        <p class="ballot-desc">Sign a message with your wallet and your badge is issued from your live RATSPEAK holdings.</p>
+        <p class="ballot-desc">Sign a message to check your current RATSPEAK holdings and claim a badge. A previously earned higher tier is retained.</p>
       </div>
       <div class="id-flow-body">
         ${ladder(badge)}

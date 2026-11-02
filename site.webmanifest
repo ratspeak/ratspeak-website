@@ -1,7 +1,7 @@
 {
   "name": "Ratspeak",
   "short_name": "Ratspeak",
-  "description": "Private communication without accounts, servers, or surveillance. Built on Reticulum for resilient messaging across any transport.",
+  "description": "Messaging without a central account, built on Reticulum. Connect over IP, LoRa or Bluetooth with compatible devices.",
   "id": "/",
   "lang": "en-US",
   "dir": "ltr",
