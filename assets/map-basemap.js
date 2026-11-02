@@ -1,6 +1,6 @@
 const STYLE_URLS = Object.freeze({
-  dark: 'assets/map-styles/ratspeak-dark.json?v=maplibre-5',
-  light: 'assets/map-styles/ratspeak-light.json?v=maplibre-5'
+  dark: 'assets/map-styles/ratspeak-dark.json?v=maplibre-6',
+  light: 'assets/map-styles/ratspeak-light.json?v=maplibre-6'
 });
 
 const PROVIDER_SOURCE_IDS = new Set(['openmaptiles', 'ne2_shaded']);

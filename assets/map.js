@@ -11,7 +11,7 @@ import {
   basemapStyleUrl,
   createFallbackStyle,
   isProviderResourceError
-} from './map-basemap.js?v=maplibre-5';
+} from './map-basemap.js?v=maplibre-6';
 
 const API_URL = '/api/map-nodes';
 // /api/map-nodes is CDN-cached for 60s, so a fresh tab is current; open tabs

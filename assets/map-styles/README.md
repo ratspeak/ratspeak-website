@@ -21,5 +21,11 @@ U.S. state names are the wide-area exception: they appear from zoom 4 through
 zoom 3 alongside major cities in both themes. State-name layers ignore placement,
 so they cannot displace major-city labels as zoom detail changes.
 
+Below zoom 3 the world view draws from `world-110m.geojson` (Natural Earth
+countries, about 50 KB gzipped) instead of the provider's low-zoom vector tiles,
+which cost about 6 MB for the opening view. Labels use Latin script only, which
+keeps glyph downloads to a few ranges. `node scripts/map-world-view.mjs` writes
+the world file and applies both rules to the two styles; it is safe to re-run.
+
 After changing either style, run `npm run check:map`. The fallback can be tested
 deterministically with `map.html?basemap=fallback`.

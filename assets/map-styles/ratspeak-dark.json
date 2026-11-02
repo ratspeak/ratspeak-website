@@ -13,6 +13,11 @@
       "type": "vector",
       "url": "https://tiles.openfreemap.org/planet",
       "attribution": "<a href=\"https://openfreemap.org/\">OpenFreeMap</a> <a href=\"https://openmaptiles.org/\">© OpenMapTiles</a> Data from <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
+    },
+    "world": {
+      "type": "geojson",
+      "data": "assets/map-styles/world-110m.geojson",
+      "attribution": "<a href=\"https://www.naturalearthdata.com/\">Natural Earth</a>"
     }
   },
   "sprite": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm",
@@ -22,7 +27,46 @@
       "id": "background",
       "type": "background",
       "paint": {
-        "background-color": "rgb(12,12,12)"
+        "background-color": [
+          "step",
+          [
+            "zoom"
+          ],
+          "rgb(27,27,29)",
+          3,
+          "rgb(12,12,12)"
+        ]
+      }
+    },
+    {
+      "id": "world-land",
+      "type": "fill",
+      "source": "world",
+      "maxzoom": 3,
+      "paint": {
+        "fill-color": "rgb(12,12,12)"
+      }
+    },
+    {
+      "id": "world-borders",
+      "type": "line",
+      "source": "world",
+      "maxzoom": 3,
+      "paint": {
+        "line-color": "hsl(0,0%,23%)",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          2,
+          0.6,
+          3,
+          0.9
+        ]
       }
     },
     {
@@ -56,7 +100,8 @@
       "paint": {
         "fill-antialias": false,
         "fill-color": "rgb(27 ,27 ,29)"
-      }
+      },
+      "minzoom": 3
     },
     {
       "id": "landcover_ice_shelf",
@@ -90,7 +135,8 @@
       "paint": {
         "fill-color": "rgb(12,12,12)",
         "fill-opacity": 0.7
-      }
+      },
+      "minzoom": 3
     },
     {
       "id": "landcover_glacier",
@@ -136,7 +182,8 @@
           8,
           0.5
         ]
-      }
+      },
+      "minzoom": 3
     },
     {
       "id": "landuse_residential",
@@ -170,7 +217,8 @@
       "paint": {
         "fill-color": "hsl(0,2%,5%)",
         "fill-opacity": 0.4
-      }
+      },
+      "minzoom": 3
     },
     {
       "id": "landcover_wood",
@@ -256,7 +304,8 @@
       ],
       "paint": {
         "fill-color": "rgb(32,32,32)"
-      }
+      },
+      "minzoom": 3
     },
     {
       "id": "waterway",
@@ -301,33 +350,18 @@
         "symbol-placement": "line",
         "symbol-spacing": 500,
         "text-field": [
-          "case",
+          "coalesce",
           [
-            "has",
-            "name:nonlatin"
+            "get",
+            "name_en"
           ],
           [
-            "concat",
-            [
-              "get",
-              "name:latin"
-            ],
-            "\n",
-            [
-              "get",
-              "name:nonlatin"
-            ]
+            "get",
+            "name:latin"
           ],
           [
-            "coalesce",
-            [
-              "get",
-              "name_en"
-            ],
-            [
-              "get",
-              "name"
-            ]
+            "get",
+            "name"
           ]
         ],
         "text-font": [
@@ -1527,33 +1561,18 @@
         "symbol-placement": "line",
         "symbol-spacing": 350,
         "text-field": [
-          "case",
+          "coalesce",
           [
-            "has",
-            "name:nonlatin"
+            "get",
+            "name_en"
           ],
           [
-            "concat",
-            [
-              "get",
-              "name:latin"
-            ],
-            " ",
-            [
-              "get",
-              "name:nonlatin"
-            ]
+            "get",
+            "name:latin"
           ],
           [
-            "coalesce",
-            [
-              "get",
-              "name_en"
-            ],
-            [
-              "get",
-              "name"
-            ]
+            "get",
+            "name"
           ]
         ],
         "text-font": [
@@ -1731,7 +1750,8 @@
           22,
           20
         ]
-      }
+      },
+      "minzoom": 3
     },
     {
       "id": "boundary_country_z5-",
@@ -1820,33 +1840,18 @@
       "layout": {
         "text-anchor": "center",
         "text-field": [
-          "case",
+          "coalesce",
           [
-            "has",
-            "name:nonlatin"
+            "get",
+            "name_en"
           ],
           [
-            "concat",
-            [
-              "get",
-              "name:latin"
-            ],
-            "\n",
-            [
-              "get",
-              "name:nonlatin"
-            ]
+            "get",
+            "name:latin"
           ],
           [
-            "coalesce",
-            [
-              "get",
-              "name_en"
-            ],
-            [
-              "get",
-              "name"
-            ]
+            "get",
+            "name"
           ]
         ],
         "text-font": [
@@ -1900,33 +1905,18 @@
       "layout": {
         "text-anchor": "center",
         "text-field": [
-          "case",
+          "coalesce",
           [
-            "has",
-            "name:nonlatin"
+            "get",
+            "name_en"
           ],
           [
-            "concat",
-            [
-              "get",
-              "name:latin"
-            ],
-            "\n",
-            [
-              "get",
-              "name:nonlatin"
-            ]
+            "get",
+            "name:latin"
           ],
           [
-            "coalesce",
-            [
-              "get",
-              "name_en"
-            ],
-            [
-              "get",
-              "name"
-            ]
+            "get",
+            "name"
           ]
         ],
         "text-font": [
@@ -1981,33 +1971,18 @@
         "icon-size": 0.4,
         "text-anchor": "left",
         "text-field": [
-          "case",
+          "coalesce",
           [
-            "has",
-            "name:nonlatin"
+            "get",
+            "name_en"
           ],
           [
-            "concat",
-            [
-              "get",
-              "name:latin"
-            ],
-            "\n",
-            [
-              "get",
-              "name:nonlatin"
-            ]
+            "get",
+            "name:latin"
           ],
           [
-            "coalesce",
-            [
-              "get",
-              "name_en"
-            ],
-            [
-              "get",
-              "name"
-            ]
+            "get",
+            "name"
           ]
         ],
         "text-font": [
@@ -2079,33 +2054,18 @@
           "center"
         ],
         "text-field": [
-          "case",
+          "coalesce",
           [
-            "has",
-            "name:nonlatin"
+            "get",
+            "name_en"
           ],
           [
-            "concat",
-            [
-              "get",
-              "name:latin"
-            ],
-            "\n",
-            [
-              "get",
-              "name:nonlatin"
-            ]
+            "get",
+            "name:latin"
           ],
           [
-            "coalesce",
-            [
-              "get",
-              "name_en"
-            ],
-            [
-              "get",
-              "name"
-            ]
+            "get",
+            "name"
           ]
         ],
         "text-font": [
@@ -2185,33 +2145,18 @@
           "center"
         ],
         "text-field": [
-          "case",
+          "coalesce",
           [
-            "has",
-            "name:nonlatin"
+            "get",
+            "name_en"
           ],
           [
-            "concat",
-            [
-              "get",
-              "name:latin"
-            ],
-            "\n",
-            [
-              "get",
-              "name:nonlatin"
-            ]
+            "get",
+            "name:latin"
           ],
           [
-            "coalesce",
-            [
-              "get",
-              "name_en"
-            ],
-            [
-              "get",
-              "name"
-            ]
+            "get",
+            "name"
           ]
         ],
         "text-font": [
@@ -2291,33 +2236,18 @@
           "center"
         ],
         "text-field": [
-          "case",
+          "coalesce",
           [
-            "has",
-            "name:nonlatin"
+            "get",
+            "name_en"
           ],
           [
-            "concat",
-            [
-              "get",
-              "name:latin"
-            ],
-            "\n",
-            [
-              "get",
-              "name:nonlatin"
-            ]
+            "get",
+            "name:latin"
           ],
           [
-            "coalesce",
-            [
-              "get",
-              "name_en"
-            ],
-            [
-              "get",
-              "name"
-            ]
+            "get",
+            "name"
           ]
         ],
         "text-font": [
@@ -2509,33 +2439,18 @@
       ],
       "layout": {
         "text-field": [
-          "case",
+          "coalesce",
           [
-            "has",
-            "name:nonlatin"
+            "get",
+            "name_en"
           ],
           [
-            "concat",
-            [
-              "get",
-              "name:latin"
-            ],
-            "\n",
-            [
-              "get",
-              "name:nonlatin"
-            ]
+            "get",
+            "name:latin"
           ],
           [
-            "coalesce",
-            [
-              "get",
-              "name_en"
-            ],
-            [
-              "get",
-              "name"
-            ]
+            "get",
+            "name"
           ]
         ],
         "text-font": [
@@ -2593,33 +2508,18 @@
       ],
       "layout": {
         "text-field": [
-          "case",
+          "coalesce",
           [
-            "has",
-            "name:nonlatin"
+            "get",
+            "name_en"
           ],
           [
-            "concat",
-            [
-              "get",
-              "name:latin"
-            ],
-            "\n",
-            [
-              "get",
-              "name:nonlatin"
-            ]
+            "get",
+            "name:latin"
           ],
           [
-            "coalesce",
-            [
-              "get",
-              "name_en"
-            ],
-            [
-              "get",
-              "name"
-            ]
+            "get",
+            "name"
           ]
         ],
         "text-font": [
@@ -2645,7 +2545,7 @@
         "text-halo-color": "rgba(0,0,0,0.7)",
         "text-halo-width": 1.4
       },
-      "minzoom": 2.35
+      "minzoom": 3
     },
     {
       "id": "place_country_minor",
@@ -2690,33 +2590,18 @@
       ],
       "layout": {
         "text-field": [
-          "case",
+          "coalesce",
           [
-            "has",
-            "name:nonlatin"
+            "get",
+            "name_en"
           ],
           [
-            "concat",
-            [
-              "get",
-              "name:latin"
-            ],
-            "\n",
-            [
-              "get",
-              "name:nonlatin"
-            ]
+            "get",
+            "name:latin"
           ],
           [
-            "coalesce",
-            [
-              "get",
-              "name_en"
-            ],
-            [
-              "get",
-              "name"
-            ]
+            "get",
+            "name"
           ]
         ],
         "text-font": [
@@ -2742,7 +2627,7 @@
         "text-halo-color": "rgba(0,0,0,0.7)",
         "text-halo-width": 1.4
       },
-      "minzoom": 2.35
+      "minzoom": 3
     },
     {
       "id": "place_country_major",
@@ -2788,33 +2673,18 @@
       "layout": {
         "text-anchor": "center",
         "text-field": [
-          "case",
+          "coalesce",
           [
-            "has",
-            "name:nonlatin"
+            "get",
+            "name_en"
           ],
           [
-            "concat",
-            [
-              "get",
-              "name:latin"
-            ],
-            "\n",
-            [
-              "get",
-              "name:nonlatin"
-            ]
+            "get",
+            "name:latin"
           ],
           [
-            "coalesce",
-            [
-              "get",
-              "name_en"
-            ],
-            [
-              "get",
-              "name"
-            ]
+            "get",
+            "name"
           ]
         ],
         "text-font": [
@@ -2843,7 +2713,7 @@
         "text-halo-color": "rgba(0,0,0,0.7)",
         "text-halo-width": 1.4
       },
-      "minzoom": 2.35
+      "minzoom": 3
     }
   ],
   "name": "Ratspeak Dark"

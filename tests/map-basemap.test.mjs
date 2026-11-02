@@ -112,6 +112,20 @@ for (const [theme, path] of Object.entries(stylePaths)) {
   });
 }
 
+for (const theme of Object.keys(stylePaths)) {
+  test(`${theme} style draws the world view without provider tiles`, async () => {
+    const style = await readStyle(theme);
+    const providerLayers = style.layers.filter((layer) => layer.source === 'openmaptiles');
+    const worldLayers = style.layers.filter((layer) => layer.source === 'world');
+
+    assert.match(style.sources.world.data, /^assets\/map-styles\/world-110m\.geojson$/);
+    assert.deepEqual(worldLayers.map((layer) => layer.id), ['world-land', 'world-borders']);
+    assert.ok(worldLayers.every((layer) => layer.maxzoom === 3));
+    assert.ok(providerLayers.every((layer) => layer.minzoom >= 3));
+    assert.doesNotMatch(JSON.stringify(style.layers), /name:nonlatin/);
+  });
+}
+
 test('fallback style is provider-independent and preserves geographic context', () => {
   const style = createFallbackStyle('dark', 'scripts/data/countries.geojson');
 
