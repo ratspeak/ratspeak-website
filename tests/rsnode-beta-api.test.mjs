@@ -88,7 +88,7 @@ test('production Node adapter exposes a Web Standard fetch handler and fails clo
   try {
     const response = await api.fetch(new Request(ORIGIN + '/api/rsnode-beta?action=session'));
     assert.equal(response.status, 503);
-    assert.deepEqual(await response.json(), { error: 'Private beta is not available yet.' });
+    assert.deepEqual(await response.json(), { error: 'The private beta is offline right now. Try again later.' });
     privateResponse(response);
   } finally {
     if (saved === undefined) delete process.env.RSNODE_BETA_CATALOG;
@@ -189,7 +189,7 @@ test('invitation lists reject malformed JSON, wrong types, controls, duplicates,
     const f = fixture({ RSNODE_BETA_PASSWORDS: value });
     const response = await f.request('session');
     assert.equal(response.status, 503);
-    assert.deepEqual(await response.json(), { error: 'Private beta is not available yet.' });
+    assert.deepEqual(await response.json(), { error: 'The private beta is offline right now. Try again later.' });
     privateResponse(response);
     assert.equal(f.runtime.fetches.length, 0);
   }
@@ -496,7 +496,7 @@ test('missing, weak, or incomplete configuration fails closed and hides configur
     const f = fixture(config);
     const response = await f.request('session');
     assert.equal(response.status, 503, Object.keys(config).join(','));
-    assert.deepEqual(await response.json(), { error: 'Private beta is not available yet.' });
+    assert.deepEqual(await response.json(), { error: 'The private beta is offline right now. Try again later.' });
     privateResponse(response);
     assert.equal(f.runtime.fetches.length, 0);
   }
