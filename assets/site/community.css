@@ -1,0 +1,30 @@
+/* Community token letter. Loaded after site.css and pages.css (legal-hero). */
+
+.letter{padding:var(--section-y) var(--pad-x);color:var(--text)}
+.letter-container{max-width:680px;font-size:19px;line-height:1.7}
+.letter-p{margin:0 0 24px}
+.letter-p a,.letter-link{color:var(--text-strong);font-weight:700;text-decoration-thickness:1px;text-underline-offset:4px;overflow-wrap:anywhere}
+.letter-p a:hover,.letter-link:hover{text-decoration-thickness:2px}
+
+.letter-list{display:grid;gap:12px;margin:0 0 32px;padding:0;list-style:none;counter-reset:reason}
+.letter-list li{counter-increment:reason;display:grid;grid-template-columns:40px minmax(0,1fr);align-items:center;gap:16px;padding:16px 20px;background:var(--surface);border:1.5px solid var(--line);font-size:var(--t-body);line-height:1.5}
+.letter-list li::before{content:counter(reason);display:grid;place-items:center;width:40px;height:40px;background:var(--text-strong);color:var(--surface);font:400 22px/1 Anton,Impact,sans-serif}
+
+.letter-break{width:72px;height:4px;margin:56px 0;background:var(--text-strong)}
+
+/* the legal boundary of the token reads as a notice, not a paragraph */
+.letter-disclaimer{margin:32px 0;padding:20px 24px;background:var(--tint);border-left:6px solid var(--text-strong)}
+
+.letter-cta{margin:40px 0 0;padding:20px 24px;background:var(--surface);border:1.5px solid var(--line);font-size:17px;line-height:1.55}
+
+.letter-signoff{display:flex;align-items:center;gap:16px;max-width:680px;margin-top:56px;padding-top:32px;border-top:1px solid var(--line)}
+.signoff-name{margin:0;font:400 clamp(32px,3.4vw,48px)/1 Anton,Impact,sans-serif;letter-spacing:.01em;color:var(--text-strong)}
+.signoff-logo{width:44px;height:44px;flex:none;color:var(--text-strong)}
+
+@media(max-width:700px){
+  .letter-container{font-size:17px}
+  .letter-list li{grid-template-columns:32px minmax(0,1fr);gap:14px;padding:14px 16px}
+  .letter-list li::before{width:32px;height:32px;font-size:18px}
+  .letter-disclaimer,.letter-cta{padding:16px 18px}
+  .letter-break{margin:44px 0}
+}

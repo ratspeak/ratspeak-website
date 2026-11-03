@@ -106,6 +106,7 @@ html.page-map,html.page-map body{height:auto;min-height:0;overflow:visible}
 .page-map .filter-label,.page-map .legend-title,.page-map .detail-label{font-size:var(--t-micro);font-weight:700;color:var(--muted)}
 .page-map .eyebrow{font-size:var(--t-micro);font-family:'DM Sans',system-ui,sans-serif}
 .page-map .legend-item{font-size:var(--t-micro);color:var(--text)}
+.page-map .map-snapshot-status{font-size:var(--t-micro);color:var(--muted)}
 .page-map .tag{border-radius:0}
 .page-map .detail-title{font-family:var(--font-sans);font-weight:700;letter-spacing:-.01em}
 .page-map .detail-list{border-radius:0;border-color:var(--line)}
@@ -138,4 +139,21 @@ html.page-map,html.page-map body{height:auto;min-height:0;overflow:visible}
   --pin-edge:rgb(238 242 255 / .2);--pin-shadow:rgb(0 0 0 / .45);
   --map-canvas-bg:#0a0f2e;--map-canvas-bg-deep:#070b24;
   --map-vignette-x:rgb(4 8 30 / .3);--map-vignette-y:rgb(4 8 30 / .16);--map-ambient-glow:rgb(169 184 255 / .05);
+}
+
+/* ── 404 ───────────────────────────────────────────────── */
+.notfound{display:flex;flex-direction:column;justify-content:center;min-height:calc(100svh - 80px);padding:clamp(48px,6vw,96px) var(--pad-x) clamp(64px,7vw,112px)}
+.notfound:focus{outline:none}
+.notfound__code{margin:0 0 20px;font-size:var(--t-small);font-weight:700;color:var(--on-band-muted)}
+.notfound__title{margin:0;max-width:9em;font:400 clamp(56px,10vw,168px)/.92 Anton,Impact,sans-serif;letter-spacing:-.01em;text-transform:uppercase;text-wrap:balance}
+.notfound__lede{margin:clamp(24px,2.6vw,36px) 0 0;max-width:34ch;text-wrap:pretty;font-size:var(--t-hero-sub);line-height:1.45}
+.notfound__links{display:flex;flex-wrap:wrap;align-items:center;gap:16px 36px;margin:clamp(32px,3.4vw,48px) 0 0;padding:0;list-style:none}
+.notfound__links .block-button{min-width:220px}
+.notfound__link{display:inline-block;padding:11px 0;font-size:18px;font-weight:700;color:var(--on-band);text-decoration:underline 2px color-mix(in srgb,currentColor 45%,transparent);text-underline-offset:6px}
+.notfound__link:hover{text-decoration-color:currentColor}
+.notfound__link span{font-size:20px;line-height:1}
+@media(max-width:700px){.notfound{min-height:calc(100svh - 104px)}}
+@media(max-width:560px){
+  .notfound__links{flex-direction:column;align-items:stretch;gap:8px}
+  .notfound__links .block-button{width:100%;min-width:0}
 }
