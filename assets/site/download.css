@@ -71,7 +71,6 @@ body.is-flasher-active .dl-hero{display:none}
 .dl-cta-secondary{justify-content:flex-start;gap:8px;padding-inline:14px}
 .dl-cta-secondary:hover{background:var(--text-strong);color:var(--bg);border-color:var(--text-strong)}
 .dl-cta-meta{white-space:nowrap;margin-left:auto;font-size:var(--t-micro);font-weight:400;opacity:.85}
-.dl-cta-soon{display:flex;align-items:center;min-height:48px;margin:0;padding:0 2px;font-size:var(--t-small);color:var(--muted)}
 .dl-cta-also{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 16px;margin:0;font-size:var(--t-small);color:var(--muted)}
 .dl-cta-also a{display:inline-block;padding:4px 0;color:var(--text-strong);font-weight:700;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
 .dl-cta-also a:hover{text-decoration-thickness:2px}

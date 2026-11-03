@@ -3,8 +3,9 @@ import { webcrypto } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
+import { allFlasherPages, flasherPage } from './flasher-page.mjs';
 
-const downloadHtml = readFileSync(new URL('../download.html', import.meta.url), 'utf8');
+const downloadHtml = flasherPage('flash.html');
 const firmwareApi = readFileSync(new URL('../api/firmware.js', import.meta.url), 'utf8');
 
 function findMatchingBrace(source, openIndex) {
@@ -599,7 +600,7 @@ test('nRF52 DFU path is separate from ESP32 flashing and has a long reboot settl
 
 test('verified RNode setup does not surface Missing Config copy after completion', () => {
   assert.match(downloadHtml, /Ratspeak keeps startup radio settings host-controlled/);
-  assert.doesNotMatch(downloadHtml, /Missing Config/);
+  assert.doesNotMatch(allFlasherPages(), /Missing Config/);
   assert.match(downloadHtml, /Use if identity or firmware-hash setup fails\./);
   assert.match(downloadHtml, /titleEl\.textContent = 'RNode Ready'/);
   assert.match(downloadHtml, /descEl\.textContent = ''/);
@@ -630,7 +631,7 @@ test('nRF52 RNode provisioning is click-driven after a physical reset', () => {
   assert.match(downloadHtml, /Select the RNode serial port\./);
   assert.match(downloadHtml, /Selected port did not answer as RNode/);
   assert.match(downloadHtml, /Finish Setup/);
-  assert.doesNotMatch(downloadHtml, /Activate RNode/);
+  assert.doesNotMatch(allFlasherPages(), /Activate RNode/);
   assert.match(downloadHtml, /settleMs: rnodeActivationSettleMs\(\)/);
   assert.match(downloadHtml, /rnodePostResetSettleMs\(\)/);
   assert.match(downloadHtml, /dataTerminalReady:\s*true/);

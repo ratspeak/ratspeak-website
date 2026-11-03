@@ -44,7 +44,7 @@
         <!-- Browser warning (only visible on non-WebSerial browsers) -->
         <div class="browser-warning" id="browserWarning">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            <span>In-browser flashing needs <strong>Chrome</strong> or <strong>Edge</strong>, version 89 or later. Open this page in one of them on a computer.</span>
+            <span>In-browser flashing needs a current desktop version of <strong>Chrome</strong> or <strong>Edge</strong> with Web Serial. Open this page in one of them on a computer.</span>
         </div>
 
     <!-- Flash Interface -->
@@ -142,6 +142,7 @@
                                     </div>
                                     <div class="drop-zone__text">Drop a firmware file here</div>
                                     <div class="drop-zone__hint">or choose one &middot; .bin or .zip</div>
+                                    <div class="drop-zone__hint">Back up first. Confirm the board and write offsets; custom firmware may overwrite your identity and data.</div>
                                 </div>
                                 <div class="drop-zone__file-info">
                                     <div class="drop-zone__file-name" id="fileName"></div>
@@ -175,7 +176,7 @@
                                     <p class="rsnode-beta__note">Check the chip marking or your order details: ESP32-S3R2 has 2 MB PSRAM; ESP32-S3R8 has 8 MB. Both V4s have 16 MB flash and need different firmware.</p>
                                     <label class="rsnode-beta__check rsnode-beta__variant"><input type="checkbox" id="rsnodeVariantConfirmed"><span id="rsnodeVariantLabel">I checked my V4 variant.</span></label>
                                 </div>
-                                <p class="rsnode-beta__note rsnode-beta__note--warning" id="rsnodeInstallNote">Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings. From the next beta, Update keeps them.</p>
+                                <p class="rsnode-beta__note rsnode-beta__note--warning" id="rsnodeInstallNote">Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings. Update requires a compatible package and firmware that supports USB updates.</p>
                                 <div class="rsnode-update" id="rsnodeUpdate" hidden>
                                     <div class="rsnode-update__check">
                                         <button class="rsnode-beta__button" id="rsnodeUpdateCheck" type="button" aria-describedby="rsnodeUpdateStatus">Check the node</button>
@@ -251,7 +252,7 @@
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
                                 </span>
                                 <span class="flash-option-pill__copy">
-                                    <span class="flash-option-pill__label">Full erase</span>
+                                    <span class="flash-option-pill__label">Full Erase</span>
                                     <span class="flash-option-pill__hint">Erases everything on the device first</span>
                                 </span>
                                 <span class="flash-option-pill__check" aria-hidden="true">
@@ -427,7 +428,7 @@
                     <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
                 </summary>
                 <div class="flash-cta__repair-body">
-                    <p class="rsnode-tools__lede">Read the node's settings, change them here, and save. Saving restarts the node. Region, LIMITS, and the radio are set on the device.</p>
+                    <p class="rsnode-tools__lede">Requires firmware with USB settings support. Read the node's settings, change them here, and save. Saving restarts the node. Region, LIMITS, and the radio are set on the device.</p>
                     <form id="rsnodeSettingsForm" novalidate hidden>
                         <fieldset class="rsnode-owner__fields" id="rsnodeSettingsFields">
                             <p class="rsnode-settings__persona" id="rsnodeSettingsPersona"></p>
@@ -489,7 +490,7 @@
                                     <div><dt>Radio</dt><dd id="rsnodeSettingsRadio"></dd></div>
                                     <div><dt>LoRa IFAC</dt><dd id="rsnodeSettingsIfac"></dd></div>
                                 </dl>
-                                <p class="rsnode-tools__help">Change the region, LIMITS, and radio on the Repeater's own menus; they carry legal confirmations only the device asks for.</p>
+                                <p class="rsnode-tools__help">Change the region, LIMITS, and radio on the Repeater's own menus; these changes require confirmation on the device.</p>
                             </div>
                         </fieldset>
                     </form>
@@ -543,7 +544,7 @@
                                             <option value="owner">Owner</option>
                                             <option value="admin">Admin</option>
                                         </select>
-                                        <p class="rsnode-tools__help" id="rsnodeRoleHelp">The Owner changes settings and managers. Admins read status and settings and install updates.</p>
+                                        <p class="rsnode-tools__help" id="rsnodeRoleHelp">The Owner changes settings and managers. Admins read status and settings and install updates. Settings access requires firmware that supports it.</p>
                                         <div class="rsnode-managers__editor-actions">
                                             <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeManagerDone" type="button">Add</button>
                                             <button class="rsnode-beta__button" id="rsnodeManagerCancel" type="button">Cancel</button>
@@ -558,7 +559,7 @@
                                 <ul>
                                     <li>Plug the node in over USB. Close other apps that use its port, such as Ratspeak or a serial monitor.</li>
                                     <li>If you just installed, press RESET on the board first.</li>
-                                    <li>A running Repeater takes manager changes over USB. In RNode, hold USB on the home menu to take over from another app.</li>
+                                    <li>Some betas require RNode mode for manager changes: stop and exit the Repeater first if a change is refused. In RNode, hold USB on the home menu to take over from another app.</li>
                                     <li>Adding the first manager creates the node's identity, so its Bluetooth or Wi-Fi radio must be running (a normal RNode boot has one).</li>
                                 </ul>
                             </div>
@@ -621,7 +622,7 @@
                             </span>
                             <span class="flash-repair__copy">
                                 <span class="flash-repair__label">Adopt running hash</span>
-                                <span class="flash-repair__sub">Use this for &ldquo;Firmware Corrupt&rdquo; when the board still answers USB.</span>
+                                <span class="flash-repair__sub">Trusts the firmware currently running on the board. Use only with a known-good installation; this does not repair corrupted firmware.</span>
                             </span>
                         </button>
                         <button type="button" class="flash-repair__action" id="inspectHashBtn">

@@ -1367,7 +1367,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     // ── rsNode Update (CMD_RSNODE BEGIN/CHUNK/FINISH over USB, keeps settings) or Install (esptool, erases) ──
     var rsnodeChecking = false;
     var RSNODE_CHECK_MS = 10000;
-    var RSNODE_INSTALL_NOTE = 'Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings. From the next beta, Update keeps them.';
+    var RSNODE_INSTALL_NOTE = 'Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings. Update requires a compatible package and firmware that supports USB updates.';
     var RSNODE_UPDATE_NOTE = 'Update keeps the node\'s identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings; Install erases them. Check the node to see whether it can update.';
 
     function rsnodeUpdateChosen() {
@@ -1465,7 +1465,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         var metadata = state.rsnodeMetadata, bundle = metadata.update, bytes = state.rsnodeBundle.bytes;
         setProgress(2, 'Preparing update...');
         await verifyRsnodeBundle(bytes, bundle);
-        logMessage('Verified signed update ' + bundle.version + ' for ' + metadata.label, 'log-green');
+        logMessage('Verified update package hash and metadata: ' + bundle.version + ' for ' + metadata.label, 'log-green');
         if (!await confirmFactoryInstall({ product: 'rsnode', installMode: 'update', board: metadata.id, boardLabel: metadata.label }, {
             title: 'Update',
             intro: 'You are updating this node to rsNode ' + bundle.version + '.',
@@ -1567,10 +1567,10 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
 
     function rnodeActivationPortGuidance() {
         if (isTechoRnodeFirmwareSelected()) {
-            return 'Press RESET once. When the serial port returns, click Finish setup.';
+            return 'Press RESET once. When the serial port returns, click Finish Setup.';
         }
         if (isNrf52RnodeFirmwareSelected()) {
-            return 'Reset or unplug/replug the board. When the serial port returns, click Finish setup.';
+            return 'Reset or unplug/replug the board. When the serial port returns, click Finish Setup.';
         }
         return 'Select the RNode serial port that appeared after the device rebooted.';
     }
@@ -1584,10 +1584,10 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
 
     function rnodeActivationRetryGuidance() {
         if (isTechoRnodeFirmwareSelected()) {
-            return 'Press RESET once, then try Finish setup again.';
+            return 'Press RESET once, then try Finish Setup again.';
         }
         if (isNrf52RnodeFirmwareSelected()) {
-            return 'Reset or unplug/replug the board, then try Finish setup again.';
+            return 'Reset or unplug/replug the board, then try Finish Setup again.';
         }
         return 'Select the RNode serial port and try again.';
     }
@@ -3058,7 +3058,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
                     logMessage(RNODE_UNSIGNED_PROVISIONING_NOTICE, 'log-orange');
                     await writeRnodeIdentity(session, product, model, hwRev, serialBytes, madeBytes, checksum, signature, logMessage);
                 } else {
-                    throw new Error(existingIssue + '; use Full erase and flash again');
+                    throw new Error(existingIssue + '; use Full Erase and flash again');
                 }
 
                 if (setProgress) setProgress(97, 'Finalizing RNode setup...');
@@ -3174,7 +3174,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
 
     async function runReprovisionOnly() {
         if (!('serial' in navigator)) {
-            alert('RNode setup requires Web Serial (Chrome / Edge 89+).');
+            alert('RNode setup requires Web Serial (desktop Chrome / Edge).');
             return;
         }
         if (resolveBoardIdentity() == null) {
@@ -3219,7 +3219,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
 
     async function runSetHashOnly() {
         if (!('serial' in navigator)) {
-            alert('This requires Web Serial (Chrome / Edge 89+).');
+            alert('This requires Web Serial (desktop Chrome / Edge).');
             return;
         }
         if (!state.firmwareAppBytes || !state.firmwareAppBytes.length) {
@@ -3251,7 +3251,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
 
     async function runAdoptRunningHashOnly() {
         if (!('serial' in navigator)) {
-            alert('This requires Web Serial (Chrome / Edge 89+).');
+            alert('This requires Web Serial (desktop Chrome / Edge).');
             return;
         }
         try { await requestFreshRnodePortFromUser(); } catch (e) { return; }
@@ -3270,11 +3270,11 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             if (adoptionSent) {
                 ui.log('Waiting for the RNode reboot, then verifying persistence...', 'log-orange');
                 await ensureRnodeFirmwareHashMatches(ui.log, rnodePostResetSettleMs(), { quiet: true });
-                ui.log('Running firmware hash adopted and verified.', 'log-green');
+                ui.log('Running firmware hash stored and matched after reboot.', 'log-green');
             } else {
                 ui.log('Target hash already matches running firmware.', 'log-green');
             }
-            ui.setStatus('Running hash verified.');
+            ui.setStatus('Stored hash matches the running firmware.');
         } catch (err) {
             ui.log('Error: ' + (err.message || err), 'log-red');
             ui.setStatus('Adopt hash failed.');
@@ -3283,7 +3283,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
 
     async function runInspectHashesOnly() {
         if (!('serial' in navigator)) {
-            alert('This requires Web Serial (Chrome / Edge 89+).');
+            alert('This requires Web Serial (desktop Chrome / Edge).');
             return;
         }
         try { await requestFreshRnodePortFromUser(); } catch (e) { return; }
@@ -3302,7 +3302,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
 
     async function runSetNormalModeOnly() {
         if (!('serial' in navigator)) {
-            alert('This requires Web Serial (Chrome / Edge 89+).');
+            alert('This requires Web Serial (desktop Chrome / Edge).');
             return;
         }
         var message = 'Keep this RNode idle until Ratspeak configures it?\n\n' +
@@ -3987,7 +3987,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             ? (repeater ? 'Without Wi-Fi the Repeater forwards over LoRa only.' : 'Apps connect over USB or Bluetooth.')
             : repeater ? 'The Repeater\'s uplink and peers use this network.'
             : 'Bluetooth is off while Wi-Fi is on. Apps connect over TCP port ' + RSNODE_APP_PORT + '.' +
-              (mode === 'own' ? ' The node\'s network offers no internet, so a laptop keeps its own.' : '');
+              (mode === 'own' ? ' The node\'s network does not provide Internet access.' : '');
         document.getElementById('rsnodeWifiPasswordStored').hidden = rsnodeSettingsPassword;
         document.getElementById('rsnodeWifiPassword').hidden = !rsnodeSettingsPassword;
         document.getElementById('rsnodeWifiPasswordHelp').hidden = !rsnodeSettingsPassword;
@@ -4093,7 +4093,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             if (save && nodeId !== before.nodeId) throw new Error('This is RNode ' + nodeId + ', not RNode ' + before.nodeId + '. Read its settings first.');
             var status = await readRsnodeStatus(session);
             if (!status || !status.node) {
-                throw new Error('RNode ' + nodeId + ' runs a beta without USB settings. Install the latest beta to change settings here.');
+                throw new Error('RNode ' + nodeId + ' did not report USB settings support. Check the connection and use the instructions for its firmware version. The Install action erases the node.');
             }
             if (save) {
                 var held = rsnodeHeldElsewhere(status);
@@ -4108,7 +4108,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
                 }
                 if (outcome.kind === 'refused') throw new Error(rsnodeHeldMessage(nodeId, 'Bluetooth or Wi-Fi'));
                 if (outcome.kind === 'busy') throw new Error('RNode ' + nodeId + ' is busy finishing an update or saving. Try again in a minute.');
-                if (outcome.kind === 'storage') throw new Error('RNode ' + nodeId + ' could not save the settings. Nothing changed.');
+                if (outcome.kind === 'storage') throw new Error('RNode ' + nodeId + ' could not confirm that the settings were saved. Read its settings before retrying.');
                 if (outcome.kind === 'unsupported') throw new Error('RNode ' + nodeId + ' cannot change these settings over USB.');
                 if (outcome.kind === 'failed') throw new Error('RNode ' + nodeId + ' refused the settings (result ' + outcome.result + ').');
                 if (outcome.kind === 'restart') {
@@ -5732,7 +5732,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
                 if (prepared.installMode === 'factory') {
                     logMessage('Fresh install — resetting internal storage...', 'log-orange');
                 } else if (eraseBeforeFlash) {
-                    logMessage('Full erase enabled — wiping all memory...', 'log-orange');
+                    logMessage('Full erase enabled — wiping internal flash...', 'log-orange');
                 }
                 logMessage('Flashing ' + prepared.fileArray.length + ' part(s)...', '');
                 var totalFlashBytes = prepared.fileArray.reduce(function(sum, part) { return sum + part.data.length; }, 0);
@@ -5792,7 +5792,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
                     if (isRnodeReconnectSetupIssue(setupError)) {
                         rnodeSetupIssue = setupError;
                         rnodeSetupIssueKind = 'reconnect';
-                        logMessage('Firmware installed. Reset the board, then click Finish setup.', 'log-green');
+                        logMessage('Firmware installed. Reset the board, then click Finish Setup.', 'log-green');
                     } else {
                         rnodeSetupIssue = 'Provisioning failed: ' + setupError;
                         rnodeSetupIssueKind = 'provision';
@@ -5924,7 +5924,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         resultEl.classList.add('active', 'flash-result--complete');
         iconEl.className = 'flash-result__icon flash-result__icon--success';
         svgEl.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
-        titleEl.textContent = 'RNode ready';
+        titleEl.textContent = 'RNode Ready';
         descEl.textContent = '';
         updateFlashFlow();
     }
@@ -6081,7 +6081,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             : 'Firmware was written, but RNode setup did not finish. Use RNode tools below to retry setup if the device does not boot cleanly. Last error: ' + issue;
         if (needsReconnect) {
             resultEl.classList.add('flash-result--continue');
-            configureResultAction('Finish setup', runReprovisionOnly);
+            configureResultAction('Finish Setup', runReprovisionOnly);
         }
         resultEl.classList.add('active');
     }

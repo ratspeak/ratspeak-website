@@ -6,10 +6,11 @@ import { HOST_OWNERS, SCREEN_HEIGHT, SCREEN_WIDTH, leaveRsnode, parseRsnodeStatu
   readRsnodeRadio, readRsnodeScreen, readRsnodeStatus, renderTransport, restartRsnode, rsnodeBluetoothOff, rsnodeDetails,
   rsnodeSummary, screenPixels, screenSupported, startRsnodePairing, waitForRsnode } from '../assets/js/rsnode-device.js';
 import { renderNode } from '../assets/js/rsnode-provision.js';
+import { flasherPage } from './flasher-page.mjs';
 
 // rsNode's own answers, recorded from its code by scripts/rsnode-device-vectors.py.
 const vectors = JSON.parse(readFileSync(new URL('./fixtures/rsnode-device-vectors.json', import.meta.url), 'utf8'));
-const html = readFileSync(new URL('../download.html', import.meta.url), 'utf8');
+const html = flasherPage('flash.html');
 const bytes = value => Uint8Array.from(Buffer.from(value, 'hex'));
 const hex = value => Buffer.from(value).toString('hex');
 const scenario = name => vectors.scenarios.find(entry => entry.name.startsWith(name));

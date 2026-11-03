@@ -5,8 +5,9 @@ import test, { describe } from 'node:test';
 import vm from 'node:vm';
 import { chooseRsnodeInstall, parseRsnodeBundle, rsnodeOtaTarget, streamRsnodeUpdate, verifyRsnodeBundle } from '../assets/js/rsnode-update.js';
 import { parseRsnodeStatus } from '../assets/js/rsnode-device.js';
+import { flasherPage } from './flasher-page.mjs';
 
-const html = readFileSync(new URL('../download.html', import.meta.url), 'utf8');
+const html = flasherPage('flash.html');
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 
 function extract(name) {

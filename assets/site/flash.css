@@ -3,3 +3,4 @@
 .is-flash-page .flash-interface.active{animation:none}
 .is-flash-page .browser-warning.show{display:flex;box-sizing:border-box;width:min(calc(100% - 2 * var(--gutter)),calc(1120px - 2 * var(--gutter)));margin:32px auto 0}
 .is-flash-page.is-flasher-active .dl-hero{display:block}
+.is-flash-page .drop-zone__hint + .drop-zone__hint{max-width:36em;margin:10px auto 0}

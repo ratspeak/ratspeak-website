@@ -3,10 +3,11 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
 import { parseHash, parseManagementStatus, parseNodeStatus, provisionRsnode, renderNode } from '../assets/js/rsnode-provision.js';
+import { allFlasherPages, flasherPage } from './flasher-page.mjs';
 
 // Generated from rsNode's provision-rsnode.py by scripts/rsnode-provision-vectors.py.
 const vectors = JSON.parse(readFileSync(new URL('./fixtures/rsnode-provision-vectors.json', import.meta.url), 'utf8'));
-const html = readFileSync(new URL('../download.html', import.meta.url), 'utf8');
+const html = flasherPage('flash.html');
 const bytes = value => Uint8Array.from(Buffer.from(value, 'hex'));
 const hex = value => Buffer.from(value).toString('hex');
 
@@ -136,7 +137,7 @@ test('owner hashes are accepted exactly when provision-rsnode.py accepts them', 
 test('the page has no management key paths left', async () => {
   const module = await import('../assets/js/rsnode-provision.js');
   for (const name of ['parseKeyFile', 'generateManagementKey', 'KEY_FILE_READ_MAX', 'renderStatus']) assert.equal(module[name], undefined, name);
-  assert.doesNotMatch(html, /managementKey|noKey|clearKey|saveKey/);
+  assert.doesNotMatch(allFlasherPages(), /managementKey|noKey|clearKey|saveKey/);
 });
 
 const plain = options => JSON.parse(JSON.stringify(options, (key, value) => value instanceof Uint8Array ? hex(value) : value));
@@ -400,7 +401,7 @@ test('the device management row says owner and admin, as the docs define them', 
 
 test('the tools ask for a Ratspeak LXMF address, say managers are optional, and never send testers to EXIT the Repeater', () => {
   const tools = /id="rsnodeDevice"[\s\S]*?id="flashRepair"/.exec(html)[0];
-  assert.doesNotMatch(html, /rsnode-client whoami/);
+  assert.doesNotMatch(allFlasherPages(), /rsnode-client whoami/);
   assert.doesNotMatch(tools, /EXIT a running Repeater/);
   const text = tools.replace(/<[^>]+>/g, ' ');
   assert.match(text, /your Ratspeak LXMF address/);

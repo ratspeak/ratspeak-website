@@ -6,8 +6,9 @@ import { RSNODE_RESULT } from '../assets/js/rsnode-device.js';
 import { SETTING, WIFI_MODES, checkSettingsForm, decodeEntries, decodeSettings, encodeEntries, readRsnodeSettings,
   settingsChanges, settingsForm, settingsOutcome, settingsRadioLines, settingsRefusal, settingsSavedMessage,
   writeRsnodeSettings } from '../assets/js/rsnode-settings.js';
+import { flasherPage } from './flasher-page.mjs';
 
-const html = readFileSync(new URL('../download.html', import.meta.url), 'utf8');
+const html = flasherPage('flash.html');
 const hex = value => Buffer.from(value).toString('hex');
 const bytes = text => Array.from(Buffer.from(text));
 const entry = (id, value) => [id, value.length, ...value];

@@ -27,8 +27,8 @@
       "@type": "SoftwareApplication",
       "name": "Ratspeak",
       "applicationCategory": "CommunicationApplication",
-      "operatingSystem": "macOS, Windows, Linux, iOS, Android, GrapheneOS, ESP32",
-      "description": "Download Ratspeak for macOS, Windows, Linux, and Android, or flash it to a LoRa handheld from your browser.",
+      "operatingSystem": "macOS, Windows, Linux, iOS, Android",
+      "description": "Download Ratspeak for macOS, Windows, Linux, Android, and iPhone, or flash it to a LoRa handheld from your browser.",
       "url": "https://ratspeak.org/download.html",
       "offers": {
         "@type": "Offer",
@@ -50,7 +50,7 @@
     <section class="flash-hero dl-hero" aria-labelledby="dl-hero-title">
         <h1 id="dl-hero-title">Get Ratspeak.</h1>
         <p class="dl-hero__sub">Free on every device, with no account or phone number. Install the app, or flash a LoRa handheld from your browser.</p>
-        <p class="dl-hero__meta"><span class="dl-hero__ver">App <span id="ratspeakReleaseTag">v1.0.36</span> &middot; </span>Built on <a href="https://docs.ratspeak.org/docs/concepts/what-is-reticulum">Reticulum <span aria-hidden="true">↗</span></a></p>
+        <p class="dl-hero__meta"><span class="dl-hero__ver"><span id="ratspeakReleaseTag">Latest app release</span> &middot; </span>Built on <a href="https://docs.ratspeak.org/docs/concepts/what-is-reticulum">Reticulum <span aria-hidden="true">↗</span></a></p>
     </section>
 </div>
 
@@ -61,7 +61,7 @@
         <!-- Browser warning (only visible on non-WebSerial browsers) -->
         <div class="browser-warning" id="browserWarning">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            <span>In-browser flashing needs <strong>Chrome</strong> or <strong>Edge</strong>, version 89 or later. App downloads work in any browser.</span>
+            <span>In-browser flashing needs a current desktop version of <strong>Chrome</strong> or <strong>Edge</strong> with Web Serial. App downloads work in any browser.</span>
         </div>
 
         <section class="dl-platform-panel" id="dlPlatformPanel" data-active-platform="desktop" aria-label="Your download">
@@ -79,7 +79,7 @@
                                 <span class="dl-cta-primary__meta">Apple Silicon &middot; .dmg</span>
                             </span>
                         </a>
-                        <p class="dl-cta-facts" data-release-facts="macos-arm64"><span data-release-version>v1.0.36</span></p>
+                        <p class="dl-cta-facts" data-release-facts="macos-arm64">Latest release</p>
                         <div class="dl-cta-secondary-row">
                             <a href="https://github.com/ratspeak/Ratspeak/releases/latest" class="nr-btn nr-btn-secondary dl-cta-secondary" data-ratspeak-release-asset="windows-msi">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
@@ -121,10 +121,9 @@
                                 <span class="dl-cta-primary__meta">Most phones &middot; arm64 .apk</span>
                             </span>
                         </a>
-                        <p class="dl-cta-facts" data-release-facts="android-arm64"><span data-release-version>v1.0.36</span></p>
+                        <p class="dl-cta-facts" data-release-facts="android-arm64">Latest release</p>
                         <div class="dl-cta-secondary-row">
                             <a href="https://testflight.apple.com/join/AzzW4Jg6" class="nr-btn nr-btn-secondary dl-cta-secondary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 3 21 12 3 21 3 3" fill="currentColor"/></svg> iPhone and iPad<span class="dl-cta-meta">TestFlight ↗</span></a>
-                            <p class="dl-cta-soon">Google Play: coming soon</p>
                         </div>
                         <p class="dl-cta-also">Also: <a href="https://github.com/ratspeak/Ratspeak/releases/latest" data-ratspeak-release-asset="android-armv7">Older phones .apk</a> <a href="https://github.com/ratspeak/Ratspeak/releases/latest" data-ratspeak-release-asset="android-x86_64">x86_64 .apk</a> <a href="https://github.com/ratspeak/Ratspeak/releases/latest">All downloads <span aria-hidden="true">↗</span></a></p>
                     </div>
@@ -351,7 +350,7 @@
                     <svg class="device" viewBox="0 0 90 170" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="4" width="78" height="162" rx="13.5" fill="var(--bg-secondary)" stroke="currentColor"/><line x1="85" y1="40" x2="85" y2="56" stroke="currentColor" stroke-width="1.8"/><line x1="5" y1="34" x2="5" y2="42" stroke="currentColor" stroke-width="1.8"/><line x1="5" y1="47" x2="5" y2="59" stroke="currentColor" stroke-width="1.8"/><rect x="10" y="8" width="70" height="154" rx="10" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="0.8"/><rect x="37" y="11.5" width="16" height="4.6" rx="2.3" fill="var(--accent)" stroke="none"/><line x1="15.5" y1="13.8" x2="21.5" y2="13.8" stroke="var(--accent)" stroke-width="0.9"/><rect x="67" y="12.2" width="7.5" height="3.4" rx="1" stroke="var(--accent)" stroke-width="0.6"/><path d="M16.5 26.5l-2.6 2.6 2.6 2.6" stroke="var(--accent)" stroke-width="0.9"/><circle cx="25" cy="29.1" r="4.6" fill="var(--screen-ui)" stroke="var(--accent)" stroke-width="0.6"/><line x1="32.5" y1="27.3" x2="49" y2="27.3" stroke="var(--accent)" stroke-width="1"/><line x1="32.5" y1="31.3" x2="44" y2="31.3" stroke="var(--accent)" stroke-width="0.55" opacity="0.6"/><line x1="10" y1="38" x2="80" y2="38" stroke="var(--accent)" stroke-width="0.45" opacity="0.5"/><rect x="14" y="45" width="42" height="11" rx="5.5" fill="var(--screen-ui)" stroke="var(--accent)" stroke-width="0.6"/><rect x="14" y="60" width="28" height="11" rx="5.5" fill="var(--screen-ui)" stroke="var(--accent)" stroke-width="0.6"/><rect x="35" y="78" width="41" height="11" rx="5.5" fill="var(--accent)" stroke="none"/><rect x="48" y="93" width="28" height="11" rx="5.5" fill="var(--accent)" stroke="none"/><polyline points="69.5,108.6 71.6,110.7 75.4,106.9" stroke="var(--accent)" stroke-width="0.8"/><rect x="14" y="141" width="49" height="11" rx="5.5" fill="var(--screen-ui)" stroke="var(--accent)" stroke-width="0.6"/><circle cx="70.5" cy="146.5" r="5.5" fill="var(--accent)" stroke="none"/><path d="M68.2 146.5h4.6M70.8 144.4l2.1 2.1-2.1 2.1" stroke="var(--screen-ui)" stroke-width="0.9"/><line x1="36" y1="157.6" x2="54" y2="157.6" stroke="var(--accent)" stroke-width="1.2"/></svg>
                 </span>
                 <span class="dl-picker__name">Mobile</span>
-                <span class="dl-picker__sub">Android, iOS (beta), GrapheneOS</span>
+                <span class="dl-picker__sub">Android, iOS (beta)</span>
             </button>
 
             <button type="button" id="dl-tab-tdeck" class="dl-picker__tile" role="tab" tabindex="-1" aria-selected="false" aria-controls="dl-case-tdeck" aria-label="T-Deck Plus" data-platform="tdeck">
@@ -674,7 +673,7 @@
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
                                 </span>
                                 <span class="flash-option-pill__copy">
-                                    <span class="flash-option-pill__label">Full erase</span>
+                                    <span class="flash-option-pill__label">Full Erase</span>
                                     <span class="flash-option-pill__hint">Erases everything on the device first</span>
                                 </span>
                                 <span class="flash-option-pill__check" aria-hidden="true">
@@ -787,7 +786,7 @@
 <script type="module" src="/assets/site/flasher.js"></script>
 <!-- ── Download page: platform panels, release facts, handheld choices ── -->
 <script type="module">
-import { handheldRelease } from '../../assets/js/handheld-release.js';
+import { handheldRelease } from '/assets/js/handheld-release.js';
 (function () {
     var picker = document.querySelector('.dl-picker');
     var spotlight = document.getElementById('dlSpotlight');
@@ -894,8 +893,8 @@ import { handheldRelease } from '../../assets/js/handheld-release.js';
         'android-arm64': '-android-arm64.apk', 'android-armv7': '-android-armv7.apk', 'android-x86_64': '-android-x86_64.apk'
     };
     var releaseTag = document.getElementById('ratspeakReleaseTag');
-    // Shown until GitHub answers, and kept if it can't; update it with each app release.
-    var appVersion = releaseTag.textContent;
+    // Shown until GitHub answers, and kept if it can't.
+    var appVersion = 'Latest release';
     var releaseAssets = null;
 
     function formatSize(bytes) {
@@ -927,7 +926,7 @@ import { handheldRelease } from '../../assets/js/handheld-release.js';
         }).then(function (release) {
             if (release.tag_name) {
                 appVersion = release.tag_name;
-                releaseTag.textContent = release.tag_name;
+                releaseTag.textContent = 'App ' + release.tag_name;
                 releaseTag.dataset.ratspeakReleaseResolved = 'true';
             }
             releaseAssets = {};

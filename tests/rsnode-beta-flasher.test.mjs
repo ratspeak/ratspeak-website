@@ -5,9 +5,10 @@ import vm from 'node:vm';
 import test from 'node:test';
 import { betaRequest, rsnodeBoard, validUpdateMetadata, validateBetaCatalog, verifyBetaDownload, validateBetaManifest } from '../assets/js/rsnode-beta.js';
 import { sha256Hex } from '../assets/js/handheld-release.js';
+import { flasherPage } from './flasher-page.mjs';
 
 globalThis.crypto ||= webcrypto;
-const html = readFileSync(new URL('../download.html', import.meta.url), 'utf8');
+const html = flasherPage('flash.html');
 
 function extractFunction(name) {
   const match = new RegExp(`(?:async )?function ${name}\\(`).exec(html);

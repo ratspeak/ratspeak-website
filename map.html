@@ -34,12 +34,11 @@
   <h1 class="sr-only">Ratspeak network map</h1>
 <main class="map-app" id="mapApp" aria-label="Ratspeak Map">
     <div class="map-canvas" id="map" aria-label="Interactive Ratspeak network map"></div>
-    <div class="map-fallback" id="mapFallback" role="status" hidden>
-        <span class="map-fallback-dot" aria-hidden="true"></span>
-        <span class="map-fallback-text">Detailed basemap unavailable. Showing the resilient map.</span>
-    </div>
-
     <div class="map-left-stack" role="group" aria-label="Map controls">
+        <div class="map-fallback" id="mapFallback" role="status" hidden>
+            <span class="map-fallback-dot" aria-hidden="true"></span>
+            <span class="map-fallback-text">Detailed basemap unavailable. Showing the basic map.</span>
+        </div>
         <aside class="map-rail" id="mapMenu" aria-label="Map filters">
             <button class="map-menu-toggle" id="mapMenuToggle" type="button" aria-expanded="true" aria-controls="mapMenuBody">
                 <span class="map-menu-title">Filter</span>
@@ -81,6 +80,7 @@
                     </label>
                 </div>
             </section>
+            <p class="map-snapshot-status" id="mapSnapshotStatus" role="status">Loading node records…</p>
         </aside>
     </div>
 

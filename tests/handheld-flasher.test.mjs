@@ -4,8 +4,9 @@ import test from 'node:test';
 import vm from 'node:vm';
 import { handheldPackage, handheldRelease, identifyHandheldImage, isLauncherImage,
   validateHandheldImage, verifyHandheldDownload, sha256Hex } from '../assets/js/handheld-release.js';
+import { allFlasherPages, flasherPage } from './flasher-page.mjs';
 
-const downloadHtml = readFileSync(new URL('../download.html', import.meta.url), 'utf8');
+const downloadHtml = flasherPage('download.html');
 
 function extractFunction(name) {
   const start = downloadHtml.indexOf(`function ${name}(`);
@@ -41,7 +42,7 @@ test('custom firmware keeps the explicit full-erase choice', () => {
 
 test('erase confirmation uses conditional data-loss copy', () => {
   assert.match(extractFunction('confirmFactoryInstall'), /All data in internal storage will be lost/);
-  assert.doesNotMatch(downloadHtml, /These packages are fresh installs|new Rust messaging backend|Before you flash|This is a fresh install|installDialogBackup/);
+  assert.doesNotMatch(allFlasherPages(), /These packages are fresh installs|new Rust messaging backend|Before you flash|This is a fresh install|installDialogBackup/);
   assert.match(downloadHtml, /eraseAll: eraseBeforeFlash/);
   assert.match(downloadHtml, /<span class="flash-option-pill__label">Full Erase<\/span>/);
 });
