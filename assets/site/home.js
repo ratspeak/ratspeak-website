@@ -379,7 +379,7 @@ const narrow = matchMedia('(max-width: 900px)');
 const hint = document.createElement('p');
 hint.className = 'reply-hint';
 hint.setAttribute('aria-hidden', 'true');
-hint.innerHTML = '<svg viewBox="0 0 72 52"><path d="M70 9C46 2 22 14 5 46"/><path d="M3 34l2 12 11-4"/></svg><span><b><span class="live-dot"></span>Live demo</b>Reply to Alice</span>';
+hint.innerHTML = '<svg viewBox="0 0 72 52"><path d="M70 9C50 3 34 10 26 24C20 35 12 40 3 42"/><path d="M11 33l-8 9 11 5"/></svg><span><b><span class="live-dot"></span>Live demo</b>Reply to Alice</span>';
 function placeHint() {
   const chip = document.querySelector('#chat-you .reply-chip');
   if (!chip) return hint.remove();
