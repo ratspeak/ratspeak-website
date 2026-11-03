@@ -7,3 +7,4 @@ scripts/*.py
 scripts/map-server
 scripts/poll-dev
 seo-preview.html
+scripts/map-styles

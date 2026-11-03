@@ -26,10 +26,14 @@ countries) instead of the provider's low-zoom vector tiles. Name labels prefer
 English, then Latin-script names, then the original name when those are missing.
 This reduces glyph downloads but does not guarantee Latin-only text.
 
-From the repository root, `node scripts/map-world-view.mjs` regenerates
-`world-110m.geojson` and rewrites both style files with the low-zoom layers and
-label rules. Review the resulting diff before keeping changes; the script
-replaces the generated world layers and may raise vector-layer minimum zooms.
+The served styles are generated. `scripts/map-styles/` holds the base styles in
+the provider's colours; edit those, never the files here. From the repository
+root, `npm run map:styles` runs `scripts/map-world-view.mjs` (regenerates
+`world-110m.geojson` and the base styles' low-zoom layers and label rules), then
+`scripts/map-recolour.mjs` (re-tones the base styles onto the site palette and
+writes both files here). Review the resulting diff before keeping changes; the
+world-view step replaces the generated world layers and may raise vector-layer
+minimum zooms.
 
 After changing either style, run `npm run check:map`. The fallback can be tested
 deterministically with `map.html?basemap=fallback`.

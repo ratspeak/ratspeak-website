@@ -1,13 +1,14 @@
 // Uses local Natural Earth land and borders below DETAIL_ZOOM. Label fields
 // referencing name:nonlatin prefer English, then Latin, then the original name.
-// Rewrites world-110m.geojson and both theme styles under assets/map-styles;
-// review the generated diff before using it.
+// Rewrites assets/map-styles/world-110m.geojson and the base theme styles in
+// scripts/map-styles; scripts/map-recolour.mjs then derives the served styles.
+// Review the generated diff before using it.
 // Run from the website root: node scripts/map-world-view.mjs
 import { readFileSync, writeFileSync } from 'node:fs';
 
-const DIR = 'assets/map-styles';
+const BASE = 'scripts/map-styles';
 const DETAIL_ZOOM = 3;
-const WORLD_URL = `${DIR}/world-110m.geojson`;
+const WORLD_URL = 'assets/map-styles/world-110m.geojson';
 const COLORS = {
   dark: { ocean: 'rgb(27,27,29)', land: 'rgb(12,12,12)', border: 'hsl(0,0%,23%)' },
   light: { ocean: 'rgb(194,200,202)', land: 'rgb(242,243,240)', border: 'hsl(0,0%,70%)' }
@@ -22,7 +23,7 @@ writeFileSync(WORLD_URL, JSON.stringify({
 }) + '\n');
 
 for (const theme of ['dark', 'light']) {
-  const path = `${DIR}/ratspeak-${theme}.json`;
+  const path = `${BASE}/ratspeak-${theme}.json`;
   const style = JSON.parse(readFileSync(path, 'utf8'));
   const c = COLORS[theme];
   style.layers = style.layers.filter(l => l.source !== 'world');
