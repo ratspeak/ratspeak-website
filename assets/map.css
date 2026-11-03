@@ -519,21 +519,17 @@ a {
     padding: 14px;
 }
 
+.map-snapshot {
+    display: grid;
+    gap: 2px;
+}
+
 .map-snapshot-status {
     margin: 0;
-    padding: 10px 14px 14px;
     color: var(--map-text-muted);
     font-size: 12px;
     line-height: 1.5;
     overflow-wrap: anywhere;
-}
-
-.map-snapshot-status:has(+ .map-snapshot-note) {
-    padding-bottom: 0;
-}
-
-.map-snapshot-note {
-    padding-top: 2px;
 }
 
 .search-box {
