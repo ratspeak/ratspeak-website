@@ -21,6 +21,7 @@
     <script>(()=>{let t;try{t=localStorage.getItem('ratspeak-theme')}catch(e){}if(t!=='light'&&t!=='dark')t='dark';document.documentElement.setAttribute('data-theme',t);const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',t==='dark'?'#10208c':'#1838ed')})()</script>
     <script>(()=>{const u=new URL(location.href),h=u.hash;if(h==='#dl-custom'||h==='#custom'||u.searchParams.get('device')==='custom'){u.searchParams.delete('device');location.replace('flash.html'+u.search+(h==='#dl-custom'||h==='#custom'?'':h))}})()</script>
     <script src="/assets/site/theme.js" defer></script>
+    <script src="/assets/site/release-notes.js" defer></script>
     <script type="application/ld+json">
 {
       "@context": "https://schema.org",
@@ -50,7 +51,6 @@
     <section class="flash-hero dl-hero" aria-labelledby="dl-hero-title">
         <h1 id="dl-hero-title">Get Ratspeak.</h1>
         <p class="dl-hero__sub">Free on every device, with no account or phone number. Install the app, or flash a LoRa handheld from your browser.</p>
-        <p class="dl-hero__meta"><span class="dl-hero__ver"><span id="ratspeakReleaseTag">Latest app release</span> &middot; </span>Built on <a href="https://docs.ratspeak.org/docs/concepts/what-is-reticulum">Reticulum <span aria-hidden="true">↗</span></a></p>
     </section>
 </div>
 
@@ -76,10 +76,9 @@
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
                             <span class="dl-cta-primary__text">
                                 <span class="dl-cta-primary__line">Download for macOS</span>
-                                <span class="dl-cta-primary__meta">Apple Silicon &middot; .dmg</span>
+                                <span class="dl-cta-primary__meta" data-release-meta="Apple Silicon">Apple Silicon</span>
                             </span>
                         </a>
-                        <p class="dl-cta-facts" data-release-facts="macos-arm64">Latest release</p>
                         <div class="dl-cta-secondary-row">
                             <a href="https://github.com/ratspeak/Ratspeak/releases/latest" class="nr-btn nr-btn-secondary dl-cta-secondary" data-ratspeak-release-asset="windows-msi">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
@@ -97,7 +96,7 @@
                         <li>Connects over the internet, your local network, Bluetooth, or a LoRa radio.</li>
                         <li>Free and open source, with no sign-up.</li>
                     </ul>
-                    <a href="https://github.com/ratspeak/Ratspeak/releases" class="dl-release-link">Release notes <span aria-hidden="true">↗</span></a>
+                    <a href="https://github.com/ratspeak/Ratspeak/releases/latest" class="dl-release-link" data-release-notes="Ratspeak">Release notes</a>
                 </div>
                 <aside class="dl-next" aria-labelledby="dl-next-desktop">
                     <h3 class="dl-next__title" id="dl-next-desktop">Then, three steps</h3>
@@ -118,10 +117,9 @@
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
                             <span class="dl-cta-primary__text">
                                 <span class="dl-cta-primary__line">Download Android APK</span>
-                                <span class="dl-cta-primary__meta">Most phones &middot; arm64 .apk</span>
+                                <span class="dl-cta-primary__meta" data-release-meta="Most phones">Most phones</span>
                             </span>
                         </a>
-                        <p class="dl-cta-facts" data-release-facts="android-arm64">Latest release</p>
                         <div class="dl-cta-secondary-row">
                             <a href="https://testflight.apple.com/join/AzzW4Jg6" class="nr-btn nr-btn-secondary dl-cta-secondary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 3 21 12 3 21 3 3" fill="currentColor"/></svg> iPhone and iPad<span class="dl-cta-meta">TestFlight ↗</span></a>
                         </div>
@@ -159,10 +157,9 @@
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                             <span class="dl-cta-primary__text">
                                 <span class="dl-cta-primary__line">Flash in browser</span>
-                                <span class="dl-cta-primary__meta">Takes a few minutes &middot; keep this tab open</span>
+                                <span class="dl-cta-primary__meta" data-handheld-meta>Takes a few minutes</span>
                             </span>
                         </button>
-                        <p class="dl-cta-facts" data-handheld-facts="tdeck"></p>
                         <div class="dl-cta-secondary-row">
                             <a href="/api/firmware?source=handheld&amp;device=tdeck&amp;package=full" data-handheld-download class="nr-btn nr-btn-secondary dl-cta-secondary">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -179,7 +176,7 @@
                         <li>Touchscreen, trackball, and keyboard.</li>
                         <li>Can also be the LoRa radio for Ratspeak on your phone or computer.</li>
                     </ul>
-                    <a href="https://github.com/ratspeak/ratspeak-handheld/releases" class="dl-release-link">Release notes <span aria-hidden="true">↗</span></a>
+                    <a href="https://github.com/ratspeak/ratspeak-handheld/releases/latest" class="dl-release-link" data-release-notes="Ratspeak Handheld">Release notes</a>
                 </div>
                 <aside class="dl-next" aria-labelledby="dl-next-tdeck">
                     <h3 class="dl-next__title" id="dl-next-tdeck">Before you start</h3>
@@ -207,10 +204,9 @@
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                             <span class="dl-cta-primary__text">
                                 <span class="dl-cta-primary__line">Flash in browser</span>
-                                <span class="dl-cta-primary__meta">Takes a few minutes &middot; keep this tab open</span>
+                                <span class="dl-cta-primary__meta" data-handheld-meta>Takes a few minutes</span>
                             </span>
                         </button>
-                        <p class="dl-cta-facts" data-handheld-facts="cardputer"></p>
                         <div class="dl-cta-secondary-row">
                             <a href="/api/firmware?source=handheld&amp;device=cardputer&amp;package=full" data-handheld-download class="nr-btn nr-btn-secondary dl-cta-secondary">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -227,7 +223,7 @@
                         <li>Keyboard navigation in your pocket.</li>
                         <li>Can also be the LoRa radio for Ratspeak on your phone or computer.</li>
                     </ul>
-                    <a href="https://github.com/ratspeak/ratspeak-handheld/releases" class="dl-release-link">Release notes <span aria-hidden="true">↗</span></a>
+                    <a href="https://github.com/ratspeak/ratspeak-handheld/releases/latest" class="dl-release-link" data-release-notes="Ratspeak Handheld">Release notes</a>
                 </div>
                 <aside class="dl-next" aria-labelledby="dl-next-cardputer">
                     <h3 class="dl-next__title" id="dl-next-cardputer">Before you start</h3>
@@ -255,10 +251,9 @@
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                             <span class="dl-cta-primary__text">
                                 <span class="dl-cta-primary__line">Flash in browser</span>
-                                <span class="dl-cta-primary__meta">Takes a few minutes &middot; keep this tab open</span>
+                                <span class="dl-cta-primary__meta" data-handheld-meta>Takes a few minutes</span>
                             </span>
                         </button>
-                        <p class="dl-cta-facts" data-handheld-facts="tpager"></p>
                         <div class="dl-cta-secondary-row">
                             <a href="/api/firmware?source=handheld&amp;device=tpager&amp;package=full" data-handheld-download class="nr-btn nr-btn-secondary dl-cta-secondary">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -275,7 +270,7 @@
                         <li>Scroll wheel and keyboard.</li>
                         <li>Can also be the LoRa radio for Ratspeak on your phone or computer.</li>
                     </ul>
-                    <a href="https://github.com/ratspeak/ratspeak-handheld/releases" class="dl-release-link">Release notes <span aria-hidden="true">↗</span></a>
+                    <a href="https://github.com/ratspeak/ratspeak-handheld/releases/latest" class="dl-release-link" data-release-notes="Ratspeak Handheld">Release notes</a>
                 </div>
                 <aside class="dl-next" aria-labelledby="dl-next-tpager">
                     <h3 class="dl-next__title" id="dl-next-tpager">Before you start</h3>
@@ -297,10 +292,9 @@
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                             <span class="dl-cta-primary__text">
                                 <span class="dl-cta-primary__line">Flash in browser</span>
-                                <span class="dl-cta-primary__meta">Takes a few minutes &middot; keep this tab open</span>
+                                <span class="dl-cta-primary__meta" data-handheld-meta>Takes a few minutes</span>
                             </span>
                         </button>
-                        <p class="dl-cta-facts" data-handheld-facts="m9"></p>
                         <div class="dl-cta-secondary-row">
                             <a href="/api/firmware?source=handheld&amp;device=m9&amp;package=standalone" data-handheld-download class="nr-btn nr-btn-secondary dl-cta-secondary">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -317,7 +311,7 @@
                         <li>Full keyboard and a built-in battery.</li>
                         <li>Messenger firmware; radio mode is coming soon.</li>
                     </ul>
-                    <a href="https://github.com/ratspeak/ratspeak-handheld/releases" class="dl-release-link">Release notes <span aria-hidden="true">↗</span></a>
+                    <a href="https://github.com/ratspeak/ratspeak-handheld/releases/latest" class="dl-release-link" data-release-notes="Ratspeak Handheld">Release notes</a>
                 </div>
                 <aside class="dl-next" aria-labelledby="dl-next-m9">
                     <h3 class="dl-next__title" id="dl-next-m9">Before you start</h3>
@@ -594,14 +588,7 @@
             <div class="flash-panel__header">
                 <div class="flash-panel__identity">
                     <div class="flash-panel__device-icon" id="panelIcon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <rect x="4" y="6.5" width="16" height="12.5" rx="1.4"/>
-                            <rect x="9" y="9.5" width="6" height="6" rx="0.5"/>
-                            <circle cx="10.3" cy="10.8" r="0.55" fill="currentColor" stroke="none"/>
-                            <path d="M4 9.5 h-1.5 M4 12.5 h-1.5 M4 15.5 h-1.5"/>
-                            <path d="M20 9.5 h1.5 M20 12.5 h1.5 M20 15.5 h1.5"/>
-                            <path d="M10.5 6.5 v-2 h3 v2"/>
-                        </svg>
+                        <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><use href="/assets/site/devices.svg#device-tdeck"/></svg>
                     </div>
                     <div class="flash-panel__copy">
                         <span class="flash-panel__eyebrow">Flash firmware</span>
@@ -891,9 +878,9 @@ import { handheldRelease } from '/assets/js/handheld-release.js';
         'linux-deb-arm64': '-linux-arm64.deb', 'linux-rpm': '-linux-x86_64.rpm',
         'android-arm64': '-android-arm64.apk', 'android-armv7': '-android-armv7.apk', 'android-x86_64': '-android-x86_64.apk'
     };
-    var releaseTag = document.getElementById('ratspeakReleaseTag');
-    // Shown until GitHub answers, and kept if it can't.
-    var appVersion = 'Latest release';
+    var RELEASE_API = 'https://api.github.com/repos/ratspeak/Ratspeak/releases/latest';
+    // Null until GitHub answers; button labels stay version-free until then.
+    var appVersion = null;
     var releaseAssets = null;
 
     function formatSize(bytes) {
@@ -902,9 +889,9 @@ import { handheldRelease } from '/assets/js/handheld-release.js';
     }
 
     function applyReleaseAssets(root) {
-        root.querySelectorAll('[data-release-facts]').forEach(function (line) {
-            var asset = releaseAssets && releaseAssets[line.dataset.releaseFacts];
-            line.textContent = appVersion + (asset ? ' · ' + formatSize(asset.size) : '');
+        root.querySelectorAll('[data-ratspeak-release-asset] [data-release-meta]').forEach(function (meta) {
+            var asset = releaseAssets && releaseAssets[meta.closest('[data-ratspeak-release-asset]').dataset.ratspeakReleaseAsset];
+            meta.textContent = meta.dataset.releaseMeta + (asset && appVersion ? ' · ' + appVersion + ' · ' + formatSize(asset.size) : '');
         });
         if (!releaseAssets) return;
         root.querySelectorAll('[data-ratspeak-release-asset]').forEach(function (link) {
@@ -917,17 +904,16 @@ import { handheldRelease } from '/assets/js/handheld-release.js';
 
     function resolveRatspeakReleaseAssets() {
         if (typeof fetch !== 'function') return;
-        fetch('https://api.github.com/repos/ratspeak/Ratspeak/releases/latest', {
+        // Shared with release-notes.js so the notes dialog reuses this response.
+        var cache = window.ratspeakReleaseCache = window.ratspeakReleaseCache || {};
+        if (!cache[RELEASE_API]) cache[RELEASE_API] = fetch(RELEASE_API, {
             headers: { Accept: 'application/vnd.github+json' }
         }).then(function (response) {
             if (!response.ok) throw new Error('Release lookup failed');
             return response.json();
-        }).then(function (release) {
-            if (release.tag_name) {
-                appVersion = release.tag_name;
-                releaseTag.textContent = 'App ' + release.tag_name;
-                releaseTag.dataset.ratspeakReleaseResolved = 'true';
-            }
+        });
+        cache[RELEASE_API].then(function (release) {
+            if (release.tag_name) appVersion = release.tag_name;
             releaseAssets = {};
             (Array.isArray(release.assets) ? release.assets : []).forEach(function (asset) {
                 var name = String(asset.name || '').toLowerCase();
@@ -939,7 +925,7 @@ import { handheldRelease } from '/assets/js/handheld-release.js';
             });
             applyReleaseAssets(document);
         }).catch(function () {
-            // The fallback version and release-page links stay.
+            // Version-free labels and release-page links stay.
         });
     }
 
@@ -969,10 +955,10 @@ import { handheldRelease } from '/assets/js/handheld-release.js';
         return { macos: svgs[0].outerHTML, windows: svgs[1].outerHTML, linux: svgs[2].outerHTML };
     })();
     var DESKTOP_OS = {
-        macos: { name: 'macOS', asset: 'macos-arm64', meta: 'Apple Silicon &middot; .dmg', short: '.dmg', also: [['macos-x64', 'Intel Mac .dmg']] },
-        intelMac: { name: 'macOS', asset: 'macos-x64', meta: 'Intel &middot; .dmg', also: [['macos-arm64', 'Apple Silicon .dmg']] },
-        windows: { name: 'Windows', asset: 'windows-msi', meta: '64-bit &middot; .msi', short: '.msi', also: [['windows-exe', 'Setup .exe']] },
-        linux: { name: 'Linux', asset: 'linux-appimage', meta: 'x86_64 &middot; .AppImage', short: '.AppImage', also: [['linux-deb', '.deb'], ['linux-rpm', '.rpm'], ['linux-deb-arm64', 'arm64 .deb']] }
+        macos: { name: 'macOS', asset: 'macos-arm64', meta: 'Apple Silicon', short: '.dmg', also: [['macos-x64', 'Intel Mac .dmg']] },
+        intelMac: { name: 'macOS', asset: 'macos-x64', meta: 'Intel', also: [['macos-arm64', 'Apple Silicon .dmg']] },
+        windows: { name: 'Windows', asset: 'windows-msi', meta: '64-bit', short: '.msi', also: [['windows-exe', 'Setup .exe']] },
+        linux: { name: 'Linux', asset: 'linux-appimage', meta: 'x86_64', short: '.AppImage', also: [['linux-deb', '.deb'], ['linux-rpm', '.rpm'], ['linux-deb-arm64', 'arm64 .deb']] }
     };
 
     function sizedIcon(svg, size) {
@@ -986,13 +972,6 @@ import { handheldRelease } from '/assets/js/handheld-release.js';
         link.dataset.ratspeakReleaseAsset = asset;
         link.innerHTML = html;
         return link;
-    }
-
-    function factsLine(asset) {
-        var line = document.createElement('p');
-        line.className = 'dl-cta-facts';
-        line.dataset.releaseFacts = asset;
-        return line;
     }
 
     function alsoLine(also) {
@@ -1024,8 +1003,7 @@ import { handheldRelease } from '/assets/js/handheld-release.js';
             secondary.append(assetLink(t.asset, 'nr-btn nr-btn-secondary dl-cta-secondary', sizedIcon(desktopIcons[other], 14) + t.name + '<span class="dl-cta-meta">' + t.short + '</span>'));
         });
         desktopRow.replaceChildren(
-            assetLink(primary.asset, 'nr-btn nr-btn-lg dl-cta-primary', sizedIcon(desktopIcons[os], 18) + '<span class="dl-cta-primary__text"><span class="dl-cta-primary__line">Download for ' + primary.name + '</span><span class="dl-cta-primary__meta">' + primary.meta + '</span></span>'),
-            factsLine(primary.asset),
+            assetLink(primary.asset, 'nr-btn nr-btn-lg dl-cta-primary', sizedIcon(desktopIcons[os], 18) + '<span class="dl-cta-primary__text"><span class="dl-cta-primary__line">Download for ' + primary.name + '</span><span class="dl-cta-primary__meta" data-release-meta="' + primary.meta + '">' + primary.meta + '</span></span>'),
             secondary,
             alsoLine(primary.also)
         );
@@ -1043,7 +1021,6 @@ import { handheldRelease } from '/assets/js/handheld-release.js';
         apk.href = testflight.href;
         apk.removeAttribute('data-ratspeak-release-asset');
         apk.innerHTML = sizedIcon(appleIcon, 18) + '<span class="dl-cta-primary__text"><span class="dl-cta-primary__line">Join the iPhone and iPad beta</span><span class="dl-cta-primary__meta">TestFlight ↗</span></span>';
-        row.querySelector('.dl-cta-facts').remove();
         testflight.replaceWith(assetLink('android-arm64', 'nr-btn nr-btn-secondary dl-cta-secondary', sizedIcon(apkIcon, 14) + 'Android<span class="dl-cta-meta">.apk</span>'));
         row.querySelector('.dl-cta-also').remove();
         setFirstLaunch('mobile', 'ios');
@@ -1067,10 +1044,10 @@ import { handheldRelease } from '/assets/js/handheld-release.js';
         var release = handheldRelease(board);
         var panel = document.getElementById('dl-case-' + board);
         var tag = panel.querySelector('[id$="ReleaseTag"]');
-        var facts = panel.querySelector('[data-handheld-facts]');
+        var meta = panel.querySelector('[data-handheld-meta]');
         if (!release) {
             tag.textContent = 'Ratspeak Handheld';
-            facts.textContent = '';
+            meta.textContent = 'Takes a few minutes';
             return;
         }
         var pkg = chosenPackage(board) || release.defaultPackage;
@@ -1080,7 +1057,7 @@ import { handheldRelease } from '/assets/js/handheld-release.js';
         tag.textContent = 'Ratspeak Handheld';
         var key = board + '/' + pkg;
         var show = function (info) {
-            facts.textContent = release.tag + (info ? ' · ' + formatSize(info.size) : '');
+            meta.textContent = 'Takes a few minutes' + (info ? ' · ' + release.tag + ' · ' + formatSize(info.size) : '');
         };
         if (handheldInfo[key]) { show(handheldInfo[key]); return; }
         show(null);
