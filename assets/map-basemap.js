@@ -1,6 +1,6 @@
 const STYLE_URLS = Object.freeze({
-  dark: 'assets/map-styles/ratspeak-dark.json?v=maplibre-6',
-  light: 'assets/map-styles/ratspeak-light.json?v=maplibre-6'
+  dark: 'assets/map-styles/ratspeak-dark.json?v=maplibre-7',
+  light: 'assets/map-styles/ratspeak-light.json?v=maplibre-7'
 });
 
 const PROVIDER_SOURCE_IDS = new Set(['openmaptiles', 'ne2_shaded']);
@@ -27,7 +27,7 @@ export function createFallbackStyle(theme, countriesUrl) {
         id: 'fallback-ocean',
         type: 'background',
         paint: {
-          'background-color': light ? '#E7E0D7' : '#071014'
+          'background-color': light ? '#CBD6FA' : '#0A0F2E'
         }
       },
       {
@@ -35,7 +35,7 @@ export function createFallbackStyle(theme, countriesUrl) {
         type: 'fill',
         source: 'countries',
         paint: {
-          'fill-color': light ? '#F4EFE9' : '#171A1C',
+          'fill-color': light ? '#F7F9FF' : '#131B48',
           'fill-opacity': 1
         }
       },
@@ -44,7 +44,7 @@ export function createFallbackStyle(theme, countriesUrl) {
         type: 'line',
         source: 'countries',
         paint: {
-          'line-color': light ? '#C7BBB0' : '#30373A',
+          'line-color': light ? '#A9B4E0' : '#2A3570',
           'line-opacity': light ? 0.72 : 0.8,
           'line-width': [
             'interpolate',

@@ -1,0 +1,5 @@
+/* Advanced flasher page. The installer itself is styled in download.css. */
+.is-flash-page .flash-interface{padding-top:clamp(32px,4vw,48px)}
+.is-flash-page .flash-interface.active{animation:none}
+.is-flash-page .browser-warning.show{display:flex;box-sizing:border-box;width:min(calc(100% - 2 * var(--gutter)),calc(1120px - 2 * var(--gutter)));margin:32px auto 0}
+.is-flash-page.is-flasher-active .dl-hero{display:block}

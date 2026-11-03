@@ -79,6 +79,21 @@
       "source": "/portal",
       "destination": "/portal.html",
       "statusCode": 308
+    },
+    {
+      "source": "/about.html",
+      "destination": "/",
+      "statusCode": 308
+    },
+    {
+      "source": "/about",
+      "destination": "/",
+      "statusCode": 308
+    },
+    {
+      "source": "/docs.html",
+      "destination": "https://docs.ratspeak.org/",
+      "statusCode": 308
     }
   ],
   "rewrites": [

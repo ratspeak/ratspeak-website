@@ -1,17 +1,17 @@
-import { buildMapSnapshot } from './map-data.js';
-import { isIpv6Address, isYggdrasilAddress, textMentionsYggdrasil } from './map-network.js';
-import { buildCountryIndex, buildPlaceIndex, locationLabelForNode } from './map-places.js';
+import { buildMapSnapshot } from '/assets/map-data.js';
+import { isIpv6Address, isYggdrasilAddress, textMentionsYggdrasil } from '/assets/map-network.js';
+import { buildCountryIndex, buildPlaceIndex, locationLabelForNode } from '/assets/map-places.js';
 import {
   AttributionControl,
   Map as MapLibreMap,
   Marker,
   NavigationControl
-} from './vendor/maplibre/maplibre-gl.mjs';
+} from '/assets/vendor/maplibre/maplibre-gl.mjs';
 import {
   basemapStyleUrl,
   createFallbackStyle,
   isProviderResourceError
-} from './map-basemap.js?v=maplibre-6';
+} from './map-basemap.js';
 
 const API_URL = '/api/map-nodes';
 // /api/map-nodes is CDN-cached for 60s, so a fresh tab is current; open tabs
@@ -34,62 +34,56 @@ const KIND_META = {
     label: 'IPv4',
     badgeLabel: 'IPv4',
     shortLabel: 'IPv4',
-    color: '#1687B8'
+    color: 'var(--map-blue)'
   },
   'server-ipv6': {
     label: 'IPv6',
     badgeLabel: 'IPv6',
     shortLabel: 'IPv6',
-    color: '#1F4E95'
+    color: 'var(--map-blue-dark)'
   },
   'client-auto': {
     label: 'Radio',
     badgeLabel: 'Radio',
     shortLabel: 'Radio',
-    color: '#35B875'
+    color: 'var(--map-green)'
   },
   'client-manual': {
     label: 'Manual',
     badgeLabel: 'Manual',
     shortLabel: 'Manual',
-    color: '#C79A2B'
+    color: 'var(--map-yellow)'
   },
   i2p: {
     label: 'I2P',
     badgeLabel: 'I2P',
     shortLabel: 'I2P',
-    color: '#D2693B'
+    color: 'var(--map-i2p)'
   },
   yggdrasil: {
     label: 'Yggdrasil',
     badgeLabel: 'Yggdrasil',
     shortLabel: 'Ygg',
-    color: '#E989B1'
+    color: 'var(--map-yggdrasil)'
   }
 };
 
-const NODE_PALETTES = {
-  light: {
-    'server-ipv4': '#1687B8',
-    'server-ipv6': '#1F4E95',
-    'client-auto': '#35B875',
-    'client-manual': '#C79A2B',
-    i2p: '#D2693B',
-    yggdrasil: '#E989B1',
-    accent: '#B85829',
-    edge: '#2A2522'
-  },
-  dark: {
-    'server-ipv4': '#36B6E6',
-    'server-ipv6': '#4F74D8',
-    'client-auto': '#63D98F',
-    'client-manual': '#E4BD4B',
-    i2p: '#F0834D',
-    yggdrasil: '#FF9EC8',
-    accent: '#F0834D',
-    edge: '#E8E4E0'
-  }
+// Pin colours come from the page's CSS so the legend, detail tags and pins share one palette.
+const NODE_PALETTE_VARS = {
+  'server-ipv4': '--map-blue',
+  'server-ipv6': '--map-blue-dark',
+  'client-auto': '--map-green',
+  'client-manual': '--map-yellow',
+  i2p: '--map-i2p',
+  yggdrasil: '--map-yggdrasil',
+  accent: '--map-pin-selected',
+  edge: '--map-pin-edge'
 };
+
+function nodePalette() {
+  const css = getComputedStyle(document.documentElement);
+  return Object.fromEntries(Object.entries(NODE_PALETTE_VARS).map(([key, name]) => [key, css.getPropertyValue(name).trim()]));
+}
 
 const LEGEND_KIND_IDS = ['server-ipv4', 'server-ipv6', 'client-auto', 'i2p', 'yggdrasil', 'client-manual'];
 
@@ -138,7 +132,6 @@ const DEFAULT_WORLD_OFFSETS = [-WORLD_LONGITUDE_SPAN, 0, WORLD_LONGITUDE_SPAN];
 
 const state = {
   snapshot: null,
-  snapshotUnavailable: false,
   filteredNodes: [],
   selectedId: null,
   kindFilter: 'all',
@@ -176,7 +169,6 @@ const els = {
   searchInput: document.getElementById('nodeSearch'),
   kindSelect: document.getElementById('kindFilter'),
   statusSelect: document.getElementById('statusFilter'),
-  snapshotStatus: document.getElementById('mapSnapshotStatus'),
   navbar: document.getElementById('navbar'),
   themeToggle: document.getElementById('themeToggle'),
   navHamburger: document.getElementById('navHamburger'),
@@ -320,10 +312,8 @@ async function loadSnapshot() {
     if (!response.ok) throw new Error(`${API_URL} returned ${response.status}`);
     const payload = await response.json();
     if (!Array.isArray(payload.nodes)) throw new Error(`${API_URL} response missing nodes`);
-    state.snapshotUnavailable = false;
     return payload;
   } catch (error) {
-    state.snapshotUnavailable = true;
     console.info('Map snapshot unavailable:', error.message);
   }
 
@@ -464,7 +454,7 @@ function initMap() {
   }
 
   if (FORCE_FALLBACK_BASEMAP) {
-    showMapFallback('Detailed basemap disabled. Showing the basic map.');
+    showMapFallback('Detailed basemap disabled. Showing the resilient map.');
   }
 
   state.map.addControl(new NavigationControl({
@@ -521,7 +511,7 @@ function activateFallbackBasemap() {
 
   state.usingFallbackBasemap = true;
   state.styleReady = false;
-  showMapFallback('Detailed basemap unavailable. Showing the basic map.');
+  showMapFallback('Detailed basemap unavailable. Showing the resilient map.');
   state.map.setStyle(
     createFallbackStyle(currentTheme(), COUNTRY_GEOJSON_URL),
     { diff: false }
@@ -587,7 +577,7 @@ function syncMapTheme() {
     state.styleTheme = nextTheme;
     state.styleReady = false;
     state.usingFallbackBasemap = true;
-    showMapFallback('Detailed basemap disabled. Showing the basic map.');
+    showMapFallback('Detailed basemap disabled. Showing the resilient map.');
     state.map.setStyle(createFallbackStyle(nextTheme, COUNTRY_GEOJSON_URL), { diff: false });
     return;
   }
@@ -691,13 +681,11 @@ function viewportMinZoom() {
 function applyFilters() {
   const nodes = state.snapshot?.nodes || [];
   const expiryCutoff = Date.now() - NODE_MAX_AGE_MS;
-  const currentNodes = nodes.filter((node) => !nodeIsExpired(node, expiryCutoff));
-  state.filteredNodes = currentNodes.filter((node) => {
+  state.filteredNodes = nodes.filter((node) => {
+    if (nodeIsExpired(node, expiryCutoff)) return false;
     const kind = nodeKind(node);
     const matchesKind = state.kindFilter === 'all' || kind === state.kindFilter;
-    const matchesStatus = state.statusFilter === 'all' || (state.statusFilter === 'available'
-      ? ['available', 'seen', 'recent'].includes(node.status)
-      : node.status === state.statusFilter);
+    const matchesStatus = state.statusFilter === 'all' || node.status === state.statusFilter;
     const queryBlob = [
       nodeDisplayName(node),
       kind,
@@ -713,7 +701,6 @@ function applyFilters() {
 
   els.app.dataset.visibleNodeCount = String(state.filteredNodes.length);
   els.app.dataset.totalNodeCount = String(nodes.length);
-  renderSnapshotStatus(currentNodes.length);
 
   if (state.selectedId && !state.filteredNodes.some((node) => node.id === state.selectedId)) {
     state.selectedId = null;
@@ -721,35 +708,6 @@ function applyFilters() {
 
   renderDetail();
   renderMap();
-}
-
-function renderSnapshotStatus(currentNodeCount) {
-  if (!els.snapshotStatus) return;
-  if (state.snapshotUnavailable) {
-    els.snapshotStatus.textContent = 'Node records are unavailable. Reload to retry.';
-    return;
-  }
-  const snapshot = state.snapshot;
-  if (!snapshot) {
-    els.snapshotStatus.textContent = 'Loading node records…';
-    return;
-  }
-  let summary;
-  if (!currentNodeCount) {
-    summary = snapshot.nodes?.length
-      ? 'No nodes seen within the last seven days.'
-      : 'No node records in this snapshot.';
-  } else if (!state.filteredNodes.length) {
-    summary = 'No nodes match these filters. Clear the search or change a filter.';
-  } else {
-    const shown = state.filteredNodes.length;
-    summary = `${shown} of ${currentNodeCount} node${currentNodeCount === 1 ? '' : 's'} shown.`;
-  }
-  const generatedAt = Date.parse(snapshot.generatedAt || '');
-  const timestamp = Number.isFinite(generatedAt)
-    ? ` Snapshot: ${new Date(generatedAt).toISOString().slice(0, 16).replace('T', ' ')} UTC.`
-    : ' Snapshot time unavailable.';
-  els.snapshotStatus.textContent = summary + timestamp + ' Last seen does not confirm reachability.';
 }
 
 function renderWrappedOverlays() {
@@ -914,7 +872,7 @@ function updateMarkerPaint() {
   if (!state.map || !state.styleReady || !state.map.getLayer(NODE_CORE_LAYER_ID)) return;
 
   const scale = state.markerScale || MARKER_SCALE_BANDS[0];
-  const palette = NODE_PALETTES[currentTheme()] || NODE_PALETTES.dark;
+  const palette = nodePalette();
   const color = nodeColorExpression(palette);
 
   state.map.setPaintProperty(NODE_GLOW_LAYER_ID, 'circle-radius', [

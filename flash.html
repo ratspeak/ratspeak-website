@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1838ed"><meta name="color-scheme" content="light dark">
+    <title>Advanced flasher — Ratspeak</title>
+  <meta name="description" content="Flash rsNode, official RNode firmware, or your own file to a LoRa board from your browser.">
+  <link rel="canonical" href="https://ratspeak.org/flash.html">
+  <link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="manifest" href="/site.webmanifest">
+  <meta name="application-name" content="Ratspeak"><meta name="apple-mobile-web-app-title" content="Ratspeak">
+  <meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:site_name" content="Ratspeak">
+  <meta property="og:title" content="Advanced flasher — Ratspeak"><meta property="og:description" content="Flash rsNode, official RNode firmware, or your own file to a LoRa board from your browser."><meta property="og:url" content="https://ratspeak.org/flash.html">
+  <meta property="og:image" content="https://ratspeak.org/assets/seo/og-flash.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="The Ratspeak advanced flasher for LoRa boards.">
+  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@ratspeakorg"><meta name="twitter:title" content="Advanced flasher — Ratspeak"><meta name="twitter:description" content="Flash rsNode, official RNode firmware, or your own file to a LoRa board from your browser.">
+  <meta name="twitter:image" content="https://ratspeak.org/assets/seo/og-flash.png"><meta name="twitter:image:alt" content="The Ratspeak advanced flasher for LoRa boards.">
+    <link rel="preload" href="/assets/fonts/anton.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/assets/site/site.css">
+    <link rel="stylesheet" href="/assets/site/download.css">
+    <link rel="stylesheet" href="/assets/site/flash.css">
+    <script>(()=>{let t;try{t=localStorage.getItem('ratspeak-theme')}catch(e){}if(t!=='light'&&t!=='dark')t='dark';document.documentElement.setAttribute('data-theme',t);const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',t==='dark'?'#10208c':'#1838ed')})()</script>
+    <script>(()=>{const u=new URL(location.href),d=u.searchParams.get('device');if(d&&d!=='custom')location.replace('download.html'+u.search+'#'+d)})()</script>
+    <script src="/assets/site/theme.js" defer></script>
+</head>
+<body class="is-flash-page">
+
+<a class="skip" href="#main">Skip to content</a>
+<div class="band">
+    <header class="topbar" id="navbar">
+      <a class="brand" href="/" aria-label="Ratspeak home"><svg class="brand-mark" aria-hidden="true" focusable="false"><use href="/assets/ratspeak-mark.svg#mark"/></svg><span class="brand-word">ratspeak</span></a>
+      <nav aria-label="Main navigation"><a href="/map.html">Map</a><a href="https://docs.ratspeak.org/">Docs</a><a href="/#play">How it works</a></nav>
+      <div class="topbar-end"><button type="button" class="theme-toggle" data-theme-toggle aria-label="Dark theme" aria-pressed="false" title="Switch to dark theme"><svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button><a class="header-download" href="/download.html">Download</a></div>
+    </header>
+    <section class="flash-hero dl-hero" aria-labelledby="fl-hero-title">
+        <h1 id="fl-hero-title">Flash a LoRa board.</h1>
+        <p class="dl-hero__sub">Install rsNode (private beta), official RNode firmware, or your own .bin or .zip on a supported LoRa board, from Chrome or Edge on a computer.</p>
+        <p class="dl-hero__meta">Want the app or a supported handheld? <a href="/download.html">Download page <span aria-hidden="true">→</span></a></p>
+    </section>
+</div>
+
+<main class="flash-container" id="main">
+
+        <!-- Browser warning (only visible on non-WebSerial browsers) -->
+        <div class="browser-warning" id="browserWarning">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span>In-browser flashing needs <strong>Chrome</strong> or <strong>Edge</strong>, version 89 or later. Open this page in one of them on a computer.</span>
+        </div>
+
+    <!-- Flash Interface -->
+    <div class="flash-interface active" id="flashInterface">
+
+        <div class="flash-flow flash-flow--standalone" role="list" aria-label="Install progress">
+            <div class="flash-flow__item is-active" id="flowConnect" role="listitem">
+                <span class="flash-flow__index">1</span>
+                <span class="flash-flow__copy">
+                    <span class="flash-flow__label">Connect</span>
+                    <span class="flash-flow__state" id="flowConnectState">Not connected</span>
+                </span>
+            </div>
+            <div class="flash-flow__item is-blocked" id="flowFirmware" role="listitem">
+                <span class="flash-flow__index">2</span>
+                <span class="flash-flow__copy">
+                    <span class="flash-flow__label">Firmware</span>
+                    <span class="flash-flow__state" id="flowFirmwareState">Not started</span>
+                </span>
+            </div>
+            <div class="flash-flow__item is-blocked" id="flowFlash" role="listitem">
+                <span class="flash-flow__index">3</span>
+                <span class="flash-flow__copy">
+                    <span class="flash-flow__label">Install</span>
+                    <span class="flash-flow__state" id="flowFlashState">Not started</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="flash-panel flash-panel--custom" id="flashPanel" data-accent="amber">
+            <div class="flash-panel__header">
+                <div class="flash-panel__identity">
+                    <div class="flash-panel__device-icon" id="panelIcon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="4" y="6.5" width="16" height="12.5" rx="1.4"/>
+                            <rect x="9" y="9.5" width="6" height="6" rx="0.5"/>
+                            <circle cx="10.3" cy="10.8" r="0.55" fill="currentColor" stroke="none"/>
+                            <path d="M4 9.5 h-1.5 M4 12.5 h-1.5 M4 15.5 h-1.5"/>
+                            <path d="M20 9.5 h1.5 M20 12.5 h1.5 M20 15.5 h1.5"/>
+                            <path d="M10.5 6.5 v-2 h3 v2"/>
+                        </svg>
+                    </div>
+                    <div class="flash-panel__copy">
+                        <span class="flash-panel__eyebrow">Flash firmware</span>
+                        <div class="flash-panel__device-name" id="panelName">Your board</div>
+                        <div class="flash-panel__device-sub" id="panelSub">ESP32 or nRF52 &middot; rsNode, RNode, or your own file</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flash-steps">
+                <!-- Step 1: Connect -->
+                <div class="flash-step">
+                    <div class="flash-step__number">Step 1</div>
+                    <div class="flash-step__title">Connect your device</div>
+                    <button type="button" class="connect-btn connect-btn--idle" id="connectBtn" onclick="connectDevice()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8z"/><path d="M12 18v4"/></svg>
+                        Select USB device
+                    </button>
+                    <div class="connect-device-info" id="deviceInfo">
+                        <span class="connect-status__dot connect-status__dot--off" id="statusDot"></span>
+                        <span class="connect-status__text" id="statusText">No device selected</span>
+                    </div>
+                    <p class="connect-help" id="connectHelp" role="status" hidden></p>
+                </div>
+
+                <!-- Step 2: Firmware -->
+                <div class="flash-step">
+                    <div class="flash-step__number">Step 2</div>
+                    <div class="flash-step__title" id="firmwareTitle">Choose firmware</div>
+
+                    <!-- Custom firmware sources -->
+                    <div id="firmwareCustom" style="display: none;">
+                        <div class="custom-source-tabs" role="tablist" aria-label="Firmware source">
+                            <button type="button" class="custom-source-tab is-active" id="sourceTabUpload" data-source="upload" role="tab" aria-controls="customSourceUpload" aria-selected="true" tabindex="0">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                Upload
+                            </button>
+                            <button type="button" class="custom-source-tab" id="sourceTabRsnode" data-source="rsnode" role="tab" aria-controls="customSourceRsnode" aria-selected="false" tabindex="-1">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="2"/><path d="M7 7a7 7 0 000 10M17 7a7 7 0 010 10M4 4a11 11 0 000 16M20 4a11 11 0 010 16"/></svg>
+                                rsNode
+                            </button>
+                            <button type="button" class="custom-source-tab" id="sourceTabRnode" data-source="rnode" role="tab" aria-controls="customSourceRnode" aria-selected="false" tabindex="-1">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                                RNode
+                            </button>
+                        </div>
+
+                        <!-- Mode A: Upload your own -->
+                        <div class="custom-source-pane" id="customSourceUpload" role="tabpanel" aria-labelledby="sourceTabUpload">
+                            <div class="drop-zone" id="dropZone">
+                                <div class="drop-zone__prompt">
+                                    <div class="drop-zone__icon">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                    </div>
+                                    <div class="drop-zone__text">Drop a firmware file here</div>
+                                    <div class="drop-zone__hint">or choose one &middot; .bin or .zip</div>
+                                </div>
+                                <div class="drop-zone__file-info">
+                                    <div class="drop-zone__file-name" id="fileName"></div>
+                                    <div class="drop-zone__file-size" id="fileSize"></div>
+                                    <div class="drop-zone__file-change">Choose a different file</div>
+                                </div>
+                                <input type="file" id="fileInput" accept=".bin,.zip" aria-label="Firmware file, .bin or .zip">
+                            </div>
+                        </div>
+
+                        <div class="custom-source-pane rsnode-beta" id="customSourceRsnode" role="tabpanel" aria-labelledby="sourceTabRsnode" hidden>
+                            <form class="rsnode-beta__login" id="rsnodeLoginForm">
+                                <p class="rsnode-beta__note">rsNode is LoRa firmware for Heltec V3 and V4 boards, in private beta.</p>
+                                <details class="rsnode-beta__about"><summary>How rsNode works</summary><p class="rsnode-beta__note">It runs in one of two modes, chosen on the device. As an <strong>RNode</strong>, it is the radio for one app, over USB, Bluetooth or Wi-Fi. As a <strong>Repeater</strong>, it forwards traffic on its own. Bluetooth is off while Wi-Fi is on. Managers are optional and only manage a Repeater.</p></details>
+                                <label for="rsnodePassword">Private beta password</label>
+                                <input class="rsnode-beta__password" id="rsnodePassword" type="password" autocomplete="current-password" required maxlength="256" aria-describedby="rsnodeStatus rsnodePasswordHelp">
+                                <button class="rsnode-beta__button" id="rsnodeUnlock" type="submit">Unlock</button>
+                                <p class="rsnode-beta__note" id="rsnodePasswordHelp">For a beta password, email <a href="mailto:mail@ratspeak.org">mail@ratspeak.org</a>.</p>
+                            </form>
+                            <div id="rsnodeTermsPending" hidden>
+                                <p class="rsnode-beta__note">Accept the beta terms to see the boards.</p>
+                                <button class="rsnode-beta__button" id="rsnodeReviewTerms" type="button">Review beta terms</button>
+                            </div>
+                            <div id="rsnodeBoardPicker" hidden>
+                                <div class="rsnode-beta__head"><strong>rsNode private beta</strong><button class="rsnode-beta__lock" id="rsnodeLock" type="button">Lock beta</button></div>
+                                <label class="rnode-source__field" for="rsnodeBoardSelect">
+                                    <span class="rnode-source__label">Board</span>
+                                    <select class="rnode-variant-select" id="rsnodeBoardSelect"><option value="">Choose your board</option></select>
+                                </label>
+                                <div id="rsnodeVariantCheck" hidden>
+                                    <p class="rsnode-beta__note">Check the chip marking or your order details: ESP32-S3R2 has 2 MB PSRAM; ESP32-S3R8 has 8 MB. Both V4s have 16 MB flash and need different firmware.</p>
+                                    <label class="rsnode-beta__check rsnode-beta__variant"><input type="checkbox" id="rsnodeVariantConfirmed"><span id="rsnodeVariantLabel">I checked my V4 variant.</span></label>
+                                </div>
+                                <p class="rsnode-beta__note rsnode-beta__note--warning" id="rsnodeInstallNote">Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings. From the next beta, Update keeps them.</p>
+                                <div class="rsnode-update" id="rsnodeUpdate" hidden>
+                                    <div class="rsnode-update__check">
+                                        <button class="rsnode-beta__button" id="rsnodeUpdateCheck" type="button" aria-describedby="rsnodeUpdateStatus">Check the node</button>
+                                        <p class="rsnode-beta__status" id="rsnodeUpdateStatus" role="status" aria-live="polite"></p>
+                                    </div>
+                                    <fieldset class="rsnode-update__modes" id="rsnodeUpdateModes" hidden>
+                                        <legend class="rnode-source__label">Update or install</legend>
+                                        <label class="rsnode-update__mode"><input type="radio" name="rsnodeInstallMode" value="update"><span><strong>Update</strong><span>Keeps identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings.</span></span></label>
+                                        <label class="rsnode-update__mode"><input type="radio" name="rsnodeInstallMode" value="install"><span><strong>Erase and install</strong><span>Erases everything on the node first.</span></span></label>
+                                    </fieldset>
+                                </div>
+                                <div class="rsnode-beta__links"><a id="rsnodePackageDownload" hidden>Download package and source</a></div>
+                            </div>
+                            <p class="rsnode-beta__status" id="rsnodeStatus" role="status" aria-live="polite"></p>
+                            <button class="rsnode-beta__button" id="rsnodeLockRetry" type="button" hidden>Retry lock</button>
+                            <button class="rsnode-beta__button" id="rsnodeCatalogRetry" type="button" hidden>Reload boards</button>
+                        </div>
+
+                        <!-- Mode B: RNode firmware (markqvist) -->
+                        <div class="custom-source-pane" id="customSourceRnode" role="tabpanel" aria-labelledby="sourceTabRnode" style="display: none;">
+                            <div class="rnode-source">
+                                <div class="rnode-source__head">
+                                    <div>
+                                        <div class="rnode-source__title">Official RNode firmware</div>
+                                        <div class="rnode-source__sub" id="rnodeReleaseSub">Loading latest release&hellip;</div>
+                                    </div>
+                                    <a href="https://github.com/markqvist/RNode_Firmware" class="rnode-source__repo" target="_blank" rel="noopener noreferrer">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                                        RNode Firmware
+                                    </a>
+                                </div>
+                                <label class="rnode-source__field">
+                                    <span class="rnode-source__label">Firmware release</span>
+                                    <select class="rnode-variant-select" id="rnodeReleaseSelect" disabled>
+                                        <option>Loading releases&hellip;</option>
+                                    </select>
+                                </label>
+                                <label class="rnode-source__field">
+                                    <span class="rnode-source__label">Device variant</span>
+                                    <select class="rnode-variant-select" id="rnodeVariantSelect" disabled>
+                                        <option>Loading variants&hellip;</option>
+                                    </select>
+                                </label>
+                                <label class="rnode-source__field">
+                                    <span class="rnode-source__label">Hardware band</span>
+                                    <select class="rnode-variant-select" id="rnodeBandSelect" disabled>
+                                        <option>Choose a device variant first</option>
+                                    </select>
+                                </label>
+                                <div class="rnode-source__status" id="rnodeStatus">No variant selected.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flash Action -->
+            <div class="flash-action">
+                <details class="flash-advanced" id="flashAdvanced">
+                    <summary class="flash-advanced__summary">
+                        <span class="flash-advanced__label">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7"/><path d="M4 10V3"/><path d="M12 21v-9"/><path d="M12 8V3"/><path d="M20 21v-5"/><path d="M20 12V3"/><path d="M2 14h4"/><path d="M10 8h4"/><path d="M18 16h4"/></svg>
+                            Advanced options
+                        </span>
+                        <span class="flash-advanced__meta" id="advancedMeta">Default install</span>
+                        <svg class="flash-advanced__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                    </summary>
+                    <div class="flash-advanced__body">
+                        <div class="flash-options" id="flashOptions">
+                            <label class="flash-option-pill" id="eraseOption">
+                                <input type="checkbox" id="eraseToggle" onchange="toggleErase(this.checked)">
+                                <span class="flash-option-pill__icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                                </span>
+                                <span class="flash-option-pill__copy">
+                                    <span class="flash-option-pill__label">Full erase</span>
+                                    <span class="flash-option-pill__hint">Erases everything on the device first</span>
+                                </span>
+                                <span class="flash-option-pill__check" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"/></svg>
+                                </span>
+                            </label>
+                            <label class="flash-option-pill" id="provisionOption">
+                                <input type="checkbox" id="provisionToggle">
+                                <span class="flash-option-pill__icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="0.5"/><path d="M9 3v3"/><path d="M15 3v3"/><path d="M9 18v3"/><path d="M15 18v3"/><path d="M3 9h3"/><path d="M3 15h3"/><path d="M18 9h3"/><path d="M18 15h3"/></svg>
+                                </span>
+                                <span class="flash-option-pill__copy">
+                                    <span class="flash-option-pill__label">RNode setup</span>
+                                    <span class="flash-option-pill__hint">Provision after flash</span>
+                                </span>
+                                <span class="flash-option-pill__check" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"/></svg>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="flash-option-expand" id="provisionExpand" hidden>
+                            <p class="flash-option-expand__desc">
+                                Writes RNode identity and firmware hash after flashing. Ratspeak keeps startup radio settings host-controlled; use rnodeconf when signed identity or persistent TNC startup settings are required.
+                            </p>
+                            <div class="provision-board" id="provisionBoard" data-mode="auto">
+                                <div class="provision-board__row">
+                                    <span class="provision-board__icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                    </span>
+                                    <div class="provision-board__copy">
+                                        <span class="provision-board__eyebrow">Suggested board</span>
+                                        <span class="provision-board__value" id="provisionBoardValue">Choose an RNode firmware variant to suggest product/model</span>
+                                    </div>
+                                    <button type="button" class="provision-board__change" id="provisionBoardChange">Change</button>
+                                </div>
+                                <div class="provision-board__manual" id="provisionBoardManual" hidden>
+                                    <label class="provision-field">
+                                        <span class="provision-field__label">Product</span>
+                                        <select id="provisionProduct"></select>
+                                    </label>
+                                    <label class="provision-field">
+                                        <span class="provision-field__label">Model</span>
+                                        <select id="provisionModel"></select>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </details>
+
+            </div>
+        </div>
+
+        <!-- ── Action CTA — primary flash + post-flash RNode tools ── -->
+        <section class="flash-cta">
+            <div class="flash-primary-action">
+                <div class="flash-primary-action__copy">
+                    <div class="flash-primary-action__label">Step 3</div>
+                    <span class="flash-primary-action__title">Install</span>
+                    <div class="flash-primary-action__hint" id="flashBtnNote" role="status">Select a USB device to continue.</div>
+                </div>
+                <button type="button" class="flash-btn flash-btn--disabled" id="flashBtn" onclick="startFlash()" disabled>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    Install firmware
+                </button>
+            </div>
+
+            <!-- Progress -->
+            <div class="flash-progress" id="flashProgress">
+                <div class="progress-header">
+                    <span class="progress-status" id="progressStatus" aria-live="polite">Preparing…</span>
+                    <span class="progress-pct" id="progressPct">0%</span>
+                </div>
+                <div class="progress-bar-track">
+                    <div class="progress-bar-fill" id="progressBar"></div>
+                </div>
+                <details class="progress-details"><summary>Show log</summary><div class="progress-log" id="progressLog"></div></details>
+            </div>
+
+            <!-- Result -->
+            <div class="flash-result" id="flashResult" role="region" aria-labelledby="resultTitle">
+                <div class="flash-result__icon" id="resultIcon">
+                    <svg id="resultSvg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></svg>
+                </div>
+                <h3 class="flash-result__title" id="resultTitle" tabindex="-1"></h3>
+                <div class="flash-result__desc" id="resultDesc"></div>
+                <div class="flash-result__actions" id="resultActions" hidden>
+                    <button type="button" class="flash-result__btn" id="resultActionBtn">
+                        <svg id="resultActionSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 10-13h-7l1-7Z"/></svg>
+                        <span id="resultActionText">Continue</span>
+                    </button>
+                </div>
+                <ol class="flash-result__fixes" id="resultFixes" hidden></ol>
+                <div class="flash-result__actions" id="resultRecovery" hidden>
+                    <button type="button" class="flash-result__btn" id="resultRetry">Try again <span aria-hidden="true">→</span></button>
+                    <button type="button" class="rsnode-beta__button" id="resultPort">Choose the port again</button>
+                </div>
+                <details class="flash-result__tech" id="resultTech" hidden>
+                    <summary>Technical details</summary>
+                    <div class="flash-result__tech-body">
+                        <pre class="flash-result__log" id="resultLog" tabindex="0" aria-label="Technical details"></pre>
+                        <button type="button" class="flash-result__copy" id="resultCopy" aria-describedby="resultCopied">Copy</button>
+                        <span class="flash-result__copied" id="resultCopied" role="status"></span>
+                    </div>
+                </details>
+            </div>
+
+            <details class="flash-cta__repair rsnode-device" id="rsnodeDevice" name="rsnode-tools" hidden>
+                <summary class="flash-cta__repair-summary">
+                    <span class="flash-cta__repair-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8"/><path d="M12 16v4"/></svg>
+                        rsNode live view
+                    </span>
+                    <span class="flash-cta__repair-meta">See the node’s screen and status over USB</span>
+                    <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </summary>
+                <div class="flash-cta__repair-body">
+                    <p class="rsnode-tools__lede">Watch the node's screen and read its status over USB.</p>
+                    <div class="rsnode-device__layout">
+                        <figure class="rsnode-device__screen">
+                            <div class="rsnode-device__bezel" id="rsnodeScreenBezel">
+                                <canvas id="rsnodeScreen" width="128" height="64" role="img" aria-label="The node's screen"></canvas>
+                                <span class="rsnode-device__placeholder" id="rsnodeScreenEmpty">Connect to see the screen</span>
+                            </div>
+                            <figcaption class="rsnode-device__caption"><span class="rsnode-tools__dot" id="rsnodeLiveDot" aria-hidden="true"></span><span id="rsnodeScreenState">Not connected</span></figcaption>
+                        </figure>
+                        <div class="rsnode-device__info">
+                            <div class="flash-connect-tips rsnode-tools__tips" id="rsnodeFactsEmpty">
+                                <div class="flash-connect-tips__head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Before you connect</div>
+                                <ul>
+                                    <li>Plug the node in over USB. Close other apps that use its port, such as Ratspeak or a serial monitor.</li>
+                                    <li>If you just installed, press RESET on the board first.</li>
+                                    <li>A Repeater answers status over USB, and so does an RNode that another app is using.</li>
+                                </ul>
+                            </div>
+                            <dl class="rsnode-tools__facts" id="rsnodeFacts" hidden>
+                                <div data-fact="node"><dt>Node</dt><dd></dd></div>
+                                <div data-fact="board"><dt>Board</dt><dd></dd></div>
+                                <div data-fact="firmware"><dt>Firmware</dt><dd></dd></div>
+                                <div data-fact="owners"><dt>Managers</dt><dd></dd></div>
+                                <div data-fact="repeater"><dt>Repeater</dt><dd></dd></div>
+                                <div data-fact="wifi"><dt>Wi-Fi</dt><dd></dd></div>
+                                <div data-fact="radio"><dt>Radio</dt><dd></dd></div>
+                                <div data-fact="packets"><dt>Packets</dt><dd></dd></div>
+                                <div data-fact="channel"><dt>Channel</dt><dd></dd></div>
+                                <div data-fact="battery"><dt>Battery</dt><dd></dd></div>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="rsnode-tools__actions">
+                        <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeConnect" type="button">Connect</button>
+                        <button class="rsnode-beta__button" id="rsnodeScreenshot" type="button" disabled hidden>Save screenshot</button>
+                        <button class="rsnode-beta__button" id="rsnodeCopyDetails" type="button" disabled hidden>Copy details</button>
+                        <button class="rsnode-beta__button" id="rsnodePair" type="button" aria-describedby="rsnodePairNote" disabled hidden>Start Bluetooth pairing</button>
+                        <button class="rsnode-beta__button rsnode-tools__end" id="rsnodeRestart" type="button" disabled hidden>Restart node…</button>
+                    </div>
+                    <p class="rsnode-tools__help rsnode-tools__pair-note" id="rsnodePairNote" hidden>Bluetooth is off while Wi-Fi is on. Turn Wi-Fi off in Settings to pair.</p>
+                    <p class="rsnode-tools__port" hidden>Using <span class="rsnode-tools__port-label"></span> &middot; <button class="rsnode-beta__lock" type="button" data-change-port>Change port</button></p>
+                    <p class="rsnode-beta__status" id="rsnodeDeviceStatus" role="status" aria-live="polite"></p>
+                    <pre class="rsnode-device__details" id="rsnodeDetailsText" tabindex="0" aria-label="Node details" hidden></pre>
+                </div>
+            </details>
+
+            <details class="flash-cta__repair rsnode-settings" id="rsnodeSettings" name="rsnode-tools" hidden>
+                <summary class="flash-cta__repair-summary">
+                    <span class="flash-cta__repair-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+                        rsNode settings
+                    </span>
+                    <span class="flash-cta__repair-meta">Wi-Fi, peers, and uplink over USB &middot; saving restarts the node</span>
+                    <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </summary>
+                <div class="flash-cta__repair-body">
+                    <p class="rsnode-tools__lede">Read the node's settings, change them here, and save. Saving restarts the node. Region, LIMITS, and the radio are set on the device.</p>
+                    <form id="rsnodeSettingsForm" novalidate hidden>
+                        <fieldset class="rsnode-owner__fields" id="rsnodeSettingsFields">
+                            <p class="rsnode-settings__persona" id="rsnodeSettingsPersona"></p>
+                            <fieldset class="rsnode-settings__group">
+                                <legend class="rnode-source__label">Wi-Fi</legend>
+                                <div class="rsnode-settings__choices">
+                                    <label class="rsnode-settings__choice"><input type="radio" name="rsnodeWifiMode" value="off"><span>Off</span></label>
+                                    <label class="rsnode-settings__choice"><input type="radio" name="rsnodeWifiMode" value="join"><span>Join a network</span></label>
+                                    <label class="rsnode-settings__choice"><input type="radio" name="rsnodeWifiMode" value="own"><span>Own network</span></label>
+                                </div>
+                                <p class="rsnode-tools__help" id="rsnodeWifiNote"></p>
+                                <div class="rsnode-settings__grid" id="rsnodeWifiFields">
+                                    <label class="rsnode-settings__field" for="rsnodeWifiName"><span class="rsnode-settings__label" id="rsnodeWifiNameLabel">Network name</span>
+                                        <input class="rsnode-owner__input" id="rsnodeWifiName" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+                                    <div class="rsnode-settings__field">
+                                        <span class="rsnode-settings__label" id="rsnodeWifiPasswordLabel">Wi-Fi password</span>
+                                        <p class="rsnode-settings__secret" id="rsnodeWifiPasswordStored"><span id="rsnodeWifiPasswordState"></span><button class="rsnode-beta__lock" id="rsnodeWifiPasswordChange" type="button" aria-describedby="rsnodeWifiPasswordLabel">Change</button></p>
+                                        <input class="rsnode-owner__input" id="rsnodeWifiPassword" type="password" autocomplete="new-password" aria-labelledby="rsnodeWifiPasswordLabel" aria-describedby="rsnodeWifiPasswordHelp" hidden>
+                                        <p class="rsnode-tools__help" id="rsnodeWifiPasswordHelp"></p>
+                                    </div>
+                                    <label class="rsnode-settings__field" for="rsnodeWifiChannel" id="rsnodeWifiChannelField"><span class="rsnode-settings__label">Channel</span>
+                                        <select class="rnode-variant-select" id="rsnodeWifiChannel"></select></label>
+                                    <label class="rsnode-beta__check rsnode-settings__wide" id="rsnodeWifiFixedField"><input type="checkbox" id="rsnodeWifiFixed"><span>Use a fixed address</span></label>
+                                    <div class="rsnode-settings__grid rsnode-settings__wide" id="rsnodeWifiFixedFields">
+                                        <label class="rsnode-settings__field" for="rsnodeWifiAddress"><span class="rsnode-settings__label">Address</span>
+                                            <input class="rsnode-owner__input" id="rsnodeWifiAddress" type="text" inputmode="decimal" autocomplete="off" placeholder="192.168.1.50"></label>
+                                        <label class="rsnode-settings__field" for="rsnodeWifiNetmask"><span class="rsnode-settings__label">Subnet mask</span>
+                                            <input class="rsnode-owner__input" id="rsnodeWifiNetmask" type="text" inputmode="decimal" autocomplete="off" placeholder="255.255.255.0"></label>
+                                        <label class="rsnode-settings__field" for="rsnodeWifiGateway"><span class="rsnode-settings__label">Gateway (optional)</span>
+                                            <input class="rsnode-owner__input" id="rsnodeWifiGateway" type="text" inputmode="decimal" autocomplete="off" placeholder="192.168.1.1"></label>
+                                        <label class="rsnode-settings__field" for="rsnodeWifiDns"><span class="rsnode-settings__label">DNS (optional)</span>
+                                            <input class="rsnode-owner__input" id="rsnodeWifiDns" type="text" inputmode="decimal" autocomplete="off" placeholder="192.168.1.1"></label>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset class="rsnode-settings__group" id="rsnodePeersGroup">
+                                <legend class="rnode-source__label">Accept peers</legend>
+                                <label class="rsnode-beta__check"><input type="checkbox" id="rsnodePeersEnabled"><span>Accept Reticulum peers over TCP</span></label>
+                                <div class="rsnode-settings__grid">
+                                    <label class="rsnode-settings__field" for="rsnodePeersPort"><span class="rsnode-settings__label">Port</span>
+                                        <input class="rsnode-owner__input" id="rsnodePeersPort" type="text" inputmode="numeric" autocomplete="off" aria-describedby="rsnodePeersHelp"></label>
+                                </div>
+                                <p class="rsnode-tools__help" id="rsnodePeersHelp">Reticulum apps add a TCP client to the node's Wi-Fi address on this port. Up to 2 peers.</p>
+                            </fieldset>
+                            <fieldset class="rsnode-settings__group" id="rsnodeUplinkGroup">
+                                <legend class="rnode-source__label">Uplink</legend>
+                                <label class="rsnode-beta__check"><input type="checkbox" id="rsnodeUplinkEnabled"><span>Connect to a Reticulum node over TCP</span></label>
+                                <div class="rsnode-settings__grid">
+                                    <label class="rsnode-settings__field" for="rsnodeUplinkHost"><span class="rsnode-settings__label">Host</span>
+                                        <input class="rsnode-owner__input" id="rsnodeUplinkHost" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="rns.example.org"></label>
+                                    <label class="rsnode-settings__field" for="rsnodeUplinkPort"><span class="rsnode-settings__label">Port</span>
+                                        <input class="rsnode-owner__input" id="rsnodeUplinkPort" type="text" inputmode="numeric" autocomplete="off" placeholder="4242"></label>
+                                </div>
+                            </fieldset>
+                            <div class="rsnode-settings__group" id="rsnodeRadioGroup">
+                                <span class="rnode-source__label">Set on the device</span>
+                                <dl class="rsnode-tools__facts">
+                                    <div><dt>Region</dt><dd id="rsnodeSettingsRegion"></dd></div>
+                                    <div><dt>Radio</dt><dd id="rsnodeSettingsRadio"></dd></div>
+                                    <div><dt>LoRa IFAC</dt><dd id="rsnodeSettingsIfac"></dd></div>
+                                </dl>
+                                <p class="rsnode-tools__help">Change the region, LIMITS, and radio on the Repeater's own menus; they carry legal confirmations only the device asks for.</p>
+                            </div>
+                        </fieldset>
+                    </form>
+                    <div class="flash-connect-tips rsnode-tools__tips" id="rsnodeSettingsTips">
+                        <div class="flash-connect-tips__head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Before you read</div>
+                        <ul>
+                            <li>Plug the node in over USB. Close other apps that use its port, such as Ratspeak or a serial monitor.</li>
+                            <li>If you just installed, press RESET on the board first.</li>
+                            <li>An RNode another app is using over Bluetooth or Wi-Fi shows its settings but saves none: disconnect that app, or hold USB on the node.</li>
+                        </ul>
+                    </div>
+                    <div class="rsnode-tools__actions">
+                        <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeSettingsSave" type="submit" form="rsnodeSettingsForm" aria-describedby="rsnodeSettingsSummary" hidden>Save and restart</button>
+                        <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeSettingsRead" type="button">Read settings</button>
+                        <p class="rsnode-tools__summary" id="rsnodeSettingsSummary"></p>
+                    </div>
+                    <p class="rsnode-tools__port" hidden>Using <span class="rsnode-tools__port-label"></span> &middot; <button class="rsnode-beta__lock" type="button" data-change-port>Change port</button></p>
+                    <div id="rsnodeSettingsActivity">
+                        <p class="rsnode-tools__state"><span class="rsnode-tools__dot" id="rsnodeSettingsDot" aria-hidden="true"></span><span class="rsnode-beta__status progress-status" id="rsnodeSettingsStatus" role="status" aria-live="polite"></span></p>
+                        <details class="rsnode-tools__log"><summary>USB log</summary><div class="progress-log"></div></details>
+                    </div>
+                </div>
+            </details>
+
+            <details class="flash-cta__repair rsnode-owner" id="rsnodeOwner" name="rsnode-tools" hidden>
+                <summary class="flash-cta__repair-summary">
+                    <span class="flash-cta__repair-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
+                        rsNode device management
+                    </span>
+                    <span class="flash-cta__repair-meta">Optional &middot; Owner and Admins of a Repeater, over USB</span>
+                    <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </summary>
+                <div class="flash-cta__repair-body">
+                    <p class="rsnode-tools__notice" id="rsnodeOwnerNotice" tabindex="-1" hidden>Next: press RESET on the board. Optional: add managers if this node will run as a Repeater you manage remotely.</p>
+                    <p class="rsnode-tools__lede">Managers are optional. They manage this node over the mesh while it runs as a Repeater; an RNode ignores them.</p>
+                    <form id="rsnodeOwnerForm" novalidate>
+                        <fieldset class="rsnode-owner__fields" id="rsnodeOwnerFields">
+                            <div class="rsnode-owner__grid">
+                                <div class="rsnode-owner__field">
+                                    <span class="rnode-source__label" id="rsnodeManagersLabel">Managers</span>
+                                    <ul class="rsnode-managers" id="rsnodeManagers" aria-labelledby="rsnodeManagersLabel"></ul>
+                                    <p class="rsnode-tools__help" id="rsnodeManagersEmpty">Add yourself as the Owner with your Ratspeak LXMF address, or read the node to see its managers.</p>
+                                    <div class="rsnode-managers__editor" id="rsnodeManagerEditor" hidden>
+                                        <input class="rsnode-owner__input" id="rsnodeOwnerHash" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="LXMF address or identity hash" aria-label="Manager's LXMF address or identity hash" aria-describedby="rsnodeManagerNote">
+                                        <select class="rnode-variant-select" id="rsnodeOwnerKind" aria-label="Hash type">
+                                            <option value="lxmf">LXMF address</option>
+                                            <option value="identity">Identity hash</option>
+                                        </select>
+                                        <select class="rnode-variant-select" id="rsnodeOwnerRole" aria-label="Role" aria-describedby="rsnodeRoleHelp">
+                                            <option value="owner">Owner</option>
+                                            <option value="admin">Admin</option>
+                                        </select>
+                                        <p class="rsnode-tools__help" id="rsnodeRoleHelp">The Owner changes settings and managers. Admins read status and settings and install updates.</p>
+                                        <div class="rsnode-managers__editor-actions">
+                                            <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeManagerDone" type="button">Add</button>
+                                            <button class="rsnode-beta__button" id="rsnodeManagerCancel" type="button">Cancel</button>
+                                        </div>
+                                        <p class="rsnode-tools__help" id="rsnodeManagerNote" hidden></p>
+                                    </div>
+                                    <p class="rsnode-managers__add"><button class="rsnode-beta__lock" id="rsnodeManagerAdd" type="button">Add manager</button><span class="rsnode-tools__help" id="rsnodeManagersFull" hidden>A node holds up to 4 managers.</span></p>
+                                </div>
+                            </div>
+                            <div class="flash-connect-tips rsnode-tools__tips">
+                                <div class="flash-connect-tips__head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Before you save</div>
+                                <ul>
+                                    <li>Plug the node in over USB. Close other apps that use its port, such as Ratspeak or a serial monitor.</li>
+                                    <li>If you just installed, press RESET on the board first.</li>
+                                    <li>A running Repeater takes manager changes over USB. In RNode, hold USB on the home menu to take over from another app.</li>
+                                    <li>Adding the first manager creates the node's identity, so its Bluetooth or Wi-Fi radio must be running (a normal RNode boot has one).</li>
+                                </ul>
+                            </div>
+                            <div class="rsnode-tools__actions">
+                                <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeOwnerSave" type="submit" aria-describedby="rsnodeOwnerSummary" disabled>Save to rsNode</button>
+                                <button class="rsnode-beta__button" id="rsnodeOwnerRead" type="button">Read from node</button>
+                                <p class="rsnode-tools__summary" id="rsnodeOwnerSummary">Nothing to save yet. Add a manager.</p>
+                            </div>
+                            <p class="rsnode-tools__port" hidden>Using <span class="rsnode-tools__port-label"></span> &middot; <button class="rsnode-beta__lock" type="button" data-change-port>Change port</button></p>
+                        </fieldset>
+                    </form>
+                    <div id="rsnodeOwnerActivity">
+                        <p class="rsnode-tools__state"><span class="rsnode-tools__dot" id="rsnodeOwnerDot" aria-hidden="true"></span><span class="rsnode-beta__status progress-status" id="rsnodeOwnerStatus" role="status" aria-live="polite"></span></p>
+                        <div class="rsnode-owner__result" id="rsnodeOwnerResult" hidden>
+                            <span class="rnode-source__label">On the node</span>
+                            <dl class="rsnode-tools__facts">
+                                <div><dt>Node</dt><dd id="rsnodeResultNode"></dd></div>
+                                <div id="rsnodeResultIdentity"><dt>Destination</dt><dd><span class="rsnode-owner__destination"><code id="rsnodeResultDestination"></code><button class="rsnode-beta__lock" id="rsnodeCopyDestination" type="button">Copy</button><span class="rsnode-tools__help" id="rsnodeCopyNote" hidden>Press Ctrl+C or ⌘C to copy.</span></span><span class="rsnode-tools__help">Clients pin this destination.</span></dd></div>
+                            </dl>
+                            <p class="rsnode-tools__help" id="rsnodeResultNote"></p>
+                            <p class="rsnode-tools__help" id="rsnodeResultEffect" hidden>Managers act only while the node runs as a Repeater.</p>
+                        </div>
+                        <details class="rsnode-tools__log"><summary>USB log</summary><div class="progress-log"></div></details>
+                    </div>
+                </div>
+            </details>
+
+            <details class="flash-cta__repair" id="flashRepair">
+                <summary class="flash-cta__repair-summary">
+                    <span class="flash-cta__repair-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-2.4 2.6-2.6Z"/></svg>
+                        RNode tools
+                    </span>
+                    <span class="flash-cta__repair-meta">Repair and inspect an RNode without re-flashing</span>
+                    <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </summary>
+                <div class="flash-cta__repair-body">
+                    <div class="flash-repair__list">
+                        <button type="button" class="flash-repair__action" id="reprovisionBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="0.5"/><path d="M9 3v3"/><path d="M15 3v3"/><path d="M9 18v3"/><path d="M15 18v3"/><path d="M3 9h3"/><path d="M3 15h3"/><path d="M18 9h3"/><path d="M18 15h3"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label">Repair RNode setup</span>
+                                <span class="flash-repair__sub">Use if identity or firmware-hash setup fails.</span>
+                            </span>
+                        </button>
+                        <button type="button" class="flash-repair__action" id="setHashBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/><circle cx="18.5" cy="18.5" r="3"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label">Re-write firmware hash</span>
+                                <span class="flash-repair__sub">Writes the hash from the loaded firmware file.</span>
+                            </span>
+                        </button>
+                        <button type="button" class="flash-repair__action" id="adoptHashBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label">Adopt running hash</span>
+                                <span class="flash-repair__sub">Use this for &ldquo;Firmware Corrupt&rdquo; when the board still answers USB.</span>
+                            </span>
+                        </button>
+                        <button type="button" class="flash-repair__action" id="inspectHashBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18"/><path d="M3 12h18"/><path d="M3 19h10"/><path d="m17 16 4 4"/><circle cx="16.5" cy="15.5" r="3.5"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label">Read RNode status</span>
+                                <span class="flash-repair__sub">Shows firmware hash and startup radio state.</span>
+                            </span>
+                        </button>
+                        <button type="button" class="flash-repair__action" id="saveTncConfigBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 12h10"/><path d="M4 17h7"/><path d="M17 14v6"/><path d="M14 17h6"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label">Keep radio idle</span>
+                                <span class="flash-repair__sub">Clears saved startup radio settings for Ratspeak-controlled use.</span>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </details>
+        </section>
+    </div>
+
+</main>
+
+<dialog class="install-dialog rsnode-beta" id="rsnodeTermsDialog" aria-labelledby="rsnodeTermsTitle" aria-describedby="rsnodeTermsIntro">
+    <h2 id="rsnodeTermsTitle">Before joining the beta</h2>
+    <p id="rsnodeTermsIntro">For this private beta, please confirm:</p>
+    <form id="rsnodeTermsForm">
+        <div class="rsnode-beta__checks">
+            <label class="rsnode-beta__check"><input type="checkbox" name="france" required><span>I am not a citizen or resident of France.</span></label>
+            <label class="rsnode-beta__check"><input type="checkbox" name="sanctions" required><span>I am outside countries and regions where U.S. sanctions prohibit this distribution, and I am not a restricted person or acting for one.</span></label>
+            <label class="rsnode-beta__check"><input type="checkbox" name="export" required><span>I will follow applicable encryption export and local radio rules.</span></label>
+            <label class="rsnode-beta__check"><input type="checkbox" name="privateBeta" required><span>I will keep the access password private and use this prerelease firmware for testing. I understand flashing can erase my device.</span></label>
+        </div>
+        <p class="rsnode-beta__note">Please keep beta builds within the tester group. Any rights granted by included open-source licenses still apply.</p>
+        <div class="rsnode-beta__links"><a href="https://ofac.treasury.gov/sanctions-programs-and-country-information" target="_blank" rel="noopener noreferrer">U.S. sanctions <span aria-hidden="true">↗</span></a><a href="/terms.html" target="_blank" rel="noopener">Terms</a><a href="/privacy.html" target="_blank" rel="noopener">Privacy</a></div>
+        <p class="rsnode-beta__status" id="rsnodeTermsStatus" role="status"></p>
+        <div class="install-dialog__actions"><button class="install-dialog__cancel" id="rsnodeTermsCancel" type="button">Cancel</button><button class="install-dialog__continue" id="rsnodeTermsContinue" type="submit" disabled>Agree and continue</button></div>
+    </form>
+</dialog>
+
+<dialog class="install-dialog" id="installDialog" aria-labelledby="installDialogTitle" aria-describedby="installDialogIntro installDialogRisk">
+    <div class="install-dialog__device" id="installDialogDevice"></div>
+    <h2 id="installDialogTitle">Erase and install</h2>
+    <p id="installDialogIntro"></p>
+    <p id="installDialogRisk"></p>
+    <label class="rsnode-beta__check rsnode-beta__variant" id="installDialogVariant" hidden><input type="checkbox" id="installDialogVariantConfirmed"><span id="installDialogVariantLabel"></span></label>
+    <a class="install-dialog__guide" href="https://docs.ratspeak.org/docs/hardware/flashing-firmware#before-flashing" target="_blank" rel="noopener noreferrer">Flashing guide <span aria-hidden="true">↗</span></a>
+    <div class="install-dialog__actions">
+        <button class="install-dialog__cancel" id="installDialogCancel" type="button" autofocus>Cancel</button>
+        <button class="install-dialog__continue" id="installDialogContinue" type="button">Erase and install</button>
+    </div>
+</dialog>
+
+<footer class="site-foot">
+    <div class="foot-main">
+      <div class="foot-brand">
+        <a class="brand" href="/" aria-label="Ratspeak home"><svg class="brand-mark" aria-hidden="true" focusable="false"><use href="/assets/ratspeak-mark.svg#mark"/></svg><span class="brand-word">ratspeak</span></a>
+        <p>Private messaging, built on <a href="https://docs.ratspeak.org/docs/concepts/what-is-reticulum">Reticulum</a>.</p>
+      </div>
+      <nav class="foot-cols" aria-label="Footer">
+        <div><h2>Product</h2><ul><li><a href="/download.html">Download</a></li><li><a href="https://docs.ratspeak.org/">Docs <span aria-hidden="true">↗</span></a></li><li><a href="/map.html">Map</a></li></ul></div>
+        <div><h2>Source</h2><ul><li><a href="https://github.com/ratspeak">GitHub <span aria-hidden="true">↗</span></a></li><li><a href="https://github.com/ratspeak/Ratspeak">Ratspeak app <span aria-hidden="true">↗</span></a></li><li><a href="https://github.com/ratspeak/ratspeak-handheld">Handheld firmware <span aria-hidden="true">↗</span></a></li><li><a href="https://github.com/ratspeak/rsReticulum">Reticulum in Rust <span aria-hidden="true">↗</span></a></li></ul></div>
+        <div><h2>Community</h2><ul><li><a href="/discord">Discord <span aria-hidden="true">↗</span></a></li><li><a href="/telegram">Telegram <span aria-hidden="true">↗</span></a></li><li><a href="/community-guidelines.html">Guidelines</a></li></ul></div>
+        <div><h2>Help &amp; legal</h2><ul><li><a href="/support.html">Support</a></li><li><a href="/privacy.html">Privacy</a></li><li><a href="/terms.html">Terms</a></li></ul></div>
+      </nav>
+    </div>
+    <div class="foot-bar">
+      <p>© 2026 Ratspeak LLC · Free and open source under <a href="https://github.com/ratspeak/Ratspeak/blob/main/LICENSE">AGPL-3.0</a></p>
+      <p>Site content under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></p>
+    </div>
+  </footer>
+
+<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+<script type="module" src="/assets/site/flasher.js"></script>
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+
+</body>
+</html>

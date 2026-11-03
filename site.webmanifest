@@ -1,7 +1,7 @@
 {
   "name": "Ratspeak",
   "short_name": "Ratspeak",
-  "description": "Messaging without a central account, built on Reticulum. Connect over IP, LoRa or Bluetooth with compatible devices.",
+  "description": "End-to-end encrypted messenger for desktop, mobile, and LoRa handhelds. If the internet goes down, messages can still travel over Wi-Fi, Bluetooth, or radio.",
   "id": "/",
   "lang": "en-US",
   "dir": "ltr",
@@ -16,8 +16,8 @@
     "social",
     "utilities"
   ],
-  "theme_color": "#FAF7F3",
-  "background_color": "#FAF7F3",
+  "theme_color": "#1838ed",
+  "background_color": "#0a0f2e",
   "icons": [
     {
       "src": "/favicon-32x32.png",

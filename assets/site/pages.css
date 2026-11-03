@@ -1,0 +1,141 @@
+/* Map, support and policy pages. Loaded after site.css. */
+
+.topbar nav a[aria-current="page"]{text-decoration:underline;text-decoration-thickness:2px}
+
+/* ── Support and policies ─────────────────────────────── */
+.policy-nav{margin:0 var(--pad-x);display:flex;align-items:center;flex-wrap:wrap;gap:4px 28px;min-height:56px;font-size:var(--t-small);font-weight:700;border-bottom:1px solid var(--line-band)}
+.policy-nav__label{font-weight:400;color:var(--on-band-muted);margin-right:4px}
+.policy-nav a{padding:12px 0;text-decoration:none;color:var(--on-band)}
+.policy-nav a:hover{text-decoration:underline}
+.policy-nav a[aria-current="page"]{text-decoration:underline;text-decoration-thickness:2px}
+
+.legal-hero{background:var(--band);color:var(--on-band);padding:clamp(48px,6.5vw,104px) var(--pad-x) clamp(56px,7vw,112px)}
+.legal-hero:focus{outline:none}
+.legal-hero__inner{max-width:1180px}
+.legal-hero__eyebrow{margin:0 0 20px;font-size:var(--t-small);font-weight:700;color:var(--on-band-muted)}
+.legal-hero__title{margin:0;max-width:15em;font:400 clamp(44px,6.6vw,96px)/.96 Anton,Impact,sans-serif;letter-spacing:-.01em;text-transform:uppercase;text-wrap:balance}
+.legal-hero__lede{margin:clamp(24px,2.6vw,36px) 0 0;max-width:46ch;font-size:var(--t-hero-sub);line-height:1.45}
+.legal-hero__meta{display:inline-block;margin:28px 0 0;padding-top:14px;border-top:1px solid var(--line-band);font-size:var(--t-small);color:var(--on-band-muted)}
+
+.legal-layout{display:grid;grid-template-columns:minmax(180px,240px) minmax(0,720px);gap:clamp(40px,7vw,128px);padding:var(--section-y) var(--pad-x);color:var(--text)}
+.toc{position:sticky;top:24px;align-self:start;display:flex;flex-direction:column;max-height:calc(100vh - 48px);overflow:auto;font-size:var(--t-small);line-height:1.35}
+.toc strong{margin:0 0 12px;font-size:var(--t-micro);color:var(--muted)}
+.toc a{padding:8px 0 8px 16px;border-left:2px solid var(--line);color:var(--text);text-decoration:none}
+.toc a:hover{color:var(--text-strong);border-left-color:var(--text-strong)}
+.toc a[aria-current="true"]{color:var(--text-strong);border-left:4px solid var(--text-strong);padding-left:14px;font-weight:700}
+.toc a:focus-visible{outline-offset:-3px}
+
+.legal-content{min-width:0;font-size:17px;line-height:1.65}
+.legal-content section{scroll-margin-top:24px}
+.legal-content section+section{margin-top:56px;padding-top:56px;border-top:1px solid var(--line)}
+.legal-content h2{margin:0 0 20px;font:400 clamp(30px,3vw,42px)/1.02 Anton,Impact,sans-serif;letter-spacing:0;text-transform:uppercase;color:var(--text-strong);text-wrap:balance}
+.legal-content h3{margin:32px 0 8px;font-size:19px;line-height:1.35;color:var(--text)}
+.legal-content p{margin:0 0 16px}
+.legal-content ul{margin:0 0 16px;padding-left:22px}
+.legal-content li{margin:8px 0;padding-left:4px}
+.legal-content li::marker{color:var(--text-strong)}
+.legal-content a:not(.button){color:var(--text-strong);font-weight:700;text-decoration-thickness:1px;text-underline-offset:4px;overflow-wrap:anywhere}
+.legal-content a:not(.button):hover{text-decoration-thickness:2px}
+.legal-content strong{color:var(--text)}
+.legal-content > section > :last-child{margin-bottom:0}
+
+.principle-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 24px}
+.principle{display:flex;flex-direction:column;gap:6px;padding:20px 22px;background:var(--surface);border:1.5px solid var(--line)}
+.principle strong{font-size:var(--t-body);line-height:1.35;color:var(--text-strong)}
+.principle span{font-size:15px;line-height:1.55;color:var(--text)}
+
+.notice{margin:24px 0;padding:20px 24px;background:var(--tint);border-left:6px solid var(--text-strong)}
+.notice strong{display:block;font-size:var(--t-body);color:var(--text-strong)}
+.notice p{margin:6px 0 0;font-size:var(--t-body);line-height:1.6}
+
+.contact-card{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px 32px;margin:28px 0 0;padding:24px;background:var(--surface);border:1.5px solid var(--line)}
+.contact-card strong{display:block;font-size:var(--t-body);color:var(--text-strong)}
+.contact-card p{margin:4px 0 0!important;font-size:15px;line-height:1.5;max-width:44ch}
+.contact-card .button{display:inline-flex;align-items:center;min-height:48px;padding:12px 20px;background:var(--cta);color:var(--on-cta);border:2px solid var(--on-cta);box-shadow:4px 4px 0 var(--hard-shadow);font-size:var(--t-body);font-weight:700;line-height:1.2;text-decoration:none;white-space:nowrap;transition:transform .15s,box-shadow .15s}
+.contact-card .button:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--hard-shadow);background:var(--cta-hover)}
+
+@media(max-width:900px){
+  .legal-layout{grid-template-columns:minmax(0,1fr);gap:40px}
+  .toc{position:static;max-height:none;overflow:visible;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 20px;padding:20px;border:1.5px solid var(--line);background:var(--surface)}
+  .toc strong{grid-column:1/-1}
+  .toc a,.toc a[aria-current="true"]{padding:10px 0;border:0;border-top:1px solid var(--line);font-weight:400;color:var(--text)}
+}
+@media(max-width:700px){
+  .legal-content{font-size:var(--t-body)}
+  .legal-content section+section{margin-top:44px;padding-top:44px}
+  .principle-grid{grid-template-columns:minmax(0,1fr)}
+  .notice{padding:16px 18px}
+  .contact-card{padding:20px}
+}
+@media(max-width:560px){
+  .policy-nav{gap:0 20px}
+  .policy-nav__label{flex-basis:100%;padding-top:10px}
+  .policy-nav a{padding:10px 0 12px}
+}
+@media(max-width:420px){
+  .toc{grid-template-columns:minmax(0,1fr)}
+}
+
+/* ── Map ───────────────────────────────────────────────
+   map.css (live) styles the app; these rules only reset its full-viewport
+   chrome and re-skin the panels with the concept tokens. */
+html.page-map,html.page-map body{height:auto;min-height:0;overflow:visible}
+.page-map body{font-size:var(--t-body);line-height:1.45}
+.page-map{
+  --font-sans:'DM Sans',system-ui,sans-serif;--font-mono:'DM Sans',system-ui,sans-serif;--font-code:var(--mono);
+  --map-text:var(--text);--map-text-soft:var(--text);--map-text-muted:var(--muted);
+  --map-accent:var(--text-strong);--map-accent-strong:var(--text-strong);
+  --map-border:var(--line);--map-border-strong:var(--text-strong);
+  --map-bg-panel:var(--surface);--map-bg-panel-strong:var(--surface);
+  --map-control-bg:var(--surface);--map-control-bg-hover:var(--surface-2);
+  --map-control-field-bg:var(--surface);--map-control-field-bg-focus:var(--surface);
+  --map-shadow:4px 4px 0 var(--shadow-soft);--map-nav-control-shadow:3px 3px 0 var(--shadow-soft);
+  --map-attribution-bg:color-mix(in srgb,var(--surface) 88%,transparent);
+}
+.map-shell{display:flex;flex-direction:column;height:100vh;height:100svh;min-height:520px}
+.page-map .map-app{position:relative;inset:auto;flex:1;min-height:0}
+.page-map .map-rail,.page-map .map-legend,.page-map .node-detail,.page-map .map-fallback,.page-map .maplibregl-ctrl-group{border-radius:0!important;border-width:1.5px;backdrop-filter:none;-webkit-backdrop-filter:none}
+.page-map .map-rail,.page-map .node-detail,.page-map .map-legend,.page-map .map-fallback{background:var(--surface)}
+.page-map .map-menu-toggle{min-height:48px;background:var(--surface)}
+.page-map .map-menu-toggle:hover{background:var(--surface-2)}
+.page-map .map-menu-title{font-size:15px;font-weight:700}
+.page-map .search-input,.page-map .filter-select{border-radius:0;border:1.5px solid var(--control);background:var(--surface);color:var(--text);font-size:15px}
+.page-map .search-input::placeholder{color:var(--muted);opacity:1}
+.page-map .search-input:focus,.page-map .filter-select:focus{border-color:var(--text-strong);box-shadow:0 0 0 1px var(--text-strong)}
+.page-map .eyebrow,.page-map .filter-label,.page-map .legend-title,.page-map .detail-label,.page-map .tag,.page-map .continent-label{text-transform:none;letter-spacing:0}
+.page-map .filter-label,.page-map .legend-title,.page-map .detail-label{font-size:var(--t-micro);font-weight:700;color:var(--muted)}
+.page-map .eyebrow{font-size:var(--t-micro);font-family:'DM Sans',system-ui,sans-serif}
+.page-map .legend-item{font-size:var(--t-micro);color:var(--text)}
+.page-map .tag{border-radius:0}
+.page-map .detail-title{font-family:var(--font-sans);font-weight:700;letter-spacing:-.01em}
+.page-map .detail-list{border-radius:0;border-color:var(--line)}
+.page-map .detail-value{color:var(--text)}
+.page-map .detail-close{border-radius:0}
+.page-map .maplibregl-ctrl-attrib{border-radius:0}
+.page-map .map-menu-toggle:focus-visible,.page-map .maplibregl-ctrl-group button:focus-visible{outline:3px solid var(--focus);outline-offset:-3px;box-shadow:none}
+.page-map .maplibregl-canvas:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
+.page-map .detail-close:focus-visible,.page-map .detail-info:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.page-map .site-foot{border-top:0}
+@media(max-width:900px){
+  .page-map{--map-control-bg:var(--surface);--map-control-field-bg:var(--surface);--map-control-field-bg-focus:var(--surface)}
+}
+@media(max-width:620px){
+  .page-map .node-detail{border-radius:0!important}
+  .page-map .detail-label{font-size:12px}
+  .page-map .detail-row{grid-template-columns:minmax(96px,30%) minmax(0,1fr)}
+}
+/* one pin palette: the concept map.js reads these for the node layer, the legend and tags use them directly */
+.page-map{
+  --map-blue:#0a7cc4;--map-blue-dark:#1838ed;--map-green:#0b8a52;--map-yellow:#a87700;--map-i2p:#d9541e;--map-yggdrasil:#c8407f;
+  --map-pin-selected:#15204a;--map-pin-edge:#15204a;
+  --pin-edge:rgb(21 32 74 / .28);--pin-shadow:rgb(21 32 74 / .22);
+  --map-canvas-bg:#dfe6fb;--map-canvas-bg-deep:#cbd6fa;
+  --map-vignette-x:rgb(21 32 74 / .07);--map-vignette-y:rgb(21 32 74 / .05);--map-ambient-glow:rgb(24 56 237 / .06);
+}
+.page-map[data-theme="dark"]{
+  --map-blue:#5cc8ff;--map-blue-dark:#8fa2ff;--map-green:#5fe0a1;--map-yellow:#ffc766;--map-i2p:#ff9a5c;--map-yggdrasil:#ff9ec8;
+  --map-pin-selected:#edff9c;--map-pin-edge:#eef2ff;
+  --pin-edge:rgb(238 242 255 / .2);--pin-shadow:rgb(0 0 0 / .45);
+  --map-canvas-bg:#0a0f2e;--map-canvas-bg-deep:#070b24;
+  --map-vignette-x:rgb(4 8 30 / .3);--map-vignette-y:rgb(4 8 30 / .16);--map-ambient-glow:rgb(169 184 255 / .05);
+}
