@@ -9,7 +9,7 @@ export const config = { runtime: 'edge' };
 //
 // Required env vars:
 //   BLOB_READ_WRITE_TOKEN      Vercel Blob read/write token.
-//   TASKS_ADMIN_TOKEN          Shared admin secret used by tasks.html.
+//   TASKS_ADMIN_TOKEN          Shared admin secret for the ?admin UI.
 
 const BLOB_API = 'https://vercel.com/api/blob';
 const PATHNAME = 'community-poll-proposals.json';

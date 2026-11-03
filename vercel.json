@@ -94,6 +94,11 @@
       "source": "/docs.html",
       "destination": "https://docs.ratspeak.org/",
       "statusCode": 308
+    },
+    {
+      "source": "/tasks.html",
+      "destination": "/",
+      "statusCode": 308
     }
   ],
   "rewrites": [
@@ -118,9 +123,6 @@
     "api/og-map.js": {
       "maxDuration": 10,
       "includeFiles": "{scripts/data,lib/fonts}/**"
-    },
-    "api/tasks.js": {
-      "maxDuration": 10
     },
     "api/proposals.js": {
       "maxDuration": 10
