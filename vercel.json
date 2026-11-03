@@ -122,7 +122,7 @@
     },
     "api/og-map.js": {
       "maxDuration": 10,
-      "includeFiles": "{scripts/data,lib/fonts}/**"
+      "includeFiles": "scripts/data/**"
     },
     "api/proposals.js": {
       "maxDuration": 10

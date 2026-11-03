@@ -70,20 +70,20 @@ test('plottableNodes skips missing locations and out-of-frame latitudes', () => 
   assert.equal(nodes[0].color, KIND_COLORS['client-auto']);
 });
 
-test('buildMapSvg renders dots, logo, and site caption', () => {
+test('buildMapSvg renders dots and logo without text', () => {
   const svg = buildMapSvg(
     snapshot([{ kind: 'i2p', location: { lat: 52.5, lon: 13.4 } }]),
     { land: FIXTURE_LAND }
   );
   assert.ok(svg.startsWith(`<svg width="${OG_WIDTH}" height="${OG_HEIGHT}"`));
   assert.ok(svg.includes(KIND_COLORS.i2p));
-  assert.ok(svg.includes('>ratspeak.org</text>'));
+  assert.ok(!svg.includes('ratspeak.org'));
   assert.ok(svg.includes('<path d="M327.97'));
 });
 
 test('buildMapSvg tolerates an empty snapshot and missing geometry', () => {
   const svg = buildMapSvg({ nodes: [] }, {});
-  assert.ok(svg.includes('>ratspeak.org</text>'));
+  assert.ok(svg.includes('<path d="M327.97'));
   assert.ok(!svg.includes('NaN') && !svg.includes('Infinity') && !svg.includes('undefined'));
 });
 

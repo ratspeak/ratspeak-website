@@ -3,7 +3,6 @@
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { Resvg } from '@resvg/resvg-js';
 import { buildMapSvg } from '../lib/og-map-render.js';
 
@@ -19,13 +18,7 @@ const svg = buildMapSvg(snapshot, {
   countries: JSON.parse(readFileSync(new URL('./data/ne_110m_admin_0_countries.geojson', import.meta.url), 'utf8'))
 });
 
-const png = new Resvg(svg, {
-  font: {
-    fontFiles: [fileURLToPath(new URL('../lib/fonts/JetBrainsMono-Medium.ttf', import.meta.url))],
-    defaultFontFamily: 'JetBrains Mono',
-    loadSystemFonts: false
-  }
-}).render().asPng();
+const png = new Resvg(svg, { font: { loadSystemFonts: false } }).render().asPng();
 
 mkdirSync(dirname(outPath), { recursive: true });
 writeFileSync(outPath, png);

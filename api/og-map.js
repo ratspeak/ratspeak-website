@@ -1,5 +1,4 @@
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import { Resvg } from '@resvg/resvg-js';
 import { loadPublishedSnapshot, mapPathname, pruneExpiredNodes } from '../lib/map-live-snapshot.js';
 import { buildMapSvg } from '../lib/og-map-render.js';
@@ -15,8 +14,7 @@ function loadAssets() {
     try {
       assets = {
         land: JSON.parse(readFileSync(new URL('../scripts/data/ne_110m_land.geojson', import.meta.url), 'utf8')),
-        countries: JSON.parse(readFileSync(new URL('../scripts/data/ne_110m_admin_0_countries.geojson', import.meta.url), 'utf8')),
-        fontPath: tracedFontPath()
+        countries: JSON.parse(readFileSync(new URL('../scripts/data/ne_110m_admin_0_countries.geojson', import.meta.url), 'utf8'))
       };
     } catch (error) {
       console.error('OG map asset load failed', error);
@@ -24,12 +22,6 @@ function loadAssets() {
     }
   }
   return assets;
-}
-
-function tracedFontPath() {
-  const url = new URL('../lib/fonts/JetBrainsMono-Medium.ttf', import.meta.url);
-  readFileSync(url); // readFileSync(new URL(...)) is the pattern Vercel's file tracer bundles from
-  return fileURLToPath(url);
 }
 
 export default async function handler(req, res) {
@@ -54,13 +46,8 @@ export default async function handler(req, res) {
   let png;
   try {
     const svg = buildMapSvg(snapshot, geo);
-    png = new Resvg(svg, {
-      font: {
-        fontFiles: [geo.fontPath],
-        defaultFontFamily: 'JetBrains Mono',
-        loadSystemFonts: false
-      }
-    }).render().asPng();
+    // The card is all paths; skip the system font scan.
+    png = new Resvg(svg, { font: { loadSystemFonts: false } }).render().asPng();
   } catch (error) {
     console.error('OG map render failed', error);
     res.setHeader('Cache-Control', CACHE_FALLBACK);
