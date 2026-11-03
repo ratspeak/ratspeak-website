@@ -737,13 +737,16 @@ function renderSnapshotStatus(currentNodeCount) {
     summary = 'No nodes match these filters. Clear the search or change a filter.';
   } else {
     const shown = state.filteredNodes.length;
-    summary = `${shown} of ${currentNodeCount} node${currentNodeCount === 1 ? '' : 's'} shown.`;
+    const total = `${currentNodeCount} node${currentNodeCount === 1 ? '' : 's'}`;
+    summary = shown === currentNodeCount ? total : `${shown} of ${total}`;
   }
+  const sep = summary.endsWith('.') ? ' ' : ' · ';
   const generatedAt = Date.parse(snapshot.generatedAt || '');
+  // Snapshot date in the visitor's own date order, pinned to UTC
   const timestamp = Number.isFinite(generatedAt)
-    ? ` Snapshot: ${new Date(generatedAt).toISOString().slice(0, 16).replace('T', ' ')} UTC.`
-    : ' Snapshot time unavailable.';
-  els.snapshotStatus.textContent = summary + timestamp + ' Last seen does not confirm reachability.';
+    ? `${sep}Snapshot: ${new Date(generatedAt).toLocaleDateString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'UTC' })} UTC`
+    : `${sep}Snapshot time unavailable`;
+  els.snapshotStatus.textContent = summary + timestamp;
 }
 
 function renderWrappedOverlays() {

@@ -528,6 +528,14 @@ a {
     overflow-wrap: anywhere;
 }
 
+.map-snapshot-status:has(+ .map-snapshot-note) {
+    padding-bottom: 0;
+}
+
+.map-snapshot-note {
+    padding-top: 2px;
+}
+
 .search-box {
     position: relative;
 }
