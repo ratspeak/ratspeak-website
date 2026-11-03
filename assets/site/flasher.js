@@ -147,6 +147,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         custom: {
             name: 'Your board',
             sub: 'ESP32 or nRF52 \u00b7 rsNode, RNode, or your own file',
+            art: 'board',
             accent: 'amber',
             firmware: null,
             firmwareSize: null,
@@ -163,6 +164,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         var release = handheldCapabilities(board);
         var device = DEVICES[board];
         device.sub = 'ESP32-S3 \u00b7 Ratspeak Handheld';
+        device.art = board;
         device.apiDevice = board;
         device.defaultPackage = release.defaultPackage;
         device.firmware = release.prefix + '-' + release.defaultPackage + '.zip';
@@ -300,6 +302,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         panel.classList.toggle('flash-panel--custom', deviceId === 'custom');
         document.getElementById('panelName').textContent = dev.name;
         document.getElementById('panelSub').textContent = dev.sub;
+        document.querySelector('#panelIcon use').setAttribute('href', '/assets/site/devices.svg#device-' + dev.art);
         if (HANDHELD) {
             m9DriverNotice.hidden = deviceId !== 'm9' || m9DriverNoticeDismissed;
             document.getElementById('legacyRecoveryDownloads').hidden = deviceId === 'm9';
