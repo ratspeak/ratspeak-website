@@ -142,9 +142,6 @@ main h2{text-transform:uppercase}
 .play-head{margin-bottom:clamp(40px,4vw,64px);text-align:center}
 .br-narrow{display:none}
 .live-dot{width:7px;height:7px;flex:none;border-radius:50%;background:var(--success);box-shadow:0 0 0 3px var(--success-tint)}
-/* the title holds the centre alone; the reply hint says it's live, the footnote that nothing leaves */
-.play-foot{margin:clamp(28px,3vw,44px) 0 0;font-size:var(--t-small);line-height:1.5;color:var(--muted);text-align:center}
-#demo[hidden]~.play-foot{display:none}
 .demo-unsupported{font-size:var(--t-lead);color:var(--text);margin:0}
 .phone{display:flex;flex-direction:column;align-items:center;min-width:0}
 .phone-label{align-self:stretch;margin:0 0 12px;text-align:center;font-size:var(--t-small);line-height:1.3;font-weight:700;color:var(--text-strong)}
