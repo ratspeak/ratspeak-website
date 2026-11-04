@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="ru" dir="ltr">
+<head>
+    <meta charset="UTF-8"><meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#10208c"><meta name="color-scheme" content="dark">
+    <title data-i18n="flash.meta.title">Расширенный инструмент прошивки — Ratspeak</title>
+  <meta name="description" content="Запишите на плату LoRa прошивку rsNode, официальную прошивку RNode или свой файл прямо из браузера." data-i18n-attr="content:flash.meta.description">
+  
+  
+  <link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="manifest" href="/site.webmanifest">
+  <meta name="application-name" content="Ratspeak"><meta name="apple-mobile-web-app-title" content="Ratspeak">
+  <meta property="og:type" content="website"><meta property="og:locale" content="ru_RU"><meta property="og:site_name" content="Ratspeak">
+  <meta property="og:title" content="Расширенный инструмент прошивки — Ratspeak" data-i18n-attr="content:flash.meta.title"><meta property="og:description" content="Запишите на плату LoRa прошивку rsNode, официальную прошивку RNode или свой файл прямо из браузера." data-i18n-attr="content:flash.meta.description"><meta property="og:url" content="https://ratspeak.org/ru/flash.html">
+  <meta property="og:image" content="https://ratspeak.org/assets/seo/og-flash.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Расширенный инструмент Ratspeak для прошивки плат LoRa." data-i18n-attr="content:flash.meta.imageAlt">
+  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@ratspeakorg"><meta name="twitter:title" content="Расширенный инструмент прошивки — Ratspeak" data-i18n-attr="content:flash.meta.title"><meta name="twitter:description" content="Запишите на плату LoRa прошивку rsNode, официальную прошивку RNode или свой файл прямо из браузера." data-i18n-attr="content:flash.meta.description">
+  <meta name="twitter:image" content="https://ratspeak.org/assets/seo/og-flash.png"><meta name="twitter:image:alt" content="Расширенный инструмент Ratspeak для прошивки плат LoRa." data-i18n-attr="content:flash.meta.imageAlt">
+    <link rel="preload" href="/lang/assets/fonts/anton.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/lang/assets/site/site.css">
+    <link rel="stylesheet" href="/lang/assets/site/download.css">
+    <link rel="stylesheet" href="/lang/assets/site/flash.css">
+    <script>(()=>{const u=new URL(location.href),d=u.searchParams.get('device');if(d&&d!=='custom')location.replace('download.html'+u.search+'#'+d)})()</script>
+    <script>window.RS_I18N={"lang":"ru","dir":"ltr","locale":"ru","tech":"ru","base":"/lang/ru/","pages":["index.html","map.html","download.html","flash.html","404.html"],"strings":{"dl.handheld.firmware":"Прошивка","dl.handheld.messenger-only":"Только мессенджер","dl.handheld.radio-for-your-phone":"Радио для телефона или компьютера","dl.handheld.the-ratspeak-app-sends":"Приложение Ratspeak передаёт сообщения через LoRa-радио этого устройства, подключённого по USB или Bluetooth.","dl.flash.not-started":"Не начато","dl.flash.no-device-selected":"Устройство не выбрано","dl.flash.select-a-usb-device":"Выберите USB-устройство, чтобы продолжить.","dl.dialog.erase-and-install":"Стереть и установить","dl.flash.btn.install":"Установить Ratspeak","dl.fw.full":"Мессенджер и радио","dl.flash.pkg.fullDesc":"Рекомендуется. Выбирайте режим при каждом запуске устройства.","dl.flash.pkg.standaloneDesc":"Отправляйте и читайте сообщения на самом устройстве.","dl.flash.fw.checked":"Загружено и проверено","dl.flash.fw.downloading":"Загрузка: {received} из {total}…","dl.flash.fw.checkingRelease":"Проверка выпуска…","dl.flash.fw.failed":"Загрузка не завершилась. Проверьте соединение и повторите попытку.","dl.flash.connect.selecting":"Выбор…","dl.flash.connect.choose":"Выберите устройство в окне браузера…","dl.flash.connect.denied":"Браузер не смог использовать это устройство.","dl.flash.connect.none":"Устройство не выбрано","dl.flash.connect.selected":"Устройство выбрано","dl.flash.usb.esp32s3":"Плата ESP32-S3","dl.flash.usb.bridge":"Плата с USB-адаптером {chip}","dl.flash.usb.serial":"Последовательное USB-устройство","dl.flash.connect.checked":"{chip} · проверено","dl.flash.boot.tdeck":"Переведите в режим загрузки: при выключенном питании и подключённом USB зажмите трекбол, включите питание и отпустите трекбол через несколько секунд.","dl.flash.boot.tpager":"Переведите в режим загрузки: зажмите BOOT, нажмите RST и отпустите BOOT.","dl.flash.boot.cardputer":"Переведите в режим загрузки: выключите питание боковым переключателем, зажмите G0, подключите USB и отпустите G0.","dl.flash.boot.m9":"Оставьте M9 включённым с подключённым USB. Если порт не появляется, установите USB-драйвер по ссылке выше.","dl.flash.stage.capacity":"Проверка объёма флеш-памяти…","dl.flash.stage.layout":"Чтение разметки памяти…","dl.flash.stage.bootloader":"Проверка загрузчика…","dl.flash.stage.startup":"Проверка выбора при запуске…","dl.flash.dialog.chosen":"Вы выбрали чистую установку.","dl.flash.dialog.risk":"Все данные во внутренней памяти будут потеряны, включая ключи и адрес, настройки и сообщения.","dl.flash.reason.unidentified":"Не удалось определить установленную прошивку.","dl.flash.reason.layout":"Не удалось определить установленную прошивку или разметку памяти.","dl.flash.reason.bootloader":"Установленный загрузчик не поддерживает обновление.","dl.flash.reason.incomplete":"Установленная прошивка неполная.","dl.flash.reason.unreadable":"Не удалось прочитать установленную прошивку.","dl.flash.reason.package":"Для смены пакета прошивки нужна чистая установка.","dl.flash.reason.unverified":"Этот пакет прошивки не проверен на возможность обновления с сохранением данных.","dl.flash.reason.storage":"Для этого обновления нужна другая разметка памяти или загрузчик.","dl.flash.stage.apps":"Проверка установленных приложений ({done}/{all})…","dl.flash.help.missing":"Нет устройства в списке? Используйте кабель с передачей данных и закройте другие приложения, работающие с устройством.","dl.flash.help.denied":"Закройте другие приложения или вкладки, работающие с устройством, и выберите его снова.","dl.flash.connect.select":"Выбрать USB-устройство","dl.flash.flow.downloading":"Загрузка {pct}","dl.flash.tech.copied":"Скопировано","dl.flash.adv.eraseOn":"Полное стирание включено","dl.flash.adv.default":"Обычная установка","dl.flash.flow.selected":"Выбрано","dl.flash.flow.written":"Записано","dl.flash.flow.complete":"Завершено","dl.flash.note.installed":"Установлено. Перезапустите устройство, чтобы начать работу.","dl.flash.flow.ready":"Готово","dl.flash.flow.writing":"Запись","dl.flash.flow.checking":"Проверка устройства","dl.flash.note.writing":"Идёт запись прошивки. Не отключайте USB-кабель до завершения.","dl.flash.note.checking":"Проверка устройства перед установкой.","dl.flash.flow.couldntConnect":"Нет соединения","dl.flash.flow.selectDevice":"Выберите устройство","dl.flash.flow.notDownloaded":"Не загружено","dl.flash.flow.stopped":"Остановлено","dl.flash.note.fwFailed":"Прошивка не загрузилась. Повторите попытку в шаге 2.","dl.flash.note.ready":"Готово. Установщик проверит устройство, затем обновит его или спросит перед стиранием. Оставьте эту вкладку открытой.","dl.flash.note.selectWhileDownloading":"Выберите USB-устройство, пока загружается прошивка.","dl.flash.note.waiting":"Ожидание завершения загрузки прошивки.","dl.flash.dialog.introRadio":"Вы устанавливаете версию Ratspeak Handheld только с режимом радио.","dl.flash.dialog.intro":"Вы устанавливаете Ratspeak Handheld.","dl.flash.btn.preparing":"Подготовка…","dl.flash.status.loadingTool":"Загрузка esptool…","dl.flash.status.preparing":"Подготовка прошивки…","dl.flash.btn.checking":"Проверка устройства…","dl.flash.status.connecting":"Подключение к загрузчику…","dl.flash.status.entering":"Переход в загрузчик…","dl.flash.status.checkingInstalled":"Проверка установленной прошивки…","dl.flash.status.cancelled":"Отменено. Ничего не записано. При необходимости перезапустите устройство.","dl.flash.btn.installing":"Установка…","dl.flash.status.writing":"Запись прошивки…","dl.flash.status.writingPart":"Запись части {part}/{parts}…","dl.flash.status.written":"Флеш-память записана","dl.flash.fail.cable":"Используйте USB-кабель с передачей данных, подключённый прямо к компьютеру.","dl.flash.fail.replug":"Отключите устройство, подключите его снова и заново выберите порт.","dl.flash.fail.busy.title":"USB-порт занят","dl.flash.fail.busy.cause":"Браузер нашёл {device}, но не смог открыть соединение. Вероятно, устройство занято другим приложением.","dl.flash.fail.busy.fix1":"Закройте приложения, использующие порт: Ratspeak, монитор последовательного порта или другую вкладку с этой страницей.","dl.flash.fail.busy.fix2":"Отключите {device}, подключите снова и заново выберите порт.","dl.flash.fail.silent.title":"{device} не отвечает","dl.flash.fail.silent.cause":"Порт открылся, но устройство не ответило установщику.","dl.flash.fail.silent.fix2":"Выберите порт снова: в режиме загрузки он может измениться.","dl.flash.fail.wrong.title":"Похоже, это не {device}","dl.flash.fail.wrong.cause":"Подключённое устройство не соответствует выбранному.","dl.flash.fail.wrong.fix1":"Убедитесь, что выбран правильный порт.","dl.flash.fail.wrong.fix2":"Вернитесь к списку устройств и выберите то, на которое устанавливаете прошивку.","dl.flash.fail.dropped.title":"Соединение прервалось","dl.flash.fail.dropped.cause":"Устройство перестало отвечать в процессе установки.","dl.flash.fail.dropped.fix1":"Не отключайте кабель и питание устройства до завершения установки.","dl.flash.fail.dropped.fix2":"Отключите устройство, подключите снова и заново выберите порт.","dl.flash.fail.integrity.title":"Прошивка не прошла проверку","dl.flash.fail.integrity.cause":"Загруженная прошивка не прошла проверку целостности.","dl.flash.fail.integrity.fix1":"Проверьте подключение к интернету.","dl.flash.fail.integrity.fix2":"Повторите попытку: установщик загрузит новую копию.","dl.flash.fail.stopped.title":"Установка остановилась","dl.flash.fail.stopped.cause":"Произошла ошибка при обмене данными с устройством.","dl.flash.tech.selected":"Выделено. Нажмите Ctrl+C или ⌘C, чтобы скопировать.","flash.btn.update":"Обновить rsNode","flash.btn.reinstall":"Стереть и переустановить","flash.btn.rsnode":"Прошить rsNode","flash.btn.install":"Установить прошивку","flash.board.name":"Ваша плата","flash.board.sub":"ESP32 или nRF52 · rsNode, RNode или свой файл","flash.usb.esp32":"Плата ESP32","flash.usb.nrf52":"Плата nRF52","flash.boot.custom":"Переведите плату в режим загрузки: зажмите BOOT, подключите USB и отпустите кнопку.","flash.rsnode.beta.loadFailed":"Не удалось загрузить бету. Попробуйте ещё раз.","flash.rsnode.beta.sessionFailed":"Не удалось проверить сеанс беты. Попробуйте ещё раз.","flash.rsnode.beta.termsChanged":"Условия беты изменились. Ознакомьтесь с ними ещё раз.","flash.rsnode.beta.listFailed":"Список плат для беты недоступен. Попробуйте ещё раз.","flash.rsnode.beta.incomplete":"Данные пакета беты неполные. На плату ничего не записано.","flash.rsnode.beta.verifyFailed":"Скачанная прошивка не прошла проверку. Выберите плату ещё раз.","flash.rsnode.beta.noManifest":"В пакете беты нет манифеста.","flash.rsnode.beta.wrongPackage":"Этот заводской пакет rsNode не подходит для выбранной платы.","flash.rsnode.beta.badLayout":"Недопустимая разметка заводского образа rsNode.","flash.rsnode.beta.noImage":"В пакете rsNode нет заводского образа.","flash.rsnode.beta.imageFailed":"Заводской образ rsNode не прошёл проверку.","flash.rsnode.beta.settingsMismatch":"Чип или параметры флеш-памяти в образе rsNode не соответствуют манифесту.","flash.rsnode.beta.unverified":"Не удалось проверить прошивку. Попробуйте позже.","flash.rsnode.beta.invalid":"Недопустимый запрос.","flash.rsnode.beta.wrongSite":"Чтобы продолжить, откройте инструмент прошивки на этом сайте.","flash.rsnode.beta.down":"Закрытая бета сейчас недоступна. Попробуйте позже.","flash.rsnode.beta.tooMany":"Слишком много попыток. Попробуйте позже.","flash.rsnode.beta.notAccepted":"Пароль беты не принят.","flash.rsnode.beta.enterPassword":"Чтобы продолжить, введите пароль беты.","flash.rsnode.beta.confirmEach":"Чтобы продолжить, подтвердите каждое условие беты.","flash.rsnode.beta.confirmFirst":"Сначала подтвердите условия беты.","flash.rsnode.beta.noBoard":"Эта плата недоступна в бете.","flash.rsnode.beta.noUpdate":"Для этой платы беты нет пакета обновления.","flash.rsnode.beta.unavailable":"Закрытая бета временно недоступна. Попробуйте ещё раз.","flash.rsnode.beta.checkTft":"Подтверждаю: у меня V4 R8 TFT — Expansion Kit V2 с сенсорным экраном 2,8 дюйма.","flash.rsnode.beta.checkR8":"Подтверждаю: у меня V4 R8 (ESP32-S3R8) с небольшим OLED-экраном.","flash.rsnode.beta.checkR2":"Подтверждаю: у меня V4 R2 (ESP32-S3R2).","flash.rsnode.update.noteInstall":"При установке стираются ключи и адрес узла, список операторов, настройки Wi-Fi, сопряжения Bluetooth и настройки Repeater. Для обновления нужны совместимый пакет и прошивка с поддержкой обновления по USB.","flash.rsnode.update.noteUpdate":"При обновлении сохраняются ключи и адрес узла, список операторов, настройки Wi-Fi, сопряжения Bluetooth и настройки Repeater. При установке они стираются. Проверьте, можно ли обновить узел.","flash.rsnode.update.title":"Обновить","flash.rsnode.update.noSupport":"Узел не сообщил о поддержке обновлений по USB. Установка сотрёт данные узла.","flash.rsnode.update.otherBoard":"У этого узла другая плата или другой её вариант.","flash.rsnode.update.otherKey":"Узел доверяет другому ключу обновления.","flash.rsnode.update.finishing":"Завершается предыдущее обновление. Попробуйте через минуту.","flash.rsnode.update.current":"Установлена актуальная версия.","flash.rsnode.update.packageFailed":"Пакет обновления не прошёл проверку. Выберите плату ещё раз.","flash.rsnode.wait.none30":"Нет ответа по USB за 30 с. Если вы только что установили прошивку, нажмите RESET на плате и повторите попытку.","flash.rsnode.wait.noneConnect":"Нет ответа по USB. Если вы только что установили прошивку, нажмите RESET на плате и подключитесь снова.","flash.rsnode.managers.predates":"В этой версии прошивки ещё нет операторов","flash.rsnode.settings.check.name":"Введите имя сети для подключения.","flash.rsnode.settings.check.nameLength":"Имя сети не должно превышать 32 байта.","flash.rsnode.settings.check.ownPassword":"Введите пароль для сети узла.","flash.rsnode.settings.check.joinPassword":"Введите пароль сети или оставьте поле пустым для открытой сети.","flash.rsnode.settings.check.ownLength":"Для собственной сети узла нужен пароль длиной от 8 до 32 символов.","flash.rsnode.settings.check.printable":"Используйте в пароле буквы, цифры, пробелы и стандартные символы.","flash.rsnode.settings.check.joinLength":"Пароль Wi-Fi должен содержать от 8 до 32 символов. Для открытой сети оставьте поле пустым.","flash.rsnode.settings.check.channel":"Выберите канал от 1 до 13.","flash.rsnode.settings.check.address":"Введите статический адрес, например 192.168.1.50.","flash.rsnode.settings.check.netmask":"Введите маску подсети, например 255.255.255.0.","flash.rsnode.settings.check.subnet":"Это адрес самой подсети или её широковещательный адрес.","flash.rsnode.settings.check.gateway":"Введите адрес шлюза в той же подсети или оставьте поле пустым.","flash.rsnode.settings.check.dns":"Введите адрес DNS-сервера или оставьте поле пустым.","flash.rsnode.settings.check.peersPort":"Для подключений соседей выберите порт от 1 до 65535, кроме 80.","flash.rsnode.settings.check.uplinkHost":"Введите имя или адрес хоста восходящего соединения. Допустимо до 64 букв, цифр, точек, дефисов и знаков подчёркивания.","flash.rsnode.settings.check.uplinkPort":"Выберите порт восходящего соединения от 1 до 65535.","flash.rsnode.settings.refused.malformed":"Узел не смог прочитать запрос. Ничего не изменилось.","flash.rsnode.settings.refused.unknown":"В этой прошивке такой настройки нет.","flash.rsnode.settings.refused.wifi":"Узел отклонил настройки Wi-Fi. Для подключения к сети нужны её имя и пароль длиной от 8 до 32 символов; у открытой сети пароля нет. Для собственной сети узла обязателен пароль от 8 до 32 символов.","flash.rsnode.settings.refused.radio":"Узел отклонил настройки радио.","flash.rsnode.settings.refused.confirm":"Подтвердите изменение на устройстве.","flash.rsnode.settings.refused.transport":"Узел отклонил настройки Repeater.","flash.rsnode.settings.refused.network":"Узел отклонил настройки соседей или восходящего соединения. Проверьте порты и хост восходящего соединения.","flash.rsnode.settings.refused.wifiMode":"Узел отклонил этот режим Wi-Fi.","flash.rsnode.settings.refused.channel":"Узел отклонил этот канал.","flash.rsnode.settings.refused.name":"Узел отклонил это имя сети.","flash.rsnode.settings.refused.password":"Узел отклонил этот пароль.","flash.rsnode.settings.refused.address":"Узел отклонил этот статический адрес.","flash.rsnode.settings.refused.gateway":"Узел отклонил этот шлюз.","flash.rsnode.settings.refused.dns":"Узел отклонил этот DNS-сервер.","flash.rsnode.settings.refused.peers":"Узел отклонил настройки соседей.","flash.rsnode.settings.refused.peersPort":"Узел отклонил этот порт для соседей.","flash.rsnode.settings.refused.uplink":"Узел отклонил настройки восходящего соединения.","flash.rsnode.settings.refused.uplinkHost":"Узел отклонил этот хост восходящего соединения.","flash.rsnode.settings.refused.uplinkPort":"Узел отклонил этот порт восходящего соединения.","flash.rsnode.settings.refused.value":"Узел отклонил одно из значений.","flash.rsnode.settings.region.none":"Не выбран","flash.rsnode.settings.region.americas":"Америка 915","flash.rsnode.settings.region.europe":"Европа 868","flash.rsnode.settings.region.australia":"Австралия 915","flash.rsnode.settings.region.asia":"Азия 923","flash.rsnode.facts.notSetUp":"Не настроено","flash.rsnode.settings.notSet":"Не задано","flash.rsnode.facts.on":"Вкл.","flash.rsnode.facts.off":"Выкл.","flash.rsnode.facts.unsupported":"Не поддерживается прошивкой","flash.rsnode.facts.noneYet":"Пока нет","flash.rsnode.facts.none":"Нет","flash.rsnode.managers.role.owner":"Владелец","flash.rsnode.facts.profileSaved":"Профиль сохранён","flash.rsnode.facts.ifacOff":"IFAC выкл.","flash.rsnode.facts.startsRepeater":"запускается как Repeater","flash.rsnode.facts.joined":"Подключено к сети","flash.rsnode.facts.own":"Своя сеть","flash.rsnode.facts.joining":"Подключение к сети…","flash.rsnode.facts.starting":"Запуск своей сети…","flash.rsnode.facts.notConfigured":"не настроено","flash.rsnode.facts.discharging":"разряжается","flash.rsnode.facts.charging":"заряжается","flash.rsnode.facts.charged":"заряжена","flash.rnode.guide.techo":"Один раз нажмите RESET. Когда последовательный порт снова появится, нажмите «Завершить настройку».","flash.rnode.guide.nrf52":"Перезагрузите плату или отключите и снова подключите её. Когда появится последовательный порт, нажмите «Завершить настройку».","flash.rnode.guide.esp32":"Выберите последовательный порт RNode, появившийся после перезагрузки устройства.","flash.rnode.err.noReleases":"Совместимых выпусков RNode нет","flash.rnode.err.info":"Не удалось получить сведения","flash.rnode.err.download":"Не удалось скачать","flash.rnode.err.size":"В метаданных официального выпуска не указан корректный размер файла","flash.rnode.err.sizeMismatch":"Размер скачанного официального выпуска не совпадает с данными издателя","flash.rnode.err.digest":"В метаданных официального выпуска нет корректного хеша SHA-256 от издателя","flash.rnode.err.sha":"Скачанный официальный выпуск не прошёл проверку SHA-256 по хешу издателя","flash.rsnode.update.offerFrom":"Обновление с {from} до {version}. Ключи, адрес, список операторов и настройки сохранятся.","flash.rsnode.update.offer":"Обновление до {version}. Ключи, адрес, список операторов и настройки сохранятся.","flash.rsnode.update.currentWith":"Установлена актуальная версия {version}.","flash.rsnode.update.done":"Обновлено до {version}. Ключи, адрес, список операторов и настройки сохранены.","flash.rsnode.update.noPackage":"Для этой платы нет пакета обновления. Установка сотрёт данные узла.","flash.rsnode.update.noPackageFor":"Для {board} нет пакета обновления. Установка сотрёт данные узла.","flash.rsnode.settings.saved.offBluetooth":"Сохранено. Узел {name} перезапустился с выключенным Wi-Fi. Bluetooth снова доступен.","flash.rsnode.settings.saved.off":"Сохранено. Узел {name} перезапустился с выключенным Wi-Fi.","flash.rsnode.settings.saved.notJoined":"Сохранено. Узел {name} перезапустился, но пока не подключился к сети «{network}». Проверьте имя сети и пароль. Состояние Wi-Fi показано на экране узла.","flash.rsnode.settings.saved.notUp":"Сохранено. Узел {name} перезапустился, но его сеть ещё не работает. Состояние Wi-Fi показано на экране узла.","flash.rsnode.settings.saved.joinedPeers":"Сохранено. Узел {name} подключился к сети «{network}» с адресом {ip}. Соседи подключаются к {ip}, порт {port}.","flash.rsnode.settings.saved.joinedApps":"Сохранено. Узел {name} подключился к сети «{network}» с адресом {ip}. Приложения подключаются к {ip}, порт {port}.","flash.rsnode.settings.saved.joined":"Сохранено. Узел {name} подключился к сети «{network}» с адресом {ip}.","flash.rsnode.settings.saved.ownPeers":"Сохранено. Узел {name} запустил свою сеть «{network}» с адресом {ip}. Соседи подключаются к {ip}, порт {port}.","flash.rsnode.settings.saved.ownApps":"Сохранено. Узел {name} запустил свою сеть «{network}» с адресом {ip}. Приложения подключаются к {ip}, порт {port}.","flash.rsnode.settings.saved.own":"Сохранено. Узел {name} запустил свою сеть «{network}» с адресом {ip}.","flash.rsnode.settings.otherNode":"Это {name}, а не {expected}. Сначала считайте его настройки.","flash.rsnode.managers.otherNode":"Это {name}, а не {expected}","flash.rsnode.settings.noSupport":"Узел {name} не сообщил о поддержке настройки по USB. Проверьте соединение и следуйте инструкции для его версии прошивки. Установка сотрёт данные узла.","flash.rsnode.heldAny":"Другое приложение использует {name} по Bluetooth или Wi-Fi. Отключите его или удерживайте USB в меню узла, затем сохраните ещё раз.","flash.rsnode.held":"Другое приложение использует {name} через {via}. Отключите его или удерживайте USB в меню узла, затем сохраните ещё раз.","flash.rsnode.settings.busy":"Узел {name} завершает обновление или сохраняет данные. Попробуйте через минуту.","flash.rsnode.settings.storage":"Узел {name} не подтвердил сохранение настроек. Считайте их перед новой попыткой.","flash.rsnode.settings.unsupported":"Узел {name} не может изменить эти настройки по USB.","flash.rsnode.settings.failed":"Узел {name} отклонил настройки (код {code}).","flash.rsnode.settings.noRestart":"Узел {name} сохранил настройки, но не ответил после перезапуска. Нажмите RESET на плате и считайте настройки ещё раз.","flash.rsnode.settings.notReported":"Узел {name} не передал настройки.","flash.rsnode.managers.notHex":"Это не шестнадцатеричный хеш: {text}","flash.rsnode.managers.hashLength":"В хеше должно быть 32 шестнадцатеричных символа, получено {count}: {text}","flash.rsnode.settings.region.other":"Регион {id}","flash.rsnode.settings.ifacOn":"Вкл. ({size})","flash.rsnode.facts.ifacOn":"IFAC вкл. ({size})","flash.rsnode.facts.board":"Плата {byte}","flash.rsnode.facts.image":"образ {hash}","flash.rsnode.facts.last":"последний сигнал: {rssi} дБм, {snr} дБ","flash.rsnode.facts.airtime":"Эфирное время: {pct}","flash.rsnode.facts.load":"нагрузка: {pct}","flash.rsnode.facts.noise":"шум: {dbm} дБм","flash.result.provisionFailed":"Не удалось настроить: {error}","flash.board.fileType":"Выберите файл прошивки .bin или .zip.","flash.rsnode.beta.chooseBoard":"Выберите плату","flash.rsnode.beta.expired":"Срок доступа к бете истёк. Введите пароль ещё раз.","flash.rsnode.beta.offline":"Сервис беты не отвечает; проверить пароль не удалось. Попробуйте позже.","flash.rsnode.beta.loading":"Загрузка списка плат беты…","flash.rsnode.beta.empty":"Сборок беты пока нет. Попробуйте позже.","flash.rsnode.beta.checking":"Проверка пароля…","flash.rsnode.beta.wrongPassword":"Пароль не подошёл. Попробуйте ещё раз.","flash.rsnode.beta.checkingAccess":"Проверка доступа…","flash.rsnode.beta.confirmFailed":"Не удалось подтвердить доступ. Попробуйте ещё раз.","flash.rsnode.beta.locking":"Закрытие доступа к бете…","flash.rsnode.beta.lockFailed":"Выбор прошивки сброшен, но закрыть доступ к бете не удалось. Попробуйте ещё раз.","flash.rsnode.beta.ready":"{version} · {size} · Можно прошивать","flash.rsnode.beta.readyConfirm":"{version} · {size} · Подтвердите вариант V4.","flash.rsnode.beta.downloading":"Загрузка прошивки для {board}…","flash.rsnode.update.checking":"Проверка…","flash.rsnode.update.checkAgain":"Проверить снова","flash.rsnode.update.check":"Проверить узел","flash.rsnode.update.reading":"Чтение данных узла…","flash.rsnode.update.noAnswer":"Ни один rsNode не ответил по USB. Если на узле установлен rsNode, нажмите RESET на плате и проверьте снова. Установка доступна в любом случае.","flash.rsnode.update.downloading":"Загрузка обновления…","flash.rsnode.update.selectPort":"Выберите последовательный порт rsNode для проверки.","flash.rsnode.update.downloadFailed":"{error} Установка по-прежнему доступна.","flash.rsnode.update.preparing":"Подготовка обновления…","flash.rsnode.update.intro":"Вы обновляете узел до rsNode {version}.","flash.rsnode.update.detail":"Ключи, адрес, список операторов, настройки Wi-Fi, сопряжения Bluetooth и настройки Repeater сохранятся. Узел перезапустится, проверит новую прошивку и либо оставит её, либо вернётся к текущей.","flash.rsnode.update.action":"Обновить","flash.rsnode.update.btnChecking":"Проверка устройства…","flash.rsnode.update.connecting":"Подключение к rsNode…","flash.rsnode.update.btnUpdating":"Обновление…","flash.rsnode.update.sending":"Отправка обновления… {pct}","flash.rsnode.update.restarting":"Перезапуск с новой прошивкой…","flash.rsnode.update.trial":"Узел проверяет новую прошивку…","flash.rsnode.update.confirming":"Подтверждение…","flash.rsnode.update.updated":"Обновлено","flash.rnode.pickVariant":"Для продолжения выберите вариант устройства.","flash.rnode.releasesFailed":"Ошибка загрузки выпусков","flash.rnode.loadingVariants":"Загрузка вариантов…","flash.rnode.loading":"Загрузка вариантов RNode…","flash.rnode.selectDevice":"Выберите устройство…","flash.rnode.pickSupported":"Для продолжения выберите совместимый вариант RNode.","flash.rnode.releaseFailed":"Не удалось загрузить выпуски RNode","flash.rnode.variantsFailed":"Ошибка загрузки вариантов","flash.rnode.error":"Ошибка: {error}","flash.rnode.downloadingFile":"Загрузка {file}…","flash.rnode.downloading":"Загрузка прошивки для {board} ({size})…","flash.rnode.verifying":"Проверка SHA-256 издателя для {board}…","flash.rnode.band.low":"{range} (платы на 433 МГц)","flash.rnode.band.high":"{range} (платы на 868/915 МГц)","flash.rnode.band.other":"Платы диапазона {range}","flash.rnode.band.manual":"Укажите точную модель платы в дополнительных параметрах","flash.rnode.band.first":"Сначала выберите вариант устройства","flash.rnode.ready.nrf52":"DFU приложения nRF52; загрузчик и EEPROM сохраняются","flash.rnode.ready.esp32":"Прошивка ESP32 из браузера","flash.rnode.ready.verified":"SHA-256 издателя проверен","flash.rnode.ready.flash":"можно прошивать","flash.rnode.board.product":"Изделие {byte}","flash.rnode.board.model":"Модель {byte}","flash.rnode.board.unknownProduct":"Неизвестное изделие","flash.rnode.board.unknownModel":"Неизвестная модель","flash.rnode.board.none":"Выберите вариант прошивки RNode или укажите плату и диапазон вручную.","flash.rnode.board.suggestion":"Использовать подсказку","flash.rnode.board.change":"Изменить","flash.rnode.setup.required":"Обязательно для RNode","flash.rnode.setup.after":"Настроить после прошивки","flash.rnode.setup.completing":"Завершение записи идентификационных данных RNode…","flash.rnode.setup.identity":"Запись идентификационных данных RNode…","flash.rnode.setup.finalizing":"Завершение настройки RNode…","flash.rnode.setup.hash":"Запись хеша прошивки…","flash.rnode.setup.verifyHash":"Проверка хеша прошивки…","flash.rnode.tools.needSerialSetup":"Для настройки RNode нужен Web Serial (Chrome или Edge на компьютере).","flash.rnode.tools.noBoard":"Плата ещё не определена. Выберите вариант прошивки RNode или нажмите «Изменить», чтобы вручную задать плату и диапазон.","flash.rnode.tools.finishing":"Завершить настройку RNode…","flash.rnode.tools.cancelled":"Настройка отменена.","flash.rnode.tools.verifying":"Проверка RNode…","flash.rnode.tools.complete":"Настройка RNode завершена","flash.rnode.tools.resetRetry":"Перезагрузите плату и попробуйте ещё раз.","flash.rnode.tools.failed":"Не удалось настроить RNode.","flash.rnode.tools.needSerial":"Требуется Web Serial (Chrome или Edge на компьютере).","flash.rnode.tools.loadFirst":"Сначала загрузите прошивку на шаге 2, чтобы вычислить её хеш. Затем повторите действие.","flash.rnode.tools.writingHash":"Запись хеша прошивки…","flash.rnode.tools.hashVerified":"Хеш прошивки проверен.","flash.rnode.tools.hashFailed":"Не удалось записать хеш.","flash.rnode.tools.adopting":"Принятие хеша запущенной прошивки…","flash.rnode.tools.adopted":"Сохранённый хеш соответствует запущенной прошивке.","flash.rnode.tools.adoptFailed":"Не удалось принять хеш.","flash.rnode.tools.reading":"Чтение состояния RNode…","flash.rnode.tools.read":"Состояние RNode получено.","flash.rnode.tools.readFailed":"Не удалось прочитать состояние.","flash.rnode.tools.idleConfirm":"Оставить этот RNode в ожидании, пока Ratspeak не настроит его?\n\nСохранённые параметры запуска радио будут стёрты. Радио останется в ожидании, пока его не настроит Ratspeak или другой хост Reticulum.","flash.rnode.tools.idling":"Перевод радио в режим ожидания…","flash.rnode.tools.idle":"Параметры запуска радио стёрты.","flash.rnode.tools.idleFailed":"Не удалось стереть параметры запуска радио.","flash.rsnode.managers.kind.lxmf":"Адрес LXMF","flash.rsnode.managers.kind.identity":"Хеш идентификатора","flash.rsnode.managers.role.admin":"Администратор","flash.rsnode.managers.change.owner":"назначить Владельца","flash.rsnode.whenFlashed":"Доступно после завершения прошивки.","flash.rsnode.managers.nothing":"Пока нечего сохранять. Добавьте оператора.","flash.rsnode.managers.summary":"Изменения при сохранении: {changes}.","flash.rsnode.managers.duplicate":"Этот оператор уже в списке.","flash.rsnode.managers.max":"У узла может быть до четырёх операторов.","flash.rsnode.managers.done":"Готово","flash.rsnode.managers.add":"Добавить","flash.rsnode.managers.state.removed":"Удалён","flash.rsnode.managers.state.new":"Новый","flash.rsnode.managers.state.changed":"Изменён","flash.rsnode.managers.undo":"Отменить","flash.rsnode.managers.undoOwner":"Отменить удаление Владельца {hash}","flash.rsnode.managers.undoAdmin":"Отменить удаление Администратора {hash}","flash.rsnode.managers.edit":"Изменить","flash.rsnode.managers.editOwner":"Изменить Владельца {hash}","flash.rsnode.managers.editAdmin":"Изменить Администратора {hash}","flash.rsnode.managers.remove":"Удалить","flash.rsnode.managers.removeOwner":"Удалить Владельца {hash}","flash.rsnode.managers.removeAdmin":"Удалить Администратора {hash}","flash.rsnode.managers.empty":"Добавьте себя как Владельца по своему адресу LXMF в Ratspeak или считайте с узла список операторов.","flash.rsnode.managers.none":"Операторов пока нет. Добавьте себя как Владельца по своему адресу LXMF в Ratspeak.","flash.rsnode.managers.unsupported":"Эта прошивка не поддерживает операторов.","flash.rsnode.saving":"Сохранение…","flash.rsnode.managers.save":"Сохранить на rsNode","flash.rsnode.reading":"Чтение…","flash.rsnode.managers.read":"Считать с узла","flash.rsnode.managers.crowded":"У узла может быть до четырёх операторов. Для сохранения удалите одного.","flash.rsnode.port.busyCheck":"Не удалось открыть последовательный порт. Закройте использующие его приложения, например Ratspeak или монитор порта, и проверьте снова.","flash.rsnode.port.busyConnect":"Не удалось открыть последовательный порт. Закройте использующие его приложения, например Ratspeak или монитор порта, и подключитесь снова.","flash.rsnode.port.busy":"Не удалось открыть последовательный порт. Закройте использующие его приложения, например Ratspeak или монитор порта, и повторите попытку.","flash.rsnode.port.lost":"Узел отключился от USB.","flash.rsnode.managers.readBack":"Считайте данные с узла, чтобы увидеть его текущее состояние.","flash.rsnode.managers.busy":"Узел {name} завершает обновление или сохраняет свои ключи и адрес. Попробуйте через минуту.","flash.rsnode.managers.listFull":"Список операторов узла {name} заполнен.","flash.rsnode.managers.listFullHint":"У узла может быть до четырёх операторов. Считайте с узла текущий список.","flash.rsnode.managers.refusedBeta":"Узел {name} отклонил изменение. В этой бете менять операторов можно только в режиме RNode: выйдите из Repeater на устройстве и сохраните снова.","flash.rsnode.managers.refused":"Узел {name} отклонил оператора.","flash.rsnode.managers.noSuch":"У узла {name} нет такого оператора.","flash.rsnode.persona.repeater":"Узел продолжает работать как Repeater.","flash.rsnode.persona.home":"Узел вернулся в главное меню.","flash.rsnode.managers.noIdentity":"У узла пока нет ключей и адреса. Они появятся при добавлении первого оператора.","flash.rsnode.managers.nearby":"Обновления только от операторов поблизости.","flash.rsnode.managers.effectNow":"Работающий Repeater уже использует новый список операторов.","flash.rsnode.managers.effectLater":"Операторы действуют только в режиме Repeater.","flash.rsnode.managers.reading":"Чтение rsNode…","flash.rsnode.managers.saving":"Сохранение на rsNode…","flash.rsnode.wait.plain":"Ожидание rsNode…","flash.rsnode.wait.reset":"Ожидание rsNode. {takeover}","flash.rsnode.readingNode":"Чтение с {name}…","flash.rsnode.savingNode":"Сохранение на {name}…","flash.rsnode.showing":"Показан узел {name}.","flash.rsnode.managers.saved":"Сохранено на {name}.","flash.rsnode.selectPort":"Для продолжения выберите последовательный порт rsNode.","flash.rsnode.managers.copy":"Копировать","flash.rsnode.settings.readAgain":"Считать снова","flash.rsnode.settings.read":"Считать настройки","flash.rsnode.settings.personaRepeater":"Узел {name} работает как Repeater. Восходящее соединение и входящие подключения соседей идут по Wi-Fi.","flash.rsnode.settings.personaRnode":"Узел {name} работает как RNode. Приложения подключаются по Wi-Fi через TCP-порт {port}.","flash.rsnode.settings.save":"Сохранить и перезапустить","flash.rsnode.settings.nameOptional":"Имя сети (необязательно)","flash.rsnode.settings.name":"Имя сети","flash.rsnode.settings.offRepeater":"Без Wi-Fi узел Repeater ретранслирует трафик только по LoRa.","flash.rsnode.settings.offRnode":"Приложения подключаются по USB или Bluetooth.","flash.rsnode.settings.onRepeater":"Восходящее соединение и соседи Repeater используют эту сеть.","flash.rsnode.settings.ownRnode":"Пока включён Wi-Fi, Bluetooth выключен. Приложения подключаются через TCP-порт {port}. Сеть узла не даёт доступа в интернет.","flash.rsnode.settings.joinRnode":"Пока включён Wi-Fi, Bluetooth выключен. Приложения подключаются через TCP-порт {port}.","flash.rsnode.settings.set":"Задан","flash.rsnode.settings.passwordOwn":"От 8 до 32 символов. Нужен устройствам для подключения к сети узла.","flash.rsnode.settings.passwordJoin":"От 8 до 32 символов; для открытой сети оставьте поле пустым.","flash.rsnode.settings.summary":"При сохранении узел {name} перезапустится с новыми настройками.","flash.rsnode.settings.nothing":"Пока нечего сохранять.","flash.rsnode.settings.notRsnode":"Узел отвечает как RNode, но не как rsNode. Для настройки нужна прошивка rsNode.","flash.rsnode.settings.saving":"Сохранение настроек…","flash.rsnode.settings.reading":"Чтение настроек…","flash.rsnode.restarting":"Перезапуск…","flash.rsnode.settings.waitingWifi":"Ожидание Wi-Fi…","flash.rsnode.settings.unchanged":"Ничего не изменилось: у узла {name} уже были эти настройки.","flash.rsnode.wait.takeover":"Если вы только что установили прошивку, сначала нажмите RESET на плате.","flash.rsnode.device.disconnect":"Отключиться","flash.rsnode.device.cancel":"Отмена","flash.rsnode.device.connect":"Подключиться","flash.rsnode.device.notRsnode":"Узел отвечает как RNode, но не как rsNode. Для просмотра экрана нужна прошивка rsNode.","flash.rsnode.device.quiet":"Узел перестал отвечать по USB. Проверьте кабель или нажмите RESET на плате, затем подключитесь снова.","flash.rsnode.device.noScreen":"Экран этой платы недоступен для просмотра","flash.rsnode.device.live":"Трансляция","flash.rsnode.device.statusOnly":"Только состояние","flash.rsnode.device.paused":"Пауза","flash.rsnode.device.dark":"Трансляция · экран выключен","flash.rsnode.device.fps":"Трансляция · {fps} кадр/с","flash.rsnode.device.connectingScreen":"Подключение","flash.rsnode.device.connecting":"Подключение…","flash.rsnode.device.restartRefused":"Узел {name} не перезапустился: его использует другое приложение. Перезапустите узел на самом устройстве.","flash.rsnode.device.connectToSee":"Подключитесь, чтобы увидеть экран","flash.rsnode.device.notConnected":"Не подключено","flash.rsnode.device.disconnecting":"Отключение…","flash.rsnode.device.released":"Соединение закрыто, чтобы порт могла использовать другая задача USB. Подключитесь снова для продолжения.","flash.rsnode.device.pairRefused":"Узел {name} не начал сопряжение: его использует другое приложение. Отключите приложение или начните сопряжение на устройстве.","flash.rsnode.device.pairing":"Сопряжение начато. В течение 2 минут выберите {name} в списке Bluetooth вашего приложения и введите код с экрана узла. Bluetooth останется включён.","flash.rsnode.device.restartRepeater":"Перезапустить {name}?\n\nЧерез несколько секунд узел снова запустится как Repeater.","flash.rsnode.device.restartRnode":"Перезапустить {name}?\n\nЧерез несколько секунд узел снова запустится в режиме RNode.","flash.rsnode.device.restartingNode":"Перезапуск {name}. Подключитесь снова через несколько секунд.","flash.rsnode.device.saved":"Сохранено","flash.rsnode.device.screenshot":"Сохранить снимок экрана","flash.rsnode.device.copyDetails":"Скопировать сведения","flash.rsnode.device.copyFailed":"Не удалось скопировать автоматически. Сведения ниже выделены: нажмите Ctrl+C или ⌘C.","flash.advanced.setupRequired":"Требуется настройка RNode","flash.advanced.setupOn":"Настройка RNode включена","flash.flow.chooseFirmware":"Выберите прошивку","flash.flow.finishSetup":"Завершить настройку","flash.flow.rnodeSetup":"Настройка RNode","flash.note.finishSetup":"Прошивка установлена. Перезагрузите плату и завершите настройку RNode.","flash.note.setupAttention":"Прошивка записана, но нужно проверить настройку RNode.","flash.note.setupVerified":"Прошивка завершена. Настройка RNode проверена.","flash.note.rsnodeTools":"rsNode установлен. Нажмите RESET на плате. Инструментами ниже можно считать данные узла и настроить его.","flash.note.rsnodeInstalled":"rsNode установлен. Нажмите RESET на плате.","flash.note.fwFailed":"Не удалось загрузить прошивку. Выберите её ещё раз.","flash.note.readyUpdate":"Всё готово к обновлению. Ключи, адрес, список операторов и настройки сохранятся. Не закрывайте вкладку, пока узел не подтвердит обновление.","flash.note.ready":"Всё готово к записи прошивки. Не закрывайте вкладку до завершения.","flash.note.selectBoth":"Для продолжения выберите USB-устройство и прошивку.","flash.note.chooseFirmware":"Загрузите файл .bin или .zip либо выберите прошивку rsNode или RNode.","flash.rsnode.flow.unlock":"Для продолжения откройте доступ к бете rsNode.","flash.rsnode.flow.terms":"Для продолжения примите условия беты.","flash.rsnode.flow.board":"Выберите плату для прошивки. Если на узле уже установлен rsNode, для управления используйте инструменты ниже.","flash.rsnode.flow.loading":"Загрузка прошивки для вашей платы…","flash.rsnode.flow.failed":"Не удалось загрузить прошивку. Выберите плату ещё раз.","flash.rsnode.flow.variant":"Для продолжения подтвердите вариант V4.","flash.nrf52.packet":"Запись пакета прошивки {part}/{parts}…","flash.nrf52.starting":"Запуск обновления прошивки…","flash.nrf52.init":"Отправка начального пакета…","flash.nrf52.validating":"Проверка передачи прошивки…","flash.nrf52.activating":"Активация прошивки…","flash.nrf52.package":"Подготовка пакета прошивки…","flash.nrf52.device":"Подготовка устройства…","flash.nrf52.opening":"Открытие последовательного порта…","flash.nrf52.waitActivation":"Ожидание активации nRF52…","flash.nrf52.waitReboot":"Ожидание перезапуска RNode…","flash.rsnode.install.risk":"С узла стираются все данные: ключи, адрес, список операторов, настройки Wi-Fi, сопряжения Bluetooth и настройки Repeater.","flash.rsnode.install.intro":"Вы устанавливаете прошивку закрытой беты rsNode.","flash.status.updateCancelled":"Обновление отменено","flash.status.installCancelled":"Установка отменена","flash.status.booting":"Запуск прошивки RNode…","flash.status.provisioning":"Настройка EEPROM RNode…","flash.status.setupVerified":"Настройка RNode проверена","flash.status.installed":"Прошивка установлена","flash.status.setupAttention":"Проверьте настройку RNode","flash.result.rnodeReady":"RNode готов","flash.fail.busy.cause":"Браузер нашёл плату, но не смог установить соединение. Вероятно, её использует другое приложение.","flash.fail.busy.fix2":"Отключите плату, подключите снова и ещё раз выберите порт.","flash.fail.silent.title":"Плата не ответила","flash.fail.wrong.title":"Похоже, это не та плата, которую вы выбрали","flash.fail.wrong.fix2":"Проверьте выбранную плату.","flash.fail.beta.title":"Срок доступа к бете истёк","flash.fail.beta.cause":"Снова откройте доступ к бете rsNode, затем установите прошивку.","flash.result.installed":"Прошивка установлена","flash.result.attention":"Прошивка установлена, но нужно проверить настройку RNode","flash.result.attentionDesc":"Прошивка записана, но настройка RNode не завершилась. Если устройство не загружается нормально, повторите настройку с помощью инструментов RNode ниже. Последняя ошибка: {error}","flash.result.finishSetup":"Завершить настройку","flash.rsnode.facts.admins":{"one":"{n} Администратор","few":"{n} Администратора","many":"{n} Администраторов","other":"{n} Администратора"},"flash.rsnode.facts.ownerAdmins":{"one":"Владелец и {n} Администратор","few":"Владелец и {n} Администратора","many":"Владелец и {n} Администраторов","other":"Владелец и {n} Администратора"},"flash.rnode.releaseOption":{"one":"{version} · {n} вариант","few":"{version} · {n} варианта","many":"{version} · {n} вариантов","other":"{version} · {n} варианта"},"flash.rnode.release":{"one":"Версия {version} · поддерживается {n} вариант","few":"Версия {version} · поддерживаются {n} варианта","many":"Версия {version} · поддерживается {n} вариантов","other":"Версия {version} · поддерживается {n} варианта"},"flash.rsnode.managers.change.add":{"one":"добавить {n} Администратора","few":"добавить {n} Администраторов","many":"добавить {n} Администраторов","other":"добавить {n} Администратора"},"flash.rsnode.managers.change.change":{"one":"изменить {n} Администратора","few":"изменить {n} Администраторов","many":"изменить {n} Администраторов","other":"изменить {n} Администратора"},"flash.rsnode.managers.change.remove":{"one":"удалить {n} оператора","few":"удалить {n} операторов","many":"удалить {n} операторов","other":"удалить {n} оператора"}}}</script><script src="/lang/assets/site/i18n.js"></script>
+    <script src="/lang/assets/site/lang.js" defer></script>
+</head>
+<body class="is-flash-page">
+
+<a class="skip" href="#main" data-i18n="common.skip.content">Перейти к содержимому</a>
+<div class="band">
+    <header class="topbar" id="navbar">
+      <a class="brand" href="/lang/ru/" aria-label="Главная Ratspeak" data-i18n-attr="aria-label:common.brand.home"><svg class="brand-mark" aria-hidden="true" focusable="false"><use href="/lang/assets/ratspeak-mark.svg#mark"/></svg><span class="brand-word">ratspeak</span></a>
+      <nav aria-label="Основная навигация" data-i18n-attr="aria-label:common.nav.main-navigation"><a href="/lang/ru/map.html" data-i18n="common.nav.map">Карта</a><a href="https://docs.ratspeak.org/" data-i18n="common.nav.docs">Документация</a><a href="/lang/ru/#play" data-i18n="common.nav.how-it-works">Как это работает</a></nav>
+      <div class="topbar-end"><!--lang-menu--><div class="lang-menu" data-lang-menu data-cookie="rs-lang" data-max-age="31536000"><button type="button" class="lang-trigger" id="lang-trigger" aria-expanded="false" aria-controls="lang-panel"><span class="sr-only">Язык: Русский</span><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-ru"/></svg><span class="lang-trigger__code" aria-hidden="true">RU</span><svg class="lang-trigger__chevron" viewBox="0 0 10 6" aria-hidden="true" focusable="false"><path d="M1 1l4 4 4-4"/></svg></button><div class="lang-panel" id="lang-panel" hidden><p class="lang-panel__label" id="lang-panel-label">Язык</p><ul aria-labelledby="lang-panel-label"><li><a href="/lang/en/flash.html" hreflang="en" data-lang="en" data-same-page><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-us"/></svg><span class="lang-name">Английский</span></a></li><li><a href="/lang/es/flash.html" hreflang="es" data-lang="es" data-same-page><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-es"/></svg><span class="lang-name">Испанский</span></a></li><li><a href="/lang/ru/flash.html" hreflang="ru" data-lang="ru" data-same-page aria-current="true"><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-ru"/></svg><span class="lang-name">Русский</span><svg class="lang-check" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8.5l3.2 3L13 4.5"/></svg></a></li><li><a href="/lang/uk/flash.html" hreflang="uk" data-lang="uk" data-same-page><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-ua"/></svg><span class="lang-name">Украинский</span></a></li><li><a href="/lang/pt/flash.html" hreflang="pt-BR" data-lang="pt-BR" data-same-page><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-br"/></svg><span class="lang-name">Португальский</span></a></li><li><a href="/lang/fa/flash.html" hreflang="fa" data-lang="fa" data-same-page><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-ir-lion-sun"/></svg><span class="lang-name">Персидский</span></a></li></ul></div><svg class="flag-sprite" aria-hidden="true" focusable="false"><symbol id="flag-us" viewBox="0 0 24 18"><path fill="#fff" d="M0 0h24v18H0z"/><path fill="#b22234" d="M0 0.000h24v1.385H0zM0 2.769h24v1.385H0zM0 5.538h24v1.385H0zM0 8.308h24v1.385H0zM0 11.077h24v1.385H0zM0 13.846h24v1.385H0zM0 16.615h24v1.385H0z"/><path fill="#3c3b6e" d="M0 0h10.4v9.692H0z"/><path fill="#fff" d="M1.15 1.25m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M3.15 1.25m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M5.15 1.25m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M7.15 1.25m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M9.15 1.25m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M2.15 3.55m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M4.15 3.55m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M6.15 3.55m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M8.15 3.55m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M1.15 5.85m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M3.15 5.85m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M5.15 5.85m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M7.15 5.85m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M9.15 5.85m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M2.15 8.15m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M4.15 8.15m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M6.15 8.15m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M8.15 8.15m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0"/></symbol><symbol id="flag-es" viewBox="0 0 24 18"><path fill="#aa151b" d="M0 0h24v18H0z"/><path fill="#f1bf00" d="M0 4.5h24v9H0z"/><path fill="#aa151b" d="M6.3 7.1h2.8v2.3c0 1-.6 1.7-1.4 1.7s-1.4-.7-1.4-1.7z"/><path fill="#aa151b" d="M6.2 6.1l.5.6.5-.7.5.7.5-.7.5.7.5-.6v.7H6.2z"/></symbol><symbol id="flag-ru" viewBox="0 0 24 18"><path fill="#fff" d="M0 0h24v6H0z"/><path fill="#0039a6" d="M0 6h24v6H0z"/><path fill="#d52b1e" d="M0 12h24v6H0z"/></symbol><symbol id="flag-ua" viewBox="0 0 24 18"><path fill="#0057b7" d="M0 0h24v9H0z"/><path fill="#ffd700" d="M0 9h24v9H0z"/></symbol><symbol id="flag-br" viewBox="0 0 24 18"><path fill="#009c3b" d="M0 0h24v18H0z"/><path fill="#ffdf00" d="M12 1.7L22.2 9 12 16.3 1.8 9z"/><circle cx="12" cy="9" r="4.15" fill="#002776"/><path fill="#fff" d="M7.96 8.05a8.4 8.4 0 0 1 8.07 2.3l-.24.62a7.6 7.6 0 0 0-7.9-2.18z"/></symbol><symbol id="flag-ir-lion-sun" viewBox="0 0 24 18"><path fill="#239f40" d="M0 0h24v6H0z"/><path fill="#fff" d="M0 6h24v6H0z"/><path fill="#da0000" d="M0 12h24v6H0z"/><path fill="#ffc425" d="M12.90 6.15L13.20 6.83L13.74 6.32L13.76 7.06L14.46 6.79L14.19 7.49L14.93 7.51L14.42 8.05L15.10 8.35L14.42 8.65L14.93 9.19L14.19 9.21L14.46 9.91L13.76 9.64L13.74 10.38L13.20 9.87L12.90 10.55L12.60 9.87L12.06 10.38L12.04 9.64L11.34 9.91L11.61 9.21L10.87 9.19L11.38 8.65L10.70 8.35L11.38 8.05L10.87 7.51L11.61 7.49L11.34 6.79L12.04 7.06L12.06 6.32L12.60 6.83z"/><path fill="#b8770a" d="M8.2 8.7L8.5 8.2C8.6 7.6 9.3 7.3 9.9 7.5C10.6 7.7 10.9 8.3 10.8 8.7C12 8.5 13.9 8.5 15 8.8C15.4 8.9 15.5 9.4 15.4 9.9L15.3 11.7H14.8L14.7 10.6H14.3L14.2 11.7H13.7L13.6 10.4C12.5 10.5 11.4 10.5 10.7 10.4L10.6 11.7H10.1L10 10.6L9.7 10.5L9.6 11.7H9.1V10.2C8.8 10 8.6 9.6 8.6 9.3L8.2 9.1z"/><path fill="none" stroke="#b8770a" stroke-width=".42" stroke-linecap="round" d="M15.3 9.1C16.2 8.9 16.3 7.9 15.8 7.4"/><circle cx="15.8" cy="7.35" r=".38" fill="#b8770a"/><path fill="none" stroke="#5c3d00" stroke-width=".42" stroke-linecap="round" d="M8 9.3Q7.3 7.9 7.7 6.4"/><path fill="none" stroke="#5c3d00" stroke-width=".4" stroke-linecap="round" d="M7.5 9.05h.9"/></symbol></svg></div><!--/lang-menu--><a class="header-download" href="/lang/ru/download.html" data-i18n="common.nav.download">Скачать</a></div>
+    </header>
+    <section class="flash-hero dl-hero" aria-labelledby="fl-hero-title">
+        <h1 id="fl-hero-title" data-i18n="flash.hero.flash-a-board">Прошейте плату.</h1>
+        <p class="dl-hero__sub" data-i18n="flash.hero.install-rsnode-private-beta">Установите rsNode (закрытая бета), официальную прошивку RNode или свой файл .bin или .zip на совместимую плату LoRa через Chrome или Edge на компьютере.</p>
+        <p class="dl-hero__meta" data-i18n="flash.hero.want-the-app-or">Ищете приложение или совместимое портативное устройство? <a href="/lang/en/download.html">Страница загрузки <span aria-hidden="true">→</span></a></p>
+    </section>
+</div>
+
+<main class="flash-container" id="main">
+
+        <!-- Browser warning (only visible on non-WebSerial browsers) -->
+        <div class="browser-warning" id="browserWarning">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span data-i18n="flash.warning.in-browser-flashing-needs">Для прошивки из браузера нужна актуальная версия <strong>Chrome</strong> или <strong>Edge</strong> с поддержкой Web Serial. Откройте эту страницу в одном из них на компьютере.</span>
+        </div>
+
+    <!-- Flash Interface -->
+    <div class="flash-interface active" id="flashInterface">
+
+        <div class="flash-flow flash-flow--standalone" role="list" aria-label="Ход установки" data-i18n-attr="aria-label:flash.steps.install-progress">
+            <div class="flash-flow__item is-active" id="flowConnect" role="listitem">
+                <span class="flash-flow__index">1</span>
+                <span class="flash-flow__copy">
+                    <span class="flash-flow__label" data-i18n="flash.steps.connect">Подключение</span>
+                    <span class="flash-flow__state" id="flowConnectState" data-i18n="flash.steps.not-connected">Не подключено</span>
+                </span>
+            </div>
+            <div class="flash-flow__item is-blocked" id="flowFirmware" role="listitem">
+                <span class="flash-flow__index">2</span>
+                <span class="flash-flow__copy">
+                    <span class="flash-flow__label" data-i18n="flash.steps.firmware">Прошивка</span>
+                    <span class="flash-flow__state" id="flowFirmwareState" data-i18n="flash.steps.not-started">Не начато</span>
+                </span>
+            </div>
+            <div class="flash-flow__item is-blocked" id="flowFlash" role="listitem">
+                <span class="flash-flow__index">3</span>
+                <span class="flash-flow__copy">
+                    <span class="flash-flow__label" data-i18n="flash.steps.install">Установка</span>
+                    <span class="flash-flow__state" id="flowFlashState" data-i18n="flash.steps.not-started">Не начато</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="flash-panel flash-panel--custom" id="flashPanel" data-accent="amber">
+            <div class="flash-panel__header">
+                <div class="flash-panel__identity">
+                    <div class="flash-panel__device-icon" id="panelIcon">
+                        <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><use href="/lang/assets/site/devices.svg#device-board"/></svg>
+                    </div>
+                    <div class="flash-panel__copy">
+                        <span class="flash-panel__eyebrow" data-i18n="flash.steps.flash-firmware">Установка прошивки</span>
+                        <div class="flash-panel__device-name" id="panelName" data-i18n="flash.steps.your-board">Ваша плата</div>
+                        <div class="flash-panel__device-sub" id="panelSub" data-i18n="flash.steps.esp32-or-nrf52-rsnode">ESP32 или nRF52 · rsNode, RNode или свой файл</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flash-steps">
+                <!-- Step 1: Connect -->
+                <div class="flash-step">
+                    <div class="flash-step__number" data-i18n="flash.steps.step-1">Шаг 1</div>
+                    <div class="flash-step__title" data-i18n="flash.steps.connect-your-device">Подключите устройство</div>
+                    <button type="button" class="connect-btn connect-btn--idle" id="connectBtn" onclick="connectDevice()" data-i18n="flash.steps.select-usb-device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8z"/><path d="M12 18v4"/></svg> Выбрать USB-устройство</button>
+                    <div class="connect-device-info" id="deviceInfo">
+                        <span class="connect-status__dot connect-status__dot--off" id="statusDot"></span>
+                        <span class="connect-status__text" id="statusText" data-i18n="flash.steps.no-device-selected">Устройство не выбрано</span>
+                    </div>
+                    <p class="connect-help" id="connectHelp" role="status" hidden></p>
+                </div>
+
+                <!-- Step 2: Firmware -->
+                <div class="flash-step">
+                    <div class="flash-step__number" data-i18n="flash.steps.step-2">Шаг 2</div>
+                    <div class="flash-step__title" id="firmwareTitle" data-i18n="flash.steps.choose-firmware">Выберите прошивку</div>
+
+                    <!-- Custom firmware sources -->
+                    <div id="firmwareCustom" style="display: none;">
+                        <div class="custom-source-tabs" role="tablist" aria-label="Источник прошивки" data-i18n-attr="aria-label:flash.steps.firmware-source">
+                            <button type="button" class="custom-source-tab is-active" id="sourceTabUpload" data-source="upload" role="tab" aria-controls="customSourceUpload" aria-selected="true" tabindex="0" data-i18n="flash.steps.upload"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Свой файл</button>
+                            <button type="button" class="custom-source-tab" id="sourceTabRsnode" data-source="rsnode" role="tab" aria-controls="customSourceRsnode" aria-selected="false" tabindex="-1">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="2"/><path d="M7 7a7 7 0 000 10M17 7a7 7 0 010 10M4 4a11 11 0 000 16M20 4a11 11 0 010 16"/></svg>
+                                rsNode
+                            </button>
+                            <button type="button" class="custom-source-tab" id="sourceTabRnode" data-source="rnode" role="tab" aria-controls="customSourceRnode" aria-selected="false" tabindex="-1">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                                RNode
+                            </button>
+                        </div>
+
+                        <!-- Mode A: Upload your own -->
+                        <div class="custom-source-pane" id="customSourceUpload" role="tabpanel" aria-labelledby="sourceTabUpload">
+                            <div class="drop-zone" id="dropZone">
+                                <div class="drop-zone__prompt">
+                                    <div class="drop-zone__icon">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                    </div>
+                                    <div class="drop-zone__text" data-i18n="flash.upload.drop-a-firmware-file">Перетащите сюда файл прошивки</div>
+                                    <div class="drop-zone__hint" data-i18n="flash.upload.or-choose-one-bin">или выберите файл .bin или .zip</div>
+                                </div>
+                                <div class="drop-zone__file-info">
+                                    <div class="drop-zone__file-name" id="fileName"></div>
+                                    <div class="drop-zone__file-size" id="fileSize"></div>
+                                    <div class="drop-zone__file-change" data-i18n="flash.upload.choose-a-different-file">Выбрать другой файл</div>
+                                </div>
+                                <input type="file" id="fileInput" accept=".bin,.zip" aria-label="Файл прошивки .bin или .zip" data-i18n-attr="aria-label:flash.upload.firmware-file-bin-or">
+                            </div>
+                        </div>
+
+                        <div class="custom-source-pane rsnode-beta" id="customSourceRsnode" role="tabpanel" aria-labelledby="sourceTabRsnode" hidden>
+                            <form class="rsnode-beta__login" id="rsnodeLoginForm">
+                                <p class="rsnode-beta__note" data-i18n="flash.rsnode.rsnode-is-lora-firmware">rsNode — прошивка LoRa для плат Heltec V3 и V4. Сейчас она в закрытом бета-тестировании.</p>
+                                <details class="rsnode-beta__about"><summary data-i18n="flash.rsnode.how-rsnode-works">Как работает rsNode</summary><p class="rsnode-beta__note" data-i18n="flash.rsnode.it-runs-in-one">Режим выбирается на устройстве. В режиме <strong>RNode</strong> плата служит радиомодемом для одного приложения через USB, Bluetooth или Wi-Fi. В режиме <strong>Repeater</strong> она самостоятельно ретранслирует трафик. Пока включён Wi-Fi, Bluetooth выключен. Добавлять операторов необязательно; они управляют узлом только в режиме Repeater.</p></details>
+                                <label for="rsnodePassword" data-i18n="flash.rsnode.private-beta-password">Пароль закрытой беты</label>
+                                <input class="rsnode-beta__password" id="rsnodePassword" type="password" autocomplete="current-password" required maxlength="256" aria-describedby="rsnodeStatus rsnodePasswordHelp">
+                                <button class="rsnode-beta__button" id="rsnodeUnlock" type="submit" data-i18n="flash.rsnode.unlock">Открыть доступ</button>
+                                <p class="rsnode-beta__note" id="rsnodePasswordHelp" data-i18n="flash.rsnode.for-a-beta-password">Чтобы получить пароль беты, напишите на <a href="mailto:mail@ratspeak.org">mail@ratspeak.org</a>.</p>
+                            </form>
+                            <div id="rsnodeTermsPending" hidden>
+                                <p class="rsnode-beta__note" data-i18n="flash.rsnode.accept-the-beta-terms">Примите условия беты, чтобы увидеть список плат.</p>
+                                <button class="rsnode-beta__button" id="rsnodeReviewTerms" type="button" data-i18n="flash.rsnode.review-beta-terms">Просмотреть условия беты</button>
+                            </div>
+                            <div id="rsnodeBoardPicker" hidden>
+                                <div class="rsnode-beta__head"><strong data-i18n="flash.rsnode.rsnode-private-beta">Закрытая бета rsNode</strong><button class="rsnode-beta__lock" id="rsnodeLock" type="button" data-i18n="flash.rsnode.lock-beta">Закрыть доступ</button></div>
+                                <label class="rnode-source__field" for="rsnodeBoardSelect">
+                                    <span class="rnode-source__label" data-i18n="flash.rsnode.board">Плата</span>
+                                    <select class="rnode-variant-select" id="rsnodeBoardSelect"><option value="" data-i18n="flash.rsnode.choose-your-board">Выберите плату</option></select>
+                                </label>
+                                <div id="rsnodeVariantCheck" hidden>
+                                    <p class="rsnode-beta__note" data-i18n="flash.rsnode.check-the-chip-marking">Проверьте маркировку чипа или сведения о заказе: у ESP32-S3R2 2 МБ PSRAM, у ESP32-S3R8 — 8 МБ. У обеих плат V4 по 16 МБ флеш-памяти, но прошивки разные.</p>
+                                    <label class="rsnode-beta__check rsnode-beta__variant"><input type="checkbox" id="rsnodeVariantConfirmed"><span id="rsnodeVariantLabel" data-i18n="flash.rsnode.i-checked-my-v4">Вариант моей платы V4 проверен.</span></label>
+                                </div>
+                                <p class="rsnode-beta__note rsnode-beta__note--warning" id="rsnodeInstallNote" data-i18n="flash.rsnode.install-erases-the-node">При установке стираются ключи и адрес узла, список операторов, настройки Wi-Fi, сопряжения Bluetooth и настройки Repeater. Для обновления нужны совместимый пакет и прошивка с поддержкой обновления по USB.</p>
+                                <div class="rsnode-update" id="rsnodeUpdate" hidden>
+                                    <div class="rsnode-update__check">
+                                        <button class="rsnode-beta__button" id="rsnodeUpdateCheck" type="button" aria-describedby="rsnodeUpdateStatus" data-i18n="flash.rsnode.check-the-node">Проверить узел</button>
+                                        <p class="rsnode-beta__status" id="rsnodeUpdateStatus" role="status" aria-live="polite"></p>
+                                    </div>
+                                    <fieldset class="rsnode-update__modes" id="rsnodeUpdateModes" hidden>
+                                        <legend class="rnode-source__label" data-i18n="flash.rsnode.update-or-install">Обновление или установка</legend>
+                                        <label class="rsnode-update__mode"><input type="radio" name="rsnodeInstallMode" value="update"><span><strong data-i18n="flash.rsnode.update">Обновить</strong><span data-i18n="flash.rsnode.keeps-identity-managers-wi">Сохраняет ключи и адрес, список операторов, настройки Wi-Fi, сопряжения Bluetooth и настройки Repeater.</span></span></label>
+                                        <label class="rsnode-update__mode"><input type="radio" name="rsnodeInstallMode" value="install"><span><strong data-i18n="flash.rsnode.erase-and-install">Стереть и установить</strong><span data-i18n="flash.rsnode.erases-everything-on-the">Сначала стирает все данные узла.</span></span></label>
+                                    </fieldset>
+                                </div>
+                                <div class="rsnode-beta__links"><a id="rsnodePackageDownload" hidden data-i18n="flash.rsnode.download-package-and-source">Скачать пакет и исходный код</a></div>
+                            </div>
+                            <p class="rsnode-beta__status" id="rsnodeStatus" role="status" aria-live="polite"></p>
+                            <button class="rsnode-beta__button" id="rsnodeLockRetry" type="button" hidden data-i18n="flash.rsnode.retry-lock">Снова закрыть доступ</button>
+                            <button class="rsnode-beta__button" id="rsnodeCatalogRetry" type="button" hidden data-i18n="flash.rsnode.reload-boards">Обновить список плат</button>
+                        </div>
+
+                        <!-- Mode B: RNode firmware (markqvist) -->
+                        <div class="custom-source-pane" id="customSourceRnode" role="tabpanel" aria-labelledby="sourceTabRnode" style="display: none;">
+                            <div class="rnode-source">
+                                <div class="rnode-source__head">
+                                    <div>
+                                        <div class="rnode-source__title" data-i18n="flash.rnode.official-rnode-firmware">Официальная прошивка RNode</div>
+                                        <div class="rnode-source__sub" id="rnodeReleaseSub" data-i18n="flash.rnode.loading-latest-release">Загрузка последнего выпуска…</div>
+                                    </div>
+                                    <a href="https://github.com/markqvist/RNode_Firmware" class="rnode-source__repo" translate="no" target="_blank" rel="noopener noreferrer">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                                        RNode Firmware
+                                    </a>
+                                </div>
+                                <label class="rnode-source__field">
+                                    <span class="rnode-source__label" data-i18n="flash.rnode.firmware-release">Выпуск прошивки</span>
+                                    <select class="rnode-variant-select" id="rnodeReleaseSelect" disabled>
+                                        <option data-i18n="flash.rnode.loading-releases">Загрузка выпусков…</option>
+                                    </select>
+                                </label>
+                                <label class="rnode-source__field">
+                                    <span class="rnode-source__label" data-i18n="flash.rnode.device-variant">Вариант устройства</span>
+                                    <select class="rnode-variant-select" id="rnodeVariantSelect" disabled>
+                                        <option data-i18n="flash.rnode.loading-variants">Загрузка вариантов…</option>
+                                    </select>
+                                </label>
+                                <label class="rnode-source__field">
+                                    <span class="rnode-source__label" data-i18n="flash.rnode.hardware-band">Диапазон платы</span>
+                                    <select class="rnode-variant-select" id="rnodeBandSelect" disabled>
+                                        <option data-i18n="flash.rnode.choose-a-device-variant">Сначала выберите вариант устройства</option>
+                                    </select>
+                                </label>
+                                <div class="rnode-source__status" id="rnodeStatus" data-i18n="flash.rnode.no-variant-selected">Вариант не выбран.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flash Action -->
+            <div class="flash-action">
+                <details class="flash-advanced" id="flashAdvanced">
+                    <summary class="flash-advanced__summary">
+                        <span class="flash-advanced__label" data-i18n="flash.advanced.advanced-options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7"/><path d="M4 10V3"/><path d="M12 21v-9"/><path d="M12 8V3"/><path d="M20 21v-5"/><path d="M20 12V3"/><path d="M2 14h4"/><path d="M10 8h4"/><path d="M18 16h4"/></svg> Дополнительные параметры</span>
+                        <span class="flash-advanced__meta" id="advancedMeta" data-i18n="flash.advanced.default-install">Обычная установка</span>
+                        <svg class="flash-advanced__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                    </summary>
+                    <div class="flash-advanced__body">
+                        <div class="flash-options" id="flashOptions">
+                            <label class="flash-option-pill" id="eraseOption">
+                                <input type="checkbox" id="eraseToggle" onchange="toggleErase(this.checked)">
+                                <span class="flash-option-pill__icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                                </span>
+                                <span class="flash-option-pill__copy">
+                                    <span class="flash-option-pill__label" data-i18n="flash.advanced.full-erase">Полное стирание</span>
+                                    <span class="flash-option-pill__hint" data-i18n="flash.advanced.erases-everything-on-the">Сначала стирает всё на устройстве</span>
+                                </span>
+                                <span class="flash-option-pill__check" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"/></svg>
+                                </span>
+                            </label>
+                            <label class="flash-option-pill" id="provisionOption">
+                                <input type="checkbox" id="provisionToggle">
+                                <span class="flash-option-pill__icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="0.5"/><path d="M9 3v3"/><path d="M15 3v3"/><path d="M9 18v3"/><path d="M15 18v3"/><path d="M3 9h3"/><path d="M3 15h3"/><path d="M18 9h3"/><path d="M18 15h3"/></svg>
+                                </span>
+                                <span class="flash-option-pill__copy">
+                                    <span class="flash-option-pill__label" data-i18n="flash.advanced.rnode-setup">Настройка RNode</span>
+                                    <span class="flash-option-pill__hint" data-i18n="flash.advanced.provision-after-flash">Настроить после прошивки</span>
+                                </span>
+                                <span class="flash-option-pill__check" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"/></svg>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="flash-option-expand" id="provisionExpand" hidden>
+                            <p class="flash-option-expand__desc" data-i18n="flash.advanced.writes-rnode-identity-and">После прошивки записывает идентификационные данные RNode и хеш прошивки. В Ratspeak параметрами радио при запуске управляет подключённое устройство. Для подписанных идентификационных данных или постоянных параметров запуска TNC используйте rnodeconf.</p>
+                            <div class="provision-board" id="provisionBoard" data-mode="auto">
+                                <div class="provision-board__row">
+                                    <span class="provision-board__icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                    </span>
+                                    <div class="provision-board__copy">
+                                        <span class="provision-board__eyebrow" data-i18n="flash.advanced.suggested-board">Предлагаемая плата</span>
+                                        <span class="provision-board__value" id="provisionBoardValue" data-i18n="flash.advanced.choose-an-rnode-firmware">Выберите вариант прошивки RNode, чтобы получить подсказку по изделию и модели</span>
+                                    </div>
+                                    <button type="button" class="provision-board__change" id="provisionBoardChange" data-i18n="flash.advanced.change">Изменить</button>
+                                </div>
+                                <div class="provision-board__manual" id="provisionBoardManual" hidden>
+                                    <label class="provision-field">
+                                        <span class="provision-field__label" data-i18n="flash.advanced.product">Продукт</span>
+                                        <select id="provisionProduct"></select>
+                                    </label>
+                                    <label class="provision-field">
+                                        <span class="provision-field__label" data-i18n="flash.advanced.model">Модель</span>
+                                        <select id="provisionModel"></select>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </details>
+
+            </div>
+        </div>
+
+        <!-- ── Action CTA — primary flash + post-flash RNode tools ── -->
+        <section class="flash-cta">
+            <div class="flash-primary-action">
+                <div class="flash-primary-action__copy">
+                    <div class="flash-primary-action__label" data-i18n="flash.steps.step-3">Шаг 3</div>
+                    <span class="flash-primary-action__title" data-i18n="flash.steps.install">Установка</span>
+                    <div class="flash-primary-action__hint" id="flashBtnNote" role="status" data-i18n="flash.steps.select-a-usb-device">Выберите USB-устройство, чтобы продолжить.</div>
+                </div>
+                <button type="button" class="flash-btn flash-btn--disabled" id="flashBtn" onclick="startFlash()" disabled data-i18n="flash.steps.install-firmware"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Установить прошивку</button>
+            </div>
+
+            <!-- Progress -->
+            <div class="flash-progress" id="flashProgress">
+                <div class="progress-header">
+                    <span class="progress-status" id="progressStatus" aria-live="polite" data-i18n="flash.progress.preparing">Подготовка…</span>
+                    <span class="progress-pct" id="progressPct">0%</span>
+                </div>
+                <div class="progress-bar-track">
+                    <div class="progress-bar-fill" id="progressBar"></div>
+                </div>
+                <details class="progress-details"><summary data-i18n="flash.progress.show-log">Показать журнал</summary><div class="progress-log" id="progressLog"></div></details>
+            </div>
+
+            <!-- Result -->
+            <div class="flash-result" id="flashResult" role="region" aria-labelledby="resultTitle">
+                <div class="flash-result__icon" id="resultIcon">
+                    <svg id="resultSvg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></svg>
+                </div>
+                <h3 class="flash-result__title" id="resultTitle" tabindex="-1"></h3>
+                <div class="flash-result__desc" id="resultDesc"></div>
+                <div class="flash-result__actions" id="resultActions" hidden>
+                    <button type="button" class="flash-result__btn" id="resultActionBtn">
+                        <svg id="resultActionSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 10-13h-7l1-7Z"/></svg>
+                        <span id="resultActionText" data-i18n="flash.result.continue">Продолжить</span>
+                    </button>
+                </div>
+                <ol class="flash-result__fixes" id="resultFixes" hidden></ol>
+                <div class="flash-result__actions" id="resultRecovery" hidden>
+                    <button type="button" class="flash-result__btn" id="resultRetry" data-i18n="flash.result.try-again">Повторить <span aria-hidden="true">→</span></button>
+                    <button type="button" class="rsnode-beta__button" id="resultPort" data-i18n="flash.result.choose-the-port-again">Выбрать порт снова</button>
+                </div>
+                <details class="flash-result__tech" id="resultTech" hidden>
+                    <summary data-i18n="flash.result.technical-details">Технические подробности</summary>
+                    <div class="flash-result__tech-body">
+                        <pre class="flash-result__log" id="resultLog" tabindex="0" aria-label="Технические подробности" data-i18n-attr="aria-label:flash.result.technical-details"></pre>
+                        <button type="button" class="flash-result__copy" id="resultCopy" aria-describedby="resultCopied" data-i18n="flash.result.copy">Копировать</button>
+                        <span class="flash-result__copied" id="resultCopied" role="status"></span>
+                    </div>
+                </details>
+            </div>
+
+            <details class="flash-cta__repair rsnode-device" id="rsnodeDevice" name="rsnode-tools" hidden>
+                <summary class="flash-cta__repair-summary">
+                    <span class="flash-cta__repair-label" data-i18n="flash.live.rsnode-live-view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8"/><path d="M12 16v4"/></svg> Монитор rsNode</span>
+                    <span class="flash-cta__repair-meta" data-i18n="flash.live.see-the-node-s">Экран и состояние узла по USB</span>
+                    <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </summary>
+                <div class="flash-cta__repair-body">
+                    <p class="rsnode-tools__lede" data-i18n="flash.live.watch-the-node-s">Наблюдайте за экраном узла и проверяйте его состояние по USB.</p>
+                    <div class="rsnode-device__layout">
+                        <figure class="rsnode-device__screen">
+                            <div class="rsnode-device__bezel" id="rsnodeScreenBezel">
+                                <canvas id="rsnodeScreen" width="128" height="64" role="img" aria-label="Экран узла" data-i18n-attr="aria-label:flash.live.the-node-s-screen"></canvas>
+                                <span class="rsnode-device__placeholder" id="rsnodeScreenEmpty" data-i18n="flash.live.connect-to-see-the">Подключитесь, чтобы увидеть экран</span>
+                            </div>
+                            <figcaption class="rsnode-device__caption"><span class="rsnode-tools__dot" id="rsnodeLiveDot" aria-hidden="true"></span><span id="rsnodeScreenState" data-i18n="flash.steps.not-connected">Не подключено</span></figcaption>
+                        </figure>
+                        <div class="rsnode-device__info">
+                            <div class="flash-connect-tips rsnode-tools__tips" id="rsnodeFactsEmpty">
+                                <div class="flash-connect-tips__head" data-i18n="flash.live.before-you-connect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Перед подключением</div>
+                                <ul>
+                                    <li data-i18n="flash.live.plug-the-node-in">Подключите узел по USB. Закройте другие приложения, использующие его порт, например Ratspeak или монитор последовательного порта.</li>
+                                    <li data-i18n="flash.live.if-you-just-installed">Если вы только что установили прошивку, сначала нажмите RESET на плате.</li>
+                                    <li data-i18n="flash.live.a-repeater-answers-status">В режиме Repeater узел сообщает своё состояние по USB. В режиме RNode он тоже отвечает, даже если его использует другое приложение.</li>
+                                </ul>
+                            </div>
+                            <dl class="rsnode-tools__facts" id="rsnodeFacts" hidden>
+                                <div data-fact="node"><dt data-i18n="flash.live.node">Узел</dt><dd></dd></div>
+                                <div data-fact="board"><dt data-i18n="flash.rsnode.board">Плата</dt><dd></dd></div>
+                                <div data-fact="firmware"><dt data-i18n="flash.steps.firmware">Прошивка</dt><dd></dd></div>
+                                <div data-fact="owners"><dt data-i18n="flash.live.managers">Операторы</dt><dd></dd></div>
+                                <div data-fact="repeater"><dt data-i18n="flash.live.repeater">Repeater</dt><dd></dd></div>
+                                <div data-fact="wifi"><dt data-i18n="flash.live.wi-fi">Wi-Fi</dt><dd></dd></div>
+                                <div data-fact="radio"><dt data-i18n="flash.live.radio">Радио</dt><dd></dd></div>
+                                <div data-fact="packets"><dt data-i18n="flash.live.packets">Пакеты</dt><dd></dd></div>
+                                <div data-fact="channel"><dt data-i18n="flash.live.channel">Канал</dt><dd></dd></div>
+                                <div data-fact="battery"><dt data-i18n="flash.live.battery">Батарея</dt><dd></dd></div>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="rsnode-tools__actions">
+                        <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeConnect" type="button" data-i18n="flash.live.connect">Подключиться</button>
+                        <button class="rsnode-beta__button" id="rsnodeScreenshot" type="button" disabled hidden data-i18n="flash.live.save-screenshot">Сохранить снимок экрана</button>
+                        <button class="rsnode-beta__button" id="rsnodeCopyDetails" type="button" disabled hidden data-i18n="flash.live.copy-details">Скопировать сведения</button>
+                        <button class="rsnode-beta__button" id="rsnodePair" type="button" aria-describedby="rsnodePairNote" disabled hidden data-i18n="flash.live.start-bluetooth-pairing">Начать сопряжение Bluetooth</button>
+                        <button class="rsnode-beta__button rsnode-tools__end" id="rsnodeRestart" type="button" disabled hidden data-i18n="flash.live.restart-node">Перезапустить узел…</button>
+                    </div>
+                    <p class="rsnode-tools__help rsnode-tools__pair-note" id="rsnodePairNote" hidden data-i18n="flash.live.bluetooth-is-off-while">Пока включён Wi-Fi, Bluetooth выключен. Для сопряжения выключите Wi-Fi в настройках.</p>
+                    <p class="rsnode-tools__port" hidden data-i18n="flash.live.using">Используется <span class="rsnode-tools__port-label"></span> · <button class="rsnode-beta__lock" type="button" data-change-port data-i18n="flash.live.change-port">Сменить порт</button></p>
+                    <p class="rsnode-beta__status" id="rsnodeDeviceStatus" role="status" aria-live="polite"></p>
+                    <pre class="rsnode-device__details" id="rsnodeDetailsText" tabindex="0" aria-label="Сведения об узле" hidden data-i18n-attr="aria-label:flash.live.node-details"></pre>
+                </div>
+            </details>
+
+            <details class="flash-cta__repair rsnode-settings" id="rsnodeSettings" name="rsnode-tools" hidden>
+                <summary class="flash-cta__repair-summary">
+                    <span class="flash-cta__repair-label" data-i18n="flash.settings.rsnode-settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg> Настройки rsNode</span>
+                    <span class="flash-cta__repair-meta" data-i18n="flash.settings.wi-fi-peers-and">Wi-Fi, соседи и восходящее соединение по USB · сохранение перезапускает узел</span>
+                    <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </summary>
+                <div class="flash-cta__repair-body">
+                    <p class="rsnode-tools__lede" data-i18n="flash.settings.requires-firmware-with-usb">Нужна прошивка с поддержкой настройки по USB. Считайте настройки узла, измените их здесь и сохраните. При сохранении узел перезапустится. Регион, LIMITS и радио настраиваются на устройстве.</p>
+                    <form id="rsnodeSettingsForm" novalidate hidden>
+                        <fieldset class="rsnode-owner__fields" id="rsnodeSettingsFields">
+                            <p class="rsnode-settings__persona" id="rsnodeSettingsPersona"></p>
+                            <fieldset class="rsnode-settings__group">
+                                <legend class="rnode-source__label" data-i18n="flash.live.wi-fi">Wi-Fi</legend>
+                                <div class="rsnode-settings__choices">
+                                    <label class="rsnode-settings__choice"><input type="radio" name="rsnodeWifiMode" value="off"><span data-i18n="flash.settings.off">Выкл.</span></label>
+                                    <label class="rsnode-settings__choice"><input type="radio" name="rsnodeWifiMode" value="join"><span data-i18n="flash.settings.join-a-network">Подключиться к сети</span></label>
+                                    <label class="rsnode-settings__choice"><input type="radio" name="rsnodeWifiMode" value="own"><span data-i18n="flash.settings.own-network">Своя сеть</span></label>
+                                </div>
+                                <p class="rsnode-tools__help" id="rsnodeWifiNote"></p>
+                                <div class="rsnode-settings__grid" id="rsnodeWifiFields">
+                                    <label class="rsnode-settings__field" for="rsnodeWifiName"><span class="rsnode-settings__label" id="rsnodeWifiNameLabel" data-i18n="flash.settings.network-name">Имя сети</span>
+                                        <input class="rsnode-owner__input" id="rsnodeWifiName" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+                                    <div class="rsnode-settings__field">
+                                        <span class="rsnode-settings__label" id="rsnodeWifiPasswordLabel" data-i18n="flash.settings.wi-fi-password">Пароль Wi-Fi</span>
+                                        <p class="rsnode-settings__secret" id="rsnodeWifiPasswordStored"><span id="rsnodeWifiPasswordState"></span><button class="rsnode-beta__lock" id="rsnodeWifiPasswordChange" type="button" aria-describedby="rsnodeWifiPasswordLabel" data-i18n="flash.advanced.change">Изменить</button></p>
+                                        <input class="rsnode-owner__input" id="rsnodeWifiPassword" type="password" autocomplete="new-password" aria-labelledby="rsnodeWifiPasswordLabel" aria-describedby="rsnodeWifiPasswordHelp" hidden>
+                                        <p class="rsnode-tools__help" id="rsnodeWifiPasswordHelp"></p>
+                                    </div>
+                                    <label class="rsnode-settings__field" for="rsnodeWifiChannel" id="rsnodeWifiChannelField"><span class="rsnode-settings__label" data-i18n="flash.live.channel">Канал</span>
+                                        <select class="rnode-variant-select" id="rsnodeWifiChannel"></select></label>
+                                    <label class="rsnode-beta__check rsnode-settings__wide" id="rsnodeWifiFixedField"><input type="checkbox" id="rsnodeWifiFixed"><span data-i18n="flash.settings.use-a-fixed-address">Использовать статический адрес</span></label>
+                                    <div class="rsnode-settings__grid rsnode-settings__wide" id="rsnodeWifiFixedFields">
+                                        <label class="rsnode-settings__field" for="rsnodeWifiAddress"><span class="rsnode-settings__label" data-i18n="flash.settings.address">Адрес</span>
+                                            <input class="rsnode-owner__input" id="rsnodeWifiAddress" type="text" inputmode="decimal" autocomplete="off" placeholder="192.168.1.50"></label>
+                                        <label class="rsnode-settings__field" for="rsnodeWifiNetmask"><span class="rsnode-settings__label" data-i18n="flash.settings.subnet-mask">Маска подсети</span>
+                                            <input class="rsnode-owner__input" id="rsnodeWifiNetmask" type="text" inputmode="decimal" autocomplete="off" placeholder="255.255.255.0"></label>
+                                        <label class="rsnode-settings__field" for="rsnodeWifiGateway"><span class="rsnode-settings__label" data-i18n="flash.settings.gateway-optional">Шлюз (необязательно)</span>
+                                            <input class="rsnode-owner__input" id="rsnodeWifiGateway" type="text" inputmode="decimal" autocomplete="off" placeholder="192.168.1.1"></label>
+                                        <label class="rsnode-settings__field" for="rsnodeWifiDns"><span class="rsnode-settings__label" data-i18n="flash.settings.dns-optional">DNS (необязательно)</span>
+                                            <input class="rsnode-owner__input" id="rsnodeWifiDns" type="text" inputmode="decimal" autocomplete="off" placeholder="192.168.1.1"></label>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset class="rsnode-settings__group" id="rsnodePeersGroup">
+                                <legend class="rnode-source__label" data-i18n="flash.settings.accept-peers">Принимать подключения</legend>
+                                <label class="rsnode-beta__check"><input type="checkbox" id="rsnodePeersEnabled"><span data-i18n="flash.settings.accept-reticulum-peers-over">Принимать подключения узлов Reticulum по TCP</span></label>
+                                <div class="rsnode-settings__grid">
+                                    <label class="rsnode-settings__field" for="rsnodePeersPort"><span class="rsnode-settings__label" data-i18n="flash.settings.port">Порт</span>
+                                        <input class="rsnode-owner__input" id="rsnodePeersPort" type="text" inputmode="numeric" autocomplete="off" aria-describedby="rsnodePeersHelp"></label>
+                                </div>
+                                <p class="rsnode-tools__help" id="rsnodePeersHelp" data-i18n="flash.settings.reticulum-apps-add-a">В приложении Reticulum добавьте TCP-клиент с Wi-Fi-адресом узла и этим портом. Одновременно могут подключиться до двух соседей.</p>
+                            </fieldset>
+                            <fieldset class="rsnode-settings__group" id="rsnodeUplinkGroup">
+                                <legend class="rnode-source__label" data-i18n="flash.settings.uplink">Восходящее соединение</legend>
+                                <label class="rsnode-beta__check"><input type="checkbox" id="rsnodeUplinkEnabled"><span data-i18n="flash.settings.connect-to-a-reticulum">Подключаться к узлу Reticulum по TCP</span></label>
+                                <div class="rsnode-settings__grid">
+                                    <label class="rsnode-settings__field" for="rsnodeUplinkHost"><span class="rsnode-settings__label" data-i18n="flash.settings.host">Хост</span>
+                                        <input class="rsnode-owner__input" id="rsnodeUplinkHost" translate="no" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="rns.example.org"></label>
+                                    <label class="rsnode-settings__field" for="rsnodeUplinkPort"><span class="rsnode-settings__label" data-i18n="flash.settings.port">Порт</span>
+                                        <input class="rsnode-owner__input" id="rsnodeUplinkPort" type="text" inputmode="numeric" autocomplete="off" placeholder="4242"></label>
+                                </div>
+                            </fieldset>
+                            <div class="rsnode-settings__group" id="rsnodeRadioGroup">
+                                <span class="rnode-source__label" data-i18n="flash.settings.set-on-the-device">Задаётся на устройстве</span>
+                                <dl class="rsnode-tools__facts">
+                                    <div><dt data-i18n="flash.settings.region">Регион</dt><dd id="rsnodeSettingsRegion"></dd></div>
+                                    <div><dt data-i18n="flash.live.radio">Радио</dt><dd id="rsnodeSettingsRadio"></dd></div>
+                                    <div><dt data-i18n="flash.settings.lora-ifac">IFAC для LoRa</dt><dd id="rsnodeSettingsIfac"></dd></div>
+                                </dl>
+                                <p class="rsnode-tools__help" data-i18n="flash.settings.change-the-region-limits">Регион, LIMITS и параметры радио изменяются в меню самого Repeater. Изменения нужно подтвердить на устройстве.</p>
+                            </div>
+                        </fieldset>
+                    </form>
+                    <div class="flash-connect-tips rsnode-tools__tips" id="rsnodeSettingsTips">
+                        <div class="flash-connect-tips__head" data-i18n="flash.settings.before-you-read"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Перед чтением</div>
+                        <ul>
+                            <li data-i18n="flash.live.plug-the-node-in">Подключите узел по USB. Закройте другие приложения, использующие его порт, например Ratspeak или монитор последовательного порта.</li>
+                            <li data-i18n="flash.live.if-you-just-installed">Если вы только что установили прошивку, сначала нажмите RESET на плате.</li>
+                            <li data-i18n="flash.settings.an-rnode-another-app">Если RNode занят другим приложением по Bluetooth или Wi-Fi, настройки можно прочитать, но нельзя сохранить. Отключите приложение или удерживайте USB в меню узла.</li>
+                        </ul>
+                    </div>
+                    <div class="rsnode-tools__actions">
+                        <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeSettingsSave" type="submit" form="rsnodeSettingsForm" aria-describedby="rsnodeSettingsSummary" hidden data-i18n="flash.settings.save-and-restart">Сохранить и перезапустить</button>
+                        <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeSettingsRead" type="button" data-i18n="flash.settings.read-settings">Считать настройки</button>
+                        <p class="rsnode-tools__summary" id="rsnodeSettingsSummary"></p>
+                    </div>
+                    <p class="rsnode-tools__port" hidden data-i18n="flash.live.using">Используется <span class="rsnode-tools__port-label"></span> · <button class="rsnode-beta__lock" type="button" data-change-port data-i18n="flash.live.change-port">Сменить порт</button></p>
+                    <div id="rsnodeSettingsActivity">
+                        <p class="rsnode-tools__state"><span class="rsnode-tools__dot" id="rsnodeSettingsDot" aria-hidden="true"></span><span class="rsnode-beta__status progress-status" id="rsnodeSettingsStatus" role="status" aria-live="polite"></span></p>
+                        <details class="rsnode-tools__log"><summary data-i18n="flash.settings.usb-log">Журнал USB</summary><div class="progress-log"></div></details>
+                    </div>
+                </div>
+            </details>
+
+            <details class="flash-cta__repair rsnode-owner" id="rsnodeOwner" name="rsnode-tools" hidden>
+                <summary class="flash-cta__repair-summary">
+                    <span class="flash-cta__repair-label" data-i18n="flash.managers.rsnode-device-management"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg> Управление устройством rsNode</span>
+                    <span class="flash-cta__repair-meta" data-i18n="flash.managers.optional-owner-and-admins">Необязательно · Владелец и Администраторы узла Repeater, настройка по USB</span>
+                    <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </summary>
+                <div class="flash-cta__repair-body">
+                    <p class="rsnode-tools__notice" id="rsnodeOwnerNotice" tabindex="-1" hidden data-i18n="flash.managers.next-press-reset-on">Далее нажмите RESET на плате. Если узел будет работать как Repeater с удалённым управлением, можно добавить операторов.</p>
+                    <p class="rsnode-tools__lede" data-i18n="flash.managers.managers-are-optional-they">Операторов добавлять необязательно. Они управляют узлом через mesh-сеть, пока он работает как Repeater. В режиме RNode список игнорируется.</p>
+                    <form id="rsnodeOwnerForm" novalidate>
+                        <fieldset class="rsnode-owner__fields" id="rsnodeOwnerFields">
+                            <div class="rsnode-owner__grid">
+                                <div class="rsnode-owner__field">
+                                    <span class="rnode-source__label" id="rsnodeManagersLabel" data-i18n="flash.live.managers">Операторы</span>
+                                    <ul class="rsnode-managers" id="rsnodeManagers" aria-labelledby="rsnodeManagersLabel"></ul>
+                                    <p class="rsnode-tools__help" id="rsnodeManagersEmpty" data-i18n="flash.managers.add-yourself-as-the">Добавьте себя как Владельца по своему адресу LXMF в Ratspeak или считайте с узла список операторов.</p>
+                                    <div class="rsnode-managers__editor" id="rsnodeManagerEditor" hidden>
+                                        <input class="rsnode-owner__input" id="rsnodeOwnerHash" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Адрес LXMF или хеш идентификатора" aria-label="Адрес LXMF или хеш идентификатора оператора" aria-describedby="rsnodeManagerNote" data-i18n-attr="aria-label:flash.managers.manager-s-lxmf-address;placeholder:flash.managers.lxmf-address-or-identity">
+                                        <select class="rnode-variant-select" id="rsnodeOwnerKind" aria-label="Тип хеша" data-i18n-attr="aria-label:flash.managers.hash-type">
+                                            <option value="lxmf" data-i18n="flash.managers.lxmf-address">Адрес LXMF</option>
+                                            <option value="identity" data-i18n="flash.managers.identity-hash">Хеш идентификатора</option>
+                                        </select>
+                                        <select class="rnode-variant-select" id="rsnodeOwnerRole" aria-label="Роль" aria-describedby="rsnodeRoleHelp" data-i18n-attr="aria-label:flash.managers.role">
+                                            <option value="owner" data-i18n="flash.managers.owner">Владелец</option>
+                                            <option value="admin" data-i18n="flash.managers.admin">Администратор</option>
+                                        </select>
+                                        <p class="rsnode-tools__help" id="rsnodeRoleHelp" data-i18n="flash.managers.the-owner-changes-settings">Владелец меняет настройки и список операторов. Администраторы могут просматривать состояние и настройки и устанавливать обновления. Для доступа к настройкам нужна прошивка с такой поддержкой.</p>
+                                        <div class="rsnode-managers__editor-actions">
+                                            <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeManagerDone" type="button" data-i18n="flash.managers.add">Добавить</button>
+                                            <button class="rsnode-beta__button" id="rsnodeManagerCancel" type="button" data-i18n="flash.managers.cancel">Отмена</button>
+                                        </div>
+                                        <p class="rsnode-tools__help" id="rsnodeManagerNote" hidden></p>
+                                    </div>
+                                    <p class="rsnode-managers__add"><button class="rsnode-beta__lock" id="rsnodeManagerAdd" type="button" data-i18n="flash.managers.add-manager">Добавить оператора</button><span class="rsnode-tools__help" id="rsnodeManagersFull" hidden data-i18n="flash.managers.a-node-holds-up">У узла может быть до четырёх операторов.</span></p>
+                                </div>
+                            </div>
+                            <div class="flash-connect-tips rsnode-tools__tips">
+                                <div class="flash-connect-tips__head" data-i18n="flash.managers.before-you-save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Перед сохранением</div>
+                                <ul>
+                                    <li data-i18n="flash.live.plug-the-node-in">Подключите узел по USB. Закройте другие приложения, использующие его порт, например Ratspeak или монитор последовательного порта.</li>
+                                    <li data-i18n="flash.live.if-you-just-installed">Если вы только что установили прошивку, сначала нажмите RESET на плате.</li>
+                                    <li data-i18n="flash.managers.some-betas-require-rnode">В некоторых бета-версиях список операторов меняется только в режиме RNode. Если узел отклонил изменение, остановите Repeater и выйдите из этого режима. В режиме RNode удерживайте USB в главном меню, чтобы перехватить управление у другого приложения.</li>
+                                    <li data-i18n="flash.managers.adding-the-first-manager">При добавлении первого оператора создаются ключи и адрес узла, поэтому должен работать Bluetooth или Wi-Fi. При обычном запуске RNode один из них включён.</li>
+                                </ul>
+                            </div>
+                            <div class="rsnode-tools__actions">
+                                <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeOwnerSave" type="submit" aria-describedby="rsnodeOwnerSummary" disabled data-i18n="flash.managers.save-to-rsnode">Сохранить на rsNode</button>
+                                <button class="rsnode-beta__button" id="rsnodeOwnerRead" type="button" data-i18n="flash.managers.read-from-node">Считать с узла</button>
+                                <p class="rsnode-tools__summary" id="rsnodeOwnerSummary" data-i18n="flash.managers.nothing-to-save-yet">Пока нечего сохранять. Добавьте оператора.</p>
+                            </div>
+                            <p class="rsnode-tools__port" hidden data-i18n="flash.live.using">Используется <span class="rsnode-tools__port-label"></span> · <button class="rsnode-beta__lock" type="button" data-change-port data-i18n="flash.live.change-port">Сменить порт</button></p>
+                        </fieldset>
+                    </form>
+                    <div id="rsnodeOwnerActivity">
+                        <p class="rsnode-tools__state"><span class="rsnode-tools__dot" id="rsnodeOwnerDot" aria-hidden="true"></span><span class="rsnode-beta__status progress-status" id="rsnodeOwnerStatus" role="status" aria-live="polite"></span></p>
+                        <div class="rsnode-owner__result" id="rsnodeOwnerResult" hidden>
+                            <span class="rnode-source__label" data-i18n="flash.managers.on-the-node">На узле</span>
+                            <dl class="rsnode-tools__facts">
+                                <div><dt data-i18n="flash.live.node">Узел</dt><dd id="rsnodeResultNode"></dd></div>
+                                <div id="rsnodeResultIdentity"><dt data-i18n="flash.managers.destination">Назначение</dt><dd><span class="rsnode-owner__destination"><code id="rsnodeResultDestination"></code><button class="rsnode-beta__lock" id="rsnodeCopyDestination" type="button" data-i18n="flash.result.copy">Копировать</button><span class="rsnode-tools__help" id="rsnodeCopyNote" hidden data-i18n="flash.managers.press-ctrl-c-or">Нажмите Ctrl+C или ⌘C для копирования.</span></span><span class="rsnode-tools__help" data-i18n="flash.managers.clients-pin-this-destination">Клиенты закрепляют этот адрес назначения.</span></dd></div>
+                            </dl>
+                            <p class="rsnode-tools__help" id="rsnodeResultNote"></p>
+                            <p class="rsnode-tools__help" id="rsnodeResultEffect" hidden data-i18n="flash.managers.managers-act-only-while">Операторы действуют только в режиме Repeater.</p>
+                        </div>
+                        <details class="rsnode-tools__log"><summary data-i18n="flash.settings.usb-log">Журнал USB</summary><div class="progress-log"></div></details>
+                    </div>
+                </div>
+            </details>
+
+            <details class="flash-cta__repair" id="flashRepair">
+                <summary class="flash-cta__repair-summary">
+                    <span class="flash-cta__repair-label" data-i18n="flash.repair.rnode-tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-2.4 2.6-2.6Z"/></svg> Инструменты RNode</span>
+                    <span class="flash-cta__repair-meta" data-i18n="flash.repair.repair-and-inspect-an">Проверка и восстановление RNode без перепрошивки</span>
+                    <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </summary>
+                <div class="flash-cta__repair-body">
+                    <div class="flash-repair__list">
+                        <button type="button" class="flash-repair__action" id="reprovisionBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="0.5"/><path d="M9 3v3"/><path d="M15 3v3"/><path d="M9 18v3"/><path d="M15 18v3"/><path d="M3 9h3"/><path d="M3 15h3"/><path d="M18 9h3"/><path d="M18 15h3"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label" data-i18n="flash.repair.repair-rnode-setup">Восстановить настройки RNode</span>
+                                <span class="flash-repair__sub" data-i18n="flash.repair.use-if-identity-or">Если не удалось записать идентификационные данные или хеш прошивки.</span>
+                            </span>
+                        </button>
+                        <button type="button" class="flash-repair__action" id="setHashBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/><circle cx="18.5" cy="18.5" r="3"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label" data-i18n="flash.repair.re-write-firmware-hash">Перезаписать хеш прошивки</span>
+                                <span class="flash-repair__sub" data-i18n="flash.repair.writes-the-hash-from">Записывает хеш из загруженного файла прошивки.</span>
+                            </span>
+                        </button>
+                        <button type="button" class="flash-repair__action" id="adoptHashBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label" data-i18n="flash.repair.adopt-running-hash">Принять хеш текущей прошивки</span>
+                                <span class="flash-repair__sub" data-i18n="flash.repair.trusts-the-firmware-currently">Помечает запущенную на плате прошивку как доверенную. Используйте только с заведомо исправной установкой: повреждённая прошивка не будет восстановлена.</span>
+                            </span>
+                        </button>
+                        <button type="button" class="flash-repair__action" id="inspectHashBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18"/><path d="M3 12h18"/><path d="M3 19h10"/><path d="m17 16 4 4"/><circle cx="16.5" cy="15.5" r="3.5"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label" data-i18n="flash.repair.read-rnode-status">Считать состояние RNode</span>
+                                <span class="flash-repair__sub" data-i18n="flash.repair.shows-firmware-hash-and">Показывает хеш прошивки и состояние радио при запуске.</span>
+                            </span>
+                        </button>
+                        <button type="button" class="flash-repair__action" id="saveTncConfigBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 12h10"/><path d="M4 17h7"/><path d="M17 14v6"/><path d="M14 17h6"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label" data-i18n="flash.repair.keep-radio-idle">Оставить радио в ожидании</span>
+                                <span class="flash-repair__sub" data-i18n="flash.repair.clears-saved-startup-radio">Стирает сохранённые параметры запуска радио, чтобы им управлял Ratspeak.</span>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </details>
+        </section>
+    </div>
+
+</main>
+
+<dialog class="install-dialog rsnode-beta" id="rsnodeTermsDialog" aria-labelledby="rsnodeTermsTitle" aria-describedby="rsnodeTermsIntro">
+    <h2 id="rsnodeTermsTitle" data-i18n="flash.terms.before-joining-the-beta">Перед участием в бете</h2>
+    <p id="rsnodeTermsIntro" data-i18n="flash.terms.for-this-private-beta">Для участия в закрытой бете подтвердите следующее:</p>
+    <form id="rsnodeTermsForm">
+        <div class="rsnode-beta__checks" translate="no">
+            <label class="rsnode-beta__check"><input type="checkbox" name="france" required><span>I am not a citizen or resident of France.</span></label>
+            <label class="rsnode-beta__check"><input type="checkbox" name="sanctions" required><span>I am outside countries and regions where U.S. sanctions prohibit this distribution, and I am not a restricted person or acting for one.</span></label>
+            <label class="rsnode-beta__check"><input type="checkbox" name="export" required><span>I will follow applicable encryption export and local radio rules.</span></label>
+            <label class="rsnode-beta__check"><input type="checkbox" name="privateBeta" required><span>I will keep the access password private and use this prerelease firmware for testing. I understand flashing can erase my device.</span></label>
+        </div>
+        <p class="rsnode-beta__note" translate="no">Please keep beta builds within the tester group. Any rights granted by included open-source licenses still apply.</p>
+        <div class="rsnode-beta__links"><a href="https://ofac.treasury.gov/sanctions-programs-and-country-information" target="_blank" rel="noopener noreferrer" data-i18n="flash.terms.u-s-sanctions">Санкции США <span aria-hidden="true">↗</span></a><a href="/terms.html" target="_blank" rel="noopener" data-i18n="flash.terms.terms">Условия</a><a href="/privacy.html" target="_blank" rel="noopener" data-i18n="flash.terms.privacy">Конфиденциальность</a></div>
+        <p class="rsnode-beta__status" id="rsnodeTermsStatus" role="status"></p>
+        <div class="install-dialog__actions"><button class="install-dialog__cancel" id="rsnodeTermsCancel" type="button" data-i18n="flash.managers.cancel">Отмена</button><button class="install-dialog__continue" id="rsnodeTermsContinue" type="submit" disabled data-i18n="flash.terms.agree-and-continue">Принять и продолжить</button></div>
+    </form>
+</dialog>
+
+<dialog class="install-dialog" id="installDialog" aria-labelledby="installDialogTitle" aria-describedby="installDialogIntro installDialogRisk">
+    <div class="install-dialog__device" id="installDialogDevice"></div>
+    <h2 id="installDialogTitle" data-i18n="flash.rsnode.erase-and-install">Стереть и установить</h2>
+    <p id="installDialogIntro"></p>
+    <p id="installDialogRisk"></p>
+    <label class="rsnode-beta__check rsnode-beta__variant" id="installDialogVariant" hidden><input type="checkbox" id="installDialogVariantConfirmed"><span id="installDialogVariantLabel"></span></label>
+    <a class="install-dialog__guide" href="https://docs.ratspeak.org/docs/hardware/flashing-firmware#before-flashing" target="_blank" rel="noopener noreferrer" data-i18n="flash.dialog.flashing-guide">Руководство по прошивке <span aria-hidden="true">↗</span></a>
+    <div class="install-dialog__actions">
+        <button class="install-dialog__cancel" id="installDialogCancel" type="button" autofocus data-i18n="flash.managers.cancel">Отмена</button>
+        <button class="install-dialog__continue" id="installDialogContinue" type="button" data-i18n="flash.rsnode.erase-and-install">Стереть и установить</button>
+    </div>
+</dialog>
+
+<footer class="site-foot">
+    <div class="foot-main">
+      <div class="foot-brand">
+        <div class="brand"><a class="brand" href="/letter.html" aria-label="Письмо сообществу" data-i18n-attr="aria-label:common.foot.letter"><svg class="brand-mark" aria-hidden="true" focusable="false"><use href="/lang/assets/ratspeak-mark.svg#mark"/></svg></a><a class="brand" href="/lang/ru/" aria-label="Главная Ratspeak" data-i18n-attr="aria-label:common.brand.home"><span class="brand-word">ratspeak</span></a></div>
+        <p data-i18n="common.foot.built-on-reticulum">Работает на <a href="https://docs.ratspeak.org/docs/concepts/what-is-reticulum">Reticulum</a></p>
+      </div>
+      <nav class="foot-cols" aria-label="Нижняя часть страницы" data-i18n-attr="aria-label:common.foot.footer">
+        <div><h2 data-i18n="common.foot.product">Продукт</h2><ul><li><a href="/lang/ru/download.html" data-i18n="common.nav.download">Скачать</a></li><li><a href="https://docs.ratspeak.org/" data-i18n="common.foot.docs">Документация<span aria-hidden="true">&nbsp;↗</span></a></li><li><a href="/lang/ru/map.html" data-i18n="common.nav.map">Карта</a></li><li><a href="/portal.html" data-i18n="common.foot.holder-portal">Портал держателей</a></li></ul></div>
+        <div><h2 data-i18n="common.foot.source">Исходники</h2><ul><li><a href="https://github.com/ratspeak">GitHub<span aria-hidden="true">&nbsp;↗</span></a></li><li><a href="https://github.com/ratspeak/Ratspeak" data-i18n="common.foot.ratspeak-app">Приложение Ratspeak<span aria-hidden="true">&nbsp;↗</span></a></li><li><a href="https://github.com/ratspeak/ratspeak-handheld" data-i18n="common.foot.handheld-firmware">Прошивка портативных устройств<span aria-hidden="true">&nbsp;↗</span></a></li><li><a href="https://github.com/ratspeak/rsReticulum" data-i18n="common.foot.reticulum-in-rust">Reticulum на Rust<span aria-hidden="true">&nbsp;↗</span></a></li></ul></div>
+        <div><h2 data-i18n="common.foot.community">Сообщество</h2><ul><li><a href="/discord">Discord<span aria-hidden="true">&nbsp;↗</span></a></li><li><a href="/telegram">Telegram<span aria-hidden="true">&nbsp;↗</span></a></li><li><a href="/community-guidelines.html" data-i18n="common.foot.guidelines">Правила</a></li><li><a href="/community.html" data-i18n="common.foot.community-token">Токен сообщества</a></li></ul></div>
+        <div><h2 data-i18n="common.foot.help-legal">Помощь и право</h2><ul><li><a href="/support.html" data-i18n="common.foot.support">Поддержка</a></li><li><a href="/privacy.html" data-i18n="common.foot.privacy">Конфиденциальность</a></li><li><a href="/terms.html" data-i18n="common.foot.terms">Условия</a></li></ul></div>
+      </nav>
+    </div>
+    <div class="foot-bar">
+        <p>© 2026 Ratspeak LLC</p>
+      </div>
+  </footer>
+
+<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+<script type="module" src="/lang/assets/site/flasher.js"></script>
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+
+</body>
+</html>

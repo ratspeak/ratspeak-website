@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="pt-BR" dir="ltr">
+<head>
+    <meta charset="UTF-8"><meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#10208c"><meta name="color-scheme" content="dark">
+    <title data-i18n="flash.meta.title">Gravador avançado de firmware — Ratspeak</title>
+  <meta name="description" content="Grave o rsNode, o firmware oficial do RNode ou seu próprio arquivo em uma placa LoRa pelo navegador." data-i18n-attr="content:flash.meta.description">
+  
+  
+  <link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="manifest" href="/site.webmanifest">
+  <meta name="application-name" content="Ratspeak"><meta name="apple-mobile-web-app-title" content="Ratspeak">
+  <meta property="og:type" content="website"><meta property="og:locale" content="pt_BR"><meta property="og:site_name" content="Ratspeak">
+  <meta property="og:title" content="Gravador avançado de firmware — Ratspeak" data-i18n-attr="content:flash.meta.title"><meta property="og:description" content="Grave o rsNode, o firmware oficial do RNode ou seu próprio arquivo em uma placa LoRa pelo navegador." data-i18n-attr="content:flash.meta.description"><meta property="og:url" content="https://ratspeak.org/pt/flash.html">
+  <meta property="og:image" content="https://ratspeak.org/assets/seo/og-flash.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Gravador avançado de firmware do Ratspeak para placas LoRa." data-i18n-attr="content:flash.meta.imageAlt">
+  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@ratspeakorg"><meta name="twitter:title" content="Gravador avançado de firmware — Ratspeak" data-i18n-attr="content:flash.meta.title"><meta name="twitter:description" content="Grave o rsNode, o firmware oficial do RNode ou seu próprio arquivo em uma placa LoRa pelo navegador." data-i18n-attr="content:flash.meta.description">
+  <meta name="twitter:image" content="https://ratspeak.org/assets/seo/og-flash.png"><meta name="twitter:image:alt" content="Gravador avançado de firmware do Ratspeak para placas LoRa." data-i18n-attr="content:flash.meta.imageAlt">
+    <link rel="preload" href="/lang/assets/fonts/anton.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/lang/assets/site/site.css">
+    <link rel="stylesheet" href="/lang/assets/site/download.css">
+    <link rel="stylesheet" href="/lang/assets/site/flash.css">
+    <script>(()=>{const u=new URL(location.href),d=u.searchParams.get('device');if(d&&d!=='custom')location.replace('download.html'+u.search+'#'+d)})()</script>
+    <script>window.RS_I18N={"lang":"pt-BR","dir":"ltr","locale":"pt-BR","tech":"pt-BR","base":"/lang/pt/","pages":["index.html","map.html","download.html","flash.html","404.html"],"strings":{"dl.handheld.firmware":"Firmware","dl.handheld.messenger-only":"Só mensagens","dl.handheld.radio-for-your-phone":"Rádio para seu celular ou computador","dl.handheld.the-ratspeak-app-sends":"O app Ratspeak envia mensagens pelo rádio LoRa do aparelho, conectado por USB ou Bluetooth.","dl.flash.not-started":"Não iniciado","dl.flash.no-device-selected":"Nenhum dispositivo selecionado","dl.flash.select-a-usb-device":"Selecione um dispositivo USB para continuar.","dl.dialog.erase-and-install":"Apagar e instalar","dl.flash.btn.install":"Instalar o Ratspeak","dl.fw.full":"Mensagens e rádio","dl.flash.pkg.fullDesc":"Recomendado. Escolha o modo sempre que ligar o dispositivo.","dl.flash.pkg.standaloneDesc":"Envie e leia mensagens no próprio dispositivo.","dl.flash.fw.checked":"Baixado e verificado","dl.flash.fw.downloading":"Baixando {received} de {total}…","dl.flash.fw.checkingRelease":"Verificando a versão…","dl.flash.fw.failed":"O download não terminou. Verifique sua conexão e tente novamente.","dl.flash.connect.selecting":"Selecionando…","dl.flash.connect.choose":"Escolha seu dispositivo na janela do navegador…","dl.flash.connect.denied":"O navegador não conseguiu usar esse dispositivo.","dl.flash.connect.none":"Nenhum dispositivo escolhido","dl.flash.connect.selected":"Dispositivo selecionado","dl.flash.usb.esp32s3":"Placa ESP32-S3","dl.flash.usb.bridge":"Placa com adaptador USB {chip}","dl.flash.usb.serial":"Dispositivo serial USB","dl.flash.connect.checked":"{chip} · verificado","dl.flash.boot.tdeck":"Ative o modo de download: com o aparelho desligado e o USB conectado, mantenha o trackball pressionado, ligue o aparelho e solte após alguns segundos.","dl.flash.boot.tpager":"Ative o modo de download: segure BOOT, pressione RST e solte BOOT.","dl.flash.boot.cardputer":"Ative o modo de download: desligue pela chave lateral, segure G0 enquanto conecta o USB e depois solte.","dl.flash.boot.m9":"Deixe o M9 ligado com o USB conectado. Se nenhuma porta aparecer, instale o driver USB indicado acima.","dl.flash.stage.capacity":"Verificando a capacidade da memória flash…","dl.flash.stage.layout":"Lendo o layout de armazenamento…","dl.flash.stage.bootloader":"Verificando o bootloader…","dl.flash.stage.startup":"Verificando a seleção de inicialização…","dl.flash.dialog.chosen":"Você escolheu uma instalação limpa.","dl.flash.dialog.risk":"Todos os dados do armazenamento interno serão perdidos, incluindo sua identidade, configurações e mensagens.","dl.flash.reason.unidentified":"Não foi possível identificar o firmware instalado.","dl.flash.reason.layout":"Não foi possível identificar o firmware instalado ou o layout de armazenamento.","dl.flash.reason.bootloader":"O bootloader instalado não é compatível com atualizações.","dl.flash.reason.incomplete":"O firmware instalado está incompleto.","dl.flash.reason.unreadable":"Não foi possível ler o firmware instalado.","dl.flash.reason.package":"Mudar o pacote de firmware exige uma instalação limpa.","dl.flash.reason.unverified":"Este pacote de firmware não foi verificado para atualizações que preservam os dados.","dl.flash.reason.storage":"Esta atualização exige outro layout de armazenamento ou bootloader.","dl.flash.stage.apps":"Verificando os aplicativos instalados ({done}/{all})…","dl.flash.help.missing":"O dispositivo não está na lista? Use um cabo de dados e feche outros apps que usam o dispositivo.","dl.flash.help.denied":"Feche outros apps ou abas que usam o dispositivo e selecione-o novamente.","dl.flash.connect.select":"Selecionar dispositivo USB","dl.flash.flow.downloading":"Baixando {pct}","dl.flash.tech.copied":"Copiado","dl.flash.adv.eraseOn":"Apagamento completo ativado","dl.flash.adv.default":"Instalação padrão","dl.flash.flow.selected":"Selecionado","dl.flash.flow.written":"Gravado","dl.flash.flow.complete":"Concluído","dl.flash.note.installed":"Instalado. Reinicie o dispositivo para começar a usar.","dl.flash.flow.ready":"Pronto","dl.flash.flow.writing":"Gravando","dl.flash.flow.checking":"Verificando o dispositivo","dl.flash.note.writing":"Gravando o firmware. Mantenha o cabo USB conectado até terminar.","dl.flash.note.checking":"Verificando seu dispositivo antes da instalação.","dl.flash.flow.couldntConnect":"Falha ao conectar","dl.flash.flow.selectDevice":"Selecione seu dispositivo","dl.flash.flow.notDownloaded":"Não baixado","dl.flash.flow.stopped":"Interrompido","dl.flash.note.fwFailed":"O firmware não foi baixado. Tente novamente no passo 2.","dl.flash.note.ready":"Pronto. O instalador verifica o dispositivo e então atualiza ou pergunta antes de apagar. Mantenha esta aba aberta.","dl.flash.note.selectWhileDownloading":"Selecione um dispositivo USB enquanto o firmware é baixado.","dl.flash.note.waiting":"Aguardando o download do firmware terminar.","dl.flash.dialog.introRadio":"Você está instalando a versão do Ratspeak Handheld só com rádio.","dl.flash.dialog.intro":"Você está instalando o Ratspeak Handheld.","dl.flash.btn.preparing":"Preparando…","dl.flash.status.loadingTool":"Carregando o esptool…","dl.flash.status.preparing":"Preparando o firmware…","dl.flash.btn.checking":"Verificando o dispositivo…","dl.flash.status.connecting":"Conectando ao bootloader…","dl.flash.status.entering":"Entrando no bootloader…","dl.flash.status.checkingInstalled":"Verificando o firmware instalado…","dl.flash.status.cancelled":"Cancelado. Nada foi gravado. Reinicie o dispositivo se necessário.","dl.flash.btn.installing":"Instalando…","dl.flash.status.writing":"Gravando o firmware…","dl.flash.status.writingPart":"Gravando a parte {part}/{parts}…","dl.flash.status.written":"Memória flash gravada","dl.flash.fail.cable":"Use um cabo USB de dados conectado diretamente ao computador.","dl.flash.fail.replug":"Desconecte o dispositivo, conecte-o de novo e escolha a porta novamente.","dl.flash.fail.busy.title":"A porta USB está ocupada","dl.flash.fail.busy.cause":"Seu navegador encontrou o {device}, mas não conseguiu abrir a conexão. Outro app provavelmente está usando o dispositivo.","dl.flash.fail.busy.fix1":"Feche outros apps que usam a porta: o Ratspeak, um monitor serial ou outra aba com esta página.","dl.flash.fail.busy.fix2":"Desconecte o {device}, conecte-o de novo e escolha a porta novamente.","dl.flash.fail.silent.title":"O {device} não respondeu","dl.flash.fail.silent.cause":"A porta abriu, mas o dispositivo não respondeu ao instalador.","dl.flash.fail.silent.fix2":"Escolha a porta novamente; ela pode mudar no modo de download.","dl.flash.fail.wrong.title":"Isto não parece ser um {device}","dl.flash.fail.wrong.cause":"O dispositivo conectado não corresponde ao que você escolheu.","dl.flash.fail.wrong.fix1":"Verifique se escolheu a porta certa.","dl.flash.fail.wrong.fix2":"Volte à lista de dispositivos e escolha aquele em que está instalando.","dl.flash.fail.dropped.title":"A conexão caiu","dl.flash.fail.dropped.cause":"O dispositivo parou de responder durante o processo.","dl.flash.fail.dropped.fix1":"Mantenha o cabo conectado e o dispositivo ligado até a instalação terminar.","dl.flash.fail.dropped.fix2":"Desconecte, conecte de novo e escolha a porta novamente.","dl.flash.fail.integrity.title":"O firmware não passou na verificação","dl.flash.fail.integrity.cause":"O firmware baixado falhou na verificação de integridade.","dl.flash.fail.integrity.fix1":"Verifique sua conexão com a internet.","dl.flash.fail.integrity.fix2":"Tente novamente; o instalador baixa uma nova cópia.","dl.flash.fail.stopped.title":"A instalação parou","dl.flash.fail.stopped.cause":"Algo deu errado na comunicação com o dispositivo.","dl.flash.tech.selected":"Selecionado. Pressione Ctrl+C ou ⌘C para copiar.","flash.btn.update":"Atualizar rsNode","flash.btn.reinstall":"Apagar e reinstalar","flash.btn.rsnode":"Gravar rsNode","flash.btn.install":"Instalar firmware","flash.board.name":"Sua placa","flash.board.sub":"ESP32 ou nRF52 · rsNode, RNode ou arquivo próprio","flash.usb.esp32":"Placa ESP32","flash.usb.nrf52":"Placa nRF52","flash.boot.custom":"Coloque a placa no modo de download: mantenha BOOT pressionado ao conectar o USB e depois solte.","flash.rsnode.beta.loadFailed":"Não foi possível carregar o beta. Tente novamente.","flash.rsnode.beta.sessionFailed":"Não foi possível verificar a sessão do beta. Tente novamente.","flash.rsnode.beta.termsChanged":"Os termos do beta mudaram. Consulte-os novamente.","flash.rsnode.beta.listFailed":"A lista de placas do beta está indisponível. Tente novamente.","flash.rsnode.beta.incomplete":"Faltam informações sobre o pacote do beta. Nada foi gravado.","flash.rsnode.beta.verifyFailed":"O firmware baixado não passou na verificação. Escolha a placa de novo para tentar novamente.","flash.rsnode.beta.noManifest":"O pacote do beta está sem o manifesto.","flash.rsnode.beta.wrongPackage":"Este pacote de fábrica do rsNode não é compatível com a placa selecionada.","flash.rsnode.beta.badLayout":"O layout da imagem de fábrica do rsNode é inválido.","flash.rsnode.beta.noImage":"O pacote rsNode está sem a imagem de fábrica.","flash.rsnode.beta.imageFailed":"A imagem de fábrica do rsNode não passou na verificação.","flash.rsnode.beta.settingsMismatch":"O chip ou as configurações da memória flash da imagem rsNode não correspondem ao manifesto.","flash.rsnode.beta.unverified":"Não foi possível verificar o firmware. Tente mais tarde.","flash.rsnode.beta.invalid":"Solicitação inválida.","flash.rsnode.beta.wrongSite":"Abra o gravador de firmware neste site para continuar.","flash.rsnode.beta.down":"O beta privado está fora do ar. Tente mais tarde.","flash.rsnode.beta.tooMany":"Muitas tentativas. Tente mais tarde.","flash.rsnode.beta.notAccepted":"A senha do beta não foi aceita.","flash.rsnode.beta.enterPassword":"Digite a senha do beta para continuar.","flash.rsnode.beta.confirmEach":"Confirme cada condição do beta para continuar.","flash.rsnode.beta.confirmFirst":"Confirme primeiro as condições do beta.","flash.rsnode.beta.noBoard":"Essa placa não está disponível no beta.","flash.rsnode.beta.noUpdate":"Essa placa do beta não tem pacote de atualização.","flash.rsnode.beta.unavailable":"O beta privado está temporariamente indisponível. Tente novamente.","flash.rsnode.beta.checkTft":"Confirmei que meu dispositivo é o V4 R8 TFT, o Expansion Kit V2 com tela sensível ao toque de 2,8 polegadas.","flash.rsnode.beta.checkR8":"Confirmei que meu dispositivo é o V4 R8 (ESP32-S3R8) com a tela OLED pequena.","flash.rsnode.beta.checkR2":"Confirmei que meu dispositivo é o V4 R2 (ESP32-S3R2).","flash.rsnode.update.noteInstall":"A instalação apaga a identidade do nó, os gestores, as configurações de Wi-Fi, os pareamentos Bluetooth e os ajustes do Repeater. A atualização exige um pacote compatível e firmware com suporte a atualizações via USB.","flash.rsnode.update.noteUpdate":"Atualizar preserva a identidade do nó, os gestores, o Wi-Fi, os pareamentos Bluetooth e os ajustes do Repeater. Instalar apaga esses dados. Verifique se o nó aceita atualização.","flash.rsnode.update.title":"Atualizar","flash.rsnode.update.noSupport":"O nó não informou suporte a atualizações via USB. A opção Instalar apaga os dados do nó.","flash.rsnode.update.otherBoard":"Este nó usa outra placa ou variante.","flash.rsnode.update.otherKey":"Este nó confia em outra chave de atualização.","flash.rsnode.update.finishing":"Concluindo a última atualização. Tente de novo em um minuto.","flash.rsnode.update.current":"Já está atualizado.","flash.rsnode.update.packageFailed":"O pacote de atualização não passou na verificação. Escolha a placa de novo para tentar novamente.","flash.rsnode.wait.none30":"Sem resposta via USB em 30 s. Se acabou de instalar, pressione RESET na placa e tente de novo.","flash.rsnode.wait.noneConnect":"Sem resposta via USB. Se acabou de instalar, pressione RESET na placa e conecte de novo.","flash.rsnode.managers.predates":"Este firmware é anterior ao suporte a gestores","flash.rsnode.settings.check.name":"Digite o nome da rede à qual você quer se conectar.","flash.rsnode.settings.check.nameLength":"O nome da rede pode ter até 32 bytes.","flash.rsnode.settings.check.ownPassword":"Digite uma senha para a rede do nó.","flash.rsnode.settings.check.joinPassword":"Digite a senha da rede ou deixe o campo vazio se a rede for aberta.","flash.rsnode.settings.check.ownLength":"A rede própria do nó precisa de uma senha de 8 a 32 caracteres.","flash.rsnode.settings.check.printable":"Use letras, números, espaços e símbolos comuns na senha.","flash.rsnode.settings.check.joinLength":"A senha do Wi-Fi deve ter de 8 a 32 caracteres. Para uma rede aberta, deixe o campo vazio.","flash.rsnode.settings.check.channel":"Escolha um canal de 1 a 13.","flash.rsnode.settings.check.address":"Digite um endereço fixo, como 192.168.1.50.","flash.rsnode.settings.check.netmask":"Digite uma máscara de sub-rede, como 255.255.255.0.","flash.rsnode.settings.check.subnet":"Este é o endereço de rede ou de broadcast da sub-rede.","flash.rsnode.settings.check.gateway":"Digite um gateway na mesma sub-rede ou deixe o campo vazio.","flash.rsnode.settings.check.dns":"Digite o endereço de um servidor DNS ou deixe o campo vazio.","flash.rsnode.settings.check.peersPort":"Escolha uma porta para os pares entre 1 e 65535, exceto 80.","flash.rsnode.settings.check.uplinkHost":"Digite o nome ou endereço do host da conexão de saída. Use até 64 letras, números, pontos, hifens e sublinhados.","flash.rsnode.settings.check.uplinkPort":"Escolha uma porta de saída entre 1 e 65535.","flash.rsnode.settings.refused.malformed":"O nó não conseguiu ler a solicitação. Nada mudou.","flash.rsnode.settings.refused.unknown":"Este firmware não tem essa configuração.","flash.rsnode.settings.refused.wifi":"O nó recusou estas configurações de Wi-Fi. Para entrar em uma rede, informe o nome e uma senha de 8 a 32 caracteres, ou deixe a senha vazia se a rede for aberta. A rede própria do nó exige uma senha de 8 a 32 caracteres.","flash.rsnode.settings.refused.radio":"O nó recusou as configurações de rádio.","flash.rsnode.settings.refused.confirm":"Confirme a mudança no dispositivo.","flash.rsnode.settings.refused.transport":"O nó recusou as configurações do Repeater.","flash.rsnode.settings.refused.network":"O nó recusou as configurações dos pares ou da conexão de saída. Verifique as portas e o host de saída.","flash.rsnode.settings.refused.wifiMode":"O nó recusou este modo Wi-Fi.","flash.rsnode.settings.refused.channel":"O nó recusou este canal.","flash.rsnode.settings.refused.name":"O nó recusou este nome de rede.","flash.rsnode.settings.refused.password":"O nó recusou esta senha.","flash.rsnode.settings.refused.address":"O nó recusou este endereço fixo.","flash.rsnode.settings.refused.gateway":"O nó recusou este gateway.","flash.rsnode.settings.refused.dns":"O nó recusou este servidor DNS.","flash.rsnode.settings.refused.peers":"O nó recusou as configurações dos pares.","flash.rsnode.settings.refused.peersPort":"O nó recusou esta porta para os pares.","flash.rsnode.settings.refused.uplink":"O nó recusou as configurações da conexão de saída.","flash.rsnode.settings.refused.uplinkHost":"O nó recusou este host de saída.","flash.rsnode.settings.refused.uplinkPort":"O nó recusou esta porta de saída.","flash.rsnode.settings.refused.value":"O nó recusou um dos valores.","flash.rsnode.settings.region.none":"Não escolhida","flash.rsnode.settings.region.americas":"Américas 915","flash.rsnode.settings.region.europe":"Europa 868","flash.rsnode.settings.region.australia":"Austrália 915","flash.rsnode.settings.region.asia":"Ásia 923","flash.rsnode.facts.notSetUp":"Não configurado","flash.rsnode.settings.notSet":"Não definido","flash.rsnode.facts.on":"Ligado","flash.rsnode.facts.off":"Desligado","flash.rsnode.facts.unsupported":"Sem suporte neste firmware","flash.rsnode.facts.noneYet":"Nenhum por enquanto","flash.rsnode.facts.none":"Não","flash.rsnode.managers.role.owner":"Proprietário","flash.rsnode.facts.profileSaved":"Perfil salvo","flash.rsnode.facts.ifacOff":"IFAC desligado","flash.rsnode.facts.startsRepeater":"inicia como Repeater","flash.rsnode.facts.joined":"Conectado a uma rede","flash.rsnode.facts.own":"Rede própria","flash.rsnode.facts.joining":"Entrando na rede…","flash.rsnode.facts.starting":"Iniciando rede própria…","flash.rsnode.facts.notConfigured":"não configurado","flash.rsnode.facts.discharging":"descarregando","flash.rsnode.facts.charging":"carregando","flash.rsnode.facts.charged":"carregada","flash.rnode.guide.techo":"Pressione RESET uma vez. Quando a porta serial reaparecer, clique em Concluir configuração.","flash.rnode.guide.nrf52":"Reinicie a placa ou desconecte e reconecte o cabo. Quando a porta serial reaparecer, clique em Concluir configuração.","flash.rnode.guide.esp32":"Selecione a porta serial do RNode que apareceu depois que o dispositivo reiniciou.","flash.rnode.err.noReleases":"Nenhuma versão compatível do RNode encontrada","flash.rnode.err.info":"Não foi possível obter as informações","flash.rnode.err.download":"Falha no download","flash.rnode.err.size":"Os metadados da versão oficial não informam um tamanho de arquivo válido","flash.rnode.err.sizeMismatch":"O tamanho do download oficial não corresponde aos metadados do publicador","flash.rnode.err.digest":"Os metadados da versão oficial não incluem um hash SHA-256 válido do publicador","flash.rnode.err.sha":"O download oficial não passou na verificação do SHA-256 do publicador","flash.rsnode.update.offerFrom":"Atualizar de {from} para {version}. A identidade, os gestores e as configurações serão preservados.","flash.rsnode.update.offer":"Atualizar para {version}. A identidade, os gestores e as configurações serão preservados.","flash.rsnode.update.currentWith":"Já atualizado ({version}).","flash.rsnode.update.done":"Atualizado para {version}. A identidade, os gestores e as configurações foram preservados.","flash.rsnode.update.noPackage":"Não há pacote de atualização para esta placa. A opção Instalar apaga os dados do nó.","flash.rsnode.update.noPackageFor":"Não há pacote de atualização para {board}. A opção Instalar apaga os dados do nó.","flash.rsnode.settings.saved.offBluetooth":"Salvo. {name} reiniciou com o Wi-Fi desligado. O Bluetooth está disponível de novo.","flash.rsnode.settings.saved.off":"Salvo. {name} reiniciou com o Wi-Fi desligado.","flash.rsnode.settings.saved.notJoined":"Salvo. {name} reiniciou, mas ainda não entrou em “{network}”. Confira o nome da rede e a senha. A tela do nó mostra o estado do Wi-Fi.","flash.rsnode.settings.saved.notUp":"Salvo. {name} reiniciou, mas sua rede ainda não está ativa. A tela do nó mostra o estado do Wi-Fi.","flash.rsnode.settings.saved.joinedPeers":"Salvo. {name} entrou em “{network}” com o endereço {ip}. Os pares se conectam a {ip}, porta {port}.","flash.rsnode.settings.saved.joinedApps":"Salvo. {name} entrou em “{network}” com o endereço {ip}. Os apps se conectam a {ip}, porta {port}.","flash.rsnode.settings.saved.joined":"Salvo. {name} entrou em “{network}” com o endereço {ip}.","flash.rsnode.settings.saved.ownPeers":"Salvo. {name} mantém sua rede “{network}” em {ip}. Os pares se conectam a {ip}, porta {port}.","flash.rsnode.settings.saved.ownApps":"Salvo. {name} mantém sua rede “{network}” em {ip}. Os apps se conectam a {ip}, porta {port}.","flash.rsnode.settings.saved.own":"Salvo. {name} mantém sua rede “{network}” em {ip}.","flash.rsnode.settings.otherNode":"Este nó é {name}, não {expected}. Leia as configurações dele primeiro.","flash.rsnode.managers.otherNode":"Este nó é {name}, não {expected}","flash.rsnode.settings.noSupport":"{name} não informou suporte a configurações via USB. Confira a conexão e siga as instruções para a versão do firmware. A opção Instalar apaga os dados do nó.","flash.rsnode.heldAny":"Outro app está usando {name} por Bluetooth ou Wi-Fi. Desconecte o app ou mantenha USB pressionado no nó e salve de novo.","flash.rsnode.held":"Outro app está usando {name} via {via}. Desconecte o app ou mantenha USB pressionado no nó e salve de novo.","flash.rsnode.settings.busy":"{name} está terminando uma atualização ou salvando dados. Tente de novo em um minuto.","flash.rsnode.settings.storage":"{name} não confirmou que as configurações foram salvas. Leia as configurações antes de tentar de novo.","flash.rsnode.settings.unsupported":"{name} não pode alterar essas configurações via USB.","flash.rsnode.settings.failed":"{name} recusou as configurações (resultado {code}).","flash.rsnode.settings.noRestart":"{name} salvou as configurações, mas não respondeu após reiniciar. Pressione RESET na placa e leia de novo.","flash.rsnode.settings.notReported":"{name} não informou as configurações.","flash.rsnode.managers.notHex":"Não é um hash hexadecimal: {text}","flash.rsnode.managers.hashLength":"Um hash tem 32 caracteres hexadecimais. Recebidos {count}: {text}","flash.rsnode.settings.region.other":"Região {id}","flash.rsnode.settings.ifacOn":"Ligado ({size})","flash.rsnode.facts.ifacOn":"IFAC ligado ({size})","flash.rsnode.facts.board":"Placa {byte}","flash.rsnode.facts.image":"imagem {hash}","flash.rsnode.facts.last":"último sinal: {rssi} dBm, {snr} dB","flash.rsnode.facts.airtime":"Tempo no ar: {pct}","flash.rsnode.facts.load":"carga: {pct}","flash.rsnode.facts.noise":"ruído: {dbm} dBm","flash.result.provisionFailed":"Falha ao configurar: {error}","flash.board.fileType":"Selecione um arquivo de firmware .bin ou .zip.","flash.rsnode.beta.chooseBoard":"Escolha sua placa","flash.rsnode.beta.expired":"Seu acesso ao beta expirou. Digite a senha de novo.","flash.rsnode.beta.offline":"O serviço do beta não está respondendo. Não foi possível verificar a senha. Tente mais tarde.","flash.rsnode.beta.loading":"Carregando placas do beta…","flash.rsnode.beta.empty":"Ainda não há compilações do beta. Tente mais tarde.","flash.rsnode.beta.checking":"Verificando senha…","flash.rsnode.beta.wrongPassword":"A senha não confere. Tente novamente.","flash.rsnode.beta.checkingAccess":"Verificando acesso…","flash.rsnode.beta.confirmFailed":"Não foi possível confirmar o acesso. Tente novamente.","flash.rsnode.beta.locking":"Bloqueando o beta…","flash.rsnode.beta.lockFailed":"O firmware foi retirado da seleção, mas não foi possível bloquear o acesso ao beta. Tente novamente.","flash.rsnode.beta.ready":"{version} · {size} · Pronto para gravar","flash.rsnode.beta.readyConfirm":"{version} · {size} · Confirme a variante da V4 para continuar.","flash.rsnode.beta.downloading":"Baixando firmware para {board}…","flash.rsnode.update.checking":"Verificando…","flash.rsnode.update.checkAgain":"Verificar de novo","flash.rsnode.update.check":"Verificar nó","flash.rsnode.update.reading":"Lendo o nó…","flash.rsnode.update.noAnswer":"Nenhum rsNode respondeu via USB. Se o nó usa rsNode, pressione RESET na placa e verifique de novo. A instalação funciona mesmo assim.","flash.rsnode.update.downloading":"Baixando a atualização…","flash.rsnode.update.selectPort":"Selecione a porta serial do rsNode para verificar o nó.","flash.rsnode.update.downloadFailed":"{error} A opção Instalar continua disponível.","flash.rsnode.update.preparing":"Preparando atualização…","flash.rsnode.update.intro":"Você está atualizando este nó para o rsNode {version}.","flash.rsnode.update.detail":"A identidade, os gestores, o Wi-Fi, os pareamentos Bluetooth e os ajustes do Repeater serão preservados. O nó reinicia, verifica o novo firmware e o mantém ou volta ao firmware atual.","flash.rsnode.update.action":"Atualizar","flash.rsnode.update.btnChecking":"Verificando dispositivo…","flash.rsnode.update.connecting":"Conectando ao rsNode…","flash.rsnode.update.btnUpdating":"Atualizando…","flash.rsnode.update.sending":"Enviando atualização… {pct}","flash.rsnode.update.restarting":"Reiniciando com o novo firmware…","flash.rsnode.update.trial":"O nó está verificando o novo firmware…","flash.rsnode.update.confirming":"Confirmando…","flash.rsnode.update.updated":"Atualizado","flash.rnode.pickVariant":"Escolha uma variante do dispositivo para continuar.","flash.rnode.releasesFailed":"Erro ao carregar versões","flash.rnode.loadingVariants":"Carregando variantes…","flash.rnode.loading":"Carregando variantes do RNode…","flash.rnode.selectDevice":"Selecione um dispositivo…","flash.rnode.pickSupported":"Escolha uma variante compatível do RNode para continuar.","flash.rnode.releaseFailed":"Não foi possível carregar as versões do RNode","flash.rnode.variantsFailed":"Erro ao carregar variantes","flash.rnode.error":"Erro: {error}","flash.rnode.downloadingFile":"Baixando {file}…","flash.rnode.downloading":"Baixando firmware para {board} ({size})…","flash.rnode.verifying":"Verificando o SHA-256 do publicador para {board}…","flash.rnode.band.low":"{range} (placas de 433 MHz)","flash.rnode.band.high":"{range} (placas de 868/915 MHz)","flash.rnode.band.other":"Placas de {range}","flash.rnode.band.manual":"Defina a placa exata nas opções avançadas","flash.rnode.band.first":"Escolha primeiro uma variante do dispositivo","flash.rnode.ready.nrf52":"DFU do aplicativo nRF52; bootloader e EEPROM preservados","flash.rnode.ready.esp32":"Gravação do ESP32 pelo navegador","flash.rnode.ready.verified":"SHA-256 do publicador verificado","flash.rnode.ready.flash":"pronto para gravar","flash.rnode.board.product":"Produto {byte}","flash.rnode.board.model":"Modelo {byte}","flash.rnode.board.unknownProduct":"Produto desconhecido","flash.rnode.board.unknownModel":"Modelo desconhecido","flash.rnode.board.none":"Escolha uma variante do firmware RNode ou defina a placa e a faixa manualmente.","flash.rnode.board.suggestion":"Usar sugestão","flash.rnode.board.change":"Alterar","flash.rnode.setup.required":"Obrigatório para RNode","flash.rnode.setup.after":"Configurar após a gravação","flash.rnode.setup.completing":"Concluindo a identidade do RNode…","flash.rnode.setup.identity":"Gravando a identidade do RNode…","flash.rnode.setup.finalizing":"Concluindo a configuração do RNode…","flash.rnode.setup.hash":"Gravando hash do firmware…","flash.rnode.setup.verifyHash":"Verificando hash do firmware…","flash.rnode.tools.needSerialSetup":"A configuração do RNode exige Web Serial (Chrome ou Edge no computador).","flash.rnode.tools.noBoard":"Placa ainda não identificada. Escolha uma variante do firmware RNode ou clique em Alterar para definir a placa e a faixa manualmente.","flash.rnode.tools.finishing":"Concluir configuração do RNode…","flash.rnode.tools.cancelled":"Configuração cancelada.","flash.rnode.tools.verifying":"Verificando RNode…","flash.rnode.tools.complete":"Configuração do RNode concluída","flash.rnode.tools.resetRetry":"Reinicie a placa e tente novamente.","flash.rnode.tools.failed":"A configuração do RNode falhou.","flash.rnode.tools.needSerial":"É preciso usar Web Serial (Chrome ou Edge no computador).","flash.rnode.tools.loadFirst":"Carregue o firmware primeiro (passo 2) para calcular o hash e execute a ação novamente.","flash.rnode.tools.writingHash":"Gravando hash do firmware…","flash.rnode.tools.hashVerified":"Hash do firmware verificado.","flash.rnode.tools.hashFailed":"Falha ao definir o hash.","flash.rnode.tools.adopting":"Adotando o hash do firmware em execução…","flash.rnode.tools.adopted":"O hash armazenado corresponde ao firmware em execução.","flash.rnode.tools.adoptFailed":"Falha ao adotar o hash.","flash.rnode.tools.reading":"Lendo o estado do RNode…","flash.rnode.tools.read":"Estado do RNode lido.","flash.rnode.tools.readFailed":"Falha ao ler o estado.","flash.rnode.tools.idleConfirm":"Manter este RNode inativo até que o Ratspeak o configure?\n\nIsso limpa as configurações de inicialização do rádio. Ele ficará inativo até que o Ratspeak ou outro host Reticulum o configure.","flash.rnode.tools.idling":"Mantendo o rádio inativo…","flash.rnode.tools.idle":"Configurações de inicialização do rádio apagadas.","flash.rnode.tools.idleFailed":"Não foi possível apagar as configurações de inicialização do rádio.","flash.rsnode.managers.kind.lxmf":"Endereço LXMF","flash.rsnode.managers.kind.identity":"Hash de identidade","flash.rsnode.managers.role.admin":"Administrador","flash.rsnode.managers.change.owner":"definir o Proprietário","flash.rsnode.whenFlashed":"Disponível ao concluir a gravação.","flash.rsnode.managers.nothing":"Ainda não há nada para salvar. Adicione um gestor.","flash.rsnode.managers.summary":"Alterações ao salvar: {changes}.","flash.rsnode.managers.duplicate":"Este gestor já está na lista.","flash.rsnode.managers.max":"Um nó aceita até 4 gestores.","flash.rsnode.managers.done":"Concluído","flash.rsnode.managers.add":"Adicionar","flash.rsnode.managers.state.removed":"Removido","flash.rsnode.managers.state.new":"Novo","flash.rsnode.managers.state.changed":"Alterado","flash.rsnode.managers.undo":"Desfazer","flash.rsnode.managers.undoOwner":"Desfazer a remoção do Proprietário {hash}","flash.rsnode.managers.undoAdmin":"Desfazer a remoção do Administrador {hash}","flash.rsnode.managers.edit":"Editar","flash.rsnode.managers.editOwner":"Editar Proprietário {hash}","flash.rsnode.managers.editAdmin":"Editar Administrador {hash}","flash.rsnode.managers.remove":"Remover","flash.rsnode.managers.removeOwner":"Remover Proprietário {hash}","flash.rsnode.managers.removeAdmin":"Remover Administrador {hash}","flash.rsnode.managers.empty":"Adicione seu endereço LXMF do Ratspeak como Proprietário ou leia a lista de gestores do nó.","flash.rsnode.managers.none":"Ainda não há gestores. Adicione seu endereço LXMF do Ratspeak como Proprietário.","flash.rsnode.managers.unsupported":"Este firmware não oferece suporte a gestores.","flash.rsnode.saving":"Salvando…","flash.rsnode.managers.save":"Salvar no rsNode","flash.rsnode.reading":"Lendo…","flash.rsnode.managers.read":"Ler do nó","flash.rsnode.managers.crowded":"Um nó aceita até 4 gestores. Remova um para salvar.","flash.rsnode.port.busyCheck":"Não foi possível abrir a porta serial. Feche outros apps que a usam, como o Ratspeak ou um monitor serial, e verifique de novo.","flash.rsnode.port.busyConnect":"Não foi possível abrir a porta serial. Feche outros apps que a usam, como o Ratspeak ou um monitor serial, e conecte de novo.","flash.rsnode.port.busy":"Não foi possível abrir a porta serial. Feche outros apps que a usam, como o Ratspeak ou um monitor serial, e tente de novo.","flash.rsnode.port.lost":"O nó foi desconectado do USB.","flash.rsnode.managers.readBack":"Leia os dados do nó para ver o estado atual.","flash.rsnode.managers.busy":"{name} está concluindo uma atualização ou salvando sua identidade. Tente de novo em um minuto.","flash.rsnode.managers.listFull":"A lista de gestores de {name} está cheia.","flash.rsnode.managers.listFullHint":"Um nó aceita até 4 gestores. Leia os dados do nó para ver a lista atual.","flash.rsnode.managers.refusedBeta":"{name} recusou a alteração. Neste beta, só é possível alterar gestores no modo RNode. Saia do Repeater no dispositivo e salve novamente.","flash.rsnode.managers.refused":"{name} recusou o gestor.","flash.rsnode.managers.noSuch":"{name} não tem esse gestor.","flash.rsnode.persona.repeater":"O nó continua funcionando como Repeater.","flash.rsnode.persona.home":"O nó voltou ao menu inicial.","flash.rsnode.managers.noIdentity":"O nó ainda não tem identidade. Ela será criada ao adicionar o primeiro gestor.","flash.rsnode.managers.nearby":"Atualizações somente de gestores próximos.","flash.rsnode.managers.effectNow":"O Repeater em execução já usa a nova lista de gestores.","flash.rsnode.managers.effectLater":"Os gestores só atuam enquanto o nó funciona como Repeater.","flash.rsnode.managers.reading":"Lendo rsNode…","flash.rsnode.managers.saving":"Salvando no rsNode…","flash.rsnode.wait.plain":"Aguardando rsNode…","flash.rsnode.wait.reset":"Aguardando rsNode. {takeover}","flash.rsnode.readingNode":"Lendo {name}…","flash.rsnode.savingNode":"Salvando em {name}…","flash.rsnode.showing":"Exibindo {name}.","flash.rsnode.managers.saved":"Salvo em {name}.","flash.rsnode.selectPort":"Selecione a porta serial do rsNode para continuar.","flash.rsnode.managers.copy":"Copiar","flash.rsnode.settings.readAgain":"Ler de novo","flash.rsnode.settings.read":"Ler configurações","flash.rsnode.settings.personaRepeater":"{name} funciona como Repeater. A conexão de saída e os pares aceitos usam o Wi-Fi.","flash.rsnode.settings.personaRnode":"{name} funciona como RNode. Os apps se conectam por Wi-Fi na porta TCP {port}.","flash.rsnode.settings.save":"Salvar e reiniciar","flash.rsnode.settings.nameOptional":"Nome da rede (opcional)","flash.rsnode.settings.name":"Nome da rede","flash.rsnode.settings.offRepeater":"Sem Wi-Fi, o Repeater retransmite apenas por LoRa.","flash.rsnode.settings.offRnode":"Os apps se conectam por USB ou Bluetooth.","flash.rsnode.settings.onRepeater":"A conexão de saída e os pares do Repeater usam esta rede.","flash.rsnode.settings.ownRnode":"O Bluetooth fica desligado enquanto o Wi-Fi está ligado. Os apps se conectam pela porta TCP {port}. A rede do nó não oferece acesso à internet.","flash.rsnode.settings.joinRnode":"O Bluetooth fica desligado enquanto o Wi-Fi está ligado. Os apps se conectam pela porta TCP {port}.","flash.rsnode.settings.set":"Definida","flash.rsnode.settings.passwordOwn":"De 8 a 32 caracteres. Os dispositivos precisam dela para entrar na rede do nó.","flash.rsnode.settings.passwordJoin":"De 8 a 32 caracteres. Deixe em branco para uma rede aberta.","flash.rsnode.settings.summary":"Ao salvar, {name} reinicia com as novas configurações.","flash.rsnode.settings.nothing":"Ainda não há nada para salvar.","flash.rsnode.settings.notRsnode":"Este nó responde como RNode, mas não como rsNode. As configurações exigem o firmware rsNode.","flash.rsnode.settings.saving":"Salvando configurações…","flash.rsnode.settings.reading":"Lendo configurações…","flash.rsnode.restarting":"Reiniciando…","flash.rsnode.settings.waitingWifi":"Aguardando Wi-Fi…","flash.rsnode.settings.unchanged":"Nada mudou: {name} já tinha essas configurações.","flash.rsnode.wait.takeover":"Se acabou de instalar, pressione RESET na placa primeiro.","flash.rsnode.device.disconnect":"Desconectar","flash.rsnode.device.cancel":"Cancelar","flash.rsnode.device.connect":"Conectar","flash.rsnode.device.notRsnode":"Este nó responde como RNode, mas não como rsNode. A visualização ao vivo exige o firmware rsNode.","flash.rsnode.device.quiet":"O nó parou de responder via USB. Confira o cabo ou pressione RESET na placa e conecte de novo.","flash.rsnode.device.noScreen":"Visualização da tela indisponível para esta placa","flash.rsnode.device.live":"Ao vivo","flash.rsnode.device.statusOnly":"Somente estado","flash.rsnode.device.paused":"Pausado","flash.rsnode.device.dark":"Ao vivo · tela desligada","flash.rsnode.device.fps":"Ao vivo · {fps} fps","flash.rsnode.device.connectingScreen":"Conectando","flash.rsnode.device.connecting":"Conectando…","flash.rsnode.device.restartRefused":"{name} não reiniciou: outro app está usando o nó. Reinicie pelo dispositivo.","flash.rsnode.device.connectToSee":"Conecte para ver a tela","flash.rsnode.device.notConnected":"Não conectado","flash.rsnode.device.disconnecting":"Desconectando…","flash.rsnode.device.released":"Conexão encerrada para liberar a porta para outra tarefa USB. Conecte de novo para retomar.","flash.rsnode.device.pairRefused":"{name} não iniciou o pareamento: outro app está usando o nó. Desconecte o app ou inicie o pareamento pelo dispositivo.","flash.rsnode.device.pairing":"Pareamento iniciado. Em até 2 minutos, escolha {name} na lista Bluetooth do seu app e digite o código mostrado na tela do nó. O Bluetooth continuará ligado.","flash.rsnode.device.restartRepeater":"Reiniciar {name}?\n\nEm alguns segundos, ele voltará a funcionar como Repeater.","flash.rsnode.device.restartRnode":"Reiniciar {name}?\n\nEm alguns segundos, ele voltará ao modo RNode.","flash.rsnode.device.restartingNode":"Reiniciando {name}. Conecte de novo em alguns segundos.","flash.rsnode.device.saved":"Salvo","flash.rsnode.device.screenshot":"Salvar captura de tela","flash.rsnode.device.copyDetails":"Copiar detalhes","flash.rsnode.device.copyFailed":"Não foi possível copiar automaticamente. Os detalhes abaixo estão selecionados: pressione Ctrl+C ou ⌘C.","flash.advanced.setupRequired":"É preciso configurar o RNode","flash.advanced.setupOn":"Configuração do RNode ativada","flash.flow.chooseFirmware":"Escolha o firmware","flash.flow.finishSetup":"Concluir configuração","flash.flow.rnodeSetup":"Configuração do RNode","flash.note.finishSetup":"Firmware instalado. Reinicie a placa e conclua a configuração do RNode.","flash.note.setupAttention":"O firmware foi gravado, mas é preciso revisar a configuração do RNode.","flash.note.setupVerified":"Gravação concluída. A configuração do RNode foi verificada.","flash.note.rsnodeTools":"rsNode instalado. Pressione RESET na placa. As ferramentas abaixo permitem ler e configurar o nó.","flash.note.rsnodeInstalled":"rsNode instalado. Pressione RESET na placa.","flash.note.fwFailed":"Não foi possível carregar o firmware. Selecione-o de novo para tentar novamente.","flash.note.readyUpdate":"Pronto para atualizar. A identidade, os gestores e as configurações serão preservados. Mantenha a aba aberta até o nó confirmar a atualização.","flash.note.ready":"Pronto para gravar o firmware. Mantenha a aba aberta até a conclusão.","flash.note.selectBoth":"Selecione um dispositivo USB e escolha o firmware para continuar.","flash.note.chooseFirmware":"Envie um arquivo .bin ou .zip ou escolha o firmware rsNode ou RNode.","flash.rsnode.flow.unlock":"Desbloqueie o beta do rsNode para continuar.","flash.rsnode.flow.terms":"Aceite os termos do beta para continuar.","flash.rsnode.flow.board":"Escolha a placa que deseja gravar. Para gerenciar um nó que já usa rsNode, use as ferramentas abaixo.","flash.rsnode.flow.loading":"Carregando o firmware da sua placa…","flash.rsnode.flow.failed":"Não foi possível carregar o firmware. Escolha a placa de novo para tentar novamente.","flash.rsnode.flow.variant":"Confirme a variante da V4 para continuar.","flash.nrf52.packet":"Gravando pacote de firmware {part}/{parts}…","flash.nrf52.starting":"Iniciando atualização de firmware…","flash.nrf52.init":"Enviando pacote de inicialização…","flash.nrf52.validating":"Validando a transferência do firmware…","flash.nrf52.activating":"Ativando firmware…","flash.nrf52.package":"Preparando pacote de firmware…","flash.nrf52.device":"Preparando dispositivo…","flash.nrf52.opening":"Abrindo porta serial…","flash.nrf52.waitActivation":"Aguardando ativação do nRF52…","flash.nrf52.waitReboot":"Aguardando reinicialização do RNode…","flash.rsnode.install.risk":"Tudo no nó será apagado: identidade, gestores, Wi-Fi, pareamentos Bluetooth e configurações do Repeater.","flash.rsnode.install.intro":"Você está instalando o firmware do beta privado do rsNode.","flash.status.updateCancelled":"Atualização cancelada","flash.status.installCancelled":"Instalação cancelada","flash.status.booting":"Iniciando o firmware do RNode…","flash.status.provisioning":"Configurando a EEPROM do RNode…","flash.status.setupVerified":"Configuração do RNode verificada","flash.status.installed":"Firmware instalado","flash.status.setupAttention":"Revise a configuração do RNode","flash.result.rnodeReady":"RNode pronto","flash.fail.busy.cause":"O navegador encontrou a placa, mas não conseguiu abrir a conexão. Outro app provavelmente está usando a placa.","flash.fail.busy.fix2":"Desconecte a placa, conecte-a de novo e selecione a porta novamente.","flash.fail.silent.title":"A placa não respondeu","flash.fail.wrong.title":"Esta não parece ser a placa que você escolheu","flash.fail.wrong.fix2":"Confira a placa selecionada.","flash.fail.beta.title":"Seu acesso ao beta expirou","flash.fail.beta.cause":"Desbloqueie o beta do rsNode novamente e faça a instalação.","flash.result.installed":"Firmware instalado","flash.result.attention":"Firmware instalado; revise a configuração do RNode","flash.result.attentionDesc":"O firmware foi gravado, mas a configuração do RNode não terminou. Se o dispositivo não iniciar corretamente, use as ferramentas do RNode abaixo para tentar configurar de novo. Último erro: {error}","flash.result.finishSetup":"Concluir configuração","flash.rsnode.facts.admins":{"one":"{n} Administrador","many":"{n} Administradores","other":"{n} Administradores"},"flash.rsnode.facts.ownerAdmins":{"one":"Proprietário e {n} Administrador","many":"Proprietário e {n} Administradores","other":"Proprietário e {n} Administradores"},"flash.rnode.releaseOption":{"one":"{version} · {n} variante","many":"{version} · {n} variantes","other":"{version} · {n} variantes"},"flash.rnode.release":{"one":"Versão {version} · {n} variante compatível","many":"Versão {version} · {n} variantes compatíveis","other":"Versão {version} · {n} variantes compatíveis"},"flash.rsnode.managers.change.add":{"one":"adicionar {n} Administrador","many":"adicionar {n} Administradores","other":"adicionar {n} Administradores"},"flash.rsnode.managers.change.change":{"one":"alterar {n} Administrador","many":"alterar {n} Administradores","other":"alterar {n} Administradores"},"flash.rsnode.managers.change.remove":{"one":"remover {n} gestor","many":"remover {n} gestores","other":"remover {n} gestores"}}}</script><script src="/lang/assets/site/i18n.js"></script>
+    <script src="/lang/assets/site/lang.js" defer></script>
+</head>
+<body class="is-flash-page">
+
+<a class="skip" href="#main" data-i18n="common.skip.content">Pular para o conteúdo</a>
+<div class="band">
+    <header class="topbar" id="navbar">
+      <a class="brand" href="/lang/pt/" aria-label="Início do Ratspeak" data-i18n-attr="aria-label:common.brand.home"><svg class="brand-mark" aria-hidden="true" focusable="false"><use href="/lang/assets/ratspeak-mark.svg#mark"/></svg><span class="brand-word">ratspeak</span></a>
+      <nav aria-label="Navegação principal" data-i18n-attr="aria-label:common.nav.main-navigation"><a href="/lang/pt/map.html" data-i18n="common.nav.map">Mapa</a><a href="https://docs.ratspeak.org/" data-i18n="common.nav.docs">Docs</a><a href="/lang/pt/#play" data-i18n="common.nav.how-it-works">Como funciona</a></nav>
+      <div class="topbar-end"><!--lang-menu--><div class="lang-menu" data-lang-menu data-cookie="rs-lang" data-max-age="31536000"><button type="button" class="lang-trigger" id="lang-trigger" aria-expanded="false" aria-controls="lang-panel"><span class="sr-only">Idioma: Português</span><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-br"/></svg><span class="lang-trigger__code" aria-hidden="true">PT</span><svg class="lang-trigger__chevron" viewBox="0 0 10 6" aria-hidden="true" focusable="false"><path d="M1 1l4 4 4-4"/></svg></button><div class="lang-panel" id="lang-panel" hidden><p class="lang-panel__label" id="lang-panel-label">Idioma</p><ul aria-labelledby="lang-panel-label"><li><a href="/lang/en/flash.html" hreflang="en" data-lang="en" data-same-page><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-us"/></svg><span class="lang-name">Inglês</span></a></li><li><a href="/lang/es/flash.html" hreflang="es" data-lang="es" data-same-page><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-es"/></svg><span class="lang-name">Espanhol</span></a></li><li><a href="/lang/ru/flash.html" hreflang="ru" data-lang="ru" data-same-page><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-ru"/></svg><span class="lang-name">Russo</span></a></li><li><a href="/lang/uk/flash.html" hreflang="uk" data-lang="uk" data-same-page><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-ua"/></svg><span class="lang-name">Ucraniano</span></a></li><li><a href="/lang/pt/flash.html" hreflang="pt-BR" data-lang="pt-BR" data-same-page aria-current="true"><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-br"/></svg><span class="lang-name">Português</span><svg class="lang-check" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8.5l3.2 3L13 4.5"/></svg></a></li><li><a href="/lang/fa/flash.html" hreflang="fa" data-lang="fa" data-same-page><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-ir-lion-sun"/></svg><span class="lang-name">Persa</span></a></li></ul></div><svg class="flag-sprite" aria-hidden="true" focusable="false"><symbol id="flag-us" viewBox="0 0 24 18"><path fill="#fff" d="M0 0h24v18H0z"/><path fill="#b22234" d="M0 0.000h24v1.385H0zM0 2.769h24v1.385H0zM0 5.538h24v1.385H0zM0 8.308h24v1.385H0zM0 11.077h24v1.385H0zM0 13.846h24v1.385H0zM0 16.615h24v1.385H0z"/><path fill="#3c3b6e" d="M0 0h10.4v9.692H0z"/><path fill="#fff" d="M1.15 1.25m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M3.15 1.25m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M5.15 1.25m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M7.15 1.25m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M9.15 1.25m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M2.15 3.55m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M4.15 3.55m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M6.15 3.55m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M8.15 3.55m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M1.15 5.85m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M3.15 5.85m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M5.15 5.85m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M7.15 5.85m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M9.15 5.85m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M2.15 8.15m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M4.15 8.15m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M6.15 8.15m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M8.15 8.15m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0"/></symbol><symbol id="flag-es" viewBox="0 0 24 18"><path fill="#aa151b" d="M0 0h24v18H0z"/><path fill="#f1bf00" d="M0 4.5h24v9H0z"/><path fill="#aa151b" d="M6.3 7.1h2.8v2.3c0 1-.6 1.7-1.4 1.7s-1.4-.7-1.4-1.7z"/><path fill="#aa151b" d="M6.2 6.1l.5.6.5-.7.5.7.5-.7.5.7.5-.6v.7H6.2z"/></symbol><symbol id="flag-ru" viewBox="0 0 24 18"><path fill="#fff" d="M0 0h24v6H0z"/><path fill="#0039a6" d="M0 6h24v6H0z"/><path fill="#d52b1e" d="M0 12h24v6H0z"/></symbol><symbol id="flag-ua" viewBox="0 0 24 18"><path fill="#0057b7" d="M0 0h24v9H0z"/><path fill="#ffd700" d="M0 9h24v9H0z"/></symbol><symbol id="flag-br" viewBox="0 0 24 18"><path fill="#009c3b" d="M0 0h24v18H0z"/><path fill="#ffdf00" d="M12 1.7L22.2 9 12 16.3 1.8 9z"/><circle cx="12" cy="9" r="4.15" fill="#002776"/><path fill="#fff" d="M7.96 8.05a8.4 8.4 0 0 1 8.07 2.3l-.24.62a7.6 7.6 0 0 0-7.9-2.18z"/></symbol><symbol id="flag-ir-lion-sun" viewBox="0 0 24 18"><path fill="#239f40" d="M0 0h24v6H0z"/><path fill="#fff" d="M0 6h24v6H0z"/><path fill="#da0000" d="M0 12h24v6H0z"/><path fill="#ffc425" d="M12.90 6.15L13.20 6.83L13.74 6.32L13.76 7.06L14.46 6.79L14.19 7.49L14.93 7.51L14.42 8.05L15.10 8.35L14.42 8.65L14.93 9.19L14.19 9.21L14.46 9.91L13.76 9.64L13.74 10.38L13.20 9.87L12.90 10.55L12.60 9.87L12.06 10.38L12.04 9.64L11.34 9.91L11.61 9.21L10.87 9.19L11.38 8.65L10.70 8.35L11.38 8.05L10.87 7.51L11.61 7.49L11.34 6.79L12.04 7.06L12.06 6.32L12.60 6.83z"/><path fill="#b8770a" d="M8.2 8.7L8.5 8.2C8.6 7.6 9.3 7.3 9.9 7.5C10.6 7.7 10.9 8.3 10.8 8.7C12 8.5 13.9 8.5 15 8.8C15.4 8.9 15.5 9.4 15.4 9.9L15.3 11.7H14.8L14.7 10.6H14.3L14.2 11.7H13.7L13.6 10.4C12.5 10.5 11.4 10.5 10.7 10.4L10.6 11.7H10.1L10 10.6L9.7 10.5L9.6 11.7H9.1V10.2C8.8 10 8.6 9.6 8.6 9.3L8.2 9.1z"/><path fill="none" stroke="#b8770a" stroke-width=".42" stroke-linecap="round" d="M15.3 9.1C16.2 8.9 16.3 7.9 15.8 7.4"/><circle cx="15.8" cy="7.35" r=".38" fill="#b8770a"/><path fill="none" stroke="#5c3d00" stroke-width=".42" stroke-linecap="round" d="M8 9.3Q7.3 7.9 7.7 6.4"/><path fill="none" stroke="#5c3d00" stroke-width=".4" stroke-linecap="round" d="M7.5 9.05h.9"/></symbol></svg></div><!--/lang-menu--><a class="header-download" href="/lang/pt/download.html" data-i18n="common.nav.download">Baixar</a></div>
+    </header>
+    <section class="flash-hero dl-hero" aria-labelledby="fl-hero-title">
+        <h1 id="fl-hero-title" data-i18n="flash.hero.flash-a-board">Grave sua placa.</h1>
+        <p class="dl-hero__sub" data-i18n="flash.hero.install-rsnode-private-beta">Instale o rsNode (beta privado), o firmware oficial do RNode ou seu próprio arquivo .bin ou .zip em uma placa LoRa compatível pelo Chrome ou Edge no computador.</p>
+        <p class="dl-hero__meta" data-i18n="flash.hero.want-the-app-or">Procura o app ou um aparelho portátil compatível? <a href="/lang/en/download.html">Página de downloads <span aria-hidden="true">→</span></a></p>
+    </section>
+</div>
+
+<main class="flash-container" id="main">
+
+        <!-- Browser warning (only visible on non-WebSerial browsers) -->
+        <div class="browser-warning" id="browserWarning">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span data-i18n="flash.warning.in-browser-flashing-needs">Para gravar pelo navegador, você precisa de uma versão atual do <strong>Chrome</strong> ou do <strong>Edge</strong> com Web Serial. Abra esta página em um deles no computador.</span>
+        </div>
+
+    <!-- Flash Interface -->
+    <div class="flash-interface active" id="flashInterface">
+
+        <div class="flash-flow flash-flow--standalone" role="list" aria-label="Progresso da instalação" data-i18n-attr="aria-label:flash.steps.install-progress">
+            <div class="flash-flow__item is-active" id="flowConnect" role="listitem">
+                <span class="flash-flow__index">1</span>
+                <span class="flash-flow__copy">
+                    <span class="flash-flow__label" data-i18n="flash.steps.connect">Conectar</span>
+                    <span class="flash-flow__state" id="flowConnectState" data-i18n="flash.steps.not-connected">Não conectado</span>
+                </span>
+            </div>
+            <div class="flash-flow__item is-blocked" id="flowFirmware" role="listitem">
+                <span class="flash-flow__index">2</span>
+                <span class="flash-flow__copy">
+                    <span class="flash-flow__label" data-i18n="flash.steps.firmware">Firmware</span>
+                    <span class="flash-flow__state" id="flowFirmwareState" data-i18n="flash.steps.not-started">Não iniciado</span>
+                </span>
+            </div>
+            <div class="flash-flow__item is-blocked" id="flowFlash" role="listitem">
+                <span class="flash-flow__index">3</span>
+                <span class="flash-flow__copy">
+                    <span class="flash-flow__label" data-i18n="flash.steps.install">Instalar</span>
+                    <span class="flash-flow__state" id="flowFlashState" data-i18n="flash.steps.not-started">Não iniciado</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="flash-panel flash-panel--custom" id="flashPanel" data-accent="amber">
+            <div class="flash-panel__header">
+                <div class="flash-panel__identity">
+                    <div class="flash-panel__device-icon" id="panelIcon">
+                        <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><use href="/lang/assets/site/devices.svg#device-board"/></svg>
+                    </div>
+                    <div class="flash-panel__copy">
+                        <span class="flash-panel__eyebrow" data-i18n="flash.steps.flash-firmware">Gravar firmware</span>
+                        <div class="flash-panel__device-name" id="panelName" data-i18n="flash.steps.your-board">Sua placa</div>
+                        <div class="flash-panel__device-sub" id="panelSub" data-i18n="flash.steps.esp32-or-nrf52-rsnode">ESP32 ou nRF52 · rsNode, RNode ou arquivo próprio</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flash-steps">
+                <!-- Step 1: Connect -->
+                <div class="flash-step">
+                    <div class="flash-step__number" data-i18n="flash.steps.step-1">Passo 1</div>
+                    <div class="flash-step__title" data-i18n="flash.steps.connect-your-device">Conecte seu dispositivo</div>
+                    <button type="button" class="connect-btn connect-btn--idle" id="connectBtn" onclick="connectDevice()" data-i18n="flash.steps.select-usb-device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8z"/><path d="M12 18v4"/></svg> Selecionar dispositivo USB</button>
+                    <div class="connect-device-info" id="deviceInfo">
+                        <span class="connect-status__dot connect-status__dot--off" id="statusDot"></span>
+                        <span class="connect-status__text" id="statusText" data-i18n="flash.steps.no-device-selected">Nenhum dispositivo selecionado</span>
+                    </div>
+                    <p class="connect-help" id="connectHelp" role="status" hidden></p>
+                </div>
+
+                <!-- Step 2: Firmware -->
+                <div class="flash-step">
+                    <div class="flash-step__number" data-i18n="flash.steps.step-2">Passo 2</div>
+                    <div class="flash-step__title" id="firmwareTitle" data-i18n="flash.steps.choose-firmware">Escolha o firmware</div>
+
+                    <!-- Custom firmware sources -->
+                    <div id="firmwareCustom" style="display: none;">
+                        <div class="custom-source-tabs" role="tablist" aria-label="Origem do firmware" data-i18n-attr="aria-label:flash.steps.firmware-source">
+                            <button type="button" class="custom-source-tab is-active" id="sourceTabUpload" data-source="upload" role="tab" aria-controls="customSourceUpload" aria-selected="true" tabindex="0" data-i18n="flash.steps.upload"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Enviar arquivo</button>
+                            <button type="button" class="custom-source-tab" id="sourceTabRsnode" data-source="rsnode" role="tab" aria-controls="customSourceRsnode" aria-selected="false" tabindex="-1">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="2"/><path d="M7 7a7 7 0 000 10M17 7a7 7 0 010 10M4 4a11 11 0 000 16M20 4a11 11 0 010 16"/></svg>
+                                rsNode
+                            </button>
+                            <button type="button" class="custom-source-tab" id="sourceTabRnode" data-source="rnode" role="tab" aria-controls="customSourceRnode" aria-selected="false" tabindex="-1">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                                RNode
+                            </button>
+                        </div>
+
+                        <!-- Mode A: Upload your own -->
+                        <div class="custom-source-pane" id="customSourceUpload" role="tabpanel" aria-labelledby="sourceTabUpload">
+                            <div class="drop-zone" id="dropZone">
+                                <div class="drop-zone__prompt">
+                                    <div class="drop-zone__icon">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                    </div>
+                                    <div class="drop-zone__text" data-i18n="flash.upload.drop-a-firmware-file">Solte o arquivo de firmware aqui</div>
+                                    <div class="drop-zone__hint" data-i18n="flash.upload.or-choose-one-bin">ou escolha um arquivo .bin ou .zip</div>
+                                </div>
+                                <div class="drop-zone__file-info">
+                                    <div class="drop-zone__file-name" id="fileName"></div>
+                                    <div class="drop-zone__file-size" id="fileSize"></div>
+                                    <div class="drop-zone__file-change" data-i18n="flash.upload.choose-a-different-file">Escolher outro arquivo</div>
+                                </div>
+                                <input type="file" id="fileInput" accept=".bin,.zip" aria-label="Arquivo de firmware .bin ou .zip" data-i18n-attr="aria-label:flash.upload.firmware-file-bin-or">
+                            </div>
+                        </div>
+
+                        <div class="custom-source-pane rsnode-beta" id="customSourceRsnode" role="tabpanel" aria-labelledby="sourceTabRsnode" hidden>
+                            <form class="rsnode-beta__login" id="rsnodeLoginForm">
+                                <p class="rsnode-beta__note" data-i18n="flash.rsnode.rsnode-is-lora-firmware">O rsNode é um firmware LoRa para placas Heltec V3 e V4, em beta privado.</p>
+                                <details class="rsnode-beta__about"><summary data-i18n="flash.rsnode.how-rsnode-works">Como funciona o rsNode</summary><p class="rsnode-beta__note" data-i18n="flash.rsnode.it-runs-in-one">Você escolhe um dos dois modos no dispositivo. No modo <strong>RNode</strong>, ele serve de rádio para um app via USB, Bluetooth ou Wi-Fi. No modo <strong>Repeater</strong>, ele retransmite o tráfego por conta própria. O Bluetooth fica desligado enquanto o Wi-Fi está ligado. Os gestores são opcionais e só gerenciam nós em modo Repeater.</p></details>
+                                <label for="rsnodePassword" data-i18n="flash.rsnode.private-beta-password">Senha do beta privado</label>
+                                <input class="rsnode-beta__password" id="rsnodePassword" type="password" autocomplete="current-password" required maxlength="256" aria-describedby="rsnodeStatus rsnodePasswordHelp">
+                                <button class="rsnode-beta__button" id="rsnodeUnlock" type="submit" data-i18n="flash.rsnode.unlock">Desbloquear</button>
+                                <p class="rsnode-beta__note" id="rsnodePasswordHelp" data-i18n="flash.rsnode.for-a-beta-password">Para pedir a senha do beta, escreva para <a href="mailto:mail@ratspeak.org">mail@ratspeak.org</a>.</p>
+                            </form>
+                            <div id="rsnodeTermsPending" hidden>
+                                <p class="rsnode-beta__note" data-i18n="flash.rsnode.accept-the-beta-terms">Aceite os termos do beta para ver as placas.</p>
+                                <button class="rsnode-beta__button" id="rsnodeReviewTerms" type="button" data-i18n="flash.rsnode.review-beta-terms">Consultar termos do beta</button>
+                            </div>
+                            <div id="rsnodeBoardPicker" hidden>
+                                <div class="rsnode-beta__head"><strong data-i18n="flash.rsnode.rsnode-private-beta">Beta privado do rsNode</strong><button class="rsnode-beta__lock" id="rsnodeLock" type="button" data-i18n="flash.rsnode.lock-beta">Bloquear beta</button></div>
+                                <label class="rnode-source__field" for="rsnodeBoardSelect">
+                                    <span class="rnode-source__label" data-i18n="flash.rsnode.board">Placa</span>
+                                    <select class="rnode-variant-select" id="rsnodeBoardSelect"><option value="" data-i18n="flash.rsnode.choose-your-board">Escolha sua placa</option></select>
+                                </label>
+                                <div id="rsnodeVariantCheck" hidden>
+                                    <p class="rsnode-beta__note" data-i18n="flash.rsnode.check-the-chip-marking">Confira a marcação do chip ou os detalhes do pedido: o ESP32-S3R2 tem 2 MB de PSRAM e o ESP32-S3R8 tem 8 MB. As duas V4 têm 16 MB de memória flash e precisam de firmwares diferentes.</p>
+                                    <label class="rsnode-beta__check rsnode-beta__variant"><input type="checkbox" id="rsnodeVariantConfirmed"><span id="rsnodeVariantLabel" data-i18n="flash.rsnode.i-checked-my-v4">Conferi a variante da minha V4.</span></label>
+                                </div>
+                                <p class="rsnode-beta__note rsnode-beta__note--warning" id="rsnodeInstallNote" data-i18n="flash.rsnode.install-erases-the-node">A instalação apaga a identidade do nó, os gestores, as configurações de Wi-Fi, os pareamentos Bluetooth e os ajustes do Repeater. A atualização exige um pacote compatível e firmware com suporte a atualizações via USB.</p>
+                                <div class="rsnode-update" id="rsnodeUpdate" hidden>
+                                    <div class="rsnode-update__check">
+                                        <button class="rsnode-beta__button" id="rsnodeUpdateCheck" type="button" aria-describedby="rsnodeUpdateStatus" data-i18n="flash.rsnode.check-the-node">Verificar nó</button>
+                                        <p class="rsnode-beta__status" id="rsnodeUpdateStatus" role="status" aria-live="polite"></p>
+                                    </div>
+                                    <fieldset class="rsnode-update__modes" id="rsnodeUpdateModes" hidden>
+                                        <legend class="rnode-source__label" data-i18n="flash.rsnode.update-or-install">Atualizar ou instalar</legend>
+                                        <label class="rsnode-update__mode"><input type="radio" name="rsnodeInstallMode" value="update"><span><strong data-i18n="flash.rsnode.update">Atualizar</strong><span data-i18n="flash.rsnode.keeps-identity-managers-wi">Preserva a identidade, os gestores, as configurações de Wi-Fi, os pareamentos Bluetooth e os ajustes do Repeater.</span></span></label>
+                                        <label class="rsnode-update__mode"><input type="radio" name="rsnodeInstallMode" value="install"><span><strong data-i18n="flash.rsnode.erase-and-install">Apagar e instalar</strong><span data-i18n="flash.rsnode.erases-everything-on-the">Primeiro apaga tudo no nó.</span></span></label>
+                                    </fieldset>
+                                </div>
+                                <div class="rsnode-beta__links"><a id="rsnodePackageDownload" hidden data-i18n="flash.rsnode.download-package-and-source">Baixar pacote e código-fonte</a></div>
+                            </div>
+                            <p class="rsnode-beta__status" id="rsnodeStatus" role="status" aria-live="polite"></p>
+                            <button class="rsnode-beta__button" id="rsnodeLockRetry" type="button" hidden data-i18n="flash.rsnode.retry-lock">Tentar bloquear de novo</button>
+                            <button class="rsnode-beta__button" id="rsnodeCatalogRetry" type="button" hidden data-i18n="flash.rsnode.reload-boards">Recarregar placas</button>
+                        </div>
+
+                        <!-- Mode B: RNode firmware (markqvist) -->
+                        <div class="custom-source-pane" id="customSourceRnode" role="tabpanel" aria-labelledby="sourceTabRnode" style="display: none;">
+                            <div class="rnode-source">
+                                <div class="rnode-source__head">
+                                    <div>
+                                        <div class="rnode-source__title" data-i18n="flash.rnode.official-rnode-firmware">Firmware oficial do RNode</div>
+                                        <div class="rnode-source__sub" id="rnodeReleaseSub" data-i18n="flash.rnode.loading-latest-release">Carregando a versão mais recente…</div>
+                                    </div>
+                                    <a href="https://github.com/markqvist/RNode_Firmware" class="rnode-source__repo" translate="no" target="_blank" rel="noopener noreferrer">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                                        RNode Firmware
+                                    </a>
+                                </div>
+                                <label class="rnode-source__field">
+                                    <span class="rnode-source__label" data-i18n="flash.rnode.firmware-release">Versão do firmware</span>
+                                    <select class="rnode-variant-select" id="rnodeReleaseSelect" disabled>
+                                        <option data-i18n="flash.rnode.loading-releases">Carregando versões…</option>
+                                    </select>
+                                </label>
+                                <label class="rnode-source__field">
+                                    <span class="rnode-source__label" data-i18n="flash.rnode.device-variant">Variante do dispositivo</span>
+                                    <select class="rnode-variant-select" id="rnodeVariantSelect" disabled>
+                                        <option data-i18n="flash.rnode.loading-variants">Carregando variantes…</option>
+                                    </select>
+                                </label>
+                                <label class="rnode-source__field">
+                                    <span class="rnode-source__label" data-i18n="flash.rnode.hardware-band">Faixa da placa</span>
+                                    <select class="rnode-variant-select" id="rnodeBandSelect" disabled>
+                                        <option data-i18n="flash.rnode.choose-a-device-variant">Escolha primeiro uma variante do dispositivo</option>
+                                    </select>
+                                </label>
+                                <div class="rnode-source__status" id="rnodeStatus" data-i18n="flash.rnode.no-variant-selected">Nenhuma variante selecionada.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flash Action -->
+            <div class="flash-action">
+                <details class="flash-advanced" id="flashAdvanced">
+                    <summary class="flash-advanced__summary">
+                        <span class="flash-advanced__label" data-i18n="flash.advanced.advanced-options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7"/><path d="M4 10V3"/><path d="M12 21v-9"/><path d="M12 8V3"/><path d="M20 21v-5"/><path d="M20 12V3"/><path d="M2 14h4"/><path d="M10 8h4"/><path d="M18 16h4"/></svg> Opções avançadas</span>
+                        <span class="flash-advanced__meta" id="advancedMeta" data-i18n="flash.advanced.default-install">Instalação padrão</span>
+                        <svg class="flash-advanced__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                    </summary>
+                    <div class="flash-advanced__body">
+                        <div class="flash-options" id="flashOptions">
+                            <label class="flash-option-pill" id="eraseOption">
+                                <input type="checkbox" id="eraseToggle" onchange="toggleErase(this.checked)">
+                                <span class="flash-option-pill__icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                                </span>
+                                <span class="flash-option-pill__copy">
+                                    <span class="flash-option-pill__label" data-i18n="flash.advanced.full-erase">Apagamento completo</span>
+                                    <span class="flash-option-pill__hint" data-i18n="flash.advanced.erases-everything-on-the">Apaga tudo no dispositivo primeiro</span>
+                                </span>
+                                <span class="flash-option-pill__check" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"/></svg>
+                                </span>
+                            </label>
+                            <label class="flash-option-pill" id="provisionOption">
+                                <input type="checkbox" id="provisionToggle">
+                                <span class="flash-option-pill__icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="0.5"/><path d="M9 3v3"/><path d="M15 3v3"/><path d="M9 18v3"/><path d="M15 18v3"/><path d="M3 9h3"/><path d="M3 15h3"/><path d="M18 9h3"/><path d="M18 15h3"/></svg>
+                                </span>
+                                <span class="flash-option-pill__copy">
+                                    <span class="flash-option-pill__label" data-i18n="flash.advanced.rnode-setup">Configuração do RNode</span>
+                                    <span class="flash-option-pill__hint" data-i18n="flash.advanced.provision-after-flash">Configurar após a gravação</span>
+                                </span>
+                                <span class="flash-option-pill__check" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"/></svg>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="flash-option-expand" id="provisionExpand" hidden>
+                            <p class="flash-option-expand__desc" data-i18n="flash.advanced.writes-rnode-identity-and">Grava a identidade do RNode e o hash do firmware após a instalação. No Ratspeak, as configurações de rádio na inicialização ficam a cargo do host. Use o rnodeconf se precisar de identidade assinada ou de configurações persistentes de inicialização do TNC.</p>
+                            <div class="provision-board" id="provisionBoard" data-mode="auto">
+                                <div class="provision-board__row">
+                                    <span class="provision-board__icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                    </span>
+                                    <div class="provision-board__copy">
+                                        <span class="provision-board__eyebrow" data-i18n="flash.advanced.suggested-board">Placa sugerida</span>
+                                        <span class="provision-board__value" id="provisionBoardValue" data-i18n="flash.advanced.choose-an-rnode-firmware">Escolha uma variante do firmware RNode para ver o produto e o modelo sugeridos</span>
+                                    </div>
+                                    <button type="button" class="provision-board__change" id="provisionBoardChange" data-i18n="flash.advanced.change">Alterar</button>
+                                </div>
+                                <div class="provision-board__manual" id="provisionBoardManual" hidden>
+                                    <label class="provision-field">
+                                        <span class="provision-field__label" data-i18n="flash.advanced.product">Produto</span>
+                                        <select id="provisionProduct"></select>
+                                    </label>
+                                    <label class="provision-field">
+                                        <span class="provision-field__label" data-i18n="flash.advanced.model">Modelo</span>
+                                        <select id="provisionModel"></select>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </details>
+
+            </div>
+        </div>
+
+        <!-- ── Action CTA — primary flash + post-flash RNode tools ── -->
+        <section class="flash-cta">
+            <div class="flash-primary-action">
+                <div class="flash-primary-action__copy">
+                    <div class="flash-primary-action__label" data-i18n="flash.steps.step-3">Passo 3</div>
+                    <span class="flash-primary-action__title" data-i18n="flash.steps.install">Instalar</span>
+                    <div class="flash-primary-action__hint" id="flashBtnNote" role="status" data-i18n="flash.steps.select-a-usb-device">Selecione um dispositivo USB para continuar.</div>
+                </div>
+                <button type="button" class="flash-btn flash-btn--disabled" id="flashBtn" onclick="startFlash()" disabled data-i18n="flash.steps.install-firmware"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Instalar firmware</button>
+            </div>
+
+            <!-- Progress -->
+            <div class="flash-progress" id="flashProgress">
+                <div class="progress-header">
+                    <span class="progress-status" id="progressStatus" aria-live="polite" data-i18n="flash.progress.preparing">Preparando…</span>
+                    <span class="progress-pct" id="progressPct">0%</span>
+                </div>
+                <div class="progress-bar-track">
+                    <div class="progress-bar-fill" id="progressBar"></div>
+                </div>
+                <details class="progress-details"><summary data-i18n="flash.progress.show-log">Mostrar log</summary><div class="progress-log" id="progressLog"></div></details>
+            </div>
+
+            <!-- Result -->
+            <div class="flash-result" id="flashResult" role="region" aria-labelledby="resultTitle">
+                <div class="flash-result__icon" id="resultIcon">
+                    <svg id="resultSvg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></svg>
+                </div>
+                <h3 class="flash-result__title" id="resultTitle" tabindex="-1"></h3>
+                <div class="flash-result__desc" id="resultDesc"></div>
+                <div class="flash-result__actions" id="resultActions" hidden>
+                    <button type="button" class="flash-result__btn" id="resultActionBtn">
+                        <svg id="resultActionSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 10-13h-7l1-7Z"/></svg>
+                        <span id="resultActionText" data-i18n="flash.result.continue">Continuar</span>
+                    </button>
+                </div>
+                <ol class="flash-result__fixes" id="resultFixes" hidden></ol>
+                <div class="flash-result__actions" id="resultRecovery" hidden>
+                    <button type="button" class="flash-result__btn" id="resultRetry" data-i18n="flash.result.try-again">Tentar novamente <span aria-hidden="true">→</span></button>
+                    <button type="button" class="rsnode-beta__button" id="resultPort" data-i18n="flash.result.choose-the-port-again">Escolher a porta de novo</button>
+                </div>
+                <details class="flash-result__tech" id="resultTech" hidden>
+                    <summary data-i18n="flash.result.technical-details">Detalhes técnicos</summary>
+                    <div class="flash-result__tech-body">
+                        <pre class="flash-result__log" id="resultLog" tabindex="0" aria-label="Detalhes técnicos" data-i18n-attr="aria-label:flash.result.technical-details"></pre>
+                        <button type="button" class="flash-result__copy" id="resultCopy" aria-describedby="resultCopied" data-i18n="flash.result.copy">Copiar</button>
+                        <span class="flash-result__copied" id="resultCopied" role="status"></span>
+                    </div>
+                </details>
+            </div>
+
+            <details class="flash-cta__repair rsnode-device" id="rsnodeDevice" name="rsnode-tools" hidden>
+                <summary class="flash-cta__repair-summary">
+                    <span class="flash-cta__repair-label" data-i18n="flash.live.rsnode-live-view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8"/><path d="M12 16v4"/></svg> rsNode ao vivo</span>
+                    <span class="flash-cta__repair-meta" data-i18n="flash.live.see-the-node-s">Veja a tela e o estado do nó via USB</span>
+                    <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </summary>
+                <div class="flash-cta__repair-body">
+                    <p class="rsnode-tools__lede" data-i18n="flash.live.watch-the-node-s">Acompanhe a tela do nó e consulte seu estado via USB.</p>
+                    <div class="rsnode-device__layout">
+                        <figure class="rsnode-device__screen">
+                            <div class="rsnode-device__bezel" id="rsnodeScreenBezel">
+                                <canvas id="rsnodeScreen" width="128" height="64" role="img" aria-label="Tela do nó" data-i18n-attr="aria-label:flash.live.the-node-s-screen"></canvas>
+                                <span class="rsnode-device__placeholder" id="rsnodeScreenEmpty" data-i18n="flash.live.connect-to-see-the">Conecte para ver a tela</span>
+                            </div>
+                            <figcaption class="rsnode-device__caption"><span class="rsnode-tools__dot" id="rsnodeLiveDot" aria-hidden="true"></span><span id="rsnodeScreenState" data-i18n="flash.steps.not-connected">Não conectado</span></figcaption>
+                        </figure>
+                        <div class="rsnode-device__info">
+                            <div class="flash-connect-tips rsnode-tools__tips" id="rsnodeFactsEmpty">
+                                <div class="flash-connect-tips__head" data-i18n="flash.live.before-you-connect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Antes de conectar</div>
+                                <ul>
+                                    <li data-i18n="flash.live.plug-the-node-in">Conecte o nó via USB. Feche outros apps que usam a porta, como o Ratspeak ou um monitor serial.</li>
+                                    <li data-i18n="flash.live.if-you-just-installed">Se acabou de instalar, pressione RESET na placa primeiro.</li>
+                                    <li data-i18n="flash.live.a-repeater-answers-status">Um Repeater informa seu estado via USB, assim como um RNode em uso por outro app.</li>
+                                </ul>
+                            </div>
+                            <dl class="rsnode-tools__facts" id="rsnodeFacts" hidden>
+                                <div data-fact="node"><dt data-i18n="flash.live.node">Nó</dt><dd></dd></div>
+                                <div data-fact="board"><dt data-i18n="flash.rsnode.board">Placa</dt><dd></dd></div>
+                                <div data-fact="firmware"><dt data-i18n="flash.steps.firmware">Firmware</dt><dd></dd></div>
+                                <div data-fact="owners"><dt data-i18n="flash.live.managers">Gestores</dt><dd></dd></div>
+                                <div data-fact="repeater"><dt data-i18n="flash.live.repeater">Repeater</dt><dd></dd></div>
+                                <div data-fact="wifi"><dt data-i18n="flash.live.wi-fi">Wi-Fi</dt><dd></dd></div>
+                                <div data-fact="radio"><dt data-i18n="flash.live.radio">Rádio</dt><dd></dd></div>
+                                <div data-fact="packets"><dt data-i18n="flash.live.packets">Pacotes</dt><dd></dd></div>
+                                <div data-fact="channel"><dt data-i18n="flash.live.channel">Canal</dt><dd></dd></div>
+                                <div data-fact="battery"><dt data-i18n="flash.live.battery">Bateria</dt><dd></dd></div>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="rsnode-tools__actions">
+                        <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeConnect" type="button" data-i18n="flash.live.connect">Conectar</button>
+                        <button class="rsnode-beta__button" id="rsnodeScreenshot" type="button" disabled hidden data-i18n="flash.live.save-screenshot">Salvar captura de tela</button>
+                        <button class="rsnode-beta__button" id="rsnodeCopyDetails" type="button" disabled hidden data-i18n="flash.live.copy-details">Copiar detalhes</button>
+                        <button class="rsnode-beta__button" id="rsnodePair" type="button" aria-describedby="rsnodePairNote" disabled hidden data-i18n="flash.live.start-bluetooth-pairing">Iniciar pareamento Bluetooth</button>
+                        <button class="rsnode-beta__button rsnode-tools__end" id="rsnodeRestart" type="button" disabled hidden data-i18n="flash.live.restart-node">Reiniciar nó…</button>
+                    </div>
+                    <p class="rsnode-tools__help rsnode-tools__pair-note" id="rsnodePairNote" hidden data-i18n="flash.live.bluetooth-is-off-while">O Bluetooth fica desligado enquanto o Wi-Fi está ligado. Para parear, desligue o Wi-Fi nas configurações.</p>
+                    <p class="rsnode-tools__port" hidden data-i18n="flash.live.using">Em uso: <span class="rsnode-tools__port-label"></span> · <button class="rsnode-beta__lock" type="button" data-change-port data-i18n="flash.live.change-port">Trocar porta</button></p>
+                    <p class="rsnode-beta__status" id="rsnodeDeviceStatus" role="status" aria-live="polite"></p>
+                    <pre class="rsnode-device__details" id="rsnodeDetailsText" tabindex="0" aria-label="Detalhes do nó" hidden data-i18n-attr="aria-label:flash.live.node-details"></pre>
+                </div>
+            </details>
+
+            <details class="flash-cta__repair rsnode-settings" id="rsnodeSettings" name="rsnode-tools" hidden>
+                <summary class="flash-cta__repair-summary">
+                    <span class="flash-cta__repair-label" data-i18n="flash.settings.rsnode-settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg> Configurações do rsNode</span>
+                    <span class="flash-cta__repair-meta" data-i18n="flash.settings.wi-fi-peers-and">Wi-Fi, pares e conexão de saída via USB · salvar reinicia o nó</span>
+                    <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </summary>
+                <div class="flash-cta__repair-body">
+                    <p class="rsnode-tools__lede" data-i18n="flash.settings.requires-firmware-with-usb">O firmware precisa aceitar configurações via USB. Leia as configurações do nó, altere os valores aqui e salve. Ao salvar, o nó reinicia. A região, o LIMITS e o rádio são configurados no dispositivo.</p>
+                    <form id="rsnodeSettingsForm" novalidate hidden>
+                        <fieldset class="rsnode-owner__fields" id="rsnodeSettingsFields">
+                            <p class="rsnode-settings__persona" id="rsnodeSettingsPersona"></p>
+                            <fieldset class="rsnode-settings__group">
+                                <legend class="rnode-source__label" data-i18n="flash.live.wi-fi">Wi-Fi</legend>
+                                <div class="rsnode-settings__choices">
+                                    <label class="rsnode-settings__choice"><input type="radio" name="rsnodeWifiMode" value="off"><span data-i18n="flash.settings.off">Desligado</span></label>
+                                    <label class="rsnode-settings__choice"><input type="radio" name="rsnodeWifiMode" value="join"><span data-i18n="flash.settings.join-a-network">Entrar em uma rede</span></label>
+                                    <label class="rsnode-settings__choice"><input type="radio" name="rsnodeWifiMode" value="own"><span data-i18n="flash.settings.own-network">Rede própria</span></label>
+                                </div>
+                                <p class="rsnode-tools__help" id="rsnodeWifiNote"></p>
+                                <div class="rsnode-settings__grid" id="rsnodeWifiFields">
+                                    <label class="rsnode-settings__field" for="rsnodeWifiName"><span class="rsnode-settings__label" id="rsnodeWifiNameLabel" data-i18n="flash.settings.network-name">Nome da rede</span>
+                                        <input class="rsnode-owner__input" id="rsnodeWifiName" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+                                    <div class="rsnode-settings__field">
+                                        <span class="rsnode-settings__label" id="rsnodeWifiPasswordLabel" data-i18n="flash.settings.wi-fi-password">Senha do Wi-Fi</span>
+                                        <p class="rsnode-settings__secret" id="rsnodeWifiPasswordStored"><span id="rsnodeWifiPasswordState"></span><button class="rsnode-beta__lock" id="rsnodeWifiPasswordChange" type="button" aria-describedby="rsnodeWifiPasswordLabel" data-i18n="flash.advanced.change">Alterar</button></p>
+                                        <input class="rsnode-owner__input" id="rsnodeWifiPassword" type="password" autocomplete="new-password" aria-labelledby="rsnodeWifiPasswordLabel" aria-describedby="rsnodeWifiPasswordHelp" hidden>
+                                        <p class="rsnode-tools__help" id="rsnodeWifiPasswordHelp"></p>
+                                    </div>
+                                    <label class="rsnode-settings__field" for="rsnodeWifiChannel" id="rsnodeWifiChannelField"><span class="rsnode-settings__label" data-i18n="flash.live.channel">Canal</span>
+                                        <select class="rnode-variant-select" id="rsnodeWifiChannel"></select></label>
+                                    <label class="rsnode-beta__check rsnode-settings__wide" id="rsnodeWifiFixedField"><input type="checkbox" id="rsnodeWifiFixed"><span data-i18n="flash.settings.use-a-fixed-address">Usar endereço fixo</span></label>
+                                    <div class="rsnode-settings__grid rsnode-settings__wide" id="rsnodeWifiFixedFields">
+                                        <label class="rsnode-settings__field" for="rsnodeWifiAddress"><span class="rsnode-settings__label" data-i18n="flash.settings.address">Endereço</span>
+                                            <input class="rsnode-owner__input" id="rsnodeWifiAddress" type="text" inputmode="decimal" autocomplete="off" placeholder="192.168.1.50"></label>
+                                        <label class="rsnode-settings__field" for="rsnodeWifiNetmask"><span class="rsnode-settings__label" data-i18n="flash.settings.subnet-mask">Máscara de sub-rede</span>
+                                            <input class="rsnode-owner__input" id="rsnodeWifiNetmask" type="text" inputmode="decimal" autocomplete="off" placeholder="255.255.255.0"></label>
+                                        <label class="rsnode-settings__field" for="rsnodeWifiGateway"><span class="rsnode-settings__label" data-i18n="flash.settings.gateway-optional">Gateway (opcional)</span>
+                                            <input class="rsnode-owner__input" id="rsnodeWifiGateway" type="text" inputmode="decimal" autocomplete="off" placeholder="192.168.1.1"></label>
+                                        <label class="rsnode-settings__field" for="rsnodeWifiDns"><span class="rsnode-settings__label" data-i18n="flash.settings.dns-optional">DNS (opcional)</span>
+                                            <input class="rsnode-owner__input" id="rsnodeWifiDns" type="text" inputmode="decimal" autocomplete="off" placeholder="192.168.1.1"></label>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset class="rsnode-settings__group" id="rsnodePeersGroup">
+                                <legend class="rnode-source__label" data-i18n="flash.settings.accept-peers">Aceitar pares</legend>
+                                <label class="rsnode-beta__check"><input type="checkbox" id="rsnodePeersEnabled"><span data-i18n="flash.settings.accept-reticulum-peers-over">Aceitar pares do Reticulum via TCP</span></label>
+                                <div class="rsnode-settings__grid">
+                                    <label class="rsnode-settings__field" for="rsnodePeersPort"><span class="rsnode-settings__label" data-i18n="flash.settings.port">Porta</span>
+                                        <input class="rsnode-owner__input" id="rsnodePeersPort" type="text" inputmode="numeric" autocomplete="off" aria-describedby="rsnodePeersHelp"></label>
+                                </div>
+                                <p class="rsnode-tools__help" id="rsnodePeersHelp" data-i18n="flash.settings.reticulum-apps-add-a">No app Reticulum, adicione um cliente TCP com o endereço Wi-Fi do nó e esta porta. Até 2 pares.</p>
+                            </fieldset>
+                            <fieldset class="rsnode-settings__group" id="rsnodeUplinkGroup">
+                                <legend class="rnode-source__label" data-i18n="flash.settings.uplink">Conexão de saída</legend>
+                                <label class="rsnode-beta__check"><input type="checkbox" id="rsnodeUplinkEnabled"><span data-i18n="flash.settings.connect-to-a-reticulum">Conectar a um nó Reticulum via TCP</span></label>
+                                <div class="rsnode-settings__grid">
+                                    <label class="rsnode-settings__field" for="rsnodeUplinkHost"><span class="rsnode-settings__label" data-i18n="flash.settings.host">Host</span>
+                                        <input class="rsnode-owner__input" id="rsnodeUplinkHost" translate="no" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="rns.example.org"></label>
+                                    <label class="rsnode-settings__field" for="rsnodeUplinkPort"><span class="rsnode-settings__label" data-i18n="flash.settings.port">Porta</span>
+                                        <input class="rsnode-owner__input" id="rsnodeUplinkPort" type="text" inputmode="numeric" autocomplete="off" placeholder="4242"></label>
+                                </div>
+                            </fieldset>
+                            <div class="rsnode-settings__group" id="rsnodeRadioGroup">
+                                <span class="rnode-source__label" data-i18n="flash.settings.set-on-the-device">Definido no dispositivo</span>
+                                <dl class="rsnode-tools__facts">
+                                    <div><dt data-i18n="flash.settings.region">Região</dt><dd id="rsnodeSettingsRegion"></dd></div>
+                                    <div><dt data-i18n="flash.live.radio">Rádio</dt><dd id="rsnodeSettingsRadio"></dd></div>
+                                    <div><dt data-i18n="flash.settings.lora-ifac">IFAC do LoRa</dt><dd id="rsnodeSettingsIfac"></dd></div>
+                                </dl>
+                                <p class="rsnode-tools__help" data-i18n="flash.settings.change-the-region-limits">Altere a região, o LIMITS e o rádio nos menus do próprio Repeater. É preciso confirmar essas mudanças no dispositivo.</p>
+                            </div>
+                        </fieldset>
+                    </form>
+                    <div class="flash-connect-tips rsnode-tools__tips" id="rsnodeSettingsTips">
+                        <div class="flash-connect-tips__head" data-i18n="flash.settings.before-you-read"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Antes da leitura</div>
+                        <ul>
+                            <li data-i18n="flash.live.plug-the-node-in">Conecte o nó via USB. Feche outros apps que usam a porta, como o Ratspeak ou um monitor serial.</li>
+                            <li data-i18n="flash.live.if-you-just-installed">Se acabou de instalar, pressione RESET na placa primeiro.</li>
+                            <li data-i18n="flash.settings.an-rnode-another-app">Se outro app estiver usando o RNode por Bluetooth ou Wi-Fi, você pode ler as configurações, mas não salvá-las. Desconecte o app ou mantenha a opção USB pressionada no nó.</li>
+                        </ul>
+                    </div>
+                    <div class="rsnode-tools__actions">
+                        <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeSettingsSave" type="submit" form="rsnodeSettingsForm" aria-describedby="rsnodeSettingsSummary" hidden data-i18n="flash.settings.save-and-restart">Salvar e reiniciar</button>
+                        <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeSettingsRead" type="button" data-i18n="flash.settings.read-settings">Ler configurações</button>
+                        <p class="rsnode-tools__summary" id="rsnodeSettingsSummary"></p>
+                    </div>
+                    <p class="rsnode-tools__port" hidden data-i18n="flash.live.using">Em uso: <span class="rsnode-tools__port-label"></span> · <button class="rsnode-beta__lock" type="button" data-change-port data-i18n="flash.live.change-port">Trocar porta</button></p>
+                    <div id="rsnodeSettingsActivity">
+                        <p class="rsnode-tools__state"><span class="rsnode-tools__dot" id="rsnodeSettingsDot" aria-hidden="true"></span><span class="rsnode-beta__status progress-status" id="rsnodeSettingsStatus" role="status" aria-live="polite"></span></p>
+                        <details class="rsnode-tools__log"><summary data-i18n="flash.settings.usb-log">Log USB</summary><div class="progress-log"></div></details>
+                    </div>
+                </div>
+            </details>
+
+            <details class="flash-cta__repair rsnode-owner" id="rsnodeOwner" name="rsnode-tools" hidden>
+                <summary class="flash-cta__repair-summary">
+                    <span class="flash-cta__repair-label" data-i18n="flash.managers.rsnode-device-management"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg> Gerenciamento do rsNode</span>
+                    <span class="flash-cta__repair-meta" data-i18n="flash.managers.optional-owner-and-admins">Opcional · Proprietário e Administradores de um Repeater, via USB</span>
+                    <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </summary>
+                <div class="flash-cta__repair-body">
+                    <p class="rsnode-tools__notice" id="rsnodeOwnerNotice" tabindex="-1" hidden data-i18n="flash.managers.next-press-reset-on">Agora pressione RESET na placa. Se o nó for funcionar como Repeater com gerenciamento remoto, você pode adicionar gestores.</p>
+                    <p class="rsnode-tools__lede" data-i18n="flash.managers.managers-are-optional-they">Os gestores são opcionais. Eles gerenciam o nó pela rede mesh enquanto ele funciona como Repeater. No modo RNode, a lista é ignorada.</p>
+                    <form id="rsnodeOwnerForm" novalidate>
+                        <fieldset class="rsnode-owner__fields" id="rsnodeOwnerFields">
+                            <div class="rsnode-owner__grid">
+                                <div class="rsnode-owner__field">
+                                    <span class="rnode-source__label" id="rsnodeManagersLabel" data-i18n="flash.live.managers">Gestores</span>
+                                    <ul class="rsnode-managers" id="rsnodeManagers" aria-labelledby="rsnodeManagersLabel"></ul>
+                                    <p class="rsnode-tools__help" id="rsnodeManagersEmpty" data-i18n="flash.managers.add-yourself-as-the">Adicione seu endereço LXMF do Ratspeak como Proprietário ou leia a lista de gestores do nó.</p>
+                                    <div class="rsnode-managers__editor" id="rsnodeManagerEditor" hidden>
+                                        <input class="rsnode-owner__input" id="rsnodeOwnerHash" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Endereço LXMF ou hash de identidade" aria-label="Endereço LXMF ou hash de identidade do gestor" aria-describedby="rsnodeManagerNote" data-i18n-attr="aria-label:flash.managers.manager-s-lxmf-address;placeholder:flash.managers.lxmf-address-or-identity">
+                                        <select class="rnode-variant-select" id="rsnodeOwnerKind" aria-label="Tipo de hash" data-i18n-attr="aria-label:flash.managers.hash-type">
+                                            <option value="lxmf" data-i18n="flash.managers.lxmf-address">Endereço LXMF</option>
+                                            <option value="identity" data-i18n="flash.managers.identity-hash">Hash de identidade</option>
+                                        </select>
+                                        <select class="rnode-variant-select" id="rsnodeOwnerRole" aria-label="Função" aria-describedby="rsnodeRoleHelp" data-i18n-attr="aria-label:flash.managers.role">
+                                            <option value="owner" data-i18n="flash.managers.owner">Proprietário</option>
+                                            <option value="admin" data-i18n="flash.managers.admin">Administrador</option>
+                                        </select>
+                                        <p class="rsnode-tools__help" id="rsnodeRoleHelp" data-i18n="flash.managers.the-owner-changes-settings">O Proprietário altera as configurações e a lista de gestores. Os Administradores consultam o estado e as configurações e instalam atualizações. O acesso às configurações depende de suporte no firmware.</p>
+                                        <div class="rsnode-managers__editor-actions">
+                                            <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeManagerDone" type="button" data-i18n="flash.managers.add">Adicionar</button>
+                                            <button class="rsnode-beta__button" id="rsnodeManagerCancel" type="button" data-i18n="flash.managers.cancel">Cancelar</button>
+                                        </div>
+                                        <p class="rsnode-tools__help" id="rsnodeManagerNote" hidden></p>
+                                    </div>
+                                    <p class="rsnode-managers__add"><button class="rsnode-beta__lock" id="rsnodeManagerAdd" type="button" data-i18n="flash.managers.add-manager">Adicionar gestor</button><span class="rsnode-tools__help" id="rsnodeManagersFull" hidden data-i18n="flash.managers.a-node-holds-up">Um nó aceita até 4 gestores.</span></p>
+                                </div>
+                            </div>
+                            <div class="flash-connect-tips rsnode-tools__tips">
+                                <div class="flash-connect-tips__head" data-i18n="flash.managers.before-you-save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Antes de salvar</div>
+                                <ul>
+                                    <li data-i18n="flash.live.plug-the-node-in">Conecte o nó via USB. Feche outros apps que usam a porta, como o Ratspeak ou um monitor serial.</li>
+                                    <li data-i18n="flash.live.if-you-just-installed">Se acabou de instalar, pressione RESET na placa primeiro.</li>
+                                    <li data-i18n="flash.managers.some-betas-require-rnode">Algumas versões beta só permitem alterar gestores no modo RNode. Se o nó recusar a mudança, pare o Repeater e saia desse modo. No RNode, mantenha a opção USB pressionada no menu inicial para assumir o controle de outro app.</li>
+                                    <li data-i18n="flash.managers.adding-the-first-manager">Ao adicionar o primeiro gestor, o nó cria sua identidade. Para isso, o rádio Bluetooth ou Wi-Fi precisa estar ativo, como ao iniciar normalmente no modo RNode.</li>
+                                </ul>
+                            </div>
+                            <div class="rsnode-tools__actions">
+                                <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeOwnerSave" type="submit" aria-describedby="rsnodeOwnerSummary" disabled data-i18n="flash.managers.save-to-rsnode">Salvar no rsNode</button>
+                                <button class="rsnode-beta__button" id="rsnodeOwnerRead" type="button" data-i18n="flash.managers.read-from-node">Ler do nó</button>
+                                <p class="rsnode-tools__summary" id="rsnodeOwnerSummary" data-i18n="flash.managers.nothing-to-save-yet">Ainda não há nada para salvar. Adicione um gestor.</p>
+                            </div>
+                            <p class="rsnode-tools__port" hidden data-i18n="flash.live.using">Em uso: <span class="rsnode-tools__port-label"></span> · <button class="rsnode-beta__lock" type="button" data-change-port data-i18n="flash.live.change-port">Trocar porta</button></p>
+                        </fieldset>
+                    </form>
+                    <div id="rsnodeOwnerActivity">
+                        <p class="rsnode-tools__state"><span class="rsnode-tools__dot" id="rsnodeOwnerDot" aria-hidden="true"></span><span class="rsnode-beta__status progress-status" id="rsnodeOwnerStatus" role="status" aria-live="polite"></span></p>
+                        <div class="rsnode-owner__result" id="rsnodeOwnerResult" hidden>
+                            <span class="rnode-source__label" data-i18n="flash.managers.on-the-node">No nó</span>
+                            <dl class="rsnode-tools__facts">
+                                <div><dt data-i18n="flash.live.node">Nó</dt><dd id="rsnodeResultNode"></dd></div>
+                                <div id="rsnodeResultIdentity"><dt data-i18n="flash.managers.destination">Destino</dt><dd><span class="rsnode-owner__destination"><code id="rsnodeResultDestination"></code><button class="rsnode-beta__lock" id="rsnodeCopyDestination" type="button" data-i18n="flash.result.copy">Copiar</button><span class="rsnode-tools__help" id="rsnodeCopyNote" hidden data-i18n="flash.managers.press-ctrl-c-or">Pressione Ctrl+C ou ⌘C para copiar.</span></span><span class="rsnode-tools__help" data-i18n="flash.managers.clients-pin-this-destination">Os clientes fixam este destino.</span></dd></div>
+                            </dl>
+                            <p class="rsnode-tools__help" id="rsnodeResultNote"></p>
+                            <p class="rsnode-tools__help" id="rsnodeResultEffect" hidden data-i18n="flash.managers.managers-act-only-while">Os gestores só atuam enquanto o nó funciona como Repeater.</p>
+                        </div>
+                        <details class="rsnode-tools__log"><summary data-i18n="flash.settings.usb-log">Log USB</summary><div class="progress-log"></div></details>
+                    </div>
+                </div>
+            </details>
+
+            <details class="flash-cta__repair" id="flashRepair">
+                <summary class="flash-cta__repair-summary">
+                    <span class="flash-cta__repair-label" data-i18n="flash.repair.rnode-tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-2.4 2.6-2.6Z"/></svg> Ferramentas do RNode</span>
+                    <span class="flash-cta__repair-meta" data-i18n="flash.repair.repair-and-inspect-an">Repare e inspecione um RNode sem gravar o firmware de novo</span>
+                    <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </summary>
+                <div class="flash-cta__repair-body">
+                    <div class="flash-repair__list">
+                        <button type="button" class="flash-repair__action" id="reprovisionBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="0.5"/><path d="M9 3v3"/><path d="M15 3v3"/><path d="M9 18v3"/><path d="M15 18v3"/><path d="M3 9h3"/><path d="M3 15h3"/><path d="M18 9h3"/><path d="M18 15h3"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label" data-i18n="flash.repair.repair-rnode-setup">Reparar configuração do RNode</span>
+                                <span class="flash-repair__sub" data-i18n="flash.repair.use-if-identity-or">Use se a configuração da identidade ou do hash do firmware falhar.</span>
+                            </span>
+                        </button>
+                        <button type="button" class="flash-repair__action" id="setHashBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/><circle cx="18.5" cy="18.5" r="3"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label" data-i18n="flash.repair.re-write-firmware-hash">Regravar hash do firmware</span>
+                                <span class="flash-repair__sub" data-i18n="flash.repair.writes-the-hash-from">Grava o hash do arquivo de firmware carregado.</span>
+                            </span>
+                        </button>
+                        <button type="button" class="flash-repair__action" id="adoptHashBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label" data-i18n="flash.repair.adopt-running-hash">Adotar hash do firmware em execução</span>
+                                <span class="flash-repair__sub" data-i18n="flash.repair.trusts-the-firmware-currently">Passa a confiar no firmware em execução na placa. Use apenas se souber que a instalação está íntegra; isso não corrige um firmware corrompido.</span>
+                            </span>
+                        </button>
+                        <button type="button" class="flash-repair__action" id="inspectHashBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18"/><path d="M3 12h18"/><path d="M3 19h10"/><path d="m17 16 4 4"/><circle cx="16.5" cy="15.5" r="3.5"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label" data-i18n="flash.repair.read-rnode-status">Ler estado do RNode</span>
+                                <span class="flash-repair__sub" data-i18n="flash.repair.shows-firmware-hash-and">Mostra o hash do firmware e o estado do rádio na inicialização.</span>
+                            </span>
+                        </button>
+                        <button type="button" class="flash-repair__action" id="saveTncConfigBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 12h10"/><path d="M4 17h7"/><path d="M17 14v6"/><path d="M14 17h6"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label" data-i18n="flash.repair.keep-radio-idle">Manter rádio inativo</span>
+                                <span class="flash-repair__sub" data-i18n="flash.repair.clears-saved-startup-radio">Limpa as configurações de inicialização do rádio para que o Ratspeak o controle.</span>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </details>
+        </section>
+    </div>
+
+</main>
+
+<dialog class="install-dialog rsnode-beta" id="rsnodeTermsDialog" aria-labelledby="rsnodeTermsTitle" aria-describedby="rsnodeTermsIntro">
+    <h2 id="rsnodeTermsTitle" data-i18n="flash.terms.before-joining-the-beta">Antes de entrar no beta</h2>
+    <p id="rsnodeTermsIntro" data-i18n="flash.terms.for-this-private-beta">Para participar deste beta privado, confirme:</p>
+    <form id="rsnodeTermsForm">
+        <div class="rsnode-beta__checks" translate="no">
+            <label class="rsnode-beta__check"><input type="checkbox" name="france" required><span>I am not a citizen or resident of France.</span></label>
+            <label class="rsnode-beta__check"><input type="checkbox" name="sanctions" required><span>I am outside countries and regions where U.S. sanctions prohibit this distribution, and I am not a restricted person or acting for one.</span></label>
+            <label class="rsnode-beta__check"><input type="checkbox" name="export" required><span>I will follow applicable encryption export and local radio rules.</span></label>
+            <label class="rsnode-beta__check"><input type="checkbox" name="privateBeta" required><span>I will keep the access password private and use this prerelease firmware for testing. I understand flashing can erase my device.</span></label>
+        </div>
+        <p class="rsnode-beta__note" translate="no">Please keep beta builds within the tester group. Any rights granted by included open-source licenses still apply.</p>
+        <div class="rsnode-beta__links"><a href="https://ofac.treasury.gov/sanctions-programs-and-country-information" target="_blank" rel="noopener noreferrer" data-i18n="flash.terms.u-s-sanctions">Sanções dos EUA <span aria-hidden="true">↗</span></a><a href="/terms.html" target="_blank" rel="noopener" data-i18n="flash.terms.terms">Termos</a><a href="/privacy.html" target="_blank" rel="noopener" data-i18n="flash.terms.privacy">Privacidade</a></div>
+        <p class="rsnode-beta__status" id="rsnodeTermsStatus" role="status"></p>
+        <div class="install-dialog__actions"><button class="install-dialog__cancel" id="rsnodeTermsCancel" type="button" data-i18n="flash.managers.cancel">Cancelar</button><button class="install-dialog__continue" id="rsnodeTermsContinue" type="submit" disabled data-i18n="flash.terms.agree-and-continue">Concordar e continuar</button></div>
+    </form>
+</dialog>
+
+<dialog class="install-dialog" id="installDialog" aria-labelledby="installDialogTitle" aria-describedby="installDialogIntro installDialogRisk">
+    <div class="install-dialog__device" id="installDialogDevice"></div>
+    <h2 id="installDialogTitle" data-i18n="flash.rsnode.erase-and-install">Apagar e instalar</h2>
+    <p id="installDialogIntro"></p>
+    <p id="installDialogRisk"></p>
+    <label class="rsnode-beta__check rsnode-beta__variant" id="installDialogVariant" hidden><input type="checkbox" id="installDialogVariantConfirmed"><span id="installDialogVariantLabel"></span></label>
+    <a class="install-dialog__guide" href="https://docs.ratspeak.org/docs/hardware/flashing-firmware#before-flashing" target="_blank" rel="noopener noreferrer" data-i18n="flash.dialog.flashing-guide">Guia de gravação <span aria-hidden="true">↗</span></a>
+    <div class="install-dialog__actions">
+        <button class="install-dialog__cancel" id="installDialogCancel" type="button" autofocus data-i18n="flash.managers.cancel">Cancelar</button>
+        <button class="install-dialog__continue" id="installDialogContinue" type="button" data-i18n="flash.rsnode.erase-and-install">Apagar e instalar</button>
+    </div>
+</dialog>
+
+<footer class="site-foot">
+    <div class="foot-main">
+      <div class="foot-brand">
+        <div class="brand"><a class="brand" href="/letter.html" aria-label="Uma carta à comunidade" data-i18n-attr="aria-label:common.foot.letter"><svg class="brand-mark" aria-hidden="true" focusable="false"><use href="/lang/assets/ratspeak-mark.svg#mark"/></svg></a><a class="brand" href="/lang/pt/" aria-label="Início do Ratspeak" data-i18n-attr="aria-label:common.brand.home"><span class="brand-word">ratspeak</span></a></div>
+        <p data-i18n="common.foot.built-on-reticulum">Baseado no <a href="https://docs.ratspeak.org/docs/concepts/what-is-reticulum">Reticulum</a></p>
+      </div>
+      <nav class="foot-cols" aria-label="Rodapé" data-i18n-attr="aria-label:common.foot.footer">
+        <div><h2 data-i18n="common.foot.product">Produto</h2><ul><li><a href="/lang/pt/download.html" data-i18n="common.nav.download">Baixar</a></li><li><a href="https://docs.ratspeak.org/" data-i18n="common.foot.docs">Docs<span aria-hidden="true">&nbsp;↗</span></a></li><li><a href="/lang/pt/map.html" data-i18n="common.nav.map">Mapa</a></li><li><a href="/portal.html" data-i18n="common.foot.holder-portal">Portal dos detentores</a></li></ul></div>
+        <div><h2 data-i18n="common.foot.source">Código</h2><ul><li><a href="https://github.com/ratspeak">GitHub<span aria-hidden="true">&nbsp;↗</span></a></li><li><a href="https://github.com/ratspeak/Ratspeak" data-i18n="common.foot.ratspeak-app">App Ratspeak<span aria-hidden="true">&nbsp;↗</span></a></li><li><a href="https://github.com/ratspeak/ratspeak-handheld" data-i18n="common.foot.handheld-firmware">Firmware para portáteis<span aria-hidden="true">&nbsp;↗</span></a></li><li><a href="https://github.com/ratspeak/rsReticulum" data-i18n="common.foot.reticulum-in-rust">Reticulum em Rust<span aria-hidden="true">&nbsp;↗</span></a></li></ul></div>
+        <div><h2 data-i18n="common.foot.community">Comunidade</h2><ul><li><a href="/discord">Discord<span aria-hidden="true">&nbsp;↗</span></a></li><li><a href="/telegram">Telegram<span aria-hidden="true">&nbsp;↗</span></a></li><li><a href="/community-guidelines.html" data-i18n="common.foot.guidelines">Diretrizes</a></li><li><a href="/community.html" data-i18n="common.foot.community-token">Token da comunidade</a></li></ul></div>
+        <div><h2 data-i18n="common.foot.help-legal">Ajuda e jurídico</h2><ul><li><a href="/support.html" data-i18n="common.foot.support">Suporte</a></li><li><a href="/privacy.html" data-i18n="common.foot.privacy">Privacidade</a></li><li><a href="/terms.html" data-i18n="common.foot.terms">Termos</a></li></ul></div>
+      </nav>
+    </div>
+    <div class="foot-bar">
+        <p>© 2026 Ratspeak LLC</p>
+      </div>
+  </footer>
+
+<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+<script type="module" src="/lang/assets/site/flasher.js"></script>
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+
+</body>
+</html>

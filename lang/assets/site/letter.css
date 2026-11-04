@@ -1,0 +1,41 @@
+/* Letter: a sheet laid on the cobalt band. Loaded after site.css and pages.css. */
+
+.letter-hero{padding:clamp(56px,7vw,112px) var(--pad-x) clamp(150px,16vw,240px);text-align:center}
+.letter-hero:focus{outline:none}
+.threshold-logo{width:44px;height:44px;margin:0 auto 28px;color:var(--on-band-muted)}
+.letter-label{margin:0 0 20px;font-size:var(--t-small);font-weight:700;color:var(--on-band-muted)}
+.letter-title{margin:0 auto;max-width:12em;font:400 clamp(48px,8.2vw,124px)/.94 Anton,Impact,sans-serif;letter-spacing:-.01em;text-transform:uppercase;text-wrap:balance}
+
+.letter-sheet{position:relative;width:min(calc(100% - 2 * var(--gutter)),800px);margin:calc(-1 * clamp(110px,12vw,180px)) auto var(--section-y);padding:clamp(32px,5vw,72px) clamp(22px,7vw,104px) clamp(36px,5vw,72px);background:var(--surface);color:var(--text);border:1.5px solid var(--line);box-shadow:12px 16px 0 var(--band-deep)}
+
+.letter-container{font-size:clamp(17px,1.4vw,19px);line-height:1.72}
+.letter-p{margin:0 0 1.15em}
+.letter-aside{margin:clamp(36px,4vw,52px) 0;padding-inline-start:clamp(18px,2vw,28px);border-inline-start:6px solid var(--text-strong);font:400 clamp(28px,3.2vw,42px)/1.08 Anton,Impact,sans-serif;letter-spacing:0;text-transform:uppercase;color:var(--text-strong);text-wrap:balance}
+.letter-aside em{font-style:normal;color:var(--on-cta);background:var(--cta);padding:0 .1em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.letter-break{width:56px;height:2px;margin:clamp(40px,4.5vw,60px) 0;background:var(--line)}
+.letter-cta{margin:clamp(36px,4vw,52px) 0 0;font:400 clamp(44px,5.4vw,72px)/1 Anton,Impact,sans-serif;text-transform:uppercase;color:var(--text-strong)}
+
+.letter-signoff{display:flex;align-items:center;gap:16px;margin-top:clamp(40px,4.5vw,64px);padding-top:24px;border-top:1.5px solid var(--line)}
+.signoff-line{display:none}
+.signoff-name{margin:0;flex:1;font-size:var(--t-small);font-weight:700;letter-spacing:.06em;color:var(--text)}
+.signoff-logo{width:36px;height:36px;flex:none;color:var(--text-strong)}
+
+/* hero cascade, then each passage as it scrolls in (JS adds .visible) */
+@media (scripting:enabled) and (prefers-reduced-motion:no-preference){
+  .threshold-logo,.letter-label,.letter-title{animation:letter-in .8s cubic-bezier(.2,.7,.2,1) both}
+  .threshold-logo{animation-delay:.1s}
+  .letter-label{animation-delay:.3s}
+  .letter-title{animation-delay:.5s}
+  .letter-p,.letter-aside,.letter-cta,.letter-signoff{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
+  .letter-p.visible,.letter-aside.visible,.letter-cta.visible,.letter-signoff.visible{opacity:1;transform:none}
+}
+@keyframes letter-in{from{opacity:0;transform:translateY(10px)}}
+@media print{
+  .letter-p,.letter-aside,.letter-cta,.letter-signoff{opacity:1!important;transform:none!important}
+  .letter-sheet{box-shadow:none;margin-top:0}
+}
+
+@media(max-width:560px){
+  .letter-sheet{box-shadow:6px 10px 0 var(--band-deep)}
+  .letter-hero{padding-bottom:150px}
+}

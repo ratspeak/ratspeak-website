@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="pt-BR" class="page-map" dir="ltr">
+<head>
+  <meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10208c"><meta name="color-scheme" content="dark">
+  <title data-i18n="map.meta.title">Mapa — Ratspeak</title>
+  <meta name="description" content="Explore o mapa público dos nós que optaram por divulgar a localização." data-i18n-attr="content:map.meta.description">
+  <meta name="base:app_id" content="6a3c6e26bff5f57cb7afde68">
+  
+  
+  <link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="manifest" href="/site.webmanifest">
+  <meta name="application-name" content="Ratspeak"><meta name="apple-mobile-web-app-title" content="Ratspeak">
+  <meta property="og:type" content="website"><meta property="og:locale" content="pt_BR"><meta property="og:site_name" content="Ratspeak">
+  <meta property="og:title" content="Mapa — Ratspeak" data-i18n-attr="content:map.meta.title"><meta property="og:description" content="Explore o mapa público dos nós que optaram por divulgar a localização." data-i18n-attr="content:map.meta.description"><meta property="og:url" content="https://ratspeak.org/pt/map.html">
+  <meta property="og:image" content="https://ratspeak.org/assets/seo/og-map.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Prévia do mapa da rede Ratspeak com dados publicados; as localizações podem ser aproximadas." data-i18n-attr="content:map.meta.imageAlt">
+  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@ratspeakorg"><meta name="twitter:title" content="Mapa — Ratspeak" data-i18n-attr="content:map.meta.title"><meta name="twitter:description" content="Explore o mapa público dos nós que optaram por divulgar a localização." data-i18n-attr="content:map.meta.description">
+  <meta name="twitter:image" content="https://ratspeak.org/assets/seo/og-map.png"><meta name="twitter:image:alt" content="Prévia do mapa da rede Ratspeak com dados publicados; as localizações podem ser aproximadas." data-i18n-attr="content:map.meta.imageAlt">
+  <link rel="preload" href="/lang/assets/fonts/anton.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="modulepreload" href="/lang/assets/vendor/maplibre/maplibre-gl.mjs"><link rel="modulepreload" href="/lang/assets/vendor/maplibre/maplibre-gl-shared.mjs">
+  <link rel="stylesheet" href="/lang/assets/vendor/maplibre/maplibre-gl.css?v=6.3.0"><link rel="stylesheet" href="/lang/assets/map.css?v=maplibre-1"><link rel="stylesheet" href="/lang/assets/site/site.css"><link rel="stylesheet" href="/lang/assets/site/pages.css">
+  <script>window.RS_I18N={"lang":"pt-BR","dir":"ltr","locale":"pt-BR","tech":"pt-BR","base":"/lang/pt/","pages":["index.html","map.html","download.html","flash.html","404.html"],"strings":{"map.map.detailed-basemap-unavailable-showing":"Mapa base detalhado indisponível. Mostrando o mapa básico.","map.filters.radio":"Rádio","map.filters.manual":"Manual","map.filters.loading-node-records":"Carregando registros dos nós…","map.continent.northAmerica":"América do Norte","map.continent.southAmerica":"América do Sul","map.continent.europe":"Europa","map.continent.africa":"África","map.continent.asia":"Ásia","map.continent.oceania":"Oceania","map.continent.antarctica":"Antártida","map.detail.coordsNote":"As coordenadas podem ser informadas pelo próprio operador e não ser exatas.","map.fallback.noWebgl":"Este navegador não pode exibir o mapa interativo porque o WebGL está indisponível.","map.controls.map":"Mapa","map.controls.zoomIn":"Aproximar","map.controls.zoomOut":"Afastar","map.controls.attribution":"Mostrar ou ocultar créditos","map.fallback.failed":"Não foi possível iniciar o mapa interativo neste navegador.","map.fallback.disabled":"Mapa base detalhado desativado. Mostrando o mapa básico.","map.legend.title":"Legenda","map.status.unavailable":"Os registros dos nós estão indisponíveis. Recarregue para tentar novamente.","map.status.noneRecent":"Nenhum nó visto nos últimos sete dias.","map.status.noneInSnapshot":"Não há registros de nós neste conjunto de dados.","map.status.noMatch":"Nenhum nó corresponde a estes filtros. Limpe a busca ou mude um filtro.","map.status.snapshot":"Dados de: {date} UTC","map.status.snapshotUnknown":"Data dos dados indisponível","map.detail.location":"Localização","map.detail.lastSeen":"Visto pela última vez","map.detail.interface":"Interface","map.detail.services":"Serviços","map.detail.radio":"Rádio","map.detail.port":"Porta","map.detail.eyebrow":"Nó selecionado","map.detail.closeLabel":"Fechar detalhes do nó selecionado","map.detail.close":"Fechar","map.node.unnamed":"Nó sem nome","map.detail.coordinates":"Coordenadas","map.detail.coordsInfo":"Sobre a precisão das coordenadas","map.detail.noServices":"Nenhum listado","map.detail.unknown":"Desconhecido","map.status.nodes":{"one":"{n} nó","many":"{n} nós","other":"{n} nós"},"map.status.shownOf":{"one":"{shown} de {n} nó","many":"{shown} de {n} nós","other":"{shown} de {n} nós"}}}</script><script src="/lang/assets/site/i18n.js"></script>
+  <script src="/lang/assets/site/pages.js" defer></script>
+  <script src="/lang/assets/site/lang.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="/lang/pt/map.html#mapApp" data-i18n="common.skip.map">Pular para o mapa</a>
+  <div class="map-shell">
+  <div class="band">
+    <header class="topbar" id="navbar">
+      <a class="brand" href="/lang/pt/" aria-label="Início do Ratspeak" data-i18n-attr="aria-label:common.brand.home"><svg class="brand-mark" aria-hidden="true" focusable="false"><use href="/lang/assets/ratspeak-mark.svg#mark"/></svg><span class="brand-word">ratspeak</span></a>
+      <nav aria-label="Navegação principal" data-i18n-attr="aria-label:common.nav.main-navigation"><a href="/lang/pt/map.html" aria-current="page" data-i18n="common.nav.map">Mapa</a><a href="https://docs.ratspeak.org/" data-i18n="common.nav.docs">Docs</a><a href="/lang/pt/#play" data-i18n="common.nav.how-it-works">Como funciona</a></nav>
+      <div class="topbar-end"><!--lang-menu--><div class="lang-menu" data-lang-menu data-cookie="rs-lang" data-max-age="31536000"><button type="button" class="lang-trigger" id="lang-trigger" aria-expanded="false" aria-controls="lang-panel"><span class="sr-only">Idioma: Português</span><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-br"/></svg><span class="lang-trigger__code" aria-hidden="true">PT</span><svg class="lang-trigger__chevron" viewBox="0 0 10 6" aria-hidden="true" focusable="false"><path d="M1 1l4 4 4-4"/></svg></button><div class="lang-panel" id="lang-panel" hidden><p class="lang-panel__label" id="lang-panel-label">Idioma</p><ul aria-labelledby="lang-panel-label"><li><a href="/lang/en/map.html" hreflang="en" data-lang="en" data-same-page><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-us"/></svg><span class="lang-name">Inglês</span></a></li><li><a href="/lang/es/map.html" hreflang="es" data-lang="es" data-same-page><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-es"/></svg><span class="lang-name">Espanhol</span></a></li><li><a href="/lang/ru/map.html" hreflang="ru" data-lang="ru" data-same-page><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-ru"/></svg><span class="lang-name">Russo</span></a></li><li><a href="/lang/uk/map.html" hreflang="uk" data-lang="uk" data-same-page><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-ua"/></svg><span class="lang-name">Ucraniano</span></a></li><li><a href="/lang/pt/map.html" hreflang="pt-BR" data-lang="pt-BR" data-same-page aria-current="true"><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-br"/></svg><span class="lang-name">Português</span><svg class="lang-check" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8.5l3.2 3L13 4.5"/></svg></a></li><li><a href="/lang/fa/map.html" hreflang="fa" data-lang="fa" data-same-page><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-ir-lion-sun"/></svg><span class="lang-name">Persa</span></a></li></ul></div><svg class="flag-sprite" aria-hidden="true" focusable="false"><symbol id="flag-us" viewBox="0 0 24 18"><path fill="#fff" d="M0 0h24v18H0z"/><path fill="#b22234" d="M0 0.000h24v1.385H0zM0 2.769h24v1.385H0zM0 5.538h24v1.385H0zM0 8.308h24v1.385H0zM0 11.077h24v1.385H0zM0 13.846h24v1.385H0zM0 16.615h24v1.385H0z"/><path fill="#3c3b6e" d="M0 0h10.4v9.692H0z"/><path fill="#fff" d="M1.15 1.25m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M3.15 1.25m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M5.15 1.25m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M7.15 1.25m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M9.15 1.25m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M2.15 3.55m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M4.15 3.55m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M6.15 3.55m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M8.15 3.55m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M1.15 5.85m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M3.15 5.85m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M5.15 5.85m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M7.15 5.85m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M9.15 5.85m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M2.15 8.15m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M4.15 8.15m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M6.15 8.15m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M8.15 8.15m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0"/></symbol><symbol id="flag-es" viewBox="0 0 24 18"><path fill="#aa151b" d="M0 0h24v18H0z"/><path fill="#f1bf00" d="M0 4.5h24v9H0z"/><path fill="#aa151b" d="M6.3 7.1h2.8v2.3c0 1-.6 1.7-1.4 1.7s-1.4-.7-1.4-1.7z"/><path fill="#aa151b" d="M6.2 6.1l.5.6.5-.7.5.7.5-.7.5.7.5-.6v.7H6.2z"/></symbol><symbol id="flag-ru" viewBox="0 0 24 18"><path fill="#fff" d="M0 0h24v6H0z"/><path fill="#0039a6" d="M0 6h24v6H0z"/><path fill="#d52b1e" d="M0 12h24v6H0z"/></symbol><symbol id="flag-ua" viewBox="0 0 24 18"><path fill="#0057b7" d="M0 0h24v9H0z"/><path fill="#ffd700" d="M0 9h24v9H0z"/></symbol><symbol id="flag-br" viewBox="0 0 24 18"><path fill="#009c3b" d="M0 0h24v18H0z"/><path fill="#ffdf00" d="M12 1.7L22.2 9 12 16.3 1.8 9z"/><circle cx="12" cy="9" r="4.15" fill="#002776"/><path fill="#fff" d="M7.96 8.05a8.4 8.4 0 0 1 8.07 2.3l-.24.62a7.6 7.6 0 0 0-7.9-2.18z"/></symbol><symbol id="flag-ir-lion-sun" viewBox="0 0 24 18"><path fill="#239f40" d="M0 0h24v6H0z"/><path fill="#fff" d="M0 6h24v6H0z"/><path fill="#da0000" d="M0 12h24v6H0z"/><path fill="#ffc425" d="M12.90 6.15L13.20 6.83L13.74 6.32L13.76 7.06L14.46 6.79L14.19 7.49L14.93 7.51L14.42 8.05L15.10 8.35L14.42 8.65L14.93 9.19L14.19 9.21L14.46 9.91L13.76 9.64L13.74 10.38L13.20 9.87L12.90 10.55L12.60 9.87L12.06 10.38L12.04 9.64L11.34 9.91L11.61 9.21L10.87 9.19L11.38 8.65L10.70 8.35L11.38 8.05L10.87 7.51L11.61 7.49L11.34 6.79L12.04 7.06L12.06 6.32L12.60 6.83z"/><path fill="#b8770a" d="M8.2 8.7L8.5 8.2C8.6 7.6 9.3 7.3 9.9 7.5C10.6 7.7 10.9 8.3 10.8 8.7C12 8.5 13.9 8.5 15 8.8C15.4 8.9 15.5 9.4 15.4 9.9L15.3 11.7H14.8L14.7 10.6H14.3L14.2 11.7H13.7L13.6 10.4C12.5 10.5 11.4 10.5 10.7 10.4L10.6 11.7H10.1L10 10.6L9.7 10.5L9.6 11.7H9.1V10.2C8.8 10 8.6 9.6 8.6 9.3L8.2 9.1z"/><path fill="none" stroke="#b8770a" stroke-width=".42" stroke-linecap="round" d="M15.3 9.1C16.2 8.9 16.3 7.9 15.8 7.4"/><circle cx="15.8" cy="7.35" r=".38" fill="#b8770a"/><path fill="none" stroke="#5c3d00" stroke-width=".42" stroke-linecap="round" d="M8 9.3Q7.3 7.9 7.7 6.4"/><path fill="none" stroke="#5c3d00" stroke-width=".4" stroke-linecap="round" d="M7.5 9.05h.9"/></symbol></svg></div><!--/lang-menu--><a class="header-download" href="/lang/pt/download.html" data-i18n="common.nav.download">Baixar</a></div>
+    </header>
+  </div>
+  <h1 class="sr-only" data-i18n="map.page.heading">Mapa da rede Ratspeak</h1>
+<main class="map-app" id="mapApp" aria-label="Mapa do Ratspeak" data-i18n-attr="aria-label:map.map.ratspeak-map">
+    <div class="map-canvas" id="map" aria-label="Mapa interativo da rede Ratspeak" data-i18n-attr="aria-label:map.map.interactive-ratspeak-network-map"></div>
+    <div class="map-left-stack" role="group" aria-label="Controles do mapa" data-i18n-attr="aria-label:map.map.map-controls">
+        <div class="map-fallback" id="mapFallback" role="status" hidden>
+            <span class="map-fallback-dot" aria-hidden="true"></span>
+            <span class="map-fallback-text" data-i18n="map.map.detailed-basemap-unavailable-showing">Mapa base detalhado indisponível. Mostrando o mapa básico.</span>
+        </div>
+        <aside class="map-rail" id="mapMenu" aria-label="Filtros do mapa" data-i18n-attr="aria-label:map.filters.map-filters">
+            <button class="map-menu-toggle" id="mapMenuToggle" type="button" aria-expanded="true" aria-controls="mapMenuBody">
+                <span class="map-menu-title" data-i18n="map.filters.filter">Filtro</span>
+                <svg class="map-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m6 15 6-6 6 6"/>
+                </svg>
+            </button>
+            <section class="rail-controls" id="mapMenuBody" aria-label="Filtros do mapa" data-i18n-attr="aria-label:map.filters.map-filters">
+                <label class="search-box">
+                    <span hidden data-i18n="map.filters.search-nodes">Buscar nós</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+                    <input class="search-input" id="nodeSearch" type="search" autocomplete="off" placeholder="Buscar…" data-i18n-attr="placeholder:map.filters.search">
+                </label>
+                <div class="filter-row">
+                    <label class="filter-field">
+                        <span class="filter-label" data-i18n="map.filters.type">Tipo</span>
+                        <span class="select-wrap">
+                            <select class="filter-select" id="kindFilter">
+                                <option value="all" data-i18n="map.filters.all">Todos</option>
+                                <option value="server-ipv4">IPv4</option>
+                                <option value="server-ipv6">IPv6</option>
+                                <option value="client-auto" data-i18n="map.filters.radio">Rádio</option>
+                                <option value="i2p">I2P</option>
+                                <option value="yggdrasil">Yggdrasil</option>
+                                <option value="client-manual" data-i18n="map.filters.manual">Manual</option>
+                            </select>
+                        </span>
+                    </label>
+                    <label class="filter-field">
+                        <span class="filter-label" data-i18n="map.filters.freshness">Atualidade</span>
+                        <span class="select-wrap">
+                            <select class="filter-select" id="statusFilter">
+                                <option value="all" data-i18n="map.filters.all">Todos</option>
+                                <option value="available" data-i18n="map.filters.seen">Recentes</option>
+                                <option value="unknown" data-i18n="map.filters.unknown">Desconhecida</option>
+                                <option value="stale" data-i18n="map.filters.stale">Antigos</option>
+                            </select>
+                        </span>
+                    </label>
+                </div>
+                <div class="map-snapshot">
+                    <p class="map-snapshot-status" id="mapSnapshotStatus" role="status" data-i18n="map.filters.loading-node-records">Carregando registros dos nós…</p>
+                    <p class="map-snapshot-status map-snapshot-note" data-i18n="map.filters.only-showing-opt-in">*Só aparecem nós cujos operadores optaram por publicar a localização.</p>
+                </div>
+            </section>
+        </aside>
+    </div>
+
+    <section class="node-detail" id="nodeDetail" aria-live="polite" aria-label="Detalhes do nó selecionado" hidden data-i18n-attr="aria-label:map.map.selected-node-details"></section>
+</main>
+  </div>
+  <footer class="site-foot">
+    <div class="foot-main">
+      <div class="foot-brand">
+        <div class="brand"><a class="brand" href="/letter.html" aria-label="Uma carta à comunidade" data-i18n-attr="aria-label:common.foot.letter"><svg class="brand-mark" aria-hidden="true" focusable="false"><use href="/lang/assets/ratspeak-mark.svg#mark"/></svg></a><a class="brand" href="/lang/pt/" aria-label="Início do Ratspeak" data-i18n-attr="aria-label:common.brand.home"><span class="brand-word">ratspeak</span></a></div>
+        <p data-i18n="common.foot.built-on-reticulum">Baseado no <a href="https://docs.ratspeak.org/docs/concepts/what-is-reticulum">Reticulum</a></p>
+      </div>
+      <nav class="foot-cols" aria-label="Rodapé" data-i18n-attr="aria-label:common.foot.footer">
+        <div><h2 data-i18n="common.foot.product">Produto</h2><ul><li><a href="/lang/pt/download.html" data-i18n="common.nav.download">Baixar</a></li><li><a href="https://docs.ratspeak.org/" data-i18n="common.foot.docs">Docs<span aria-hidden="true">&nbsp;↗</span></a></li><li><a href="/lang/pt/map.html" aria-current="page" data-i18n="common.nav.map">Mapa</a></li><li><a href="/portal.html" data-i18n="common.foot.holder-portal">Portal dos detentores</a></li></ul></div>
+        <div><h2 data-i18n="common.foot.source">Código</h2><ul><li><a href="https://github.com/ratspeak">GitHub<span aria-hidden="true">&nbsp;↗</span></a></li><li><a href="https://github.com/ratspeak/Ratspeak" data-i18n="common.foot.ratspeak-app">App Ratspeak<span aria-hidden="true">&nbsp;↗</span></a></li><li><a href="https://github.com/ratspeak/ratspeak-handheld" data-i18n="common.foot.handheld-firmware">Firmware para portáteis<span aria-hidden="true">&nbsp;↗</span></a></li><li><a href="https://github.com/ratspeak/rsReticulum" data-i18n="common.foot.reticulum-in-rust">Reticulum em Rust<span aria-hidden="true">&nbsp;↗</span></a></li></ul></div>
+        <div><h2 data-i18n="common.foot.community">Comunidade</h2><ul><li><a href="/discord">Discord<span aria-hidden="true">&nbsp;↗</span></a></li><li><a href="/telegram">Telegram<span aria-hidden="true">&nbsp;↗</span></a></li><li><a href="/community-guidelines.html" data-i18n="common.foot.guidelines">Diretrizes</a></li><li><a href="/community.html" data-i18n="common.foot.community-token">Token da comunidade</a></li></ul></div>
+        <div><h2 data-i18n="common.foot.help-legal">Ajuda e jurídico</h2><ul><li><a href="/support.html" data-i18n="common.foot.support">Suporte</a></li><li><a href="/privacy.html" data-i18n="common.foot.privacy">Privacidade</a></li><li><a href="/terms.html" data-i18n="common.foot.terms">Termos</a></li></ul></div>
+      </nav>
+    </div>
+    <div class="foot-bar">
+        <p>© 2026 Ratspeak LLC</p>
+      </div>
+  </footer>
+<script type="module" src="/lang/assets/map.js"></script>
+  <script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

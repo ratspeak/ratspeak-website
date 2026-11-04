@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8"><meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#10208c"><meta name="color-scheme" content="dark">
+    <title data-i18n="flash.meta.title">ابزار فلش پیشرفته — Ratspeak</title>
+  <meta name="description" content="با مرورگر، فریمور rsNode، فریمور رسمی RNode یا فایل خودتان را روی برد LoRa فلش کنید." data-i18n-attr="content:flash.meta.description">
+  
+  
+  <link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="manifest" href="/site.webmanifest">
+  <meta name="application-name" content="Ratspeak"><meta name="apple-mobile-web-app-title" content="Ratspeak">
+  <meta property="og:type" content="website"><meta property="og:locale" content="fa_IR"><meta property="og:site_name" content="Ratspeak">
+  <meta property="og:title" content="ابزار فلش پیشرفته — Ratspeak" data-i18n-attr="content:flash.meta.title"><meta property="og:description" content="با مرورگر، فریمور rsNode، فریمور رسمی RNode یا فایل خودتان را روی برد LoRa فلش کنید." data-i18n-attr="content:flash.meta.description"><meta property="og:url" content="https://ratspeak.org/fa/flash.html">
+  <meta property="og:image" content="https://ratspeak.org/assets/seo/og-flash.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="ابزار فلش پیشرفتهٔ Ratspeak برای بردهای LoRa." data-i18n-attr="content:flash.meta.imageAlt">
+  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@ratspeakorg"><meta name="twitter:title" content="ابزار فلش پیشرفته — Ratspeak" data-i18n-attr="content:flash.meta.title"><meta name="twitter:description" content="با مرورگر، فریمور rsNode، فریمور رسمی RNode یا فایل خودتان را روی برد LoRa فلش کنید." data-i18n-attr="content:flash.meta.description">
+  <meta name="twitter:image" content="https://ratspeak.org/assets/seo/og-flash.png"><meta name="twitter:image:alt" content="ابزار فلش پیشرفتهٔ Ratspeak برای بردهای LoRa." data-i18n-attr="content:flash.meta.imageAlt">
+    <link rel="preload" href="/lang/assets/fonts/anton.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/lang/assets/site/site.css">
+    <link rel="stylesheet" href="/lang/assets/site/download.css">
+    <link rel="stylesheet" href="/lang/assets/site/flash.css">
+    <script>(()=>{const u=new URL(location.href),d=u.searchParams.get('device');if(d&&d!=='custom')location.replace('download.html'+u.search+'#'+d)})()</script>
+    <script>window.RS_I18N={"lang":"fa","dir":"rtl","locale":"fa-u-ca-gregory","tech":"fa-u-nu-latn","base":"/lang/fa/","pages":["index.html","map.html","download.html","flash.html","404.html"],"strings":{"dl.handheld.firmware":"فریمور","dl.handheld.messenger-only":"فقط پیام‌رسان","dl.handheld.radio-for-your-phone":"رادیو برای تلفن یا رایانهٔ شما","dl.handheld.the-ratspeak-app-sends":"برنامهٔ Ratspeak از رادیو LoRa این دستگاه، با اتصال USB یا بلوتوث، پیام می‌فرستد.","dl.flash.not-started":"شروع نشده","dl.flash.no-device-selected":"دستگاهی انتخاب نشده","dl.flash.select-a-usb-device":"برای ادامه یک دستگاه USB انتخاب کنید.","dl.dialog.erase-and-install":"پاک کردن و نصب","dl.flash.btn.install":"نصب Ratspeak","dl.fw.full":"پیام‌رسان و رادیو","dl.flash.pkg.fullDesc":"پیشنهادی. هر بار که دستگاه روشن می‌شود، حالت را انتخاب کنید.","dl.flash.pkg.standaloneDesc":"پیام‌ها را روی خود دستگاه بفرستید و بخوانید.","dl.flash.fw.checked":"دانلود و بررسی شد","dl.flash.fw.downloading":"دانلود {received} از {total}…","dl.flash.fw.checkingRelease":"بررسی نسخه…","dl.flash.fw.failed":"دانلود کامل نشد. اتصال خود را بررسی کنید و دوباره امتحان کنید.","dl.flash.connect.selecting":"انتخاب…","dl.flash.connect.choose":"دستگاه خود را در پنجرهٔ مرورگر انتخاب کنید…","dl.flash.connect.denied":"مرورگر نتوانست از آن دستگاه استفاده کند.","dl.flash.connect.none":"دستگاهی انتخاب نشده","dl.flash.connect.selected":"دستگاه انتخاب شد","dl.flash.usb.esp32s3":"برد ESP32-S3","dl.flash.usb.bridge":"برد با مبدل USB مدل {chip}","dl.flash.usb.serial":"دستگاه سریال USB","dl.flash.connect.checked":"{chip} · بررسی شد","dl.flash.boot.tdeck":"حالت دانلود را فعال کنید: وقتی دستگاه خاموش و USB وصل است، ترک‌بال را فشار دهید و نگه دارید، دستگاه را روشن کنید و پس از چند ثانیه ترک‌بال را رها کنید.","dl.flash.boot.tpager":"حالت دانلود را فعال کنید: BOOT را نگه دارید، RST را بزنید و سپس BOOT را رها کنید.","dl.flash.boot.cardputer":"حالت دانلود را فعال کنید: کلید برق کنار دستگاه را خاموش کنید، G0 را نگه دارید و USB را وصل کنید، سپس G0 را رها کنید.","dl.flash.boot.m9":"M9 را روشن و USB را وصل نگه دارید. اگر پورتی دیده نمی‌شود، درایور USB را از پیوند بالا نصب کنید.","dl.flash.stage.capacity":"بررسی ظرفیت حافظهٔ فلش…","dl.flash.stage.layout":"خواندن چیدمان فضای ذخیره‌سازی…","dl.flash.stage.bootloader":"بررسی بوت‌لودر…","dl.flash.stage.startup":"بررسی انتخاب هنگام راه‌اندازی…","dl.flash.dialog.chosen":"نصب از نو را انتخاب کرده‌اید.","dl.flash.dialog.risk":"همهٔ داده‌های حافظهٔ داخلی، از جمله هویت، تنظیمات و پیام‌های شما از دست می‌روند.","dl.flash.reason.unidentified":"فریمور نصب‌شده شناسایی نشد.","dl.flash.reason.layout":"فریمور نصب‌شده یا چیدمان فضای ذخیره‌سازی شناسایی نشد.","dl.flash.reason.bootloader":"بوت‌لودر نصب‌شده از به‌روزرسانی پشتیبانی نمی‌کند.","dl.flash.reason.incomplete":"فریمور نصب‌شده ناقص است.","dl.flash.reason.unreadable":"فریمور نصب‌شده خوانده نشد.","dl.flash.reason.package":"تغییر بستهٔ فریمور به نصب از نو نیاز دارد.","dl.flash.reason.unverified":"این بستهٔ فریمور برای به‌روزرسانی با حفظ داده‌ها تأیید نشده است.","dl.flash.reason.storage":"این به‌روزرسانی به چیدمان ذخیره‌سازی یا بوت‌لودر دیگری نیاز دارد.","dl.flash.stage.apps":"بررسی برنامه‌های نصب‌شده ({done}/{all})…","dl.flash.help.missing":"دستگاه در فهرست نیست؟ از کابل با انتقال داده استفاده کنید و برنامه‌های دیگری را که از دستگاه استفاده می‌کنند ببندید.","dl.flash.help.denied":"برنامه‌ها یا زبانه‌های دیگری را که از دستگاه استفاده می‌کنند ببندید، سپس دوباره آن را انتخاب کنید.","dl.flash.connect.select":"انتخاب دستگاه USB","dl.flash.flow.downloading":"دانلود {pct}","dl.flash.tech.copied":"کپی شد","dl.flash.adv.eraseOn":"پاک‌سازی کامل فعال است","dl.flash.adv.default":"نصب پیش‌فرض","dl.flash.flow.selected":"انتخاب شد","dl.flash.flow.written":"نوشته شد","dl.flash.flow.complete":"کامل شد","dl.flash.note.installed":"نصب شد. برای شروع استفاده، دستگاه را دوباره راه‌اندازی کنید.","dl.flash.flow.ready":"آماده","dl.flash.flow.writing":"در حال نوشتن","dl.flash.flow.checking":"بررسی دستگاه","dl.flash.note.writing":"فریمور در حال نوشته شدن است. کابل USB را تا پایان کار وصل نگه دارید.","dl.flash.note.checking":"بررسی دستگاه پیش از نصب.","dl.flash.flow.couldntConnect":"اتصال برقرار نشد","dl.flash.flow.selectDevice":"دستگاه را انتخاب کنید","dl.flash.flow.notDownloaded":"دانلود نشد","dl.flash.flow.stopped":"متوقف شد","dl.flash.note.fwFailed":"فریمور دانلود نشد. در گام ۲ دوباره امتحان کنید.","dl.flash.note.ready":"آماده است. نصب‌کننده دستگاه را بررسی می‌کند، سپس آن را به‌روز می‌کند یا پیش از پاک کردن از شما می‌پرسد. این زبانه را باز نگه دارید.","dl.flash.note.selectWhileDownloading":"هنگام دانلود فریمور، یک دستگاه USB انتخاب کنید.","dl.flash.note.waiting":"در انتظار پایان دانلود فریمور.","dl.flash.dialog.introRadio":"در حال نصب نسخهٔ فقط‌رادیوی Ratspeak Handheld هستید.","dl.flash.dialog.intro":"در حال نصب Ratspeak Handheld هستید.","dl.flash.btn.preparing":"آماده‌سازی…","dl.flash.status.loadingTool":"بارگذاری esptool…","dl.flash.status.preparing":"آماده‌سازی فریمور…","dl.flash.btn.checking":"بررسی دستگاه…","dl.flash.status.connecting":"اتصال به بوت‌لودر…","dl.flash.status.entering":"ورود به بوت‌لودر…","dl.flash.status.checkingInstalled":"بررسی فریمور نصب‌شده…","dl.flash.status.cancelled":"لغو شد. چیزی نوشته نشد. در صورت نیاز دستگاه را دوباره راه‌اندازی کنید.","dl.flash.btn.installing":"در حال نصب…","dl.flash.status.writing":"نوشتن فریمور…","dl.flash.status.writingPart":"نوشتن بخش {part}/{parts}…","dl.flash.status.written":"حافظهٔ فلش نوشته شد","dl.flash.fail.cable":"از کابل USB با انتقال داده استفاده کنید و آن را مستقیم به رایانه وصل کنید.","dl.flash.fail.replug":"دستگاه را جدا کنید، دوباره وصل کنید و پورت را دوباره انتخاب کنید.","dl.flash.fail.busy.title":"پورت USB مشغول است","dl.flash.fail.busy.cause":"مرورگر {device} را پیدا کرد، اما نتوانست اتصالش را باز کند. احتمالاً برنامهٔ دیگری از آن استفاده می‌کند.","dl.flash.fail.busy.fix1":"برنامه‌های دیگری را که از پورت استفاده می‌کنند ببندید: برنامهٔ Ratspeak، مانیتور سریال یا زبانهٔ دیگری با همین صفحه.","dl.flash.fail.busy.fix2":"{device} را جدا کنید، دوباره وصل کنید و پورت را دوباره انتخاب کنید.","dl.flash.fail.silent.title":"{device} پاسخ نداد","dl.flash.fail.silent.cause":"پورت باز شد، اما دستگاه به نصب‌کننده پاسخ نداد.","dl.flash.fail.silent.fix2":"پورت را دوباره انتخاب کنید؛ ممکن است در حالت دانلود تغییر کند.","dl.flash.fail.wrong.title":"به نظر نمی‌رسد این دستگاه {device} باشد","dl.flash.fail.wrong.cause":"دستگاه وصل‌شده با انتخاب شما مطابقت ندارد.","dl.flash.fail.wrong.fix1":"بررسی کنید پورت درست را انتخاب کرده باشید.","dl.flash.fail.wrong.fix2":"به فهرست همهٔ دستگاه‌ها برگردید و دستگاهی را که روی آن نصب می‌کنید انتخاب کنید.","dl.flash.fail.dropped.title":"اتصال قطع شد","dl.flash.fail.dropped.cause":"دستگاه در میانهٔ کار دیگر پاسخ نداد.","dl.flash.fail.dropped.fix1":"کابل را وصل و دستگاه را روشن نگه دارید تا نصب تمام شود.","dl.flash.fail.dropped.fix2":"دستگاه را جدا و دوباره وصل کنید، سپس پورت را دوباره انتخاب کنید.","dl.flash.fail.integrity.title":"فریمور از بررسی عبور نکرد","dl.flash.fail.integrity.cause":"فریمور دانلودشده در بررسی یکپارچگی رد شد.","dl.flash.fail.integrity.fix1":"اتصال اینترنت خود را بررسی کنید.","dl.flash.fail.integrity.fix2":"دوباره امتحان کنید؛ نصب‌کننده یک نسخهٔ تازه دانلود می‌کند.","dl.flash.fail.stopped.title":"نصب متوقف شد","dl.flash.fail.stopped.cause":"هنگام ارتباط با دستگاه مشکلی پیش آمد.","dl.flash.tech.selected":"انتخاب شد. برای کپی Ctrl+C یا ⌘C را بزنید.","flash.btn.update":"به‌روزرسانی rsNode","flash.btn.reinstall":"پاک کردن و نصب دوباره","flash.btn.rsnode":"فلش rsNode","flash.btn.install":"نصب فریمور","flash.board.name":"برد شما","flash.board.sub":"ESP32 یا nRF52 · فریمور rsNode، فریمور RNode یا فایل خودتان","flash.usb.esp32":"برد ESP32","flash.usb.nrf52":"برد nRF52","flash.boot.custom":"برد را به حالت دانلود ببرید: BOOT را نگه دارید، USB را وصل کنید و سپس دکمه را رها کنید.","flash.rsnode.beta.loadFailed":"بارگیری بتا ممکن نشد. دوباره تلاش کنید.","flash.rsnode.beta.sessionFailed":"تأیید نشست بتا ممکن نشد. دوباره تلاش کنید.","flash.rsnode.beta.termsChanged":"شرایط بتا تغییر کرده است. دوباره آن را مرور کنید.","flash.rsnode.beta.listFailed":"فهرست بردهای بتا در دسترس نیست. دوباره تلاش کنید.","flash.rsnode.beta.incomplete":"اطلاعات بستهٔ بتا ناقص است. هیچ فریموری روی برد نوشته نشده است.","flash.rsnode.beta.verifyFailed":"فریمور دانلودشده تأیید نشد. برد را دوباره انتخاب کنید.","flash.rsnode.beta.noManifest":"بستهٔ بتا فایل مانیفست ندارد.","flash.rsnode.beta.wrongPackage":"این بستهٔ کارخانه‌ای rsNode برای برد انتخاب‌شده پشتیبانی نمی‌شود.","flash.rsnode.beta.badLayout":"چیدمان تصویر کارخانه‌ای rsNode معتبر نیست.","flash.rsnode.beta.noImage":"تصویر کارخانه‌ای در بستهٔ rsNode وجود ندارد.","flash.rsnode.beta.imageFailed":"تصویر کارخانه‌ای rsNode تأیید نشد.","flash.rsnode.beta.settingsMismatch":"تراشه یا تنظیمات حافظهٔ فلش در تصویر rsNode با مانیفست آن مطابقت ندارد.","flash.rsnode.beta.unverified":"تأیید فریمور ممکن نشد. بعداً دوباره تلاش کنید.","flash.rsnode.beta.invalid":"درخواست نامعتبر است.","flash.rsnode.beta.wrongSite":"برای ادامه، ابزار فلش را در همین سایت باز کنید.","flash.rsnode.beta.down":"بتای خصوصی فعلاً در دسترس نیست. بعداً دوباره تلاش کنید.","flash.rsnode.beta.tooMany":"تعداد تلاش‌ها بیش از حد مجاز است. بعداً دوباره تلاش کنید.","flash.rsnode.beta.notAccepted":"گذرواژهٔ بتا پذیرفته نشد.","flash.rsnode.beta.enterPassword":"برای ادامه، گذرواژهٔ بتا را وارد کنید.","flash.rsnode.beta.confirmEach":"برای ادامه، هر یک از شرایط بتا را تأیید کنید.","flash.rsnode.beta.confirmFirst":"ابتدا شرایط بتا را تأیید کنید.","flash.rsnode.beta.noBoard":"این برد در بتا در دسترس نیست.","flash.rsnode.beta.noUpdate":"این برد بتا بستهٔ به‌روزرسانی ندارد.","flash.rsnode.beta.unavailable":"بتای خصوصی موقتاً در دسترس نیست. دوباره تلاش کنید.","flash.rsnode.beta.checkTft":"بررسی کردم که دستگاه من V4 R8 TFT است، همان Expansion Kit V2 با صفحهٔ لمسی ۲٫۸ اینچی.","flash.rsnode.beta.checkR8":"بررسی کردم که دستگاه من V4 R8 با تراشهٔ ESP32-S3R8 و نمایشگر کوچک OLED است.","flash.rsnode.beta.checkR2":"بررسی کردم که دستگاه من V4 R2 با تراشهٔ ESP32-S3R2 است.","flash.rsnode.update.noteInstall":"با نصب، هویت گره، فهرست گردانندگان، تنظیمات وای‌فای، جفت‌سازی‌های بلوتوث و تنظیمات Repeater پاک می‌شوند. برای به‌روزرسانی به بستهٔ سازگار و فریموری نیاز دارید که از به‌روزرسانی با USB پشتیبانی کند.","flash.rsnode.update.noteUpdate":"به‌روزرسانی هویت گره، فهرست گردانندگان، وای‌فای، جفت‌سازی‌های بلوتوث و تنظیمات Repeater را نگه می‌دارد؛ نصب آن‌ها را پاک می‌کند. گره را بررسی کنید تا ببینید به‌روزرسانی ممکن است یا نه.","flash.rsnode.update.title":"به‌روزرسانی","flash.rsnode.update.noSupport":"گره پشتیبانی از به‌روزرسانی با USB را گزارش نکرد. گزینهٔ نصب، داده‌های گره را پاک می‌کند.","flash.rsnode.update.otherBoard":"برد یا مدل این گره با انتخاب شما متفاوت است.","flash.rsnode.update.otherKey":"این گره به کلید به‌روزرسانی دیگری اعتماد دارد.","flash.rsnode.update.finishing":"به‌روزرسانی قبلی در حال پایان است؛ یک دقیقهٔ دیگر دوباره تلاش کنید.","flash.rsnode.update.current":"به‌روز است.","flash.rsnode.update.packageFailed":"بستهٔ به‌روزرسانی تأیید نشد. برد را دوباره انتخاب کنید.","flash.rsnode.wait.none30":"تا ۳۰ ثانیه پاسخی از راه USB دریافت نشد. اگر همین حالا فریمور را نصب کرده‌اید، ابتدا RESET را روی برد فشار دهید و دوباره تلاش کنید.","flash.rsnode.wait.noneConnect":"پاسخی از راه USB دریافت نشد. اگر همین حالا فریمور را نصب کرده‌اید، ابتدا RESET را روی برد فشار دهید و دوباره وصل شوید.","flash.rsnode.managers.predates":"این فریمور پیش از افزوده شدن پشتیبانی از گردانندگان منتشر شده است","flash.rsnode.settings.check.name":"نام شبکه‌ای را که می‌خواهید به آن بپیوندید وارد کنید.","flash.rsnode.settings.check.nameLength":"نام شبکه حداکثر ۳۲ بایت است.","flash.rsnode.settings.check.ownPassword":"برای شبکهٔ گره گذرواژه‌ای وارد کنید.","flash.rsnode.settings.check.joinPassword":"گذرواژهٔ شبکه را وارد کنید یا برای شبکهٔ باز، این قسمت را خالی بگذارید.","flash.rsnode.settings.check.ownLength":"شبکهٔ خود گره به گذرواژه‌ای با ۸ تا ۳۲ نویسه نیاز دارد.","flash.rsnode.settings.check.printable":"در گذرواژه از حروف، رقم، فاصله و نمادهای متداول استفاده کنید.","flash.rsnode.settings.check.joinLength":"گذرواژهٔ وای‌فای باید ۸ تا ۳۲ نویسه داشته باشد. برای شبکهٔ باز آن را خالی بگذارید.","flash.rsnode.settings.check.channel":"یک کانال از ۱ تا ۱۳ انتخاب کنید.","flash.rsnode.settings.check.address":"یک نشانی ثابت مانند 192.168.1.50 وارد کنید.","flash.rsnode.settings.check.netmask":"یک ماسک زیرشبکه مانند 255.255.255.0 وارد کنید.","flash.rsnode.settings.check.subnet":"این نشانی متعلق به خود زیرشبکه یا نشانی پخش همگانی آن است.","flash.rsnode.settings.check.gateway":"نشانی دروازه باید در همین زیرشبکه باشد؛ می‌توانید این قسمت را خالی بگذارید.","flash.rsnode.settings.check.dns":"نشانی سرور DNS را وارد کنید یا این قسمت را خالی بگذارید.","flash.rsnode.settings.check.peersPort":"برای همتاها پورتی بین 1 و 65535 به‌جز 80 انتخاب کنید.","flash.rsnode.settings.check.uplinkHost":"نام یا نشانی میزبان بالادست را وارد کنید؛ حداکثر ۶۴ نویسه از حروف، رقم، نقطه، خط تیره و زیرخط.","flash.rsnode.settings.check.uplinkPort":"برای اتصال بالادست پورتی بین 1 و 65535 انتخاب کنید.","flash.rsnode.settings.refused.malformed":"گره نتوانست درخواست را بخواند. چیزی تغییر نکرد.","flash.rsnode.settings.refused.unknown":"این فریمور چنین تنظیمی ندارد.","flash.rsnode.settings.refused.wifi":"گره این تنظیمات وای‌فای را نپذیرفت. برای پیوستن به شبکه، نام آن و گذرواژه‌ای با ۸ تا ۳۲ نویسه لازم است؛ شبکهٔ باز گذرواژه نمی‌خواهد. شبکهٔ خود گره به گذرواژه‌ای با ۸ تا ۳۲ نویسه نیاز دارد.","flash.rsnode.settings.refused.radio":"گره تنظیمات رادیو را نپذیرفت.","flash.rsnode.settings.refused.confirm":"این تغییر را روی دستگاه تأیید کنید.","flash.rsnode.settings.refused.transport":"گره تنظیمات Repeater را نپذیرفت.","flash.rsnode.settings.refused.network":"گره تنظیمات همتاها یا اتصال بالادست را نپذیرفت. پورت‌ها و میزبان بالادست را بررسی کنید.","flash.rsnode.settings.refused.wifiMode":"گره این حالت وای‌فای را نپذیرفت.","flash.rsnode.settings.refused.channel":"گره این کانال را نپذیرفت.","flash.rsnode.settings.refused.name":"گره این نام شبکه را نپذیرفت.","flash.rsnode.settings.refused.password":"گره این گذرواژه را نپذیرفت.","flash.rsnode.settings.refused.address":"گره این نشانی ثابت را نپذیرفت.","flash.rsnode.settings.refused.gateway":"گره این دروازه را نپذیرفت.","flash.rsnode.settings.refused.dns":"گره این سرور DNS را نپذیرفت.","flash.rsnode.settings.refused.peers":"گره تنظیمات همتاها را نپذیرفت.","flash.rsnode.settings.refused.peersPort":"گره این پورت برای همتاها را نپذیرفت.","flash.rsnode.settings.refused.uplink":"گره تنظیمات اتصال بالادست را نپذیرفت.","flash.rsnode.settings.refused.uplinkHost":"گره این میزبان بالادست را نپذیرفت.","flash.rsnode.settings.refused.uplinkPort":"گره این پورت بالادست را نپذیرفت.","flash.rsnode.settings.refused.value":"گره یکی از مقادیر را نپذیرفت.","flash.rsnode.settings.region.none":"انتخاب نشده","flash.rsnode.settings.region.americas":"قارهٔ آمریکا ۹۱۵","flash.rsnode.settings.region.europe":"اروپا ۸۶۸","flash.rsnode.settings.region.australia":"استرالیا ۹۱۵","flash.rsnode.settings.region.asia":"آسیا ۹۲۳","flash.rsnode.facts.notSetUp":"راه‌اندازی نشده","flash.rsnode.settings.notSet":"تعیین نشده","flash.rsnode.facts.on":"روشن","flash.rsnode.facts.off":"خاموش","flash.rsnode.facts.unsupported":"این فریمور پشتیبانی نمی‌کند","flash.rsnode.facts.noneYet":"هنوز هیچ‌کدام","flash.rsnode.facts.none":"ندارد","flash.rsnode.managers.role.owner":"مالک","flash.rsnode.facts.profileSaved":"نمایه ذخیره شد","flash.rsnode.facts.ifacOff":"IFAC خاموش","flash.rsnode.facts.startsRepeater":"در حالت Repeater شروع می‌شود","flash.rsnode.facts.joined":"به شبکه پیوست","flash.rsnode.facts.own":"شبکهٔ خود گره","flash.rsnode.facts.joining":"در حال پیوستن به شبکه…","flash.rsnode.facts.starting":"در حال راه‌اندازی شبکهٔ خود گره…","flash.rsnode.facts.notConfigured":"تنظیم نشده","flash.rsnode.facts.discharging":"در حال تخلیه","flash.rsnode.facts.charging":"در حال شارژ","flash.rsnode.facts.charged":"شارژ کامل","flash.rnode.guide.techo":"یک بار RESET را فشار دهید. وقتی پورت سریال دوباره ظاهر شد، «پایان راه‌اندازی» را بزنید.","flash.rnode.guide.nrf52":"برد را بازنشانی کنید یا کابل را جدا و دوباره وصل کنید. وقتی پورت سریال برگشت، «پایان راه‌اندازی» را بزنید.","flash.rnode.guide.esp32":"پورت سریال RNode را که پس از راه‌اندازی مجدد دستگاه ظاهر شد انتخاب کنید.","flash.rnode.err.noReleases":"هیچ نسخهٔ سازگاری از RNode یافت نشد","flash.rnode.err.info":"دریافت اطلاعات ناموفق بود","flash.rnode.err.download":"دانلود ناموفق بود","flash.rnode.err.size":"اندازهٔ معتبر فایل در فرادادهٔ نسخهٔ رسمی وجود ندارد","flash.rnode.err.sizeMismatch":"اندازهٔ فایل رسمی دانلودشده با فرادادهٔ منتشرکننده مطابقت ندارد","flash.rnode.err.digest":"فرادادهٔ نسخهٔ رسمی هش SHA-256 معتبری از منتشرکننده ندارد","flash.rnode.err.sha":"فایل رسمی دانلودشده با هش SHA-256 منتشرکننده مطابقت ندارد","flash.rsnode.update.offerFrom":"به‌روزرسانی از {from} به {version}. هویت، گردانندگان و تنظیمات حفظ می‌شوند.","flash.rsnode.update.offer":"به‌روزرسانی به {version}. هویت، گردانندگان و تنظیمات حفظ می‌شوند.","flash.rsnode.update.currentWith":"نسخهٔ {version} به‌روز است.","flash.rsnode.update.done":"به نسخهٔ {version} به‌روزرسانی شد. هویت، گردانندگان و تنظیمات حفظ شدند.","flash.rsnode.update.noPackage":"برای این برد بستهٔ به‌روزرسانی وجود ندارد. گزینهٔ نصب، داده‌های گره را پاک می‌کند.","flash.rsnode.update.noPackageFor":"برای {board} بستهٔ به‌روزرسانی وجود ندارد. گزینهٔ نصب، داده‌های گره را پاک می‌کند.","flash.rsnode.settings.saved.offBluetooth":"ذخیره شد. {name} با وای‌فای خاموش دوباره راه‌اندازی شد. بلوتوث دوباره در دسترس است.","flash.rsnode.settings.saved.off":"ذخیره شد. {name} با وای‌فای خاموش دوباره راه‌اندازی شد.","flash.rsnode.settings.saved.notJoined":"ذخیره شد. {name} دوباره راه‌اندازی شد، اما هنوز به «{network}» نپیوسته است. نام شبکه و گذرواژه را بررسی کنید. وضعیت وای‌فای روی صفحهٔ گره دیده می‌شود.","flash.rsnode.settings.saved.notUp":"ذخیره شد. {name} دوباره راه‌اندازی شد، اما شبکهٔ خودش هنوز فعال نیست. وضعیت وای‌فای روی صفحهٔ گره دیده می‌شود.","flash.rsnode.settings.saved.joinedPeers":"ذخیره شد. {name} با نشانی {ip} به «{network}» پیوست. همتاها به نشانی {ip} و پورت {port} وصل می‌شوند.","flash.rsnode.settings.saved.joinedApps":"ذخیره شد. {name} با نشانی {ip} به «{network}» پیوست. برنامه‌ها به نشانی {ip} و پورت {port} وصل می‌شوند.","flash.rsnode.settings.saved.joined":"ذخیره شد. {name} با نشانی {ip} به «{network}» پیوست.","flash.rsnode.settings.saved.ownPeers":"ذخیره شد. {name} شبکهٔ خود به نام «{network}» را با نشانی {ip} راه‌اندازی کرد. همتاها به نشانی {ip} و پورت {port} وصل می‌شوند.","flash.rsnode.settings.saved.ownApps":"ذخیره شد. {name} شبکهٔ خود به نام «{network}» را با نشانی {ip} راه‌اندازی کرد. برنامه‌ها به نشانی {ip} و پورت {port} وصل می‌شوند.","flash.rsnode.settings.saved.own":"ذخیره شد. {name} شبکهٔ خود به نام «{network}» را با نشانی {ip} راه‌اندازی کرد.","flash.rsnode.settings.otherNode":"این گره {name} است، نه {expected}. ابتدا تنظیمات آن را بخوانید.","flash.rsnode.managers.otherNode":"این گره {name} است، نه {expected}","flash.rsnode.settings.noSupport":"گره {name} پشتیبانی از تنظیمات با USB را گزارش نکرد. اتصال را بررسی کنید و از راهنمای نسخهٔ فریمور آن استفاده کنید. گزینهٔ نصب، داده‌های گره را پاک می‌کند.","flash.rsnode.heldAny":"برنامهٔ دیگری از راه بلوتوث یا وای‌فای از {name} استفاده می‌کند. اتصال آن برنامه را قطع کنید یا گزینهٔ USB را روی گره نگه دارید و دوباره ذخیره کنید.","flash.rsnode.held":"برنامهٔ دیگری از راه {via} از {name} استفاده می‌کند. اتصال آن برنامه را قطع کنید یا گزینهٔ USB را روی گره نگه دارید و دوباره ذخیره کنید.","flash.rsnode.settings.busy":"گره {name} در حال پایان دادن به به‌روزرسانی یا ذخیرهٔ داده‌هاست. یک دقیقهٔ دیگر دوباره تلاش کنید.","flash.rsnode.settings.storage":"گره {name} نتوانست ذخیره شدن تنظیمات را تأیید کند. پیش از تلاش دوباره، تنظیمات گره را بخوانید.","flash.rsnode.settings.unsupported":"گره {name} نمی‌تواند این تنظیمات را از راه USB تغییر دهد.","flash.rsnode.settings.failed":"گره {name} تنظیمات را نپذیرفت (کد نتیجه: {code}).","flash.rsnode.settings.noRestart":"گره {name} تنظیمات را ذخیره کرد، اما پس از راه‌اندازی مجدد پاسخ نداد. روی برد RESET را فشار دهید و دوباره بخوانید.","flash.rsnode.settings.notReported":"گره {name} تنظیماتش را گزارش نکرد.","flash.rsnode.managers.notHex":"این مقدار هش در مبنای شانزده نیست: {text}","flash.rsnode.managers.hashLength":"هش باید ۳۲ نویسه در مبنای شانزده داشته باشد؛ مقدار واردشده {count} نویسه دارد: {text}","flash.rsnode.settings.region.other":"منطقهٔ {id}","flash.rsnode.settings.ifacOn":"روشن ({size})","flash.rsnode.facts.ifacOn":"IFAC روشن ({size})","flash.rsnode.facts.board":"برد {byte}","flash.rsnode.facts.image":"تصویر {hash}","flash.rsnode.facts.last":"آخرین سیگنال: {rssi} dBm، {snr} dB","flash.rsnode.facts.airtime":"زمان اشغال کانال: {pct}","flash.rsnode.facts.load":"بار: {pct}","flash.rsnode.facts.noise":"نویز: {dbm} dBm","flash.result.provisionFailed":"راه‌اندازی ناموفق بود: {error}","flash.board.fileType":"یکی از فایل‌های فریمور .bin یا .zip را انتخاب کنید.","flash.rsnode.beta.chooseBoard":"بردتان را انتخاب کنید","flash.rsnode.beta.expired":"مهلت دسترسی شما به بتا تمام شده است. گذرواژه را دوباره وارد کنید.","flash.rsnode.beta.offline":"سرویس بتا پاسخ نمی‌دهد و گذرواژه بررسی نشد. بعداً دوباره تلاش کنید.","flash.rsnode.beta.loading":"در حال بارگیری فهرست بردهای بتا…","flash.rsnode.beta.empty":"هنوز هیچ ساختی از بتا در دسترس نیست. بعداً دوباره تلاش کنید.","flash.rsnode.beta.checking":"در حال بررسی گذرواژه…","flash.rsnode.beta.wrongPassword":"گذرواژه درست نبود. دوباره تلاش کنید.","flash.rsnode.beta.checkingAccess":"در حال بررسی دسترسی…","flash.rsnode.beta.confirmFailed":"تأیید دسترسی ممکن نشد. دوباره تلاش کنید.","flash.rsnode.beta.locking":"در حال قفل کردن بتا…","flash.rsnode.beta.lockFailed":"فریمور از انتخاب خارج شد، اما قفل کردن دسترسی به بتا ممکن نشد. دوباره تلاش کنید.","flash.rsnode.beta.ready":"{version} · {size} · آمادهٔ فلش","flash.rsnode.beta.readyConfirm":"{version} · {size} · برای ادامه، مدل V4 را تأیید کنید.","flash.rsnode.beta.downloading":"در حال دانلود فریمور {board}…","flash.rsnode.update.checking":"در حال بررسی…","flash.rsnode.update.checkAgain":"بررسی دوباره","flash.rsnode.update.check":"بررسی گره","flash.rsnode.update.reading":"در حال خواندن از گره…","flash.rsnode.update.noAnswer":"هیچ rsNode از راه USB پاسخ نداد. اگر گره از rsNode استفاده می‌کند، روی برد RESET را فشار دهید و دوباره بررسی کنید. در هر صورت می‌توانید نصب کنید.","flash.rsnode.update.downloading":"در حال دانلود به‌روزرسانی…","flash.rsnode.update.selectPort":"برای بررسی گره، پورت سریال rsNode را انتخاب کنید.","flash.rsnode.update.downloadFailed":"{error} گزینهٔ نصب همچنان در دسترس است.","flash.rsnode.update.preparing":"در حال آماده‌سازی به‌روزرسانی…","flash.rsnode.update.intro":"شما در حال به‌روزرسانی این گره به rsNode نسخهٔ {version} هستید.","flash.rsnode.update.detail":"هویت، گردانندگان، وای‌فای، جفت‌سازی‌های بلوتوث و تنظیمات Repeater حفظ می‌شوند. گره دوباره راه‌اندازی می‌شود، فریمور جدید را بررسی می‌کند و آن را نگه می‌دارد یا به فریمور فعلی برمی‌گردد.","flash.rsnode.update.action":"به‌روزرسانی","flash.rsnode.update.btnChecking":"در حال بررسی دستگاه…","flash.rsnode.update.connecting":"در حال اتصال به rsNode…","flash.rsnode.update.btnUpdating":"در حال به‌روزرسانی…","flash.rsnode.update.sending":"در حال ارسال به‌روزرسانی… {pct}","flash.rsnode.update.restarting":"در حال راه‌اندازی مجدد با فریمور جدید…","flash.rsnode.update.trial":"گره در حال بررسی فریمور جدید است…","flash.rsnode.update.confirming":"در حال تأیید…","flash.rsnode.update.updated":"به‌روز شد","flash.rnode.pickVariant":"برای ادامه، مدل دستگاه را انتخاب کنید.","flash.rnode.releasesFailed":"خطا در بارگیری نسخه‌ها","flash.rnode.loadingVariants":"در حال بارگیری مدل‌ها…","flash.rnode.loading":"در حال بارگیری مدل‌های RNode…","flash.rnode.selectDevice":"یک دستگاه انتخاب کنید…","flash.rnode.pickSupported":"برای ادامه، یک مدل سازگار RNode انتخاب کنید.","flash.rnode.releaseFailed":"بارگیری نسخه‌های RNode ممکن نشد","flash.rnode.variantsFailed":"خطا در بارگیری مدل‌ها","flash.rnode.error":"خطا: {error}","flash.rnode.downloadingFile":"در حال دانلود {file}…","flash.rnode.downloading":"در حال دانلود فریمور {board} ({size})…","flash.rnode.verifying":"در حال بررسی هش SHA-256 منتشرکننده برای {board}…","flash.rnode.band.low":"{range} (بردهای ۴۳۳ مگاهرتز)","flash.rnode.band.high":"{range} (بردهای ۸۶۸ یا ۹۱۵ مگاهرتز)","flash.rnode.band.other":"بردهای {range}","flash.rnode.band.manual":"مدل دقیق برد را در گزینه‌های پیشرفته تعیین کنید","flash.rnode.band.first":"ابتدا مدل دستگاه را انتخاب کنید","flash.rnode.ready.nrf52":"به‌روزرسانی برنامهٔ nRF52 با DFU؛ بوت‌لودر و EEPROM حفظ می‌شوند","flash.rnode.ready.esp32":"فلش ESP32 در مرورگر","flash.rnode.ready.verified":"هش SHA-256 منتشرکننده تأیید شد","flash.rnode.ready.flash":"آمادهٔ فلش","flash.rnode.board.product":"محصول {byte}","flash.rnode.board.model":"مدل {byte}","flash.rnode.board.unknownProduct":"محصول ناشناخته","flash.rnode.board.unknownModel":"مدل ناشناخته","flash.rnode.board.none":"یک مدل فریمور RNode انتخاب کنید یا برد و باند فرکانسی دقیق را دستی تعیین کنید.","flash.rnode.board.suggestion":"استفاده از پیشنهاد","flash.rnode.board.change":"تغییر","flash.rnode.setup.required":"برای RNode الزامی است","flash.rnode.setup.after":"راه‌اندازی پس از فلش","flash.rnode.setup.completing":"در حال تکمیل هویت RNode…","flash.rnode.setup.identity":"در حال نوشتن هویت RNode…","flash.rnode.setup.finalizing":"در حال تکمیل راه‌اندازی RNode…","flash.rnode.setup.hash":"در حال نوشتن هش فریمور…","flash.rnode.setup.verifyHash":"در حال بررسی هش فریمور…","flash.rnode.tools.needSerialSetup":"راه‌اندازی RNode به Web Serial نیاز دارد (Chrome یا Edge روی رایانه).","flash.rnode.tools.noBoard":"برد هنوز شناسایی نشده است. یک مدل فریمور RNode انتخاب کنید یا «تغییر» را بزنید و برد و باند فرکانسی را دستی تعیین کنید.","flash.rnode.tools.finishing":"پایان راه‌اندازی RNode…","flash.rnode.tools.cancelled":"راه‌اندازی لغو شد.","flash.rnode.tools.verifying":"در حال بررسی RNode…","flash.rnode.tools.complete":"راه‌اندازی RNode کامل شد","flash.rnode.tools.resetRetry":"برد را بازنشانی کنید و دوباره تلاش کنید.","flash.rnode.tools.failed":"راه‌اندازی RNode ناموفق بود.","flash.rnode.tools.needSerial":"به Web Serial نیاز است (Chrome یا Edge روی رایانه).","flash.rnode.tools.loadFirst":"ابتدا در گام ۲ فریمور را بارگذاری کنید تا هش آن محاسبه شود، سپس این کار را تکرار کنید.","flash.rnode.tools.writingHash":"در حال نوشتن هش فریمور…","flash.rnode.tools.hashVerified":"هش فریمور تأیید شد.","flash.rnode.tools.hashFailed":"ثبت هش ناموفق بود.","flash.rnode.tools.adopting":"در حال پذیرش هش فریمور در حال اجرا…","flash.rnode.tools.adopted":"هش ذخیره‌شده با فریمور در حال اجرا مطابقت دارد.","flash.rnode.tools.adoptFailed":"پذیرش هش ناموفق بود.","flash.rnode.tools.reading":"در حال خواندن وضعیت RNode…","flash.rnode.tools.read":"وضعیت RNode خوانده شد.","flash.rnode.tools.readFailed":"خواندن وضعیت ناموفق بود.","flash.rnode.tools.idleConfirm":"رادیوی این RNode تا زمان تنظیم به‌دست Ratspeak غیرفعال بماند؟\n\nتنظیمات ذخیره‌شدهٔ راه‌اندازی رادیو پاک می‌شوند تا رادیو غیرفعال بماند و Ratspeak یا میزبان دیگری در Reticulum آن را تنظیم کند.","flash.rnode.tools.idling":"در حال غیرفعال نگه داشتن رادیو…","flash.rnode.tools.idle":"تنظیمات راه‌اندازی رادیو پاک شدند.","flash.rnode.tools.idleFailed":"پاک کردن تنظیمات راه‌اندازی رادیو ممکن نشد.","flash.rsnode.managers.kind.lxmf":"نشانی LXMF","flash.rsnode.managers.kind.identity":"هش هویت","flash.rsnode.managers.role.admin":"مدیر","flash.rsnode.managers.change.owner":"تعیین مالک","flash.rsnode.whenFlashed":"پس از پایان فلش در دسترس است.","flash.rsnode.managers.nothing":"هنوز چیزی برای ذخیره نیست. یک گرداننده اضافه کنید.","flash.rsnode.managers.summary":"تغییرات هنگام ذخیره: {changes}.","flash.rsnode.managers.duplicate":"این گرداننده از قبل در فهرست است.","flash.rsnode.managers.max":"هر گره حداکثر ۴ گرداننده می‌پذیرد.","flash.rsnode.managers.done":"انجام شد","flash.rsnode.managers.add":"افزودن","flash.rsnode.managers.state.removed":"حذف شد","flash.rsnode.managers.state.new":"جدید","flash.rsnode.managers.state.changed":"تغییر کرد","flash.rsnode.managers.undo":"واگردانی","flash.rsnode.managers.undoOwner":"لغو حذف مالک {hash}","flash.rsnode.managers.undoAdmin":"لغو حذف مدیر {hash}","flash.rsnode.managers.edit":"ویرایش","flash.rsnode.managers.editOwner":"ویرایش مالک {hash}","flash.rsnode.managers.editAdmin":"ویرایش مدیر {hash}","flash.rsnode.managers.remove":"حذف","flash.rsnode.managers.removeOwner":"حذف مالک {hash}","flash.rsnode.managers.removeAdmin":"حذف مدیر {hash}","flash.rsnode.managers.empty":"با نشانی LXMF خود در Ratspeak، خودتان را به‌عنوان مالک اضافه کنید یا فهرست گردانندگان را از روی گره بخوانید.","flash.rsnode.managers.none":"هنوز گرداننده‌ای نیست. با نشانی LXMF خود در Ratspeak، خودتان را به‌عنوان مالک اضافه کنید.","flash.rsnode.managers.unsupported":"این فریمور از گردانندگان پشتیبانی نمی‌کند.","flash.rsnode.saving":"در حال ذخیره…","flash.rsnode.managers.save":"ذخیره در rsNode","flash.rsnode.reading":"در حال خواندن…","flash.rsnode.managers.read":"خواندن از گره","flash.rsnode.managers.crowded":"هر گره حداکثر ۴ گرداننده می‌پذیرد. برای ذخیره یکی را حذف کنید.","flash.rsnode.port.busyCheck":"باز کردن پورت سریال ممکن نشد. برنامه‌های دیگری را که از آن استفاده می‌کنند ببندید، مانند Ratspeak یا مانیتور سریال، و دوباره بررسی کنید.","flash.rsnode.port.busyConnect":"باز کردن پورت سریال ممکن نشد. برنامه‌های دیگری را که از آن استفاده می‌کنند ببندید، مانند Ratspeak یا مانیتور سریال، و دوباره وصل شوید.","flash.rsnode.port.busy":"باز کردن پورت سریال ممکن نشد. برنامه‌های دیگری را که از آن استفاده می‌کنند ببندید، مانند Ratspeak یا مانیتور سریال، و دوباره تلاش کنید.","flash.rsnode.port.lost":"اتصال USB گره قطع شد.","flash.rsnode.managers.readBack":"داده‌های گره را بخوانید تا وضعیت فعلی آن را ببینید.","flash.rsnode.managers.busy":"گره {name} در حال پایان دادن به به‌روزرسانی یا ذخیرهٔ هویت خود است. یک دقیقهٔ دیگر دوباره تلاش کنید.","flash.rsnode.managers.listFull":"فهرست گردانندگان {name} پر است.","flash.rsnode.managers.listFullHint":"هر گره حداکثر ۴ گرداننده می‌پذیرد. فهرست فعلی را از روی گره بخوانید.","flash.rsnode.managers.refusedBeta":"گره {name} تغییر را نپذیرفت. در این بتا فقط در حالت RNode می‌توان گردانندگان را تغییر داد. روی دستگاه از حالت Repeater خارج شوید و دوباره ذخیره کنید.","flash.rsnode.managers.refused":"گره {name} این گرداننده را نپذیرفت.","flash.rsnode.managers.noSuch":"گره {name} چنین گرداننده‌ای ندارد.","flash.rsnode.persona.repeater":"گره همچنان در حالت Repeater کار می‌کند.","flash.rsnode.persona.home":"گره به منوی اصلی برگشته است.","flash.rsnode.managers.noIdentity":"گره هنوز هویتی ندارد. با افزودن نخستین گرداننده، هویت ساخته می‌شود.","flash.rsnode.managers.nearby":"به‌روزرسانی فقط از گردانندگان نزدیک پذیرفته می‌شود.","flash.rsnode.managers.effectNow":"Repeater در حال اجرا اکنون از فهرست جدید گردانندگان استفاده می‌کند.","flash.rsnode.managers.effectLater":"گردانندگان فقط در حالت Repeater می‌توانند گره را مدیریت کنند.","flash.rsnode.managers.reading":"در حال خواندن از rsNode…","flash.rsnode.managers.saving":"در حال ذخیره در rsNode…","flash.rsnode.wait.plain":"در انتظار rsNode…","flash.rsnode.wait.reset":"در انتظار rsNode. {takeover}","flash.rsnode.readingNode":"در حال خواندن از {name}…","flash.rsnode.savingNode":"در حال ذخیره در {name}…","flash.rsnode.showing":"در حال نمایش {name}.","flash.rsnode.managers.saved":"در {name} ذخیره شد.","flash.rsnode.selectPort":"برای ادامه پورت سریال rsNode را انتخاب کنید.","flash.rsnode.managers.copy":"کپی","flash.rsnode.settings.readAgain":"خواندن دوباره","flash.rsnode.settings.read":"خواندن تنظیمات","flash.rsnode.settings.personaRepeater":"گره {name} در حالت Repeater کار می‌کند. اتصال بالادست و همتاهایی که گره می‌پذیرد از وای‌فای استفاده می‌کنند.","flash.rsnode.settings.personaRnode":"گره {name} در حالت RNode کار می‌کند. برنامه‌ها از راه وای‌فای به پورت TCP شمارهٔ {port} وصل می‌شوند.","flash.rsnode.settings.save":"ذخیره و راه‌اندازی مجدد","flash.rsnode.settings.nameOptional":"نام شبکه (اختیاری)","flash.rsnode.settings.name":"نام شبکه","flash.rsnode.settings.offRepeater":"بدون وای‌فای، Repeater فقط از راه LoRa بازپخش می‌کند.","flash.rsnode.settings.offRnode":"برنامه‌ها از راه USB یا بلوتوث وصل می‌شوند.","flash.rsnode.settings.onRepeater":"اتصال بالادست و همتاهای Repeater از این شبکه استفاده می‌کنند.","flash.rsnode.settings.ownRnode":"تا وقتی وای‌فای روشن است، بلوتوث خاموش می‌ماند. برنامه‌ها به پورت TCP شمارهٔ {port} وصل می‌شوند. شبکهٔ گره دسترسی به اینترنت نمی‌دهد.","flash.rsnode.settings.joinRnode":"تا وقتی وای‌فای روشن است، بلوتوث خاموش می‌ماند. برنامه‌ها به پورت TCP شمارهٔ {port} وصل می‌شوند.","flash.rsnode.settings.set":"تعیین شده","flash.rsnode.settings.passwordOwn":"۸ تا ۳۲ نویسه. دستگاه‌ها برای پیوستن به شبکهٔ گره به آن نیاز دارند.","flash.rsnode.settings.passwordJoin":"۸ تا ۳۲ نویسه؛ برای شبکهٔ باز خالی بگذارید.","flash.rsnode.settings.summary":"با ذخیره، {name} با تنظیمات جدید راه‌اندازی مجدد می‌شود.","flash.rsnode.settings.nothing":"هنوز چیزی برای ذخیره نیست.","flash.rsnode.settings.notRsnode":"این گره به‌عنوان RNode پاسخ می‌دهد، اما به‌عنوان rsNode نه. برای تنظیمات به فریمور rsNode نیاز است.","flash.rsnode.settings.saving":"در حال ذخیرهٔ تنظیمات…","flash.rsnode.settings.reading":"در حال خواندن تنظیمات…","flash.rsnode.restarting":"در حال راه‌اندازی مجدد…","flash.rsnode.settings.waitingWifi":"در انتظار وای‌فای…","flash.rsnode.settings.unchanged":"چیزی تغییر نکرد: {name} از قبل همین تنظیمات را داشت.","flash.rsnode.wait.takeover":"اگر همین حالا فریمور را نصب کرده‌اید، ابتدا RESET را روی برد فشار دهید.","flash.rsnode.device.disconnect":"قطع اتصال","flash.rsnode.device.cancel":"لغو","flash.rsnode.device.connect":"اتصال","flash.rsnode.device.notRsnode":"این گره به‌عنوان RNode پاسخ می‌دهد، اما به‌عنوان rsNode نه. نمایش زنده به فریمور rsNode نیاز دارد.","flash.rsnode.device.quiet":"گره دیگر از راه USB پاسخ نمی‌دهد. کابل را بررسی کنید یا روی برد RESET را فشار دهید، سپس دوباره وصل شوید.","flash.rsnode.device.noScreen":"نمایش صفحه برای این برد در دسترس نیست","flash.rsnode.device.live":"زنده","flash.rsnode.device.statusOnly":"فقط وضعیت","flash.rsnode.device.paused":"مکث","flash.rsnode.device.dark":"زنده · صفحه خاموش","flash.rsnode.device.fps":"زنده · {fps} فریم بر ثانیه","flash.rsnode.device.connectingScreen":"در حال اتصال","flash.rsnode.device.connecting":"در حال اتصال…","flash.rsnode.device.restartRefused":"گره {name} دوباره راه‌اندازی نشد؛ برنامهٔ دیگری از آن استفاده می‌کند. راه‌اندازی مجدد را روی خود دستگاه انجام دهید.","flash.rsnode.device.connectToSee":"برای دیدن صفحه متصل شوید","flash.rsnode.device.notConnected":"وصل نیست","flash.rsnode.device.disconnecting":"در حال قطع اتصال…","flash.rsnode.device.released":"اتصال قطع شد تا کار دیگری بتواند از پورت USB استفاده کند. برای ادامه دوباره وصل شوید.","flash.rsnode.device.pairRefused":"گره {name} جفت‌سازی را آغاز نکرد؛ برنامهٔ دیگری از آن استفاده می‌کند. اتصال آن برنامه را قطع کنید یا جفت‌سازی را روی دستگاه آغاز کنید.","flash.rsnode.device.pairing":"جفت‌سازی آغاز شد. تا ۲ دقیقهٔ دیگر {name} را در فهرست بلوتوث برنامه انتخاب کنید و کد روی صفحهٔ گره را وارد کنید. بلوتوث روشن می‌ماند.","flash.rsnode.device.restartRepeater":"گره {name} دوباره راه‌اندازی شود؟\n\nچند ثانیهٔ دیگر در حالت Repeater شروع به کار می‌کند.","flash.rsnode.device.restartRnode":"گره {name} دوباره راه‌اندازی شود؟\n\nچند ثانیهٔ دیگر در حالت RNode شروع به کار می‌کند.","flash.rsnode.device.restartingNode":"گره {name} در حال راه‌اندازی مجدد است. چند ثانیهٔ دیگر دوباره وصل شوید.","flash.rsnode.device.saved":"ذخیره شد","flash.rsnode.device.screenshot":"ذخیرهٔ تصویر صفحه","flash.rsnode.device.copyDetails":"کپی جزئیات","flash.rsnode.device.copyFailed":"کپی خودکار ممکن نشد. جزئیات زیر انتخاب شده‌اند: Ctrl+C یا ⌘C را بزنید.","flash.advanced.setupRequired":"راه‌اندازی RNode لازم است","flash.advanced.setupOn":"راه‌اندازی RNode فعال است","flash.flow.chooseFirmware":"فریمور را انتخاب کنید","flash.flow.finishSetup":"پایان راه‌اندازی","flash.flow.rnodeSetup":"راه‌اندازی RNode","flash.note.finishSetup":"فریمور نصب شد. برد را بازنشانی کنید، سپس راه‌اندازی RNode را به پایان برسانید.","flash.note.setupAttention":"فریمور نوشته شد، اما راه‌اندازی RNode نیاز به بررسی دارد.","flash.note.setupVerified":"فلش کامل شد. راه‌اندازی RNode تأیید شد.","flash.note.rsnodeTools":"rsNode نصب شد. روی برد RESET را فشار دهید. با ابزارهای زیر می‌توانید داده‌های گره را بخوانید و آن را تنظیم کنید.","flash.note.rsnodeInstalled":"rsNode نصب شد. روی برد RESET را فشار دهید.","flash.note.fwFailed":"بارگیری فریمور ممکن نشد. آن را دوباره انتخاب کنید.","flash.note.readyUpdate":"آمادهٔ به‌روزرسانی. هویت، گردانندگان و تنظیمات حفظ می‌شوند. تا وقتی گره به‌روزرسانی را تأیید نکرده، این زبانه را باز نگه دارید.","flash.note.ready":"آمادهٔ نوشتن فریمور. تا پایان کار این زبانه را باز نگه دارید.","flash.note.selectBoth":"برای ادامه یک دستگاه USB و یک فریمور انتخاب کنید.","flash.note.chooseFirmware":"فایل .bin یا .zip بارگذاری کنید یا فریمور rsNode یا RNode را انتخاب کنید.","flash.rsnode.flow.unlock":"برای ادامه قفل بتای rsNode را باز کنید.","flash.rsnode.flow.terms":"برای ادامه شرایط بتا را بپذیرید.","flash.rsnode.flow.board":"برد موردنظر برای فلش را انتخاب کنید. اگر گره از قبل rsNode دارد، برای مدیریت آن از ابزارهای زیر استفاده کنید.","flash.rsnode.flow.loading":"در حال بارگیری فریمور برد شما…","flash.rsnode.flow.failed":"بارگیری فریمور ممکن نشد. برد را دوباره انتخاب کنید.","flash.rsnode.flow.variant":"برای ادامه مدل V4 را تأیید کنید.","flash.nrf52.packet":"در حال نوشتن بستهٔ فریمور {part}/{parts}…","flash.nrf52.starting":"در حال آغاز به‌روزرسانی فریمور…","flash.nrf52.init":"در حال ارسال بستهٔ آغازین…","flash.nrf52.validating":"در حال بررسی انتقال فریمور…","flash.nrf52.activating":"در حال فعال‌سازی فریمور…","flash.nrf52.package":"در حال آماده‌سازی بستهٔ فریمور…","flash.nrf52.device":"در حال آماده‌سازی دستگاه…","flash.nrf52.opening":"در حال باز کردن پورت سریال…","flash.nrf52.waitActivation":"در انتظار فعال شدن nRF52…","flash.nrf52.waitReboot":"در انتظار راه‌اندازی مجدد RNode…","flash.rsnode.install.risk":"همهٔ داده‌های گره پاک می‌شوند: هویت، گردانندگان، وای‌فای، جفت‌سازی‌های بلوتوث و تنظیمات Repeater.","flash.rsnode.install.intro":"شما در حال نصب فریمور بتای خصوصی rsNode هستید.","flash.status.updateCancelled":"به‌روزرسانی لغو شد","flash.status.installCancelled":"نصب لغو شد","flash.status.booting":"در حال راه‌اندازی فریمور RNode…","flash.status.provisioning":"در حال آماده‌سازی EEPROM دستگاه RNode…","flash.status.setupVerified":"راه‌اندازی RNode تأیید شد","flash.status.installed":"فریمور نصب شد","flash.status.setupAttention":"راه‌اندازی RNode نیاز به بررسی دارد","flash.result.rnodeReady":"RNode آماده است","flash.fail.busy.cause":"مرورگر برد را پیدا کرد اما نتوانست اتصال را باز کند. احتمالاً برنامهٔ دیگری از آن استفاده می‌کند.","flash.fail.busy.fix2":"برد را جدا کنید، دوباره وصل کنید و پورت را دوباره انتخاب کنید.","flash.fail.silent.title":"برد پاسخ نداد","flash.fail.wrong.title":"به نظر می‌رسد این برد همان مدل انتخابی شما نیست","flash.fail.wrong.fix2":"برد انتخابی را بررسی کنید.","flash.fail.beta.title":"مهلت دسترسی شما به بتا تمام شده است","flash.fail.beta.cause":"قفل بتای rsNode را دوباره باز کنید و سپس نصب کنید.","flash.result.installed":"فریمور نصب شد","flash.result.attention":"فریمور نصب شد؛ راه‌اندازی RNode را بررسی کنید","flash.result.attentionDesc":"فریمور نوشته شد، اما راه‌اندازی RNode به پایان نرسید. اگر دستگاه درست بالا نمی‌آید، با ابزارهای RNode در پایین، راه‌اندازی را دوباره انجام دهید. آخرین خطا: {error}","flash.result.finishSetup":"پایان راه‌اندازی","flash.rsnode.facts.admins":{"one":"{n} مدیر","other":"{n} مدیر"},"flash.rsnode.facts.ownerAdmins":{"one":"مالک و {n} مدیر","other":"مالک و {n} مدیر"},"flash.rnode.releaseOption":{"one":"{version} · {n} مدل","other":"{version} · {n} مدل"},"flash.rnode.release":{"one":"نسخهٔ {version} · {n} مدل سازگار","other":"نسخهٔ {version} · {n} مدل سازگار"},"flash.rsnode.managers.change.add":{"one":"افزودن {n} مدیر","other":"افزودن {n} مدیر"},"flash.rsnode.managers.change.change":{"one":"تغییر {n} مدیر","other":"تغییر {n} مدیر"},"flash.rsnode.managers.change.remove":{"one":"حذف {n} گرداننده","other":"حذف {n} گرداننده"}}}</script><script src="/lang/assets/site/i18n.js"></script>
+    <script src="/lang/assets/site/lang.js" defer></script>
+</head>
+<body class="is-flash-page">
+
+<a class="skip" href="#main" data-i18n="common.skip.content">رفتن به محتوا</a>
+<div class="band">
+    <header class="topbar" id="navbar">
+      <a class="brand" href="/lang/fa/" aria-label="صفحهٔ اصلی Ratspeak" data-i18n-attr="aria-label:common.brand.home"><svg class="brand-mark" aria-hidden="true" focusable="false"><use href="/lang/assets/ratspeak-mark.svg#mark"/></svg><span class="brand-word">⁦ratspeak⁩</span></a>
+      <nav aria-label="پیمایش اصلی" data-i18n-attr="aria-label:common.nav.main-navigation"><a href="/lang/fa/map.html" data-i18n="common.nav.map">نقشه</a><a href="https://docs.ratspeak.org/" data-i18n="common.nav.docs">مستندات</a><a href="/lang/fa/#play" data-i18n="common.nav.how-it-works">چطور کار می‌کند</a></nav>
+      <div class="topbar-end"><!--lang-menu--><div class="lang-menu" data-lang-menu data-cookie="rs-lang" data-max-age="31536000"><button type="button" class="lang-trigger" id="lang-trigger" aria-expanded="false" aria-controls="lang-panel"><span class="sr-only">زبان: فارسی</span><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-ir-lion-sun"/></svg><span class="lang-trigger__code" aria-hidden="true">FA</span><svg class="lang-trigger__chevron" viewBox="0 0 10 6" aria-hidden="true" focusable="false"><path d="M1 1l4 4 4-4"/></svg></button><div class="lang-panel" id="lang-panel" hidden><p class="lang-panel__label" id="lang-panel-label">زبان</p><ul aria-labelledby="lang-panel-label"><li><a href="/lang/en/flash.html" hreflang="en" data-lang="en" data-same-page><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-us"/></svg><span class="lang-name">انگلیسی</span></a></li><li><a href="/lang/es/flash.html" hreflang="es" data-lang="es" data-same-page><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-es"/></svg><span class="lang-name">اسپانیایی</span></a></li><li><a href="/lang/ru/flash.html" hreflang="ru" data-lang="ru" data-same-page><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-ru"/></svg><span class="lang-name">روسی</span></a></li><li><a href="/lang/uk/flash.html" hreflang="uk" data-lang="uk" data-same-page><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-ua"/></svg><span class="lang-name">اوکراینی</span></a></li><li><a href="/lang/pt/flash.html" hreflang="pt-BR" data-lang="pt-BR" data-same-page><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-br"/></svg><span class="lang-name">پرتغالی</span></a></li><li><a href="/lang/fa/flash.html" hreflang="fa" data-lang="fa" data-same-page aria-current="true"><svg class="flag" aria-hidden="true" focusable="false"><use href="#flag-ir-lion-sun"/></svg><span class="lang-name">فارسی</span><svg class="lang-check" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8.5l3.2 3L13 4.5"/></svg></a></li></ul></div><svg class="flag-sprite" aria-hidden="true" focusable="false"><symbol id="flag-us" viewBox="0 0 24 18"><path fill="#fff" d="M0 0h24v18H0z"/><path fill="#b22234" d="M0 0.000h24v1.385H0zM0 2.769h24v1.385H0zM0 5.538h24v1.385H0zM0 8.308h24v1.385H0zM0 11.077h24v1.385H0zM0 13.846h24v1.385H0zM0 16.615h24v1.385H0z"/><path fill="#3c3b6e" d="M0 0h10.4v9.692H0z"/><path fill="#fff" d="M1.15 1.25m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M3.15 1.25m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M5.15 1.25m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M7.15 1.25m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M9.15 1.25m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M2.15 3.55m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M4.15 3.55m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M6.15 3.55m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M8.15 3.55m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M1.15 5.85m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M3.15 5.85m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M5.15 5.85m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M7.15 5.85m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M9.15 5.85m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M2.15 8.15m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M4.15 8.15m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M6.15 8.15m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0M8.15 8.15m-.45 0a.45 .45 0 1 0 .9 0a.45 .45 0 1 0-.9 0"/></symbol><symbol id="flag-es" viewBox="0 0 24 18"><path fill="#aa151b" d="M0 0h24v18H0z"/><path fill="#f1bf00" d="M0 4.5h24v9H0z"/><path fill="#aa151b" d="M6.3 7.1h2.8v2.3c0 1-.6 1.7-1.4 1.7s-1.4-.7-1.4-1.7z"/><path fill="#aa151b" d="M6.2 6.1l.5.6.5-.7.5.7.5-.7.5.7.5-.6v.7H6.2z"/></symbol><symbol id="flag-ru" viewBox="0 0 24 18"><path fill="#fff" d="M0 0h24v6H0z"/><path fill="#0039a6" d="M0 6h24v6H0z"/><path fill="#d52b1e" d="M0 12h24v6H0z"/></symbol><symbol id="flag-ua" viewBox="0 0 24 18"><path fill="#0057b7" d="M0 0h24v9H0z"/><path fill="#ffd700" d="M0 9h24v9H0z"/></symbol><symbol id="flag-br" viewBox="0 0 24 18"><path fill="#009c3b" d="M0 0h24v18H0z"/><path fill="#ffdf00" d="M12 1.7L22.2 9 12 16.3 1.8 9z"/><circle cx="12" cy="9" r="4.15" fill="#002776"/><path fill="#fff" d="M7.96 8.05a8.4 8.4 0 0 1 8.07 2.3l-.24.62a7.6 7.6 0 0 0-7.9-2.18z"/></symbol><symbol id="flag-ir-lion-sun" viewBox="0 0 24 18"><path fill="#239f40" d="M0 0h24v6H0z"/><path fill="#fff" d="M0 6h24v6H0z"/><path fill="#da0000" d="M0 12h24v6H0z"/><path fill="#ffc425" d="M12.90 6.15L13.20 6.83L13.74 6.32L13.76 7.06L14.46 6.79L14.19 7.49L14.93 7.51L14.42 8.05L15.10 8.35L14.42 8.65L14.93 9.19L14.19 9.21L14.46 9.91L13.76 9.64L13.74 10.38L13.20 9.87L12.90 10.55L12.60 9.87L12.06 10.38L12.04 9.64L11.34 9.91L11.61 9.21L10.87 9.19L11.38 8.65L10.70 8.35L11.38 8.05L10.87 7.51L11.61 7.49L11.34 6.79L12.04 7.06L12.06 6.32L12.60 6.83z"/><path fill="#b8770a" d="M8.2 8.7L8.5 8.2C8.6 7.6 9.3 7.3 9.9 7.5C10.6 7.7 10.9 8.3 10.8 8.7C12 8.5 13.9 8.5 15 8.8C15.4 8.9 15.5 9.4 15.4 9.9L15.3 11.7H14.8L14.7 10.6H14.3L14.2 11.7H13.7L13.6 10.4C12.5 10.5 11.4 10.5 10.7 10.4L10.6 11.7H10.1L10 10.6L9.7 10.5L9.6 11.7H9.1V10.2C8.8 10 8.6 9.6 8.6 9.3L8.2 9.1z"/><path fill="none" stroke="#b8770a" stroke-width=".42" stroke-linecap="round" d="M15.3 9.1C16.2 8.9 16.3 7.9 15.8 7.4"/><circle cx="15.8" cy="7.35" r=".38" fill="#b8770a"/><path fill="none" stroke="#5c3d00" stroke-width=".42" stroke-linecap="round" d="M8 9.3Q7.3 7.9 7.7 6.4"/><path fill="none" stroke="#5c3d00" stroke-width=".4" stroke-linecap="round" d="M7.5 9.05h.9"/></symbol></svg></div><!--/lang-menu--><a class="header-download" href="/lang/fa/download.html" data-i18n="common.nav.download">دانلود</a></div>
+    </header>
+    <section class="flash-hero dl-hero" aria-labelledby="fl-hero-title">
+        <h1 id="fl-hero-title" data-i18n="flash.hero.flash-a-board">برد را فلش کنید.</h1>
+        <p class="dl-hero__sub" data-i18n="flash.hero.install-rsnode-private-beta">در ⁦Chrome⁩ یا ⁦Edge⁩ روی رایانه، ⁦rsNode⁩ (بتای خصوصی)، فریمور رسمی ⁦RNode⁩ یا فایل ⁦.bin⁩ یا ⁦.zip⁩ خودتان را روی یک برد ⁦LoRa⁩ سازگار نصب کنید.</p>
+        <p class="dl-hero__meta" data-i18n="flash.hero.want-the-app-or">برنامه یا دستگاه دستی سازگار می‌خواهید؟ <a href="/lang/en/download.html">صفحهٔ دانلود <span aria-hidden="true">←</span></a></p>
+    </section>
+</div>
+
+<main class="flash-container" id="main">
+
+        <!-- Browser warning (only visible on non-WebSerial browsers) -->
+        <div class="browser-warning" id="browserWarning">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span data-i18n="flash.warning.in-browser-flashing-needs">برای فلش در مرورگر، به نسخهٔ به‌روز <strong>⁦Chrome⁩</strong> یا <strong>⁦Edge⁩</strong> با پشتیبانی از ⁦Web Serial⁩ نیاز دارید. این صفحه را روی رایانه در یکی از این دو مرورگر باز کنید.</span>
+        </div>
+
+    <!-- Flash Interface -->
+    <div class="flash-interface active" id="flashInterface">
+
+        <div class="flash-flow flash-flow--standalone" role="list" aria-label="پیشرفت نصب" data-i18n-attr="aria-label:flash.steps.install-progress">
+            <div class="flash-flow__item is-active" id="flowConnect" role="listitem">
+                <span class="flash-flow__index">⁦1⁩</span>
+                <span class="flash-flow__copy">
+                    <span class="flash-flow__label" data-i18n="flash.steps.connect">اتصال</span>
+                    <span class="flash-flow__state" id="flowConnectState" data-i18n="flash.steps.not-connected">وصل نیست</span>
+                </span>
+            </div>
+            <div class="flash-flow__item is-blocked" id="flowFirmware" role="listitem">
+                <span class="flash-flow__index">⁦2⁩</span>
+                <span class="flash-flow__copy">
+                    <span class="flash-flow__label" data-i18n="flash.steps.firmware">فریمور</span>
+                    <span class="flash-flow__state" id="flowFirmwareState" data-i18n="flash.steps.not-started">شروع نشده</span>
+                </span>
+            </div>
+            <div class="flash-flow__item is-blocked" id="flowFlash" role="listitem">
+                <span class="flash-flow__index">⁦3⁩</span>
+                <span class="flash-flow__copy">
+                    <span class="flash-flow__label" data-i18n="flash.steps.install">نصب</span>
+                    <span class="flash-flow__state" id="flowFlashState" data-i18n="flash.steps.not-started">شروع نشده</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="flash-panel flash-panel--custom" id="flashPanel" data-accent="amber">
+            <div class="flash-panel__header">
+                <div class="flash-panel__identity">
+                    <div class="flash-panel__device-icon" id="panelIcon">
+                        <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><use href="/lang/assets/site/devices.svg#device-board"/></svg>
+                    </div>
+                    <div class="flash-panel__copy">
+                        <span class="flash-panel__eyebrow" data-i18n="flash.steps.flash-firmware">فلش فریمور</span>
+                        <div class="flash-panel__device-name" id="panelName" data-i18n="flash.steps.your-board">برد شما</div>
+                        <div class="flash-panel__device-sub" id="panelSub" data-i18n="flash.steps.esp32-or-nrf52-rsnode">⁦ESP32⁩ یا ⁦nRF52⁩ · فریمور ⁦rsNode⁩، فریمور ⁦RNode⁩ یا فایل خودتان</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flash-steps">
+                <!-- Step 1: Connect -->
+                <div class="flash-step">
+                    <div class="flash-step__number" data-i18n="flash.steps.step-1">گام ۱</div>
+                    <div class="flash-step__title" data-i18n="flash.steps.connect-your-device">دستگاه را وصل کنید</div>
+                    <button type="button" class="connect-btn connect-btn--idle" id="connectBtn" onclick="connectDevice()" data-i18n="flash.steps.select-usb-device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6"/><path d="M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0V8z"/><path d="M12 18v4"/></svg> انتخاب دستگاه ⁦USB⁩</button>
+                    <div class="connect-device-info" id="deviceInfo">
+                        <span class="connect-status__dot connect-status__dot--off" id="statusDot"></span>
+                        <span class="connect-status__text" id="statusText" data-i18n="flash.steps.no-device-selected">دستگاهی انتخاب نشده</span>
+                    </div>
+                    <p class="connect-help" id="connectHelp" role="status" hidden></p>
+                </div>
+
+                <!-- Step 2: Firmware -->
+                <div class="flash-step">
+                    <div class="flash-step__number" data-i18n="flash.steps.step-2">گام ۲</div>
+                    <div class="flash-step__title" id="firmwareTitle" data-i18n="flash.steps.choose-firmware">فریمور را انتخاب کنید</div>
+
+                    <!-- Custom firmware sources -->
+                    <div id="firmwareCustom" style="display: none;">
+                        <div class="custom-source-tabs" role="tablist" aria-label="منبع فریمور" data-i18n-attr="aria-label:flash.steps.firmware-source">
+                            <button type="button" class="custom-source-tab is-active" id="sourceTabUpload" data-source="upload" role="tab" aria-controls="customSourceUpload" aria-selected="true" tabindex="0" data-i18n="flash.steps.upload"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> بارگذاری فایل</button>
+                            <button type="button" class="custom-source-tab" id="sourceTabRsnode" data-source="rsnode" role="tab" aria-controls="customSourceRsnode" aria-selected="false" tabindex="-1">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="2"/><path d="M7 7a7 7 0 000 10M17 7a7 7 0 010 10M4 4a11 11 0 000 16M20 4a11 11 0 010 16"/></svg>
+                                ⁦rsNode⁩
+                            </button>
+                            <button type="button" class="custom-source-tab" id="sourceTabRnode" data-source="rnode" role="tab" aria-controls="customSourceRnode" aria-selected="false" tabindex="-1">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                                ⁦RNode⁩
+                            </button>
+                        </div>
+
+                        <!-- Mode A: Upload your own -->
+                        <div class="custom-source-pane" id="customSourceUpload" role="tabpanel" aria-labelledby="sourceTabUpload">
+                            <div class="drop-zone" id="dropZone">
+                                <div class="drop-zone__prompt">
+                                    <div class="drop-zone__icon">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                    </div>
+                                    <div class="drop-zone__text" data-i18n="flash.upload.drop-a-firmware-file">فایل فریمور را اینجا رها کنید</div>
+                                    <div class="drop-zone__hint" data-i18n="flash.upload.or-choose-one-bin">یا یک فایل ⁦.bin⁩ یا ⁦.zip⁩ انتخاب کنید</div>
+                                </div>
+                                <div class="drop-zone__file-info">
+                                    <div class="drop-zone__file-name" id="fileName"></div>
+                                    <div class="drop-zone__file-size" id="fileSize"></div>
+                                    <div class="drop-zone__file-change" data-i18n="flash.upload.choose-a-different-file">انتخاب فایلی دیگر</div>
+                                </div>
+                                <input type="file" id="fileInput" accept=".bin,.zip" aria-label="فایل فریمور با پسوند .bin یا .zip" data-i18n-attr="aria-label:flash.upload.firmware-file-bin-or">
+                            </div>
+                        </div>
+
+                        <div class="custom-source-pane rsnode-beta" id="customSourceRsnode" role="tabpanel" aria-labelledby="sourceTabRsnode" hidden>
+                            <form class="rsnode-beta__login" id="rsnodeLoginForm">
+                                <p class="rsnode-beta__note" data-i18n="flash.rsnode.rsnode-is-lora-firmware">⁦rsNode⁩ فریمور ⁦LoRa⁩ برای بردهای ⁦Heltec V3⁩ و ⁦V4⁩ است و فعلاً در مرحلهٔ بتای خصوصی است.</p>
+                                <details class="rsnode-beta__about"><summary data-i18n="flash.rsnode.how-rsnode-works">⁦rsNode⁩ چطور کار می‌کند؟</summary><p class="rsnode-beta__note" data-i18n="flash.rsnode.it-runs-in-one">روی دستگاه یکی از دو حالت را انتخاب می‌کنید. در حالت <strong>⁦RNode⁩</strong>، برد از راه ⁦USB⁩، بلوتوث یا وای‌فای نقش رادیوی یک برنامه را دارد. در حالت <strong>⁦Repeater⁩</strong>، خودش ترافیک را بازپخش می‌کند. تا وقتی وای‌فای روشن است، بلوتوث خاموش می‌ماند. افزودن گرداننده اختیاری است و گردانندگان فقط در حالت ⁦Repeater⁩ می‌توانند گره را مدیریت کنند.</p></details>
+                                <label for="rsnodePassword" data-i18n="flash.rsnode.private-beta-password">گذرواژهٔ بتای خصوصی</label>
+                                <input class="rsnode-beta__password" id="rsnodePassword" type="password" autocomplete="current-password" required maxlength="256" aria-describedby="rsnodeStatus rsnodePasswordHelp">
+                                <button class="rsnode-beta__button" id="rsnodeUnlock" type="submit" data-i18n="flash.rsnode.unlock">باز کردن قفل</button>
+                                <p class="rsnode-beta__note" id="rsnodePasswordHelp" data-i18n="flash.rsnode.for-a-beta-password">برای دریافت گذرواژهٔ بتا به <a href="mailto:mail@ratspeak.org">⁦mail@ratspeak.org⁩</a> ایمیل بزنید.</p>
+                            </form>
+                            <div id="rsnodeTermsPending" hidden>
+                                <p class="rsnode-beta__note" data-i18n="flash.rsnode.accept-the-beta-terms">برای دیدن بردها، شرایط بتا را بپذیرید.</p>
+                                <button class="rsnode-beta__button" id="rsnodeReviewTerms" type="button" data-i18n="flash.rsnode.review-beta-terms">مرور شرایط بتا</button>
+                            </div>
+                            <div id="rsnodeBoardPicker" hidden>
+                                <div class="rsnode-beta__head"><strong data-i18n="flash.rsnode.rsnode-private-beta">بتای خصوصی ⁦rsNode⁩</strong><button class="rsnode-beta__lock" id="rsnodeLock" type="button" data-i18n="flash.rsnode.lock-beta">قفل کردن بتا</button></div>
+                                <label class="rnode-source__field" for="rsnodeBoardSelect">
+                                    <span class="rnode-source__label" data-i18n="flash.rsnode.board">برد</span>
+                                    <select class="rnode-variant-select" id="rsnodeBoardSelect"><option value="" data-i18n="flash.rsnode.choose-your-board">بردتان را انتخاب کنید</option></select>
+                                </label>
+                                <div id="rsnodeVariantCheck" hidden>
+                                    <p class="rsnode-beta__note" data-i18n="flash.rsnode.check-the-chip-marking">نوشتهٔ روی تراشه یا جزئیات سفارش را بررسی کنید: ⁦ESP32-S3R2⁩ دارای ۲ مگابایت ⁦PSRAM⁩ و ⁦ESP32-S3R8⁩ دارای ۸ مگابایت است. هر دو برد ⁦V4⁩ دارای ۱۶ مگابایت حافظهٔ فلش هستند اما به فریمورهای متفاوتی نیاز دارند.</p>
+                                    <label class="rsnode-beta__check rsnode-beta__variant"><input type="checkbox" id="rsnodeVariantConfirmed"><span id="rsnodeVariantLabel" data-i18n="flash.rsnode.i-checked-my-v4">مدل دقیق برد ⁦V4⁩ خود را بررسی کردم.</span></label>
+                                </div>
+                                <p class="rsnode-beta__note rsnode-beta__note--warning" id="rsnodeInstallNote" data-i18n="flash.rsnode.install-erases-the-node">با نصب، هویت گره، فهرست گردانندگان، تنظیمات وای‌فای، جفت‌سازی‌های بلوتوث و تنظیمات ⁦Repeater⁩ پاک می‌شوند. برای به‌روزرسانی به بستهٔ سازگار و فریموری نیاز دارید که از به‌روزرسانی با ⁦USB⁩ پشتیبانی کند.</p>
+                                <div class="rsnode-update" id="rsnodeUpdate" hidden>
+                                    <div class="rsnode-update__check">
+                                        <button class="rsnode-beta__button" id="rsnodeUpdateCheck" type="button" aria-describedby="rsnodeUpdateStatus" data-i18n="flash.rsnode.check-the-node">بررسی گره</button>
+                                        <p class="rsnode-beta__status" id="rsnodeUpdateStatus" role="status" aria-live="polite"></p>
+                                    </div>
+                                    <fieldset class="rsnode-update__modes" id="rsnodeUpdateModes" hidden>
+                                        <legend class="rnode-source__label" data-i18n="flash.rsnode.update-or-install">به‌روزرسانی یا نصب</legend>
+                                        <label class="rsnode-update__mode"><input type="radio" name="rsnodeInstallMode" value="update"><span><strong data-i18n="flash.rsnode.update">به‌روزرسانی</strong><span data-i18n="flash.rsnode.keeps-identity-managers-wi">هویت، فهرست گردانندگان، تنظیمات وای‌فای، جفت‌سازی‌های بلوتوث و تنظیمات ⁦Repeater⁩ را نگه می‌دارد.</span></span></label>
+                                        <label class="rsnode-update__mode"><input type="radio" name="rsnodeInstallMode" value="install"><span><strong data-i18n="flash.rsnode.erase-and-install">پاک کردن و نصب</strong><span data-i18n="flash.rsnode.erases-everything-on-the">ابتدا همهٔ داده‌های گره را پاک می‌کند.</span></span></label>
+                                    </fieldset>
+                                </div>
+                                <div class="rsnode-beta__links"><a id="rsnodePackageDownload" hidden data-i18n="flash.rsnode.download-package-and-source">دانلود بسته و کد منبع</a></div>
+                            </div>
+                            <p class="rsnode-beta__status" id="rsnodeStatus" role="status" aria-live="polite"></p>
+                            <button class="rsnode-beta__button" id="rsnodeLockRetry" type="button" hidden data-i18n="flash.rsnode.retry-lock">تلاش دوباره برای قفل کردن</button>
+                            <button class="rsnode-beta__button" id="rsnodeCatalogRetry" type="button" hidden data-i18n="flash.rsnode.reload-boards">بارگیری دوبارهٔ فهرست بردها</button>
+                        </div>
+
+                        <!-- Mode B: RNode firmware (markqvist) -->
+                        <div class="custom-source-pane" id="customSourceRnode" role="tabpanel" aria-labelledby="sourceTabRnode" style="display: none;">
+                            <div class="rnode-source">
+                                <div class="rnode-source__head">
+                                    <div>
+                                        <div class="rnode-source__title" data-i18n="flash.rnode.official-rnode-firmware">فریمور رسمی ⁦RNode⁩</div>
+                                        <div class="rnode-source__sub" id="rnodeReleaseSub" data-i18n="flash.rnode.loading-latest-release">در حال بارگیری آخرین نسخه…</div>
+                                    </div>
+                                    <a href="https://github.com/markqvist/RNode_Firmware" class="rnode-source__repo" translate="no" target="_blank" rel="noopener noreferrer">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                                        ⁦RNode Firmware⁩
+                                    </a>
+                                </div>
+                                <label class="rnode-source__field">
+                                    <span class="rnode-source__label" data-i18n="flash.rnode.firmware-release">نسخهٔ فریمور</span>
+                                    <select class="rnode-variant-select" id="rnodeReleaseSelect" disabled>
+                                        <option data-i18n="flash.rnode.loading-releases">در حال بارگیری نسخه‌ها…</option>
+                                    </select>
+                                </label>
+                                <label class="rnode-source__field">
+                                    <span class="rnode-source__label" data-i18n="flash.rnode.device-variant">مدل دستگاه</span>
+                                    <select class="rnode-variant-select" id="rnodeVariantSelect" disabled>
+                                        <option data-i18n="flash.rnode.loading-variants">در حال بارگیری مدل‌ها…</option>
+                                    </select>
+                                </label>
+                                <label class="rnode-source__field">
+                                    <span class="rnode-source__label" data-i18n="flash.rnode.hardware-band">باند فرکانسی برد</span>
+                                    <select class="rnode-variant-select" id="rnodeBandSelect" disabled>
+                                        <option data-i18n="flash.rnode.choose-a-device-variant">ابتدا مدل دستگاه را انتخاب کنید</option>
+                                    </select>
+                                </label>
+                                <div class="rnode-source__status" id="rnodeStatus" data-i18n="flash.rnode.no-variant-selected">مدلی انتخاب نشده است.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flash Action -->
+            <div class="flash-action">
+                <details class="flash-advanced" id="flashAdvanced">
+                    <summary class="flash-advanced__summary">
+                        <span class="flash-advanced__label" data-i18n="flash.advanced.advanced-options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7"/><path d="M4 10V3"/><path d="M12 21v-9"/><path d="M12 8V3"/><path d="M20 21v-5"/><path d="M20 12V3"/><path d="M2 14h4"/><path d="M10 8h4"/><path d="M18 16h4"/></svg> گزینه‌های پیشرفته</span>
+                        <span class="flash-advanced__meta" id="advancedMeta" data-i18n="flash.advanced.default-install">نصب پیش‌فرض</span>
+                        <svg class="flash-advanced__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                    </summary>
+                    <div class="flash-advanced__body">
+                        <div class="flash-options" id="flashOptions">
+                            <label class="flash-option-pill" id="eraseOption">
+                                <input type="checkbox" id="eraseToggle" onchange="toggleErase(this.checked)">
+                                <span class="flash-option-pill__icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                                </span>
+                                <span class="flash-option-pill__copy">
+                                    <span class="flash-option-pill__label" data-i18n="flash.advanced.full-erase">پاک‌سازی کامل</span>
+                                    <span class="flash-option-pill__hint" data-i18n="flash.advanced.erases-everything-on-the">ابتدا همه‌چیز را روی دستگاه پاک می‌کند</span>
+                                </span>
+                                <span class="flash-option-pill__check" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"/></svg>
+                                </span>
+                            </label>
+                            <label class="flash-option-pill" id="provisionOption">
+                                <input type="checkbox" id="provisionToggle">
+                                <span class="flash-option-pill__icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="0.5"/><path d="M9 3v3"/><path d="M15 3v3"/><path d="M9 18v3"/><path d="M15 18v3"/><path d="M3 9h3"/><path d="M3 15h3"/><path d="M18 9h3"/><path d="M18 15h3"/></svg>
+                                </span>
+                                <span class="flash-option-pill__copy">
+                                    <span class="flash-option-pill__label" data-i18n="flash.advanced.rnode-setup">راه‌اندازی ⁦RNode⁩</span>
+                                    <span class="flash-option-pill__hint" data-i18n="flash.advanced.provision-after-flash">راه‌اندازی پس از فلش</span>
+                                </span>
+                                <span class="flash-option-pill__check" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"/></svg>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="flash-option-expand" id="provisionExpand" hidden>
+                            <p class="flash-option-expand__desc" data-i18n="flash.advanced.writes-rnode-identity-and">پس از فلش، هویت ⁦RNode⁩ و هش فریمور را می‌نویسد. در ⁦Ratspeak⁩، میزبان تنظیمات رادیو هنگام راه‌اندازی را تعیین می‌کند. اگر به هویت امضاشده یا تنظیمات ماندگار راه‌اندازی ⁦TNC⁩ نیاز دارید، از ⁦rnodeconf⁩ استفاده کنید.</p>
+                            <div class="provision-board" id="provisionBoard" data-mode="auto">
+                                <div class="provision-board__row">
+                                    <span class="provision-board__icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                    </span>
+                                    <div class="provision-board__copy">
+                                        <span class="provision-board__eyebrow" data-i18n="flash.advanced.suggested-board">برد پیشنهادی</span>
+                                        <span class="provision-board__value" id="provisionBoardValue" data-i18n="flash.advanced.choose-an-rnode-firmware">برای دیدن محصول و مدل پیشنهادی، یکی از مدل‌های فریمور ⁦RNode⁩ را انتخاب کنید</span>
+                                    </div>
+                                    <button type="button" class="provision-board__change" id="provisionBoardChange" data-i18n="flash.advanced.change">تغییر</button>
+                                </div>
+                                <div class="provision-board__manual" id="provisionBoardManual" hidden>
+                                    <label class="provision-field">
+                                        <span class="provision-field__label" data-i18n="flash.advanced.product">محصول</span>
+                                        <select id="provisionProduct"></select>
+                                    </label>
+                                    <label class="provision-field">
+                                        <span class="provision-field__label" data-i18n="flash.advanced.model">مدل</span>
+                                        <select id="provisionModel"></select>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </details>
+
+            </div>
+        </div>
+
+        <!-- ── Action CTA — primary flash + post-flash RNode tools ── -->
+        <section class="flash-cta">
+            <div class="flash-primary-action">
+                <div class="flash-primary-action__copy">
+                    <div class="flash-primary-action__label" data-i18n="flash.steps.step-3">گام ۳</div>
+                    <span class="flash-primary-action__title" data-i18n="flash.steps.install">نصب</span>
+                    <div class="flash-primary-action__hint" id="flashBtnNote" role="status" data-i18n="flash.steps.select-a-usb-device">برای ادامه یک دستگاه ⁦USB⁩ انتخاب کنید.</div>
+                </div>
+                <button type="button" class="flash-btn flash-btn--disabled" id="flashBtn" onclick="startFlash()" disabled data-i18n="flash.steps.install-firmware"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> نصب فریمور</button>
+            </div>
+
+            <!-- Progress -->
+            <div class="flash-progress" id="flashProgress">
+                <div class="progress-header">
+                    <span class="progress-status" id="progressStatus" aria-live="polite" data-i18n="flash.progress.preparing">آماده‌سازی…</span>
+                    <span class="progress-pct" id="progressPct">⁦0%⁩</span>
+                </div>
+                <div class="progress-bar-track">
+                    <div class="progress-bar-fill" id="progressBar"></div>
+                </div>
+                <details class="progress-details"><summary data-i18n="flash.progress.show-log">نمایش گزارش</summary><div class="progress-log" id="progressLog"></div></details>
+            </div>
+
+            <!-- Result -->
+            <div class="flash-result" id="flashResult" role="region" aria-labelledby="resultTitle">
+                <div class="flash-result__icon" id="resultIcon">
+                    <svg id="resultSvg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></svg>
+                </div>
+                <h3 class="flash-result__title" id="resultTitle" tabindex="-1"></h3>
+                <div class="flash-result__desc" id="resultDesc"></div>
+                <div class="flash-result__actions" id="resultActions" hidden>
+                    <button type="button" class="flash-result__btn" id="resultActionBtn">
+                        <svg id="resultActionSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 10-13h-7l1-7Z"/></svg>
+                        <span id="resultActionText" data-i18n="flash.result.continue">ادامه</span>
+                    </button>
+                </div>
+                <ol class="flash-result__fixes" id="resultFixes" hidden></ol>
+                <div class="flash-result__actions" id="resultRecovery" hidden>
+                    <button type="button" class="flash-result__btn" id="resultRetry" data-i18n="flash.result.try-again">تلاش دوباره <span aria-hidden="true">←</span></button>
+                    <button type="button" class="rsnode-beta__button" id="resultPort" data-i18n="flash.result.choose-the-port-again">انتخاب دوبارهٔ پورت</button>
+                </div>
+                <details class="flash-result__tech" id="resultTech" hidden>
+                    <summary data-i18n="flash.result.technical-details">جزئیات فنی</summary>
+                    <div class="flash-result__tech-body">
+                        <pre class="flash-result__log" id="resultLog" tabindex="0" aria-label="جزئیات فنی" data-i18n-attr="aria-label:flash.result.technical-details"></pre>
+                        <button type="button" class="flash-result__copy" id="resultCopy" aria-describedby="resultCopied" data-i18n="flash.result.copy">کپی</button>
+                        <span class="flash-result__copied" id="resultCopied" role="status"></span>
+                    </div>
+                </details>
+            </div>
+
+            <details class="flash-cta__repair rsnode-device" id="rsnodeDevice" name="rsnode-tools" hidden>
+                <summary class="flash-cta__repair-summary">
+                    <span class="flash-cta__repair-label" data-i18n="flash.live.rsnode-live-view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8"/><path d="M12 16v4"/></svg> نمایش زندهٔ ⁦rsNode⁩</span>
+                    <span class="flash-cta__repair-meta" data-i18n="flash.live.see-the-node-s">نمایش صفحه و وضعیت گره از راه ⁦USB⁩</span>
+                    <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </summary>
+                <div class="flash-cta__repair-body">
+                    <p class="rsnode-tools__lede" data-i18n="flash.live.watch-the-node-s">صفحهٔ گره را زنده ببینید و وضعیت آن را از راه ⁦USB⁩ بخوانید.</p>
+                    <div class="rsnode-device__layout">
+                        <figure class="rsnode-device__screen">
+                            <div class="rsnode-device__bezel" id="rsnodeScreenBezel">
+                                <canvas id="rsnodeScreen" width="128" height="64" role="img" aria-label="صفحهٔ گره" data-i18n-attr="aria-label:flash.live.the-node-s-screen"></canvas>
+                                <span class="rsnode-device__placeholder" id="rsnodeScreenEmpty" data-i18n="flash.live.connect-to-see-the">برای دیدن صفحه متصل شوید</span>
+                            </div>
+                            <figcaption class="rsnode-device__caption"><span class="rsnode-tools__dot" id="rsnodeLiveDot" aria-hidden="true"></span><span id="rsnodeScreenState" data-i18n="flash.steps.not-connected">وصل نیست</span></figcaption>
+                        </figure>
+                        <div class="rsnode-device__info">
+                            <div class="flash-connect-tips rsnode-tools__tips" id="rsnodeFactsEmpty">
+                                <div class="flash-connect-tips__head" data-i18n="flash.live.before-you-connect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> پیش از اتصال</div>
+                                <ul>
+                                    <li data-i18n="flash.live.plug-the-node-in">گره را با ⁦USB⁩ وصل کنید. برنامه‌های دیگری را که از پورت آن استفاده می‌کنند ببندید، مانند ⁦Ratspeak⁩ یا مانیتور سریال.</li>
+                                    <li data-i18n="flash.live.if-you-just-installed">اگر همین حالا فریمور را نصب کرده‌اید، ابتدا ⁦RESET⁩ را روی برد فشار دهید.</li>
+                                    <li data-i18n="flash.live.a-repeater-answers-status">گره در حالت ⁦Repeater⁩ به درخواست وضعیت از راه ⁦USB⁩ پاسخ می‌دهد. در حالت ⁦RNode⁩ هم وقتی برنامهٔ دیگری از آن استفاده می‌کند، پاسخ می‌دهد.</li>
+                                </ul>
+                            </div>
+                            <dl class="rsnode-tools__facts" id="rsnodeFacts" hidden>
+                                <div data-fact="node"><dt data-i18n="flash.live.node">گره</dt><dd></dd></div>
+                                <div data-fact="board"><dt data-i18n="flash.rsnode.board">برد</dt><dd></dd></div>
+                                <div data-fact="firmware"><dt data-i18n="flash.steps.firmware">فریمور</dt><dd></dd></div>
+                                <div data-fact="owners"><dt data-i18n="flash.live.managers">گردانندگان</dt><dd></dd></div>
+                                <div data-fact="repeater"><dt data-i18n="flash.live.repeater">⁦Repeater⁩</dt><dd></dd></div>
+                                <div data-fact="wifi"><dt data-i18n="flash.live.wi-fi">وای‌فای</dt><dd></dd></div>
+                                <div data-fact="radio"><dt data-i18n="flash.live.radio">رادیو</dt><dd></dd></div>
+                                <div data-fact="packets"><dt data-i18n="flash.live.packets">بسته‌ها</dt><dd></dd></div>
+                                <div data-fact="channel"><dt data-i18n="flash.live.channel">کانال</dt><dd></dd></div>
+                                <div data-fact="battery"><dt data-i18n="flash.live.battery">باتری</dt><dd></dd></div>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="rsnode-tools__actions">
+                        <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeConnect" type="button" data-i18n="flash.live.connect">اتصال</button>
+                        <button class="rsnode-beta__button" id="rsnodeScreenshot" type="button" disabled hidden data-i18n="flash.live.save-screenshot">ذخیرهٔ تصویر صفحه</button>
+                        <button class="rsnode-beta__button" id="rsnodeCopyDetails" type="button" disabled hidden data-i18n="flash.live.copy-details">کپی جزئیات</button>
+                        <button class="rsnode-beta__button" id="rsnodePair" type="button" aria-describedby="rsnodePairNote" disabled hidden data-i18n="flash.live.start-bluetooth-pairing">آغاز جفت‌سازی بلوتوث</button>
+                        <button class="rsnode-beta__button rsnode-tools__end" id="rsnodeRestart" type="button" disabled hidden data-i18n="flash.live.restart-node">راه‌اندازی مجدد گره…</button>
+                    </div>
+                    <p class="rsnode-tools__help rsnode-tools__pair-note" id="rsnodePairNote" hidden data-i18n="flash.live.bluetooth-is-off-while">تا وقتی وای‌فای روشن است، بلوتوث خاموش می‌ماند. برای جفت‌سازی، وای‌فای را در تنظیمات خاموش کنید.</p>
+                    <p class="rsnode-tools__port" hidden data-i18n="flash.live.using">در حال استفاده از <span class="rsnode-tools__port-label"></span> · <button class="rsnode-beta__lock" type="button" data-change-port data-i18n="flash.live.change-port">تغییر پورت</button></p>
+                    <p class="rsnode-beta__status" id="rsnodeDeviceStatus" role="status" aria-live="polite"></p>
+                    <pre class="rsnode-device__details" id="rsnodeDetailsText" tabindex="0" aria-label="جزئیات گره" hidden data-i18n-attr="aria-label:flash.live.node-details"></pre>
+                </div>
+            </details>
+
+            <details class="flash-cta__repair rsnode-settings" id="rsnodeSettings" name="rsnode-tools" hidden>
+                <summary class="flash-cta__repair-summary">
+                    <span class="flash-cta__repair-label" data-i18n="flash.settings.rsnode-settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg> تنظیمات ⁦rsNode⁩</span>
+                    <span class="flash-cta__repair-meta" data-i18n="flash.settings.wi-fi-peers-and">وای‌فای، همتاها و اتصال بالادست از راه ⁦USB⁩ · با ذخیره، گره دوباره راه‌اندازی می‌شود</span>
+                    <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </summary>
+                <div class="flash-cta__repair-body">
+                    <p class="rsnode-tools__lede" data-i18n="flash.settings.requires-firmware-with-usb">به فریموری نیاز دارید که تنظیم از راه ⁦USB⁩ را پشتیبانی کند. تنظیمات گره را بخوانید، اینجا تغییر دهید و ذخیره کنید. با ذخیره، گره دوباره راه‌اندازی می‌شود. منطقه، ⁦LIMITS⁩ و رادیو روی خود دستگاه تنظیم می‌شوند.</p>
+                    <form id="rsnodeSettingsForm" novalidate hidden>
+                        <fieldset class="rsnode-owner__fields" id="rsnodeSettingsFields">
+                            <p class="rsnode-settings__persona" id="rsnodeSettingsPersona"></p>
+                            <fieldset class="rsnode-settings__group">
+                                <legend class="rnode-source__label" data-i18n="flash.live.wi-fi">وای‌فای</legend>
+                                <div class="rsnode-settings__choices">
+                                    <label class="rsnode-settings__choice"><input type="radio" name="rsnodeWifiMode" value="off"><span data-i18n="flash.settings.off">خاموش</span></label>
+                                    <label class="rsnode-settings__choice"><input type="radio" name="rsnodeWifiMode" value="join"><span data-i18n="flash.settings.join-a-network">پیوستن به شبکه</span></label>
+                                    <label class="rsnode-settings__choice"><input type="radio" name="rsnodeWifiMode" value="own"><span data-i18n="flash.settings.own-network">شبکهٔ خود گره</span></label>
+                                </div>
+                                <p class="rsnode-tools__help" id="rsnodeWifiNote"></p>
+                                <div class="rsnode-settings__grid" id="rsnodeWifiFields">
+                                    <label class="rsnode-settings__field" for="rsnodeWifiName"><span class="rsnode-settings__label" id="rsnodeWifiNameLabel" data-i18n="flash.settings.network-name">نام شبکه</span>
+                                        <input class="rsnode-owner__input" id="rsnodeWifiName" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+                                    <div class="rsnode-settings__field">
+                                        <span class="rsnode-settings__label" id="rsnodeWifiPasswordLabel" data-i18n="flash.settings.wi-fi-password">گذرواژهٔ وای‌فای</span>
+                                        <p class="rsnode-settings__secret" id="rsnodeWifiPasswordStored"><span id="rsnodeWifiPasswordState"></span><button class="rsnode-beta__lock" id="rsnodeWifiPasswordChange" type="button" aria-describedby="rsnodeWifiPasswordLabel" data-i18n="flash.advanced.change">تغییر</button></p>
+                                        <input class="rsnode-owner__input" id="rsnodeWifiPassword" type="password" autocomplete="new-password" aria-labelledby="rsnodeWifiPasswordLabel" aria-describedby="rsnodeWifiPasswordHelp" hidden>
+                                        <p class="rsnode-tools__help" id="rsnodeWifiPasswordHelp"></p>
+                                    </div>
+                                    <label class="rsnode-settings__field" for="rsnodeWifiChannel" id="rsnodeWifiChannelField"><span class="rsnode-settings__label" data-i18n="flash.live.channel">کانال</span>
+                                        <select class="rnode-variant-select" id="rsnodeWifiChannel"></select></label>
+                                    <label class="rsnode-beta__check rsnode-settings__wide" id="rsnodeWifiFixedField"><input type="checkbox" id="rsnodeWifiFixed"><span data-i18n="flash.settings.use-a-fixed-address">استفاده از نشانی ثابت</span></label>
+                                    <div class="rsnode-settings__grid rsnode-settings__wide" id="rsnodeWifiFixedFields">
+                                        <label class="rsnode-settings__field" for="rsnodeWifiAddress"><span class="rsnode-settings__label" data-i18n="flash.settings.address">نشانی</span>
+                                            <input class="rsnode-owner__input" id="rsnodeWifiAddress" type="text" inputmode="decimal" autocomplete="off" placeholder="192.168.1.50"></label>
+                                        <label class="rsnode-settings__field" for="rsnodeWifiNetmask"><span class="rsnode-settings__label" data-i18n="flash.settings.subnet-mask">ماسک زیرشبکه</span>
+                                            <input class="rsnode-owner__input" id="rsnodeWifiNetmask" type="text" inputmode="decimal" autocomplete="off" placeholder="255.255.255.0"></label>
+                                        <label class="rsnode-settings__field" for="rsnodeWifiGateway"><span class="rsnode-settings__label" data-i18n="flash.settings.gateway-optional">دروازه (اختیاری)</span>
+                                            <input class="rsnode-owner__input" id="rsnodeWifiGateway" type="text" inputmode="decimal" autocomplete="off" placeholder="192.168.1.1"></label>
+                                        <label class="rsnode-settings__field" for="rsnodeWifiDns"><span class="rsnode-settings__label" data-i18n="flash.settings.dns-optional">⁦DNS⁩ (اختیاری)</span>
+                                            <input class="rsnode-owner__input" id="rsnodeWifiDns" type="text" inputmode="decimal" autocomplete="off" placeholder="192.168.1.1"></label>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset class="rsnode-settings__group" id="rsnodePeersGroup">
+                                <legend class="rnode-source__label" data-i18n="flash.settings.accept-peers">پذیرش همتاها</legend>
+                                <label class="rsnode-beta__check"><input type="checkbox" id="rsnodePeersEnabled"><span data-i18n="flash.settings.accept-reticulum-peers-over">پذیرش همتاهای ⁦Reticulum⁩ از راه ⁦TCP⁩</span></label>
+                                <div class="rsnode-settings__grid">
+                                    <label class="rsnode-settings__field" for="rsnodePeersPort"><span class="rsnode-settings__label" data-i18n="flash.settings.port">پورت</span>
+                                        <input class="rsnode-owner__input" id="rsnodePeersPort" type="text" inputmode="numeric" autocomplete="off" aria-describedby="rsnodePeersHelp"></label>
+                                </div>
+                                <p class="rsnode-tools__help" id="rsnodePeersHelp" data-i18n="flash.settings.reticulum-apps-add-a">در برنامهٔ ⁦Reticulum⁩ یک کلاینت ⁦TCP⁩ با نشانی وای‌فای گره و این پورت اضافه کنید. حداکثر ۲ همتا می‌توانند وصل شوند.</p>
+                            </fieldset>
+                            <fieldset class="rsnode-settings__group" id="rsnodeUplinkGroup">
+                                <legend class="rnode-source__label" data-i18n="flash.settings.uplink">اتصال بالادست</legend>
+                                <label class="rsnode-beta__check"><input type="checkbox" id="rsnodeUplinkEnabled"><span data-i18n="flash.settings.connect-to-a-reticulum">اتصال به یک گره ⁦Reticulum⁩ از راه ⁦TCP⁩</span></label>
+                                <div class="rsnode-settings__grid">
+                                    <label class="rsnode-settings__field" for="rsnodeUplinkHost"><span class="rsnode-settings__label" data-i18n="flash.settings.host">میزبان</span>
+                                        <input class="rsnode-owner__input" id="rsnodeUplinkHost" translate="no" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="rns.example.org"></label>
+                                    <label class="rsnode-settings__field" for="rsnodeUplinkPort"><span class="rsnode-settings__label" data-i18n="flash.settings.port">پورت</span>
+                                        <input class="rsnode-owner__input" id="rsnodeUplinkPort" type="text" inputmode="numeric" autocomplete="off" placeholder="4242"></label>
+                                </div>
+                            </fieldset>
+                            <div class="rsnode-settings__group" id="rsnodeRadioGroup">
+                                <span class="rnode-source__label" data-i18n="flash.settings.set-on-the-device">تنظیم روی دستگاه</span>
+                                <dl class="rsnode-tools__facts">
+                                    <div><dt data-i18n="flash.settings.region">منطقه</dt><dd id="rsnodeSettingsRegion"></dd></div>
+                                    <div><dt data-i18n="flash.live.radio">رادیو</dt><dd id="rsnodeSettingsRadio"></dd></div>
+                                    <div><dt data-i18n="flash.settings.lora-ifac">⁦IFAC⁩ رادیوی ⁦LoRa⁩</dt><dd id="rsnodeSettingsIfac"></dd></div>
+                                </dl>
+                                <p class="rsnode-tools__help" data-i18n="flash.settings.change-the-region-limits">منطقه، ⁦LIMITS⁩ و رادیو را در منوهای خود ⁦Repeater⁩ تغییر دهید. این تغییرات باید روی دستگاه تأیید شوند.</p>
+                            </div>
+                        </fieldset>
+                    </form>
+                    <div class="flash-connect-tips rsnode-tools__tips" id="rsnodeSettingsTips">
+                        <div class="flash-connect-tips__head" data-i18n="flash.settings.before-you-read"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> پیش از خواندن</div>
+                        <ul>
+                            <li data-i18n="flash.live.plug-the-node-in">گره را با ⁦USB⁩ وصل کنید. برنامه‌های دیگری را که از پورت آن استفاده می‌کنند ببندید، مانند ⁦Ratspeak⁩ یا مانیتور سریال.</li>
+                            <li data-i18n="flash.live.if-you-just-installed">اگر همین حالا فریمور را نصب کرده‌اید، ابتدا ⁦RESET⁩ را روی برد فشار دهید.</li>
+                            <li data-i18n="flash.settings.an-rnode-another-app">اگر برنامهٔ دیگری از راه بلوتوث یا وای‌فای از ⁦RNode⁩ استفاده کند، خواندن تنظیمات ممکن است اما ذخیرهٔ آن‌ها ممکن نیست. اتصال آن برنامه را قطع کنید یا گزینهٔ ⁦USB⁩ را روی گره نگه دارید.</li>
+                        </ul>
+                    </div>
+                    <div class="rsnode-tools__actions">
+                        <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeSettingsSave" type="submit" form="rsnodeSettingsForm" aria-describedby="rsnodeSettingsSummary" hidden data-i18n="flash.settings.save-and-restart">ذخیره و راه‌اندازی مجدد</button>
+                        <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeSettingsRead" type="button" data-i18n="flash.settings.read-settings">خواندن تنظیمات</button>
+                        <p class="rsnode-tools__summary" id="rsnodeSettingsSummary"></p>
+                    </div>
+                    <p class="rsnode-tools__port" hidden data-i18n="flash.live.using">در حال استفاده از <span class="rsnode-tools__port-label"></span> · <button class="rsnode-beta__lock" type="button" data-change-port data-i18n="flash.live.change-port">تغییر پورت</button></p>
+                    <div id="rsnodeSettingsActivity">
+                        <p class="rsnode-tools__state"><span class="rsnode-tools__dot" id="rsnodeSettingsDot" aria-hidden="true"></span><span class="rsnode-beta__status progress-status" id="rsnodeSettingsStatus" role="status" aria-live="polite"></span></p>
+                        <details class="rsnode-tools__log"><summary data-i18n="flash.settings.usb-log">گزارش ⁦USB⁩</summary><div class="progress-log"></div></details>
+                    </div>
+                </div>
+            </details>
+
+            <details class="flash-cta__repair rsnode-owner" id="rsnodeOwner" name="rsnode-tools" hidden>
+                <summary class="flash-cta__repair-summary">
+                    <span class="flash-cta__repair-label" data-i18n="flash.managers.rsnode-device-management"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg> مدیریت دستگاه ⁦rsNode⁩</span>
+                    <span class="flash-cta__repair-meta" data-i18n="flash.managers.optional-owner-and-admins">اختیاری · تنظیم مالک و مدیران ⁦Repeater⁩ از راه ⁦USB⁩</span>
+                    <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </summary>
+                <div class="flash-cta__repair-body">
+                    <p class="rsnode-tools__notice" id="rsnodeOwnerNotice" tabindex="-1" hidden data-i18n="flash.managers.next-press-reset-on">اکنون ⁦RESET⁩ را روی برد فشار دهید. اگر می‌خواهید گره در حالت ⁦Repeater⁩ کار کند و از راه دور آن را مدیریت کنید، می‌توانید گرداننده اضافه کنید.</p>
+                    <p class="rsnode-tools__lede" data-i18n="flash.managers.managers-are-optional-they">افزودن گرداننده اختیاری است. گردانندگان از راه شبکهٔ مش گره را در حالت ⁦Repeater⁩ مدیریت می‌کنند. در حالت ⁦RNode⁩ این فهرست نادیده گرفته می‌شود.</p>
+                    <form id="rsnodeOwnerForm" novalidate>
+                        <fieldset class="rsnode-owner__fields" id="rsnodeOwnerFields">
+                            <div class="rsnode-owner__grid">
+                                <div class="rsnode-owner__field">
+                                    <span class="rnode-source__label" id="rsnodeManagersLabel" data-i18n="flash.live.managers">گردانندگان</span>
+                                    <ul class="rsnode-managers" id="rsnodeManagers" aria-labelledby="rsnodeManagersLabel"></ul>
+                                    <p class="rsnode-tools__help" id="rsnodeManagersEmpty" data-i18n="flash.managers.add-yourself-as-the">با نشانی ⁦LXMF⁩ خود در ⁦Ratspeak⁩، خودتان را به‌عنوان مالک اضافه کنید یا فهرست گردانندگان را از روی گره بخوانید.</p>
+                                    <div class="rsnode-managers__editor" id="rsnodeManagerEditor" hidden>
+                                        <input class="rsnode-owner__input" id="rsnodeOwnerHash" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="نشانی LXMF یا هش هویت" aria-label="نشانی LXMF یا هش هویت گرداننده" aria-describedby="rsnodeManagerNote" data-i18n-attr="aria-label:flash.managers.manager-s-lxmf-address;placeholder:flash.managers.lxmf-address-or-identity">
+                                        <select class="rnode-variant-select" id="rsnodeOwnerKind" aria-label="نوع هش" data-i18n-attr="aria-label:flash.managers.hash-type">
+                                            <option value="lxmf" data-i18n="flash.managers.lxmf-address">نشانی ⁦LXMF⁩</option>
+                                            <option value="identity" data-i18n="flash.managers.identity-hash">هش هویت</option>
+                                        </select>
+                                        <select class="rnode-variant-select" id="rsnodeOwnerRole" aria-label="نقش" aria-describedby="rsnodeRoleHelp" data-i18n-attr="aria-label:flash.managers.role">
+                                            <option value="owner" data-i18n="flash.managers.owner">مالک</option>
+                                            <option value="admin" data-i18n="flash.managers.admin">مدیر</option>
+                                        </select>
+                                        <p class="rsnode-tools__help" id="rsnodeRoleHelp" data-i18n="flash.managers.the-owner-changes-settings">مالک تنظیمات و فهرست گردانندگان را تغییر می‌دهد. مدیران می‌توانند وضعیت و تنظیمات را بخوانند و به‌روزرسانی نصب کنند. دسترسی به تنظیمات نیاز به پشتیبانی فریمور دارد.</p>
+                                        <div class="rsnode-managers__editor-actions">
+                                            <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeManagerDone" type="button" data-i18n="flash.managers.add">افزودن</button>
+                                            <button class="rsnode-beta__button" id="rsnodeManagerCancel" type="button" data-i18n="flash.managers.cancel">لغو</button>
+                                        </div>
+                                        <p class="rsnode-tools__help" id="rsnodeManagerNote" hidden></p>
+                                    </div>
+                                    <p class="rsnode-managers__add"><button class="rsnode-beta__lock" id="rsnodeManagerAdd" type="button" data-i18n="flash.managers.add-manager">افزودن گرداننده</button><span class="rsnode-tools__help" id="rsnodeManagersFull" hidden data-i18n="flash.managers.a-node-holds-up">هر گره حداکثر ۴ گرداننده می‌پذیرد.</span></p>
+                                </div>
+                            </div>
+                            <div class="flash-connect-tips rsnode-tools__tips">
+                                <div class="flash-connect-tips__head" data-i18n="flash.managers.before-you-save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> پیش از ذخیره</div>
+                                <ul>
+                                    <li data-i18n="flash.live.plug-the-node-in">گره را با ⁦USB⁩ وصل کنید. برنامه‌های دیگری را که از پورت آن استفاده می‌کنند ببندید، مانند ⁦Ratspeak⁩ یا مانیتور سریال.</li>
+                                    <li data-i18n="flash.live.if-you-just-installed">اگر همین حالا فریمور را نصب کرده‌اید، ابتدا ⁦RESET⁩ را روی برد فشار دهید.</li>
+                                    <li data-i18n="flash.managers.some-betas-require-rnode">در بعضی نسخه‌های بتا، تغییر گردانندگان فقط در حالت ⁦RNode⁩ ممکن است. اگر تغییری رد شد، ابتدا ⁦Repeater⁩ را متوقف کنید و از آن خارج شوید. در حالت ⁦RNode⁩، گزینهٔ ⁦USB⁩ را در منوی اصلی نگه دارید تا کنترل را از برنامهٔ دیگر بگیرید.</li>
+                                    <li data-i18n="flash.managers.adding-the-first-manager">با افزودن نخستین گرداننده، هویت گره ساخته می‌شود. برای این کار بلوتوث یا وای‌فای گره باید روشن باشد؛ در راه‌اندازی عادی ⁦RNode⁩ یکی از آن‌ها روشن است.</li>
+                                </ul>
+                            </div>
+                            <div class="rsnode-tools__actions">
+                                <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeOwnerSave" type="submit" aria-describedby="rsnodeOwnerSummary" disabled data-i18n="flash.managers.save-to-rsnode">ذخیره در ⁦rsNode⁩</button>
+                                <button class="rsnode-beta__button" id="rsnodeOwnerRead" type="button" data-i18n="flash.managers.read-from-node">خواندن از گره</button>
+                                <p class="rsnode-tools__summary" id="rsnodeOwnerSummary" data-i18n="flash.managers.nothing-to-save-yet">هنوز چیزی برای ذخیره نیست. یک گرداننده اضافه کنید.</p>
+                            </div>
+                            <p class="rsnode-tools__port" hidden data-i18n="flash.live.using">در حال استفاده از <span class="rsnode-tools__port-label"></span> · <button class="rsnode-beta__lock" type="button" data-change-port data-i18n="flash.live.change-port">تغییر پورت</button></p>
+                        </fieldset>
+                    </form>
+                    <div id="rsnodeOwnerActivity">
+                        <p class="rsnode-tools__state"><span class="rsnode-tools__dot" id="rsnodeOwnerDot" aria-hidden="true"></span><span class="rsnode-beta__status progress-status" id="rsnodeOwnerStatus" role="status" aria-live="polite"></span></p>
+                        <div class="rsnode-owner__result" id="rsnodeOwnerResult" hidden>
+                            <span class="rnode-source__label" data-i18n="flash.managers.on-the-node">روی گره</span>
+                            <dl class="rsnode-tools__facts">
+                                <div><dt data-i18n="flash.live.node">گره</dt><dd id="rsnodeResultNode"></dd></div>
+                                <div id="rsnodeResultIdentity"><dt data-i18n="flash.managers.destination">مقصد</dt><dd><span class="rsnode-owner__destination"><code id="rsnodeResultDestination"></code><button class="rsnode-beta__lock" id="rsnodeCopyDestination" type="button" data-i18n="flash.result.copy">کپی</button><span class="rsnode-tools__help" id="rsnodeCopyNote" hidden data-i18n="flash.managers.press-ctrl-c-or">برای کپی، ⁦Ctrl+C⁩ یا ⌘⁦C⁩ را بزنید.</span></span><span class="rsnode-tools__help" data-i18n="flash.managers.clients-pin-this-destination">کلاینت‌ها این مقصد را ثابت نگه می‌دارند.</span></dd></div>
+                            </dl>
+                            <p class="rsnode-tools__help" id="rsnodeResultNote"></p>
+                            <p class="rsnode-tools__help" id="rsnodeResultEffect" hidden data-i18n="flash.managers.managers-act-only-while">گردانندگان فقط در حالت ⁦Repeater⁩ می‌توانند گره را مدیریت کنند.</p>
+                        </div>
+                        <details class="rsnode-tools__log"><summary data-i18n="flash.settings.usb-log">گزارش ⁦USB⁩</summary><div class="progress-log"></div></details>
+                    </div>
+                </div>
+            </details>
+
+            <details class="flash-cta__repair" id="flashRepair">
+                <summary class="flash-cta__repair-summary">
+                    <span class="flash-cta__repair-label" data-i18n="flash.repair.rnode-tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-2.4 2.6-2.6Z"/></svg> ابزارهای ⁦RNode⁩</span>
+                    <span class="flash-cta__repair-meta" data-i18n="flash.repair.repair-and-inspect-an">بررسی و تعمیر ⁦RNode⁩ بدون فلش دوباره</span>
+                    <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </summary>
+                <div class="flash-cta__repair-body">
+                    <div class="flash-repair__list">
+                        <button type="button" class="flash-repair__action" id="reprovisionBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="0.5"/><path d="M9 3v3"/><path d="M15 3v3"/><path d="M9 18v3"/><path d="M15 18v3"/><path d="M3 9h3"/><path d="M3 15h3"/><path d="M18 9h3"/><path d="M18 15h3"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label" data-i18n="flash.repair.repair-rnode-setup">ترمیم تنظیمات ⁦RNode⁩</span>
+                                <span class="flash-repair__sub" data-i18n="flash.repair.use-if-identity-or">اگر تنظیم هویت یا هش فریمور ناموفق بود، از این ابزار استفاده کنید.</span>
+                            </span>
+                        </button>
+                        <button type="button" class="flash-repair__action" id="setHashBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/><circle cx="18.5" cy="18.5" r="3"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label" data-i18n="flash.repair.re-write-firmware-hash">بازنویسی هش فریمور</span>
+                                <span class="flash-repair__sub" data-i18n="flash.repair.writes-the-hash-from">هش فایل فریمور بارگذاری‌شده را می‌نویسد.</span>
+                            </span>
+                        </button>
+                        <button type="button" class="flash-repair__action" id="adoptHashBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label" data-i18n="flash.repair.adopt-running-hash">پذیرش هش فریمور در حال اجرا</span>
+                                <span class="flash-repair__sub" data-i18n="flash.repair.trusts-the-firmware-currently">فریمور در حال اجرای برد را قابل اعتماد می‌داند. فقط وقتی از سالم بودن نصب مطمئن هستید از این گزینه استفاده کنید؛ فریمور آسیب‌دیده را ترمیم نمی‌کند.</span>
+                            </span>
+                        </button>
+                        <button type="button" class="flash-repair__action" id="inspectHashBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18"/><path d="M3 12h18"/><path d="M3 19h10"/><path d="m17 16 4 4"/><circle cx="16.5" cy="15.5" r="3.5"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label" data-i18n="flash.repair.read-rnode-status">خواندن وضعیت ⁦RNode⁩</span>
+                                <span class="flash-repair__sub" data-i18n="flash.repair.shows-firmware-hash-and">هش فریمور و وضعیت رادیو هنگام راه‌اندازی را نشان می‌دهد.</span>
+                            </span>
+                        </button>
+                        <button type="button" class="flash-repair__action" id="saveTncConfigBtn">
+                            <span class="flash-repair__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 12h10"/><path d="M4 17h7"/><path d="M17 14v6"/><path d="M14 17h6"/></svg>
+                            </span>
+                            <span class="flash-repair__copy">
+                                <span class="flash-repair__label" data-i18n="flash.repair.keep-radio-idle">غیرفعال نگه داشتن رادیو</span>
+                                <span class="flash-repair__sub" data-i18n="flash.repair.clears-saved-startup-radio">تنظیمات ذخیره‌شدهٔ راه‌اندازی رادیو را پاک می‌کند تا ⁦Ratspeak⁩ آن را کنترل کند.</span>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </details>
+        </section>
+    </div>
+
+</main>
+
+<dialog class="install-dialog rsnode-beta" id="rsnodeTermsDialog" aria-labelledby="rsnodeTermsTitle" aria-describedby="rsnodeTermsIntro">
+    <h2 id="rsnodeTermsTitle" data-i18n="flash.terms.before-joining-the-beta">پیش از پیوستن به بتا</h2>
+    <p id="rsnodeTermsIntro" data-i18n="flash.terms.for-this-private-beta">برای شرکت در این بتای خصوصی، موارد زیر را تأیید کنید:</p>
+    <form id="rsnodeTermsForm">
+        <div class="rsnode-beta__checks" translate="no">
+            <label class="rsnode-beta__check"><input type="checkbox" name="france" required><span>⁦I am not a citizen or resident of France⁩.</span></label>
+            <label class="rsnode-beta__check"><input type="checkbox" name="sanctions" required><span>⁦I am outside countries and regions where U.S. sanctions prohibit this distribution, and I am not a restricted person or acting for one⁩.</span></label>
+            <label class="rsnode-beta__check"><input type="checkbox" name="export" required><span>⁦I will follow applicable encryption export and local radio rules⁩.</span></label>
+            <label class="rsnode-beta__check"><input type="checkbox" name="privateBeta" required><span>⁦I will keep the access password private and use this prerelease firmware for testing. I understand flashing can erase my device⁩.</span></label>
+        </div>
+        <p class="rsnode-beta__note" translate="no">⁦Please keep beta builds within the tester group. Any rights granted by included open-source licenses still apply⁩.</p>
+        <div class="rsnode-beta__links"><a href="https://ofac.treasury.gov/sanctions-programs-and-country-information" target="_blank" rel="noopener noreferrer" data-i18n="flash.terms.u-s-sanctions">تحریم‌های ایالات متحده <span aria-hidden="true">↖</span></a><a href="/terms.html" target="_blank" rel="noopener" data-i18n="flash.terms.terms">شرایط استفاده</a><a href="/privacy.html" target="_blank" rel="noopener" data-i18n="flash.terms.privacy">حریم خصوصی</a></div>
+        <p class="rsnode-beta__status" id="rsnodeTermsStatus" role="status"></p>
+        <div class="install-dialog__actions"><button class="install-dialog__cancel" id="rsnodeTermsCancel" type="button" data-i18n="flash.managers.cancel">لغو</button><button class="install-dialog__continue" id="rsnodeTermsContinue" type="submit" disabled data-i18n="flash.terms.agree-and-continue">پذیرش و ادامه</button></div>
+    </form>
+</dialog>
+
+<dialog class="install-dialog" id="installDialog" aria-labelledby="installDialogTitle" aria-describedby="installDialogIntro installDialogRisk">
+    <div class="install-dialog__device" id="installDialogDevice"></div>
+    <h2 id="installDialogTitle" data-i18n="flash.rsnode.erase-and-install">پاک کردن و نصب</h2>
+    <p id="installDialogIntro"></p>
+    <p id="installDialogRisk"></p>
+    <label class="rsnode-beta__check rsnode-beta__variant" id="installDialogVariant" hidden><input type="checkbox" id="installDialogVariantConfirmed"><span id="installDialogVariantLabel"></span></label>
+    <a class="install-dialog__guide" href="https://docs.ratspeak.org/docs/hardware/flashing-firmware#before-flashing" target="_blank" rel="noopener noreferrer" data-i18n="flash.dialog.flashing-guide">راهنمای فلش <span aria-hidden="true">↖</span></a>
+    <div class="install-dialog__actions">
+        <button class="install-dialog__cancel" id="installDialogCancel" type="button" autofocus data-i18n="flash.managers.cancel">لغو</button>
+        <button class="install-dialog__continue" id="installDialogContinue" type="button" data-i18n="flash.rsnode.erase-and-install">پاک کردن و نصب</button>
+    </div>
+</dialog>
+
+<footer class="site-foot">
+    <div class="foot-main">
+      <div class="foot-brand">
+        <div class="brand"><a class="brand" href="/letter.html" aria-label="نامه‌ای به جامعه" data-i18n-attr="aria-label:common.foot.letter"><svg class="brand-mark" aria-hidden="true" focusable="false"><use href="/lang/assets/ratspeak-mark.svg#mark"/></svg></a><a class="brand" href="/lang/fa/" aria-label="صفحهٔ اصلی Ratspeak" data-i18n-attr="aria-label:common.brand.home"><span class="brand-word">⁦ratspeak⁩</span></a></div>
+        <p data-i18n="common.foot.built-on-reticulum">ساخته‌شده بر پایهٔ <a href="https://docs.ratspeak.org/docs/concepts/what-is-reticulum">⁦Reticulum⁩</a></p>
+      </div>
+      <nav class="foot-cols" aria-label="پاصفحه" data-i18n-attr="aria-label:common.foot.footer">
+        <div><h2 data-i18n="common.foot.product">محصول</h2><ul><li><a href="/lang/fa/download.html" data-i18n="common.nav.download">دانلود</a></li><li><a href="https://docs.ratspeak.org/" data-i18n="common.foot.docs">مستندات<span aria-hidden="true">&nbsp;↖</span></a></li><li><a href="/lang/fa/map.html" data-i18n="common.nav.map">نقشه</a></li><li><a href="/portal.html" data-i18n="common.foot.holder-portal">درگاه دارندگان</a></li></ul></div>
+        <div><h2 data-i18n="common.foot.source">کد</h2><ul><li><a href="https://github.com/ratspeak">⁦GitHub⁩<span aria-hidden="true">&nbsp;↖</span></a></li><li><a href="https://github.com/ratspeak/Ratspeak" data-i18n="common.foot.ratspeak-app">برنامهٔ ⁦Ratspeak⁩<span aria-hidden="true">&nbsp;↖</span></a></li><li><a href="https://github.com/ratspeak/ratspeak-handheld" data-i18n="common.foot.handheld-firmware">فریمور دستگاه‌های دستی<span aria-hidden="true">&nbsp;↖</span></a></li><li><a href="https://github.com/ratspeak/rsReticulum" data-i18n="common.foot.reticulum-in-rust">⁦Reticulum⁩ با ⁦Rust⁩<span aria-hidden="true">&nbsp;↖</span></a></li></ul></div>
+        <div><h2 data-i18n="common.foot.community">جامعه</h2><ul><li><a href="/discord">⁦Discord⁩<span aria-hidden="true">&nbsp;↖</span></a></li><li><a href="/telegram">⁦Telegram⁩<span aria-hidden="true">&nbsp;↖</span></a></li><li><a href="/community-guidelines.html" data-i18n="common.foot.guidelines">رهنمودها</a></li><li><a href="/community.html" data-i18n="common.foot.community-token">توکن جامعه</a></li></ul></div>
+        <div><h2 data-i18n="common.foot.help-legal">راهنما و حقوقی</h2><ul><li><a href="/support.html" data-i18n="common.foot.support">پشتیبانی</a></li><li><a href="/privacy.html" data-i18n="common.foot.privacy">حریم خصوصی</a></li><li><a href="/terms.html" data-i18n="common.foot.terms">شرایط استفاده</a></li></ul></div>
+      </nav>
+    </div>
+    <div class="foot-bar">
+        <p>© ⁦2026 Ratspeak LLC⁩</p>
+      </div>
+  </footer>
+
+<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+<script type="module" src="/lang/assets/site/flasher.js"></script>
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+
+</body>
+</html>

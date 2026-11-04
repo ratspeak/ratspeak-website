@@ -1,0 +1,1672 @@
+import { buildMapSnapshot } from '/lang/assets/map-data.js';
+import { isIpv6Address, isYggdrasilAddress, textMentionsYggdrasil } from '/lang/assets/map-network.js';
+import { buildCountryIndex, buildPlaceIndex, locationLabelForNode } from '/lang/assets/map-places.js';
+import {
+  AttributionControl,
+  Map as MapLibreMap,
+  Marker,
+  NavigationControl
+} from '/lang/assets/vendor/maplibre/maplibre-gl.mjs';
+import {
+  basemapStyleUrl,
+  createFallbackStyle,
+  isProviderResourceError
+} from './map-basemap.js';
+
+const { t, tp, date, rel, ltr } = window.RSI18N;
+
+const API_URL = '/api/map-nodes';
+// /api/map-nodes is CDN-cached for 60s, so a fresh tab is current; open tabs
+// re-poll every 5 min and pause while hidden (refresh on return).
+const SNAPSHOT_REFRESH_MS = 5 * 60_000;
+const NODE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+const LAND_MASK_URL = '/scripts/data/ne_110m_land.geojson';
+const PLACE_GAZETTEER_URL = '/scripts/data/ne_110m_populated_places_simple.geojson';
+const COUNTRY_GEOJSON_URL = '/scripts/data/ne_110m_admin_0_countries.geojson';
+// the site is dark-only; ratspeak-light.json stays on disk but is no longer loaded
+const BASEMAP_THEME = 'dark';
+const NODE_SOURCE_ID = 'ratspeak-nodes';
+const NODE_GLOW_LAYER_ID = 'ratspeak-node-glow';
+const NODE_SELECTION_LAYER_ID = 'ratspeak-node-selection';
+const NODE_CORE_LAYER_ID = 'ratspeak-node-core';
+const PROVIDER_ERROR_THRESHOLD = 4;
+const PROVIDER_ERROR_WINDOW_MS = 8_000;
+const FORCE_FALLBACK_BASEMAP = new URLSearchParams(window.location.search).get('basemap') === 'fallback';
+
+const KIND_META = {
+  'server-ipv4': {
+    label: 'IPv4',
+    badgeLabel: 'IPv4',
+    shortLabel: 'IPv4',
+    color: 'var(--map-blue)'
+  },
+  'server-ipv6': {
+    label: 'IPv6',
+    badgeLabel: 'IPv6',
+    shortLabel: 'IPv6',
+    color: 'var(--map-blue-dark)'
+  },
+  'client-auto': {
+    label: t('map.filters.radio', 'Radio'),
+    badgeLabel: t('map.filters.radio', 'Radio'),
+    shortLabel: t('map.filters.radio', 'Radio'),
+    color: 'var(--map-green)'
+  },
+  'client-manual': {
+    label: t('map.filters.manual', 'Manual'),
+    badgeLabel: t('map.filters.manual', 'Manual'),
+    shortLabel: t('map.filters.manual', 'Manual'),
+    color: 'var(--map-yellow)'
+  },
+  i2p: {
+    label: 'I2P',
+    badgeLabel: 'I2P',
+    shortLabel: 'I2P',
+    color: 'var(--map-i2p)'
+  },
+  yggdrasil: {
+    label: 'Yggdrasil',
+    badgeLabel: 'Yggdrasil',
+    shortLabel: 'Ygg',
+    color: 'var(--map-yggdrasil)'
+  }
+};
+
+// Pin colours come from the page's CSS so the legend, detail tags and pins share one palette.
+const NODE_PALETTE_VARS = {
+  'server-ipv4': '--map-blue',
+  'server-ipv6': '--map-blue-dark',
+  'client-auto': '--map-green',
+  'client-manual': '--map-yellow',
+  i2p: '--map-i2p',
+  yggdrasil: '--map-yggdrasil',
+  accent: '--map-pin-selected',
+  edge: '--map-pin-edge'
+};
+
+function nodePalette() {
+  const css = getComputedStyle(document.documentElement);
+  return Object.fromEntries(Object.entries(NODE_PALETTE_VARS).map(([key, name]) => [key, css.getPropertyValue(name).trim()]));
+}
+
+const LEGEND_KIND_IDS = ['server-ipv4', 'server-ipv6', 'client-auto', 'i2p', 'yggdrasil', 'client-manual'];
+
+const MARKER_SCALE_BANDS = [
+  { maxZoom: 2, size: 5.5, selectedCore: 7.5, selected: 17, ring: 1.75, ringAlpha: 16, selectedRing: 2.75, selectedHalo: 5.5 },
+  { maxZoom: 3, size: 6.1, selectedCore: 8, selected: 18, ring: 1.85, ringAlpha: 17, selectedRing: 3, selectedHalo: 6 },
+  { maxZoom: 4, size: 6.8, selectedCore: 8.7, selected: 19.5, ring: 2, ringAlpha: 18, selectedRing: 3, selectedHalo: 6 },
+  { maxZoom: 5, size: 7.4, selectedCore: 9.3, selected: 21, ring: 2, ringAlpha: 17, selectedRing: 3, selectedHalo: 6.5 },
+  { maxZoom: 8, size: 8, selectedCore: 10, selected: 22, ring: 2, ringAlpha: 16, selectedRing: 3, selectedHalo: 7 },
+  { maxZoom: Infinity, size: 8.5, selectedCore: 10, selected: 22, ring: 2, ringAlpha: 14, selectedRing: 3, selectedHalo: 7 }
+];
+
+const DENSE_MARKER_DISTANCE_PX = 18;
+const MOBILE_MARKER_PICK_RADIUS_PX = 22;
+const MOBILE_MARKER_PRECISE_RADIUS_PX = 10;
+const MOBILE_MARKER_PICK_TIE_PX = 9;
+const MOBILE_SHEET_DISMISS_DISTANCE_PX = 72;
+const MOBILE_SHEET_DISMISS_FAST_DISTANCE_PX = 28;
+const MOBILE_SHEET_DISMISS_VELOCITY_PX_MS = 0.5;
+const MIN_MAP_ZOOM = 2;
+const MOBILE_VIEWPORT_QUERY = '(max-width: 900px)';
+const MOBILE_SHEET_VIEWPORT_QUERY = '(max-width: 620px)';
+const LOW_ZOOM_LABEL_CUTOFF = MIN_MAP_ZOOM;
+const LOW_ZOOM_LABELS = [
+  { label: t('map.continent.northAmerica', 'North America'), lat: 48, lon: -103 },
+  { label: t('map.continent.southAmerica', 'South America'), lat: -18, lon: -60 },
+  { label: t('map.continent.europe', 'Europe'), lat: 52, lon: 17 },
+  { label: t('map.continent.africa', 'Africa'), lat: 6, lon: 21 },
+  { label: t('map.continent.asia', 'Asia'), lat: 47, lon: 86 },
+  { label: t('map.continent.oceania', 'Oceania'), lat: -23, lon: 136 },
+  { label: t('map.continent.antarctica', 'Antarctica'), lat: -75, lon: 18 }
+];
+const DECLUTTER_ITERATIONS = 3;
+const DECLUTTER_NEIGHBOR_DISTANCE_PX = 17;
+const DECLUTTER_MIN_DISTANCE_PX = 10;
+const DECLUTTER_MAX_OFFSET_PX = 8;
+const DECLUTTER_MAX_STRENGTH = 0.7;
+const DECLUTTER_LOCAL_COLLISION_DISTANCE_PX = 10;
+const DECLUTTER_LOCAL_MAX_STRENGTH = 0.5;
+const DECLUTTER_FULL_ZOOM = MIN_MAP_ZOOM;
+const DECLUTTER_END_ZOOM = MIN_MAP_ZOOM + 2.6;
+const WORLD_LONGITUDE_SPAN = 360;
+const WORLD_RENDER_PADDING = 1;
+const COORDINATE_ACCURACY_NOTE = t('map.detail.coordsNote', 'Coordinates can be self-reported and may not be accurate.');
+const DEFAULT_WORLD_OFFSETS = [-WORLD_LONGITUDE_SPAN, 0, WORLD_LONGITUDE_SPAN];
+
+const state = {
+  snapshot: null,
+  snapshotUnavailable: false,
+  filteredNodes: [],
+  selectedId: null,
+  kindFilter: 'all',
+  statusFilter: 'all',
+  query: '',
+  map: null,
+  styleReady: false,
+  usingFallbackBasemap: false,
+  providerErrorTimes: [],
+  lowZoomLabelMarkers: [],
+  markerPlacements: new Map(),
+  renderedWorldOffsets: null,
+  markerScale: MARKER_SCALE_BANDS[0],
+  landMask: null,
+  landMaskPromise: null,
+  placeIndex: [],
+  countryIndex: [],
+  locationIndexPromise: null,
+  nodeCursorActive: false,
+  detailSheetDrag: null,
+  refreshTimer: null,
+  refreshInFlight: false,
+  suppressMapClickUntil: 0
+};
+
+const els = {
+  app: document.getElementById('mapApp'),
+  map: document.getElementById('map'),
+  fallback: document.getElementById('mapFallback'),
+  nodeDetail: document.getElementById('nodeDetail'),
+  mapMenu: document.getElementById('mapMenu'),
+  mapMenuToggle: document.getElementById('mapMenuToggle'),
+  mapMenuBody: document.getElementById('mapMenuBody'),
+  searchInput: document.getElementById('nodeSearch'),
+  kindSelect: document.getElementById('kindFilter'),
+  statusSelect: document.getElementById('statusFilter'),
+  snapshotStatus: document.getElementById('mapSnapshotStatus'),
+  navbar: document.getElementById('navbar'),
+  navHamburger: document.getElementById('navHamburger'),
+  navMobileMenu: document.getElementById('navMobileMenu')
+};
+
+init();
+
+function init() {
+  bindChrome();
+  bindControls();
+  initMap();
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  void loadInitialSnapshot();
+  state.landMaskPromise = loadLandMask().then((landMask) => {
+    state.landMask = landMask;
+    renderMap();
+    return landMask;
+  });
+}
+
+async function loadInitialSnapshot() {
+  state.snapshot = await loadSnapshot();
+  applyFilters();
+  scheduleSnapshotRefresh();
+}
+
+function bindChrome() {
+  if (els.navHamburger && els.navMobileMenu) {
+    els.navHamburger.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const isOpen = els.navMobileMenu.classList.toggle('open');
+      els.navHamburger.setAttribute('aria-expanded', String(isOpen));
+    });
+    document.addEventListener('click', (event) => {
+      if (!els.navMobileMenu.contains(event.target) && !els.navHamburger.contains(event.target)) {
+        els.navMobileMenu.classList.remove('open');
+        els.navHamburger.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  if (els.navbar) {
+    const syncNavbar = () => {
+      els.navbar.classList.toggle('scrolled', window.scrollY > 10);
+    };
+    syncNavbar();
+    window.addEventListener('scroll', syncNavbar, { passive: true });
+  }
+}
+
+function bindControls() {
+  if (els.mapMenu && els.mapMenuToggle && els.mapMenuBody) {
+    setMapMenuExpanded(!isMobileViewport());
+
+    els.mapMenuToggle.addEventListener('click', () => {
+      const expanded = els.mapMenuToggle.getAttribute('aria-expanded') === 'true';
+      setMapMenuExpanded(!expanded);
+    });
+  }
+
+  if (els.kindSelect) {
+    els.kindSelect.addEventListener('change', () => {
+      state.kindFilter = els.kindSelect.value;
+      applyFilters();
+    });
+  }
+
+  if (els.statusSelect) {
+    els.statusSelect.addEventListener('change', () => {
+      state.statusFilter = els.statusSelect.value;
+      applyFilters();
+    });
+  }
+
+  if (els.searchInput) {
+    els.searchInput.addEventListener('input', () => {
+      state.query = els.searchInput.value.trim().toLowerCase();
+      applyFilters();
+      if (state.query) void ensureLocationIndexes();
+    });
+  }
+
+  if (els.nodeDetail) {
+    els.nodeDetail.addEventListener('pointerdown', handleDetailSheetPointerDown);
+    els.nodeDetail.addEventListener('click', (event) => {
+      const infoButton = event.target instanceof Element ? event.target.closest('.detail-info') : null;
+      if (infoButton && els.nodeDetail.contains(infoButton)) {
+        event.stopPropagation();
+        toggleDetailInfo(infoButton);
+        return;
+      }
+
+      closeDetailInfo();
+      event.stopPropagation();
+    });
+  }
+
+}
+
+function isMobileViewport() {
+  return window.matchMedia(MOBILE_VIEWPORT_QUERY).matches;
+}
+
+function isMobileSheetViewport() {
+  return window.matchMedia(MOBILE_SHEET_VIEWPORT_QUERY).matches;
+}
+
+function usesCoarsePointer() {
+  return isMobileViewport() || window.matchMedia('(pointer: coarse)').matches;
+}
+
+function setMapMenuExpanded(expanded) {
+  els.mapMenuToggle.setAttribute('aria-expanded', String(expanded));
+  els.mapMenuBody.hidden = !expanded;
+  els.mapMenu.classList.toggle('is-collapsed', !expanded);
+}
+
+async function loadSnapshot() {
+  try {
+    const response = await fetch(API_URL, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`${API_URL} returned ${response.status}`);
+    const payload = await response.json();
+    if (!Array.isArray(payload.nodes)) throw new Error(`${API_URL} response missing nodes`);
+    state.snapshotUnavailable = false;
+    return payload;
+  } catch (error) {
+    state.snapshotUnavailable = true;
+    console.info('Map snapshot unavailable:', error.message);
+  }
+
+  return buildMapSnapshot(new Date());
+}
+
+async function loadLandMask() {
+  try {
+    const response = await fetch(LAND_MASK_URL, { cache: 'force-cache' });
+    if (!response.ok) throw new Error(`${LAND_MASK_URL} returned ${response.status}`);
+    const geojson = await response.json();
+    const polygons = [];
+
+    for (const feature of geojson.features || []) {
+      const geometry = feature.geometry;
+      if (!geometry) continue;
+
+      const polygonGroups = geometry.type === 'Polygon'
+        ? [geometry.coordinates]
+        : geometry.type === 'MultiPolygon'
+          ? geometry.coordinates
+          : [];
+
+      for (const rings of polygonGroups) {
+        if (!Array.isArray(rings) || !rings.length) continue;
+        polygons.push({ rings, bbox: bboxForRing(rings[0]) });
+      }
+    }
+
+    return polygons.length ? { polygons } : null;
+  } catch (error) {
+    console.info('Map land mask unavailable:', error.message);
+    return null;
+  }
+}
+
+async function loadCountryIndex() {
+  try {
+    const response = await fetch(COUNTRY_GEOJSON_URL, { cache: 'force-cache' });
+    if (!response.ok) throw new Error(`${COUNTRY_GEOJSON_URL} returned ${response.status}`);
+    return buildCountryIndex(await response.json());
+  } catch (error) {
+    console.info('Map country index unavailable:', error.message);
+    return [];
+  }
+}
+
+async function loadPlaceIndex() {
+  try {
+    const response = await fetch(PLACE_GAZETTEER_URL, { cache: 'force-cache' });
+    if (!response.ok) throw new Error(`${PLACE_GAZETTEER_URL} returned ${response.status}`);
+    return buildPlaceIndex(await response.json());
+  } catch (error) {
+    console.info('Map place gazetteer unavailable:', error.message);
+    return [];
+  }
+}
+
+function ensureLocationIndexes() {
+  if (state.locationIndexPromise) return state.locationIndexPromise;
+
+  state.locationIndexPromise = Promise.all([
+    loadPlaceIndex(),
+    loadCountryIndex()
+  ]).then(([placeIndex, countryIndex]) => {
+    state.placeIndex = placeIndex;
+    state.countryIndex = countryIndex;
+    if (state.selectedId) renderDetail();
+    if (state.query) applyFilters();
+    return { placeIndex, countryIndex };
+  });
+
+  return state.locationIndexPromise;
+}
+
+function scheduleSnapshotRefresh() {
+  if (state.refreshTimer) window.clearTimeout(state.refreshTimer);
+  state.refreshTimer = null;
+  if (document.hidden) return; // resumed by handleVisibilityChange
+  state.refreshTimer = window.setTimeout(refreshSnapshot, SNAPSHOT_REFRESH_MS);
+}
+
+function handleVisibilityChange() {
+  if (document.hidden) {
+    scheduleSnapshotRefresh();
+  } else if (state.snapshot && !state.refreshTimer && !state.refreshInFlight) {
+    void refreshSnapshot();
+  }
+}
+
+async function refreshSnapshot() {
+  if (state.refreshInFlight) return;
+  state.refreshInFlight = true;
+  try {
+    const previousSelectedId = state.selectedId;
+    state.snapshot = await loadSnapshot();
+    if (previousSelectedId && !(state.snapshot.nodes || []).some((node) => node.id === previousSelectedId)) {
+      state.selectedId = null;
+    }
+    applyFilters();
+  } finally {
+    state.refreshInFlight = false;
+    scheduleSnapshotRefresh();
+  }
+}
+
+function initMap() {
+  if (!mapLibreSupported()) {
+    showMapFallback(t('map.fallback.noWebgl', 'This browser cannot render the interactive map because WebGL is unavailable.'), { fatal: true });
+    return;
+  }
+
+  const minZoom = viewportMinZoom();
+  state.usingFallbackBasemap = FORCE_FALLBACK_BASEMAP;
+  try {
+    state.map = new MapLibreMap({
+      container: els.map,
+      style: FORCE_FALLBACK_BASEMAP ? createFallbackStyle(BASEMAP_THEME, COUNTRY_GEOJSON_URL) : undefined,
+      center: [-18, 29],
+      zoom: minZoom,
+      minZoom,
+      maxZoom: 19,
+      maxPitch: 0,
+      dragRotate: false,
+      pitchWithRotate: false,
+      touchPitch: false,
+      renderWorldCopies: true,
+      attributionControl: false,
+      locale: {
+        'Map.Title': t('map.controls.map', 'Map'),
+        'NavigationControl.ZoomIn': t('map.controls.zoomIn', 'Zoom in'),
+        'NavigationControl.ZoomOut': t('map.controls.zoomOut', 'Zoom out'),
+        'AttributionControl.ToggleAttribution': t('map.controls.attribution', 'Toggle attribution')
+      },
+      fadeDuration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 180
+    });
+  } catch (error) {
+    console.info('Map renderer unavailable:', error.message);
+    showMapFallback(t('map.fallback.failed', 'The interactive map could not start in this browser.'), { fatal: true });
+    return;
+  }
+  if (!FORCE_FALLBACK_BASEMAP) {
+    state.map.setStyle(rootUrl(basemapStyleUrl(BASEMAP_THEME)), { transformStyle: (_, style) => rootStyleSources(style) });
+  }
+
+  if (FORCE_FALLBACK_BASEMAP) {
+    showMapFallback(t('map.fallback.disabled', 'Detailed basemap disabled. Showing the basic map.'));
+  }
+
+  state.map.addControl(new NavigationControl({
+    showCompass: false,
+    showZoom: true,
+    visualizePitch: false
+  }), 'bottom-right');
+  state.map.addControl(new AttributionControl({ compact: true }), 'bottom-right');
+  initLegendControl();
+  initLowZoomLabels();
+
+  state.map.on('style.load', handleStyleLoad);
+  state.map.on('error', handleMapError);
+  state.map.on('zoomend', () => {
+    updateMarkerScale();
+    syncLowZoomLabels();
+    renderMap();
+  });
+  state.map.on('dragstart', () => {
+    suppressNextMapClick();
+    clearNodeCursor();
+  });
+  state.map.on('dragend', suppressNextMapClick);
+  state.map.on('moveend', renderWrappedOverlays);
+  state.map.on('mousemove', syncNodeCursor);
+  state.map.on('mouseout', clearNodeCursor);
+  state.map.on('click', handleMapClick);
+  window.addEventListener('resize', syncMapViewport, { passive: true });
+}
+
+function handleStyleLoad() {
+  state.styleReady = true;
+  ensureNodeLayers();
+  updateMarkerScale();
+  syncLowZoomLabels();
+  renderMap();
+  if (!state.usingFallbackBasemap) hideMapFallback();
+}
+
+function handleMapError(event) {
+  if (state.usingFallbackBasemap || !isProviderResourceError(event)) return;
+
+  const now = Date.now();
+  state.providerErrorTimes = state.providerErrorTimes
+    .filter((time) => now - time <= PROVIDER_ERROR_WINDOW_MS);
+  state.providerErrorTimes.push(now);
+  if (state.providerErrorTimes.length >= PROVIDER_ERROR_THRESHOLD) {
+    activateFallbackBasemap();
+  }
+}
+
+function activateFallbackBasemap() {
+  if (!state.map || state.usingFallbackBasemap) return;
+
+  state.usingFallbackBasemap = true;
+  state.styleReady = false;
+  showMapFallback(t('map.map.detailed-basemap-unavailable-showing', 'Detailed basemap unavailable. Showing the basic map.'));
+  state.map.setStyle(
+    createFallbackStyle(BASEMAP_THEME, COUNTRY_GEOJSON_URL),
+    { diff: false }
+  );
+}
+
+function showMapFallback(message, options = {}) {
+  els.fallback.querySelector('.map-fallback-text').textContent = message;
+  els.fallback.classList.toggle('is-fatal', Boolean(options.fatal));
+  els.fallback.hidden = false;
+  els.app.classList.toggle('map-unavailable', Boolean(options.fatal));
+  els.app.dataset.basemapMode = options.fatal ? 'unavailable' : 'fallback';
+}
+
+function hideMapFallback() {
+  els.fallback.hidden = true;
+  els.fallback.classList.remove('is-fatal');
+  els.app.classList.remove('map-unavailable');
+  els.app.dataset.basemapMode = 'provider';
+}
+
+function initLegendControl() {
+  if (!state.map) return;
+
+  const legend = {
+    container: null,
+    onAdd() {
+      const container = document.createElement('section');
+      container.className = 'map-legend maplibregl-ctrl';
+      container.setAttribute('aria-label', t('map.legend.title', 'Legend'));
+      container.innerHTML = `
+        <h2 class="legend-title">${escapeHtml(t('map.legend.title', 'Legend'))}</h2>
+        <div class="legend-grid">
+          ${LEGEND_KIND_IDS.map((kindId) => {
+            const kind = KIND_META[kindId];
+            return `
+              <span class="legend-item">
+                <span class="legend-marker"><span class="map-pin map-pin--${cssToken(kindId)}" aria-hidden="true"></span></span>
+                ${escapeHtml(kind.label)}
+              </span>
+            `;
+          }).join('')}
+        </div>
+      `;
+      container.addEventListener('click', (event) => event.stopPropagation());
+      container.addEventListener('wheel', (event) => event.stopPropagation(), { passive: true });
+      this.container = container;
+      return container;
+    },
+    onRemove() {
+      this.container?.remove();
+      this.container = null;
+    }
+  };
+
+  state.map.addControl(legend, 'bottom-left');
+}
+
+// style URLs and their GeoJSON sources are site-root paths, so the map also works from /es/map.html and the like
+function rootUrl(path) {
+  return new URL(path, `${location.origin}/`).href;
+}
+
+function rootStyleSources(style) {
+  for (const source of Object.values(style.sources || {})) {
+    if (typeof source.data === 'string' && !/^([a-z]+:|\/)/i.test(source.data)) source.data = rootUrl(source.data);
+  }
+  return style;
+}
+
+function mapLibreSupported() {
+  const canvas = document.createElement('canvas');
+  try {
+    return Boolean(canvas.getContext('webgl2') || canvas.getContext('webgl'));
+  } catch {
+    return false;
+  }
+}
+
+function isLowZoomLabelMode() {
+  return state.map ? state.map.getZoom() <= LOW_ZOOM_LABEL_CUTOFF + 0.001 : true;
+}
+
+function visibleWorldOffsets() {
+  if (!state.map) return [...DEFAULT_WORLD_OFFSETS];
+
+  const bounds = state.map.getBounds();
+  if (!bounds) return [...DEFAULT_WORLD_OFFSETS];
+
+  const west = bounds.getWest();
+  const east = bounds.getEast();
+  if (!Number.isFinite(west) || !Number.isFinite(east)) return [...DEFAULT_WORLD_OFFSETS];
+
+  const firstWorld = Math.ceil((west - 180) / WORLD_LONGITUDE_SPAN) - WORLD_RENDER_PADDING;
+  const lastWorld = Math.floor((east + 180) / WORLD_LONGITUDE_SPAN) + WORLD_RENDER_PADDING;
+  const offsets = [];
+  for (let world = firstWorld; world <= lastWorld; world += 1) {
+    offsets.push(world * WORLD_LONGITUDE_SPAN);
+  }
+
+  return offsets.length ? offsets : [...DEFAULT_WORLD_OFFSETS];
+}
+
+function sameWorldOffsets(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+  return a.every((offset, index) => offset === b[index]);
+}
+
+function initLowZoomLabels() {
+  if (!state.map || state.lowZoomLabelMarkers.length) return;
+
+  state.lowZoomLabelMarkers = LOW_ZOOM_LABELS.map((label) => {
+    const element = document.createElement('div');
+    element.className = 'continent-label-marker';
+    element.innerHTML = `<span class="continent-label">${escapeHtml(label.label)}</span>`;
+    const marker = new Marker({ element, anchor: 'center' })
+      .setLngLat([label.lon, label.lat])
+      .addTo(state.map);
+    return { element, marker };
+  });
+  syncLowZoomLabels();
+}
+
+function renderLowZoomLabels() {
+  syncLowZoomLabels();
+}
+
+function syncLowZoomLabels() {
+  if (!state.map) return;
+  const visible = isLowZoomLabelMode();
+  state.lowZoomLabelMarkers.forEach(({ element }) => {
+    element.classList.toggle('is-visible', visible);
+  });
+}
+
+function syncMapViewport() {
+  if (!state.map) return;
+  state.map.resize();
+  const minZoom = viewportMinZoom();
+  state.map.setMinZoom(minZoom);
+  if (state.map.getZoom() < minZoom) state.map.setZoom(minZoom);
+  renderLowZoomLabels();
+  renderMap();
+}
+
+function viewportMinZoom() {
+  return MIN_MAP_ZOOM;
+}
+
+function applyFilters() {
+  const nodes = state.snapshot?.nodes || [];
+  const expiryCutoff = Date.now() - NODE_MAX_AGE_MS;
+  const currentNodes = nodes.filter((node) => !nodeIsExpired(node, expiryCutoff));
+  state.filteredNodes = currentNodes.filter((node) => {
+    const kind = nodeKind(node);
+    const matchesKind = state.kindFilter === 'all' || kind === state.kindFilter;
+    const matchesStatus = state.statusFilter === 'all' || (state.statusFilter === 'available'
+      ? ['available', 'seen', 'recent'].includes(node.status)
+      : node.status === state.statusFilter);
+    const queryBlob = [
+      nodeDisplayName(node),
+      kind,
+      node.status,
+      nodeLocationLabel(node),
+      node.reticulum?.interfaceType,
+      node.reticulum?.networkId,
+      ...(node.services || [])
+    ].filter(Boolean).join(' ').toLowerCase();
+    const matchesQuery = !state.query || queryBlob.includes(state.query);
+    return matchesKind && matchesStatus && matchesQuery;
+  });
+
+  els.app.dataset.visibleNodeCount = String(state.filteredNodes.length);
+  els.app.dataset.totalNodeCount = String(nodes.length);
+  renderSnapshotStatus(currentNodes.length);
+
+  if (state.selectedId && !state.filteredNodes.some((node) => node.id === state.selectedId)) {
+    state.selectedId = null;
+  }
+
+  renderDetail();
+  renderMap();
+}
+
+function renderSnapshotStatus(currentNodeCount) {
+  if (!els.snapshotStatus) return;
+  if (state.snapshotUnavailable) {
+    els.snapshotStatus.textContent = t('map.status.unavailable', 'Node records are unavailable. Reload to retry.');
+    return;
+  }
+  const snapshot = state.snapshot;
+  if (!snapshot) {
+    els.snapshotStatus.textContent = t('map.filters.loading-node-records', 'Loading node records…');
+    return;
+  }
+  let summary;
+  if (!currentNodeCount) {
+    summary = snapshot.nodes?.length
+      ? t('map.status.noneRecent', 'No nodes seen within the last seven days.')
+      : t('map.status.noneInSnapshot', 'No node records in this snapshot.');
+  } else if (!state.filteredNodes.length) {
+    summary = t('map.status.noMatch', 'No nodes match these filters. Clear the search or change a filter.');
+  } else {
+    const shown = state.filteredNodes.length;
+    summary = shown === currentNodeCount
+      ? tp('map.status.nodes', '{n} node', '{n} nodes', currentNodeCount)
+      : tp('map.status.shownOf', '{shown} of {n} node', '{shown} of {n} nodes', currentNodeCount, { shown });
+  }
+  const sep = /[.։。]$/.test(summary) ? ' ' : ' · ';
+  const generatedAt = Date.parse(snapshot.generatedAt || '');
+  // Snapshot date in the page's date order (the visitor's own on English pages), pinned to UTC
+  const timestamp = Number.isFinite(generatedAt)
+    ? sep + t('map.status.snapshot', 'Snapshot: {date} UTC', { date: date(new Date(generatedAt), { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'UTC' }) })
+    : sep + t('map.status.snapshotUnknown', 'Snapshot time unavailable');
+  els.snapshotStatus.textContent = summary + timestamp;
+}
+
+function renderWrappedOverlays() {
+  const worldOffsets = visibleWorldOffsets();
+  const shouldRenderMarkers = !sameWorldOffsets(worldOffsets, state.renderedWorldOffsets);
+  syncLowZoomLabels();
+  if (shouldRenderMarkers) renderMap({ worldOffsets });
+}
+
+function renderDetail() {
+  const node = selectedNode();
+  if (!node) {
+    els.nodeDetail.hidden = true;
+    els.nodeDetail.innerHTML = '';
+    return;
+  }
+
+  els.nodeDetail.hidden = false;
+  const kindId = nodeKind(node);
+  const kind = KIND_META[kindId] || KIND_META['client-manual'];
+  const reticulum = node.reticulum || {};
+  const endpoint = nodeEndpoint(node, reticulum);
+  const radio = radioSummary(reticulum);
+  const location = nodeLocationLabel(node);
+  const coord = `${formatCoord(node.location?.lat, 'lat')}, ${formatCoord(node.location?.lon, 'lon')}`;
+  const fields = [
+    location ? detailField(t('map.detail.location', 'Location'), location) : '',
+    coordinateDetailField(coord),
+    detailField(t('map.detail.lastSeen', 'Last seen'), lastSeenLabel(node)),
+    reticulum.interfaceType ? detailField(t('map.detail.interface', 'Interface'), reticulum.interfaceType) : '',
+    detailField(t('map.detail.services', 'Services'), serviceTags(node.services), true, false, true),
+    radio ? detailField(t('map.detail.radio', 'Radio'), radio, true, true) : '',
+    endpoint.address ? detailField(endpoint.label, endpoint.address, true, true) : '',
+    endpoint.port == null ? '' : detailField(t('map.detail.port', 'Port'), String(endpoint.port), false, true)
+  ].filter(Boolean).join('');
+
+  els.nodeDetail.innerHTML = `
+    <div class="detail-grabber" aria-hidden="true"></div>
+    <div class="detail-head">
+      <span class="eyebrow">${escapeHtml(t('map.detail.eyebrow', 'Selected node'))}</span>
+      <div class="detail-title-row">
+        <h2 class="detail-title">${escapeHtml(nodeDisplayName(node))}</h2>
+        <span class="detail-actions">
+          <span class="tag tag--type" style="--type-color: ${kind.color}">${escapeHtml(kind.badgeLabel || kind.label)}</span>
+          <button class="detail-close" type="button" aria-label="${escapeHtml(t('map.detail.closeLabel', 'Close selected node details'))}" title="${escapeHtml(t('map.detail.close', 'Close'))}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+              <path d="M18 6 6 18"/>
+              <path d="m6 6 12 12"/>
+            </svg>
+          </button>
+        </span>
+      </div>
+    </div>
+    <dl class="detail-list">
+      ${fields}
+    </dl>
+  `;
+
+  els.nodeDetail.querySelector('.detail-close')?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    clearSelectedNode();
+  });
+}
+
+function toggleDetailInfo(button) {
+  const isOpen = button.getAttribute('aria-expanded') === 'true';
+  closeDetailInfo(button);
+  setDetailInfoOpen(button, !isOpen);
+}
+
+function closeDetailInfo(exceptButton = null) {
+  els.nodeDetail?.querySelectorAll('.detail-info').forEach((button) => {
+    if (button !== exceptButton) setDetailInfoOpen(button, false);
+  });
+}
+
+function setDetailInfoOpen(button, open) {
+  const popover = button.closest('.detail-row')?.querySelector('.detail-info-popover');
+  button.setAttribute('aria-expanded', String(open));
+  if (popover) popover.hidden = !open;
+}
+
+function renderMap(options = {}) {
+  if (!state.map) return;
+
+  const worldOffsets = options.worldOffsets || visibleWorldOffsets();
+  state.renderedWorldOffsets = [...worldOffsets];
+  state.markerPlacements = getMarkerDisplayLayout(state.filteredNodes);
+  const denseNodeIds = getDenseNodeIds(state.filteredNodes);
+
+  const data = {
+    type: 'FeatureCollection',
+    features: state.filteredNodes.map((node) => {
+      const placement = state.markerPlacements.get(node.id) || ZERO_PLACEMENT;
+      return {
+        type: 'Feature',
+        id: String(node.id),
+        geometry: {
+          type: 'Point',
+          coordinates: displayedNodeCoordinates(node, placement)
+        },
+        properties: {
+          id: String(node.id),
+          kind: nodeKind(node),
+          status: stringValue(node.status) || 'unknown',
+          selected: node.id === state.selectedId,
+          dense: denseNodeIds.has(node.id),
+          label: nodeDisplayName(node)
+        }
+      };
+    })
+  };
+
+  const source = state.styleReady ? state.map.getSource(NODE_SOURCE_ID) : null;
+  source?.setData(data);
+}
+
+const ZERO_PLACEMENT = Object.freeze({ dx: 0, dy: 0, isSpread: false });
+
+function ensureNodeLayers() {
+  if (!state.map || !state.styleReady) return;
+
+  if (!state.map.getSource(NODE_SOURCE_ID)) {
+    state.map.addSource(NODE_SOURCE_ID, {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] }
+    });
+  }
+
+  if (!state.map.getLayer(NODE_GLOW_LAYER_ID)) {
+    state.map.addLayer({
+      id: NODE_GLOW_LAYER_ID,
+      type: 'circle',
+      source: NODE_SOURCE_ID,
+      paint: {}
+    });
+  }
+
+  if (!state.map.getLayer(NODE_SELECTION_LAYER_ID)) {
+    state.map.addLayer({
+      id: NODE_SELECTION_LAYER_ID,
+      type: 'circle',
+      source: NODE_SOURCE_ID,
+      filter: ['==', ['get', 'selected'], true],
+      paint: {}
+    });
+  }
+
+  if (!state.map.getLayer(NODE_CORE_LAYER_ID)) {
+    state.map.addLayer({
+      id: NODE_CORE_LAYER_ID,
+      type: 'circle',
+      source: NODE_SOURCE_ID,
+      paint: {}
+    });
+  }
+
+  updateMarkerPaint();
+}
+
+function updateMarkerPaint() {
+  if (!state.map || !state.styleReady || !state.map.getLayer(NODE_CORE_LAYER_ID)) return;
+
+  const scale = state.markerScale || MARKER_SCALE_BANDS[0];
+  const palette = nodePalette();
+  const color = nodeColorExpression(palette);
+
+  state.map.setPaintProperty(NODE_GLOW_LAYER_ID, 'circle-radius', [
+    'case',
+    ['boolean', ['get', 'selected'], false],
+    (scale.selected / 2) + scale.selectedHalo,
+    (scale.size / 2) + (scale.ring * 2)
+  ]);
+  state.map.setPaintProperty(NODE_GLOW_LAYER_ID, 'circle-color', color);
+  state.map.setPaintProperty(NODE_GLOW_LAYER_ID, 'circle-opacity', [
+    'case',
+    ['boolean', ['get', 'selected'], false], 0.2,
+    ['boolean', ['get', 'dense'], false], 0.08,
+    0.14
+  ]);
+  state.map.setPaintProperty(NODE_GLOW_LAYER_ID, 'circle-blur', 0.7);
+
+  state.map.setPaintProperty(
+    NODE_SELECTION_LAYER_ID,
+    'circle-radius',
+    (scale.selectedCore / 2) + scale.selectedRing
+  );
+  state.map.setPaintProperty(NODE_SELECTION_LAYER_ID, 'circle-color', palette.accent);
+  state.map.setPaintProperty(NODE_SELECTION_LAYER_ID, 'circle-opacity', 0.78);
+  state.map.setPaintProperty(NODE_SELECTION_LAYER_ID, 'circle-blur', 0.12);
+
+  state.map.setPaintProperty(NODE_CORE_LAYER_ID, 'circle-radius', [
+    'case',
+    ['boolean', ['get', 'selected'], false], scale.selectedCore / 2,
+    scale.size / 2
+  ]);
+  state.map.setPaintProperty(NODE_CORE_LAYER_ID, 'circle-color', color);
+  state.map.setPaintProperty(NODE_CORE_LAYER_ID, 'circle-opacity', [
+    'match',
+    ['get', 'status'],
+    ['stale', 'unknown'], 0.9,
+    1
+  ]);
+  state.map.setPaintProperty(NODE_CORE_LAYER_ID, 'circle-stroke-color', palette.edge);
+  state.map.setPaintProperty(NODE_CORE_LAYER_ID, 'circle-stroke-opacity', 0.2);
+  state.map.setPaintProperty(NODE_CORE_LAYER_ID, 'circle-stroke-width', 1);
+}
+
+function nodeColorExpression(palette) {
+  return [
+    'match',
+    ['get', 'kind'],
+    'server-ipv4', palette['server-ipv4'],
+    'server-ipv6', palette['server-ipv6'],
+    'client-auto', palette['client-auto'],
+    'client-manual', palette['client-manual'],
+    'i2p', palette.i2p,
+    'yggdrasil', palette.yggdrasil,
+    palette['client-manual']
+  ];
+}
+
+function displayedNodeCoordinates(node, placement) {
+  const lat = Number(node.location?.lat);
+  const lon = normalizeLongitude(node.location?.lon);
+  if (!state.map || (!placement.dx && !placement.dy)) return [lon, lat];
+
+  const worldLon = lon + nearestWorldOffset(lon);
+  const point = state.map.project([worldLon, lat]);
+  const displayed = state.map.unproject([point.x + placement.dx, point.y + placement.dy]);
+  return [normalizeLongitude(displayed.lng), displayed.lat];
+}
+
+function nearestWorldOffset(lon) {
+  if (!state.map) return 0;
+  const center = state.map.getCenter();
+  return Math.round((center.lng - lon) / WORLD_LONGITUDE_SPAN) * WORLD_LONGITUDE_SPAN;
+}
+
+function getMarkerDisplayLayout(nodes) {
+  const placements = new Map();
+  if (!state.map) return placements;
+
+  const items = [];
+  const sortedNodes = [...nodes].sort((a, b) => String(a.id).localeCompare(String(b.id)));
+
+  sortedNodes.forEach((node) => {
+    const lon = normalizeLongitude(node.location?.lon);
+    const point = state.map.project([lon + nearestWorldOffset(lon), node.location.lat]);
+    items.push({
+      key: node.id,
+      node,
+      x: point.x,
+      y: point.y,
+      dx: 0,
+      dy: 0,
+      nearestOriginalDistance: Infinity
+    });
+    placements.set(node.id, ZERO_PLACEMENT);
+  });
+
+  const zoomStrength = declutterStrength();
+  if (items.length < 2) return placements;
+
+  const neighborDistanceSq = DECLUTTER_NEIGHBOR_DISTANCE_PX * DECLUTTER_NEIGHBOR_DISTANCE_PX;
+  for (let iteration = 0; iteration < DECLUTTER_ITERATIONS; iteration++) {
+    for (let i = 0; i < items.length; i++) {
+      for (let j = i + 1; j < items.length; j++) {
+        const a = items[i];
+        const b = items[j];
+        const originalDx = a.x - b.x;
+        const originalDy = a.y - b.y;
+        const originalDistanceSq = (originalDx * originalDx) + (originalDy * originalDy);
+        if (originalDistanceSq > neighborDistanceSq) continue;
+
+        const originalDistance = Math.sqrt(originalDistanceSq);
+        a.nearestOriginalDistance = Math.min(a.nearestOriginalDistance, originalDistance);
+        b.nearestOriginalDistance = Math.min(b.nearestOriginalDistance, originalDistance);
+
+        const displayDx = (a.x + a.dx) - (b.x + b.dx);
+        const displayDy = (a.y + a.dy) - (b.y + b.dy);
+        const distance = Math.hypot(displayDx, displayDy);
+        if (distance >= DECLUTTER_MIN_DISTANCE_PX) continue;
+
+        const { x: ux, y: uy } = spreadDirection(a, b, displayDx, displayDy, distance);
+        const push = (DECLUTTER_MIN_DISTANCE_PX - distance) * 0.32;
+        a.dx += ux * push;
+        a.dy += uy * push;
+        b.dx -= ux * push;
+        b.dy -= uy * push;
+        clampSpread(a);
+        clampSpread(b);
+      }
+    }
+  }
+
+  items.forEach((item) => {
+    const strength = Math.max(zoomStrength, localCollisionStrength(item));
+    const { dx, dy } = guardSpreadOnLand(
+      item,
+      roundPixel(item.dx * strength),
+      roundPixel(item.dy * strength)
+    );
+    placements.set(item.key, {
+      dx,
+      dy,
+      isSpread: Math.hypot(dx, dy) >= 0.5
+    });
+  });
+
+  return placements;
+}
+
+function localCollisionStrength(item) {
+  if (!Number.isFinite(item.nearestOriginalDistance)) return 0;
+  if (item.nearestOriginalDistance >= DECLUTTER_LOCAL_COLLISION_DISTANCE_PX) return 0;
+
+  const severity = 1 - (item.nearestOriginalDistance / DECLUTTER_LOCAL_COLLISION_DISTANCE_PX);
+  return DECLUTTER_LOCAL_MAX_STRENGTH * severity;
+}
+
+function guardSpreadOnLand(item, dx, dy) {
+  if (!state.landMask || (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1)) return { dx, dy };
+
+  const realLat = item.node.location?.lat;
+  const realLon = normalizeLongitude(item.node.location?.lon);
+  if (!pointIsOnLand(realLat, realLon)) return { dx, dy };
+  if (spreadPointIsOnLand(item, dx, dy)) return { dx, dy };
+
+  for (const scale of [0.7, 0.45, 0.25]) {
+    const nextDx = roundPixel(dx * scale);
+    const nextDy = roundPixel(dy * scale);
+    if (spreadPointIsOnLand(item, nextDx, nextDy)) return { dx: nextDx, dy: nextDy };
+  }
+
+  return ZERO_PLACEMENT;
+}
+
+function spreadPointIsOnLand(item, dx, dy) {
+  if (!state.map) return true;
+  const lngLat = state.map.unproject([item.x + dx, item.y + dy]);
+  return pointIsOnLand(lngLat.lat, normalizeLongitude(lngLat.lng));
+}
+
+function declutterStrength() {
+  if (!state.map) return 0;
+  const zoom = state.map.getZoom();
+  if (zoom <= DECLUTTER_FULL_ZOOM) return DECLUTTER_MAX_STRENGTH;
+  if (zoom >= DECLUTTER_END_ZOOM) return 0;
+
+  const progress = (zoom - DECLUTTER_FULL_ZOOM) / (DECLUTTER_END_ZOOM - DECLUTTER_FULL_ZOOM);
+  return DECLUTTER_MAX_STRENGTH * Math.max(0, 1 - (progress * progress));
+}
+
+function spreadDirection(a, b, dx, dy, distance) {
+  if (distance > 0.001) {
+    return { x: dx / distance, y: dy / distance };
+  }
+
+  const angle = stableAngle(`${a.key}:${b.key}`);
+  return {
+    x: Math.cos(angle),
+    y: Math.sin(angle)
+  };
+}
+
+function stableAngle(value) {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i++) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return ((hash >>> 0) / 0xffffffff) * Math.PI * 2;
+}
+
+function clampSpread(item) {
+  const distance = Math.hypot(item.dx, item.dy);
+  if (distance <= DECLUTTER_MAX_OFFSET_PX) return;
+
+  const scale = DECLUTTER_MAX_OFFSET_PX / distance;
+  item.dx *= scale;
+  item.dy *= scale;
+}
+
+function roundPixel(value) {
+  return Math.round(value * 10) / 10;
+}
+
+function handleMapClick(event) {
+  if (Date.now() < state.suppressMapClickUntil) return;
+
+  const hit = pickNodeAt(event.point);
+  if (hit) {
+    selectNode(hit.node.id, { pan: false });
+    return;
+  }
+
+  if (state.selectedId && isMobileSheetViewport()) {
+    clearSelectedNode();
+    return;
+  }
+
+  clearSelectedNode();
+}
+
+function handleDetailSheetPointerDown(event) {
+  if (!state.selectedId || !isMobileSheetViewport()) return;
+  if (event.target.closest('button, a, input, select, textarea')) return;
+
+  state.detailSheetDrag = {
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    lastY: event.clientY,
+    startedAt: performance.now(),
+    dragging: false,
+    initialScrollTop: els.nodeDetail.scrollTop
+  };
+
+  window.addEventListener('pointermove', handleDetailSheetPointerMove, { passive: false });
+  window.addEventListener('pointerup', handleDetailSheetPointerUp, { passive: true });
+  window.addEventListener('pointercancel', handleDetailSheetPointerCancel, { passive: true });
+}
+
+function handleDetailSheetPointerMove(event) {
+  const drag = state.detailSheetDrag;
+  if (!drag || event.pointerId !== drag.pointerId || !state.selectedId) return;
+
+  const dx = event.clientX - drag.startX;
+  const dy = event.clientY - drag.startY;
+  drag.lastY = event.clientY;
+
+  if (!drag.dragging) {
+    if (Math.abs(dx) > 16 && Math.abs(dx) > Math.abs(dy)) {
+      resetDetailSheetDrag();
+      return;
+    }
+    if (dy < 8) return;
+    if (drag.initialScrollTop > 0 || els.nodeDetail.scrollTop > 0) return;
+
+    drag.dragging = true;
+    els.nodeDetail.classList.add('is-dragging');
+  }
+
+  if (!drag.dragging) return;
+  event.preventDefault();
+
+  const dragY = Math.max(0, dy);
+  const opacity = Math.max(0.58, 1 - (dragY / 420));
+  els.nodeDetail.style.setProperty('--sheet-drag-y', `${dragY}px`);
+  els.nodeDetail.style.setProperty('--sheet-drag-opacity', String(opacity));
+}
+
+function handleDetailSheetPointerUp(event) {
+  const drag = state.detailSheetDrag;
+  if (!drag || event.pointerId !== drag.pointerId) return;
+
+  const dragY = Math.max(0, drag.lastY - drag.startY);
+  const elapsed = Math.max(1, performance.now() - drag.startedAt);
+  const velocity = dragY / elapsed;
+  const shouldDismiss = drag.dragging && (
+    dragY >= MOBILE_SHEET_DISMISS_DISTANCE_PX ||
+    (dragY >= MOBILE_SHEET_DISMISS_FAST_DISTANCE_PX && velocity >= MOBILE_SHEET_DISMISS_VELOCITY_PX_MS)
+  );
+
+  if (shouldDismiss) {
+    dismissDetailSheet();
+    return;
+  }
+
+  resetDetailSheetDrag();
+}
+
+function handleDetailSheetPointerCancel(event) {
+  const drag = state.detailSheetDrag;
+  if (!drag || event.pointerId !== drag.pointerId) return;
+  resetDetailSheetDrag();
+}
+
+function dismissDetailSheet() {
+  cleanupDetailSheetDragListeners();
+  state.detailSheetDrag = null;
+  suppressNextMapClick();
+  els.nodeDetail.classList.remove('is-dragging');
+  els.nodeDetail.classList.add('is-dismissing');
+  els.nodeDetail.style.removeProperty('--sheet-drag-y');
+  els.nodeDetail.style.removeProperty('--sheet-drag-opacity');
+
+  window.setTimeout(() => {
+    els.nodeDetail.classList.remove('is-dismissing');
+    clearSelectedNode();
+  }, 180);
+}
+
+function resetDetailSheetDrag() {
+  cleanupDetailSheetDragListeners();
+  state.detailSheetDrag = null;
+  suppressNextMapClick();
+  els.nodeDetail.classList.remove('is-dragging');
+  els.nodeDetail.style.removeProperty('--sheet-drag-y');
+  els.nodeDetail.style.removeProperty('--sheet-drag-opacity');
+}
+
+function cleanupDetailSheetDragListeners() {
+  window.removeEventListener('pointermove', handleDetailSheetPointerMove);
+  window.removeEventListener('pointerup', handleDetailSheetPointerUp);
+  window.removeEventListener('pointercancel', handleDetailSheetPointerCancel);
+}
+
+function syncNodeCursor(event) {
+  const active = Boolean(pickNodeAt(event.point));
+  if (active === state.nodeCursorActive) return;
+
+  state.nodeCursorActive = active;
+  els.map.classList.toggle('is-node-hit', active);
+}
+
+function clearNodeCursor() {
+  if (!state.nodeCursorActive) return;
+
+  state.nodeCursorActive = false;
+  els.map.classList.remove('is-node-hit');
+}
+
+function pickNodeAt(containerPoint) {
+  if (!state.map || !containerPoint) return null;
+
+  let nearest = null;
+  let visualRank = 0;
+  const coarsePointer = usesCoarsePointer();
+  const worldOffsets = state.renderedWorldOffsets || DEFAULT_WORLD_OFFSETS;
+  state.filteredNodes.forEach((node) => {
+    const radius = markerPickRadius(node, coarsePointer);
+    const radiusSq = radius * radius;
+
+    worldOffsets.forEach((worldOffset) => {
+      const rank = visualRank;
+      visualRank += 1;
+      const key = `${node.id}:${worldOffset}`;
+      const placement = state.markerPlacements.get(node.id) || ZERO_PLACEMENT;
+      const center = state.map.project([node.location.lon + worldOffset, node.location.lat]);
+      const dx = containerPoint.x - (center.x + placement.dx);
+      const dy = containerPoint.y - (center.y + placement.dy);
+      const distanceSq = (dx * dx) + (dy * dy);
+      if (distanceSq > radiusSq) return;
+      const distance = Math.sqrt(distanceSq);
+      const preciseRadius = markerPreciseRadius(node, coarsePointer);
+      const candidate = { node, key, distance, distanceSq, rank, isPrecise: distance <= preciseRadius };
+      if (isBetterPick(candidate, nearest, coarsePointer)) {
+        nearest = candidate;
+      }
+    });
+  });
+
+  return nearest;
+}
+
+function isBetterPick(candidate, current, coarsePointer = usesCoarsePointer()) {
+  if (!current) return true;
+  if (candidate.node.id === state.selectedId && current.node.id !== state.selectedId) return true;
+  if (candidate.node.id !== state.selectedId && current.node.id === state.selectedId) return false;
+
+  if (coarsePointer && candidate.isPrecise !== current.isPrecise) {
+    return candidate.isPrecise;
+  }
+
+  if (
+    coarsePointer &&
+    !candidate.isPrecise &&
+    !current.isPrecise &&
+    Math.abs(candidate.distance - current.distance) <= MOBILE_MARKER_PICK_TIE_PX
+  ) {
+    return candidate.rank > current.rank;
+  }
+
+  if (Math.abs(candidate.distance - current.distance) > 0.01) {
+    return candidate.distanceSq < current.distanceSq;
+  }
+  return candidate.key < current.key;
+}
+
+function markerPickRadius(node, coarsePointer = usesCoarsePointer()) {
+  const scale = state.markerScale || MARKER_SCALE_BANDS[0];
+  const minimumRadius = coarsePointer ? MOBILE_MARKER_PICK_RADIUS_PX : 0;
+  if (node.id === state.selectedId) {
+    return Math.max(minimumRadius, (scale.selectedCore / 2) + scale.selectedRing + 2);
+  }
+
+  return Math.max(minimumRadius, (scale.size / 2) + 3);
+}
+
+function markerPreciseRadius(node, coarsePointer = usesCoarsePointer()) {
+  const scale = state.markerScale || MARKER_SCALE_BANDS[0];
+  if (!coarsePointer) return 0;
+  if (node.id === state.selectedId) {
+    return Math.max(MOBILE_MARKER_PRECISE_RADIUS_PX, (scale.selectedCore / 2) + scale.selectedRing + 2);
+  }
+
+  return Math.max(MOBILE_MARKER_PRECISE_RADIUS_PX, (scale.size / 2) + scale.ring + 2);
+}
+
+function selectNode(id, options = {}) {
+  state.selectedId = id;
+  renderDetail();
+  renderMap();
+
+  const node = selectedNode();
+  if (node && !nodeLocationLabel(node)) void ensureLocationIndexes();
+  if (node && state.map && options.pan !== false) {
+    state.map.panTo([node.location.lon, node.location.lat], {
+      duration: 400
+    });
+  }
+}
+
+function clearSelectedNode() {
+  if (!state.selectedId) return;
+  clearDetailSheetState();
+  state.selectedId = null;
+  renderDetail();
+  renderMap();
+}
+
+function clearDetailSheetState() {
+  cleanupDetailSheetDragListeners();
+  state.detailSheetDrag = null;
+  if (!els.nodeDetail) return;
+  els.nodeDetail.classList.remove('is-dragging', 'is-dismissing');
+  els.nodeDetail.style.removeProperty('--sheet-drag-y');
+  els.nodeDetail.style.removeProperty('--sheet-drag-opacity');
+}
+
+function suppressNextMapClick() {
+  state.suppressMapClickUntil = Date.now() + 220;
+}
+
+function updateMarkerScale() {
+  if (!state.map || !els.map) return;
+  const zoom = state.map.getZoom();
+  const scale = MARKER_SCALE_BANDS.find((band) => zoom <= band.maxZoom) || MARKER_SCALE_BANDS.at(-1);
+  state.markerScale = scale;
+  const style = els.map.style;
+  style.setProperty('--pin-size', `${scale.size}px`);
+  style.setProperty('--pin-selected-size', `${scale.selected}px`);
+  style.setProperty('--pin-selected-core-size', `${scale.selectedCore}px`);
+  style.setProperty('--pin-ring', `${scale.ring}px`);
+  style.setProperty('--pin-ring-alpha', `${scale.ringAlpha}%`);
+  style.setProperty('--pin-selected-ring', `${scale.selectedRing}px`);
+  style.setProperty('--pin-selected-halo', `${scale.selectedHalo}px`);
+  updateMarkerPaint();
+}
+
+function getDenseNodeIds(nodes) {
+  if (!state.map || nodes.length < 2) return new Set();
+  const dense = new Set();
+  const points = nodes.map((node) => {
+    const lon = normalizeLongitude(node.location?.lon);
+    return {
+      id: node.id,
+      point: state.map.project([lon + nearestWorldOffset(lon), node.location.lat])
+    };
+  });
+  const thresholdSq = DENSE_MARKER_DISTANCE_PX * DENSE_MARKER_DISTANCE_PX;
+
+  for (let i = 0; i < points.length; i++) {
+    for (let j = i + 1; j < points.length; j++) {
+      const dx = points[i].point.x - points[j].point.x;
+      const dy = points[i].point.y - points[j].point.y;
+      if ((dx * dx + dy * dy) <= thresholdSq) {
+        dense.add(points[i].id);
+        dense.add(points[j].id);
+      }
+    }
+  }
+  return dense;
+}
+
+function selectedNode() {
+  return (state.snapshot?.nodes || []).find((node) => node.id === state.selectedId) || null;
+}
+
+function nodeDisplayName(node) {
+  const label = typeof node.label === 'string' ? node.label.trim() : '';
+  return label || t('map.node.unnamed', 'Unnamed node');
+}
+
+function nodeLocationLabel(node) {
+  return locationLabelForNode(node, state.placeIndex, state.countryIndex);
+}
+
+function nodeKind(node) {
+  if (isI2PNode(node)) return 'i2p';
+  if (isYggdrasilNode(node)) return 'yggdrasil';
+  if (node.kind === 'server') return serverAddressKind(node);
+  if (KIND_META[node.kind]) return node.kind;
+  return 'client-manual';
+}
+
+function serverAddressKind(node) {
+  const address = nodeAddress(node, node.reticulum || {});
+  return isIpv6Address(address) ? 'server-ipv6' : 'server-ipv4';
+}
+
+function isI2PNode(node) {
+  if (node.kind === 'i2p') return true;
+  if (node.reticulum?.interfaceType === 'I2PInterface') return true;
+  return (node.services || []).some((service) => String(service).toLowerCase().includes('i2p'));
+}
+
+function isYggdrasilNode(node) {
+  if (node.kind === 'yggdrasil') return true;
+  if (String(node.reticulum?.interfaceType || '').toLowerCase().includes('yggdrasil')) return true;
+
+  const address = nodeAddress(node, node.reticulum || {});
+  if (isYggdrasilAddress(address)) return true;
+
+  return textMentionsYggdrasil(
+    node.label,
+    node.reticulum?.interfaceType,
+    address,
+    ...(node.services || [])
+  );
+}
+
+function pointIsOnLand(lat, lon) {
+  if (!state.landMask || !Number.isFinite(lat) || !Number.isFinite(lon)) return false;
+
+  for (const polygon of state.landMask.polygons) {
+    if (!bboxContains(polygon.bbox, lat, lon)) continue;
+    if (pointInPolygon(lon, lat, polygon.rings)) return true;
+  }
+  return false;
+}
+
+function pointInPolygon(x, y, rings) {
+  if (!pointInRing(x, y, rings[0])) return false;
+  for (let i = 1; i < rings.length; i += 1) {
+    if (pointInRing(x, y, rings[i])) return false;
+  }
+  return true;
+}
+
+function pointInRing(x, y, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i, i += 1) {
+    const xi = Number(ring[i][0]);
+    const yi = Number(ring[i][1]);
+    const xj = Number(ring[j][0]);
+    const yj = Number(ring[j][1]);
+    const intersects = ((yi > y) !== (yj > y)) &&
+      (x < ((xj - xi) * (y - yi)) / ((yj - yi) || Number.EPSILON) + xi);
+    if (intersects) inside = !inside;
+  }
+  return inside;
+}
+
+function bboxForRing(ring) {
+  let minLat = Infinity;
+  let maxLat = -Infinity;
+  let minLon = Infinity;
+  let maxLon = -Infinity;
+
+  for (const point of ring) {
+    const lon = Number(point[0]);
+    const lat = Number(point[1]);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+    minLat = Math.min(minLat, lat);
+    maxLat = Math.max(maxLat, lat);
+    minLon = Math.min(minLon, lon);
+    maxLon = Math.max(maxLon, lon);
+  }
+
+  return { minLat, maxLat, minLon, maxLon };
+}
+
+function bboxContains(bbox, lat, lon) {
+  return lat >= bbox.minLat && lat <= bbox.maxLat && lon >= bbox.minLon && lon <= bbox.maxLon;
+}
+
+function detailField(label, value, _wide = false, code = false, html = false) {
+  const valueClass = code ? ' detail-value--code' : '';
+  const content = html ? value : escapeHtml(value);
+  return `
+    <div class="detail-row">
+      <dt class="detail-label">${escapeHtml(label)}</dt>
+      <dd class="detail-value${valueClass}">${content}</dd>
+    </div>
+  `;
+}
+
+function coordinateDetailField(value) {
+  return `
+    <div class="detail-row">
+      <dt class="detail-label detail-label--with-info">
+        <span>${escapeHtml(t('map.detail.coordinates', 'Coordinates'))}</span>
+        <button class="detail-info" type="button" aria-expanded="false" aria-controls="coordinateAccuracyNote" aria-label="${escapeHtml(t('map.detail.coordsInfo', 'About coordinate accuracy'))}">
+          <span aria-hidden="true">i</span>
+        </button>
+      </dt>
+      <dd class="detail-value detail-value--code">${escapeHtml(value)}</dd>
+      <span class="detail-info-popover" id="coordinateAccuracyNote" role="tooltip" hidden>${escapeHtml(COORDINATE_ACCURACY_NOTE)}</span>
+    </div>
+  `;
+}
+
+function serviceTags(services = []) {
+  if (!services.length) return `<span>${escapeHtml(t('map.detail.noServices', 'None listed'))}</span>`;
+  return `<span class="service-list">${services.map((service) => `<span class="tag">${escapeHtml(service)}</span>`).join('')}</span>`;
+}
+
+function nodeEndpoint(node, reticulum) {
+  const endpoint = node.endpoint || {};
+  const address = nodeAddress(node, reticulum);
+
+  if (isI2PNode(node)) {
+    const port = positiveIntegerValue(endpoint.port) ?? positiveIntegerValue(reticulum.port);
+    return {
+      label: 'I2P',
+      address,
+      port
+    };
+  }
+
+  if (isYggdrasilNode(node)) {
+    return {
+      label: 'Yggdrasil',
+      address,
+      port: positiveIntegerValue(endpoint.port) ?? positiveIntegerValue(reticulum.port)
+    };
+  }
+
+  if (!isServerKind(nodeKind(node))) return {};
+
+  return {
+    label: 'IP',
+    address,
+    port: integerValue(endpoint.port) ?? integerValue(reticulum.port)
+  };
+}
+
+function nodeAddress(node, reticulum = {}) {
+  const endpoint = node.endpoint || {};
+  return stringValue(endpoint.ip) ||
+    stringValue(endpoint.host) ||
+    stringValue(endpoint.address) ||
+    stringValue(reticulum.reachableOn);
+}
+
+function isServerKind(kind) {
+  return kind === 'server' || kind === 'server-ipv4' || kind === 'server-ipv6';
+}
+
+function radioSummary(reticulum) {
+  if (reticulum.interfaceType !== 'RNodeInterface' || !reticulum.radio) return '';
+
+  const radio = reticulum.radio;
+  const parts = [];
+  const frequency = numberValue(radio.frequency);
+  const bandwidth = numberValue(radio.bandwidth);
+  const spreadingFactor = integerValue(radio.spreadingFactor ?? radio.spreading_factor ?? radio.sf);
+  const codingRate = integerValue(radio.codingRate ?? radio.coding_rate ?? radio.cr);
+  const txPower = integerValue(radio.txPowerDbm ?? radio.txPower ?? radio.tx_power);
+  const modulation = stringValue(radio.modulation);
+  const channel = integerValue(radio.channel);
+
+  if (frequency != null) parts.push(formatFrequency(frequency));
+  if (bandwidth != null) parts.push(`BW ${formatFrequency(bandwidth)}`);
+  if (spreadingFactor != null) parts.push(`SF${spreadingFactor}`);
+  if (codingRate != null) parts.push(`CR ${formatCodingRate(codingRate)}`);
+  if (txPower != null) parts.push(`TX ${txPower} dBm`);
+  if (modulation) parts.push(modulation);
+  if (channel != null) parts.push(`CH ${channel}`);
+
+  return parts.join(', ');
+}
+
+function formatFrequency(hz) {
+  if (hz >= 1_000_000_000) return `${trimNumber(hz / 1_000_000_000, 3)} GHz`;
+  if (hz >= 1_000_000) return `${trimNumber(hz / 1_000_000, 3)} MHz`;
+  if (hz >= 1_000) return `${trimNumber(hz / 1_000, 3)} kHz`;
+  return `${trimNumber(hz, 0)} Hz`;
+}
+
+function formatCodingRate(value) {
+  return value >= 5 && value <= 8 ? `4/${value}` : String(value);
+}
+
+function trimNumber(value, digits) {
+  return Number(value).toFixed(digits).replace(/\.?0+$/, '');
+}
+
+function lastSeenLabel(node) {
+  if (!node.lastSeen) return t('map.filters.manual', 'Manual');
+  return rel(node.lastSeen) ?? t('map.detail.unknown', 'Unknown');
+}
+
+// Mirrors the /api/map-nodes expiry rule so long-lived tabs age nodes out
+// between fetches; nodes without lastSeen (manual opt-ins) never expire.
+function nodeIsExpired(node, cutoff) {
+  if (!node.lastSeen) return false;
+  const lastSeen = Date.parse(node.lastSeen);
+  return Number.isFinite(lastSeen) && lastSeen < cutoff;
+}
+
+function formatCoord(value, axis) {
+  if (typeof value !== 'number') return t('map.detail.unknown', 'Unknown');
+  const hemi = axis === 'lat'
+    ? (value >= 0 ? 'N' : 'S')
+    : (value >= 0 ? 'E' : 'W');
+  return ltr(`${Math.abs(value).toFixed(3)} ${hemi}`);
+}
+
+function normalizeLongitude(value) {
+  const lon = Number(value);
+  if (!Number.isFinite(lon)) return null;
+  return ((((lon + 180) % 360) + 360) % 360) - 180;
+}
+
+function cssToken(value) {
+  return String(value || 'unknown').replace(/[^a-z0-9_-]/gi, '-').toLowerCase();
+}
+
+function numberValue(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function integerValue(value) {
+  const number = numberValue(value);
+  return number == null ? null : Math.trunc(number);
+}
+
+function positiveIntegerValue(value) {
+  const number = integerValue(value);
+  return number != null && number > 0 ? number : null;
+}
+
+function stringValue(value) {
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[char]);
+}

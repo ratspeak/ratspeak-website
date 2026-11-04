@@ -1,0 +1,24 @@
+{
+  "default": "en",
+  "cookie": { "name": "rs-lang", "maxAge": 31536000 },
+  "localizedPages": ["index.html", "map.html", "download.html", "flash.html", "404.html"],
+  "languages": [
+    { "code": "en", "path": "/", "dir": "ltr", "short": "EN", "flag": "us", "ogLocale": "en_US", "accept": ["en"] },
+    { "code": "es", "path": "/es/", "dir": "ltr", "short": "ES", "flag": "es", "ogLocale": "es_ES", "accept": ["es"] },
+    { "code": "ru", "path": "/ru/", "dir": "ltr", "short": "RU", "flag": "ru", "ogLocale": "ru_RU", "accept": ["ru"] },
+    { "code": "uk", "path": "/uk/", "dir": "ltr", "short": "UK", "flag": "ua", "ogLocale": "uk_UA", "accept": ["uk"] },
+    { "code": "pt-BR", "path": "/pt/", "dir": "ltr", "short": "PT", "flag": "br", "ogLocale": "pt_BR", "accept": ["pt"] },
+    { "code": "fa", "path": "/fa/", "dir": "rtl", "short": "FA", "flag": "ir-lion-sun", "ogLocale": "fa_IR", "accept": ["fa"], "calendar": "gregory", "techDigits": "latn" }
+  ],
+  "names": {
+    "en": { "en": "English", "es": "Spanish", "ru": "Russian", "uk": "Ukrainian", "pt-BR": "Portuguese", "fa": "Persian" },
+    "es": { "en": "Inglés", "es": "Español", "ru": "Ruso", "uk": "Ucraniano", "pt-BR": "Portugués", "fa": "Persa" },
+    "ru": { "en": "Английский", "es": "Испанский", "ru": "Русский", "uk": "Украинский", "pt-BR": "Португальский", "fa": "Персидский" },
+    "uk": { "en": "Англійська", "es": "Іспанська", "ru": "Російська", "uk": "Українська", "pt-BR": "Португальська", "fa": "Перська" },
+    "pt-BR": { "en": "Inglês", "es": "Espanhol", "ru": "Russo", "uk": "Ucraniano", "pt-BR": "Português", "fa": "Persa" },
+    "fa": { "en": "انگلیسی", "es": "اسپانیایی", "ru": "روسی", "uk": "اوکراینی", "pt-BR": "پرتغالی", "fa": "فارسی" }
+  },
+  "ui": {
+    "label": { "en": "Language", "es": "Idioma", "ru": "Язык", "uk": "Мова", "pt-BR": "Idioma", "fa": "زبان" }
+  }
+}
