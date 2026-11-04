@@ -172,7 +172,6 @@ const els = {
   statusSelect: document.getElementById('statusFilter'),
   snapshotStatus: document.getElementById('mapSnapshotStatus'),
   navbar: document.getElementById('navbar'),
-  themeToggle: document.getElementById('themeToggle'),
   navHamburger: document.getElementById('navHamburger'),
   navMobileMenu: document.getElementById('navMobileMenu'),
   themeMeta: document.querySelector('meta[name="theme-color"]')
@@ -206,16 +205,6 @@ function bindChrome() {
     if (bg) els.themeMeta.setAttribute('content', bg);
   };
 
-  if (els.themeToggle) {
-    els.themeToggle.addEventListener('click', () => {
-      const htmlEl = document.documentElement;
-      const next = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      htmlEl.setAttribute('data-theme', next);
-      localStorage.setItem('ratspeak-theme', next);
-      syncThemeColor();
-      syncMapTheme();
-    });
-  }
   syncThemeColor();
 
   if (els.navHamburger && els.navMobileMenu) {

@@ -1,18 +1,5 @@
-// Map, support and policy pages: toggle state and the "On this page" position.
+// Support and policy pages: the "On this page" position.
 (() => {
-  const root = document.documentElement;
-
-  // The map's own script flips the theme (it must, to restyle the basemap); mirror it on the button.
-  const syncToggle = () => {
-    const dark = root.getAttribute('data-theme') === 'dark';
-    for (const button of document.querySelectorAll('[data-theme-toggle]')) {
-      button.setAttribute('aria-pressed', String(dark));
-      button.title = dark ? 'Switch to light theme' : 'Switch to dark theme';
-    }
-  };
-  new MutationObserver(syncToggle).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
-  syncToggle();
-
   const toc = document.querySelector('.toc');
   if (!toc || !('IntersectionObserver' in window)) return;
   const links = new Map();

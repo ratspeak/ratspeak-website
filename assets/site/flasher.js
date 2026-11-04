@@ -18,23 +18,13 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     var HANDHELD = !!document.getElementById('firmwarePreset');
     var ADVANCED = !!document.getElementById('firmwareCustom');
 
-    // ── Theme toggle ──
+    // ── Theme colour ──
     var htmlEl = document.documentElement;
     var themeMeta = document.querySelector('meta[name="theme-color"]');
     function syncThemeColor() {
         if (!themeMeta) return;
         var c = getComputedStyle(htmlEl).getPropertyValue('--bg-primary').trim();
         if (c) themeMeta.setAttribute('content', c);
-    }
-    var themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-        themeToggle.addEventListener('click', function() {
-            var current = htmlEl.getAttribute('data-theme');
-            var next = current === 'dark' ? 'light' : 'dark';
-            htmlEl.setAttribute('data-theme', next);
-            localStorage.setItem('ratspeak-theme', next);
-            syncThemeColor();
-        });
     }
     syncThemeColor();
 
