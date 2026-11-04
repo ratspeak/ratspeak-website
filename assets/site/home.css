@@ -1,7 +1,7 @@
-/* hero: SPEAK / FREELY. at one size (--hl), sized so FREELY. (2.565em) fits beside the receipt and
+/* hero: SQUEAK / FREELY. at one size (--hl), sized so SQUEAK (2.648em) fits beside the receipt and
    height-bounded so the CTA row stays above the fold, then eased to .88 of that fit; the hero fills
    the first screen with the spare height split above and below */
-.poster{--s:clamp(11px,min(1.1vw,1.9svh),18px);--pt:clamp(28px,3vw,48px);--bar:80px;--fold:calc(var(--bar) + var(--pt) + clamp(28px,2.6vw,40px) + clamp(40px,4vw,64px) + 100px);--slip-r:2vw;--room:calc(100vw - 2 * max(var(--gutter),(100vw - var(--max)) / 2) - var(--slip-r) - clamp(32px,3vw,56px) - 20.17 * var(--s));--hl:clamp(56px,.88 * min(var(--room) / 2.565,(100svh - var(--fold)) / 1.855),352px);display:grid;grid-template-columns:minmax(0,1fr) auto;align-content:center;min-height:calc(100svh - var(--bar));position:relative;overflow-x:clip;padding:var(--pt) var(--pad-x) clamp(40px,4vw,64px)}
+.poster{--s:clamp(11px,min(1.1vw,1.9svh),18px);--pt:clamp(28px,3vw,48px);--bar:80px;--fold:calc(var(--bar) + var(--pt) + clamp(28px,2.6vw,40px) + clamp(40px,4vw,64px) + 100px);--slip-r:2vw;--room:calc(100vw - 2 * max(var(--gutter),(100vw - var(--max)) / 2) - var(--slip-r) - clamp(32px,3vw,56px) - 20.17 * var(--s));--hl:clamp(56px,.88 * min(var(--room) / 2.648,(100svh - var(--fold)) / 1.855),352px);display:grid;grid-template-columns:minmax(0,1fr) auto;align-content:center;min-height:calc(100svh - var(--bar));position:relative;overflow-x:clip;padding:var(--pt) var(--pad-x) clamp(40px,4vw,64px)}
 .poster h1{grid-area:1/1;font:400 var(--hl)/.91 Anton,Impact,sans-serif;text-transform:uppercase;margin:0 0 clamp(28px,2.6vw,40px)}
 .poster h1 .ln{display:block;letter-spacing:-.025em;white-space:nowrap}
 .poster h1 .ln-2{margin-top:.035em}
@@ -348,11 +348,11 @@ main h2{text-transform:uppercase}
   :root{--h2:clamp(36px,12.2vw,64px)}
   .block-button{min-width:240px;padding:16px 20px;font-size:17px}
 
-  /* hero: equal-width SPEAK / FREELY., then copy, CTAs and a ticket stub */
+  /* hero: equal-width SQUEAK / FREELY., then copy, CTAs and a ticket stub */
   .poster{--s:clamp(13px,3.6vw,15px);--pt:24px;display:block;min-height:0;padding-bottom:48px}
-  .poster h1{--talk:min(calc((100vw - 2 * var(--gutter)) / 2.2),30svh,240px);margin:0 0 20px}
+  .poster h1{--talk:min(calc((100vw - 2 * var(--gutter)) / 2.648),30svh,240px);margin:0 0 20px}
   .poster h1 .ln-1{font-size:var(--talk);line-height:.88}
-  .poster h1 .ln-2{font-size:calc(var(--talk) * .849);line-height:.92}
+  .poster h1 .ln-2{font-size:calc(var(--talk) * 1.032);line-height:.92}
   .poster-foot{max-width:none;flex-direction:column;align-items:stretch;gap:24px}
   .poster-sub{font-size:18px;max-width:24em}
   /* the file details sit right under the button they describe */
