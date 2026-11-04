@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import test, { describe } from 'node:test';
 import vm from 'node:vm';
-import { chooseRsnodeInstall, parseRsnodeBundle, rsnodeOtaTarget, streamRsnodeUpdate, verifyRsnodeBundle } from '../assets/js/rsnode-update.js';
+import { chooseRsnodeInstall, parseRsnodeBundle, rsnodeOtaTarget, rsnodeUpdateOutcome, streamRsnodeUpdate, verifyRsnodeBundle } from '../assets/js/rsnode-update.js';
 import { parseRsnodeStatus } from '../assets/js/rsnode-device.js';
 import { flasherPage } from './flasher-page.mjs';
 
@@ -67,13 +67,16 @@ function bundleFor({ target = [0x80, 0x81, 0x3f], sequence = 2026110201, size = 
 }
 
 function statusBody({ board = 0x3f, release = '1.0.0-beta.20261030.2', keyId = '0011223344556677', sequence = 2026103002,
-  trial = false, pending = null } = {}) {
+  trial = false, pending = null, image = null, lastUpdate = null, uptimeS = 100 } = {}) {
   return [
     ...tlv(0x01, [0x80, 0x81, board]),
     ...tlv(0x02, [0, 1, 0, 0, 0, 0]),
     ...(keyId ? tlv(0x03, Array.from(Buffer.from(keyId, 'hex'))) : []),
     ...tlv(0x04, [...be32(sequence), ...be32(0x7e0000), trial ? 0x04 : 0]),
     ...(pending === null ? [] : tlv(0x05, be32(pending))),
+    ...tlv(0x09, be32(uptimeS)),
+    ...(lastUpdate ? tlv(0x0a, [...be32(lastUpdate.sequence), 1, Number(lastUpdate.running), ...Array(16).fill(0)]) : []),
+    ...(image ? tlv(0x0e, [...be32(image.len), ...Buffer.from(image.sha256, 'hex')]) : []),
     ...(release ? tlv(0x0f, Array.from(Buffer.from(release))) : []),
     ...tlv(0x10, [0, 1, 1, 1])
   ];
@@ -82,6 +85,27 @@ function statusBody({ board = 0x3f, release = '1.0.0-beta.20261030.2', keyId = '
 const BUNDLE = bundleFor();
 const BOARD = { id: 'heltec-v4', label: 'Heltec V4 · R2' };
 const status = options => parseRsnodeStatus(statusBody(options));
+
+test('update outcomes require the exact accepted image and attributable rollback evidence', () => {
+  const { meta } = BUNDLE, manifest = parseRsnodeBundle(BUNDLE.bytes), previous = status();
+  const outcome = (options, before = previous, sawTrial = false) =>
+    rsnodeUpdateOutcome(status(options), meta, manifest, before, sawTrial);
+  const accepted = { sequence: meta.sequence, release: meta.version,
+    image: { len: BUNDLE.image.length, sha256: sha(BUNDLE.image) } };
+  assert.equal(outcome(accepted).kind, 'updated');
+  assert.equal(outcome({}), null); // Still the old firmware, not evidence of rollback.
+  assert.equal(outcome({ ...accepted, trial: true }), null);
+  for (const change of [{ sequence: meta.sequence + 1 }, { image: null }, { release: '1.0.0-other' },
+    { image: { ...accepted.image, sha256: '00'.repeat(32) } }]) {
+    assert.throws(() => outcome({ ...accepted, ...change }), error => error.kind === 'uncertain');
+  }
+  const failed = { release: meta.version, lastUpdate: { sequence: meta.sequence, running: false } };
+  assert.equal(outcome(failed).kind, 'rolled-back'); // Same display label does not hide a rollback.
+  assert.equal(outcome(failed, status(failed)), null); // A previous failed attempt is not this attempt.
+  assert.equal(outcome(failed, status(failed), true).kind, 'rolled-back');
+  assert.equal(outcome({ lastUpdate: { sequence: meta.sequence - 1, running: false } }), null);
+  assert.throws(() => outcome({ board: 0xc0 }), error => error.kind === 'uncertain');
+});
 
 test('the decision table: unreported USB update support, other board, other key, trial, up to date, update', () => {
   const meta = BUNDLE.meta;
@@ -122,6 +146,7 @@ test('bundle verification checks size, SHA-256, magic, target, sequence and the 
   await assert.rejects(verifyRsnodeBundle(bytes, { ...meta, sha256: 'a'.repeat(64) }), failure);
   await assert.rejects(verifyRsnodeBundle(bytes, { ...meta, otaTarget: '80:81:bf' }), failure);
   await assert.rejects(verifyRsnodeBundle(bytes, { ...meta, sequence: meta.sequence + 1 }), failure);
+  await assert.rejects(verifyRsnodeBundle(bytes, { ...meta, version: '2.0.0' }), failure);
   await assert.rejects(verifyRsnodeBundle(bytes, undefined), failure);
   const edit = (offset, value) => {
     const copy = bytes.slice();
@@ -137,7 +162,8 @@ test('bundle verification checks size, SHA-256, magic, target, sequence and the 
 
 // A node that answers STATUS, DETECT and the update commands as firmware/common/src/usb_board.rs does.
 // Hooks bend one answer each; FINISH restarts it, quiet for restartMs, into a trial, then confirms or rolls back.
-function updateNode({ before = {}, begin = 0, onChunk = () => {}, finish = 0, rollback = false, restartMs = 300, trialPolls = 1 } = {}) {
+function updateNode({ before = {}, begin = 0, onChunk = () => {}, finish = 0, rollback = false, restartMs = 300, trialPolls = 1,
+  disconnectOnFinish = false, beginOffset = 0, chunkMax = 480 } = {}) {
   let controller, received = 0, total = 0, session = false, quietUntil = 0, trialLeft = trialPolls, current = { ...before };
   const node = { frames: [], chunks: 0, aborted: false };
   const reply = (command, payload) => controller.enqueue(Uint8Array.from([0xc0,
@@ -150,7 +176,9 @@ function updateNode({ before = {}, begin = 0, onChunk = () => {}, finish = 0, ro
   }
   function statusNow() {
     if (current.trial && --trialLeft < 0) {
-      current = rollback ? { ...before } : { ...current, trial: false, sequence: BUNDLE.meta.sequence };
+      current = rollback
+        ? { ...before, uptimeS: 1, lastUpdate: { sequence: BUNDLE.meta.sequence, running: false } }
+        : { ...current, trial: false, pending: null, sequence: BUNDLE.meta.sequence };
     }
     return statusBody(current);
   }
@@ -168,7 +196,7 @@ function updateNode({ before = {}, begin = 0, onChunk = () => {}, finish = 0, ro
         assert.equal(body.length, 128);
         if (begin) return answer(0x10, begin);
         session = true; received = 0; total = u32(body, 12);
-        return answer(0x10, 0, [...be32(0), 0x01, 0xe0]);
+        return answer(0x10, 0, [...be32(beginOffset), chunkMax >> 8, chunkMax & 0xff]);
       }
       if (sub === 0x11) {
         node.chunks++;
@@ -186,9 +214,12 @@ function updateNode({ before = {}, begin = 0, onChunk = () => {}, finish = 0, ro
       if (sub === 0x12) {
         if (finish) return answer(0x12, finish);
         assert.equal(received, total);
+        if (disconnectOnFinish) { controller.error(new Error('USB restart')); throw new Error('USB restart'); }
         answer(0x12, 0);
         quietUntil = Date.now() + restartMs;
-        current = { ...before, release: BUNDLE.meta.version, trial: true };
+        current = { ...before, release: BUNDLE.meta.version, trial: true, pending: BUNDLE.meta.sequence,
+          uptimeS: 1, image: { len: BUNDLE.image.length, sha256: sha(BUNDLE.image) },
+          lastUpdate: { sequence: BUNDLE.meta.sequence, running: true } };
         return;
       }
       if (sub === 0x13) { node.aborted = true; session = false; return answer(0x13, 0); }
@@ -263,6 +294,37 @@ describe('the USB update', { concurrency: true }, () => {
       const node = updateNode({ before });
       await assert.rejects(run(node), error => !!error.choice);
       assert.equal(node.frames.some(([command, sub]) => command === 0x7a && sub === 0x10), false);
+    }
+  });
+
+  test('invalid BEGIN offsets and chunk sizes abort before sending image data', async () => {
+    for (const options of [{ beginOffset: BUNDLE.image.length + 1 }, { chunkMax: 0 }]) {
+      const node = updateNode(options);
+      await assert.rejects(run(node), /invalid update offset or chunk size/);
+      assert.equal(node.chunks, 0);
+      assert.equal(node.aborted, true);
+    }
+  });
+
+  test('a disconnected FINISH is confirmed on the reopened device without resending the image', async () => {
+    const node = updateNode({ disconnectOnFinish: true });
+    const rebooted = updateNode({ before: { sequence: BUNDLE.meta.sequence, release: BUNDLE.meta.version,
+      image: { len: BUNDLE.image.length, sha256: sha(BUNDLE.image) }, uptimeS: 1 } });
+    const first = createRnodeSession(node.port);
+    let reopened;
+    try {
+      const result = await streamRsnodeUpdate(first, BUNDLE.bytes, () => {}, BUNDLE.meta, {
+        reconnect: async old => {
+          assert.equal(old, first);
+          await closeRnodeSession(old);
+          reopened = createRnodeSession(rebooted.port);
+          return reopened;
+        }
+      });
+      assert.equal(result.kind, 'updated');
+      assert.equal(rebooted.chunks, 0);
+    } finally {
+      await closeRnodeSession(reopened || first);
     }
   });
 

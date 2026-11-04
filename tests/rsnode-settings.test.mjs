@@ -99,6 +99,22 @@ test('a save sends only what changed, and a password only when typed', () => {
     '280101' + '2909' + hex(bytes('hub.local')) + '2a021365');
 });
 
+test('Wi-Fi form preserves UTF-8 bytes and rejects values the firmware cannot store', () => {
+  for (const password of ['é'.repeat(16), '密'.repeat(10) + 'ab']) {
+    const value = form(fresh, { wifiMode: 'join', name: '   ', password });
+    assert.equal(checkSettingsForm(value, fresh, false), null);
+    const entries = settingsChanges(value, fresh, false);
+    assert.deepEqual(entries.find(([id]) => id === SETTING.wifiName)[1], bytes('   '));
+    assert.deepEqual(entries.find(([id]) => id === SETTING.wifiPassword)[1], bytes(password));
+  }
+  for (const [field, value] of [['name', 'net\0work'], ['password', 'pass\0word'],
+    ['password', 'é'.repeat(17)], ['password', '\ud800password']]) {
+    const valueForm = form(fresh, { wifiMode: 'join', name: 'Home', password: 'password', [field]: value });
+    assert.equal(checkSettingsForm(valueForm, fresh, false).field, field);
+  }
+  assert.equal(settingsOutcome({ result: RSNODE_RESULT.ok, body: [1] }).kind, 'uncertain');
+});
+
 test('the form refuses what the node would refuse, naming the field', () => {
   const check = (settings, changes, isRepeater = false) => checkSettingsForm(form(settings, changes), settings, isRepeater);
   assert.deepEqual(check(fresh, { wifiMode: 'join', name: '', password: '' }), { field: 'name', message: 'Enter the name of the network to join.' });
@@ -106,12 +122,12 @@ test('the form refuses what the node would refuse, naming the field', () => {
   assert.equal(check(fresh, { wifiMode: 'join', name: 'é'.repeat(16), password: '' }), null);
   assert.equal(check(fresh, { wifiMode: 'join', name: 'é'.repeat(17), password: '' }).field, 'name');
   assert.deepEqual(check(fresh, { wifiMode: 'join', name: 'Home', password: 'short' }),
-    { field: 'password', message: 'A Wi-Fi password is 8 to 32 characters, or empty for an open network.' });
+    { field: 'password', message: 'A Wi-Fi password is 8 to 32 bytes, or empty for an open network.' });
   assert.equal(check(fresh, { wifiMode: 'join', name: 'Home', password: 'x'.repeat(33) }).field, 'password');
-  assert.equal(check(fresh, { wifiMode: 'join', name: 'Home', password: 'pässwörd1' }).field, 'password');
+  assert.equal(check(fresh, { wifiMode: 'join', name: 'Home', password: 'pässwörd1' }), null);
   // The node's own network needs a password; its name is optional.
   assert.deepEqual(check(fresh, { wifiMode: 'own', name: '' }),
-    { field: 'password', message: 'The node\'s own network needs a password of 8 to 32 characters.' });
+    { field: 'password', message: 'The node\'s own network needs a password of 8 to 32 bytes.' });
   assert.equal(check(fresh, { wifiMode: 'own', name: '', password: '' }).field, 'password');
   assert.equal(check(fresh, { wifiMode: 'own', name: '', password: '12345678' }), null);
   assert.equal(check(repeater, {}, true), null);
@@ -147,7 +163,7 @@ test('a set reply says restart, unchanged, or why: the entry and reason name the
   assert.deepEqual(invalid([0x21, 4]), { kind: 'invalid', field: 'peersPort', message: 'The node refused this peer port.' });
   assert.equal(invalid([0x00, 5], 'join').field, 'name');
   assert.equal(invalid([0x00, 5], 'own').field, 'password');
-  assert.match(invalid([0x00, 5]).message, /8 to 32 characters/);
+  assert.match(invalid([0x00, 5]).message, /8 to 32 bytes/);
   assert.deepEqual(invalid([0x13, 7]), { kind: 'invalid', field: null, message: 'Confirm this change on the device.' });
   assert.deepEqual(invalid([0x00, 9]), { kind: 'invalid', field: null, message: 'The node refused the peer or uplink settings. Check the ports and the uplink host.' });
   assert.deepEqual(invalid([0x10, 2]), { kind: 'invalid', field: null, message: 'This firmware does not have that setting.' });
@@ -233,7 +249,7 @@ test('get and set travel as CMD_RSNODE sub 0x02 and 0x03 frames', async () => {
     const entries = [[SETTING.wifiMode, [2]], [SETTING.wifiPassword, bytes('12345678')], [SETTING.wifiChannel, [0xc0]]];
     assert.deepEqual(await writeRsnodeSettings(session, entries, 'own'), { kind: 'restart', restartMs: 250 });
     assert.deepEqual(await writeRsnodeSettings(session, [[SETTING.wifiMode, [9]]], 'own'), { kind: 'invalid', field: 'password',
-      message: 'The node refused these Wi-Fi settings. Joining a network needs its name and a password of 8 to 32 characters, or none for an open network; the node\'s own network needs a password of 8 to 32 characters.' });
+      message: 'The node refused these Wi-Fi settings. Joining a network needs its name and a password of 8 to 32 bytes, or none for an open network; the node\'s own network needs a password of 8 to 32 bytes.' });
     // A beta without settings refuses the command.
     assert.equal(await readRsnodeSettings(session), null);
     assert.deepEqual(await writeRsnodeSettings(session, [[SETTING.wifiMode, [0]]]), { kind: 'unsupported' });

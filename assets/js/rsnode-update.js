@@ -76,6 +76,7 @@ export async function verifyRsnodeBundle(bytes, bundle) {
   let manifest;
   try { manifest = parseRsnodeBundle(data); } catch { throw failed(); }
   if (manifest.target !== bundle.otaTarget || manifest.sequence !== bundle.sequence ||
+      manifest.version.join('.') !== /^(\d+\.\d+\.\d+)(?:[-+][0-9A-Za-z.-]+)?$/.exec(bundle.version || '')?.[1] ||
       manifest.imageLength !== data.length - RSOTA_MANIFEST_LEN ||
       await sha256Hex(data.slice(RSOTA_MANIFEST_LEN)) !== manifest.imageSha256) throw failed();
   return manifest;
@@ -114,8 +115,12 @@ async function transfer(session, data, onProgress) {
   if (!begin) throw refusal(RSNODE_RESULT.unsupported);
   if (begin.result !== RSNODE_RESULT.ok) throw refusal(begin.result);
   if (begin.body.length !== 6) throw new Error('The node answered the update with a malformed reply.');
-  const chunkMax = Math.min(CHUNK_MAX, (begin.body[4] << 8) | begin.body[5]) || CHUNK_MAX;
+  const chunkMax = Math.min(CHUNK_MAX, (begin.body[4] << 8) | begin.body[5]);
   let offset = u32(begin.body, 0), gaps = 0;
+  if (!chunkMax || offset > image.length) {
+    await abort(session);
+    throw new Error('The node returned an invalid update offset or chunk size. Nothing was staged.');
+  }
   onProgress({ stage: 'writing', sent: offset, total: image.length });
   while (offset < image.length) {
     const body = [...be32(offset), ...image.subarray(offset, offset + chunkMax)];
@@ -142,35 +147,67 @@ async function transfer(session, data, onProgress) {
     offset = next;
     onProgress({ stage: 'writing', sent: offset, total: image.length });
   }
-  const finish = await exchange(session, SUB_FINISH, [], FINISH_TIMEOUT_MS);
-  if (!finish) throw new Error('The node did not confirm the finished update. Check its screen, then read its status.');
+  // A reset can cut off the acknowledgement after staging succeeds. Only the
+  // subsequent status can settle that outcome; do not abort or resend FINISH.
+  let finish;
+  try { finish = await exchange(session, SUB_FINISH, [], FINISH_TIMEOUT_MS); } catch { return; }
+  if (!finish) return;
   if (finish.result !== RSNODE_RESULT.ok) throw refusal(finish.result, 'finishing');
 }
 
+const uncertain = message => Object.assign(new Error(message), { kind: 'uncertain' });
+
+/** Classify a stable result using the exact signed image, never a release label alone. */
+export function rsnodeUpdateOutcome(status, bundle, manifest, previous, sawTrial = false) {
+  if (!status || !status.ota || updateStaged(status)) return null;
+  if (rsnodeOtaTarget(status) !== bundle.otaTarget || status.releaseKeyId !== bundle.releaseKeyId) {
+    throw uncertain('The connected node or its update key changed. Reconnect the original node and read its status.');
+  }
+  if (status.ota.acceptedSequence === bundle.sequence && status.image &&
+      status.image.len === manifest.imageLength && status.image.sha256 === manifest.imageSha256 &&
+      status.release === bundle.version) {
+    return { kind: 'updated', release: status.release,
+      message: `Updated to ${status.release}. Identity, managers and settings kept.` };
+  }
+  if (status.ota.acceptedSequence >= bundle.sequence) {
+    throw uncertain('The node reports a different accepted update or running image. Read its status before retrying.');
+  }
+  const last = status.lastUpdate, before = previous && previous.lastUpdate;
+  const rebooted = previous && status.uptimeS !== null && previous.uptimeS !== null && status.uptimeS < previous.uptimeS;
+  const newRecord = last && (!before || before.sequence !== last.sequence || before.running !== last.running);
+  if (last && last.sequence === bundle.sequence && !last.running && (sawTrial || rebooted || newRecord)) {
+    const release = status.release || previous?.release || 'its previous firmware';
+    return { kind: 'rolled-back', release: status.release,
+      message: `The update did not start correctly; the node went back to ${release}.` };
+  }
+  return null;
+}
+
 // The node restarts into the new image on trial, then confirms it or goes back to the old one.
-async function confirm(session, bundle, previous, onProgress) {
+async function confirm(session, bundle, manifest, previous, onProgress, reconnect) {
   onProgress({ stage: 'restarting' });
   await sleep(RESTART_SETTLE_MS);
   const deadline = Date.now() + CONFIRM_TIMEOUT_MS;
+  let sawTrial = false;
   while (Date.now() < deadline) {
-    const status = await waitForRsnode(session, { timeoutMs: deadline - Date.now() }) ? await readRsnodeStatus(session) : null;
+    let status = null;
+    try {
+      status = await waitForRsnode(session, { timeoutMs: Math.min(4000, deadline - Date.now()) })
+        ? await readRsnodeStatus(session) : null;
+    } catch { /* The USB handle can close while the node restarts. */ }
     if (status && status.ota) {
       const trial = updateStaged(status);
+      if (status.ota.trialPending && (status.pendingSequence === bundle.sequence || status.image?.sha256 === manifest.imageSha256)) sawTrial = true;
       onProgress({ stage: trial ? 'trial' : 'confirming', release: status.release });
-      // The accepted sequence is what the node committed; the release names it.
-      if (!trial && status.ota.acceptedSequence >= bundle.sequence) {
-        const release = status.release || bundle.version;
-        return { kind: 'updated', release, message: `Updated to ${release}. Identity, managers and settings kept.` };
-      }
-      if (!trial && status.release !== bundle.version) {
-        const release = status.release || previous || 'its previous firmware';
-        return { kind: 'rolled-back', release: status.release,
-          message: `The update did not start correctly; the node went back to ${release}.` };
-      }
+      const outcome = rsnodeUpdateOutcome(status, bundle, manifest, previous, sawTrial);
+      if (outcome) return outcome;
+    } else if (reconnect) {
+      onProgress({ stage: 'reconnecting' });
+      try { session = await reconnect(session) || session; } catch { /* Retry until the bounded confirmation deadline. */ }
     }
     await sleep(Math.min(CONFIRM_POLL_MS, Math.max(0, deadline - Date.now())));
   }
-  throw new Error('The node did not confirm the update within 3 minutes. Keep power connected and read its status before retrying.');
+  throw uncertain('The node did not confirm the update within 3 minutes. Keep power connected, reconnect it and read its status before retrying.');
 }
 
 /**
@@ -178,11 +215,12 @@ async function confirm(session, bundle, previous, onProgress) {
  * Gap says), follows the restart and reports { kind: 'updated' | 'rolled-back', release, message }.
  * onProgress gets { stage: 'writing', sent, total }, then 'restarting', 'trial' and 'confirming'.
  */
-export async function streamRsnodeUpdate(session, bundleBytes, onProgress = () => {}, bundle) {
+export async function streamRsnodeUpdate(session, bundleBytes, onProgress = () => {}, bundle, { reconnect } = {}) {
   const data = bundleBytes instanceof Uint8Array ? bundleBytes : new Uint8Array(bundleBytes);
+  const manifest = await verifyRsnodeBundle(data, bundle);
   const before = await readRsnodeStatus(session);
   const choice = chooseRsnodeInstall(before, null, bundle);
   if (choice.kind !== 'update') throw Object.assign(new Error(choice.message), { choice });
   await transfer(session, data, onProgress);
-  return confirm(session, bundle, before.release, onProgress);
+  return confirm(session, bundle, manifest, before, onProgress, reconnect);
 }

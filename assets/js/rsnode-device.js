@@ -153,7 +153,8 @@ export async function rsnodeCommand(session, sub, body = [], timeoutMs = EXCHANG
 /** rsNode's STATUS body: ManageStatus TLVs, then the node's own facts (tag 0x10). */
 export function parseRsnodeStatus(body) {
   const status = { board: null, firmware: null, releaseKeyId: null, ota: null, pendingSequence: null, owners: null,
-    radio: null, wifi: null, image: null, release: null, node: null };
+    radio: null, wifi: null, image: null, release: null, node: null, uptimeS: null, lastUpdate: null };
+  const seen = new Set();
   for (let offset = 0; offset < body.length;) {
     const tag = body[offset], len = body[offset + 1];
     const value = Array.from(body.slice(offset + 2, offset + 2 + len));
@@ -161,6 +162,10 @@ export function parseRsnodeStatus(body) {
     offset += 2 + len;
     if (STATUS_LENGTHS[tag] !== undefined && STATUS_LENGTHS[tag] !== len) {
       throw new Error(`malformed rsNode status: tag ${hexByte(tag)} length ${len}`);
+    }
+    if (STATUS_LENGTHS[tag] !== undefined || tag === 0x0f) {
+      if (seen.has(tag)) throw new Error(`malformed rsNode status: duplicate tag ${hexByte(tag)}`);
+      seen.add(tag);
     }
     switch (tag) {
       case 0x01: status.board = { platform: value[0], mcu: value[1], board: value[2] }; break;
@@ -173,6 +178,11 @@ export function parseRsnodeStatus(body) {
       case 0x07: status.radio = { frequency: u32(value), bandwidth: u32(value, 4), spreadingFactor: value[8],
         codingRate: value[9], txPower: signed(value[10]), dutyTenthsPercent: u16(value, 11),
         maxTransmissionMs: u32(value, 13) }; break;
+      case 0x09: status.uptimeS = u32(value); break;
+      case 0x0a:
+        if (value[5] > 1) throw new Error('malformed rsNode status: update result');
+        status.lastUpdate = { sequence: u32(value), source: value[4], running: value[5] === 1 };
+        break;
       case 0x0c: status.wifi = { mode: value[0], ready: !!(value[1] & WIFI_READY), ip: ipv4(value.slice(2)) }; break;
       case 0x0e: status.image = { len: u32(value), sha256: hex(value.slice(4)) }; break;
       case 0x0f:

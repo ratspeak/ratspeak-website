@@ -131,18 +131,20 @@ function parsePort(text) {
   return port >= 1 && port <= 65535 ? port : null;
 }
 
-const printable = text => /^[\x20-\x7e]*$/.test(text);
 const switchesNetwork = (from, to) => from !== to && from !== 'off' && to !== 'off';
+const validWifiText = text => !text.includes('\0') && decoder.decode(encoder.encode(text)) === text;
 
 /**
  * The first thing the device would refuse, as { field, message }, or null. The rules are rsNode's:
- * joining a network needs its name and an empty or 8–32 character password; the node's own network
- * needs an 8–32 character password; a fixed address needs a usable host, mask and on-link gateway.
+ * joining a network needs its name and an empty or 8–32 byte UTF-8 password; the node's own network
+ * needs an 8–32 byte password; a fixed address needs a usable host, mask and on-link gateway.
  */
 export function checkSettingsForm(form, settings, repeater) {
   const mode = form.wifiMode, current = MODE_NAMES[settings.wifi.mode] || 'off';
   const problem = (field, message) => ({ field, message });
+  if (!Object.hasOwn(WIFI_MODES, mode)) return problem('wifiMode', 'Choose a Wi-Fi mode.');
   if (mode !== 'off') {
+    if (!validWifiText(form.name)) return problem('name', 'The network name contains an unsupported character.');
     const name = utf8(form.name);
     if (mode === 'join' && !name.length) return problem('name', 'Enter the name of the network to join.');
     if (name.length > STRING_MAX) return problem('name', 'A network name is at most 32 bytes.');
@@ -151,14 +153,15 @@ export function checkSettingsForm(form, settings, repeater) {
         return problem('password', mode === 'own' ? 'Enter a password for the node\'s network.'
           : 'Enter the network\'s password, or leave it empty for an open network.');
       }
-      if (mode === 'own' && !settings.wifi.passwordSet) return problem('password', 'The node\'s own network needs a password of 8 to 32 characters.');
+      if (mode === 'own' && !settings.wifi.passwordSet) return problem('password', 'The node\'s own network needs a password of 8 to 32 bytes.');
     } else {
       const password = form.password;
       if (!(mode === 'join' && password === '')) {
-        if (!printable(password)) return problem('password', 'Use letters, digits, spaces and standard symbols in the password.');
-        if (password.length < PASSWORD_MIN || password.length > STRING_MAX) {
-          return problem('password', mode === 'own' ? 'The node\'s own network needs a password of 8 to 32 characters.'
-            : 'A Wi-Fi password is 8 to 32 characters, or empty for an open network.');
+        if (!validWifiText(password)) return problem('password', 'The password contains an unsupported character.');
+        const length = utf8(password).length;
+        if (length < PASSWORD_MIN || length > STRING_MAX) {
+          return problem('password', mode === 'own' ? 'The node\'s own network needs a password of 8 to 32 bytes.'
+            : 'A Wi-Fi password is 8 to 32 bytes, or empty for an open network.');
         }
       }
     }
@@ -211,7 +214,7 @@ export function settingsChanges(form, settings, repeater) {
   const mode = WIFI_MODES[form.wifiMode];
   if (mode !== wifi.mode) put(SETTING.wifiMode, [mode]);
   if (mode !== WIFI_MODES.off) {
-    const name = utf8(form.name.trim() === '' ? '' : form.name);
+    const name = utf8(form.name);
     if (!sameBytes(name, utf8(wifi.name))) put(SETTING.wifiName, name);
     if (form.password !== null) put(SETTING.wifiPassword, utf8(form.password));
     if (mode === WIFI_MODES.own && Number(form.channel) !== wifi.channel) put(SETTING.wifiChannel, [Number(form.channel)]);
@@ -243,8 +246,8 @@ const REASON_TEXT = {
   malformed: 'The node could not read the request. Nothing changed.',
   duplicate: 'The node could not read the request. Nothing changed.',
   unknownId: 'This firmware does not have that setting.',
-  wifi: 'The node refused these Wi-Fi settings. Joining a network needs its name and a password of 8 to 32 characters, ' +
-    'or none for an open network; the node\'s own network needs a password of 8 to 32 characters.',
+  wifi: 'The node refused these Wi-Fi settings. Joining a network needs its name and a password of 8 to 32 bytes, ' +
+    'or none for an open network; the node\'s own network needs a password of 8 to 32 bytes.',
   radio: 'The node refused the radio settings.',
   confirmOnDevice: 'Confirm this change on the device.',
   transport: 'The node refused the Repeater settings.',
@@ -274,7 +277,9 @@ export function settingsOutcome(reply, mode) {
   if (!reply) return { kind: 'unsupported' };
   const { result, body } = reply;
   if (result === RSNODE_RESULT.ok) {
-    return body.length === 2 ? { kind: 'restart', restartMs: u16(body) } : { kind: 'unchanged' };
+    if (body.length === 2) return { kind: 'restart', restartMs: u16(body) };
+    if (body.length === 0) return { kind: 'unchanged' };
+    return { kind: 'uncertain', message: 'The settings reply was incomplete. Read the node\'s settings before retrying.' };
   }
   if (result === RSNODE_RESULT.invalid) return { kind: 'invalid', ...settingsRefusal(body, mode) };
   if (result === RSNODE_RESULT.refused) return { kind: 'refused' };

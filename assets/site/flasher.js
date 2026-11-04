@@ -1496,10 +1496,19 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
                     logMessage('Update staged. The node restarts into the new firmware.', 'log-orange');
                 } else if (event.stage === 'trial') {
                     setProgress(94, 'The node is checking the new firmware...');
+                } else if (event.stage === 'reconnecting') {
+                    setProgress(92, 'Reconnecting to the node after restart...');
                 } else {
                     setProgress(97, 'Confirming...');
                 }
-            }, bundle);
+            }, bundle, { reconnect: async function(previous) {
+                // Reopen only the selected device. A different authorized node
+                // must not be mistaken for the one that received this update.
+                var selectedPort = previous.port;
+                await closeRnodeSession(previous);
+                session = createRnodeSession(await openRnodeSerialPort(logMessage, 0, [], selectedPort));
+                return session;
+            } });
         } finally {
             await closeRnodeSession(session);
         }
@@ -2382,14 +2391,14 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             }
         }
     }
-    async function openRnodeSerialPort(logMessage, settleMs, excludedPorts) {
+    async function openRnodeSerialPort(logMessage, settleMs, excludedPorts, onlyPort) {
         await sleepMs(settleMs == null ? RNODE_REPAIR_SETTLE_MS : settleMs);
 
         var excluded = Array.isArray(excludedPorts) ? excludedPorts : [];
         var lastError = null;
         for (var attempt = 0; attempt < RNODE_PORT_OPEN_RETRIES; attempt++) {
             var candidates = (await collectRnodePortCandidates()).filter(function (port) {
-                return excluded.indexOf(port) === -1;
+                return excluded.indexOf(port) === -1 && (!onlyPort || port === onlyPort);
             });
             if (!candidates.length) {
                 throw new Error('Serial port unavailable');
@@ -4104,6 +4113,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
                 if (outcome.kind === 'storage') throw new Error('RNode ' + nodeId + ' could not confirm that the settings were saved. Read its settings before retrying.');
                 if (outcome.kind === 'unsupported') throw new Error('RNode ' + nodeId + ' cannot change these settings over USB.');
                 if (outcome.kind === 'failed') throw new Error('RNode ' + nodeId + ' refused the settings (result ' + outcome.result + ').');
+                if (outcome.kind === 'uncertain') throw new Error(outcome.message);
                 if (outcome.kind === 'restart') {
                     rsnodeSettingsMessage('Restarting…');
                     ui.setStatus('Restarting…');

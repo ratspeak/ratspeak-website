@@ -47,7 +47,8 @@ export async function betaRequest(action, body, options = {}) {
 export function validUpdateMetadata(update, board) {
   if (update === undefined) return true;
   const target = /^([a-f0-9]{2}):([a-f0-9]{2}):([a-f0-9]{2})$/.exec(update && update.otaTarget || '');
-  return !!(update && typeof update === 'object' && target && parseInt(target[3], 16) === board.otaBoard &&
+  return !!(update && typeof update === 'object' && target && target[1] === '80' && target[2] === '81' &&
+    parseInt(target[3], 16) === board.otaBoard &&
     typeof update.fileName === 'string' && /^[a-zA-Z0-9][a-zA-Z0-9._-]*\.rsota$/.test(update.fileName) &&
     Number.isSafeInteger(update.size) && update.size > 128 && update.size <= 4 * 1024 * 1024 &&
     /^[a-f0-9]{64}$/.test(update.sha256 || '') &&

@@ -588,6 +588,11 @@ test('STATUS reads as ManageStatus decodes it: unknown tags skipped, a known tag
   assert.equal(status.releaseKeyId, '0011223344556677');
   assert.deepEqual(status.ota, { acceptedSequence: 2026110101, slotLen: 0x1e0000, nearbyOnly: true, trialPending: true });
   assert.equal(status.pendingSequence, 2026110102);
+  assert.equal(status.uptimeS, 42);
+  assert.deepEqual(parseRsnodeStatus(tlv(0x0a, [...be32(123), 1, 0, ...Array(16).fill(0)])).lastUpdate,
+    { sequence: 123, source: 1, running: false });
+  assert.throws(() => parseRsnodeStatus([...body, ...tlv(0x09, be32(1))]), /duplicate tag/);
+  assert.throws(() => parseRsnodeStatus(tlv(0x0a, [...be32(123), 1, 2, ...Array(16).fill(0)])), /update result/);
   assert.deepEqual(status.wifi, { mode: 1, ready: true, ip: '192.168.1.23' });
   assert.deepEqual(status.image, { len: 0x180000, sha256: 'ab'.repeat(32) });
   assert.equal(status.release, '1.0.0-beta.20261101.1');
