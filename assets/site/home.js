@@ -362,7 +362,7 @@ function react() {
     aliceSays('Nice. What’s the door code for tonight?');
     enqueue(async () => offer(replyChip('It’s 4417. See you at 7.')));
   } else if (yours === 2) {
-    aliceSays('Got it. The relay couldn’t read a word of that.');
+    aliceSays('Kk, see you then.');
     enqueue(async () => {
       const get = document.createElement('a');
       get.className = 'reply-chip is-get';
