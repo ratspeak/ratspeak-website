@@ -4243,12 +4243,15 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         syncRsnodePort();
     }
 
-    // The node Start repeating acts on: one set up here, or a Repeater with a saved profile in the live view.
+    // The node Start repeating acts on: one set up here, or a paused Repeater in the live view. Firmware that
+    // does not report forwarding (1.0.0) is offered it too; START on a forwarding node changes nothing.
     function rsnodeRepeaterTarget() {
         var result = rsnodeRepeaterResult;
         if (result) return result.repeating ? null : result.nodeId;
         var facts = rsnodeDeviceFacts;
-        return facts && rsnodeIsRepeater(facts) && facts.transport.radioProfile ? facts.status.nodeId : null;
+        var node = facts && facts.rsnode && facts.rsnode.node;
+        if (!facts || !rsnodeIsRepeater(facts) || !facts.transport.radioProfile || (node && node.forwarding === true)) return null;
+        return facts.status.nodeId;
     }
 
     function setRsnodeRepeaterBusy(busy, starting) {

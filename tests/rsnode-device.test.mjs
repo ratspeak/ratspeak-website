@@ -230,12 +230,12 @@ test('summarizes the node for the panel and for a bug report', async () => {
   }
   assert.deepEqual(lines['heltec-v4'], {
     node: 'RNode 887A', board: 'Heltec V4 · ESP32', firmware: `RNode 1.86 · image ${v4.device.firmwareHash.slice(0, 8)}`,
-    owners: 'Owner and 1 admin', repeater: 'Not set up', wifi: null,
+    owners: 'Owner and 1 admin', repeater: 'Not set up', forwarding: null, wifi: null,
     radio: 'Off · not configured', packets: 'RX 0 · TX 0', channel: null, battery: '84% · discharging'
   });
   assert.deepEqual(lines['heltec-v3'], {
     node: 'RNode 0F3C', board: 'Heltec V3 · ESP32', firmware: `RNode 1.86 · image ${v3.device.firmwareHash.slice(0, 8)}`,
-    owners: 'None yet', repeater: 'Not set up · IFAC on (8)', wifi: null,
+    owners: 'None yet', repeater: 'Not set up · IFAC on (8)', forwarding: null, wifi: null,
     radio: 'On · 915.000 MHz · 250 kHz · SF9 · CR 4/5 · 14 dBm', packets: 'RX 2 · TX 3 · last -117 dBm, -4.5 dB',
     channel: 'Airtime 1.2% · load 2.3% · noise -121 dBm', battery: '76% · charging'
   });
@@ -596,7 +596,13 @@ test('STATUS reads as ManageStatus decodes it: unknown tags skipped, a known tag
   assert.deepEqual(status.wifi, { mode: 1, ready: true, ip: '192.168.1.23' });
   assert.deepEqual(status.image, { len: 0x180000, sha256: 'ab'.repeat(32) });
   assert.equal(status.release, '1.0.0-beta.20261101.1');
-  assert.deepEqual(status.node, { repeater: false, bluetoothAvailable: false, bluetoothEnabled: false, hostOwner: 3 });
+  assert.deepEqual(status.node, { repeater: false, bluetoothAvailable: false, bluetoothEnabled: false, hostOwner: 3, forwarding: null });
+  // After 1.0.0 the node facts carry a fifth byte: forwarding, or paused.
+  assert.equal(parseRsnodeStatus(tlv(0x10, [1, 1, 1, 0, 1])).node.forwarding, true);
+  assert.equal(parseRsnodeStatus(tlv(0x10, [1, 1, 1, 0, 0])).node.forwarding, false);
+  assert.throws(() => parseRsnodeStatus(tlv(0x10, [1, 1, 1, 0, 2])), /forwarding/);
+  assert.throws(() => parseRsnodeStatus(tlv(0x10, [1, 1, 1])), /tag 0x10 length 3/);
+  assert.throws(() => parseRsnodeStatus(tlv(0x10, [1, 1, 1, 0, 1, 0])), /tag 0x10 length 6/);
   assert.equal(HOST_OWNERS[status.node.hostOwner], 'Wi-Fi');
   assert.deepEqual(parseRsnodeStatus(tlv(0x0c, [2, 0, 0, 0, 0, 0])).wifi, { mode: 2, ready: false, ip: null });
   assert.throws(() => parseRsnodeStatus(tlv(0x0c, [1, 1, 10, 0, 0])), /tag 0x0c length 5/);
@@ -634,6 +640,18 @@ test('a node with STATUS shows its release, variant and Wi-Fi, and Copy details 
   assert.equal(await wifi(null), 'Off');
   assert.equal(await wifi([1, 0, 0, 0, 0, 0]), 'Joining a network…');
   assert.equal(await wifi([2, 1, 10, 0, 0, 1]), 'Own network · 10.0.0.1');
+});
+
+test('a Repeater that reports forwarding shows Repeating or Paused; 1.0.0 and an RNode show neither', async () => {
+  const forwarding = async node => {
+    const { facts, radio } = await readNode(v4, { status: statusReply({ node }) });
+    return { line: rsnodeSummary(facts, radio).forwarding, mode: rsnodeDetails(facts, radio).split('\n').find(line => line.startsWith('mode: ')) };
+  };
+  assert.deepEqual(await forwarding([1, 1, 1, 0, 1]), { line: 'Repeating', mode: 'mode: Repeater, repeating, Bluetooth on' });
+  assert.deepEqual(await forwarding([1, 1, 1, 0, 0]), { line: 'Paused', mode: 'mode: Repeater, paused, Bluetooth on' });
+  assert.deepEqual(await forwarding([1, 1, 1, 0]), { line: null, mode: 'mode: Repeater, Bluetooth on' });
+  assert.equal((await forwarding([0, 1, 1, 1, 0])).line, null);
+  assert.match(html, /<div data-fact="forwarding"><dt>Forwarding<\/dt><dd><\/dd><\/div>/);
 });
 
 test('with Wi-Fi on, pairing is offered disabled with the reason instead of failing quietly', async () => {

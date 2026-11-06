@@ -315,15 +315,25 @@ test('Finish setup enrols the Owner, saves Wi-Fi and the uplink, saves the Repea
 });
 
 test('Start repeating is offered only for a node set up here or a Repeater in the live view, and sends REPEATER_CONTROL start', async () => {
-  const facts = (repeater, radioProfile) => ({ status: { nodeId: 'B44E' }, rsnode: { node: { repeater } }, transport: { bootMode: repeater, radioProfile } });
+  const facts = (repeater, radioProfile, forwarding = null) => ({ status: { nodeId: 'B44E' }, rsnode: { node: { repeater, forwarding } },
+    transport: { bootMode: repeater, radioProfile } });
   let task = repeaterTask({ nodeId: '887A' }, baseForm(), { rsnodeDeviceFacts: null });
   assert.equal(task.rsnodeRepeaterTarget(), null);
   task.context.rsnodeDeviceFacts = facts(false, true);
   assert.equal(task.rsnodeRepeaterTarget(), null);
   task.context.rsnodeDeviceFacts = facts(true, false);
   assert.equal(task.rsnodeRepeaterTarget(), null);
+  // A Repeater that says it is paused, or that predates the forwarding flag, can be started; one forwarding cannot.
+  task.context.rsnodeDeviceFacts = facts(true, true, true);
+  assert.equal(task.rsnodeRepeaterTarget(), null);
+  task.context.rsnodeDeviceFacts = facts(true, true, false);
+  assert.equal(task.rsnodeRepeaterTarget(), 'B44E');
   task.context.rsnodeDeviceFacts = facts(true, true);
   assert.equal(task.rsnodeRepeaterTarget(), 'B44E');
+  task.context.rsnodeDeviceFacts = { ...facts(true, true), rsnode: null };
+  assert.equal(task.rsnodeRepeaterTarget(), 'B44E');
+  // Setup that just finished here wins over the live view.
+  task.context.rsnodeDeviceFacts = facts(true, true, true);
   task.context.rsnodeRepeaterResult = { nodeId: '887A', repeating: false };
   assert.equal(task.rsnodeRepeaterTarget(), '887A');
   task.context.rsnodeRepeaterResult.repeating = true;

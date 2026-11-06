@@ -65,9 +65,10 @@ export const RSNODE_RESULT = Object.freeze({ ok: 0, denied: 1, invalid: 2, busy:
   rejected: 8, refused: 9, unavailable: 10, gap: 11 });
 /** STATUS host owner: who holds an RNode. */
 export const HOST_OWNERS = Object.freeze({ 0: null, 1: 'USB', 2: 'Bluetooth', 3: 'Wi-Fi' });
-// ManageStatus tags with a fixed length; a known tag of another length is malformed, unknown tags are skipped.
-const STATUS_LENGTHS = { 0x01: 3, 0x02: 6, 0x03: 8, 0x04: 9, 0x05: 4, 0x06: 2, 0x07: 25, 0x08: 1, 0x09: 4, 0x0a: 22,
-  0x0b: 9, 0x0c: 6, 0x0d: 2, 0x0e: 36, 0x10: 4 };
+// ManageStatus tags with fixed lengths; a known tag of another length is malformed, unknown tags are skipped.
+// The node facts (0x10) gained a forwarding byte after 1.0.0.
+const STATUS_LENGTHS = { 0x01: [3], 0x02: [6], 0x03: [8], 0x04: [9], 0x05: [4], 0x06: [2], 0x07: [25], 0x08: [1], 0x09: [4],
+  0x0a: [22], 0x0b: [9], 0x0c: [6], 0x0d: [2], 0x0e: [36], 0x10: [4, 5] };
 const RELEASE_MAX = 24;
 const WIFI_READY = 0x01;
 const OTA_NEARBY_ONLY = 0x02;
@@ -160,7 +161,7 @@ export function parseRsnodeStatus(body) {
     const value = Array.from(body.slice(offset + 2, offset + 2 + len));
     if (len === undefined || value.length !== len) throw new Error('malformed rsNode status: truncated entry');
     offset += 2 + len;
-    if (STATUS_LENGTHS[tag] !== undefined && STATUS_LENGTHS[tag] !== len) {
+    if (STATUS_LENGTHS[tag] !== undefined && !STATUS_LENGTHS[tag].includes(len)) {
       throw new Error(`malformed rsNode status: tag ${hexByte(tag)} length ${len}`);
     }
     if (STATUS_LENGTHS[tag] !== undefined || tag === 0x0f) {
@@ -189,8 +190,12 @@ export function parseRsnodeStatus(body) {
         if (!len || len > RELEASE_MAX || value.some(byte => byte < 0x21 || byte > 0x7e)) throw new Error('malformed rsNode status: release');
         status.release = String.fromCharCode(...value);
         break;
-      case 0x10: status.node = { repeater: value[0] === 1, bluetoothAvailable: value[1] === 1,
-        bluetoothEnabled: value[2] === 1, hostOwner: value[3] }; break;
+      case 0x10:
+        if (len === 5 && value[4] > 1) throw new Error('malformed rsNode status: forwarding');
+        // forwarding is null on 1.0.0, which does not report it.
+        status.node = { repeater: value[0] === 1, bluetoothAvailable: value[1] === 1,
+          bluetoothEnabled: value[2] === 1, hostOwner: value[3], forwarding: len === 5 ? value[4] === 1 : null };
+        break;
     }
   }
   return status;
@@ -340,6 +345,13 @@ function repeaterLine(transport) {
   return parts.join(' · ');
 }
 
+// A running Repeater's forwarding, when its STATUS reports it.
+function forwardingLine(rsnode) {
+  const node = rsnode && rsnode.node;
+  if (!node || !node.repeater || node.forwarding === null) return null;
+  return node.forwarding ? 'Repeating' : 'Paused';
+}
+
 // STATUS names the variant; the RNode BOARD byte is one for every V4.
 function boardName(facts) {
   const variant = facts.rsnode && facts.rsnode.board && rsnodeBoardForTarget(facts.rsnode.board.board);
@@ -363,6 +375,7 @@ export function rsnodeSummary(facts, radio) {
     firmware: `${rsnode && rsnode.release ? rsnode.release : `RNode ${version(facts.firmware)}`} · image ${facts.firmwareHash.slice(0, 8)}`,
     owners: ownersLine(facts.node),
     repeater: repeaterLine(facts.transport),
+    forwarding: forwardingLine(rsnode),
     wifi: rsnode ? wifiLine(rsnode.wifi) : null,
     radio: radioLine(radio),
     packets: `RX ${radio.rx} · TX ${radio.tx}` + (radio.rssi === null ? '' : ` · last ${radio.rssi} dBm, ${radio.snr} dB`),
@@ -387,6 +400,7 @@ function buildLines(rsnode) {
       (rsnode.pendingSequence !== null ? `, pending ${rsnode.pendingSequence}` : '') +
       (rsnode.ota && rsnode.ota.trialPending ? ', trial running' : ''),
     `mode: ${rsnode.node ? (rsnode.node.repeater ? 'Repeater' : 'RNode') : 'unknown'}` +
+      (forwardingLine(rsnode) ? `, ${forwardingLine(rsnode).toLowerCase()}` : '') +
       (rsnode.node && HOST_OWNERS[rsnode.node.hostOwner] ? `, held over ${HOST_OWNERS[rsnode.node.hostOwner]}` : '') +
       (rsnode.node ? `, Bluetooth ${rsnode.node.bluetoothAvailable ? (rsnode.node.bluetoothEnabled ? 'on' : 'off') : 'unavailable'}` : '')
   ];
