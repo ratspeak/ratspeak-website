@@ -1,4 +1,4 @@
-// Update (keeps identity, managers and settings) or Install (erases), and the signed update over USB
+// Update (keeps identity, managers, and settings) or Install (erases), and the signed update over USB
 // (rsNode ADR 0015): CMD_RSNODE BEGIN, CHUNK and FINISH as rsNode's firmware/common/src/usb_board.rs
 // answers them and scripts/rsnode-usb.py upload() sends them.
 import { sha256Hex } from './handheld-release.js';
@@ -50,7 +50,7 @@ export function chooseRsnodeInstall(status, board, bundle) {
     return { kind: 'current', update: false, message: `Up to date${status.release ? ` with ${status.release}` : ''}.` };
   }
   return { kind: 'update', update: true,
-    message: `Update ${status.release ? `from ${status.release} ` : ''}to ${bundle.version}. Identity, managers and settings stay.` };
+    message: `Update ${status.release ? `from ${status.release} ` : ''}to ${bundle.version}. Identity, managers, and settings stay.` };
 }
 
 /** The signed manifest of an .rsota (rsNode's package_ota.py create_manifest), unverified. */
@@ -167,7 +167,7 @@ export function rsnodeUpdateOutcome(status, bundle, manifest, previous, sawTrial
       status.image.len === manifest.imageLength && status.image.sha256 === manifest.imageSha256 &&
       status.release === bundle.version) {
     return { kind: 'updated', release: status.release,
-      message: `Updated to ${status.release}. Identity, managers and settings kept.` };
+      message: `Updated to ${status.release}. Identity, managers, and settings kept.` };
   }
   if (status.ota.acceptedSequence >= bundle.sequence) {
     throw uncertain('The node reports a different accepted update or running image. Read its status before retrying.');

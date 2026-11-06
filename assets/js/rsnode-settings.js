@@ -198,7 +198,7 @@ export function checkSettingsForm(form, settings, repeater) {
     if (form.uplinkEnabled) {
       const host = form.uplinkHost.trim();
       if (!host || host.length > HOST_MAX || !/^[A-Za-z0-9._-]+$/.test(host)) {
-        return problem('uplinkHost', 'Enter the uplink\'s host name or address, up to 64 letters, digits, dots, dashes and underscores.');
+        return problem('uplinkHost', 'Enter the uplink\'s host name or address, up to 64 letters, digits, dots, dashes, and underscores.');
       }
       if (!parsePort(form.uplinkPort)) return problem('uplinkPort', 'Choose an uplink port from 1 to 65535.');
     }

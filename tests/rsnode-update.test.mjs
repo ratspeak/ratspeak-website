@@ -130,7 +130,7 @@ test('the decision table: unreported USB update support, other board, other key,
   const update = chooseRsnodeInstall(status(), BOARD, meta);
   assert.equal(update.kind, 'update');
   assert.equal(update.update, true);
-  assert.match(update.message, /^Update from 1\.0\.0-beta\.20261030\.2 to 1\.0\.0-beta\.20261102\.1\. Identity, managers and settings stay\.$/);
+  assert.match(update.message, /^Update from 1\.0\.0-beta\.20261030\.2 to 1\.0\.0-beta\.20261102\.1\. Identity, managers, and settings stay\.$/);
   assert.equal(chooseRsnodeInstall(status(), BOARD, undefined).kind, 'install');
   assert.equal(rsnodeOtaTarget(status()), '80:81:3f');
   assert.equal(rsnodeOtaTarget(null), null);
@@ -246,7 +246,7 @@ describe('the USB update', { concurrency: true }, () => {
     const node = updateNode({ onChunk: ({ offset }) => { offsets.push(offset); } });
     const { result, progress } = await run(node);
     assert.deepEqual(result, { kind: 'updated', release: BUNDLE.meta.version,
-      message: 'Updated to 1.0.0-beta.20261102.1. Identity, managers and settings kept.' });
+      message: 'Updated to 1.0.0-beta.20261102.1. Identity, managers, and settings kept.' });
     assert.deepEqual(offsets, [0, 480, 960, 1440, 1920]);
     assert.deepEqual(progress.filter(event => event.stage === 'writing').map(event => event.sent), [0, 480, 960, 1440, 1920, 2000]);
     assert.ok(progress.some(event => event.stage === 'restarting'));

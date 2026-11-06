@@ -1360,8 +1360,8 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     // ── rsNode Update (CMD_RSNODE BEGIN/CHUNK/FINISH over USB, keeps settings) or Install (esptool, erases) ──
     var rsnodeChecking = false;
     var RSNODE_CHECK_MS = 10000;
-    var RSNODE_INSTALL_NOTE = 'Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings. Update requires a compatible package and firmware that supports USB updates.';
-    var RSNODE_UPDATE_NOTE = 'Update keeps the node\'s identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings; Install erases them. Check the node to see whether it can update.';
+    var RSNODE_INSTALL_NOTE = 'Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings, and Repeater settings. Update requires a compatible package and firmware that supports USB updates.';
+    var RSNODE_UPDATE_NOTE = 'Update keeps the node\'s identity, managers, Wi-Fi, Bluetooth pairings, and Repeater settings; Install erases them. Check the node to see whether it can update.';
 
     function rsnodeUpdateChosen() {
         return !!(state.rsnodeChoice && state.rsnodeChoice.update && state.rsnodeMode === 'update' && state.rsnodeBundle);
@@ -1462,7 +1462,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         if (!await confirmFactoryInstall({ product: 'rsnode', installMode: 'update', board: metadata.id, boardLabel: metadata.label }, {
             title: 'Update',
             intro: 'You are updating this node to rsNode ' + bundle.version + '.',
-            detail: 'Identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings stay. The node restarts, checks the new firmware and keeps it, or goes back to the firmware it runs now.',
+            detail: 'Identity, managers, Wi-Fi, Bluetooth pairings, and Repeater settings stay. The node restarts, checks the new firmware and keeps it, or goes back to the firmware it runs now.',
             action: 'Update'
         })) return null;
         var access = await betaRequest('session');
@@ -4618,7 +4618,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             } else if (isRsnodeSelected() && !ready) {
                 noteEl.textContent = rsnodeFlowNote();
             } else if (ready && isRsnodeSelected() && rsnodeUpdateChosen()) {
-                noteEl.textContent = 'Ready to update. Identity, managers and settings stay. Keep this tab open until the node confirms the update.';
+                noteEl.textContent = 'Ready to update. Identity, managers, and settings stay. Keep this tab open until the node confirms the update.';
             } else if (ready) {
                 noteEl.textContent = handheldBoard(state.device)
                     ? 'Ready. The installer checks the device, then updates it or asks before erasing. Keep this tab open.'
@@ -5464,7 +5464,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         document.getElementById('installDialogDevice').textContent = prepared.boardLabel || DEVICES[prepared.board].name;
         document.getElementById('installDialogTitle').textContent = review ? review.title : 'Erase and install';
         document.getElementById('installDialogRisk').textContent = review ? review.detail : prepared.product === 'rsnode'
-            ? 'Everything on the node is erased: identity, managers, Wi-Fi, Bluetooth pairings and Repeater settings.'
+            ? 'Everything on the node is erased: identity, managers, Wi-Fi, Bluetooth pairings, and Repeater settings.'
             : 'All data in internal storage will be lost, including your identity, settings, and messages.';
         document.getElementById('installDialogIntro').textContent = review ? review.intro : prepared.product === 'rsnode'
             ? 'You are installing rsNode private beta firmware.'
@@ -5854,7 +5854,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
                 logMessage('Error: Could not open serial port. Is another program using it?', 'log-red');
             } else if (errorMsg.includes('Timeout') || errorMsg.includes('timeout')) {
                 logMessage(state.device === 'm9'
-                    ? 'Error: Bootloader connection timed out. Keep the M9 powered on, reconnect its USB data cable, select the USB serial port and try again.'
+                    ? 'Error: Bootloader connection timed out. Keep the M9 powered on, reconnect its USB data cable, select the USB serial port, and try again.'
                     : 'Error: Bootloader connection timed out. Try holding BOOT button while clicking Flash, then release.', 'log-red');
             } else if (errorMsg.includes('ESP32-S3') || errorMsg.includes('Expected')) {
                 logMessage('Error: ' + errorMsg, 'log-red');
