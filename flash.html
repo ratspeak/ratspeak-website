@@ -360,7 +360,7 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 13v8"/><path d="M9 21h6"/><circle cx="12" cy="10" r="2"/><path d="M7.8 5.8a6 6 0 0 0 0 8.4"/><path d="M16.2 5.8a6 6 0 0 1 0 8.4"/><path d="M5 3a10 10 0 0 0 0 14"/><path d="M19 3a10 10 0 0 1 0 14"/></svg>
                         Set up as a Repeater
                     </span>
-                    <span class="flash-cta__repair-meta">Region, Owner, and start over USB</span>
+                    <span class="flash-cta__repair-meta">Region, Owner, and Wi-Fi over USB</span>
                     <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
                 </summary>
                 <div class="flash-cta__repair-body">
@@ -431,13 +431,15 @@
                         <ul>
                             <li>Plug the node in over USB. Close other apps that use its port, such as Ratspeak or a serial monitor.</li>
                             <li>If you just installed, press RESET on the board first.</li>
-                            <li>Starting restarts the node as a Repeater. It may restart once more first to join Wi-Fi.</li>
+                            <li>Finish setup restarts the node as a Repeater. It may restart once more first to join Wi-Fi.</li>
                         </ul>
                     </div>
                     <div class="rsnode-tools__actions">
-                        <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeRepeaterStart" type="submit" form="rsnodeRepeaterForm" aria-describedby="rsnodeRepeaterSummary">Start the Repeater</button>
+                        <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeRepeaterFinish" type="submit" form="rsnodeRepeaterForm" aria-describedby="rsnodeRepeaterSummary">Finish setup</button>
+                        <button class="rsnode-beta__button" id="rsnodeRepeaterGo" type="button" aria-describedby="rsnodeRepeaterLater" disabled>Start repeating</button>
                         <p class="rsnode-tools__summary" id="rsnodeRepeaterSummary"></p>
                     </div>
+                    <p class="rsnode-tools__help" id="rsnodeRepeaterLater">Finish setup saves these settings without repeating yet. Start repeating here, later from Ratspeak with /start, or from the board's menu.</p>
                     <p class="rsnode-tools__port" hidden>Using <span class="rsnode-tools__port-label"></span> &middot; <button class="rsnode-beta__lock" type="button" data-change-port>Change port</button></p>
                     <div id="rsnodeRepeaterActivity">
                         <p class="rsnode-tools__state"><span class="rsnode-tools__dot" id="rsnodeRepeaterDot" aria-hidden="true"></span><span class="rsnode-beta__status progress-status" id="rsnodeRepeaterStatus" role="status" aria-live="polite"></span></p>

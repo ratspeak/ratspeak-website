@@ -330,7 +330,7 @@ function devicePage(port, overrides = {}) {
   const context = {
     document, betaStage: 'ready', rsnodeOwnerBusy: false, rsnodeSettingsBusy: false, rsnodeRepeaterBusy: false, rsnodeChecking: false, navigator: { serial: {} },
     state: { flashing: false, device: 'custom', rsnodeInstalled: false }, isRsnodeSelected: () => true,
-    showSerialWarning: () => calls.push('serial warning'),
+    showSerialWarning: () => calls.push('serial warning'), syncRsnodeRepeaterForm: () => {},
     rsnodeToolPortFromUser: async () => calls.push('port'),
     rsnodeOtherPorts: async () => [],
     openRnodeSerialPort: async (log, settleMs) => { calls.push(['open', settleMs]); return port; },

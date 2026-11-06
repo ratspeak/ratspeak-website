@@ -6,7 +6,7 @@ import { HOST_OWNERS, RSNODE_RESULT } from '../assets/js/rsnode-device.js';
 import { addRsnodeOwner, parseNodeStatus } from '../assets/js/rsnode-provision.js';
 import { LIMITS, REPEATER_PRESETS, REPEATER_REGIONS, SETUP, checkRepeaterForm, controlRepeater, parseRsnodeIdentity,
   readRsnodeIdentity, repeaterOwner, repeaterRadioLine, repeaterRegions, repeaterSettingsForm, repeaterSetupEntries,
-  repeaterSetupOutcome, repeaterSetupRefusal, repeaterStartedMessage, repeaterSummary, writeRepeaterSetup } from '../assets/js/rsnode-repeater.js';
+  repeaterSavedMessage, repeaterSetupOutcome, repeaterSetupRefusal, repeaterSummary, writeRepeaterSetup } from '../assets/js/rsnode-repeater.js';
 import { WIFI_MODES, checkSettingsForm, decodeSettings, encodeEntries, settingsChanges } from '../assets/js/rsnode-settings.js';
 import { nodeContactCard, parseContactCard } from '../assets/js/rsnode-card.js';
 import { rsnodeBoard, rsnodeBoardForTarget } from '../assets/js/rsnode-beta.js';
@@ -211,8 +211,8 @@ test('the panel checks region, LIMITS, acceptance, Owner, and Wi-Fi before askin
   assert.equal(checkRepeaterForm(baseForm({ remote: true, wifiName: 'Home', uplinkHost: '' })).field, 'uplinkHost');
   assert.equal(checkRepeaterForm(baseForm({ remote: true, wifiName: 'Home', uplinkHost: 'rns.example.org', uplinkPort: '0' })).field, 'uplinkPort');
   assert.equal(checkRepeaterForm(baseForm({ remote: true, wifiName: 'Home', uplinkHost: 'rns.example.org' })), null);
-  assert.equal(repeaterSummary(baseForm()), 'Starts on Europe 868 with Medium Fast, LIMITS Off.');
-  assert.equal(repeaterSummary(baseForm({ region: null })), 'Choose a region to start.');
+  assert.equal(repeaterSummary(baseForm()), 'Saves Europe 868 with Medium Fast, LIMITS Off.');
+  assert.equal(repeaterSummary(baseForm({ region: null })), 'Choose a region to finish setup.');
 });
 
 const entry = (id, value) => [id, value.length, ...value];
@@ -234,15 +234,15 @@ test('reach it from anywhere joins the network and turns the uplink on, with the
   assert.equal(repeaterSettingsForm({ ...remote, wifiName: 'Cafe', wifiPassword: '' }, JOINED).password, '');
 });
 
-test('the result says the node runs, and where its Wi-Fi stands', () => {
+test('the result says the node is set up but not repeating yet, and where its Wi-Fi stands', () => {
   const status = (repeater, wifi = null) => ({ node: { repeater }, wifi });
-  assert.equal(repeaterStartedMessage('887A', status(true), baseForm()), 'RNode 887A runs as a Repeater.');
-  assert.equal(repeaterStartedMessage('887A', status(false), baseForm()),
-    'RNode 887A saved the Repeater settings but is not running as a Repeater. Check its screen.');
+  assert.equal(repeaterSavedMessage('887A', status(true), baseForm()), 'RNode 887A is set up as a Repeater and is not repeating yet.');
+  assert.equal(repeaterSavedMessage('887A', status(false), baseForm()),
+    'RNode 887A saved the Repeater settings but did not restart as a Repeater. Check its screen.');
   const remote = baseForm({ remote: true, wifiName: 'Home', uplinkHost: 'rns.example.org ', uplinkPort: '4242' });
-  assert.equal(repeaterStartedMessage('887A', status(true, { mode: 1, ready: true, ip: '192.168.1.50' }), remote),
-    'RNode 887A runs as a Repeater. It joined “Home” at 192.168.1.50 and connects to rns.example.org, port 4242.');
-  assert.match(repeaterStartedMessage('887A', status(true, { mode: 1, ready: false, ip: null }), remote), /has not joined “Home” yet/);
+  assert.equal(repeaterSavedMessage('887A', status(true, { mode: 1, ready: true, ip: '192.168.1.50' }), remote),
+    'RNode 887A is set up as a Repeater and is not repeating yet. It joined “Home” at 192.168.1.50 and connects to rns.example.org, port 4242.');
+  assert.match(repeaterSavedMessage('887A', status(true, { mode: 1, ready: false, ip: null }), remote), /It has not joined “Home” yet\./);
 });
 
 // The panel's task against stand-ins for the port, the node and the DOM it reports to.
@@ -280,19 +280,19 @@ function repeaterTask(node, form, overrides = {}) {
     sleepMs: async ms => calls.push(['sleep', ms]),
     showSerialWarning: () => {},
     checkRepeaterForm, repeaterRegions, repeaterOwner, repeaterSettingsForm, checkSettingsForm, settingsChanges, repeaterSetupEntries,
-    nodeContactCard, repeaterStartedMessage,
+    nodeContactCard, repeaterSavedMessage, controlRepeater,
     ...overrides
   };
   const page = pageFunctions(['RSNODE_SETTINGS_RESTART_MS', 'RSNODE_WIFI_WAIT_MS', 'RSNODE_WIFI_POLL_MS', 'RSNODE_CLI_WORDS',
     'rsnodePortError', 'rsnodeHeldElsewhere', 'rsnodeHeldMessage', 'waitForRsnodeWifi', 'followRsnodeRestart', 'rsnodeRepeaterRefusal',
-    'runRsnodeRepeaterTask'], context);
+    'rsnodeRepeaterError', 'rsnodeRepeaterTarget', 'rsnodeIsRepeater', 'runRsnodeRepeaterTask', 'runRsnodeRepeaterStart'], context);
   return { ...page, context, calls };
 }
 
 const statusOf = (repeater, hostOwner, extra = {}) => ({ node: { repeater, bluetoothAvailable: true, bluetoothEnabled: true, hostOwner },
   board: { platform: 0x80, mcu: 0x81, board: 0x3f }, wifi: null, ...extra });
 
-test('Start enrols the Owner, saves Wi-Fi and the uplink, starts the Repeater, then shows the node\'s card', async () => {
+test('Finish setup enrols the Owner, saves Wi-Fi and the uplink, saves the Repeater without starting it, then shows the node\'s card', async () => {
   const identity = await parseRsnodeIdentity(identityBody(node));
   const card = await parseContactCard(alice.rscp1);
   const form = baseForm({ owner: '', card, remote: true, wifiName: 'Home', wifiPassword: 'correct-horse', uplinkHost: 'rns.example.org' });
@@ -305,12 +305,50 @@ test('Start enrols the Owner, saves Wi-Fi and the uplink, starts the Repeater, t
     ['settings', '010101' + '0304' + hex(utf8('Home')) + '040d' + hex(utf8('correct-horse')) + '280101' + '290f' +
       hex(utf8('rns.example.org')) + '2a021092', 'join'],
     ['sleep', 1250],
-    ['setup', '010102' + '020100' + '080102' + '090101' + '0a0101'],
+    ['setup', '010102' + '020100' + '080102' + '090101' + '0a0100'],
     ['sleep', 1500],
     ['leave'], ['card', nodeContactCard(identity)], ['close']]);
   assert.deepEqual(task.calls.filter(call => call[0] === 'message').at(-1), ['message',
-    'RNode 887A runs as a Repeater. It joined “Home” at 192.168.1.50 and connects to rns.example.org, port 4242.', false, true]);
-  assert.equal(task.context.rsnodeRepeaterResult.nodeId, '887A');
+    'RNode 887A is set up as a Repeater and is not repeating yet. It joined “Home” at 192.168.1.50 and connects to rns.example.org, port 4242.', false, true]);
+  assert.deepEqual([task.context.rsnodeRepeaterResult.nodeId, task.context.rsnodeRepeaterResult.repeating], ['887A', false]);
+  assert.equal(task.rsnodeRepeaterTarget(), '887A');
+});
+
+test('Start repeating is offered only for a node set up here or a Repeater in the live view, and sends REPEATER_CONTROL start', async () => {
+  const facts = (repeater, radioProfile) => ({ status: { nodeId: 'B44E' }, rsnode: { node: { repeater } }, transport: { bootMode: repeater, radioProfile } });
+  let task = repeaterTask({ nodeId: '887A' }, baseForm(), { rsnodeDeviceFacts: null });
+  assert.equal(task.rsnodeRepeaterTarget(), null);
+  task.context.rsnodeDeviceFacts = facts(false, true);
+  assert.equal(task.rsnodeRepeaterTarget(), null);
+  task.context.rsnodeDeviceFacts = facts(true, false);
+  assert.equal(task.rsnodeRepeaterTarget(), null);
+  task.context.rsnodeDeviceFacts = facts(true, true);
+  assert.equal(task.rsnodeRepeaterTarget(), 'B44E');
+  task.context.rsnodeRepeaterResult = { nodeId: '887A', repeating: false };
+  assert.equal(task.rsnodeRepeaterTarget(), '887A');
+  task.context.rsnodeRepeaterResult.repeating = true;
+  assert.equal(task.rsnodeRepeaterTarget(), null);
+  // Nothing to start: nothing is sent.
+  await task.runRsnodeRepeaterStart();
+  assert.ok(!task.calls.some(call => call[0] === 'port'));
+
+  // The control frame goes to the node that was set up; it is already a Repeater, so it does not restart.
+  const port = nodePort([[0x7a, 0x06, 0x00]]);
+  task = repeaterTask({ nodeId: '887A' }, baseForm(), { rsnodeDeviceFacts: null, rsnodeRepeaterResult: { nodeId: '887A', repeating: false },
+    openRnodeSerialPort: async () => port, createRnodeSession, closeRnodeSession: async session => { await closeRnodeSession(session); task.calls.push(['close']); } });
+  await task.runRsnodeRepeaterStart();
+  assert.deepEqual(port.written, ['c07a0601c0']);
+  assert.deepEqual(task.calls.filter(call => !['busy', 'message'].includes(call[0])), [['port'], ['leave'], ['close']]);
+  assert.deepEqual(task.calls.filter(call => call[0] === 'message').at(-1), ['message', 'The node is repeating.', false, true]);
+  assert.equal(task.context.rsnodeRepeaterResult.repeating, true);
+  assert.deepEqual(task.calls.filter(call => call[0] === 'busy'), [['busy', true], ['busy', false]]);
+
+  // Another node on the port is left alone.
+  task = repeaterTask({ nodeId: 'FFFF' }, baseForm(), { rsnodeDeviceFacts: null, rsnodeRepeaterResult: { nodeId: '887A', repeating: false },
+    controlRepeater: async () => { throw new Error('sent to the wrong node'); } });
+  await task.runRsnodeRepeaterStart();
+  assert.equal(task.calls.filter(call => call[0] === 'message').at(-1)[1], 'This is RNode FFFF, not RNode 887A. Connect RNode 887A to start it.');
+  assert.equal(task.context.rsnodeRepeaterResult.repeating, false);
 });
 
 test('Start stops before writing when the form, the board, or another app says no, and lands a refusal on its field', async () => {
@@ -355,6 +393,12 @@ test('the panel sits first among the rsNode tools, asks once for the local rules
   assert.match(text, /You are responsible for following the radio rules where you use it, including frequency, power, and airtime limits\./);
   assert.match(text, /Connect it to a Reticulum TCP server so you can reach it from anywhere\./);
   assert.match(text, /Scan this in Ratspeak to add your rsNode as a contact\. You can then manage it by messaging it\./);
+  // Setup ends paused: the person is holding the board. Starting is its own, later choice.
+  assert.match(panel, /id="rsnodeRepeaterFinish" type="submit" form="rsnodeRepeaterForm"[^>]*>Finish setup</);
+  assert.match(panel, /id="rsnodeRepeaterGo" type="button"[^>]*disabled>Start repeating</);
+  assert.doesNotMatch(text, /Start the Repeater/);
+  assert.equal(text.match(/without repeating yet/g).length, 1);
+  assert.match(text, /Finish setup saves these settings without repeating yet\. Start repeating here, later from Ratspeak with \/start, or from the board's menu\./);
   assert.match(panel, /name="rsnodeRepeaterLimits" value="off" checked/);
   for (const value of ['default', 'custom']) assert.match(panel, new RegExp(`name="rsnodeRepeaterLimits" value="${value}">`));
   for (const id of Object.values(JSON.parse(extract('RSNODE_REPEATER_FIELDS').replace(/^var \w+ = /, '').replace(/;$/, '')

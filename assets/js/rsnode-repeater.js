@@ -194,23 +194,24 @@ export function repeaterOwner(form) {
   return { address: parseHash(form.owner), publicKey: null };
 }
 
-/** The line beside Start. */
+/** The line beside Finish setup. */
 export function repeaterSummary(form) {
   const region = REPEATER_REGIONS.find(entry => entry.id === form.region), preset = REPEATER_PRESETS[form.preset];
-  if (!region || !preset) return 'Choose a region to start.';
-  return `Starts on ${region.label} with ${preset.label}, LIMITS ${LIMITS_TEXT[form.limits.mode]}.`;
+  if (!region || !preset) return 'Choose a region to finish setup.';
+  return `Saves ${region.label} with ${preset.label}, LIMITS ${LIMITS_TEXT[form.limits.mode]}.`;
 }
 
-/** What a started node says, once it is back and its STATUS says where it stands. */
-export function repeaterStartedMessage(nodeId, status, form) {
+/** What a set-up node says, once it is back and its STATUS says where it stands. */
+export function repeaterSavedMessage(nodeId, status, form) {
   const name = `RNode ${nodeId}`;
   if (!status || !status.node || !status.node.repeater) {
-    return `${name} saved the Repeater settings but is not running as a Repeater. Check its screen.`;
+    return `${name} saved the Repeater settings but did not restart as a Repeater. Check its screen.`;
   }
-  if (!form.remote) return `${name} runs as a Repeater.`;
+  const saved = `${name} is set up as a Repeater and is not repeating yet.`;
+  if (!form.remote) return saved;
   const wifi = status.wifi;
   if (!wifi || wifi.mode !== 1 || !wifi.ready || !wifi.ip) {
-    return `${name} runs as a Repeater but has not joined “${form.wifiName}” yet. Check the network name and password; its screen shows its Wi-Fi state.`;
+    return `${saved} It has not joined “${form.wifiName}” yet. Check the network name and password; its screen shows its Wi-Fi state.`;
   }
-  return `${name} runs as a Repeater. It joined “${form.wifiName}” at ${wifi.ip} and connects to ${form.uplinkHost.trim()}, port ${Number(form.uplinkPort)}.`;
+  return `${saved} It joined “${form.wifiName}” at ${wifi.ip} and connects to ${form.uplinkHost.trim()}, port ${Number(form.uplinkPort)}.`;
 }

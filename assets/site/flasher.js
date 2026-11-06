@@ -3,8 +3,8 @@ import { betaRequest, rsnodeBoard, rsnodeBoardForTarget, validateBetaCatalog, ve
 import { addRsnodeOwner, parseHash, provisionRsnode, readManagementStatus } from '/assets/js/rsnode-provision.js';
 import { APP_PORT as RSNODE_APP_PORT, WIFI_MODES, checkSettingsForm, readRsnodeSettings, settingsChanges, settingsForm,
     settingsRadioLines, settingsSavedMessage, writeRsnodeSettings } from '/assets/js/rsnode-settings.js';
-import { REPEATER_PRESETS, checkRepeaterForm, readRsnodeIdentity, repeaterOwner, repeaterRadioLine, repeaterRegions,
-    repeaterSettingsForm, repeaterSetupEntries, repeaterStartedMessage, repeaterSummary, writeRepeaterSetup } from '/assets/js/rsnode-repeater.js';
+import { REPEATER_PRESETS, checkRepeaterForm, controlRepeater, readRsnodeIdentity, repeaterOwner, repeaterRadioLine, repeaterRegions,
+    repeaterSavedMessage, repeaterSettingsForm, repeaterSetupEntries, repeaterSummary, writeRepeaterSetup } from '/assets/js/rsnode-repeater.js';
 import { nodeContactCard, parseContactCard } from '/assets/js/rsnode-card.js';
 import { renderQrCanvas } from '/assets/js/qr-code.js';
 import { cameraAvailable, startQrScan } from '/assets/js/qr-scan.js';
@@ -4156,10 +4156,11 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
 
     // ── Set up as a Repeater: the Owner, optional Wi-Fi and uplink, then REPEATER_SETUP over USB (rsNode ADR 0016) ──
     var rsnodeRepeaterBusy = false;
+    var rsnodeRepeaterStarting = false;
     // A scanned card's Owner, { name, lxmf, publicKey }; a typed address leaves it null.
     var rsnodeRepeaterOwnerCard = null;
     var rsnodeRepeaterStopScan = null;
-    // { nodeId, identity, card }: the card of the node last started here.
+    // { nodeId, identity, card, repeating }: the node last set up here, paused until Start repeating.
     var rsnodeRepeaterResult = null;
     var rsnodeRepeaterRegionsFor = null;
     var RSNODE_REPEATER_OWNER_NOTE = 'Paste your address from Ratspeak, or scan your contact card there. A scanned card also gives the node your key, so it can reply right away.';
@@ -4219,8 +4220,10 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         var idle = !rsnodeRepeaterBusy && !rsnodeSettingsBusy && !rsnodeOwnerBusy && !rsnodeChecking && !state.flashing;
         var form = readRsnodeRepeaterForm();
         document.getElementById('rsnodeRepeaterFields').disabled = !idle;
-        document.getElementById('rsnodeRepeaterStart').disabled = !idle;
-        document.getElementById('rsnodeRepeaterStart').textContent = rsnodeRepeaterBusy ? 'Starting…' : 'Start the Repeater';
+        document.getElementById('rsnodeRepeaterFinish').disabled = !idle;
+        document.getElementById('rsnodeRepeaterFinish').textContent = rsnodeRepeaterBusy && !rsnodeRepeaterStarting ? 'Finishing…' : 'Finish setup';
+        document.getElementById('rsnodeRepeaterGo').disabled = !idle || !rsnodeRepeaterTarget();
+        document.getElementById('rsnodeRepeaterGo').textContent = rsnodeRepeaterBusy && rsnodeRepeaterStarting ? 'Starting…' : 'Start repeating';
         document.getElementById('rsnodeRepeaterRadio').textContent = repeaterRadioLine(form.region, form.preset) ||
             'Each region starts on its default frequency.';
         document.getElementById('rsnodeLimitsHelp').textContent = RSNODE_LIMITS_HELP[form.limits.mode];
@@ -4240,8 +4243,17 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         syncRsnodePort();
     }
 
-    function setRsnodeRepeaterBusy(busy) {
+    // The node Start repeating acts on: one set up here, or a Repeater with a saved profile in the live view.
+    function rsnodeRepeaterTarget() {
+        var result = rsnodeRepeaterResult;
+        if (result) return result.repeating ? null : result.nodeId;
+        var facts = rsnodeDeviceFacts;
+        return facts && rsnodeIsRepeater(facts) && facts.transport.radioProfile ? facts.status.nodeId : null;
+    }
+
+    function setRsnodeRepeaterBusy(busy, starting) {
         rsnodeRepeaterBusy = busy;
+        rsnodeRepeaterStarting = !!starting;
         document.getElementById('rsnodeRepeaterDot').classList.toggle('is-busy', busy);
         syncRsnodeRepeaterForm();
         syncRsnodeSettingsForm();
@@ -4420,8 +4432,9 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
                     }
                 }
             }
-            ui.setStatus('Starting the Repeater on ' + name + '…');
-            var setup = repeaterSetupEntries({ region: form.region, preset: form.preset, limits: form.limits, accepted: form.accepted, start: true });
+            // Saved, not started: the person is holding the board.
+            ui.setStatus('Saving the Repeater settings to ' + name + '…');
+            var setup = repeaterSetupEntries({ region: form.region, preset: form.preset, limits: form.limits, accepted: form.accepted, start: false });
             ui.log('repeater setup: ' + setup.map(function(entry) { return '0x' + entry[0].toString(16).padStart(2, '0'); }).join(' '));
             var outcome = await writeRepeaterSetup(session, setup);
             ui.log('result: ' + outcome.kind);
@@ -4437,26 +4450,73 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             var identity = await readRsnodeIdentity(session);
             if (!identity || !identity.present) throw new Error(name + ' did not report its identity, so there is no contact card to show.');
             await leaveRsnode(session);
-            rsnodeRepeaterResult = { nodeId: nodeId, identity: identity, card: nodeContactCard(identity) };
+            rsnodeRepeaterResult = { nodeId: nodeId, identity: identity, card: nodeContactCard(identity), repeating: false };
             renderRsnodeRepeaterCard();
             document.getElementById('rsnodeRepeaterNotice').hidden = true;
-            rsnodeRepeaterMessage(repeaterStartedMessage(nodeId, status, form), false, true);
+            rsnodeRepeaterMessage(repeaterSavedMessage(nodeId, status, form), false, true);
         } catch (error) {
             field = error.field || null;
             if (ui) ui.log('Error: ' + error.message, 'log-red');
-            if (stage === 'port' && error.name === 'NotFoundError') rsnodeRepeaterMessage('Select the rsNode serial port to continue.');
-            else if (field) rsnodeRepeaterMessage(error.message, true);
-            else {
-                var text = rsnodePortError(error, stage, 'try again') ||
-                    (error.notRsnode ? 'This node answers as an RNode but not as rsNode. A Repeater needs rsNode firmware.' : null) ||
-                    RSNODE_CLI_WORDS.reduce(function(words, swap) { return words.replace(swap[0], swap[1]); }, error.message || String(error));
-                rsnodeRepeaterMessage(text.charAt(0).toUpperCase() + text.slice(1), true);
-            }
+            rsnodeRepeaterMessage(rsnodeRepeaterError(error, stage, field), true);
         } finally {
             await closeRnodeSession(session);
             setRsnodeRepeaterBusy(false);
         }
         if (field) field.focus();
+    }
+
+    function rsnodeRepeaterError(error, stage, field) {
+        if (stage === 'port' && error.name === 'NotFoundError') return 'Select the rsNode serial port to continue.';
+        if (field) return error.message;
+        var text = rsnodePortError(error, stage, 'try again') ||
+            (error.notRsnode ? 'This node answers as an RNode but not as rsNode. A Repeater needs rsNode firmware.' : null) ||
+            RSNODE_CLI_WORDS.reduce(function(words, swap) { return words.replace(swap[0], swap[1]); }, error.message || String(error));
+        return text.charAt(0).toUpperCase() + text.slice(1);
+    }
+
+    // REPEATER_CONTROL start on the node that was set up; a node already in Repeater mode does not restart.
+    async function runRsnodeRepeaterStart() {
+        var target = rsnodeRepeaterTarget();
+        if (!target || rsnodeRepeaterBusy || rsnodeSettingsBusy || rsnodeOwnerBusy || rsnodeChecking || state.flashing) return;
+        if (!('serial' in navigator)) {
+            showSerialWarning();
+            return;
+        }
+        var ui = null, session = null, stage = 'port';
+        setRsnodeRepeaterBusy(true, true);
+        rsnodeRepeaterMessage('');
+        try {
+            await rsnodeToolPortFromUser();
+            ui = openProgressLog('Starting the Repeater…', document.getElementById('rsnodeRepeaterActivity'));
+            stage = 'open';
+            session = createRnodeSession(await openRnodeSerialPort(ui.log, RNODE_REPAIR_SETTLE_MS, await rsnodeOtherPorts()));
+            stage = 'protocol';
+            ui.setStatus('Waiting for rsNode…');
+            if (!await waitForRsnode(session, { waiting: function() { ui.setStatus('Waiting for rsNode. ' + RSNODE_TAKEOVER); } })) {
+                throw new Error('No answer over USB within 30 s. ' + RSNODE_TAKEOVER.replace(/\.$/, ', then try again.'));
+            }
+            var nodeId = (await readManagementStatus(session)).nodeId;
+            ui.log('node id: RNode ' + nodeId);
+            if (nodeId !== target) throw new Error('This is RNode ' + nodeId + ', not RNode ' + target + '. Connect RNode ' + target + ' to start it.');
+            ui.log('repeater control: start');
+            var outcome = await controlRepeater(session, 'start');
+            ui.log('result: ' + outcome.kind);
+            if (outcome.kind !== 'restart' && outcome.kind !== 'done') throw rsnodeRepeaterRefusal(outcome, nodeId, function() { return null; });
+            if (outcome.kind === 'restart') {
+                ui.setStatus('Restarting…');
+                await followRsnodeRestart(session, outcome.restartMs,
+                    'RNode ' + nodeId + ' did not answer after restarting. Press RESET on the board, then check it in the live view.');
+            }
+            await leaveRsnode(session);
+            if (rsnodeRepeaterResult) rsnodeRepeaterResult.repeating = true;
+            rsnodeRepeaterMessage('The node is repeating.', false, true);
+        } catch (error) {
+            if (ui) ui.log('Error: ' + error.message, 'log-red');
+            rsnodeRepeaterMessage(rsnodeRepeaterError(error, stage, null), true);
+        } finally {
+            await closeRnodeSession(session);
+            setRsnodeRepeaterBusy(false);
+        }
     }
 
     // The next step after an install: the node is an RNode until it is set up here.
@@ -4490,6 +4550,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         if (await useRsnodeRepeaterCard(this.value)) this.value = '';
         syncRsnodeRepeaterForm();
     });
+    if (ADVANCED) document.getElementById('rsnodeRepeaterGo').addEventListener('click', runRsnodeRepeaterStart);
     if (ADVANCED) document.getElementById('rsnodeRepeaterScan').addEventListener('click', startRsnodeRepeaterScan);
     // A closed panel lets the camera go.
     if (ADVANCED) document.getElementById('rsnodeRepeater').addEventListener('toggle', function() {
@@ -4636,6 +4697,8 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             document.querySelector('#rsnodeFacts [data-fact="firmware"] dd').title = facts.firmwareHash;
         }
         syncRsnodeDevice();
+        // A paused Repeater seen here can be started from Set up as a Repeater.
+        syncRsnodeRepeaterForm();
     }
 
     function rsnodeDeviceError(error, stage) {
