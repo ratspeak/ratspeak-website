@@ -70,6 +70,18 @@ export async function uploadBetaPackages(catalogArg, outputArg, {
     const update = entry.update === undefined ? null : await updateBundle(entry, local);
     prepared.push({ entry, bytes, update });
   }
+  // The guide page's private fragment, served only to signed-in testers.
+  let guide = null;
+  if (input.guide !== undefined) {
+    const meta = input.guide;
+    if (!meta || typeof meta !== 'object' || !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,95}$/.test(meta.version || '') ||
+        !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,126}\.html$/.test(meta.fileName || '') ||
+        !/^[a-f0-9]{64}$/.test(meta.sha256 || '') || !Number.isSafeInteger(meta.size) ||
+        meta.size <= 0 || meta.size > 4 * 1024 * 1024) throw new Error('Invalid guide entry.');
+    const bytes = await local(meta.fileName, meta.size, meta.sha256, 'guide');
+    new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    guide = { meta, bytes };
+  }
   // Validate every local package before beginning any remote writes.
   const store = async (version, meta, bytes, contentType) => {
     const path = `rsnode-beta/${version}/${meta.sha256}/${meta.fileName}`;
@@ -110,9 +122,16 @@ export async function uploadBetaPackages(catalogArg, outputArg, {
     boards.push(board);
     report(`Verified private package${update ? 's' : ''}: ${entry.id}`);
   }
-  await writeFile(outputPath, JSON.stringify({ boards }, null, 2) + '\n', { mode: 0o600, flag: 'wx' });
+  const output = { boards };
+  if (guide) {
+    const { version, fileName, size, sha256 } = guide.meta;
+    output.guide = { version, fileName, size, sha256,
+      url: await store(version, guide.meta, guide.bytes, 'text/html; charset=utf-8') };
+    report('Verified private guide');
+  }
+  await writeFile(outputPath, JSON.stringify(output, null, 2) + '\n', { mode: 0o600, flag: 'wx' });
   report(`Deployment catalog written: ${outputPath}`);
-  return { boards };
+  return output;
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {

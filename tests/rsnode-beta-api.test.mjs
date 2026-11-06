@@ -671,3 +671,39 @@ test('a board without an update has none to download, and a malformed update dis
   const oidc = oidcFixture({ RSNODE_BETA_CATALOG: JSON.stringify({ boards: [{ ...OIDC_BOARD, update: UPDATE }] }) });
   assert.equal((await oidc.request()).status, 503);
 });
+
+test('the guide needs a password session but not the firmware terms, and is integrity-checked', async () => {
+  const html = new TextEncoder().encode('<article class="legal-content"><h2>rsNode</h2></article>');
+  const guide = { version: '1.0.0', fileName: 'rsnode-guide.html', size: html.length,
+    sha256: createHash('sha256').update(html).digest('hex'),
+    url: 'https://test-store.private.blob.vercel-storage.com/rsnode-beta/1.0.0/guide.html' };
+  const f = fixture({ RSNODE_BETA_CATALOG: JSON.stringify({ boards: [BOARD], guide }) });
+  f.runtime.fetchResponse = url => new Response(url === guide.url ? html : PAYLOAD);
+  const locked = await f.request('guide');
+  assert.equal(locked.status, 401);
+  assert.equal(f.runtime.fetches.length, 0);
+  const cookie = await f.login();
+  const response = await f.request('guide', { cookie });
+  assert.equal(response.status, 200);
+  privateResponse(response);
+  assert.equal(response.headers.get('content-type'), 'text/html; charset=utf-8');
+  assert.deepEqual(new Uint8Array(await response.arrayBuffer()), html);
+  assert.equal(f.runtime.fetches[0][0], guide.url);
+  assert.equal((await f.request('guide', { cookie, method: 'POST', headers: { origin: ORIGIN } })).status, 405);
+  assert.equal((await f.request('guide', { cookie, query: '&board=heltec-v4' })).status, 400);
+  f.runtime.fetchResponse = () => new Response(new TextEncoder().encode('<script>x</script>'.padEnd(html.length)));
+  assert.equal((await f.request('guide', { cookie })).status, 502);
+});
+
+test('the guide is optional and malformed guide entries take the beta offline', async () => {
+  const f = fixture();
+  assert.equal((await f.request('guide', { cookie: await f.login() })).status, 404);
+  for (const guide of [
+    { version: '1.0.0', fileName: 'guide.js', size: 10, sha256: HASH, url: BOARD.url },
+    { version: '1.0.0', fileName: 'guide.html', size: 10, sha256: HASH, url: 'https://public.blob.vercel-storage.com/guide.html' },
+    { version: '1.0.0', fileName: 'guide.html', size: MAX_ASSET_BYTES + 1, sha256: HASH, url: BOARD.url }
+  ]) {
+    const bad = fixture({ RSNODE_BETA_CATALOG: JSON.stringify({ boards: [BOARD], guide }) });
+    assert.equal((await bad.request('session')).status, 503);
+  }
+});

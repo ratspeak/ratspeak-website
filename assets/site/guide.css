@@ -1,0 +1,55 @@
+/* Long-form guide pages (rsnode.html): adds tables, steps, and code to the policy layout. */
+.page-guide .legal-layout{grid-template-columns:minmax(180px,240px) minmax(0,820px)}
+.page-guide .legal-content h2:focus{outline:none}
+
+.legal-content ol{margin:0 0 16px;padding-inline-start:26px}
+.legal-content ol.steps{counter-reset:step;list-style:none;padding:0}
+.legal-content ol.steps>li{counter-increment:step;position:relative;margin:0;padding:14px 0 14px 48px;border-top:1px solid var(--line)}
+.legal-content ol.steps>li:last-child{border-bottom:1px solid var(--line)}
+.legal-content ol.steps>li::before{content:counter(step);position:absolute;inset-inline-start:0;top:14px;display:grid;place-items:center;width:30px;height:30px;background:var(--surface-raised);border:1.5px solid var(--text-strong);color:var(--text-strong);font-size:var(--t-small);font-weight:700;line-height:1}
+.legal-content ol.steps ul{margin:8px 0 0}
+[dir="rtl"] .legal-content ol.steps>li{padding:14px 48px 14px 0}
+
+.legal-content code{padding:1px 6px;background:var(--surface-raised);border:1px solid var(--hairline);font:600 .86em/1.4 var(--mono);color:var(--text);overflow-wrap:anywhere}
+.legal-content pre{margin:12px 0 20px;padding:16px 18px;background:var(--surface-2);border:1.5px solid var(--line);overflow-x:auto;font:500 14px/1.6 var(--mono);color:var(--text);tab-size:2}
+.legal-content pre code{padding:0;background:none;border:0;font:inherit;overflow-wrap:normal;white-space:pre}
+.legal-content li>pre{margin:10px 0 4px}
+
+.legal-content table{width:100%;margin:12px 0 24px;border-collapse:collapse;font-size:15px;line-height:1.5}
+.legal-content th,.legal-content td{padding:11px 14px;text-align:start;vertical-align:top;border-bottom:1px solid var(--line)}
+.legal-content thead th{background:var(--surface);border-bottom:1.5px solid var(--text-strong);font-size:var(--t-micro);font-weight:700;color:var(--muted)}
+.legal-content tbody tr:hover{background:color-mix(in srgb,var(--surface) 60%,transparent)}
+.legal-content td:first-child{color:var(--text-strong);font-weight:600}
+.legal-content td code{white-space:nowrap}
+
+.guide-signout{margin-inline-start:16px;padding:0;background:none;border:0;color:var(--on-band);font:inherit;font-weight:700;text-decoration:underline 1px;text-underline-offset:4px;cursor:pointer}
+.guide-signout:hover{text-decoration-thickness:2px}
+
+.guide-lock{padding:var(--section-y) var(--pad-x);color:var(--text)}
+.guide-lock__form{max-width:560px;padding:clamp(24px,3vw,40px);background:var(--surface);border:1.5px solid var(--line)}
+.guide-lock__title{margin:0 0 12px;font:400 clamp(30px,3vw,42px)/1.02 Anton,Impact,sans-serif;text-transform:uppercase;color:var(--text-strong)}
+.guide-lock__form p{margin:0 0 20px;font-size:var(--t-body);line-height:1.55}
+.guide-lock__label{display:block;margin:0 0 8px;font-size:var(--t-small);font-weight:700}
+.guide-lock__row{display:flex;gap:12px;margin:0 0 16px}
+.guide-lock__input{flex:1;min-width:0;min-height:48px;padding:10px 14px;background:var(--field-soft);border:1.5px solid var(--control);color:var(--text);font:inherit;font-size:var(--t-body)}
+.guide-lock__input:focus{border-color:var(--text-strong);outline:3px solid var(--focus);outline-offset:2px}
+.guide-lock__button{min-height:48px;padding:12px 22px;background:var(--cta);color:var(--on-cta);border:2px solid var(--on-cta);box-shadow:4px 4px 0 var(--hard-shadow);font:inherit;font-size:var(--t-body);font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.guide-lock__button:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--hard-shadow);background:var(--cta-hover)}
+.guide-lock__button:disabled{opacity:.6;cursor:progress;transform:none}
+.guide-lock__note{margin:0!important;font-size:var(--t-small)!important;color:var(--muted)}
+.guide-lock__note a{color:var(--text-strong);font-weight:700}
+.guide-lock__status{max-width:560px;margin:16px 0 0;font-size:var(--t-body);font-weight:700;color:var(--text-strong)}
+.guide-lock__status:empty{display:none}
+
+@media(max-width:900px){
+  .page-guide .legal-layout{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:700px){
+  .legal-content table,.legal-content thead,.legal-content tbody,.legal-content tr,.legal-content th,.legal-content td{display:block}
+  .legal-content thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+  .legal-content tr{padding:10px 0;border-bottom:1px solid var(--line)}
+  .legal-content th,.legal-content td{padding:2px 0;border:0}
+  .legal-content td code{white-space:normal}
+  .legal-content td[data-label]::before{content:attr(data-label) ": ";font-weight:700;color:var(--muted)}
+  .guide-lock__row{flex-direction:column}
+}

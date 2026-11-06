@@ -201,3 +201,41 @@ test('an update whose manifest or entry disagrees is refused before any remote w
     assert.equal(uploads, 0);
   }
 });
+
+test('the guide uploads privately beside the packages and lands in the deployment catalog', async t => {
+  const f = await fixture(t);
+  const html = Buffer.from('<article class="legal-content"><h2>rsNode</h2></article>');
+  const guide = { version: '1.0.0', fileName: 'rsnode-guide.html', size: html.length,
+    sha256: createHash('sha256').update(html).digest('hex') };
+  await writeFile(join(f.dir, guide.fileName), html);
+  await writeFile(f.catalogPath, JSON.stringify({ boards: f.boards, guide }));
+  const uploaded = new Map();
+  const types = [];
+  const result = await uploadBetaPackages(f.catalogPath, f.output, {
+    token: 'fixture', report() {},
+    async upload(path, bytes, options) {
+      assert.equal(options.access, 'private');
+      types.push(options.contentType);
+      const url = 'https://fixture.private.blob.vercel-storage.com/' + path;
+      uploaded.set(url, bytes);
+      return { url };
+    },
+    fetchAsset: async (url, options) => options.headers ? new Response(uploaded.get(String(url))) : new Response(null, { status: 403 })
+  });
+  assert.equal(result.guide.sha256, guide.sha256);
+  assert.match(result.guide.url, /\/rsnode-beta\/1\.0\.0\/[a-f0-9]{64}\/rsnode-guide\.html$/);
+  assert.equal(types.at(-1), 'text/html; charset=utf-8');
+  assert.deepEqual(JSON.parse(await readFile(f.output, 'utf8')).guide, result.guide);
+});
+
+test('a tampered guide fails before any remote write', async t => {
+  const f = await fixture(t);
+  await writeFile(join(f.dir, 'guide.html'), 'changed');
+  await writeFile(f.catalogPath, JSON.stringify({ boards: f.boards,
+    guide: { version: '1.0.0', fileName: 'guide.html', size: 7, sha256: 'a'.repeat(64) } }));
+  let uploads = 0;
+  await assert.rejects(uploadBetaPackages(f.catalogPath, f.output, {
+    token: 'fixture', upload() { uploads++; }, report() {}
+  }), /integrity failed: guide/);
+  assert.equal(uploads, 0);
+});

@@ -1,5 +1,7 @@
 // Support and policy pages: the "On this page" position.
+// Pages that load their content later announce it with an rs:content event.
 (() => {
+const watchToc = () => {
   const toc = document.querySelector('.toc');
   if (!toc || !('IntersectionObserver' in window)) return;
   const links = new Map();
@@ -21,4 +23,7 @@
     mark();
   }, { rootMargin: '-15% 0px -55% 0px' });
   for (const section of links.keys()) observer.observe(section);
+};
+watchToc();
+document.addEventListener('rs:content', watchToc);
 })();
