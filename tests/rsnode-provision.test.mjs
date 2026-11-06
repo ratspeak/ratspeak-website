@@ -268,7 +268,7 @@ test('owner work checks its input before asking for a port and always closes the
   const options = { owner: new Uint8Array(16) };
   const invalid = Object.assign(new Error('A hash is 32 hexadecimal characters'), { field: { focus: () => calls.push(['focus']) } });
   const context = {
-    state: { flashing: false }, navigator: { serial: {} }, rsnodeOwnerBusy: false, rsnodeSettingsBusy: false, rsnodeChecking: false, RNODE_REPAIR_SETTLE_MS: 0,
+    state: { flashing: false }, navigator: { serial: {} }, rsnodeOwnerBusy: false, rsnodeSettingsBusy: false, rsnodeRepeaterBusy: false, rsnodeChecking: false, RNODE_REPAIR_SETTLE_MS: 0,
     document: { getElementById: () => ({}) },
     setRsnodeOwnerBusy: busy => { context.rsnodeOwnerBusy = busy; calls.push(['busy', busy]); },
     rsnodeOwnerMessage: (message, error) => { if (message) calls.push(['message', !!error]); },
@@ -365,32 +365,33 @@ test('the Step 03 hint names the first rsNode step still open', () => {
     'Confirm the V4 variant to continue.', 'Select a USB device to continue.']);
 });
 
-test('the owner step appears only with beta access, before and after an rsNode install', () => {
-  const panel = { hidden: true, open: false }, notice = { hidden: true };
-  const context = { state: { device: 'custom', rsnodeInstalled: false }, betaStage: 'locked',
-    isRsnodeSelected: () => true, document: { getElementById: id => id === 'rsnodeOwner' ? panel : notice } };
-  const { updateRsnodeOwnerVisibility, showRsnodeOwnerStep } = pageFunctions(['rsnodeToolsUnlocked',
-    'updateRsnodeOwnerVisibility', 'showRsnodeOwnerStep'], context);
+test('the owner panel appears only with beta access; an rsNode install opens Set up as a Repeater next', () => {
+  const owner = { hidden: true, open: false }, repeater = { hidden: true, open: false }, notice = { hidden: true };
+  const elements = { rsnodeOwner: owner, rsnodeRepeater: repeater, rsnodeRepeaterNotice: notice };
+  const context = { state: { device: 'custom', rsnodeInstalled: false }, betaStage: 'locked', rsnodeRepeaterStopScan: null,
+    isRsnodeSelected: () => true, document: { getElementById: id => elements[id] } };
+  const { updateRsnodeOwnerVisibility, showRsnodeRepeaterStep } = pageFunctions(['rsnodeToolsUnlocked',
+    'updateRsnodeOwnerVisibility', 'updateRsnodeRepeaterVisibility', 'stopRsnodeRepeaterScan', 'showRsnodeRepeaterStep'], context);
   updateRsnodeOwnerVisibility();
-  assert.equal(panel.hidden, true);
+  assert.equal(owner.hidden, true);
   context.betaStage = 'ready';
   updateRsnodeOwnerVisibility();
-  assert.equal(panel.hidden, false);
-  // An uploaded rsNode package gets the owner step, but only while the beta is unlocked.
+  assert.equal(owner.hidden, false);
+  // An uploaded rsNode package gets the next step, but only while the beta is unlocked.
   Object.assign(context, { betaStage: 'locked', isRsnodeSelected: () => false });
-  showRsnodeOwnerStep();
-  assert.deepEqual([context.state.rsnodeInstalled, panel.hidden], [true, true]);
+  showRsnodeRepeaterStep();
+  assert.deepEqual([context.state.rsnodeInstalled, repeater.hidden], [true, true]);
   context.betaStage = 'ready';
-  showRsnodeOwnerStep();
-  assert.deepEqual([panel.hidden, panel.open, notice.hidden], [false, true, false]);
+  showRsnodeRepeaterStep();
+  assert.deepEqual([repeater.hidden, repeater.open, notice.hidden, owner.open], [false, true, false, false]);
   context.state.device = 'tdeck';
   updateRsnodeOwnerVisibility();
-  assert.equal(panel.hidden, true);
+  assert.equal(owner.hidden, true);
 
   const start = html.indexOf('window.startFlash = async function()');
   const flash = html.slice(start, html.indexOf('function isRnodeReconnectSetupIssue', start));
-  assert.match(flash, /state\.flashing \|\| rsnodeOwnerBusy \|\| rsnodeSettingsBusy \|\| rsnodeChecking\) return;/);
-  assert.ok(flash.indexOf("if (prepared && prepared.product === 'rsnode') showRsnodeOwnerStep();") > flash.indexOf('await esploader.writeFlash('));
+  assert.match(flash, /state\.flashing \|\| rsnodeOwnerBusy \|\| rsnodeSettingsBusy \|\| rsnodeRepeaterBusy \|\| rsnodeChecking\) return;/);
+  assert.ok(flash.indexOf("if (prepared && prepared.product === 'rsnode') showRsnodeRepeaterStep();") > flash.indexOf('await esploader.writeFlash('));
 });
 
 test('the device management row says owner and admin, as the docs define them', () => {
@@ -400,13 +401,14 @@ test('the device management row says owner and admin, as the docs define them', 
 });
 
 test('the tools ask for a Ratspeak LXMF address, say managers are optional, and never send testers to EXIT the Repeater', () => {
-  const tools = /id="rsnodeDevice"[\s\S]*?id="flashRepair"/.exec(html)[0];
+  const tools = /id="rsnodeRepeater"[\s\S]*?id="flashRepair"/.exec(html)[0];
   assert.doesNotMatch(allFlasherPages(), /rsnode-client whoami/);
   assert.doesNotMatch(tools, /EXIT a running Repeater/);
   const text = tools.replace(/<[^>]+>/g, ' ');
   assert.match(text, /your Ratspeak LXMF address/);
   assert.match(text, /The Owner changes settings and managers\. Admins read status and settings and install updates\./);
-  assert.match(text, /Optional: add managers if this node will run as a Repeater you manage remotely\./);
+  assert.match(text, /Managers are optional\. They manage this node over the mesh while it runs as a Repeater/);
+  assert.match(text, /Next: press RESET on the board\. Then set it up as a Repeater here, or keep it as an RNode for one app\./);
   assert.match(text, /A Repeater answers status over USB/);
   assert.match(text, /If you just installed, press RESET on the board first\./);
 });

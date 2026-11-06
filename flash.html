@@ -148,7 +148,7 @@
                         <div class="custom-source-pane rsnode-beta" id="customSourceRsnode" role="tabpanel" aria-labelledby="sourceTabRsnode" hidden>
                             <form class="rsnode-beta__login" id="rsnodeLoginForm">
                                 <p class="rsnode-beta__note">rsNode is LoRa firmware for Heltec V3 and V4 boards, in private beta.</p>
-                                <details class="rsnode-beta__about"><summary>How rsNode works</summary><p class="rsnode-beta__note">It runs in one of two modes, chosen on the device. As an <strong>RNode</strong>, it is the radio for one app, over USB, Bluetooth or Wi-Fi. As a <strong>Repeater</strong>, it forwards traffic on its own. Bluetooth is off while Wi-Fi is on. Managers are optional and only manage a Repeater.</p></details>
+                                <details class="rsnode-beta__about"><summary>How rsNode works</summary><p class="rsnode-beta__note">It runs in one of two modes, chosen on the device or in the tools below. As an <strong>RNode</strong>, it is the radio for one app, over USB, Bluetooth, or Wi-Fi. As a <strong>Repeater</strong>, it forwards traffic on its own. Bluetooth is off while Wi-Fi is on. Managers are optional and only manage a Repeater.</p></details>
                                 <label for="rsnodePassword">Private beta password</label>
                                 <input class="rsnode-beta__password" id="rsnodePassword" type="password" autocomplete="current-password" required maxlength="256" aria-describedby="rsnodeStatus rsnodePasswordHelp">
                                 <button class="rsnode-beta__button" id="rsnodeUnlock" type="submit">Unlock</button>
@@ -354,6 +354,114 @@
                 </details>
             </div>
 
+            <details class="flash-cta__repair rsnode-repeater" id="rsnodeRepeater" name="rsnode-tools" hidden>
+                <summary class="flash-cta__repair-summary">
+                    <span class="flash-cta__repair-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 13v8"/><path d="M9 21h6"/><circle cx="12" cy="10" r="2"/><path d="M7.8 5.8a6 6 0 0 0 0 8.4"/><path d="M16.2 5.8a6 6 0 0 1 0 8.4"/><path d="M5 3a10 10 0 0 0 0 14"/><path d="M19 3a10 10 0 0 1 0 14"/></svg>
+                        Set up as a Repeater
+                    </span>
+                    <span class="flash-cta__repair-meta">Region, Owner, and start over USB</span>
+                    <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </summary>
+                <div class="flash-cta__repair-body">
+                    <p class="rsnode-tools__notice" id="rsnodeRepeaterNotice" tabindex="-1" hidden>Next: press RESET on the board. Then set it up as a Repeater here, or keep it as an RNode for one app.</p>
+                    <p class="rsnode-tools__lede">A Repeater forwards mesh traffic on its own. Choose its radio and its Owner here, then manage it from Ratspeak by messaging it.</p>
+                    <form id="rsnodeRepeaterForm" novalidate>
+                        <fieldset class="rsnode-owner__fields" id="rsnodeRepeaterFields">
+                            <fieldset class="rsnode-settings__group">
+                                <legend class="rnode-source__label">Radio</legend>
+                                <div class="rsnode-settings__grid">
+                                    <label class="rsnode-settings__field" for="rsnodeRepeaterRegion"><span class="rsnode-settings__label">Region</span>
+                                        <select class="rnode-variant-select" id="rsnodeRepeaterRegion"></select></label>
+                                    <label class="rsnode-settings__field" for="rsnodeRepeaterPreset"><span class="rsnode-settings__label">Preset</span>
+                                        <select class="rnode-variant-select" id="rsnodeRepeaterPreset" aria-describedby="rsnodeRepeaterRadio"></select></label>
+                                </div>
+                                <p class="rsnode-tools__help" id="rsnodeRepeaterRadio"></p>
+                                <span class="rsnode-settings__label" id="rsnodeLimitsLabel">LIMITS</span>
+                                <div class="rsnode-settings__choices" role="radiogroup" aria-labelledby="rsnodeLimitsLabel" aria-describedby="rsnodeLimitsHelp">
+                                    <label class="rsnode-settings__choice"><input type="radio" name="rsnodeRepeaterLimits" value="off" checked><span>Off</span></label>
+                                    <label class="rsnode-settings__choice"><input type="radio" name="rsnodeRepeaterLimits" value="default"><span>Default</span></label>
+                                    <label class="rsnode-settings__choice"><input type="radio" name="rsnodeRepeaterLimits" value="custom"><span>Custom</span></label>
+                                </div>
+                                <p class="rsnode-tools__help" id="rsnodeLimitsHelp"></p>
+                                <div class="rsnode-settings__grid" id="rsnodeLimitsCustom" hidden>
+                                    <label class="rsnode-settings__field" for="rsnodeLimitsPower"><span class="rsnode-settings__label">Power limit (dBm)</span>
+                                        <input class="rsnode-owner__input" id="rsnodeLimitsPower" type="text" inputmode="numeric" autocomplete="off" value="14"></label>
+                                    <label class="rsnode-beta__check rsnode-settings__wide"><input type="checkbox" id="rsnodeLimitsDuty" checked><span>Keep the region's airtime limit</span></label>
+                                </div>
+                                <p class="rsnode-repeater__rules" id="rsnodeRepeaterRules">You are responsible for following the radio rules where you use it, including frequency, power, and airtime limits.</p>
+                                <label class="rsnode-beta__check"><input type="checkbox" id="rsnodeRepeaterAccept" aria-describedby="rsnodeRepeaterRules"><span>I understand and accept this.</span></label>
+                            </fieldset>
+                            <fieldset class="rsnode-settings__group">
+                                <legend class="rnode-source__label">Owner</legend>
+                                <p class="rsnode-tools__help">The Owner manages the node by messaging it from Ratspeak. This replaces any Owner the node has now.</p>
+                                <div class="rsnode-repeater__owner" id="rsnodeRepeaterOwnerEntry">
+                                    <input class="rsnode-owner__input" id="rsnodeRepeaterOwner" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Your Ratspeak LXMF address" aria-label="Owner's Ratspeak LXMF address" aria-describedby="rsnodeRepeaterOwnerNote">
+                                    <button class="rsnode-beta__button" id="rsnodeRepeaterScan" type="button">Scan contact card</button>
+                                </div>
+                                <div class="rsnode-repeater__scanned" id="rsnodeRepeaterScanned" hidden>
+                                    <span><strong id="rsnodeRepeaterScannedName"></strong><code id="rsnodeRepeaterScannedAddress"></code></span>
+                                    <button class="rsnode-beta__lock" id="rsnodeRepeaterScannedClear" type="button">Change</button>
+                                </div>
+                                <div class="rsnode-repeater__scanner" id="rsnodeRepeaterScanner" hidden>
+                                    <video id="rsnodeRepeaterVideo" playsinline muted aria-label="Camera"></video>
+                                    <button class="rsnode-beta__button" id="rsnodeRepeaterScanStop" type="button">Stop camera</button>
+                                </div>
+                                <p class="rsnode-tools__help" id="rsnodeRepeaterOwnerNote" aria-live="polite">Paste your address from Ratspeak, or scan your contact card there. A scanned card also gives the node your key, so it can reply right away.</p>
+                            </fieldset>
+                            <fieldset class="rsnode-settings__group">
+                                <legend class="rnode-source__label">Reach it from anywhere (optional)</legend>
+                                <label class="rsnode-beta__check"><input type="checkbox" id="rsnodeRepeaterRemote"><span>Connect it to a Reticulum TCP server so you can reach it from anywhere.</span></label>
+                                <div class="rsnode-settings__grid" id="rsnodeRepeaterRemoteFields" hidden>
+                                    <label class="rsnode-settings__field" for="rsnodeRepeaterWifiName"><span class="rsnode-settings__label">Wi-Fi network</span>
+                                        <input class="rsnode-owner__input" id="rsnodeRepeaterWifiName" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+                                    <label class="rsnode-settings__field" for="rsnodeRepeaterWifiPassword"><span class="rsnode-settings__label">Wi-Fi password</span>
+                                        <input class="rsnode-owner__input" id="rsnodeRepeaterWifiPassword" type="password" autocomplete="new-password" aria-describedby="rsnodeRepeaterRemoteHelp"></label>
+                                    <label class="rsnode-settings__field" for="rsnodeRepeaterServer"><span class="rsnode-settings__label">Server</span>
+                                        <input class="rsnode-owner__input" id="rsnodeRepeaterServer" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="rns.example.org"></label>
+                                    <label class="rsnode-settings__field" for="rsnodeRepeaterServerPort"><span class="rsnode-settings__label">Port</span>
+                                        <input class="rsnode-owner__input" id="rsnodeRepeaterServerPort" type="text" inputmode="numeric" autocomplete="off" value="4242"></label>
+                                    <p class="rsnode-tools__help rsnode-settings__wide" id="rsnodeRepeaterRemoteHelp">The node joins this Wi-Fi network, then connects to the server. Leave the password empty for an open network, or to keep the one the node has.</p>
+                                </div>
+                            </fieldset>
+                        </fieldset>
+                    </form>
+                    <div class="flash-connect-tips rsnode-tools__tips" id="rsnodeRepeaterTips">
+                        <div class="flash-connect-tips__head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Before you start</div>
+                        <ul>
+                            <li>Plug the node in over USB. Close other apps that use its port, such as Ratspeak or a serial monitor.</li>
+                            <li>If you just installed, press RESET on the board first.</li>
+                            <li>Starting restarts the node as a Repeater. It may restart once more first to join Wi-Fi.</li>
+                        </ul>
+                    </div>
+                    <div class="rsnode-tools__actions">
+                        <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeRepeaterStart" type="submit" form="rsnodeRepeaterForm" aria-describedby="rsnodeRepeaterSummary">Start the Repeater</button>
+                        <p class="rsnode-tools__summary" id="rsnodeRepeaterSummary"></p>
+                    </div>
+                    <p class="rsnode-tools__port" hidden>Using <span class="rsnode-tools__port-label"></span> &middot; <button class="rsnode-beta__lock" type="button" data-change-port>Change port</button></p>
+                    <div id="rsnodeRepeaterActivity">
+                        <p class="rsnode-tools__state"><span class="rsnode-tools__dot" id="rsnodeRepeaterDot" aria-hidden="true"></span><span class="rsnode-beta__status progress-status" id="rsnodeRepeaterStatus" role="status" aria-live="polite"></span></p>
+                        <div class="rsnode-repeater__card" id="rsnodeRepeaterCard" hidden>
+                            <canvas class="rsnode-repeater__qr" id="rsnodeRepeaterQr" width="900" height="900" role="img" aria-label="The node's contact card as a QR code"></canvas>
+                            <div class="rsnode-repeater__card-info">
+                                <p class="rsnode-tools__lede">Scan this in Ratspeak to add your rsNode as a contact. You can then manage it by messaging it.</p>
+                                <dl class="rsnode-tools__facts">
+                                    <div><dt>Node</dt><dd id="rsnodeRepeaterCardName"></dd></div>
+                                    <div><dt>Address</dt><dd><code id="rsnodeRepeaterCardAddress"></code></dd></div>
+                                </dl>
+                                <div class="rsnode-tools__actions">
+                                    <button class="rsnode-beta__button" id="rsnodeRepeaterCopy" type="button">Copy card</button>
+                                    <button class="rsnode-beta__button" id="rsnodeRepeaterSave" type="button">Save image</button>
+                                </div>
+                                <p class="rsnode-tools__help" id="rsnodeRepeaterCardNote" hidden></p>
+                                <pre class="rsnode-device__details" id="rsnodeRepeaterCardText" tabindex="0" aria-label="The node's contact card" hidden></pre>
+                            </div>
+                        </div>
+                        <details class="rsnode-tools__log"><summary>USB log</summary><div class="progress-log"></div></details>
+                    </div>
+                </div>
+            </details>
+
             <details class="flash-cta__repair rsnode-device" id="rsnodeDevice" name="rsnode-tools" hidden>
                 <summary class="flash-cta__repair-summary">
                     <span class="flash-cta__repair-label">
@@ -420,7 +528,7 @@
                     <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
                 </summary>
                 <div class="flash-cta__repair-body">
-                    <p class="rsnode-tools__lede">Requires firmware with USB settings support. Read the node's settings, change them here, and save. Saving restarts the node. Region, LIMITS, and the radio are set on the device.</p>
+                    <p class="rsnode-tools__lede">Requires firmware with USB settings support. Read the node's settings, change them here, and save. Saving restarts the node. To choose the region, preset, and LIMITS, use Set up as a Repeater.</p>
                     <form id="rsnodeSettingsForm" novalidate hidden>
                         <fieldset class="rsnode-owner__fields" id="rsnodeSettingsFields">
                             <p class="rsnode-settings__persona" id="rsnodeSettingsPersona"></p>
@@ -476,13 +584,13 @@
                                 </div>
                             </fieldset>
                             <div class="rsnode-settings__group" id="rsnodeRadioGroup">
-                                <span class="rnode-source__label">Set on the device</span>
+                                <span class="rnode-source__label">Radio</span>
                                 <dl class="rsnode-tools__facts">
                                     <div><dt>Region</dt><dd id="rsnodeSettingsRegion"></dd></div>
                                     <div><dt>Radio</dt><dd id="rsnodeSettingsRadio"></dd></div>
                                     <div><dt>LoRa IFAC</dt><dd id="rsnodeSettingsIfac"></dd></div>
                                 </dl>
-                                <p class="rsnode-tools__help">Change the region, LIMITS, and radio on the Repeater's own menus; these changes require confirmation on the device.</p>
+                                <p class="rsnode-tools__help">Change the region, preset, and LIMITS in Set up as a Repeater, or on the Repeater's own menus.</p>
                             </div>
                         </fieldset>
                     </form>
@@ -517,7 +625,6 @@
                     <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
                 </summary>
                 <div class="flash-cta__repair-body">
-                    <p class="rsnode-tools__notice" id="rsnodeOwnerNotice" tabindex="-1" hidden>Next: press RESET on the board. Optional: add managers if this node will run as a Repeater you manage remotely.</p>
                     <p class="rsnode-tools__lede">Managers are optional. They manage this node over the mesh while it runs as a Repeater; an RNode ignores them.</p>
                     <form id="rsnodeOwnerForm" novalidate>
                         <fieldset class="rsnode-owner__fields" id="rsnodeOwnerFields">

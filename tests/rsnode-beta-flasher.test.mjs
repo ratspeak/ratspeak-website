@@ -258,7 +258,7 @@ test('the rsNode pane says what Install erases, what the two modes are, and that
   const pane = /id="customSourceRsnode"[\s\S]*?<!-- Mode B/.exec(html)[0].replace(/<[^>]+>/g, '');
   assert.match(pane, /Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings, and Repeater settings\./);
   assert.match(pane, /Update requires a compatible package and firmware that supports USB updates\./);
-  assert.match(pane, /As an RNode, it is the radio for one app, over USB, Bluetooth or Wi-Fi\. As a Repeater, it forwards traffic on its own\./);
+  assert.match(pane, /As an RNode, it is the radio for one app, over USB, Bluetooth, or Wi-Fi\. As a Repeater, it forwards traffic on its own\./);
   assert.match(pane, /Bluetooth is off while Wi-Fi is on\. Managers are optional and only manage a Repeater\./);
   assert.doesNotMatch(pane, /signed OTA/);
   assert.match(extractFunction('confirmFactoryInstall'), /identity, managers, Wi-Fi, Bluetooth pairings, and Repeater settings/);
@@ -286,7 +286,7 @@ test('the pane offers Update only for a board with an update, and the flash butt
   const radios = ['update', 'install'].map(value => ({ value, checked: false }));
   const state = { flashing: false, rsnodeMetadata: { id: 'heltec-v4', label: 'Heltec V4 · R2' }, rsnodeChoice: null,
     rsnodeMode: 'install', rsnodeBundle: null };
-  const context = { state, betaStage: 'ready', rsnodeChecking: false, rsnodeOwnerBusy: false, rsnodeSettingsBusy: false,
+  const context = { state, betaStage: 'ready', rsnodeChecking: false, rsnodeOwnerBusy: false, rsnodeSettingsBusy: false, rsnodeRepeaterBusy: false,
     FLASH_ICON_HTML: '', isRsnodeSelected: () => true,
     document: { getElementById: element, querySelectorAll: () => radios } };
   const constant = name => new RegExp(`var ${name} = '(?:[^'\\\\]|\\\\.)*';`).exec(html)[0];

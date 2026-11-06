@@ -1,0 +1,34 @@
+{
+ "source": {
+  "crates/rns-identity/src/identity.rs": "cca0c3865e9af060f1d49ae935b081d11f3c271f74b3334d564d42896b0f1d39",
+  "crates/rns-identity/src/destination.rs": "83768b59fbefa374d5c6e9493a8cdf18041e8e10b4ffbfd86db988855db812df",
+  "crates/rns-identity/src/name_hash.rs": "739504beb7f6afe125e079769cc96c45be47e71a06591cf76f4b9dbf25e99d9a",
+  "crates/rns-crypto/src/sha.rs": "72dce2258aaca9a41104807780bb498e48c3f3a5d31b742748713af214c6d13b"
+ },
+ "identities": [
+  {
+   "name": "Alice Example",
+   "publicKey": "f1bc512ca0a1836fc49700283a2ad5b8c02bd06b10f3df40a99e2a012af9c756dde945412f56e058c5b61e73f82f8066d4f73b15a8df1997a162bf0a14c74f14",
+   "identity": "08ac56a318cb195a800794a04ec99bc3",
+   "lxmf": "feed9b67fdc979cf8e8d059caa8a1c09",
+   "manage": "8cfa942c1b5baec21ef7de03ea8db767",
+   "rscp1": "RSCP1:QWxpY2UgRXhhbXBsZQ:feed9b67fdc979cf8e8d059caa8a1c09:08ac56a318cb195a800794a04ec99bc3:8bxRLKChg2_ElwAoOirVuMAr0GsQ899AqZ4qASr5x1bd6UVBL1bgWMW2HnP4L4Bm1Pc7FajfGZehYr8KFMdPFA"
+  },
+  {
+   "name": "rsNode 887A",
+   "publicKey": "0a246ac0a3fba31c85d011e6aae135d37707819ac94551dda90d2cadc3e45c5d47a0e2fe28a4122bde32908d85691f6c659b50c6ed7b15558d155e84b3707b87",
+   "identity": "674097068d80a6cff4e83b61c14fc0c6",
+   "lxmf": "cc50f8f291a083388022475307ceafc4",
+   "manage": "30892bb3b417994b5bb60f211565f461",
+   "rscp1": "RSCP1:cnNOb2RlIDg4N0E:cc50f8f291a083388022475307ceafc4:674097068d80a6cff4e83b61c14fc0c6:CiRqwKP7oxyF0BHmquE103cHgZrJRVHdqQ0srcPkXF1HoOL-KKQSK94ykI2FaR9sZZtQxu17FVWNFV6Es3B7hw"
+  },
+  {
+   "name": "Zoë 🐀 Field kit",
+   "publicKey": "45c7c1e397281f9127fa60004895aa23089586fae0301a101aa37a6120ec0f0f3d818c28ef5e04b5e7e0e484762a625887feb2f23be7e518622aa812c1bafbe2",
+   "identity": "15366fed9356c3e228b4a19682372baa",
+   "lxmf": "81939788aeb702772e0f4174c459f6dc",
+   "manage": "27f6b1a4fb862c6f2bc44aba99bbfffe",
+   "rscp1": "RSCP1:Wm_DqyDwn5CAIEZpZWxkIGtpdA:81939788aeb702772e0f4174c459f6dc:15366fed9356c3e228b4a19682372baa:RcfB45coH5En-mAASJWqIwiVhvrgMBoQGqN6YSDsDw89gYwo714Etefg5IR2KmJYh_6y8jvn5RhiKqgSwbr74g"
+  }
+ ]
+}

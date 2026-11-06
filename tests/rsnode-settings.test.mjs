@@ -266,7 +266,7 @@ function settingsTask(node, overrides = {}) {
   const calls = [];
   const before = { nodeId: '887A', repeater: false, settings: fresh };
   const context = {
-    state: { flashing: false }, navigator: { serial: {} }, rsnodeOwnerBusy: false, rsnodeSettingsBusy: false, rsnodeChecking: false,
+    state: { flashing: false }, navigator: { serial: {} }, rsnodeOwnerBusy: false, rsnodeSettingsBusy: false, rsnodeRepeaterBusy: false, rsnodeChecking: false,
     rsnodeSettingsNode: before, RNODE_REPAIR_SETTLE_MS: 0, RSNODE_RESUME_MS: 100, RSNODE_TAKEOVER: 'If you just installed, press RESET on the board first.',
     HOST_OWNERS: { 0: null, 1: 'USB', 2: 'Bluetooth', 3: 'Wi-Fi' }, WIFI_MODES,
     document: { getElementById: () => ({}) },

@@ -17,7 +17,10 @@ const OWNER_ENTRY_LEN = 18;
 const OWNERS_MAX = 4;
 const OWNER_KIND_LXMF = 1;
 const OWNER_KIND_IDENTITY = 2;
-const OWNER_KINDS = { 1: 'lxmf', 2: 'identity' };
+// An LXMF address with its 64-byte public key, as a scanned contact card gives it (rsNode ADR 0016).
+const OWNER_KIND_LXMF_KEY = 3;
+const OWNER_KEY_LEN = 64;
+const OWNER_KINDS = { 1: 'lxmf', 2: 'identity', 3: 'lxmf' };
 const ROLE_PRIMARY = 1;
 const ROLE_HELPER = 2;
 const ROLES = { 1: 'owner', 2: 'admin' };
@@ -104,10 +107,13 @@ export function renderNode(node) {
   return lines;
 }
 
-/** The Owner first, then Admins (helper options): [kind, role, hash, description]. */
-export function ownersToEnrol({ owner = null, ownerIdentity = null, helper = [], helperIdentity = [] }) {
+/** The Owner first, then Admins (helper options): [kind, role, hash and any key, description]. */
+export function ownersToEnrol({ owner = null, ownerKey = null, ownerIdentity = null, helper = [], helperIdentity = [] }) {
   const owners = [];
-  if (owner) owners.push([OWNER_KIND_LXMF, ROLE_PRIMARY, owner, 'the owner']);
+  if (owner && ownerKey) {
+    if (ownerKey.length !== OWNER_KEY_LEN) throw new Error(`An owner key is ${OWNER_KEY_LEN} bytes, got ${ownerKey.length}`);
+    owners.push([OWNER_KIND_LXMF_KEY, ROLE_PRIMARY, Uint8Array.from([...owner, ...ownerKey]), 'the owner']);
+  } else if (owner) owners.push([OWNER_KIND_LXMF, ROLE_PRIMARY, owner, 'the owner']);
   if (ownerIdentity) owners.push([OWNER_KIND_IDENTITY, ROLE_PRIMARY, ownerIdentity, 'the owner']);
   for (const value of helper) owners.push([OWNER_KIND_LXMF, ROLE_HELPER, value, 'an admin']);
   for (const value of helperIdentity) owners.push([OWNER_KIND_IDENTITY, ROLE_HELPER, value, 'an admin']);
@@ -158,6 +164,12 @@ export function readManagementStatus(session) {
 /** READ_NODE as --read asks it; null on firmware that predates managers. */
 export function readNodeStatus(session) {
   return nodeExchange(session, [READ_NODE], 'READ_NODE');
+}
+
+/** ADD_OWNER for the Owner: an LXMF address, with its public key when a contact card gave one. */
+export function addRsnodeOwner(session, address, publicKey = null) {
+  const [[kind, role, hash, what]] = ownersToEnrol({ owner: address, ownerKey: publicKey });
+  return nodeExchange(session, [ADD_OWNER, kind, role, ...hash], what);
 }
 
 async function waitForDevice(session, timeoutMs, log) {

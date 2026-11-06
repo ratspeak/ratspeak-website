@@ -1,8 +1,13 @@
 // Flasher engine shared by download.html (handheld installer) and flash.html (advanced flasher). Ported from the live download.html module.
-import { betaRequest, rsnodeBoard, validateBetaCatalog, verifyBetaDownload, validateBetaManifest } from '/assets/js/rsnode-beta.js';
-import { parseHash, provisionRsnode, readManagementStatus } from '/assets/js/rsnode-provision.js';
+import { betaRequest, rsnodeBoard, rsnodeBoardForTarget, validateBetaCatalog, verifyBetaDownload, validateBetaManifest } from '/assets/js/rsnode-beta.js';
+import { addRsnodeOwner, parseHash, provisionRsnode, readManagementStatus } from '/assets/js/rsnode-provision.js';
 import { APP_PORT as RSNODE_APP_PORT, WIFI_MODES, checkSettingsForm, readRsnodeSettings, settingsChanges, settingsForm,
     settingsRadioLines, settingsSavedMessage, writeRsnodeSettings } from '/assets/js/rsnode-settings.js';
+import { REPEATER_PRESETS, checkRepeaterForm, readRsnodeIdentity, repeaterOwner, repeaterRadioLine, repeaterRegions,
+    repeaterSettingsForm, repeaterSetupEntries, repeaterStartedMessage, repeaterSummary, writeRepeaterSetup } from '/assets/js/rsnode-repeater.js';
+import { nodeContactCard, parseContactCard } from '/assets/js/rsnode-card.js';
+import { renderQrCanvas } from '/assets/js/qr-code.js';
+import { cameraAvailable, startQrScan } from '/assets/js/qr-scan.js';
 import { HOST_OWNERS, SCREEN_HEIGHT, SCREEN_WIDTH, leaveRsnode, readRsnodeFacts, readRsnodeRadio, readRsnodeScreen,
     readRsnodeStatus, restartRsnode, rsnodeBluetoothOff, rsnodeDetails, rsnodeSummary, screenSupported, startRsnodePairing,
     waitForRsnode } from '/assets/js/rsnode-device.js';
@@ -1113,7 +1118,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         betaAuthBusy = busy;
         rsnodeUnlock.disabled = busy;
         rsnodeTermsContinue.disabled = busy || !rsnodeTermsForm.checkValidity();
-        document.getElementById('rsnodeLock').disabled = busy || state.flashing || rsnodeOwnerBusy || rsnodeSettingsBusy;
+        document.getElementById('rsnodeLock').disabled = busy || state.flashing || rsnodeOwnerBusy || rsnodeSettingsBusy || rsnodeRepeaterBusy;
         document.getElementById('rsnodeLockRetry').disabled = busy;
         sourceTabs.forEach(function(tab) { tab.disabled = busy || state.flashing; });
     }
@@ -1143,6 +1148,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         }
         if (next === 'locked' && rsnodeTermsDialog.open) rsnodeTermsDialog.close();
         updateRsnodeOwnerVisibility();
+        updateRsnodeRepeaterVisibility();
         updateRsnodeDeviceVisibility();
     }
 
@@ -1383,7 +1389,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         if (!offered) return;
         var choice = state.rsnodeChoice;
         var check = document.getElementById('rsnodeUpdateCheck');
-        check.disabled = rsnodeChecking || state.flashing || rsnodeOwnerBusy || rsnodeSettingsBusy;
+        check.disabled = rsnodeChecking || state.flashing || rsnodeOwnerBusy || rsnodeSettingsBusy || rsnodeRepeaterBusy;
         check.textContent = rsnodeChecking ? 'Checking…' : choice ? 'Check again' : 'Check the node';
         var notice = choice ? { text: choice.message, error: false } : state.rsnodeNotice;
         var status = document.getElementById('rsnodeUpdateStatus');
@@ -1398,7 +1404,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     // Reads STATUS over the selected port and offers Update or Install per rsnode-update.js.
     async function checkRsnodeNode() {
         var metadata = state.rsnodeMetadata;
-        if (!metadata || !metadata.update || rsnodeChecking || state.flashing || rsnodeOwnerBusy || rsnodeSettingsBusy) return;
+        if (!metadata || !metadata.update || rsnodeChecking || state.flashing || rsnodeOwnerBusy || rsnodeSettingsBusy || rsnodeRepeaterBusy) return;
         if (!('serial' in navigator)) {
             showSerialWarning();
             return;
@@ -3338,7 +3344,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     var rsnodeManagersFrom = null;
     var rsnodeManagerEditing = null;
     var RSNODE_MANAGERS_MAX = 4;
-    var RSNODE_KINDS = { 1: 'lxmf', 2: 'identity' };
+    var RSNODE_KINDS = { 1: 'lxmf', 2: 'identity', 3: 'lxmf' };
     var RSNODE_ROLES = { 1: 'owner', 2: 'admin' };
     var RSNODE_KIND_NAMES = { lxmf: 'LXMF address', identity: 'Identity hash' };
     var RSNODE_ROLE_NAMES = { owner: 'Owner', admin: 'Admin' };
@@ -3373,7 +3379,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     }
 
     function syncRsnodePort() {
-        var idle = !rsnodeOwnerBusy && !rsnodeSettingsBusy && !rsnodeChecking && !rsnodeDevice && !state.flashing;
+        var idle = !rsnodeOwnerBusy && !rsnodeSettingsBusy && !rsnodeRepeaterBusy && !rsnodeChecking && !rsnodeDevice && !state.flashing;
         document.querySelectorAll('.rsnode-tools__port').forEach(function(line) {
             line.hidden = !state.port;
             line.querySelector('.rsnode-tools__port-label').textContent = state.port ? usbDeviceLabel(state.port) : '';
@@ -3602,7 +3608,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     }
 
     function syncRsnodeOwnerForm() {
-        var idle = !rsnodeOwnerBusy && !rsnodeSettingsBusy && !rsnodeChecking && !state.flashing;
+        var idle = !rsnodeOwnerBusy && !rsnodeSettingsBusy && !rsnodeRepeaterBusy && !rsnodeChecking && !state.flashing;
         var rows = rsnodeManagersPreview();
         var crowded = rsnodeActive(rows).length > RSNODE_MANAGERS_MAX;
         var changes = rsnodeOwnerChanges(rsnodeManagersPlan(rows));
@@ -3729,23 +3735,9 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         document.getElementById('rsnodeOwnerResult').hidden = false;
     }
 
-    // The flash button is gone once rsNode is installed; the next step takes focus.
-    function focusRsnodeOwnerNotice() {
-        var notice = document.getElementById('rsnodeOwnerNotice');
-        notice.scrollIntoView({ block: 'center' });
-        notice.focus({ preventScroll: true });
-    }
-
-    function showRsnodeOwnerStep() {
-        state.rsnodeInstalled = true;
-        updateRsnodeOwnerVisibility();
-        document.getElementById('rsnodeOwnerNotice').hidden = false;
-        document.getElementById('rsnodeOwner').open = true;
-    }
-
     // Inputs are checked before a port is requested, as the script checks its flags.
     async function runRsnodeOwnerTask(read) {
-        if (rsnodeOwnerBusy || rsnodeSettingsBusy || rsnodeChecking || state.flashing) return;
+        if (rsnodeOwnerBusy || rsnodeSettingsBusy || rsnodeRepeaterBusy || rsnodeChecking || state.flashing) return;
         if (!('serial' in navigator)) {
             showSerialWarning();
             return;
@@ -3784,7 +3776,6 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             });
             result.rsnode = context && context.rsnode;
             showRsnodeOwnerResult(result, read);
-            document.getElementById('rsnodeOwnerNotice').hidden = true;
             if (!read) rsnodeOwnerSaved = true;
             rsnodeOwnerMessage((read ? 'Showing RNode ' : 'Saved to RNode ') + result.status.nodeId + '.' +
                 rsnodePersonaNote(result.rsnode), false, true);
@@ -3859,7 +3850,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     });
     document.querySelectorAll('[data-change-port]').forEach(function(button) {
         button.addEventListener('click', function() {
-            if (rsnodeOwnerBusy || rsnodeSettingsBusy || rsnodeDevice || state.flashing) return;
+            if (rsnodeOwnerBusy || rsnodeSettingsBusy || rsnodeRepeaterBusy || rsnodeDevice || state.flashing) return;
             requestFreshRnodePortFromUser().catch(function() { /* a cancelled picker keeps the selected port */ });
         });
     });
@@ -3959,7 +3950,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     // Shows the fields the chosen Wi-Fi mode uses and says what Save would do.
     function syncRsnodeSettingsForm() {
         var node = rsnodeSettingsNode;
-        var idle = !rsnodeSettingsBusy && !rsnodeOwnerBusy && !rsnodeChecking && !state.flashing;
+        var idle = !rsnodeSettingsBusy && !rsnodeRepeaterBusy && !rsnodeOwnerBusy && !rsnodeChecking && !state.flashing;
         document.getElementById('rsnodeSettingsRead').disabled = !idle;
         document.getElementById('rsnodeSettingsRead').textContent = rsnodeSettingsBusy && !rsnodeSettingsSaving ? 'Reading…'
             : node ? 'Read again' : 'Read settings';
@@ -4057,7 +4048,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
 
     // Reads the node, or saves the form and follows the node through its restart.
     async function runRsnodeSettingsTask(save) {
-        if (rsnodeSettingsBusy || rsnodeOwnerBusy || rsnodeChecking || state.flashing) return;
+        if (rsnodeSettingsBusy || rsnodeRepeaterBusy || rsnodeOwnerBusy || rsnodeChecking || state.flashing) return;
         if (!('serial' in navigator)) {
             showSerialWarning();
             return;
@@ -4163,6 +4154,388 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     });
     if (ADVANCED) renderRsnodeSettings();
 
+    // ── Set up as a Repeater: the Owner, optional Wi-Fi and uplink, then REPEATER_SETUP over USB (rsNode ADR 0016) ──
+    var rsnodeRepeaterBusy = false;
+    // A scanned card's Owner, { name, lxmf, publicKey }; a typed address leaves it null.
+    var rsnodeRepeaterOwnerCard = null;
+    var rsnodeRepeaterStopScan = null;
+    // { nodeId, identity, card }: the card of the node last started here.
+    var rsnodeRepeaterResult = null;
+    var rsnodeRepeaterRegionsFor = null;
+    var RSNODE_REPEATER_OWNER_NOTE = 'Paste your address from Ratspeak, or scan your contact card there. A scanned card also gives the node your key, so it can reply right away.';
+    var RSNODE_LIMITS_HELP = { off: 'The board\'s full power, with no airtime limits.',
+        default: 'The power and airtime limits rsNode sets for the region.',
+        custom: 'Your own power limit, with or without the region\'s airtime limit.' };
+    var RSNODE_REPEATER_FIELDS = { region: 'rsnodeRepeaterRegion', preset: 'rsnodeRepeaterPreset', limitsPower: 'rsnodeLimitsPower',
+        accepted: 'rsnodeRepeaterAccept', owner: 'rsnodeRepeaterOwner', name: 'rsnodeRepeaterWifiName', wifiMode: 'rsnodeRepeaterWifiName',
+        password: 'rsnodeRepeaterWifiPassword', uplinkHost: 'rsnodeRepeaterServer', uplinkPort: 'rsnodeRepeaterServerPort' };
+
+    function updateRsnodeRepeaterVisibility() {
+        var panel = document.getElementById('rsnodeRepeater');
+        if (!panel) return;
+        panel.hidden = !rsnodeToolsUnlocked();
+        if (panel.hidden) stopRsnodeRepeaterScan();
+    }
+
+    function rsnodeRepeaterField(key) {
+        if (key === 'limits') return document.querySelector('input[name="rsnodeRepeaterLimits"]:checked');
+        return document.getElementById(RSNODE_REPEATER_FIELDS[key] || 'rsnodeRepeaterRegion');
+    }
+
+    // The regions the chosen board offers; a V4 has no 433 MHz radio.
+    function renderRsnodeRepeaterRegions() {
+        var board = rsnodeBoard(rsnodeBoardSelect.value);
+        var key = board ? board.id : '';
+        if (rsnodeRepeaterRegionsFor === key) return;
+        rsnodeRepeaterRegionsFor = key;
+        var select = document.getElementById('rsnodeRepeaterRegion');
+        var chosen = select.value;
+        select.replaceChildren(new Option('Choose your region', ''));
+        repeaterRegions(board).forEach(function(region) { select.add(new Option(region.label, String(region.id))); });
+        select.value = Array.prototype.some.call(select.options, function(option) { return option.value === chosen; }) ? chosen : '';
+        var preset = document.getElementById('rsnodeRepeaterPreset');
+        if (!preset.options.length) {
+            REPEATER_PRESETS.forEach(function(entry, index) { preset.add(new Option(entry.label, String(index))); });
+        }
+    }
+
+    function readRsnodeRepeaterForm() {
+        var value = function(id) { return document.getElementById(id).value; };
+        var checked = function(id) { return document.getElementById(id).checked; };
+        var mode = document.querySelector('input[name="rsnodeRepeaterLimits"]:checked');
+        var power = value('rsnodeLimitsPower').trim();
+        return {
+            region: Number(value('rsnodeRepeaterRegion')) || null, preset: Number(value('rsnodeRepeaterPreset')) || 0,
+            limits: { mode: mode ? mode.value : 'off', txPower: /^-?\d+$/.test(power) ? Number(power) : NaN, dutyCycle: checked('rsnodeLimitsDuty') },
+            accepted: checked('rsnodeRepeaterAccept'), owner: value('rsnodeRepeaterOwner'), card: rsnodeRepeaterOwnerCard,
+            remote: checked('rsnodeRepeaterRemote'), wifiName: value('rsnodeRepeaterWifiName'), wifiPassword: value('rsnodeRepeaterWifiPassword'),
+            uplinkHost: value('rsnodeRepeaterServer'), uplinkPort: value('rsnodeRepeaterServerPort')
+        };
+    }
+
+    function syncRsnodeRepeaterForm() {
+        if (!document.getElementById('rsnodeRepeater')) return;
+        renderRsnodeRepeaterRegions();
+        var idle = !rsnodeRepeaterBusy && !rsnodeSettingsBusy && !rsnodeOwnerBusy && !rsnodeChecking && !state.flashing;
+        var form = readRsnodeRepeaterForm();
+        document.getElementById('rsnodeRepeaterFields').disabled = !idle;
+        document.getElementById('rsnodeRepeaterStart').disabled = !idle;
+        document.getElementById('rsnodeRepeaterStart').textContent = rsnodeRepeaterBusy ? 'Starting…' : 'Start the Repeater';
+        document.getElementById('rsnodeRepeaterRadio').textContent = repeaterRadioLine(form.region, form.preset) ||
+            'Each region starts on its default frequency.';
+        document.getElementById('rsnodeLimitsHelp').textContent = RSNODE_LIMITS_HELP[form.limits.mode];
+        document.getElementById('rsnodeLimitsCustom').hidden = form.limits.mode !== 'custom';
+        document.getElementById('rsnodeRepeaterRemoteFields').hidden = !form.remote;
+        var card = rsnodeRepeaterOwnerCard;
+        document.getElementById('rsnodeRepeaterOwnerEntry').hidden = !!card || !!rsnodeRepeaterStopScan;
+        document.getElementById('rsnodeRepeaterScanned').hidden = !card;
+        document.getElementById('rsnodeRepeaterScanner').hidden = !rsnodeRepeaterStopScan;
+        if (card) {
+            document.getElementById('rsnodeRepeaterScannedName').textContent = card.name || 'Your contact card';
+            document.getElementById('rsnodeRepeaterScannedAddress').textContent = card.lxmf;
+        }
+        if (!rsnodeRepeaterBusy) {
+            document.getElementById('rsnodeRepeaterSummary').textContent = state.flashing ? 'Available when flashing finishes.' : repeaterSummary(form);
+        }
+        syncRsnodePort();
+    }
+
+    function setRsnodeRepeaterBusy(busy) {
+        rsnodeRepeaterBusy = busy;
+        document.getElementById('rsnodeRepeaterDot').classList.toggle('is-busy', busy);
+        syncRsnodeRepeaterForm();
+        syncRsnodeSettingsForm();
+        syncRsnodeOwnerForm();
+        syncRsnodeDevice();
+        updateFlashBtn();
+    }
+
+    function rsnodeRepeaterMessage(message, error, done) {
+        var status = document.getElementById('rsnodeRepeaterStatus');
+        status.textContent = message || '';
+        status.classList.toggle('is-error', !!error);
+        var dot = document.getElementById('rsnodeRepeaterDot');
+        dot.classList.toggle('is-error', !!error);
+        dot.classList.toggle('is-ok', !!done);
+    }
+
+    function rsnodeRepeaterOwnerNote(text) {
+        document.getElementById('rsnodeRepeaterOwnerNote').textContent = text || RSNODE_REPEATER_OWNER_NOTE;
+    }
+
+    // A card is a person's: a device's card cannot be the Owner.
+    async function useRsnodeRepeaterCard(text) {
+        var card;
+        try {
+            card = await parseContactCard(text);
+        } catch (error) {
+            rsnodeRepeaterOwnerNote(error.message + ' Show your own contact card in Ratspeak.');
+            return false;
+        }
+        if (card.kind === 'device') {
+            rsnodeRepeaterOwnerNote('This is a device\'s card. Show your own contact card in Ratspeak.');
+            return false;
+        }
+        rsnodeRepeaterOwnerCard = card;
+        rsnodeRepeaterOwnerNote('The node gets your address and key from this card.');
+        document.getElementById('rsnodeRepeaterOwner').removeAttribute('aria-invalid');
+        return true;
+    }
+
+    function stopRsnodeRepeaterScan() {
+        if (!rsnodeRepeaterStopScan) return;
+        rsnodeRepeaterStopScan();
+        rsnodeRepeaterStopScan = null;
+        syncRsnodeRepeaterForm();
+    }
+
+    var RSNODE_CAMERA_ERRORS = { NotAllowedError: 'Camera access is blocked. Allow it for this page, or paste your address instead.',
+        NotFoundError: 'No camera was found. Paste your address instead.',
+        NotReadableError: 'Another app is using the camera. Close it, or paste your address instead.' };
+
+    async function startRsnodeRepeaterScan() {
+        if (rsnodeRepeaterStopScan) return;
+        if (!cameraAvailable()) {
+            rsnodeRepeaterOwnerNote('This browser cannot open a camera here. Paste your address instead.');
+            return;
+        }
+        rsnodeRepeaterStopScan = function() {};
+        rsnodeRepeaterOwnerNote('Point the camera at your contact card in Ratspeak.');
+        syncRsnodeRepeaterForm();
+        try {
+            var stop = await startQrScan(document.getElementById('rsnodeRepeaterVideo'), async function(text) {
+                if (!await useRsnodeRepeaterCard(text)) return false;
+                rsnodeRepeaterStopScan = null;
+                syncRsnodeRepeaterForm();
+                document.getElementById('rsnodeRepeaterScannedClear').focus();
+                return true;
+            });
+            // Stopped, or read a card, while the camera was opening.
+            if (rsnodeRepeaterStopScan) rsnodeRepeaterStopScan = stop;
+            else stop();
+        } catch (error) {
+            rsnodeRepeaterStopScan = null;
+            rsnodeRepeaterOwnerNote(RSNODE_CAMERA_ERRORS[error.name] || 'The camera could not start. Paste your address instead.');
+            syncRsnodeRepeaterForm();
+        }
+    }
+
+    function renderRsnodeRepeaterCard() {
+        var result = rsnodeRepeaterResult;
+        document.getElementById('rsnodeRepeaterCard').hidden = !result;
+        document.getElementById('rsnodeRepeaterCardText').hidden = true;
+        document.getElementById('rsnodeRepeaterCardNote').hidden = true;
+        if (!result) return;
+        renderQrCanvas(document.getElementById('rsnodeRepeaterQr'), result.card);
+        document.getElementById('rsnodeRepeaterCardName').textContent = result.identity.name || 'RNode ' + result.nodeId;
+        document.getElementById('rsnodeRepeaterCardAddress').textContent = result.identity.lxmf;
+    }
+
+    // A restart the node announced: wait it out, then for the node to answer again.
+    async function followRsnodeRestart(session, restartMs, failure) {
+        await sleepMs(restartMs + RSNODE_SETTINGS_RESTART_MS);
+        if (!await waitForRsnode(session, { timeoutMs: RSNODE_RESUME_MS })) throw new Error(failure);
+    }
+
+    // A refused USB write, in the panel's words; an invalid entry lands on its field.
+    function rsnodeRepeaterRefusal(outcome, nodeId, field) {
+        var name = 'RNode ' + nodeId;
+        if (outcome.kind === 'invalid') {
+            var target = outcome.field && field(outcome.field);
+            return target ? rsnodeFieldError(target, outcome.message) : new Error(outcome.message);
+        }
+        if (outcome.kind === 'refused') return new Error(rsnodeHeldMessage(nodeId, 'Bluetooth or Wi-Fi'));
+        if (outcome.kind === 'busy') return new Error(name + ' is busy finishing an update or saving. Try again in a minute.');
+        if (outcome.kind === 'storage') return new Error(name + ' could not confirm that it saved. Try again.');
+        if (outcome.kind === 'unsupported') return new Error(name + ' cannot set up a Repeater over USB. Update it first.');
+        if (outcome.kind === 'uncertain') return new Error(outcome.message);
+        return new Error(name + ' refused the change (result ' + outcome.result + ').');
+    }
+
+    // The Owner first, since it creates the identity the card carries; then Wi-Fi and the uplink; then start.
+    async function runRsnodeRepeaterTask() {
+        if (rsnodeRepeaterBusy || rsnodeSettingsBusy || rsnodeOwnerBusy || rsnodeChecking || state.flashing) return;
+        if (!('serial' in navigator)) {
+            showSerialWarning();
+            return;
+        }
+        var ui = null, session = null, field = null, stage = 'input', nodeId = null;
+        setRsnodeRepeaterBusy(true);
+        rsnodeRepeaterMessage('');
+        try {
+            var form = readRsnodeRepeaterForm();
+            var problem = checkRepeaterForm(form);
+            if (problem) throw rsnodeFieldError(rsnodeRepeaterField(problem.field), problem.message);
+            stopRsnodeRepeaterScan();
+            stage = 'port';
+            await rsnodeToolPortFromUser();
+            rsnodeRepeaterResult = null;
+            renderRsnodeRepeaterCard();
+            ui = openProgressLog('Setting up the Repeater…', document.getElementById('rsnodeRepeaterActivity'));
+            stage = 'open';
+            session = createRnodeSession(await openRnodeSerialPort(ui.log, RNODE_REPAIR_SETTLE_MS, await rsnodeOtherPorts()));
+            stage = 'protocol';
+            ui.setStatus('Waiting for rsNode…');
+            var answered = await waitForRsnode(session, { waiting: function() { ui.setStatus('Waiting for rsNode. ' + RSNODE_TAKEOVER); } });
+            if (!answered) throw new Error('No answer over USB within 30 s. ' + RSNODE_TAKEOVER.replace(/\.$/, ', then try again.'));
+            try {
+                nodeId = (await readManagementStatus(session)).nodeId;
+            } catch (error) {
+                throw Object.assign(error, { notRsnode: true });
+            }
+            ui.log('node id: RNode ' + nodeId);
+            var name = 'RNode ' + nodeId;
+            var status = await readRsnodeStatus(session);
+            if (!status || !status.node) throw new Error(name + ' cannot set up a Repeater over USB. Update it first.');
+            var held = rsnodeHeldElsewhere(status);
+            if (held) throw new Error(rsnodeHeldMessage(nodeId, held));
+            var board = status.board && rsnodeBoardForTarget(status.board.board);
+            if (board && !repeaterRegions(board).some(function(region) { return region.id === form.region; })) {
+                throw rsnodeFieldError(rsnodeRepeaterField('region'), board.label + ' has no 433 MHz radio. Choose another region.');
+            }
+            ui.setStatus('Adding the Owner to ' + name + '…');
+            var owner = repeaterOwner(form);
+            ui.log('owner: ' + bytesToHex(owner.address) + (owner.publicKey ? ' with its key' : ''));
+            await addRsnodeOwner(session, owner.address, owner.publicKey);
+            if (form.remote) {
+                var settings = await readRsnodeSettings(session);
+                if (!settings) throw new Error(name + ' did not report its settings.');
+                var remote = repeaterSettingsForm(form, settings);
+                var remoteProblem = checkSettingsForm(remote, settings, true);
+                if (remoteProblem) throw rsnodeFieldError(rsnodeRepeaterField(remoteProblem.field), remoteProblem.message);
+                var entries = settingsChanges(remote, settings, true);
+                if (entries.length) {
+                    ui.setStatus('Saving Wi-Fi and the uplink to ' + name + '…');
+                    ui.log('settings: ' + entries.map(function(entry) { return '0x' + entry[0].toString(16).padStart(2, '0'); }).join(' '));
+                    var saved = await writeRsnodeSettings(session, entries, 'join');
+                    ui.log('result: ' + saved.kind);
+                    if (saved.kind === 'restart') {
+                        ui.setStatus('Restarting…');
+                        await followRsnodeRestart(session, saved.restartMs,
+                            name + ' saved Wi-Fi and the uplink but did not answer after restarting. Press RESET on the board, then start again.');
+                    } else if (saved.kind !== 'unchanged') {
+                        throw rsnodeRepeaterRefusal(saved, nodeId, function(key) {
+                            return rsnodeRepeaterField(key === 'wifiMode' ? 'name' : key);
+                        });
+                    }
+                }
+            }
+            ui.setStatus('Starting the Repeater on ' + name + '…');
+            var setup = repeaterSetupEntries({ region: form.region, preset: form.preset, limits: form.limits, accepted: form.accepted, start: true });
+            ui.log('repeater setup: ' + setup.map(function(entry) { return '0x' + entry[0].toString(16).padStart(2, '0'); }).join(' '));
+            var outcome = await writeRepeaterSetup(session, setup);
+            ui.log('result: ' + outcome.kind);
+            if (outcome.kind !== 'restart' && outcome.kind !== 'done') throw rsnodeRepeaterRefusal(outcome, nodeId, rsnodeRepeaterField);
+            if (outcome.kind === 'restart') {
+                rsnodeRepeaterMessage('Restarting…');
+                ui.setStatus('Restarting…');
+                await followRsnodeRestart(session, outcome.restartMs,
+                    name + ' saved the Repeater settings but did not answer after restarting. Press RESET on the board, then check it in the live view.');
+            }
+            if (form.remote) ui.setStatus('Waiting for Wi-Fi…');
+            status = form.remote ? await waitForRsnodeWifi(session, WIFI_MODES.join, RSNODE_WIFI_WAIT_MS) : await readRsnodeStatus(session);
+            var identity = await readRsnodeIdentity(session);
+            if (!identity || !identity.present) throw new Error(name + ' did not report its identity, so there is no contact card to show.');
+            await leaveRsnode(session);
+            rsnodeRepeaterResult = { nodeId: nodeId, identity: identity, card: nodeContactCard(identity) };
+            renderRsnodeRepeaterCard();
+            document.getElementById('rsnodeRepeaterNotice').hidden = true;
+            rsnodeRepeaterMessage(repeaterStartedMessage(nodeId, status, form), false, true);
+        } catch (error) {
+            field = error.field || null;
+            if (ui) ui.log('Error: ' + error.message, 'log-red');
+            if (stage === 'port' && error.name === 'NotFoundError') rsnodeRepeaterMessage('Select the rsNode serial port to continue.');
+            else if (field) rsnodeRepeaterMessage(error.message, true);
+            else {
+                var text = rsnodePortError(error, stage, 'try again') ||
+                    (error.notRsnode ? 'This node answers as an RNode but not as rsNode. A Repeater needs rsNode firmware.' : null) ||
+                    RSNODE_CLI_WORDS.reduce(function(words, swap) { return words.replace(swap[0], swap[1]); }, error.message || String(error));
+                rsnodeRepeaterMessage(text.charAt(0).toUpperCase() + text.slice(1), true);
+            }
+        } finally {
+            await closeRnodeSession(session);
+            setRsnodeRepeaterBusy(false);
+        }
+        if (field) field.focus();
+    }
+
+    // The next step after an install: the node is an RNode until it is set up here.
+    function showRsnodeRepeaterStep() {
+        state.rsnodeInstalled = true;
+        updateRsnodeRepeaterVisibility();
+        document.getElementById('rsnodeRepeaterNotice').hidden = false;
+        document.getElementById('rsnodeRepeater').open = true;
+    }
+
+    // The flash button is gone once rsNode is installed; the next step takes focus.
+    function focusRsnodeRepeaterNotice() {
+        var notice = document.getElementById('rsnodeRepeaterNotice');
+        notice.scrollIntoView({ block: 'center' });
+        notice.focus({ preventScroll: true });
+    }
+
+    if (ADVANCED) document.getElementById('rsnodeRepeaterForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        runRsnodeRepeaterTask();
+    });
+    if (ADVANCED) ['input', 'change'].forEach(function(type) {
+        document.getElementById('rsnodeRepeaterForm').addEventListener(type, function(event) {
+            event.target.removeAttribute('aria-invalid');
+            syncRsnodeRepeaterForm();
+        });
+    });
+    // A card pasted where the address goes counts as scanned.
+    if (ADVANCED) document.getElementById('rsnodeRepeaterOwner').addEventListener('change', async function() {
+        if (!/^\s*RSCP[12]:/.test(this.value)) return;
+        if (await useRsnodeRepeaterCard(this.value)) this.value = '';
+        syncRsnodeRepeaterForm();
+    });
+    if (ADVANCED) document.getElementById('rsnodeRepeaterScan').addEventListener('click', startRsnodeRepeaterScan);
+    // A closed panel lets the camera go.
+    if (ADVANCED) document.getElementById('rsnodeRepeater').addEventListener('toggle', function() {
+        if (!this.open) stopRsnodeRepeaterScan();
+    });
+    if (ADVANCED) document.getElementById('rsnodeRepeaterScanStop').addEventListener('click', function() {
+        stopRsnodeRepeaterScan();
+        rsnodeRepeaterOwnerNote('');
+        document.getElementById('rsnodeRepeaterScan').focus();
+    });
+    if (ADVANCED) document.getElementById('rsnodeRepeaterScannedClear').addEventListener('click', function() {
+        rsnodeRepeaterOwnerCard = null;
+        rsnodeRepeaterOwnerNote('');
+        syncRsnodeRepeaterForm();
+        document.getElementById('rsnodeRepeaterOwner').focus();
+    });
+    if (ADVANCED) document.getElementById('rsnodeRepeaterCopy').addEventListener('click', async function() {
+        if (!rsnodeRepeaterResult) return;
+        var button = this, shown = document.getElementById('rsnodeRepeaterCardText');
+        try {
+            await navigator.clipboard.writeText(rsnodeRepeaterResult.card);
+            shown.hidden = true;
+            button.textContent = 'Copied';
+            setTimeout(function() { button.textContent = 'Copy card'; }, 2000);
+        } catch (error) {
+            // Without clipboard access the card stays on the page, selected.
+            shown.textContent = rsnodeRepeaterResult.card;
+            shown.hidden = false;
+            window.getSelection().selectAllChildren(shown);
+            var note = document.getElementById('rsnodeRepeaterCardNote');
+            note.textContent = 'Press Ctrl+C or ⌘C to copy the card.';
+            note.hidden = false;
+        }
+    });
+    if (ADVANCED) document.getElementById('rsnodeRepeaterSave').addEventListener('click', function() {
+        if (!rsnodeRepeaterResult) return;
+        var button = this, name = 'rsnode-' + rsnodeRepeaterResult.nodeId + '-contact-card.png';
+        document.getElementById('rsnodeRepeaterQr').toBlob(function(blob) {
+            if (!blob) return;
+            saveBlob(blob, name);
+            button.textContent = 'Saved';
+            setTimeout(function() { button.textContent = 'Save image'; }, 2000);
+        }, 'image/png');
+    });
+    if (ADVANCED) syncRsnodeRepeaterForm();
+
     // ── rsNode live view: the node's screen and status over Web Serial ──
     var rsnodeDevice = null;
     var rsnodeDeviceFacts = null;
@@ -4196,7 +4569,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         var connect = document.getElementById('rsnodeConnect');
         connect.textContent = device ? (device.facts ? 'Disconnect' : 'Cancel') : 'Connect';
         connect.classList.toggle('rsnode-beta__button--primary', !device);
-        connect.disabled = device ? device.stopping : rsnodeOwnerBusy || rsnodeSettingsBusy || rsnodeChecking || state.flashing;
+        connect.disabled = device ? device.stopping : rsnodeOwnerBusy || rsnodeSettingsBusy || rsnodeRepeaterBusy || rsnodeChecking || state.flashing;
         var screenshot = document.getElementById('rsnodeScreenshot');
         screenshot.disabled = screenshot.hidden = !rsnodeScreenPixels;
         var copy = document.getElementById('rsnodeCopyDetails');
@@ -4349,7 +4722,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     }
 
     async function runRsnodeDevice() {
-        if (rsnodeDevice || rsnodeOwnerBusy || rsnodeSettingsBusy || rsnodeChecking || state.flashing) return;
+        if (rsnodeDevice || rsnodeOwnerBusy || rsnodeSettingsBusy || rsnodeRepeaterBusy || rsnodeChecking || state.flashing) return;
         if (!('serial' in navigator)) {
             showSerialWarning();
             return;
@@ -4543,12 +4916,14 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             syncRsnodeOwnerForm();
             updateRsnodeSettingsVisibility();
             syncRsnodeSettingsForm();
+            updateRsnodeRepeaterVisibility();
+            syncRsnodeRepeaterForm();
             updateRsnodeDeviceVisibility();
             syncRsnodeDevice();
             sourceTabs.forEach(function(tab) { tab.disabled = state.flashing || betaAuthBusy; });
             rsnodeBoardSelect.disabled = state.flashing;
             rsnodeVariantConfirmed.disabled = state.flashing;
-            document.getElementById('rsnodeLock').disabled = state.flashing || betaAuthBusy || rsnodeOwnerBusy || rsnodeSettingsBusy;
+            document.getElementById('rsnodeLock').disabled = state.flashing || betaAuthBusy || rsnodeOwnerBusy || rsnodeSettingsBusy || rsnodeRepeaterBusy;
         }
         document.getElementById('eraseToggle').disabled = state.flashing;
         var retry = document.getElementById('firmwareRetry');
@@ -4654,7 +5029,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         if (!btn) return;
         var ready = state.connected && state.firmwareReady;
 
-        if (ready && !state.flashing && !state.flashComplete && !rsnodeOwnerBusy && !rsnodeSettingsBusy && !rsnodeChecking) {
+        if (ready && !state.flashing && !state.flashComplete && !rsnodeOwnerBusy && !rsnodeSettingsBusy && !rsnodeRepeaterBusy && !rsnodeChecking) {
             btn.className = 'flash-btn flash-btn--ready';
             btn.disabled = false;
         } else {
@@ -5550,7 +5925,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     }
 
     window.startFlash = async function() {
-        if (!state.connected || !state.firmwareReady || state.flashing || rsnodeOwnerBusy || rsnodeSettingsBusy || rsnodeChecking) return;
+        if (!state.connected || !state.firmwareReady || state.flashing || rsnodeOwnerBusy || rsnodeSettingsBusy || rsnodeRepeaterBusy || rsnodeChecking) return;
 
         state.flashing = true;
         await releaseRsnodeDevice();
@@ -5559,7 +5934,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         state.rsnodeInstalled = false;
         state.rsnodeUpdated = null;
         clearRecovery();
-        if (ADVANCED) document.getElementById('rsnodeOwnerNotice').hidden = true;
+        if (ADVANCED) document.getElementById('rsnodeRepeaterNotice').hidden = true;
         state.rnodeSetupVerified = false;
         state.rnodeSetupIssue = null;
         state.rnodeSetupIssueKind = null;
@@ -5831,8 +6206,8 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             state.flashComplete = true;
             state.rnodeSetupVerified = rnodeSetupCompleted;
             btn.style.display = 'none';
-            if (prepared && prepared.product === 'rsnode') showRsnodeOwnerStep();
-            if (state.rsnodeInstalled && rsnodeToolsUnlocked()) focusRsnodeOwnerNotice();
+            if (prepared && prepared.product === 'rsnode') showRsnodeRepeaterStep();
+            if (state.rsnodeInstalled && rsnodeToolsUnlocked()) focusRsnodeRepeaterNotice();
             updateFlashFlow();
             if (rnodeSetupCompleted) showRnodeSetupComplete();
 

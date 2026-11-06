@@ -477,6 +477,17 @@ input[type="checkbox"]{width:22px;height:22px;flex:none;margin:0;accent-color:va
 .rsnode-owner__result{display:flex;flex-direction:column;gap:8px}
 .rsnode-owner__destination{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
 .rsnode-owner__destination code{font-size:14px;overflow-wrap:anywhere}
+.rsnode-repeater__rules{margin:0;padding:12px 14px;background:var(--surface-2);font-size:var(--t-small);line-height:1.5;color:var(--text)}
+.rsnode-repeater__owner{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px}
+.rsnode-repeater__scanned{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;min-height:48px;padding:10px 14px;background:var(--tint);border:1px solid var(--text-strong)}
+.rsnode-repeater__scanned>span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.rsnode-repeater__scanned code{font-size:14px;overflow-wrap:anywhere;color:var(--muted)}
+.rsnode-repeater__scanner{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.rsnode-repeater__scanner video{display:block;width:100%;max-width:360px;aspect-ratio:1;object-fit:cover;background:var(--oled)}
+.rsnode-repeater__card{display:grid;grid-template-columns:minmax(0,240px) minmax(0,1fr);gap:24px;align-items:start;padding:20px;background:var(--surface-2)}
+.rsnode-repeater__qr{display:block;width:100%;height:auto;aspect-ratio:1;background:#fff}
+.rsnode-repeater__card-info{display:flex;flex-direction:column;gap:14px;min-width:0}
+.rsnode-repeater__card-info code{font-size:14px}
 .flash-repair__list{display:flex;flex-direction:column;border-top:1px solid var(--line)}
 .flash-repair__action{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:14px;min-height:64px;padding:10px 4px;border:0;border-bottom:1px solid var(--line);background:none;color:var(--text);text-align:left}
 .flash-repair__action::after{content:'→';font-size:18px;color:var(--text-strong)}
@@ -595,6 +606,8 @@ html.rn-dialog-open{overflow:hidden;scrollbar-gutter:stable}
   .rsnode-managers__actions{grid-area:actions;justify-self:end}
   .rsnode-managers__who{grid-area:who}
   .provision-board__manual,.rsnode-managers__editor,.rsnode-settings__grid{grid-template-columns:minmax(0,1fr)}
+  .rsnode-repeater__owner,.rsnode-repeater__card{grid-template-columns:minmax(0,1fr)}
+  .rsnode-repeater__qr{max-width:280px}
   .rsnode-beta__login{grid-template-columns:minmax(0,1fr)}
   .install-dialog{padding:24px}
   .install-dialog h2{font-size:32px}

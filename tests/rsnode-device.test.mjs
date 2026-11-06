@@ -328,7 +328,7 @@ function devicePage(port, overrides = {}) {
   const document = panelDocument();
   const calls = [];
   const context = {
-    document, betaStage: 'ready', rsnodeOwnerBusy: false, rsnodeSettingsBusy: false, rsnodeChecking: false, navigator: { serial: {} },
+    document, betaStage: 'ready', rsnodeOwnerBusy: false, rsnodeSettingsBusy: false, rsnodeRepeaterBusy: false, rsnodeChecking: false, navigator: { serial: {} },
     state: { flashing: false, device: 'custom', rsnodeInstalled: false }, isRsnodeSelected: () => true,
     showSerialWarning: () => calls.push('serial warning'),
     rsnodeToolPortFromUser: async () => calls.push('port'),
