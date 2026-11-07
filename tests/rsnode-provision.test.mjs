@@ -108,6 +108,23 @@ for (const scenario of vectors.scenarios) {
   });
 }
 
+test('the page reads more from the node after the managers, before leaving it', async () => {
+  const scenario = vectors.scenarios.find(s => s.name === 'add the owner by LXMF address');
+  const port = replayPort(scenario.transcript);
+  const session = createRnodeSession(port);
+  let seen;
+  try {
+    await provisionRsnode(session, formOptions(scenario.options), {
+      finished: async node => { seen = { node, left: port.remaining() }; }
+    });
+  } finally {
+    session.pump.stop();
+    await session.reader.cancel();
+  }
+  assert.deepEqual(seen.node, scenario.node.value);
+  assert.equal(seen.left, 1, 'only LEAVE is still to come');
+});
+
 test('reply payloads read as provision-rsnode.py reads them', () => {
   for (const vector of vectors.replies) {
     const payload = Array.from(bytes(vector.payload));

@@ -3723,8 +3723,13 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         rsnodeManagersFrom = { nodeId: status.nodeId, supported: node !== null };
         renderRsnodeManagers();
         document.getElementById('rsnodeResultNode').textContent = 'RNode ' + status.nodeId;
-        document.getElementById('rsnodeResultIdentity').hidden = !(node && node.destination);
-        if (node && node.destination) document.getElementById('rsnodeResultDestination').textContent = node.destination;
+        // The node's Ratspeak address when it reports one; older firmware shows its management destination.
+        var address = result.identity ? result.identity.lxmf : node && node.destination;
+        document.getElementById('rsnodeResultIdentity').hidden = !address;
+        if (address) document.getElementById('rsnodeResultDestination').textContent = address;
+        document.getElementById('rsnodeResultAddressLabel').textContent = result.identity ? 'Address' : 'Destination';
+        document.getElementById('rsnodeResultAddressHelp').textContent = result.identity
+            ? 'Add the node in Ratspeak by this address, and share it with your managers.' : 'Clients pin this destination.';
         document.getElementById('rsnodeResultNote').textContent = node && !node.destination
             ? 'No node identity yet. Adding the first manager creates it.'
             : node && node.nearbyOnly ? 'Updates only from nearby managers.' : '';
@@ -3755,7 +3760,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             session = createRnodeSession(await openRnodeSerialPort(ui.log, RNODE_REPAIR_SETTLE_MS, await rsnodeOtherPorts()));
             stage = 'protocol';
             ui.setStatus('Waiting for rsNode…');
-            var named = false;
+            var named = false, identity = null;
             var result = await provisionRsnode(session, options, {
                 // STATUS before any change: an RNode another app holds refuses it.
                 identified: async function(status) {
@@ -3772,9 +3777,14 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
                         named = true;
                         ui.setStatus((read ? 'Reading ' : 'Saving to ') + line.slice(9) + '…');
                     }
+                },
+                // The address managers add in Ratspeak; firmware before IDENTITY has none to give.
+                finished: async function(node) {
+                    if (node && node.destination) identity = await readRsnodeIdentity(session).catch(function() { return null; });
                 }
             });
             result.rsnode = context && context.rsnode;
+            result.identity = identity && identity.present ? identity : null;
             showRsnodeOwnerResult(result, read);
             if (!read) rsnodeOwnerSaved = true;
             rsnodeOwnerMessage((read ? 'Showing RNode ' : 'Saved to RNode ') + result.status.nodeId + '.' +

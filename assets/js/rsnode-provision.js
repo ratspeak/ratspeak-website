@@ -192,9 +192,10 @@ function logStatus(log, status) {
  * Run provision-rsnode.py's manager sequence over an open KISS session ({ send, readFrame }).
  * Options mirror its flags: read, owner, ownerIdentity, helper (--admin), helperIdentity (--admin-identity), removeOwner (--remove-manager)
  * (hashes). nodeId, the page's own option, stops before any change on another node;
- * identified(status), the page's own hook, runs once the node is named, before any change.
+ * identified(status), the page's own hook, runs once the node is named, before any change;
+ * finished(node), also the page's, runs last, before the node is left.
  */
-export async function provisionRsnode(session, options, { log = () => {}, identified = async () => {} } = {}) {
+export async function provisionRsnode(session, options, { log = () => {}, identified = async () => {}, finished = async () => {} } = {}) {
   if (!await waitForDevice(session, KISS_TIMEOUT_MS, log)) {
     throw new Error(`no KISS response within ${KISS_TIMEOUT_MS / 1000} s: if you just installed, press RESET on the board; ` +
       'in RNode, hold USB on the home menu to take over from another app, then try again');
@@ -208,6 +209,7 @@ export async function provisionRsnode(session, options, { log = () => {}, identi
   await identified(status);
   if (options.read) {
     const node = await readNodeStatus(session);
+    await finished(node);
     await session.send(CMD_LEAVE, [0xff]);
     renderNode(node).forEach(line => log(line));
     return { status, node };
@@ -219,6 +221,7 @@ export async function provisionRsnode(session, options, { log = () => {}, identi
   const node = await readNodeStatus(session);
   if (node === null && (removals.length || owners.length)) throw new Error('this firmware predates managers');
   status = await readManagementStatus(session);
+  await finished(node);
   await session.send(CMD_LEAVE, [0xff]);
   logStatus(log, status);
   renderNode(node).forEach(line => log(line));
