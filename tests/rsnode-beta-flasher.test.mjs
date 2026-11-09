@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { webcrypto } from 'node:crypto';
 import vm from 'node:vm';
 import test from 'node:test';
-import { betaRequest, rsnodeBoard, validUpdateMetadata, validateBetaCatalog, verifyBetaDownload, validateBetaManifest } from '../assets/js/rsnode-beta.js';
+import { betaRequest, rsnodeBoard, validUf2, validUpdateMetadata, validateBetaCatalog, verifyBetaDownload, validateBetaManifest } from '../assets/js/rsnode-beta.js';
 import { sha256Hex } from '../assets/js/handheld-release.js';
 import { flasherPage } from './flasher-page.mjs';
 
@@ -51,25 +51,79 @@ async function fixture(id = 'heltec-v4') {
     parts: [{ path: 'firmware.bin', offset: 0, size: bytes.length, sha256: await sha256Hex(bytes) }] };
   const zip = { file: name => name === 'firmware.bin' ? { async: async () => bytes } : null };
   const metadata = { id, label: board.label, version: manifest.version, fileName: id + '.zip',
-    size: 100, sha256: 'a'.repeat(64), chipFamily: 'ESP32-S3', flashSize: board.flashSize };
+    size: 100, sha256: 'a'.repeat(64), chipFamily: 'ESP32-S3', installMode: 'factory', flashSize: board.flashSize };
   return { bytes, manifest, zip, metadata };
 }
 
-test('beta board catalog permits only the four reviewed Heltec targets', async () => {
+// A T114 UF2: `blocks` contiguous 256-byte payloads from the app base, as make-uf2.py writes them.
+function uf2(blocks = 3, edit = () => {}) {
+  const bytes = new Uint8Array(blocks * 512);
+  const view = new DataView(bytes.buffer);
+  for (let index = 0; index < blocks; index++) {
+    const words = [0x0a324655, 0x9e5d5157, 0x2000, 0x26000 + index * 256, 256, index, blocks, 0xada52840];
+    words.forEach((word, i) => view.setUint32(index * 512 + i * 4, word, true));
+    view.setUint32(index * 512 + 508, 0x0ab16f30, true);
+    edit(view, index * 512);
+  }
+  return bytes;
+}
+
+async function uf2Fixture(bytes = uf2()) {
+  const manifest = { schemaVersion: 1, product: 'rsnode', board: 'heltec-t114', version: '1.1.2', installMode: 'uf2',
+    chipFamily: 'nRF52840', parts: [{ path: 'firmware.uf2', size: bytes.length, sha256: await sha256Hex(bytes) }] };
+  const zip = { file: name => name === 'firmware.uf2' ? { async: async () => bytes } : null };
+  const metadata = { id: 'heltec-t114', label: 'Heltec T114', version: '1.1.2', fileName: 'rsnode-heltec-t114-1.1.2.zip',
+    size: 100, sha256: 'a'.repeat(64), chipFamily: 'nRF52840', installMode: 'uf2' };
+  return { bytes, manifest, zip, metadata };
+}
+
+test('beta board catalog permits only the reviewed Heltec targets, each with its install kind', async () => {
   for (const id of ['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft']) {
     const f = await fixture(id);
     assert.deepEqual(validateBetaCatalog({ boards: [f.metadata] }), [f.metadata]);
   }
-  for (const id of ['constructor', '__proto__', 'heltec-t114', 'tdeck']) assert.equal(rsnodeBoard(id), null);
+  const t114 = (await uf2Fixture()).metadata;
+  assert.deepEqual(validateBetaCatalog({ boards: [t114] }), [t114]);
+  for (const id of ['constructor', '__proto__', 't-echo', 'tdeck']) assert.equal(rsnodeBoard(id), null);
   const { metadata } = await fixture();
   for (const change of [{ id: 'heltec-t114' }, { flashSize: '8MB' }, { sha256: null }, { size: 0 },
-    { size: 5 * 1024 * 1024 }, { chipFamily: 'ESP32' }, { fileName: '../secret.zip' }]) {
+    { size: 5 * 1024 * 1024 }, { chipFamily: 'ESP32' }, { installMode: 'uf2' }, { fileName: '../secret.zip' }]) {
     assert.throws(() => validateBetaCatalog({ boards: [{ ...metadata, ...change }] }));
+  }
+  for (const change of [{ chipFamily: 'ESP32-S3' }, { installMode: 'factory' }, { flashSize: '16MB' }]) {
+    assert.throws(() => validateBetaCatalog({ boards: [{ ...t114, ...change }] }), JSON.stringify(change));
   }
   assert.throws(() => validateBetaCatalog({ boards: [metadata, metadata] }));
 });
 
+test('a T114 package installs a verified UF2 for its bootloader drive, never through esptool', async () => {
+  const f = await uf2Fixture();
+  const prepared = await validateBetaManifest(f.zip, f.manifest, f.metadata);
+  assert.equal(prepared.installMode, 'uf2');
+  assert.equal(prepared.fileName, 'rsnode-heltec-t114-1.1.2.uf2');
+  assert.equal(prepared.drive, 'HT-n5262');
+  assert.deepEqual(prepared.bytes, f.bytes);
+  const board = rsnodeBoard('heltec-t114');
+  assert.equal(validUf2(uf2(), board), true);
+  assert.equal(validUf2(uf2(3, (view, at) => view.setUint32(at + 28, 0x1b57745f, true)), board), false, 'family');
+  assert.equal(validUf2(uf2(3, (view, at) => at === 512 && view.setUint32(at + 12, 0x27000, true)), board), false, 'gap');
+  assert.equal(validUf2(uf2(3, (view, at) => view.setUint32(at, 0, true)), board), false, 'magic');
+  assert.equal(validUf2(uf2((0xe8000 - 0x26000) / 256 + 1), board), false, 'storage');
+  assert.equal(validUf2(uf2().slice(0, 700), board), false, 'truncated');
+  const changed = uf2();
+  changed[600] ^= 1;
+  await assert.rejects(validateBetaManifest(f.zip, { ...f.manifest, parts: [{ ...f.manifest.parts[0], sha256: await sha256Hex(changed) }] }, f.metadata), /verification/);
+  await assert.rejects(validateBetaManifest(f.zip, { ...f.manifest, installMode: 'factory' }, f.metadata));
+  await assert.rejects(validateBetaManifest((await uf2Fixture(uf2(2, (view, at) => view.setUint32(at + 28, 0, true)))).zip,
+    (await uf2Fixture(uf2(2, (view, at) => view.setUint32(at + 28, 0, true)))).manifest, f.metadata), /does not match this board/);
+  const factory = await fixture();
+  await assert.rejects(validateBetaManifest(factory.zip, factory.manifest, f.metadata));
+});
+
 test('a board may carry a signed update for its own target; boards without one are unchanged', async () => {
+  const t114 = (await uf2Fixture()).metadata;
+  assert.throws(() => validateBetaCatalog({ boards: [{ ...t114, update: { fileName: 'rsnode-heltec-t114.rsota', size: 1_500_000,
+    sha256: 'b'.repeat(64), sequence: 7, otaTarget: '80:81:3c', releaseKeyId: '0011223344556677', version: '1.1.2' } }] }));
   const targets = { 'heltec-v3': '3a', 'heltec-v4': '3f', 'heltec-v4-r8': 'bf', 'heltec-v4-r8-tft': 'c0' };
   for (const [id, board] of Object.entries(targets)) {
     const { metadata } = await fixture(id);
@@ -176,9 +230,12 @@ test('locking clears private bytes, readiness, and package URL without corruptin
   const state = { rsnodeAsset: new ArrayBuffer(10), rsnodeMetadata: {}, firmwareReady: true,
     firmwareAppBytes: new Uint8Array(10), firmwareBytes: new Uint8Array(10),
     rsnodeBundle: { bytes: new Uint8Array(10) }, rsnodeChoice: { kind: 'update', update: true }, rsnodeMode: 'update' };
-  const context = { state, document: { getElementById: () => link }, isRsnodeSelected: () => true };
+  const uf2Shown = [];
+  const context = { state, document: { getElementById: () => link }, isRsnodeSelected: () => true,
+    showRsnodeUf2: value => uf2Shown.push(value) };
   const clear = vm.runInNewContext('(' + extractFunction('clearRsnodeFirmware') + ')', context);
   clear();
+  assert.deepEqual(uf2Shown, [null]);
   for (const key of ['rsnodeAsset', 'rsnodeMetadata', 'firmwareAppBytes', 'firmwareBytes', 'rsnodeBundle', 'rsnodeChoice']) assert.equal(state[key], null);
   assert.equal(state.rsnodeMode, 'install');
   assert.equal(state.firmwareReady, false);
@@ -250,7 +307,7 @@ test('the picker, the install dialog and the package name each board the same wa
   const server = readFileSync(new URL('../lib/rsnode-beta.js', import.meta.url), 'utf8');
   const labels = Object.fromEntries([...server.matchAll(/'(heltec-[a-z0-9-]+)': \{ label: '([^']+)'/g)].map(match => [match[1], match[2]]));
   assert.deepEqual(labels, { 'heltec-v3': 'Heltec V3', 'heltec-v4': 'Heltec V4 · R2', 'heltec-v4-r8': 'Heltec V4 · R8',
-    'heltec-v4-r8-tft': 'Heltec V4 · R8 TFT' });
+    'heltec-v4-r8-tft': 'Heltec V4 · R8 TFT', 'heltec-t114': 'Heltec T114' });
   for (const [id, label] of Object.entries(labels)) assert.equal(rsnodeBoard(id).label, label, id);
 });
 

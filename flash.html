@@ -147,7 +147,7 @@
 
                         <div class="custom-source-pane rsnode-beta" id="customSourceRsnode" role="tabpanel" aria-labelledby="sourceTabRsnode" hidden>
                             <form class="rsnode-beta__login" id="rsnodeLoginForm">
-                                <p class="rsnode-beta__note">rsNode is LoRa firmware for Heltec V3 and V4 boards, in private beta.</p>
+                                <p class="rsnode-beta__note">rsNode is LoRa firmware for Heltec V3, V4, and T114 boards, in private beta.</p>
                                 <details class="rsnode-beta__about"><summary>How rsNode works</summary><p class="rsnode-beta__note">It runs in one of two modes, chosen on the device or in the tools below. As an <strong>RNode</strong>, it is the radio for one app, over USB, Bluetooth, or Wi-Fi. As a <strong>Repeater</strong>, it forwards traffic on its own. Bluetooth is off while Wi-Fi is on. Managers are optional and only manage a Repeater.</p></details>
                                 <label for="rsnodePassword">Private beta password</label>
                                 <input class="rsnode-beta__password" id="rsnodePassword" type="password" autocomplete="current-password" required maxlength="256" aria-describedby="rsnodeStatus rsnodePasswordHelp">
@@ -179,6 +179,14 @@
                                         <label class="rsnode-update__mode"><input type="radio" name="rsnodeInstallMode" value="update"><span><strong>Update</strong><span>Keeps identity, managers, Wi-Fi, Bluetooth pairings, and Repeater settings.</span></span></label>
                                         <label class="rsnode-update__mode"><input type="radio" name="rsnodeInstallMode" value="install"><span><strong>Erase and install</strong><span>Erases everything on the node first.</span></span></label>
                                     </fieldset>
+                                </div>
+                                <div class="rsnode-uf2" id="rsnodeUf2" hidden>
+                                    <ol class="rsnode-uf2__steps">
+                                        <li><a class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeUf2Save">Save the firmware file</a></li>
+                                        <li>Plug the board into this computer by USB and press RESET twice quickly. A drive named <strong id="rsnodeUf2Drive"></strong> appears.</li>
+                                        <li>Drag the file onto that drive. The drive closes by itself when the board restarts into rsNode; your computer may say it wasn&rsquo;t ejected properly.</li>
+                                        <li>Set it up with the tools below.</li>
+                                    </ol>
                                 </div>
                                 <div class="rsnode-beta__links"><a id="rsnodePackageDownload" hidden>Download package and source</a></div>
                             </div>

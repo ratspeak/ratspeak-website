@@ -444,6 +444,9 @@ input[type="checkbox"]{width:22px;height:22px;flex:none;margin:0;accent-color:va
 .rsnode-managers__editor-actions{display:flex;gap:12px}
 .rsnode-managers__add{margin:0;display:flex;align-items:center;gap:12px}
 /* rsNode Update (keeps settings) or Install (erases) */
+.rsnode-uf2{padding:16px;background:var(--surface);border:1px solid var(--line)}
+.rsnode-uf2__steps{display:grid;gap:12px;margin:0;padding-left:22px;font-size:var(--t-small);line-height:1.55;color:var(--text)}
+.rsnode-uf2__steps li::marker{font-weight:700;color:var(--text-strong)}
 .rsnode-update{display:grid;gap:12px}
 .rsnode-update__check{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
 .rsnode-update__check .rsnode-beta__status{flex:1 1 220px}

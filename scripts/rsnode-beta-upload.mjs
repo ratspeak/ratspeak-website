@@ -51,8 +51,8 @@ export async function uploadBetaPackages(catalogArg, outputArg, {
   if (!token && !storeId) throw new Error('Set the dedicated RSNODE_BETA_BLOB_STORE_ID for project OIDC or RSNODE_BETA_BLOB_TOKEN.');
   const auth = storeId ? { storeId } : { token };
   const input = JSON.parse(await readFile(catalogPath, 'utf8'));
-  const availableBoards = new Set(['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft']);
-  if (!Array.isArray(input.boards) || input.boards.length < 1 || input.boards.length > availableBoards.size) throw new Error('Expected one to four beta board packages.');
+  const availableBoards = new Set(['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft', 'heltec-t114']);
+  if (!Array.isArray(input.boards) || input.boards.length < 1 || input.boards.length > availableBoards.size) throw new Error('Expected one to five beta board packages.');
   const prepared = [];
   const local = async (fileName, size, sha256, id) => {
     const path = await realpath(resolve(dirname(catalogPath), fileName));
@@ -67,6 +67,7 @@ export async function uploadBetaPackages(catalogArg, outputArg, {
         !/^[a-f0-9]{64}$/.test(entry.sha256 || '') || !Number.isSafeInteger(entry.size) ||
         entry.size <= 0 || entry.size > 4 * 1024 * 1024) throw new Error('Invalid package catalog.');
     const bytes = await local(entry.fileName, entry.size, entry.sha256, entry.id);
+    if (entry.update !== undefined && !Object.hasOwn(OTA_BOARDS, entry.id)) throw new Error(`No signed updates for ${entry.id}.`);
     const update = entry.update === undefined ? null : await updateBundle(entry, local);
     prepared.push({ entry, bytes, update });
   }

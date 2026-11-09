@@ -502,8 +502,8 @@ test('missing, weak, or incomplete configuration fails closed and hides configur
   }
 });
 
-test('catalog accepts all four beta boards and formatted JSON without leaking Blob URLs', async () => {
-  const boards = ['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft'].map(id => ({ ...BOARD, id }));
+test('catalog accepts all five beta boards and formatted JSON without leaking Blob URLs', async () => {
+  const boards = ['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft', 'heltec-t114'].map(id => ({ ...BOARD, id }));
   const f = fixture({ RSNODE_BETA_CATALOG: JSON.stringify({ boards }, null, 2) });
   const response = await f.request('catalog', { cookie: await f.ready() });
   assert.equal(response.status, 200);
@@ -511,12 +511,20 @@ test('catalog accepts all four beta boards and formatted JSON without leaking Bl
   assert.equal(serialized.includes('blob.vercel-storage.com'), false);
   assert.equal(serialized.includes('url'), false);
   const catalog = JSON.parse(serialized);
-  assert.deepEqual(catalog.boards.map(b => b.flashSize), ['8MB', '16MB', '16MB', '16MB']);
+  assert.deepEqual(catalog.boards.map(b => b.flashSize), ['8MB', '16MB', '16MB', '16MB', undefined]);
+  assert.deepEqual(catalog.boards[4], {
+    id: 'heltec-t114', board: 'heltec-t114', label: 'Heltec T114',
+    version: BOARD.version, fileName: BOARD.fileName, size: BOARD.size, sha256: HASH,
+    product: 'rsnode', installMode: 'uf2', chipFamily: 'nRF52840', platform: 'nrf52', flashStrategy: 'uf2-drive'
+  });
 });
 
 test('invalid assets, unknown boards, duplicate targets, and unsafe metadata disable the catalog', async () => {
   const badEntries = [
-    { id: 'heltec-t114' }, { id: '__proto__' }, { id: 'constructor' }, { version: '' },
+    { id: 'heltec-t1140' }, { id: '__proto__' }, { id: 'constructor' }, { version: '' },
+    { id: 'heltec-t114', flashSize: '16MB' }, { id: 'heltec-t114', chipFamily: 'ESP32-S3' }, { installMode: 'uf2' },
+    { id: 'heltec-t114', update: { fileName: 'x.rsota', size: 1000, sha256: HASH, sequence: 7, otaTarget: '70:71:3c',
+      releaseKeyId: '0011223344556677', version: '1.1.2', url: BOARD.url } },
     { fileName: '../secret.zip' }, { fileName: 'bad\r\nheader.zip' }, { fileName: 'script.html' }, { fileName: 'firmware.bin' },
     { sha256: '' }, { sha256: 'a'.repeat(63) }, { sha256: 'A'.repeat(64) },
     { size: 0 }, { size: -1 }, { size: 1.5 }, { size: MAX_ASSET_BYTES + 1 },

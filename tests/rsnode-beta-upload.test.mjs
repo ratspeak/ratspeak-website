@@ -239,3 +239,21 @@ test('a tampered guide fails before any remote write', async t => {
   }), /integrity failed: guide/);
   assert.equal(uploads, 0);
 });
+
+test('a T114 package uploads like the others, but never with a signed update', async t => {
+  const f = await fixture(t);
+  const board = { ...f.boards[0], id: 'heltec-t114', fileName: 'heltec-t114.zip' };
+  await writeFile(join(f.dir, board.fileName), f.bytes);
+  await writeFile(f.catalogPath, JSON.stringify({ boards: [...f.boards, board] }));
+  const result = await uploadBetaPackages(f.catalogPath, f.output, {
+    token: 'fixture', report() {},
+    upload: async path => ({ url: 'https://fixture.private.blob.vercel-storage.com/' + path }),
+    fetchAsset: async (_url, options) => options.headers ? new Response(f.bytes) : new Response(null, { status: 403 })
+  });
+  assert.deepEqual(result.boards.map(entry => entry.id), ['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-t114']);
+  await writeFile(f.catalogPath, JSON.stringify({ boards: [{ ...board, update: { fileName: 'heltec-t114.rsota' } }] }));
+  let uploads = 0;
+  await assert.rejects(uploadBetaPackages(f.catalogPath, join(f.dir, 'again.json'), { token: 'fixture', upload() { uploads++; }, report() {} }),
+    /No signed updates for heltec-t114/);
+  assert.equal(uploads, 0);
+});

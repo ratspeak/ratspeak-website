@@ -1,12 +1,17 @@
 import { sha256Hex } from './handheld-release.js';
 
-// otaBoard is the board byte of the image's update target, which the node's status reports.
+// otaBoard is the board byte of the node's target, which its status reports. ESP32-S3 boards
+// install a factory image over USB; nRF52840 boards install a UF2 through their bootloader drive.
+const ESP = { chipFamily: 'ESP32-S3', installMode: 'factory' };
 const BOARDS = Object.freeze({
-  'heltec-v3': { label: 'Heltec V3', flashSize: '8MB', capacity: 8 * 1024 * 1024, otaBoard: 0x3a },
-  'heltec-v4': { label: 'Heltec V4 · R2', flashSize: '16MB', capacity: 16 * 1024 * 1024, otaBoard: 0x3f },
-  'heltec-v4-r8': { label: 'Heltec V4 · R8', flashSize: '16MB', capacity: 16 * 1024 * 1024, otaBoard: 0xbf },
-  'heltec-v4-r8-tft': { label: 'Heltec V4 · R8 TFT', flashSize: '16MB', capacity: 16 * 1024 * 1024, otaBoard: 0xc0 }
+  'heltec-v3': { ...ESP, label: 'Heltec V3', flashSize: '8MB', capacity: 8 * 1024 * 1024, otaBoard: 0x3a },
+  'heltec-v4': { ...ESP, label: 'Heltec V4 · R2', flashSize: '16MB', capacity: 16 * 1024 * 1024, otaBoard: 0x3f },
+  'heltec-v4-r8': { ...ESP, label: 'Heltec V4 · R8', flashSize: '16MB', capacity: 16 * 1024 * 1024, otaBoard: 0xbf },
+  'heltec-v4-r8-tft': { ...ESP, label: 'Heltec V4 · R8 TFT', flashSize: '16MB', capacity: 16 * 1024 * 1024, otaBoard: 0xc0 },
+  'heltec-t114': { chipFamily: 'nRF52840', installMode: 'uf2', label: 'Heltec T114', otaBoard: 0x3c,
+    uf2: { base: 0x26000, end: 0xe8000, family: 0xada52840, drive: 'HT-n5262' } }
 });
+const UF2_BLOCK = 512;
 const owns = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
 
 export function rsnodeBoard(id) {
@@ -46,6 +51,7 @@ export async function betaRequest(action, body, options = {}) {
 /** A board's optional signed update (.rsota): true when absent or well formed for that board. */
 export function validUpdateMetadata(update, board) {
   if (update === undefined) return true;
+  if (board.installMode !== 'factory') return false;
   const target = /^([a-f0-9]{2}):([a-f0-9]{2}):([a-f0-9]{2})$/.exec(update && update.otaTarget || '');
   return !!(update && typeof update === 'object' && target && target[1] === '80' && target[2] === '81' &&
     parseInt(target[3], 16) === board.otaBoard &&
@@ -64,8 +70,9 @@ export function validateBetaCatalog(catalog) {
   const seen = new Set();
   for (const metadata of catalog.boards) {
     const board = rsnodeBoard(metadata.id);
-    if (!board || seen.has(board.id) || metadata.chipFamily !== 'ESP32-S3' ||
-        metadata.flashSize !== board.flashSize || typeof metadata.version !== 'string' ||
+    if (!board || seen.has(board.id) || metadata.chipFamily !== board.chipFamily ||
+        metadata.installMode !== board.installMode || metadata.flashSize !== board.flashSize ||
+        typeof metadata.version !== 'string' ||
         !metadata.version || typeof metadata.fileName !== 'string' ||
         !/^[a-zA-Z0-9._-]+\.zip$/.test(metadata.fileName) ||
         !Number.isSafeInteger(metadata.size) || metadata.size <= 0 || metadata.size > 4 * 1024 * 1024 ||
@@ -84,9 +91,50 @@ export async function verifyBetaDownload(buffer, metadata) {
   }
 }
 
+/** A UF2 for the board's bootloader: nRF52840 family, contiguous 256-byte blocks from the app base, clear of storage. */
+export function validUf2(bytes, board) {
+  const layout = board.uf2;
+  const count = bytes.length / UF2_BLOCK;
+  if (!layout || !Number.isInteger(count) || count < 1) return false;
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  for (let index = 0; index < count; index++) {
+    const at = index * UF2_BLOCK;
+    const word = offset => view.getUint32(at + offset, true);
+    if (word(0) !== 0x0a324655 || word(4) !== 0x9e5d5157 || word(508) !== 0x0ab16f30 || word(8) !== 0x2000 ||
+        word(12) !== layout.base + index * 256 || word(16) !== 256 || word(20) !== index || word(24) !== count ||
+        word(28) !== layout.family) return false;
+  }
+  return layout.base + count * 256 <= layout.end;
+}
+
+async function validateUf2Manifest(zip, manifest, board) {
+  if (manifest.installMode !== 'uf2' || manifest.chipFamily !== board.chipFamily ||
+      !Array.isArray(manifest.parts) || manifest.parts.length !== 1) {
+    throw new Error('This is not a supported rsNode package for the selected board.');
+  }
+  const part = manifest.parts[0];
+  if (!part || part.path !== 'firmware.uf2' || !Number.isSafeInteger(part.size) || part.size < UF2_BLOCK ||
+      part.size > 2 * 1024 * 1024 || !/^[a-f0-9]{64}$/.test(part.sha256 || '')) {
+    throw new Error('Invalid rsNode firmware file layout.');
+  }
+  const entry = zip.file(part.path);
+  if (!entry || entry.dir) throw new Error('The rsNode package is missing its firmware file.');
+  const bytes = await entry.async('uint8array');
+  if (bytes.length !== part.size || await sha256Hex(bytes) !== part.sha256) {
+    throw new Error('The rsNode firmware file failed verification.');
+  }
+  if (!validUf2(bytes, board)) throw new Error('The rsNode firmware file does not match this board.');
+  return { bytes, board: board.id, boardLabel: board.label, installMode: 'uf2', product: 'rsnode',
+    fileName: `rsnode-${board.id}-${manifest.version}.uf2`, drive: board.uf2.drive };
+}
+
 export async function validateBetaManifest(zip, manifest, metadata) {
   const board = rsnodeBoard(manifest && manifest.board);
-  if (!board || !metadata || metadata.id !== board.id || manifest.version !== metadata.version ||
+  if (board && board.installMode === 'uf2' && metadata && metadata.id === board.id &&
+      manifest.version === metadata.version && manifest.schemaVersion === 1 && manifest.product === 'rsnode') {
+    return validateUf2Manifest(zip, manifest, board);
+  }
+  if (!board || board.installMode !== 'factory' || !metadata || metadata.id !== board.id || manifest.version !== metadata.version ||
       manifest.schemaVersion !== 1 || manifest.product !== 'rsnode' || manifest.installMode !== 'factory' ||
       manifest.chipFamily !== 'ESP32-S3' || manifest.flashSize !== board.flashSize ||
       manifest.flashMode !== 'dio' || !['40m', '80m'].includes(manifest.flashFreq) ||

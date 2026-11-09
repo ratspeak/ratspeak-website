@@ -59,6 +59,8 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         customSource: 'upload',
         rsnodeAsset: null,
         rsnodeMetadata: null,
+        rsnodeUf2: null,
+        rsnodeUf2Url: null,
         rsnodeLoading: false,
         rsnodeLoadFailed: false,
         rsnodeInstalled: false,
@@ -1019,6 +1021,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         state.rsnodeMode = 'install';
         var packageLink = document.getElementById('rsnodePackageDownload');
         if (packageLink) { packageLink.hidden = true; packageLink.removeAttribute('href'); }
+        showRsnodeUf2(null);
         if (isRsnodeSelected()) {
             state.firmwareReady = false;
             state.firmwareAppBytes = null;
@@ -1302,6 +1305,28 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     if (ADVANCED) document.getElementById('rsnodeLock').addEventListener('click', lockBeta);
     if (ADVANCED) document.getElementById('rsnodeLockRetry').addEventListener('click', lockBeta);
 
+    // A UF2 board installs from a file the user copies to its bootloader drive.
+    function showRsnodeUf2(prepared) {
+        var panel = document.getElementById('rsnodeUf2');
+        if (!panel) return;
+        var save = document.getElementById('rsnodeUf2Save');
+        if (state.rsnodeUf2Url) URL.revokeObjectURL(state.rsnodeUf2Url);
+        state.rsnodeUf2 = prepared;
+        state.rsnodeUf2Url = prepared ? URL.createObjectURL(new Blob([prepared.bytes], { type: 'application/octet-stream' })) : null;
+        if (prepared) {
+            save.href = state.rsnodeUf2Url;
+            save.download = prepared.fileName;
+            document.getElementById('rsnodeUf2Drive').textContent = prepared.drive;
+        } else {
+            save.removeAttribute('href');
+        }
+        panel.hidden = !prepared;
+    }
+
+    function rsnodeNeedsVariant(id) {
+        return id.indexOf('heltec-v4') === 0;
+    }
+
     function rsnodeVariantDescription(id) {
         if (id === 'heltec-v4-r8-tft') return 'V4 R8 TFT, the Expansion Kit V2 with the 2.8-inch touchscreen';
         if (id === 'heltec-v4-r8') return 'V4 R8 (ESP32-S3R8) with the small OLED display';
@@ -1310,11 +1335,12 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
 
     function rsnodeReadyText() {
         var metadata = state.rsnodeMetadata;
+        if (state.rsnodeUf2) return metadata.version + ' · ' + formatBytes(state.rsnodeUf2.bytes.length) + ' · Install it from the file below.';
         return metadata.version + ' · ' + formatBytes(metadata.size) + ' · ' + (state.firmwareReady ? 'Ready to flash' : 'Confirm the V4 variant to continue.');
     }
 
     function rsnodeVariantIsConfirmed() {
-        return state.rsnodeMetadata && (state.rsnodeMetadata.id === 'heltec-v3' || rsnodeVariantConfirmed.checked);
+        return state.rsnodeMetadata && (!rsnodeNeedsVariant(state.rsnodeMetadata.id) || rsnodeVariantConfirmed.checked);
     }
 
     if (ADVANCED) rsnodeBoardSelect.addEventListener('change', async function() {
@@ -1323,7 +1349,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         clearRsnodeFirmware();
         rsnodeVariantConfirmed.checked = false;
         var metadata = betaBoards.find(function(board) { return board.id === rsnodeBoardSelect.value; });
-        document.getElementById('rsnodeVariantCheck').hidden = !metadata || metadata.id === 'heltec-v3';
+        document.getElementById('rsnodeVariantCheck').hidden = !metadata || !rsnodeNeedsVariant(metadata.id);
         if (metadata) document.getElementById('rsnodeVariantLabel').textContent = 'I checked that my device is ' + rsnodeVariantDescription(metadata.id) + '.';
         updateFlashBtn();
         if (!metadata) { betaStatus(''); return; }
@@ -1337,16 +1363,17 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             var zip = await window.JSZip.loadAsync(buffer, { checkCRC32: true });
             var entry = zip.file('manifest.json');
             if (!entry) throw new Error('The beta package is missing its manifest.');
-            await validateBetaManifest(zip, JSON.parse(await entry.async('string')), metadata);
+            var prepared = await validateBetaManifest(zip, JSON.parse(await entry.async('string')), metadata);
             if (!customRequestIsCurrent(serial, 'rsnode') || betaStage !== 'ready') return;
             state.rsnodeAsset = buffer;
             state.rsnodeMetadata = metadata;
+            if (prepared.installMode === 'uf2') showRsnodeUf2(prepared);
             var packageLink = document.getElementById('rsnodePackageDownload');
             packageLink.href = '/api/rsnode-beta?action=download&board=' + encodeURIComponent(metadata.id);
             packageLink.download = metadata.fileName;
             packageLink.hidden = false;
             state.rsnodeLoading = false;
-            state.firmwareReady = rsnodeVariantIsConfirmed();
+            state.firmwareReady = !state.rsnodeUf2 && rsnodeVariantIsConfirmed();
             betaStatus(rsnodeReadyText());
         } catch (error) {
             if (!customRequestIsCurrent(serial, 'rsnode')) return;
@@ -1358,7 +1385,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     });
     if (ADVANCED) rsnodeVariantConfirmed.addEventListener('change', function() {
         if (state.flashing || !isRsnodeSelected()) return;
-        state.firmwareReady = !!state.rsnodeAsset && betaStage === 'ready' && rsnodeVariantIsConfirmed();
+        state.firmwareReady = !!state.rsnodeAsset && !state.rsnodeUf2 && betaStage === 'ready' && rsnodeVariantIsConfirmed();
         if (state.rsnodeMetadata) betaStatus(rsnodeReadyText());
         updateFlashBtn();
     });
@@ -1367,6 +1394,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     var rsnodeChecking = false;
     var RSNODE_CHECK_MS = 10000;
     var RSNODE_INSTALL_NOTE = 'Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings, and Repeater settings. Update requires a compatible package and firmware that supports USB updates.';
+    var RSNODE_UF2_NOTE = 'Installing from the file keeps the node\'s identity, managers, Bluetooth pairings, and Repeater settings.';
     var RSNODE_UPDATE_NOTE = 'Update keeps the node\'s identity, managers, Wi-Fi, Bluetooth pairings, and Repeater settings; Install erases them. Check the node to see whether it can update.';
 
     function rsnodeUpdateChosen() {
@@ -1382,7 +1410,9 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     function renderRsnodeUpdate() {
         var metadata = state.rsnodeMetadata;
         var offered = !!(isRsnodeSelected() && betaStage === 'ready' && metadata && metadata.update);
-        document.getElementById('rsnodeInstallNote').textContent = offered ? RSNODE_UPDATE_NOTE : RSNODE_INSTALL_NOTE;
+        var installNote = document.getElementById('rsnodeInstallNote');
+        installNote.textContent = state.rsnodeUf2 ? RSNODE_UF2_NOTE : offered ? RSNODE_UPDATE_NOTE : RSNODE_INSTALL_NOTE;
+        installNote.classList.toggle('rsnode-beta__note--warning', !state.rsnodeUf2);
         document.getElementById('rsnodeUpdate').hidden = !offered;
         var flashBtn = document.getElementById('flashBtn');
         if (!state.flashing && flashBtn && flashBtn.textContent.trim() !== flashButtonLabel()) setFlashButtonIdleContent();
@@ -5096,6 +5126,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         if (!rsnodeBoardSelect.value) return 'Choose your board to flash. To manage a node that already runs rsNode, use the tools below.';
         if (state.rsnodeLoading) return 'Loading the firmware for your board…';
         if (state.rsnodeLoadFailed) return 'Firmware could not be loaded. Choose the board again to retry.';
+        if (state.rsnodeUf2) return 'Copy the firmware file to the board, as the steps above show. Then use the tools below.';
         if (!rsnodeVariantIsConfirmed()) return 'Confirm the V4 variant to continue.';
         return 'Select a USB device to continue.';
     }
