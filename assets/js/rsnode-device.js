@@ -26,6 +26,7 @@ const CMD_MCU = 0x49;
 const CMD_FW_VERSION = 0x50;
 const CMD_RESET = 0x55;
 const CMD_HASHES = 0x60;
+const CMD_BT_PIN = 0x62;
 const CMD_DISP_READ = 0x66;
 const CMD_ERROR = 0x90;
 const CMD_TRANSPORT_CFG = 0x6f;
@@ -45,13 +46,15 @@ const INTERFERENCE_NONE = 0xff;
 export const SCREEN_WIDTH = 128;
 export const SCREEN_HEIGHT = 64;
 const SCREEN_BYTES = SCREEN_WIDTH * SCREEN_HEIGHT / 8;
-const BOARDS = { 0x3a: 'Heltec V3', 0x3c: 'Heltec T114', 0x3f: 'Heltec V4', 0x44: 'T-Echo' };
+const BOARDS = { 0x3a: 'Heltec V3', 0x3c: 'Heltec T114', 0x3f: 'Heltec V4', 0x44: 'T-Echo', 0x51: 'RAK4631' };
 // Heltec V3 and V4 mirror their whole 128x64 UI; T-Echo and T114 return part of a larger panel.
+// A board with no screen can answer as one of these: rsnodeScreenless reads its STATUS instead.
 const SCREEN_BOARDS = [0x3a, 0x3f];
 const PLATFORMS = { 0x70: 'nRF52', 0x80: 'ESP32' };
 const BATTERY_STATES = { 1: 'discharging', 2: 'charging', 3: 'charged' };
 const ROLE_PRIMARY = 1;
 const ROLE_HELPER = 2;
+const PAIRING_CODE_MAX = 999999;
 const DETECT_POLL_MS = 1000;
 const EXCHANGE_TIMEOUT_MS = 2000;
 const WAIT_TIMEOUT_MS = 30000;
@@ -85,6 +88,12 @@ const version = ({ major, minor }) => `${major}.${String(minor).padStart(2, '0')
 const rssi = wire => wire === 0 ? null : wire - RSSI_OFFSET;
 
 export const screenSupported = board => SCREEN_BOARDS.includes(board);
+
+/** STATUS names a board with no screen: the status check and the board's lights stand in for one. */
+export function rsnodeScreenless(rsnode) {
+  const board = rsnode && rsnode.board && rsnodeBoardForTarget(rsnode.board.board);
+  return !!board && board.screen === false;
+}
 
 /** A CMD_DISP_READ payload as one byte per pixel, row by row: the SSD1306 pages probe-heltec-v4.py exports. */
 export function screenPixels(payload) {
@@ -253,10 +262,24 @@ export async function readRsnodeFacts(session) {
 
 /**
  * Drop what the node sent unasked (battery and channel telemetry, received packets) or answered
- * late, so a long session neither queues it nor reads it as a fresh answer.
+ * late, so a long session neither queues it nor reads it as a fresh answer. A pairing code is kept
+ * for readRsnodePairingCode.
  */
 async function dropUnsolicited(session) {
-  while (await session.readFrame(null, 0));
+  while (await session.readFrame(frame => frame.command !== CMD_BT_PIN, 0));
+}
+
+/**
+ * The pairing code the node sends unasked once a phone starts pairing (CMD_BT_PIN, as
+ * probe-heltec-v4.py --bt-pair prints it): six digits, or null when none is waiting.
+ */
+export async function readRsnodePairingCode(session) {
+  let code = null;
+  for (let frame; (frame = await session.readFrame(candidate => candidate.command === CMD_BT_PIN, 0));) {
+    const value = frame.payload.length === 4 ? u32(frame.payload) : null;
+    if (value !== null && value <= PAIRING_CODE_MAX) code = String(value).padStart(6, '0');
+  }
+  return code;
 }
 
 /** The radio and its counters; the last packet's RSSI and SNR are null until one arrives. */
@@ -306,7 +329,10 @@ async function command(session, code, payload) {
   return !(await session.readFrame(frame => frame.command === CMD_ERROR, REFUSAL_WAIT_MS));
 }
 
-/** probe-heltec-v4.py --bt-pair: Bluetooth on and kept on, with a pairing window whose code the screen shows. */
+/**
+ * probe-heltec-v4.py --bt-pair: Bluetooth on and kept on, with a pairing window whose code the
+ * screen shows and the node sends over USB (readRsnodePairingCode).
+ */
 export function startRsnodePairing(session) {
   return command(session, CMD_BT_CTRL, [BT_PAIRING]);
 }
@@ -365,10 +391,11 @@ function wifiLine(wifi) {
   return wifi.ip ? `${name} · ${wifi.ip}` : name;
 }
 
-/** The panel's lines; Wi-Fi, channel and battery are null when the node has nothing to report. */
+/** The panel's lines; Wi-Fi, channel and battery are null when the node has nothing to report, Wi-Fi also on a board without it. */
 export function rsnodeSummary(facts, radio) {
   const channel = radio.channel;
   const rsnode = facts.rsnode;
+  const variant = rsnode && rsnode.board && rsnodeBoardForTarget(rsnode.board.board);
   return {
     node: `RNode ${facts.status.nodeId}`,
     board: `${boardName(facts)} · ${PLATFORMS[facts.platform] || hexByte(facts.platform)}`,
@@ -376,7 +403,7 @@ export function rsnodeSummary(facts, radio) {
     owners: ownersLine(facts.node),
     repeater: repeaterLine(facts.transport),
     forwarding: forwardingLine(rsnode),
-    wifi: rsnode ? wifiLine(rsnode.wifi) : null,
+    wifi: rsnode && !(variant && variant.wifi === false) ? wifiLine(rsnode.wifi) : null,
     radio: radioLine(radio),
     packets: `RX ${radio.rx} · TX ${radio.tx}` + (radio.rssi === null ? '' : ` · last ${radio.rssi} dBm, ${radio.snr} dB`),
     channel: radio.online
@@ -385,6 +412,80 @@ export function rsnodeSummary(facts, radio) {
       : null,
     battery: BATTERY_STATES[radio.battery.state] ? `${radio.battery.percent}% · ${BATTERY_STATES[radio.battery.state]}` : null
   };
+}
+
+function upFor(seconds) {
+  const count = (value, unit) => `${value} ${unit}${value === 1 ? '' : 's'}`;
+  if (seconds < 60) return 'less than a minute';
+  if (seconds < 3600) return count(Math.floor(seconds / 60), 'minute');
+  if (seconds < 86400) return count(Math.floor(seconds / 3600), 'hour');
+  return count(Math.floor(seconds / 86400), 'day');
+}
+
+function managersItem(node) {
+  const admins = node.owners.filter(owner => owner.role === ROLE_HELPER).length;
+  const parts = [];
+  if (node.owners.some(owner => owner.role === ROLE_PRIMARY)) parts.push('an Owner');
+  if (admins) parts.push(`${admins} admin${admins === 1 ? '' : 's'}`);
+  return parts.length ? `It has ${parts.join(' and ')}.` : 'It has no managers yet.';
+}
+
+/**
+ * A node with no screen, as a short checklist of { ok, text }: what readRsnodeFacts and the radio
+ * say it is doing. ok is false for what is off, waiting, or paused.
+ */
+export function rsnodeStatusCheck(facts, radio = null) {
+  const rsnode = facts.rsnode, node = rsnode && rsnode.node;
+  const repeater = node ? node.repeater : facts.transport.bootMode;
+  const items = [{ ok: true, text: `RNode ${facts.status.nodeId} answered over USB.` }];
+  const add = (ok, text) => items.push({ ok, text });
+  if (rsnode && rsnode.release) {
+    add(true, `It runs rsNode ${rsnode.release}` + (rsnode.uptimeS === null ? '.' : ` and has been up for ${upFor(rsnode.uptimeS)}.`));
+  }
+  if (rsnode && (rsnode.pendingSequence !== null || (rsnode.ota && rsnode.ota.trialPending))) add(false, 'It is finishing an update.');
+  if (!repeater) {
+    const app = node && node.hostOwner >= 2 ? HOST_OWNERS[node.hostOwner] : null;
+    add(true, app ? `It is running as an RNode, and an app is using it over ${app}.` : 'It is running as an RNode.');
+  } else if (!node || node.forwarding === null) {
+    add(true, 'It is running as a Repeater.');
+  } else if (node.forwarding) {
+    add(true, 'It is running as a Repeater and forwarding.');
+  } else {
+    add(false, 'It is a Repeater, paused. Start repeating in Set up as a Repeater.');
+  }
+  if (radio) {
+    if (radio.online) add(true, radioConfigured(radio) ? `Its radio is on at ${(radio.frequency / 1e6).toFixed(3)} MHz.` : 'Its radio is on.');
+    else add(false, repeater ? 'Its radio is off.' : 'Its radio is off until an app turns it on.');
+  }
+  if (node) {
+    if (!node.bluetoothAvailable) add(false, 'Bluetooth is off while Wi-Fi is on.');
+    else if (node.bluetoothEnabled) add(true, 'Bluetooth is on.');
+    else add(false, repeater ? 'Bluetooth is off.' : 'Bluetooth is off. Start Bluetooth pairing to turn it on.');
+  }
+  const wifi = rsnode && rsnode.wifi;
+  if (wifi && wifi.mode !== 0) {
+    if (wifi.ready && wifi.ip) add(true, wifi.mode === 1 ? `Wi-Fi joined a network at ${wifi.ip}.` : `Wi-Fi runs its own network at ${wifi.ip}.`);
+    else add(false, wifi.mode === 1 ? 'Wi-Fi is joining a network.' : 'Wi-Fi is starting its own network.');
+  }
+  if (facts.node) add(facts.node.owners.length > 0, managersItem(facts.node));
+  return items;
+}
+
+// What the firmware's lights say on a board with no screen. heartbeat names the light that flashes every 5 seconds.
+const LIGHTS = {
+  'rak4631': { heartbeat: 'green light', legend: [
+    ['Green light', 'One short flash every 5 seconds means it is running as an RNode. Two short flashes every 5 seconds mean the Repeater is forwarding.'],
+    ['Blue light', 'One flash for each packet received or sent. Steady blinking while a pairing window is open, or while a manager asked it to blink.']
+  ] },
+  'heltec-wsl-v3': { heartbeat: 'white light', legend: [
+    ['White light', 'One short flash every 5 seconds means it is running as an RNode. Two short flashes every 5 seconds mean the Repeater is forwarding. ' +
+      'An extra flash means packets were received or sent in the last second. Steady blinking means a pairing window is open, or a manager asked it to blink.']
+  ] }
+};
+
+/** A screenless board's lights: { heartbeat, legend: [[light, meaning]] }, or null for a board with a screen. */
+export function rsnodeLights(board) {
+  return board && Object.hasOwn(LIGHTS, board.id) ? LIGHTS[board.id] : null;
 }
 
 /** The build lines of a bug report, from STATUS. */

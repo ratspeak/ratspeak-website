@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
-import { HOST_OWNERS, RSNODE_RESULT } from '../assets/js/rsnode-device.js';
+import { HOST_OWNERS, RSNODE_RESULT, rsnodeLights, rsnodeScreenless } from '../assets/js/rsnode-device.js';
 import { addRsnodeOwner, parseNodeStatus } from '../assets/js/rsnode-provision.js';
 import { LIMITS, REPEATER_PRESETS, REPEATER_REGIONS, SETUP, checkRepeaterForm, controlRepeater, parseRsnodeIdentity,
   readRsnodeIdentity, repeaterOwner, repeaterRadioLine, repeaterRegions, repeaterSettingsForm, repeaterSetupEntries,
@@ -38,6 +38,12 @@ test('a V4 offers no 433 MHz region, and the radio line follows the preset', () 
   assert.deepEqual(repeaterRegions(rsnodeBoard('heltec-v4-r8')).map(region => region.id), [1, 2, 4, 5]);
   assert.deepEqual(repeaterRegions(rsnodeBoard('heltec-v3')).map(region => region.id), [1, 2, 3, 4, 5]);
   assert.deepEqual(repeaterRegions(null).map(region => region.id), [1, 2, 3, 4, 5]);
+  // Only the V4s lose 433 MHz to their amplifier: every other board, by id or by update target, gets the whole list.
+  for (const id of ['heltec-t114', 't-echo', 'thinknode-m1', 'rak4631', 'heltec-wsl-v3']) {
+    assert.deepEqual(repeaterRegions(rsnodeBoard(id)).map(region => region.id), [1, 2, 3, 4, 5], id);
+  }
+  for (const target of [0xc4, 0x51, 0xba]) assert.equal(repeaterRegions(rsnodeBoardForTarget(target)).length, 5, target.toString(16));
+  for (const id of ['heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft']) assert.equal(repeaterRegions(rsnodeBoard(id)).length, 4, id);
   assert.equal(repeaterRadioLine(2, 7), '868.000 MHz · 125 kHz · SF11 · CR 4/8');
   assert.equal(repeaterRadioLine(null, 0), '');
 });
@@ -243,6 +249,19 @@ test('the result says the node is set up but not repeating yet, and where its Wi
   assert.equal(repeaterSavedMessage('887A', status(true, { mode: 1, ready: true, ip: '192.168.1.50' }), remote),
     'RNode 887A is set up as a Repeater and is not repeating yet. It joined “Home” at 192.168.1.50 and connects to rns.example.org, port 4242.');
   assert.match(repeaterSavedMessage('887A', status(true, { mode: 1, ready: false, ip: null }), remote), /It has not joined “Home” yet\./);
+  assert.match(repeaterSavedMessage('887A', status(true, { mode: 1, ready: false, ip: null }), remote), /its screen shows its Wi-Fi state\.$/);
+  // A board with no screen is sent to the live view's status check instead.
+  const screenless = (target, repeater, wifi = null) => ({ ...status(repeater, wifi), board: { platform: 0x80, mcu: 0x81, board: target } });
+  for (const target of [0x51, 0xba]) {
+    assert.equal(repeaterSavedMessage('887A', screenless(target, false), baseForm()),
+      'RNode 887A saved the Repeater settings but did not restart as a Repeater. Run the status check in rsNode live view.');
+    assert.equal(repeaterSavedMessage('887A', screenless(target, true), baseForm()), 'RNode 887A is set up as a Repeater and is not repeating yet.');
+  }
+  assert.equal(repeaterSavedMessage('887A', screenless(0xba, true, { mode: 1, ready: false, ip: null }), remote),
+    'RNode 887A is set up as a Repeater and is not repeating yet. It has not joined “Home” yet. Check the network name and password; ' +
+    'the status check in rsNode live view shows its Wi-Fi state.');
+  // The ThinkNode M1 has a screen, and so do the boards whose wire identity the others borrow.
+  for (const target of [0xc4, 0x44, 0x3a]) assert.match(repeaterSavedMessage('887A', screenless(target, false), baseForm()), /Check its screen\.$/);
 });
 
 // The panel's task against stand-ins for the port, the node and the DOM it reports to.
@@ -250,9 +269,11 @@ function repeaterTask(node, form, overrides = {}) {
   const calls = [];
   const context = {
     state: { flashing: false }, navigator: { serial: {} }, rsnodeOwnerBusy: false, rsnodeSettingsBusy: false, rsnodeRepeaterBusy: false,
-    rsnodeChecking: false, rsnodeRepeaterResult: null, RNODE_REPAIR_SETTLE_MS: 0, RSNODE_RESUME_MS: 100,
+    rsnodeChecking: false, rsnodeRepeaterResult: null, rsnodeDeviceFacts: null, RNODE_REPAIR_SETTLE_MS: 0, RSNODE_RESUME_MS: 100,
     RSNODE_TAKEOVER: 'If you just installed, press RESET on the board first.', HOST_OWNERS, WIFI_MODES,
-    document: { getElementById: () => ({}) },
+    document: { getElementById: () => ({}), querySelectorAll: () => [] }, rsnodeHeardBoard: null,
+    updateRsnodeSettingsVisibility: () => {}, window: { confirm: text => { calls.push(['confirm', text]); return true; } },
+    showRsnodeDeviceCheck: () => calls.push(['check']),
     setRsnodeRepeaterBusy: busy => calls.push(['busy', busy]),
     rsnodeRepeaterMessage: (message, error, done) => calls.push(['message', message, !!error, !!done]),
     readRsnodeRepeaterForm: () => form,
@@ -280,12 +301,14 @@ function repeaterTask(node, form, overrides = {}) {
     sleepMs: async ms => calls.push(['sleep', ms]),
     showSerialWarning: () => {},
     checkRepeaterForm, repeaterRegions, repeaterOwner, repeaterSettingsForm, checkSettingsForm, settingsChanges, repeaterSetupEntries,
-    nodeContactCard, repeaterSavedMessage, controlRepeater,
+    nodeContactCard, repeaterSavedMessage, controlRepeater, rsnodeLights, rsnodeScreenless,
     ...overrides
   };
   const page = pageFunctions(['RSNODE_SETTINGS_RESTART_MS', 'RSNODE_WIFI_WAIT_MS', 'RSNODE_WIFI_POLL_MS', 'RSNODE_CLI_WORDS',
     'rsnodePortError', 'rsnodeHeldElsewhere', 'rsnodeHeldMessage', 'waitForRsnodeWifi', 'followRsnodeRestart', 'rsnodeRepeaterRefusal',
-    'rsnodeRepeaterError', 'rsnodeRepeaterTarget', 'rsnodeIsRepeater', 'runRsnodeRepeaterTask', 'runRsnodeRepeaterStart'], context);
+    'rsnodeRepeaterError', 'rsnodeRepeaterNode', 'rsnodeRepeaterTarget', 'rsnodeRepeaterControls', 'noteRsnodeRepeater',
+    'rsnodeBoardScreenless', 'rsnodeBoardHasWifi', 'hearRsnodeBoard', 'rsnodeIsRepeater', 'RSNODE_REPEATER_CONTROLS',
+    'runRsnodeRepeaterTask', 'runRsnodeRepeaterControl'], context);
   return { ...page, context, calls };
 }
 
@@ -339,14 +362,14 @@ test('Start repeating is offered only for a node set up here or a Repeater in th
   task.context.rsnodeRepeaterResult.repeating = true;
   assert.equal(task.rsnodeRepeaterTarget(), null);
   // Nothing to start: nothing is sent.
-  await task.runRsnodeRepeaterStart();
+  await task.runRsnodeRepeaterControl('start');
   assert.ok(!task.calls.some(call => call[0] === 'port'));
 
   // The control frame goes to the node that was set up; it is already a Repeater, so it does not restart.
   const port = nodePort([[0x7a, 0x06, 0x00]]);
   task = repeaterTask({ nodeId: '887A' }, baseForm(), { rsnodeDeviceFacts: null, rsnodeRepeaterResult: { nodeId: '887A', repeating: false },
     openRnodeSerialPort: async () => port, createRnodeSession, closeRnodeSession: async session => { await closeRnodeSession(session); task.calls.push(['close']); } });
-  await task.runRsnodeRepeaterStart();
+  await task.runRsnodeRepeaterControl('start');
   assert.deepEqual(port.written, ['c07a0601c0']);
   assert.deepEqual(task.calls.filter(call => !['busy', 'message'].includes(call[0])), [['port'], ['leave'], ['close']]);
   assert.deepEqual(task.calls.filter(call => call[0] === 'message').at(-1), ['message', 'The node is repeating.', false, true]);
@@ -356,9 +379,223 @@ test('Start repeating is offered only for a node set up here or a Repeater in th
   // Another node on the port is left alone.
   task = repeaterTask({ nodeId: 'FFFF' }, baseForm(), { rsnodeDeviceFacts: null, rsnodeRepeaterResult: { nodeId: '887A', repeating: false },
     controlRepeater: async () => { throw new Error('sent to the wrong node'); } });
-  await task.runRsnodeRepeaterStart();
+  await task.runRsnodeRepeaterControl('start');
   assert.equal(task.calls.filter(call => call[0] === 'message').at(-1)[1], 'This is RNode FFFF, not RNode 887A. Connect RNode 887A to start it.');
   assert.equal(task.context.rsnodeRepeaterResult.repeating, false);
+});
+
+test('a board with no screen is set up and started with its lights and status check named, never its screen or menu', async () => {
+  const identity = await parseRsnodeIdentity(identityBody(node));
+  const rak = (repeater, hostOwner) => statusOf(repeater, hostOwner, { board: { platform: 0x70, mcu: 0x71, board: 0x51 } });
+  // Setup remembers the board, so Start repeating can say what its light does next.
+  let task = repeaterTask({ nodeId: '887A', setup: { kind: 'restart', restartMs: 0 }, identity, status: [rak(false, 1), rak(true, 0)] }, baseForm());
+  await task.runRsnodeRepeaterTask();
+  assert.equal(task.calls.filter(call => call[0] === 'message').at(-1)[1], 'RNode 887A is set up as a Repeater and is not repeating yet.');
+  assert.equal(task.context.rsnodeRepeaterResult.board.id, 'rak4631');
+  const start = async overrides => {
+    const port = nodePort([[0x7a, 0x06, 0x00]]);
+    const started = repeaterTask({ nodeId: '887A' }, baseForm(), { openRnodeSerialPort: async () => port, createRnodeSession, closeRnodeSession, ...overrides });
+    await started.runRsnodeRepeaterControl('start');
+    assert.deepEqual(port.written, ['c07a0601c0']);
+    return started.calls.filter(call => call[0] === 'message').at(-1);
+  };
+  assert.deepEqual(await start({ rsnodeRepeaterResult: task.context.rsnodeRepeaterResult }),
+    ['message', 'The node is repeating. Its green light now flashes twice every 5 seconds.', false, true]);
+  // A paused Stick Lite V3 seen in the live view is started the same way, and its last read now says it forwards.
+  const facts = (board = 0xba) => ({ status: { nodeId: '887A' }, transport: { bootMode: true, radioProfile: true },
+    rsnode: { node: { repeater: true, forwarding: false }, board: { platform: 0x80, mcu: 0x81, board } } });
+  const lite = facts();
+  assert.equal((await start({ rsnodeDeviceFacts: lite }))[1], 'The node is repeating. Its white light now flashes twice every 5 seconds.');
+  assert.deepEqual(lite.rsnode.node, { repeater: true, forwarding: true });
+  // A board with a screen, or one whose STATUS never named it, gets the plain line.
+  assert.equal((await start({ rsnodeDeviceFacts: facts(0x3a) }))[1], 'The node is repeating.');
+  assert.equal((await start({ rsnodeDeviceFacts: { ...facts(), rsnode: null } }))[1], 'The node is repeating.');
+  // Another app holding it: there is no USB button to hold.
+  task = repeaterTask({ nodeId: '887A', status: [rak(false, 2)] }, baseForm());
+  await task.runRsnodeRepeaterTask();
+  assert.equal(task.calls.filter(call => call[0] === 'message').at(-1)[1],
+    'Another app is using RNode 887A over Bluetooth. Disconnect it, then save again.');
+  task = repeaterTask({ nodeId: '887A', status: [rak(false, 1)], setup: { kind: 'refused' } }, baseForm());
+  await task.runRsnodeRepeaterTask();
+  assert.equal(task.calls.filter(call => call[0] === 'message').at(-1)[1],
+    'Another app is using RNode 887A over Bluetooth or Wi-Fi. Disconnect it, then save again.');
+  // The panel's hint names the board's menu only for a board that has one.
+  const later = extract('syncRsnodeRepeaterForm');
+  assert.match(later, /rsnodeBoardScreenless\(rsnodeHeardBoard\) \? 'or later from Ratspeak with \/start\.' : 'later from Ratspeak with \/start, or from the board\\'s menu\.'/);
+});
+
+// A Repeater as the live view last read it: STATUS names the board by its update target.
+const repeaterFacts = (target, forwarding, repeater = true) => ({ status: { nodeId: '887A' }, transport: { bootMode: repeater, radioProfile: true },
+  rsnode: { node: { repeater, forwarding }, board: { platform: target === 0x51 ? 0x70 : 0x80, mcu: target === 0x51 ? 0x71 : 0x81, board: target } } });
+
+test('a Repeater with no screen can be stopped and returned to RNode mode here; a board with a screen keeps its own menu', async () => {
+  // Stop: one frame, no restart, and the node's last read now says it is paused.
+  let facts = repeaterFacts(0x51, true);
+  let port = nodePort([[0x7a, 0x06, 0x00]]);
+  let task = repeaterTask({ nodeId: '887A' }, baseForm(), { rsnodeDeviceFacts: facts, openRnodeSerialPort: async () => port, createRnodeSession, closeRnodeSession });
+  await task.runRsnodeRepeaterControl('stop');
+  assert.deepEqual(port.written, ['c07a0602c0']);
+  assert.deepEqual(task.calls.filter(call => call[0] === 'message').at(-1),
+    ['message', 'The node stopped repeating. Its green light now flashes once every 5 seconds.', false, true]);
+  assert.deepEqual(facts.rsnode.node, { repeater: true, forwarding: false });
+  assert.ok(!task.calls.some(call => ['confirm', 'check', 'sleep'].includes(call[0])));
+  assert.equal(task.rsnodeRepeaterTarget(), '887A');
+
+  // Back to RNode mode: said plainly first, then one frame, the restart, and the live view takes over.
+  facts = repeaterFacts(0xba, false);
+  port = nodePort([[0x7a, 0x06, 0x00, 0x00, 0xfa]]);
+  task = repeaterTask({ nodeId: '887A' }, baseForm(), { rsnodeDeviceFacts: facts, openRnodeSerialPort: async () => port, createRnodeSession,
+    closeRnodeSession: async session => { await closeRnodeSession(session); task.calls.push(['close']); } });
+  await task.runRsnodeRepeaterControl('exit');
+  assert.deepEqual(port.written, ['c07a0603c0']);
+  assert.deepEqual(task.calls.filter(call => !['busy', 'message'].includes(call[0])), [
+    ['confirm', 'Return RNode 887A to RNode mode?\n\nIt stops repeating and restarts as an RNode. Its Repeater settings and managers stay.'],
+    ['port'], ['sleep', 1250], ['leave'], ['close'], ['check']]);
+  assert.deepEqual(task.calls.filter(call => call[0] === 'message').at(-1), ['message', 'RNode 887A is back in RNode mode.', false, true]);
+  assert.deepEqual(facts.rsnode.node, { repeater: false, forwarding: false });
+  assert.equal(task.rsnodeRepeaterNode(), null);
+
+  // Declined: nothing is asked of the node.
+  task = repeaterTask({ nodeId: '887A' }, baseForm(), { rsnodeDeviceFacts: repeaterFacts(0xba, true),
+    window: { confirm: () => false }, controlRepeater: async () => { throw new Error('sent after a No'); } });
+  await task.runRsnodeRepeaterControl('exit');
+  assert.ok(!task.calls.some(call => ['port', 'check', 'busy'].includes(call[0])));
+
+  // A node set up here: its card stays, it reads as an RNode that Start repeating can bring back.
+  const identity = await parseRsnodeIdentity(identityBody(node));
+  const result = { nodeId: '887A', identity, card: nodeContactCard(identity), repeating: true, repeater: true, board: rsnodeBoard('rak4631') };
+  port = nodePort([[0x7a, 0x06, 0x00, 0x00, 0xfa]]);
+  task = repeaterTask({ nodeId: '887A' }, baseForm(), { rsnodeRepeaterResult: result, openRnodeSerialPort: async () => port, createRnodeSession, closeRnodeSession });
+  await task.runRsnodeRepeaterControl('exit');
+  assert.deepEqual([result.repeater, result.repeating, result.card], [false, false, nodeContactCard(identity)]);
+  assert.deepEqual(JSON.parse(JSON.stringify(task.rsnodeRepeaterNode())), { nodeId: '887A', board: JSON.parse(JSON.stringify(rsnodeBoard('rak4631'))),
+    repeater: false, forwarding: false });
+  assert.equal(task.rsnodeRepeaterTarget(), '887A');
+  // No longer a Repeater: neither Stop nor a second return is sent.
+  for (const action of ['stop', 'exit']) await task.runRsnodeRepeaterControl(action);
+  assert.deepEqual(port.written, ['c07a0603c0']);
+
+  // A board with a screen, or one no STATUS named: Stop and Return are not sent, whatever calls them.
+  for (const known of [repeaterFacts(0x3f, true), repeaterFacts(0xc4, true), repeaterFacts(0x44, true), { ...repeaterFacts(0x51, true), rsnode: null }]) {
+    task = repeaterTask({ nodeId: '887A' }, baseForm(), { rsnodeDeviceFacts: known, controlRepeater: async () => { throw new Error('sent to a board with a screen'); } });
+    for (const action of ['stop', 'exit']) await task.runRsnodeRepeaterControl(action);
+    assert.ok(!task.calls.some(call => ['port', 'confirm'].includes(call[0])));
+  }
+  // Another node on the port, and a node that refuses, each say so.
+  task = repeaterTask({ nodeId: 'FFFF' }, baseForm(), { rsnodeDeviceFacts: repeaterFacts(0x51, true), controlRepeater: async () => { throw new Error('sent to the wrong node'); } });
+  await task.runRsnodeRepeaterControl('stop');
+  assert.equal(task.calls.filter(call => call[0] === 'message').at(-1)[1], 'This is RNode FFFF, not RNode 887A. Connect RNode 887A to stop it.');
+  await task.runRsnodeRepeaterControl('exit');
+  assert.equal(task.calls.filter(call => call[0] === 'message').at(-1)[1], 'This is RNode FFFF, not RNode 887A. Connect RNode 887A to return it to RNode mode.');
+  facts = repeaterFacts(0x51, true);
+  port = nodePort([[0x7a, 0x06, 0x02]]);
+  task = repeaterTask({ nodeId: '887A' }, baseForm(), { rsnodeDeviceFacts: facts, openRnodeSerialPort: async () => port, createRnodeSession, closeRnodeSession });
+  await task.runRsnodeRepeaterControl('stop');
+  assert.deepEqual(task.calls.filter(call => call[0] === 'message').at(-1), ['message', 'The node refused this.', true, false]);
+  assert.equal(facts.rsnode.node.forwarding, true);
+
+  // Offering them on every board is this one line.
+  assert.equal(extract('rsnodeRepeaterControls').replace(/\s+/g, ' '), 'function rsnodeRepeaterControls(board) { return rsnodeBoardScreenless(board); }');
+});
+
+test('the panel shows Start or Stop, whichever the node is not doing, and the way back to RNode mode, only for a board with no screen', () => {
+  const elements = {};
+  const element = id => elements[id] ||= { id, hidden: false, disabled: false, textContent: '', value: '', checked: false };
+  const context = { state: { flashing: false }, rsnodeRepeaterBusy: false, rsnodeRepeaterControl: null, rsnodeSettingsBusy: false, rsnodeOwnerBusy: false,
+    rsnodeChecking: false, rsnodeRepeaterResult: null, rsnodeDeviceFacts: null, rsnodeHeardBoard: null, rsnodeRepeaterOwnerCard: null,
+    rsnodeRepeaterStopScan: null, document: { getElementById: element, querySelector: () => null },
+    renderRsnodeRepeaterRegions: () => {}, syncRsnodePort: () => {}, repeaterRadioLine, repeaterSummary, rsnodeBoardForTarget };
+  const page = pageFunctions(['RSNODE_LIMITS_HELP', 'rsnodeBoardScreenless', 'rsnodeBoardHasWifi', 'rsnodeIsRepeater', 'rsnodeRepeaterNode',
+    'rsnodeRepeaterTarget', 'rsnodeRepeaterControls', 'readRsnodeRepeaterForm', 'syncRsnodeRepeaterForm'], context);
+  const shown = changes => {
+    Object.assign(context, { rsnodeRepeaterBusy: false, rsnodeRepeaterControl: null, rsnodeRepeaterResult: null, rsnodeDeviceFacts: null }, changes);
+    page.syncRsnodeRepeaterForm();
+    return ['rsnodeRepeaterGo', 'rsnodeRepeaterStop', 'rsnodeRepeaterExit'].map(id => elements[id].hidden ? 'hidden' : elements[id].disabled ? 'off' : 'on').join(' ');
+  };
+  // No Repeater known: Start is there, disabled, as before.
+  assert.equal(shown({}), 'off hidden hidden');
+  // A board with a screen never gets Stop or the way back, forwarding or not.
+  for (const target of [0x3a, 0x3f, 0xbf, 0xc0, 0x3c, 0x44, 0xc4]) {
+    assert.equal(shown({ rsnodeDeviceFacts: repeaterFacts(target, true) }), 'off hidden hidden', target.toString(16));
+    assert.equal(shown({ rsnodeDeviceFacts: repeaterFacts(target, false) }), 'on hidden hidden', target.toString(16));
+  }
+  // A board with no screen: Stop while it forwards, Start while it is paused, and the way back either way.
+  for (const target of [0x51, 0xba]) {
+    assert.equal(shown({ rsnodeDeviceFacts: repeaterFacts(target, true) }), 'hidden on on', target.toString(16));
+    assert.equal(shown({ rsnodeDeviceFacts: repeaterFacts(target, false) }), 'on hidden on', target.toString(16));
+    // As an RNode it has nothing to stop or leave.
+    assert.equal(shown({ rsnodeDeviceFacts: repeaterFacts(target, false, false) }), 'off hidden hidden', target.toString(16));
+  }
+  // The node set up here follows the same rule, and reads as an RNode once it has been returned to RNode mode.
+  const result = (repeating, repeater = true) => ({ nodeId: '887A', repeating, repeater, board: rsnodeBoard('heltec-wsl-v3') });
+  assert.equal(shown({ rsnodeRepeaterResult: result(false) }), 'on hidden on');
+  assert.equal(shown({ rsnodeRepeaterResult: result(true) }), 'hidden on on');
+  assert.equal(shown({ rsnodeRepeaterResult: result(false, false) }), 'on hidden hidden');
+  assert.equal(shown({ rsnodeRepeaterResult: { nodeId: '887A', repeating: true, board: rsnodeBoard('heltec-v4') } }), 'off hidden hidden');
+  // While a control runs, every button waits and the one in use says so.
+  assert.equal(shown({ rsnodeRepeaterBusy: true, rsnodeRepeaterControl: 'stop', rsnodeDeviceFacts: repeaterFacts(0x51, true) }), 'hidden off off');
+  assert.deepEqual(['rsnodeRepeaterFinish', 'rsnodeRepeaterStop', 'rsnodeRepeaterExit'].map(id => elements[id].textContent),
+    ['Finish setup', 'Stopping…', 'Return to RNode mode…']);
+  shown({ rsnodeRepeaterBusy: true, rsnodeRepeaterControl: 'exit', rsnodeDeviceFacts: repeaterFacts(0x51, true) });
+  assert.equal(elements.rsnodeRepeaterExit.textContent, 'Returning…');
+  shown({ rsnodeRepeaterBusy: true, rsnodeDeviceFacts: repeaterFacts(0x51, false) });
+  assert.deepEqual([elements.rsnodeRepeaterFinish.textContent, elements.rsnodeRepeaterGo.textContent], ['Finishing…', 'Start repeating']);
+
+  // The page ships both hidden, beside Start repeating, and each click runs its control.
+  const panel = /id="rsnodeRepeater"[\s\S]*?id="rsnodeDevice"/.exec(html)[0];
+  assert.match(panel, /id="rsnodeRepeaterGo"[^>]*>Start repeating<\/button>\s*<button class="rsnode-beta__button" id="rsnodeRepeaterStop" type="button" disabled hidden>Stop repeating<\/button>/);
+  assert.match(panel, /<button class="rsnode-beta__button rsnode-tools__end" id="rsnodeRepeaterExit" type="button" disabled hidden>Return to RNode mode…<\/button>/);
+  assert.match(html, /\['Go', 'Stop', 'Exit'\]\.forEach\(function\(button, index\) \{\s+document\.getElementById\('rsnodeRepeater' \+ button\)\.addEventListener\('click', function\(\) \{\s+runRsnodeRepeaterControl\(\['start', 'stop', 'exit'\]\[index\]\);/);
+});
+
+test('a board with no Wi-Fi is not offered Reach it from anywhere, and a setup that asks for it is stopped before anything is written', async () => {
+  // The option and its tip are marked; hearing of a board without Wi-Fi hides them and renames the panel's summary.
+  const panel = /id="rsnodeRepeater"[\s\S]*?id="rsnodeDevice"/.exec(html)[0];
+  assert.match(panel, /<fieldset class="rsnode-settings__group" data-wifi-only>\s*<legend class="rnode-source__label">Reach it from anywhere \(optional\)<\/legend>/);
+  assert.match(panel, /<li>Finish setup restarts the node as a Repeater\.<span data-wifi-only> It may restart once more first to join Wi-Fi\.<\/span><\/li>/);
+  assert.match(panel, /<span class="flash-cta__repair-meta" id="rsnodeRepeaterMeta">Region, Owner, and Wi-Fi over USB<\/span>/);
+  const parts = { '[data-wifi-only]': [{ hidden: false }, { hidden: false }], '[data-screen-only]': [{ hidden: false }] };
+  const meta = { textContent: '' }, settings = { hidden: false }, remote = { checked: true, value: '' };
+  const context = { state: { device: 'custom', rsnodeInstalled: false }, betaStage: 'ready', isRsnodeSelected: () => true, rsnodeRepeaterOwnerCard: null,
+    document: { querySelectorAll: selector => parts[selector], querySelector: () => null,
+      getElementById: id => id === 'rsnodeRepeaterMeta' ? meta : id === 'rsnodeSettings' ? settings : remote } };
+  const page = pageFunctions(['rsnodeHeardBoard', 'rsnodeToolsUnlocked', 'rsnodeBoardScreenless', 'rsnodeBoardHasWifi', 'updateRsnodeSettingsVisibility',
+    'hearRsnodeBoard', 'readRsnodeRepeaterForm'], context);
+  const heard = id => {
+    page.hearRsnodeBoard(id ? rsnodeBoard(id) : null);
+    return [parts['[data-wifi-only]'].every(part => part.hidden), parts['[data-screen-only]'][0].hidden, meta.textContent, settings.hidden,
+      page.readRsnodeRepeaterForm().remote];
+  };
+  for (const id of ['rak4631', 'thinknode-m1', 't-echo', 'heltec-t114']) {
+    assert.deepEqual(heard(id), [true, id === 'rak4631', 'Region and Owner over USB', true, false], id);
+  }
+  for (const id of ['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft', 'heltec-wsl-v3', null]) {
+    assert.deepEqual(heard(id), [false, id === 'heltec-wsl-v3', 'Region, Owner, and Wi-Fi over USB', false, true], String(id));
+  }
+
+  // The form was filled in for a board with Wi-Fi, and the node on the port has none: the node says so before any write.
+  const remote1 = baseForm({ remote: true, wifiName: 'Home', wifiPassword: 'correct-horse', uplinkHost: 'rns.example.org' });
+  const rak = statusOf(false, 1, { board: { platform: 0x70, mcu: 0x71, board: 0x51 } });
+  let task = repeaterTask({ nodeId: '887A', status: [rak] }, remote1);
+  await task.runRsnodeRepeaterTask();
+  assert.deepEqual(task.calls.filter(call => call[0] === 'message').at(-1),
+    ['message', 'RAK4631 has no Wi-Fi, so it cannot connect to a server. Finish setup again to set it up without one.', true, false]);
+  assert.ok(!task.calls.some(call => ['owner', 'settings', 'setup'].includes(call[0])));
+  // The tools now know the board, so the option is gone and the next Finish setup leaves it out.
+  assert.equal(task.context.rsnodeHeardBoard.id, 'rak4631');
+  const identity = await parseRsnodeIdentity(identityBody(node));
+  task = repeaterTask({ nodeId: '887A', status: [rak, statusOf(true, 0, { board: rak.board })], setup: { kind: 'restart', restartMs: 0 }, identity }, baseForm());
+  await task.runRsnodeRepeaterTask();
+  assert.equal(task.calls.filter(call => call[0] === 'message').at(-1)[1], 'RNode 887A is set up as a Repeater and is not repeating yet.');
+  assert.ok(!task.calls.some(call => call[0] === 'settings'));
+  // A Stick Lite V3 has Wi-Fi: the same form goes through.
+  const lite = extra => statusOf(extra.repeater, 1, { board: { platform: 0x80, mcu: 0x81, board: 0xba }, ...extra });
+  task = repeaterTask({ nodeId: '887A', settings: FRESH, saved: { kind: 'restart', restartMs: 0 }, setup: { kind: 'restart', restartMs: 0 }, identity,
+    status: [lite({ repeater: false }), lite({ repeater: true, wifi: { mode: 1, ready: true, ip: '192.168.1.50' } })] }, remote1);
+  await task.runRsnodeRepeaterTask();
+  assert.ok(task.calls.some(call => call[0] === 'settings'));
+  assert.match(task.calls.filter(call => call[0] === 'message').at(-1)[1], /It joined “Home” at 192\.168\.1\.50/);
+  assert.equal(task.context.rsnodeHeardBoard.id, 'heltec-wsl-v3');
 });
 
 test('Start stops before writing when the form, the board, or another app says no, and lands a refusal on its field', async () => {

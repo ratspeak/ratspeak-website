@@ -2,10 +2,11 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
-import { RSNODE_RESULT } from '../assets/js/rsnode-device.js';
+import { RSNODE_RESULT, rsnodeScreenless } from '../assets/js/rsnode-device.js';
 import { SETTING, WIFI_MODES, checkSettingsForm, decodeEntries, decodeSettings, encodeEntries, readRsnodeSettings,
   settingsChanges, settingsForm, settingsOutcome, settingsRadioLines, settingsRefusal, settingsSavedMessage,
   writeRsnodeSettings } from '../assets/js/rsnode-settings.js';
+import { rsnodeBoard, rsnodeBoardForTarget } from '../assets/js/rsnode-beta.js';
 import { flasherPage } from './flasher-page.mjs';
 
 const html = flasherPage('flash.html');
@@ -188,6 +189,19 @@ test('after a restart the message says where Wi-Fi stands and how to connect', (
     'Saved. RNode B44E runs its own network “RNode B44E” at 10.0.0.1. Apps connect to 10.0.0.1, port 7633.');
   assert.equal(settingsSavedMessage('887A', fresh, null, false), 'Saved. RNode 887A restarted with Wi-Fi off. Bluetooth is available again.');
   assert.equal(settingsSavedMessage('887A', fresh, null, true), 'Saved. RNode 887A restarted with Wi-Fi off.');
+  assert.equal(settingsSavedMessage('B44E', repeater, wifi(2, false, null), true),
+    'Saved. RNode B44E restarted but its own network is not up yet. The node\'s screen shows its Wi-Fi state.');
+  // A Stick Lite V3 has no screen to look at: its Wi-Fi state is in the live view's status check.
+  const lite = (mode, ready, ip) => ({ ...wifi(mode, ready, ip), board: { platform: 0x80, mcu: 0x81, board: 0xba } });
+  assert.equal(settingsSavedMessage('887A', joined, lite(1, false, null), false),
+    'Saved. RNode 887A restarted but has not joined “Home” yet. Check the network name and password; the status check in rsNode live view shows its Wi-Fi state.');
+  assert.equal(settingsSavedMessage('B44E', repeater, lite(2, false, null), true),
+    'Saved. RNode B44E restarted but its own network is not up yet. The status check in rsNode live view shows its Wi-Fi state.');
+  assert.equal(settingsSavedMessage('887A', joined, lite(1, true, '192.168.1.50'), false),
+    'Saved. RNode 887A joined “Home” at 192.168.1.50. Apps connect to 192.168.1.50, port 7633.');
+  // A V3 reports the same RNode board byte and keeps its screen wording: only the update target differs.
+  assert.match(settingsSavedMessage('887A', joined, { ...wifi(1, false, null), board: { platform: 0x80, mcu: 0x81, board: 0x3a } }, false),
+    /the node's screen shows its Wi-Fi state\.$/);
 });
 
 // A node answering CMD_RSNODE settings frames, KISS-escaped as rsNode sends them.
@@ -289,11 +303,11 @@ function settingsTask(node, overrides = {}) {
     readRsnodeSettingsForm: () => node.form,
     rsnodeFieldError: (field, message) => Object.assign(new Error(message), { field }),
     rsnodeSettingsField: key => ({ key, focus: () => calls.push(['focus', key]) }),
-    checkSettingsForm, settingsChanges, settingsSavedMessage, showSerialWarning: () => {},
+    checkSettingsForm, settingsChanges, settingsSavedMessage, rsnodeScreenless, rsnodeBoardForTarget, showSerialWarning: () => {},
     ...overrides
   };
   const page = pageFunctions(['RSNODE_SETTINGS_RESTART_MS', 'RSNODE_WIFI_WAIT_MS', 'RSNODE_WIFI_POLL_MS', 'rsnodePortError',
-    'rsnodeHeldElsewhere', 'rsnodeHeldMessage', 'rsnodePersonaNote', 'rsnodeSettingsError', 'waitForRsnodeWifi',
+    'rsnodeHeldElsewhere', 'rsnodeHeldMessage', 'rsnodePersonaNote', 'rsnodeSettingsError', 'waitForRsnodeWifi', 'rsnodeBoardHasWifi',
     'runRsnodeSettingsTask'], context);
   return { ...page, context, calls };
 }
@@ -361,6 +375,63 @@ test('a refusal from the node lands on the field it names, and Unchanged says so
   task = settingsTask({ nodeId: '887A', form: join, status: [statusOf(false, 1)], outcome: { kind: 'refused' } });
   await task.runRsnodeSettingsTask(true);
   assert.match(task.calls.filter(call => call[0] === 'message').at(-1)[1], /^Another app is using RNode 887A over Bluetooth or Wi-Fi\./);
+});
+
+test('a board with no screen is never told to hold its USB button or look at a home menu', async () => {
+  const lite = (repeater, hostOwner) => ({ ...statusOf(repeater, hostOwner), board: { platform: 0x80, mcu: 0x81, board: 0xba } });
+  const join = form(fresh, { wifiMode: 'join', name: 'Home', password: '' });
+  let task = settingsTask({ nodeId: '887A', form: join, status: [lite(false, 2)] });
+  await task.runRsnodeSettingsTask(true);
+  assert.ok(!task.calls.some(call => call[0] === 'write'));
+  assert.equal(task.calls.filter(call => call[0] === 'message').at(-1)[1],
+    'Another app is using RNode 887A over Bluetooth. Disconnect it, then save again.');
+  task = settingsTask({ nodeId: '887A', form: join, status: [lite(false, 1)], outcome: { kind: 'refused' } });
+  await task.runRsnodeSettingsTask(true);
+  assert.equal(task.calls.filter(call => call[0] === 'message').at(-1)[1],
+    'Another app is using RNode 887A over Bluetooth or Wi-Fi. Disconnect it, then save again.');
+  // Reading: a V3 is back on its home menu; a Stick Lite V3 has none to be back on.
+  task = settingsTask({ nodeId: '887A', settings: fresh, status: [statusOf(false, 1)] });
+  await task.runRsnodeSettingsTask(false);
+  assert.equal(task.calls.filter(call => call[0] === 'message').at(-1)[1], 'Showing RNode 887A. The node is back on its home menu.');
+  task = settingsTask({ nodeId: '887A', settings: fresh, status: [lite(false, 1)] });
+  await task.runRsnodeSettingsTask(false);
+  assert.equal(task.calls.filter(call => call[0] === 'message').at(-1)[1], 'Showing RNode 887A.');
+});
+
+test('a board with no Wi-Fi has no settings here: the panel is hidden for one, and a node that turns out to be one is told so', async () => {
+  // Known up front, from the picker or the live view's node: the panel is not offered.
+  const panel = { hidden: false };
+  const context = { state: { device: 'custom', rsnodeInstalled: false }, betaStage: 'ready', isRsnodeSelected: () => true,
+    document: { getElementById: () => panel } };
+  const { updateRsnodeSettingsVisibility } = pageFunctions(['rsnodeHeardBoard', 'rsnodeToolsUnlocked', 'rsnodeBoardHasWifi',
+    'updateRsnodeSettingsVisibility'], context);
+  const hidden = id => {
+    context.rsnodeHeardBoard = id ? rsnodeBoard(id) : null;
+    updateRsnodeSettingsVisibility();
+    return panel.hidden;
+  };
+  assert.deepEqual(['rak4631', 'thinknode-m1', 't-echo', 'heltec-t114'].map(hidden), [true, true, true, true]);
+  assert.deepEqual(['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft', 'heltec-wsl-v3', null].map(hidden), [false, false, false, false, false, false]);
+  context.betaStage = 'locked';
+  assert.equal(hidden('heltec-v4'), true);
+
+  // Not known until the node says which board it is: nothing is written, and the form stays away.
+  const nrf = (board, repeater = false) => ({ ...statusOf(repeater, 1), board: { platform: 0x70, mcu: 0x71, board } });
+  for (const [target, save] of [[0x51, false], [0x44, false], [0x3c, false], [0xc4, false], [0x51, true]]) {
+    const task = settingsTask({ nodeId: '887A', settings: fresh, form: form(fresh, { wifiMode: 'join', name: 'Home', password: '' }),
+      status: [nrf(target)] });
+    await task.runRsnodeSettingsTask(save);
+    assert.deepEqual(task.calls.filter(call => call[0] === 'message').at(-1),
+      ['message', 'RNode 887A has no Wi-Fi, so it has no settings to change here.', false, true], target.toString(16));
+    assert.ok(!task.calls.some(call => call[0] === 'write'));
+    assert.equal(task.context.rsnodeSettingsNode, null);
+    assert.deepEqual(task.calls.filter(call => ['leave', 'render', 'close'].includes(call[0])).map(call => call[0]), ['leave', 'render', 'close']);
+  }
+  // A Stick Lite V3 has Wi-Fi and is read like a V3.
+  const lite = settingsTask({ nodeId: '887A', settings: fresh, status: [{ ...statusOf(false, 1), board: { platform: 0x80, mcu: 0x81, board: 0xba } }] });
+  await lite.runRsnodeSettingsTask(false);
+  assert.equal(lite.calls.filter(call => call[0] === 'message').at(-1)[1], 'Showing RNode 887A.');
+  assert.equal(lite.context.rsnodeSettingsNode.nodeId, '887A');
 });
 
 test('Read shows a Repeater as it runs, and the panel sits with the other rsNode tools', async () => {

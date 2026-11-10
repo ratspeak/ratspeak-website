@@ -165,7 +165,7 @@
                                     <select class="rnode-variant-select" id="rsnodeBoardSelect"><option value="">Choose your board</option></select>
                                 </label>
                                 <div id="rsnodeVariantCheck" hidden>
-                                    <p class="rsnode-beta__note">Check the chip marking or your order details: ESP32-S3R2 has 2 MB PSRAM; ESP32-S3R8 has 8 MB. Both V4s have 16 MB flash and need different firmware.</p>
+                                    <p class="rsnode-beta__note" id="rsnodeVariantNote">Check the chip marking or your order details: ESP32-S3R2 has 2 MB PSRAM; ESP32-S3R8 has 8 MB. Both V4s have 16 MB flash and need different firmware.</p>
                                     <label class="rsnode-beta__check rsnode-beta__variant"><input type="checkbox" id="rsnodeVariantConfirmed"><span id="rsnodeVariantLabel">I checked my V4 variant.</span></label>
                                 </div>
                                 <p class="rsnode-beta__note rsnode-beta__note--warning" id="rsnodeInstallNote">Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings, and Repeater settings. Update requires a compatible package and firmware that supports USB updates.</p>
@@ -183,9 +183,9 @@
                                 <div class="rsnode-uf2" id="rsnodeUf2" hidden>
                                     <ol class="rsnode-uf2__steps">
                                         <li><a class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeUf2Save">Save the firmware file</a></li>
-                                        <li>Plug the board into this computer by USB and press RESET twice quickly. A drive named <strong id="rsnodeUf2Drive"></strong> appears.</li>
+                                        <li>Plug the board into this computer by USB and press RESET twice quickly. <span id="rsnodeUf2Named">A drive named <strong id="rsnodeUf2Drive"></strong> appears.</span><span id="rsnodeUf2Unnamed" hidden>A new drive appears.</span></li>
                                         <li>Drag the file onto that drive. The drive closes by itself when the board restarts into rsNode; your computer may say it wasn&rsquo;t ejected properly.</li>
-                                        <li>Set it up with the tools below.</li>
+                                        <li id="rsnodeUf2Next">Set it up with the tools below.</li>
                                     </ol>
                                 </div>
                                 <div class="rsnode-beta__links"><a id="rsnodePackageDownload" hidden>Download package and source</a></div>
@@ -368,7 +368,7 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 13v8"/><path d="M9 21h6"/><circle cx="12" cy="10" r="2"/><path d="M7.8 5.8a6 6 0 0 0 0 8.4"/><path d="M16.2 5.8a6 6 0 0 1 0 8.4"/><path d="M5 3a10 10 0 0 0 0 14"/><path d="M19 3a10 10 0 0 1 0 14"/></svg>
                         Set up as a Repeater
                     </span>
-                    <span class="flash-cta__repair-meta">Region, Owner, and Wi-Fi over USB</span>
+                    <span class="flash-cta__repair-meta" id="rsnodeRepeaterMeta">Region, Owner, and Wi-Fi over USB</span>
                     <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
                 </summary>
                 <div class="flash-cta__repair-body">
@@ -417,7 +417,7 @@
                                 </div>
                                 <p class="rsnode-tools__help" id="rsnodeRepeaterOwnerNote" aria-live="polite">Paste your address from Ratspeak, or scan your contact card there. A scanned card also gives the node your key, so it can reply right away.</p>
                             </fieldset>
-                            <fieldset class="rsnode-settings__group">
+                            <fieldset class="rsnode-settings__group" data-wifi-only>
                                 <legend class="rnode-source__label">Reach it from anywhere (optional)</legend>
                                 <label class="rsnode-beta__check"><input type="checkbox" id="rsnodeRepeaterRemote"><span>Connect it to a Reticulum TCP server so you can reach it from anywhere.</span></label>
                                 <div class="rsnode-settings__grid" id="rsnodeRepeaterRemoteFields" hidden>
@@ -439,13 +439,15 @@
                         <ul>
                             <li>Plug the node in over USB. Close other apps that use its port, such as Ratspeak or a serial monitor.</li>
                             <li>If you just installed, press RESET on the board first.</li>
-                            <li>Finish setup restarts the node as a Repeater. It may restart once more first to join Wi-Fi.</li>
+                            <li>Finish setup restarts the node as a Repeater.<span data-wifi-only> It may restart once more first to join Wi-Fi.</span></li>
                         </ul>
                     </div>
                     <div class="rsnode-tools__actions">
                         <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeRepeaterFinish" type="submit" form="rsnodeRepeaterForm" aria-describedby="rsnodeRepeaterSummary">Finish setup</button>
                         <button class="rsnode-beta__button" id="rsnodeRepeaterGo" type="button" aria-describedby="rsnodeRepeaterLater" disabled>Start repeating</button>
+                        <button class="rsnode-beta__button" id="rsnodeRepeaterStop" type="button" disabled hidden>Stop repeating</button>
                         <p class="rsnode-tools__summary" id="rsnodeRepeaterSummary"></p>
+                        <button class="rsnode-beta__button rsnode-tools__end" id="rsnodeRepeaterExit" type="button" disabled hidden>Return to RNode mode…</button>
                     </div>
                     <p class="rsnode-tools__help" id="rsnodeRepeaterLater">Finish setup saves these settings without repeating yet. Start repeating here, later from Ratspeak with /start, or from the board's menu.</p>
                     <p class="rsnode-tools__port" hidden>Using <span class="rsnode-tools__port-label"></span> &middot; <button class="rsnode-beta__lock" type="button" data-change-port>Change port</button></p>
@@ -478,16 +480,21 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8"/><path d="M12 16v4"/></svg>
                         rsNode live view
                     </span>
-                    <span class="flash-cta__repair-meta">See the node’s screen and status over USB</span>
+                    <span class="flash-cta__repair-meta" id="rsnodeDeviceMeta">See the node’s screen and status over USB</span>
                     <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
                 </summary>
                 <div class="flash-cta__repair-body">
-                    <p class="rsnode-tools__lede">Watch the node's screen and read its status over USB.</p>
+                    <p class="rsnode-tools__notice" id="rsnodeDeviceNotice" tabindex="-1" hidden>Next: press RESET on the board, then connect here to check that rsNode is running. After that, set it up as a Repeater, or keep it as an RNode for one app.</p>
+                    <p class="rsnode-tools__lede" id="rsnodeDeviceLede">Watch the node's screen and read its status over USB.</p>
                     <div class="rsnode-device__layout">
                         <figure class="rsnode-device__screen">
                             <div class="rsnode-device__bezel" id="rsnodeScreenBezel">
                                 <canvas id="rsnodeScreen" width="128" height="64" role="img" aria-label="The node's screen"></canvas>
                                 <span class="rsnode-device__placeholder" id="rsnodeScreenEmpty">Connect to see the screen</span>
+                            </div>
+                            <div class="flash-connect-tips rsnode-device__check" id="rsnodeCheck" hidden>
+                                <div class="flash-connect-tips__head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="8 12.5 11 15.5 16 9.5"/></svg> Status check</div>
+                                <ul id="rsnodeCheckList"></ul>
                             </div>
                             <figcaption class="rsnode-device__caption"><span class="rsnode-tools__dot" id="rsnodeLiveDot" aria-hidden="true"></span><span id="rsnodeScreenState">Not connected</span></figcaption>
                         </figure>
@@ -515,14 +522,20 @@
                             </dl>
                         </div>
                     </div>
+                    <div class="rsnode-device__lights" id="rsnodeLights" hidden>
+                        <span class="rnode-source__label">Lights on the board</span>
+                        <dl class="rsnode-tools__facts" id="rsnodeLightsList"></dl>
+                    </div>
                     <div class="rsnode-tools__actions">
                         <button class="rsnode-beta__button rsnode-beta__button--primary" id="rsnodeConnect" type="button">Connect</button>
+                        <button class="rsnode-beta__button" id="rsnodeRecheck" type="button" disabled hidden>Check again</button>
                         <button class="rsnode-beta__button" id="rsnodeScreenshot" type="button" disabled hidden>Save screenshot</button>
                         <button class="rsnode-beta__button" id="rsnodeCopyDetails" type="button" disabled hidden>Copy details</button>
                         <button class="rsnode-beta__button" id="rsnodePair" type="button" aria-describedby="rsnodePairNote" disabled hidden>Start Bluetooth pairing</button>
                         <button class="rsnode-beta__button rsnode-tools__end" id="rsnodeRestart" type="button" disabled hidden>Restart node…</button>
                     </div>
                     <p class="rsnode-tools__help rsnode-tools__pair-note" id="rsnodePairNote" hidden>Bluetooth is off while Wi-Fi is on. Turn Wi-Fi off in Settings to pair.</p>
+                    <p class="rsnode-tools__notice" id="rsnodePairCode" role="status" aria-live="polite" hidden></p>
                     <p class="rsnode-tools__port" hidden>Using <span class="rsnode-tools__port-label"></span> &middot; <button class="rsnode-beta__lock" type="button" data-change-port>Change port</button></p>
                     <p class="rsnode-beta__status" id="rsnodeDeviceStatus" role="status" aria-live="polite"></p>
                     <pre class="rsnode-device__details" id="rsnodeDetailsText" tabindex="0" aria-label="Node details" hidden></pre>
@@ -601,7 +614,7 @@
                                     <div><dt>Radio</dt><dd id="rsnodeSettingsRadio"></dd></div>
                                     <div><dt>LoRa IFAC</dt><dd id="rsnodeSettingsIfac"></dd></div>
                                 </dl>
-                                <p class="rsnode-tools__help">Change the region, preset, and LIMITS in Set up as a Repeater, or on the Repeater's own menus.</p>
+                                <p class="rsnode-tools__help">Change the region, preset, and LIMITS in Set up as a Repeater<span data-screen-only>, or on the Repeater's own menus</span>.</p>
                             </div>
                         </fieldset>
                     </form>
@@ -610,7 +623,7 @@
                         <ul>
                             <li>Plug the node in over USB. Close other apps that use its port, such as Ratspeak or a serial monitor.</li>
                             <li>If you just installed, press RESET on the board first.</li>
-                            <li>An RNode another app is using over Bluetooth or Wi-Fi shows its settings but saves none: disconnect that app, or hold USB on the node.</li>
+                            <li>An RNode another app is using over Bluetooth or Wi-Fi shows its settings but saves none: disconnect that app<span data-screen-only>, or hold USB on the node</span>.</li>
                         </ul>
                     </div>
                     <div class="rsnode-tools__actions">
@@ -669,7 +682,7 @@
                                 <ul>
                                     <li>Plug the node in over USB. Close other apps that use its port, such as Ratspeak or a serial monitor.</li>
                                     <li>If you just installed, press RESET on the board first.</li>
-                                    <li>Some betas require RNode mode for manager changes: stop and exit the Repeater first if a change is refused. In RNode, hold USB on the home menu to take over from another app.</li>
+                                    <li data-screen-only>Some betas require RNode mode for manager changes: stop and exit the Repeater first if a change is refused. In RNode, hold USB on the home menu to take over from another app.</li>
                                     <li>Adding the first manager creates the node's identity, so its Bluetooth or Wi-Fi radio must be running (a normal RNode boot has one).</li>
                                 </ul>
                             </div>

@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
 import { parseHash, parseManagementStatus, parseNodeStatus, provisionRsnode, renderNode } from '../assets/js/rsnode-provision.js';
+import { rsnodeScreenless } from '../assets/js/rsnode-device.js';
+import { rsnodeBoard } from '../assets/js/rsnode-beta.js';
 import { allFlasherPages, flasherPage } from './flasher-page.mjs';
 
 // Generated from rsNode's provision-rsnode.py by scripts/rsnode-provision-vectors.py.
@@ -320,7 +322,7 @@ test('the owner row says what a save changes and what to do after a failure, in 
   const state = { flashing: false };
   const { rsnodeOwnerSummary, rsnodeOwnerError } = pageFunctions(['RSNODE_CLI_WORDS', 'RSNODE_TAKEOVER', 'RSNODE_MANAGERS_MAX',
     'rsnodeOwnerSummary', 'rsnodePortError', 'rsnodeHeldElsewhere', 'rsnodeHeldMessage', 'rsnodeOwnerError'],
-    { state, HOST_OWNERS: { 0: null, 1: 'USB', 2: 'Bluetooth', 3: 'Wi-Fi' } });
+    { state, HOST_OWNERS: { 0: null, 1: 'USB', 2: 'Bluetooth', 3: 'Wi-Fi' }, rsnodeScreenless });
   assert.equal(rsnodeOwnerSummary([]), 'Nothing to save yet. Add a manager.');
   assert.equal(rsnodeOwnerSummary(['set the owner']), 'Saving will set the owner.');
   assert.equal(rsnodeOwnerSummary(['set the owner', 'add 2 admins', 'remove 1 manager']),
@@ -348,6 +350,9 @@ test('the owner row says what a save changes and what to do after a failure, in 
     { text: 'RNode 887A is busy finishing an update or saving its identity. Try again in a minute.' });
   assert.deepEqual(plain(rsnodeOwnerError(full, 'protocol', false, at(node(false, 3)))),
     { text: 'Another app is using RNode 887A over Wi-Fi. Disconnect it, or hold USB on the node, then save again.' });
+  // A board with no screen has no USB button to hold.
+  assert.deepEqual(plain(rsnodeOwnerError(full, 'protocol', false, at({ ...node(false, 2), board: { platform: 0x70, mcu: 0x71, board: 0x51 } }))),
+    { text: 'Another app is using RNode 887A over Bluetooth. Disconnect it, then save again.' });
   // An older beta reports no STATUS and refuses manager writes as a Repeater.
   assert.deepEqual(plain(rsnodeOwnerError(full, 'protocol', false, at(null))), {
     text: 'RNode 887A refused the change. This beta takes manager changes only in RNode: exit the Repeater on the device, then save again.',
@@ -369,26 +374,33 @@ test('the owner row says what a save changes and what to do after a failure, in 
 
 test('the Step 03 hint names the first rsNode step still open', () => {
   const context = { betaStage: 'locked', state: {}, rsnodeBoardSelect: { value: '' }, rsnodeVariantIsConfirmed: () => false };
-  const { rsnodeFlowNote } = pageFunctions(['rsnodeFlowNote'], context);
+  const { rsnodeFlowNote } = pageFunctions(['rsnodeVariantPrompt', 'rsnodeFlowNote'], context);
   const notes = [];
   for (const step of [{}, { betaStage: 'terms' }, { betaStage: 'ready' }, { rsnodeBoardSelect: { value: 'heltec-v4' }, state: { rsnodeLoading: true } },
-    { state: { rsnodeLoadFailed: true } }, { state: {} }, { rsnodeVariantIsConfirmed: () => true }]) {
+    { state: { rsnodeLoadFailed: true } }, { state: {} }, { rsnodeBoardSelect: { value: 'heltec-wsl-v3' } }, { rsnodeBoardSelect: { value: 'heltec-v3' } },
+    { rsnodeVariantIsConfirmed: () => true }]) {
     Object.assign(context, step);
     notes.push(rsnodeFlowNote());
   }
   assert.deepEqual(notes, ['Unlock the rsNode beta to continue.', 'Accept the beta terms to continue.',
     'Choose your board to flash. To manage a node that already runs rsNode, use the tools below.',
     'Loading the firmware for your board…', 'Firmware could not be loaded. Choose the board again to retry.',
-    'Confirm the V4 variant to continue.', 'Select a USB device to continue.']);
+    'Confirm the V4 variant to continue.', 'Confirm your board to continue.', 'Confirm your board to continue.',
+    'Select a USB device to continue.']);
 });
 
 test('the owner panel appears only with beta access; an rsNode install opens Set up as a Repeater next', () => {
   const owner = { hidden: true, open: false }, repeater = { hidden: true, open: false }, notice = { hidden: true };
-  const elements = { rsnodeOwner: owner, rsnodeRepeater: repeater, rsnodeRepeaterNotice: notice };
+  const device = { hidden: true, open: false }, check = { hidden: true }, settings = { hidden: true }, meta = { textContent: '' };
+  const elements = { rsnodeOwner: owner, rsnodeRepeater: repeater, rsnodeRepeaterNotice: notice, rsnodeDevice: device, rsnodeDeviceNotice: check,
+    rsnodeSettings: settings, rsnodeRepeaterMeta: meta };
   const context = { state: { device: 'custom', rsnodeInstalled: false }, betaStage: 'locked', rsnodeRepeaterStopScan: null,
-    isRsnodeSelected: () => true, document: { getElementById: id => elements[id] } };
-  const { updateRsnodeOwnerVisibility, showRsnodeRepeaterStep } = pageFunctions(['rsnodeToolsUnlocked',
-    'updateRsnodeOwnerVisibility', 'updateRsnodeRepeaterVisibility', 'stopRsnodeRepeaterScan', 'showRsnodeRepeaterStep'], context);
+    isRsnodeSelected: () => true, document: { getElementById: id => elements[id], querySelectorAll: () => [] }, rsnodeBoard,
+    stopRsnodeDevice: () => {} };
+  const { updateRsnodeOwnerVisibility, showRsnodeRepeaterStep, focusRsnodeRepeaterNotice } = pageFunctions(['rsnodeHeardBoard', 'rsnodeToolsUnlocked',
+    'updateRsnodeOwnerVisibility', 'updateRsnodeRepeaterVisibility', 'updateRsnodeDeviceVisibility', 'updateRsnodeSettingsVisibility',
+    'stopRsnodeRepeaterScan', 'rsnodeBoardScreenless', 'rsnodeBoardHasWifi', 'hearRsnodeBoard', 'showRsnodeRepeaterStep',
+    'focusRsnodeRepeaterNotice'], context);
   updateRsnodeOwnerVisibility();
   assert.equal(owner.hidden, true);
   context.betaStage = 'ready';
@@ -401,6 +413,28 @@ test('the owner panel appears only with beta access; an rsNode install opens Set
   context.betaStage = 'ready';
   showRsnodeRepeaterStep();
   assert.deepEqual([repeater.hidden, repeater.open, notice.hidden, owner.open], [false, true, false, false]);
+  assert.deepEqual([device.open, check.hidden], [false, true]);
+  // A board with a screen, picked or uploaded, keeps that next step.
+  for (const board of ['heltec-v3', 'thinknode-m1', 'not-a-board']) {
+    showRsnodeRepeaterStep(board);
+    assert.deepEqual([notice.hidden, check.hidden, context.state.rsnodeInstalledBoard], [false, true, board], board);
+  }
+  // The tools hear which board was installed; a package for no known board leaves what they knew.
+  assert.equal(context.rsnodeHeardBoard.id, 'thinknode-m1');
+  assert.deepEqual([settings.hidden, meta.textContent], [true, 'Region and Owner over USB']);
+  // A board with no screen is checked first: the live view opens with its own next step, which takes focus.
+  repeater.open = false;
+  showRsnodeRepeaterStep('heltec-wsl-v3');
+  assert.deepEqual([device.hidden, device.open, check.hidden, notice.hidden, repeater.open], [false, true, false, true, false]);
+  assert.deepEqual([context.rsnodeHeardBoard.id, settings.hidden, meta.textContent], ['heltec-wsl-v3', false, 'Region, Owner, and Wi-Fi over USB']);
+  const focused = [];
+  Object.assign(check, { scrollIntoView: () => focused.push('check'), focus: () => {} });
+  Object.assign(notice, { scrollIntoView: () => focused.push('repeater'), focus: () => {} });
+  focusRsnodeRepeaterNotice();
+  check.hidden = true;
+  focusRsnodeRepeaterNotice();
+  assert.deepEqual(focused, ['check', 'repeater']);
+  assert.match(html, /id="rsnodeDeviceNotice" tabindex="-1" hidden>Next: press RESET on the board, then connect here to check that rsNode is running\. After that, set it up as a Repeater, or keep it as an RNode for one app\.</);
   context.state.device = 'tdeck';
   updateRsnodeOwnerVisibility();
   assert.equal(owner.hidden, true);
@@ -408,7 +442,9 @@ test('the owner panel appears only with beta access; an rsNode install opens Set
   const start = html.indexOf('window.startFlash = async function()');
   const flash = html.slice(start, html.indexOf('function isRnodeReconnectSetupIssue', start));
   assert.match(flash, /state\.flashing \|\| rsnodeOwnerBusy \|\| rsnodeSettingsBusy \|\| rsnodeRepeaterBusy \|\| rsnodeChecking\) return;/);
-  assert.ok(flash.indexOf("if (prepared && prepared.product === 'rsnode') showRsnodeRepeaterStep();") > flash.indexOf('await esploader.writeFlash('));
+  assert.ok(flash.indexOf("if (prepared && prepared.product === 'rsnode') showRsnodeRepeaterStep(prepared.board);") > flash.indexOf('await esploader.writeFlash('));
+  // A new install clears both next steps.
+  assert.match(flash, /getElementById\('rsnodeRepeaterNotice'\)\.hidden = document\.getElementById\('rsnodeDeviceNotice'\)\.hidden = true;/);
 });
 
 test('the device management row says owner and admin, as the docs define them', () => {

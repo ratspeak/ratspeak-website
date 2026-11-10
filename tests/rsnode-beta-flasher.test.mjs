@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { webcrypto } from 'node:crypto';
 import vm from 'node:vm';
 import test from 'node:test';
-import { betaRequest, rsnodeBoard, validUf2, validUpdateMetadata, validateBetaCatalog, verifyBetaDownload, validateBetaManifest } from '../assets/js/rsnode-beta.js';
+import { betaRequest, rsnodeBoard, rsnodeBoardForTarget, validUf2, validUpdateMetadata, validateBetaCatalog, verifyBetaDownload, validateBetaManifest } from '../assets/js/rsnode-beta.js';
 import { sha256Hex } from '../assets/js/handheld-release.js';
 import { flasherPage } from './flasher-page.mjs';
 
@@ -78,7 +78,7 @@ async function uf2Fixture(bytes = uf2()) {
 }
 
 test('beta board catalog permits only the reviewed targets, each with its install kind', async () => {
-  for (const id of ['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft']) {
+  for (const id of ['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft', 'heltec-wsl-v3']) {
     const f = await fixture(id);
     assert.deepEqual(validateBetaCatalog({ boards: [f.metadata] }), [f.metadata]);
   }
@@ -137,11 +137,89 @@ test('a T-Echo package installs through its own drive and stops at its storage p
   await assert.rejects(validateBetaManifest(zip, { ...manifest, board: 'heltec-t114' }, metadata));
 });
 
+test('the ThinkNode M1 and the RAK4631 install from a UF2 up to the T-Echo\'s storage pages, and only a recorded drive is named', async () => {
+  for (const [id, label, drive] of [['thinknode-m1', 'Elecrow ThinkNode M1', null], ['rak4631', 'RAK4631', 'RAK4631']]) {
+    const bytes = uf2();
+    const manifest = { schemaVersion: 1, product: 'rsnode', board: id, version: '1.2.0-test', installMode: 'uf2',
+      chipFamily: 'nRF52840', parts: [{ path: 'firmware.uf2', size: bytes.length, sha256: await sha256Hex(bytes) }] };
+    const zip = { file: name => name === 'firmware.uf2' ? { async: async () => bytes } : null };
+    const metadata = { id, label, version: '1.2.0-test', fileName: `rsnode-${id}-1.2.0-test.zip`,
+      size: 100, sha256: 'a'.repeat(64), chipFamily: 'nRF52840', installMode: 'uf2' };
+    assert.deepEqual(validateBetaCatalog({ boards: [metadata] }), [metadata]);
+    const prepared = await validateBetaManifest(zip, manifest, metadata);
+    assert.deepEqual([prepared.installMode, prepared.board, prepared.boardLabel, prepared.fileName, prepared.drive],
+      ['uf2', id, label, `rsnode-${id}-1.2.0-test.uf2`, drive]);
+    const board = rsnodeBoard(id);
+    assert.deepEqual(board.uf2, { base: 0x26000, end: 0xef000, family: 0xada52840, ...(drive ? { drive } : {}) });
+    assert.equal(validUf2(uf2((0xef000 - 0x26000) / 256), board), true, 'fills the application region');
+    assert.equal(validUf2(uf2((0xef000 - 0x26000) / 256 + 1), board), false, 'storage');
+    assert.equal(validUf2(uf2(3, (view, at) => view.setUint32(at + 28, 0x1b57745f, true)), board), false, 'family');
+    assert.equal(validUf2(uf2(3, (view, at) => view.setUint32(at + 12, 0x27000 + at / 2, true)), board), false, 'base');
+    await assert.rejects(validateBetaManifest(zip, { ...manifest, board: 't-echo' }, metadata));
+    await assert.rejects(validateBetaManifest(zip, { ...manifest, installMode: 'factory' }, metadata));
+    // A UF2 board reinstalls through its bootloader: it takes no signed update.
+    assert.throws(() => validateBetaCatalog({ boards: [{ ...metadata, update: { fileName: `rsnode-${id}.rsota`, size: 1_500_000,
+      sha256: 'b'.repeat(64), sequence: 7, otaTarget: `70:71:${board.otaBoard.toString(16)}`, releaseKeyId: '0011223344556677', version: '1.2.0' } }] }));
+    for (const change of [{ chipFamily: 'ESP32-S3' }, { installMode: 'factory' }, { flashSize: '8MB' }]) {
+      assert.throws(() => validateBetaCatalog({ boards: [{ ...metadata, ...change }] }), JSON.stringify(change));
+    }
+  }
+});
+
+test('the new boards resolve from their update targets, and the two with no screen are marked', () => {
+  const expected = { 'thinknode-m1': [0xc4, 'Elecrow ThinkNode M1', 'nRF52840', 'uf2', true],
+    'rak4631': [0x51, 'RAK4631', 'nRF52840', 'uf2', false],
+    'heltec-wsl-v3': [0xba, 'Heltec Wireless Stick Lite V3', 'ESP32-S3', 'factory', false] };
+  for (const [id, [target, label, chipFamily, installMode, screen]] of Object.entries(expected)) {
+    const board = rsnodeBoardForTarget(target);
+    assert.deepEqual([board.id, board.label, board.chipFamily, board.installMode, board.screen !== false],
+      [id, label, chipFamily, installMode, screen], id);
+    assert.deepEqual(rsnodeBoard(id), board);
+  }
+  // The wire identities they borrow still name their own boards.
+  assert.deepEqual([0x44, 0x3a].map(target => rsnodeBoardForTarget(target).id), ['t-echo', 'heltec-v3']);
+  assert.equal(rsnodeBoardForTarget(0x99), null);
+  const ids = ['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft', 'heltec-t114', 't-echo', 'thinknode-m1', 'rak4631', 'heltec-wsl-v3'];
+  assert.equal(new Set(ids.map(id => rsnodeBoard(id).otaBoard)).size, ids.length);
+  assert.deepEqual(ids.filter(id => rsnodeBoard(id).screen === false), ['rak4631', 'heltec-wsl-v3']);
+  // The nRF52840 boards have no Wi-Fi; every ESP32-S3 board, the Stick Lite V3 included, has it.
+  assert.deepEqual(ids.filter(id => rsnodeBoard(id).wifi === false), ['heltec-t114', 't-echo', 'thinknode-m1', 'rak4631']);
+  for (const id of ids) assert.equal(rsnodeBoard(id).wifi === false, rsnodeBoard(id).chipFamily === 'nRF52840', id);
+  // The Stick Lite installs exactly as a V3 does.
+  const install = ({ chipFamily, installMode, flashSize, capacity }) => ({ chipFamily, installMode, flashSize, capacity });
+  assert.deepEqual(install(rsnodeBoard('heltec-wsl-v3')), install(rsnodeBoard('heltec-v3')));
+});
+
+test('the UF2 steps name a drive only when one is recorded, and send a board with no screen to its status check', () => {
+  const elements = {};
+  const element = id => elements[id] ||= { id, hidden: false, textContent: '', removeAttribute() {} };
+  const context = { state: {}, document: { getElementById: element }, rsnodeBoard,
+    URL: { createObjectURL: () => 'blob:test', revokeObjectURL() {} }, Blob: class {} };
+  const { showRsnodeUf2 } = vm.runInNewContext([extractFunction('rsnodeBoardScreenless'), extractFunction('showRsnodeUf2'),
+    '({ showRsnodeUf2 })'].join('\n'), context);
+  const prepared = (board, drive) => ({ bytes: new Uint8Array(512), fileName: `rsnode-${board}.uf2`, drive, board });
+  const shown = () => [elements.rsnodeUf2Named.hidden, elements.rsnodeUf2Unnamed.hidden, elements.rsnodeUf2Drive.textContent,
+    elements.rsnodeUf2Next.textContent];
+  showRsnodeUf2(prepared('t-echo', 'TECHOBOOT'));
+  assert.deepEqual(shown(), [false, true, 'TECHOBOOT', 'Set it up with the tools below.']);
+  showRsnodeUf2(prepared('thinknode-m1', null));
+  assert.deepEqual(shown(), [true, false, '', 'Set it up with the tools below.']);
+  showRsnodeUf2(prepared('rak4631', 'RAK4631'));
+  assert.deepEqual(shown(), [false, true, 'RAK4631',
+    'Open rsNode live view below and connect to check that it is running. Then set it up with the tools.']);
+  assert.equal(elements.rsnodeUf2.hidden, false);
+  // Either wording reads as one sentence after the reset step.
+  assert.match(html, /press RESET twice quickly\. <span id="rsnodeUf2Named">A drive named <strong id="rsnodeUf2Drive"><\/strong> appears\.<\/span><span id="rsnodeUf2Unnamed" hidden>A new drive appears\.<\/span><\/li>/);
+  const note = vm.runInNewContext([extractFunction('rsnodeBoardScreenless'), extractFunction('rsnodeFlowNote'), '(rsnodeFlowNote)'].join('\n'),
+    { betaStage: 'ready', rsnodeBoardSelect: { value: 'rak4631' }, rsnodeBoard, state: { rsnodeUf2: { board: 'rak4631' } } });
+  assert.equal(note(), 'Copy the firmware file to the board, as the steps above show. Then check it in rsNode live view below.');
+});
+
 test('a board may carry a signed update for its own target; boards without one are unchanged', async () => {
   const t114 = (await uf2Fixture()).metadata;
   assert.throws(() => validateBetaCatalog({ boards: [{ ...t114, update: { fileName: 'rsnode-heltec-t114.rsota', size: 1_500_000,
     sha256: 'b'.repeat(64), sequence: 7, otaTarget: '80:81:3c', releaseKeyId: '0011223344556677', version: '1.1.2' } }] }));
-  const targets = { 'heltec-v3': '3a', 'heltec-v4': '3f', 'heltec-v4-r8': 'bf', 'heltec-v4-r8-tft': 'c0' };
+  const targets = { 'heltec-v3': '3a', 'heltec-v4': '3f', 'heltec-v4-r8': 'bf', 'heltec-v4-r8-tft': 'c0', 'heltec-wsl-v3': 'ba' };
   for (const [id, board] of Object.entries(targets)) {
     const { metadata } = await fixture(id);
     const update = { fileName: `rsnode-${id}.rsota`, size: 1_500_000, sha256: 'b'.repeat(64), sequence: 2026110201,
@@ -178,8 +256,47 @@ test('variant confirmation distinguishes the kit from either OLED board', () => 
   assert.match(describe('heltec-v4'), /R2/);
 });
 
+test('a V3 and a Stick Lite V3 share a chip and flash size, so each is confirmed as the V4 variants are', () => {
+  const context = { betaBoards: [], isRsnodeSelected: () => true };
+  const constant = name => new RegExp(`var ${name} = '(?:[^'\\\\]|\\\\.)*'(?: \\+\\s+'(?:[^'\\\\]|\\\\.)*')*;`).exec(html)[0];
+  const page = vm.runInNewContext([constant('RSNODE_V4_NOTE'), constant('RSNODE_V3_NOTE'),
+    ...['rsnodeNeedsVariant', 'rsnodeVariantDescription', 'rsnodeVariantNote', 'rsnodeVariantPrompt'].map(extractFunction),
+    '({ rsnodeNeedsVariant, rsnodeVariantDescription, rsnodeVariantNote, rsnodeVariantPrompt })'].join('\n'), context);
+  const ids = ['heltec-v3', 'heltec-wsl-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft', 'heltec-t114', 't-echo', 'thinknode-m1', 'rak4631'];
+  const asked = () => ids.filter(page.rsnodeNeedsVariant);
+  // In the picker a V3 is asked only once the catalog also offers its twin with no display.
+  context.betaBoards = ['heltec-v3', 'heltec-v4'].map(id => ({ id }));
+  assert.deepEqual(asked(), ['heltec-wsl-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft']);
+  context.betaBoards = ['heltec-v3', 'heltec-wsl-v3'].map(id => ({ id }));
+  assert.deepEqual(asked(), ['heltec-v3', 'heltec-wsl-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft']);
+  // An uploaded package has no catalog beside it: either one is confirmed in the install dialog.
+  Object.assign(context, { betaBoards: [], isRsnodeSelected: () => false });
+  assert.deepEqual(asked(), ['heltec-v3', 'heltec-wsl-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft']);
+  assert.equal(page.rsnodeVariantDescription('heltec-v3'), 'the Heltec V3, with the small OLED display');
+  assert.equal(page.rsnodeVariantDescription('heltec-wsl-v3'), 'the Wireless Stick Lite V3, with no display');
+  // The line beside the checkbox says what tells them apart, and what the wrong one does.
+  for (const id of ['heltec-v3', 'heltec-wsl-v3']) {
+    assert.equal(page.rsnodeVariantNote(id), 'Check for a display: the Heltec V3 has a small OLED; the Wireless Stick Lite V3 has none. ' +
+      'Both have the same chip and 8 MB flash and need different firmware. ' +
+      'The wrong one leaves a V3\'s display dark, or gives a Stick Lite firmware that expects a display.');
+    assert.equal(page.rsnodeVariantPrompt(id), 'Confirm your board to continue.');
+  }
+  for (const id of ['heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft']) {
+    assert.match(page.rsnodeVariantNote(id), /^Check the chip marking or your order details: .* Both V4s have 16 MB flash and need different firmware\.$/);
+    assert.equal(page.rsnodeVariantPrompt(id), 'Confirm the V4 variant to continue.');
+  }
+  // The page ships the V4 line, and names the Stick Lite only once the unlocked picker offers it.
+  assert.ok(html.includes(`<p class="rsnode-beta__note" id="rsnodeVariantNote">${page.rsnodeVariantNote('heltec-v4')}</p>`));
+  const picker = /rsnodeBoardSelect\.addEventListener\('change'[\s\S]*?updateFlashBtn\(\);/.exec(html)[0];
+  assert.match(picker, /getElementById\('rsnodeVariantCheck'\)\.hidden = !metadata \|\| !rsnodeNeedsVariant\(metadata\.id\);/);
+  assert.match(picker, /getElementById\('rsnodeVariantNote'\)\.textContent = rsnodeVariantNote\(metadata\.id\);/);
+  assert.match(picker, /'I checked that my device is ' \+ rsnodeVariantDescription\(metadata\.id\) \+ '\.'/);
+  assert.match(extractFunction('rsnodeReadyText'), /state\.firmwareReady \? 'Ready to flash' : rsnodeVariantPrompt\(metadata\.id\)/);
+  assert.match(extractFunction('confirmFactoryInstall'), /'I checked that my device is ' \+ rsnodeVariantDescription\(prepared\.board\) \+ '\.'/);
+});
+
 test('all reviewed images validate as offset-zero factory installs with their actual flash settings', async () => {
-  for (const id of ['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft']) {
+  for (const id of ['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft', 'heltec-wsl-v3']) {
     const f = await fixture(id);
     const result = await validateBetaManifest(f.zip, f.manifest, f.metadata);
     assert.equal(result.product, 'rsnode');
@@ -290,6 +407,56 @@ test('an authorized downloaded rsNode ZIP uploaded locally retains factory-insta
   assert.equal(state.firmwareAppBytes, f.bytes);
 });
 
+test('an uploaded rsNode package for a UF2 board is turned away as it is chosen, never handed to esptool', async () => {
+  const REFUSAL = 'This rsNode package is for a board that installs from a firmware file: choose the board in the rsNode tab to install it.';
+  assert.equal(new RegExp("var RSNODE_UF2_UPLOAD = '([^']+)';").exec(html)[1], REFUSAL);
+  const manifests = { uf2: { product: 'rsnode', board: 'rak4631', installMode: 'uf2' }, factory: (await fixture()).manifest,
+    handheld: { product: 'ratspeak-handheld', installMode: 'uf2' } };
+  const file = kind => ({ name: 'package.zip', kind, arrayBuffer: async () => new ArrayBuffer(1) });
+  const zipOf = manifest => ({ file: name => name === 'manifest.json' && manifest ? { async: async () => JSON.stringify(manifest) } : null });
+  const alerts = [], classes = new Set(['has-file']);
+  const state = { flashing: false, firmwareReady: true };
+  const context = { state, alert: text => alerts.push(text), updateFlashBtn: () => alerts.push('button'),
+    dropZone: { classList: { remove: name => classes.delete(name) } }, fileInput: { value: 'C:\\fakepath\\package.zip' },
+    window: { JSZip: { loadAsync: async () => { if (!context.zip) throw new Error('not a ZIP'); return context.zip; } } } };
+  const page = vm.runInNewContext([new RegExp("var RSNODE_UF2_UPLOAD = '[^']+';").exec(html)[0],
+    ...['uploadedUf2Package', 'refuseUploadedUf2'].map(extractFunction), '({ uploadedUf2Package, refuseUploadedUf2 })'].join('\n'), context);
+  // A factory package, another product, a ZIP without a manifest, and one that cannot be read are all left alone.
+  for (const zip of [zipOf(manifests.factory), zipOf(manifests.handheld), zipOf(null), null]) {
+    context.zip = zip;
+    state.customFile = file('kept');
+    assert.equal(await page.uploadedUf2Package(state.customFile), false);
+    await page.refuseUploadedUf2(state.customFile);
+    assert.deepEqual([state.customFile.kind, state.firmwareReady, alerts.length, classes.has('has-file')], ['kept', true, 0, true]);
+  }
+  // The UF2 package: the choice is undone, and one sentence says where it installs.
+  context.zip = zipOf(manifests.uf2);
+  state.customFile = file('uf2');
+  await page.refuseUploadedUf2(state.customFile);
+  assert.deepEqual([state.customFile, state.firmwareReady, classes.has('has-file'), context.fileInput.value], [null, false, false, '']);
+  assert.deepEqual(alerts, ['button', REFUSAL]);
+  // A file replaced while it was being read is not the one refused.
+  alerts.length = 0;
+  const first = file('uf2');
+  state.customFile = file('another');
+  state.firmwareReady = true;
+  await page.refuseUploadedUf2(first);
+  assert.deepEqual([state.customFile.kind, state.firmwareReady, alerts.length], ['another', true, 0]);
+  assert.match(extractFunction('handleFile'), /if \(ext === 'zip'\) refuseUploadedUf2\(file\);/);
+
+  // The install itself refuses too, before esptool is given anything, and says the same sentence.
+  const prepare = vm.runInNewContext([new RegExp("var RSNODE_UF2_UPLOAD = '[^']+';").exec(html)[0], '(' + extractFunction('prepareFileArray') + ')'].join('\n'),
+    { state: { device: 'custom', customFile: { name: 'rsnode.zip', arrayBuffer: async () => new ArrayBuffer(1) } }, isRsnodeSelected: () => false,
+      window: { JSZip: { loadAsync: async () => ({}) } },
+      findManifestFile: () => ({ path: 'manifest.json', file: { async: async () => JSON.stringify(manifests.uf2) } }),
+      validateBetaManifest: () => { throw new Error('reached the validator'); } });
+  await assert.rejects(prepare(() => {}), { message: REFUSAL });
+  // The failure card carries that sentence instead of the generic "The install stopped".
+  assert.match(html, /if \(message === RSNODE_UF2_UPLOAD\) \{\s+return \{ step: 'install', title: 'This package installs from a file', cause: RSNODE_UF2_UPLOAD, fixes: \[\] \};/);
+  const flash = html.slice(html.indexOf('window.startFlash = async function()'), html.indexOf('function isRnodeReconnectSetupIssue'));
+  assert.ok(flash.indexOf('await prepareFileArray(logMessage)') < flash.indexOf('new esptool.Transport(state.port)'));
+});
+
 test('session reads pause while a cookie-changing authentication request is in progress', async () => {
   let calls = 0;
   const refresh = vm.runInNewContext('(' + extractFunction('refreshBetaSession') + ')', {
@@ -317,15 +484,22 @@ test('rsNode flash checks session, chip and capacity before writing, and uploade
   assert.ok(flash.indexOf("prepared.product === 'rsnode') needsRnodeSetup = false") < flash.indexOf('confirmFactoryInstall(prepared)'));
   assert.match(flash, /prepared\.product === 'rsnode' && isRsnodeSelected\(\)/);
   assert.match(flash, /flashKiB !== expectedKiB/);
-  assert.match(html, /prepared\.board !== 'heltec-v3' && !isRsnodeSelected\(\)/);
+  assert.match(html, /prepared\.product === 'rsnode' && rsnodeNeedsVariant\(prepared\.board\) && !isRsnodeSelected\(\)/);
 });
 
 test('the picker, the install dialog and the package name each board the same way', () => {
   const server = readFileSync(new URL('../lib/rsnode-beta.js', import.meta.url), 'utf8');
-  const labels = Object.fromEntries([...server.matchAll(/'((?:heltec|t)-[a-z0-9-]+)': \{ label: '([^']+)'/g)].map(match => [match[1], match[2]]));
+  const labels = Object.fromEntries([...server.matchAll(/'([a-z0-9-]+)': \{ label: '([^']+)'/g)].map(match => [match[1], match[2]]));
   assert.deepEqual(labels, { 'heltec-v3': 'Heltec V3', 'heltec-v4': 'Heltec V4 · R2', 'heltec-v4-r8': 'Heltec V4 · R8',
-    'heltec-v4-r8-tft': 'Heltec V4 · R8 TFT', 'heltec-t114': 'Heltec T114', 't-echo': 'LilyGO T-Echo' });
+    'heltec-v4-r8-tft': 'Heltec V4 · R8 TFT', 'heltec-t114': 'Heltec T114', 't-echo': 'LilyGO T-Echo',
+    'thinknode-m1': 'Elecrow ThinkNode M1', 'rak4631': 'RAK4631', 'heltec-wsl-v3': 'Heltec Wireless Stick Lite V3' });
   for (const [id, label] of Object.entries(labels)) assert.equal(rsnodeBoard(id).label, label, id);
+});
+
+test('the page names the private boards only in the unlocked picker: its own text names the Heltec V3 and V4 alone', () => {
+  const page = readFileSync(new URL('../flash.html', import.meta.url), 'utf8');
+  assert.match(page, /<p class="rsnode-beta__note">rsNode is LoRa firmware for Heltec V3 and V4 boards, in private beta\.<\/p>/);
+  assert.doesNotMatch(page, /T114|T-Echo|ThinkNode M1|RAK4631|Wireless Stick|TECHOBOOT|HT-n5262/i);
 });
 
 test('the rsNode pane says what Install erases, what the two modes are, and that managers are optional', () => {

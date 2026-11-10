@@ -2,16 +2,26 @@ import { sha256Hex } from './handheld-release.js';
 
 // otaBoard is the board byte of the node's target, which its status reports. ESP32-S3 boards
 // install a factory image over USB; nRF52840 boards install a UF2 through their bootloader drive.
+// screen: false is a board with no screen: the flasher's status check and its lights stand in for one.
+// wifi: false is a board with no Wi-Fi, so no Wi-Fi settings and no uplink.
 const ESP = { chipFamily: 'ESP32-S3', installMode: 'factory' };
+const NRF = { chipFamily: 'nRF52840', installMode: 'uf2', wifi: false };
 const BOARDS = Object.freeze({
   'heltec-v3': { ...ESP, label: 'Heltec V3', flashSize: '8MB', capacity: 8 * 1024 * 1024, otaBoard: 0x3a },
   'heltec-v4': { ...ESP, label: 'Heltec V4 · R2', flashSize: '16MB', capacity: 16 * 1024 * 1024, otaBoard: 0x3f },
   'heltec-v4-r8': { ...ESP, label: 'Heltec V4 · R8', flashSize: '16MB', capacity: 16 * 1024 * 1024, otaBoard: 0xbf },
   'heltec-v4-r8-tft': { ...ESP, label: 'Heltec V4 · R8 TFT', flashSize: '16MB', capacity: 16 * 1024 * 1024, otaBoard: 0xc0 },
-  'heltec-t114': { chipFamily: 'nRF52840', installMode: 'uf2', label: 'Heltec T114', otaBoard: 0x3c,
+  'heltec-t114': { ...NRF, label: 'Heltec T114', otaBoard: 0x3c,
     uf2: { base: 0x26000, end: 0xe8000, family: 0xada52840, drive: 'HT-n5262' } },
-  't-echo': { chipFamily: 'nRF52840', installMode: 'uf2', label: 'LilyGO T-Echo', otaBoard: 0x44,
-    uf2: { base: 0x26000, end: 0xef000, family: 0xada52840, drive: 'TECHOBOOT' } }
+  't-echo': { ...NRF, label: 'LilyGO T-Echo', otaBoard: 0x44,
+    uf2: { base: 0x26000, end: 0xef000, family: 0xada52840, drive: 'TECHOBOOT' } },
+  // Its bootloader drive name is not verified, so none is recorded.
+  'thinknode-m1': { ...NRF, label: 'Elecrow ThinkNode M1', otaBoard: 0xc4,
+    uf2: { base: 0x26000, end: 0xef000, family: 0xada52840 } },
+  'rak4631': { ...NRF, label: 'RAK4631', otaBoard: 0x51, screen: false,
+    uf2: { base: 0x26000, end: 0xef000, family: 0xada52840, drive: 'RAK4631' } },
+  'heltec-wsl-v3': { ...ESP, label: 'Heltec Wireless Stick Lite V3', flashSize: '8MB', capacity: 8 * 1024 * 1024, otaBoard: 0xba,
+    screen: false }
 });
 const UF2_BLOCK = 512;
 const owns = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
@@ -127,7 +137,7 @@ async function validateUf2Manifest(zip, manifest, board) {
   }
   if (!validUf2(bytes, board)) throw new Error('The rsNode firmware file does not match this board.');
   return { bytes, board: board.id, boardLabel: board.label, installMode: 'uf2', product: 'rsnode',
-    fileName: `rsnode-${board.id}-${manifest.version}.uf2`, drive: board.uf2.drive };
+    fileName: `rsnode-${board.id}-${manifest.version}.uf2`, drive: board.uf2.drive || null };
 }
 
 export async function validateBetaManifest(zip, manifest, metadata) {

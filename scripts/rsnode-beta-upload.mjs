@@ -8,7 +8,7 @@ import { get, put } from '@vercel/blob';
 const siteRoot = await realpath(resolve(dirname(fileURLToPath(import.meta.url)), '..'));
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 // The board byte of each image's signed update target, as lib/rsnode-beta.js checks it.
-const OTA_BOARDS = { 'heltec-v3': '3a', 'heltec-v4': '3f', 'heltec-v4-r8': 'bf', 'heltec-v4-r8-tft': 'c0' };
+const OTA_BOARDS = { 'heltec-v3': '3a', 'heltec-v4': '3f', 'heltec-v4-r8': 'bf', 'heltec-v4-r8-tft': 'c0', 'heltec-wsl-v3': 'ba' };
 
 // A signed .rsota: its catalog entry, its bytes, and a manifest that names the same target and sequence.
 async function updateBundle(entry, local) {
@@ -51,8 +51,9 @@ export async function uploadBetaPackages(catalogArg, outputArg, {
   if (!token && !storeId) throw new Error('Set the dedicated RSNODE_BETA_BLOB_STORE_ID for project OIDC or RSNODE_BETA_BLOB_TOKEN.');
   const auth = storeId ? { storeId } : { token };
   const input = JSON.parse(await readFile(catalogPath, 'utf8'));
-  const availableBoards = new Set(['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft', 'heltec-t114', 't-echo']);
-  if (!Array.isArray(input.boards) || input.boards.length < 1 || input.boards.length > availableBoards.size) throw new Error('Expected one to six beta board packages.');
+  const availableBoards = new Set(['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft', 'heltec-t114', 't-echo',
+    'thinknode-m1', 'rak4631', 'heltec-wsl-v3']);
+  if (!Array.isArray(input.boards) || input.boards.length < 1 || input.boards.length > availableBoards.size) throw new Error('Expected one to nine beta board packages.');
   const prepared = [];
   const local = async (fileName, size, sha256, id) => {
     const path = await realpath(resolve(dirname(catalogPath), fileName));

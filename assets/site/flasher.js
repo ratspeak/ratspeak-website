@@ -8,9 +8,9 @@ import { REPEATER_PRESETS, checkRepeaterForm, controlRepeater, readRsnodeIdentit
 import { nodeContactCard, parseContactCard } from '/assets/js/rsnode-card.js';
 import { renderQrCanvas } from '/assets/js/qr-code.js';
 import { cameraAvailable, startQrScan } from '/assets/js/qr-scan.js';
-import { HOST_OWNERS, SCREEN_HEIGHT, SCREEN_WIDTH, leaveRsnode, readRsnodeFacts, readRsnodeRadio, readRsnodeScreen,
-    readRsnodeStatus, restartRsnode, rsnodeBluetoothOff, rsnodeDetails, rsnodeSummary, screenSupported, startRsnodePairing,
-    waitForRsnode } from '/assets/js/rsnode-device.js';
+import { HOST_OWNERS, SCREEN_HEIGHT, SCREEN_WIDTH, leaveRsnode, readRsnodeFacts, readRsnodePairingCode, readRsnodeRadio,
+    readRsnodeScreen, readRsnodeStatus, restartRsnode, rsnodeBluetoothOff, rsnodeDetails, rsnodeLights, rsnodeScreenless,
+    rsnodeStatusCheck, rsnodeSummary, screenSupported, startRsnodePairing, waitForRsnode } from '/assets/js/rsnode-device.js';
 import { chooseRsnodeInstall, streamRsnodeUpdate, verifyRsnodeBundle } from '/assets/js/rsnode-update.js';
 import { handheldBoard, handheldCapabilities, handheldRelease, HANDHELD_REPOSITORY, verifyHandheldDownload, validateHandheldManifest, identifyHandheldImage, validateHandheldImage } from '/assets/js/handheld-release.js';
 import { md5Bytes } from '/assets/js/md5.js';
@@ -64,6 +64,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         rsnodeLoading: false,
         rsnodeLoadFailed: false,
         rsnodeInstalled: false,
+        rsnodeInstalledBoard: null,
         rsnodeUpdated: null,
         rsnodeBundle: null,
         rsnodeChoice: null,
@@ -980,6 +981,33 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         document.getElementById('fileSize').textContent = formatBytes(file.size);
         dropZone.classList.add('has-file');
         updateFlashBtn();
+        if (ext === 'zip') refuseUploadedUf2(file);
+    }
+
+    // An rsNode package for a board that installs from a file on its bootloader drive: esptool cannot install it.
+    var RSNODE_UF2_UPLOAD = 'This rsNode package is for a board that installs from a firmware file: choose the board in the rsNode tab to install it.';
+
+    // Whether an uploaded ZIP is one; a ZIP that cannot be read is left for the install to report.
+    async function uploadedUf2Package(file) {
+        try {
+            var zip = await window.JSZip.loadAsync(await file.arrayBuffer());
+            var entry = zip.file('manifest.json');
+            var manifest = entry && JSON.parse(await entry.async('string'));
+            return !!manifest && manifest.product === 'rsnode' && manifest.installMode === 'uf2';
+        } catch (e) {
+            return false;
+        }
+    }
+
+    // Such a package is turned away as it is chosen, before a port is asked for.
+    async function refuseUploadedUf2(file) {
+        if (!await uploadedUf2Package(file) || state.customFile !== file || state.flashing) return;
+        state.customFile = null;
+        state.firmwareReady = false;
+        dropZone.classList.remove('has-file');
+        if (fileInput) fileInput.value = '';
+        updateFlashBtn();
+        alert(RSNODE_UF2_UPLOAD);
     }
 
     function formatBytes(bytes) {
@@ -1116,6 +1144,8 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     var rsnodeTermsForm = document.getElementById('rsnodeTermsForm');
     var rsnodeTermsContinue = document.getElementById('rsnodeTermsContinue');
     var rsnodeTermsStatus = document.getElementById('rsnodeTermsStatus');
+    // The board the tools last heard of: chosen in the picker, installed, or named by the live view's node, whichever came last.
+    var rsnodeHeardBoard = null;
 
     function setBetaAuthBusy(busy) {
         betaAuthBusy = busy;
@@ -1145,6 +1175,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             clearRsnodeFirmware();
             betaBoards = [];
             rsnodeBoardSelect.replaceChildren(new Option('Choose your board', ''));
+            hearRsnodeBoard(null);
             rsnodeVariantConfirmed.checked = false;
             document.getElementById('rsnodeVariantCheck').hidden = true;
             if (isRsnodeSelected()) updateFlashBtn();
@@ -1305,7 +1336,8 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     if (ADVANCED) document.getElementById('rsnodeLock').addEventListener('click', lockBeta);
     if (ADVANCED) document.getElementById('rsnodeLockRetry').addEventListener('click', lockBeta);
 
-    // A UF2 board installs from a file the user copies to its bootloader drive.
+    // A UF2 board installs from a file the user copies to its bootloader drive; a drive whose name is not
+    // recorded goes unnamed, and a board with no screen is checked in the live view next.
     function showRsnodeUf2(prepared) {
         var panel = document.getElementById('rsnodeUf2');
         if (!panel) return;
@@ -1316,27 +1348,70 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         if (prepared) {
             save.href = state.rsnodeUf2Url;
             save.download = prepared.fileName;
-            document.getElementById('rsnodeUf2Drive').textContent = prepared.drive;
+            document.getElementById('rsnodeUf2Drive').textContent = prepared.drive || '';
+            document.getElementById('rsnodeUf2Named').hidden = !prepared.drive;
+            document.getElementById('rsnodeUf2Unnamed').hidden = !!prepared.drive;
+            document.getElementById('rsnodeUf2Next').textContent = rsnodeBoardScreenless(rsnodeBoard(prepared.board))
+                ? 'Open rsNode live view below and connect to check that it is running. Then set it up with the tools.'
+                : 'Set it up with the tools below.';
         } else {
             save.removeAttribute('href');
         }
         panel.hidden = !prepared;
     }
 
+    // Boards the installer cannot tell apart by chip and flash size, so the owner confirms which one this is:
+    // the V4 variants, and the V3 and its twin with no display. In the picker a V3 is asked once the catalog offers that twin.
     function rsnodeNeedsVariant(id) {
-        return id.indexOf('heltec-v4') === 0;
+        if (id === 'heltec-v3' && isRsnodeSelected()) return betaBoards.some(function(board) { return board.id === 'heltec-wsl-v3'; });
+        return id.indexOf('heltec-v4') === 0 || id === 'heltec-v3' || id === 'heltec-wsl-v3';
+    }
+
+    // A board with no screen is managed and checked here alone.
+    function rsnodeBoardScreenless(board) {
+        return !!board && board.screen === false;
+    }
+
+    // A board not known to lack Wi-Fi is offered its Wi-Fi settings.
+    function rsnodeBoardHasWifi(board) {
+        return !board || board.wifi !== false;
+    }
+
+    // What the tools last heard of the board decides which of their parts fit it.
+    function hearRsnodeBoard(board) {
+        rsnodeHeardBoard = board || null;
+        var screenless = rsnodeBoardScreenless(board), wifi = rsnodeBoardHasWifi(board);
+        document.querySelectorAll('[data-screen-only]').forEach(function(part) { part.hidden = screenless; });
+        document.querySelectorAll('[data-wifi-only]').forEach(function(part) { part.hidden = !wifi; });
+        document.getElementById('rsnodeRepeaterMeta').textContent = wifi ? 'Region, Owner, and Wi-Fi over USB' : 'Region and Owner over USB';
+        updateRsnodeSettingsVisibility();
     }
 
     function rsnodeVariantDescription(id) {
         if (id === 'heltec-v4-r8-tft') return 'V4 R8 TFT, the Expansion Kit V2 with the 2.8-inch touchscreen';
         if (id === 'heltec-v4-r8') return 'V4 R8 (ESP32-S3R8) with the small OLED display';
+        if (id === 'heltec-v3') return 'the Heltec V3, with the small OLED display';
+        if (id === 'heltec-wsl-v3') return 'the Wireless Stick Lite V3, with no display';
         return 'V4 R2 (ESP32-S3R2)';
+    }
+
+    var RSNODE_V4_NOTE = 'Check the chip marking or your order details: ESP32-S3R2 has 2 MB PSRAM; ESP32-S3R8 has 8 MB. Both V4s have 16 MB flash and need different firmware.';
+    var RSNODE_V3_NOTE = 'Check for a display: the Heltec V3 has a small OLED; the Wireless Stick Lite V3 has none. Both have the same chip and 8 MB flash and need different firmware. ' +
+        'The wrong one leaves a V3\'s display dark, or gives a Stick Lite firmware that expects a display.';
+
+    // What tells the boards apart, beside the checkbox.
+    function rsnodeVariantNote(id) {
+        return id.indexOf('heltec-v4') === 0 ? RSNODE_V4_NOTE : RSNODE_V3_NOTE;
+    }
+
+    function rsnodeVariantPrompt(id) {
+        return id.indexOf('heltec-v4') === 0 ? 'Confirm the V4 variant to continue.' : 'Confirm your board to continue.';
     }
 
     function rsnodeReadyText() {
         var metadata = state.rsnodeMetadata;
         if (state.rsnodeUf2) return metadata.version + ' · ' + formatBytes(state.rsnodeUf2.bytes.length) + ' · Install it from the file below.';
-        return metadata.version + ' · ' + formatBytes(metadata.size) + ' · ' + (state.firmwareReady ? 'Ready to flash' : 'Confirm the V4 variant to continue.');
+        return metadata.version + ' · ' + formatBytes(metadata.size) + ' · ' + (state.firmwareReady ? 'Ready to flash' : rsnodeVariantPrompt(metadata.id));
     }
 
     function rsnodeVariantIsConfirmed() {
@@ -1349,8 +1424,12 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         clearRsnodeFirmware();
         rsnodeVariantConfirmed.checked = false;
         var metadata = betaBoards.find(function(board) { return board.id === rsnodeBoardSelect.value; });
+        hearRsnodeBoard(rsnodeBoard(rsnodeBoardSelect.value));
         document.getElementById('rsnodeVariantCheck').hidden = !metadata || !rsnodeNeedsVariant(metadata.id);
-        if (metadata) document.getElementById('rsnodeVariantLabel').textContent = 'I checked that my device is ' + rsnodeVariantDescription(metadata.id) + '.';
+        if (metadata) {
+            document.getElementById('rsnodeVariantNote').textContent = rsnodeVariantNote(metadata.id);
+            document.getElementById('rsnodeVariantLabel').textContent = 'I checked that my device is ' + rsnodeVariantDescription(metadata.id) + '.';
+        }
         updateFlashBtn();
         if (!metadata) { betaStatus(''); return; }
         betaStatus('Downloading ' + metadata.label + '…');
@@ -3676,8 +3755,10 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         return node && !node.repeater && node.hostOwner >= 2 ? HOST_OWNERS[node.hostOwner] : null;
     }
 
-    function rsnodeHeldMessage(nodeId, owner) {
-        return 'Another app is using RNode ' + nodeId + ' over ' + owner + '. Disconnect it, or hold USB on the node, then save again.';
+    // A board with no screen has no USB button to hold.
+    function rsnodeHeldMessage(nodeId, owner, screenless) {
+        return 'Another app is using RNode ' + nodeId + ' over ' + owner + '. Disconnect it' +
+            (screenless ? '' : ', or hold USB on the node') + ', then save again.';
     }
 
     // A failed save also gets a hint for what to do next. context: { nodeId, rsnode (STATUS or null), managers }.
@@ -3692,7 +3773,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         // ERROR_INVALID_CONFIG to a manager write: STATUS, or its absence, says why.
         if (error.code === 0x07 && (error.subcommand === 0x08 || error.subcommand === 0x09) && context) {
             var name = 'RNode ' + context.nodeId, rsnode = context.rsnode, held = rsnodeHeldElsewhere(rsnode);
-            if (held) return { text: rsnodeHeldMessage(context.nodeId, held) };
+            if (held) return { text: rsnodeHeldMessage(context.nodeId, held, rsnodeScreenless(rsnode)) };
             if (rsnode && rsnode.node && rsnode.node.repeater) {
                 return { text: name + ' is busy finishing an update or saving its identity. Try again in a minute.' };
             }
@@ -3742,7 +3823,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         var node = rsnode && rsnode.node;
         if (!node) return '';
         if (node.repeater) return ' The node keeps running as a Repeater.';
-        return node.hostOwner >= 2 ? '' : ' The node is back on its home menu.';
+        return node.hostOwner >= 2 || rsnodeScreenless(rsnode) ? '' : ' The node is back on its home menu.';
     }
 
     // What the node reported: its managers in the list, the rest laid out like the live view's facts.
@@ -3797,7 +3878,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
                     context = { nodeId: status.nodeId, rsnode: await readRsnodeStatus(session),
                         managers: rsnodeActive(rsnodeManagers).length };
                     var held = rsnodeHeldElsewhere(context.rsnode);
-                    if (held && !read) throw Object.assign(new Error(rsnodeHeldMessage(status.nodeId, held)), { held: true });
+                    if (held && !read) throw Object.assign(new Error(rsnodeHeldMessage(status.nodeId, held, rsnodeScreenless(context.rsnode))), { held: true });
                 },
                 // The USB log keeps the script's lines; the status line follows them.
                 log: function(line) {
@@ -3927,9 +4008,10 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         dns: 'rsnodeWifiDns', peersEnabled: 'rsnodePeersEnabled', peersPort: 'rsnodePeersPort', uplinkEnabled: 'rsnodeUplinkEnabled',
         uplinkHost: 'rsnodeUplinkHost', uplinkPort: 'rsnodeUplinkPort' };
 
+    // Wi-Fi, peers, and the uplink all need Wi-Fi: a board known to have none has nothing to set here.
     function updateRsnodeSettingsVisibility() {
         var panel = document.getElementById('rsnodeSettings');
-        if (panel) panel.hidden = !rsnodeToolsUnlocked();
+        if (panel) panel.hidden = !rsnodeToolsUnlocked() || !rsnodeBoardHasWifi(rsnodeHeardBoard);
     }
 
     function rsnodeSettingsField(key) {
@@ -4128,9 +4210,17 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             if (!status || !status.node) {
                 throw new Error('RNode ' + nodeId + ' did not report USB settings support. Check the connection and use the instructions for its firmware version. The Install action erases the node.');
             }
+            // A node whose STATUS names a board with no Wi-Fi is told so, not shown settings it cannot use.
+            if (!rsnodeBoardHasWifi(status.board && rsnodeBoardForTarget(status.board.board))) {
+                await leaveRsnode(session);
+                rsnodeSettingsNode = null;
+                renderRsnodeSettings();
+                rsnodeSettingsMessage('RNode ' + nodeId + ' has no Wi-Fi, so it has no settings to change here.', false, true);
+                return;
+            }
             if (save) {
                 var held = rsnodeHeldElsewhere(status);
-                if (held) throw new Error(rsnodeHeldMessage(nodeId, held));
+                if (held) throw new Error(rsnodeHeldMessage(nodeId, held, rsnodeScreenless(status)));
                 ui.setStatus('Saving to RNode ' + nodeId + '…');
                 ui.log('settings: ' + entries.map(function(entry) { return '0x' + entry[0].toString(16).padStart(2, '0'); }).join(' '));
                 outcome = await writeRsnodeSettings(session, entries, form.wifiMode);
@@ -4139,7 +4229,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
                     var target = outcome.field && rsnodeSettingsField(outcome.field);
                     throw target ? rsnodeFieldError(target, outcome.message) : new Error(outcome.message);
                 }
-                if (outcome.kind === 'refused') throw new Error(rsnodeHeldMessage(nodeId, 'Bluetooth or Wi-Fi'));
+                if (outcome.kind === 'refused') throw new Error(rsnodeHeldMessage(nodeId, 'Bluetooth or Wi-Fi', rsnodeScreenless(status)));
                 if (outcome.kind === 'busy') throw new Error('RNode ' + nodeId + ' is busy finishing an update or saving. Try again in a minute.');
                 if (outcome.kind === 'storage') throw new Error('RNode ' + nodeId + ' could not confirm that the settings were saved. Read its settings before retrying.');
                 if (outcome.kind === 'unsupported') throw new Error('RNode ' + nodeId + ' cannot change these settings over USB.');
@@ -4196,11 +4286,12 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
 
     // ── Set up as a Repeater: the Owner, optional Wi-Fi and uplink, then REPEATER_SETUP over USB (rsNode ADR 0016) ──
     var rsnodeRepeaterBusy = false;
-    var rsnodeRepeaterStarting = false;
+    // The control in progress: 'start', 'stop', or 'exit'; null while Finish setup runs.
+    var rsnodeRepeaterControl = null;
     // A scanned card's Owner, { name, lxmf, publicKey }; a typed address leaves it null.
     var rsnodeRepeaterOwnerCard = null;
     var rsnodeRepeaterStopScan = null;
-    // { nodeId, identity, card, repeating }: the node last set up here, paused until Start repeating.
+    // { nodeId, identity, card, repeating, repeater, board }: the node last set up here, paused until Start repeating.
     var rsnodeRepeaterResult = null;
     var rsnodeRepeaterRegionsFor = null;
     var RSNODE_REPEATER_OWNER_NOTE = 'Paste your address from Ratspeak, or scan your contact card there. A scanned card also gives the node your key, so it can reply right away.';
@@ -4249,7 +4340,8 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             region: Number(value('rsnodeRepeaterRegion')) || null, preset: Number(value('rsnodeRepeaterPreset')) || 0,
             limits: { mode: mode ? mode.value : 'off', txPower: /^-?\d+$/.test(power) ? Number(power) : NaN, dutyCycle: checked('rsnodeLimitsDuty') },
             accepted: checked('rsnodeRepeaterAccept'), owner: value('rsnodeRepeaterOwner'), card: rsnodeRepeaterOwnerCard,
-            remote: checked('rsnodeRepeaterRemote'), wifiName: value('rsnodeRepeaterWifiName'), wifiPassword: value('rsnodeRepeaterWifiPassword'),
+            remote: checked('rsnodeRepeaterRemote') && rsnodeBoardHasWifi(rsnodeHeardBoard), wifiName: value('rsnodeRepeaterWifiName'),
+            wifiPassword: value('rsnodeRepeaterWifiPassword'),
             uplinkHost: value('rsnodeRepeaterServer'), uplinkPort: value('rsnodeRepeaterServerPort')
         };
     }
@@ -4261,13 +4353,27 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         var form = readRsnodeRepeaterForm();
         document.getElementById('rsnodeRepeaterFields').disabled = !idle;
         document.getElementById('rsnodeRepeaterFinish').disabled = !idle;
-        document.getElementById('rsnodeRepeaterFinish').textContent = rsnodeRepeaterBusy && !rsnodeRepeaterStarting ? 'Finishing…' : 'Finish setup';
-        document.getElementById('rsnodeRepeaterGo').disabled = !idle || !rsnodeRepeaterTarget();
-        document.getElementById('rsnodeRepeaterGo').textContent = rsnodeRepeaterBusy && rsnodeRepeaterStarting ? 'Starting…' : 'Start repeating';
+        document.getElementById('rsnodeRepeaterFinish').textContent = rsnodeRepeaterBusy && !rsnodeRepeaterControl ? 'Finishing…' : 'Finish setup';
+        // Start or Stop, whichever the node is not doing; Stop and the way back to RNode mode only where rsnodeRepeaterControls offers them.
+        var node = rsnodeRepeaterNode(), controls = !!node && node.repeater && rsnodeRepeaterControls(node.board);
+        var go = document.getElementById('rsnodeRepeaterGo'), stop = document.getElementById('rsnodeRepeaterStop'),
+            exit = document.getElementById('rsnodeRepeaterExit');
+        stop.hidden = !(controls && node.forwarding === true);
+        go.hidden = !stop.hidden;
+        exit.hidden = !controls;
+        go.disabled = !idle || !rsnodeRepeaterTarget();
+        stop.disabled = !idle || stop.hidden;
+        exit.disabled = !idle || exit.hidden;
+        go.textContent = rsnodeRepeaterControl === 'start' ? 'Starting…' : 'Start repeating';
+        stop.textContent = rsnodeRepeaterControl === 'stop' ? 'Stopping…' : 'Stop repeating';
+        exit.textContent = rsnodeRepeaterControl === 'exit' ? 'Returning…' : 'Return to RNode mode…';
         document.getElementById('rsnodeRepeaterRadio').textContent = repeaterRadioLine(form.region, form.preset) ||
             'Each region starts on its default frequency.';
         document.getElementById('rsnodeLimitsHelp').textContent = RSNODE_LIMITS_HELP[form.limits.mode];
         document.getElementById('rsnodeLimitsCustom').hidden = form.limits.mode !== 'custom';
+        // A board with no screen has no menu to start from.
+        document.getElementById('rsnodeRepeaterLater').textContent = 'Finish setup saves these settings without repeating yet. Start repeating here, ' +
+            (rsnodeBoardScreenless(rsnodeHeardBoard) ? 'or later from Ratspeak with /start.' : 'later from Ratspeak with /start, or from the board\'s menu.');
         document.getElementById('rsnodeRepeaterRemoteFields').hidden = !form.remote;
         var card = rsnodeRepeaterOwnerCard;
         document.getElementById('rsnodeRepeaterOwnerEntry').hidden = !!card || !!rsnodeRepeaterStopScan;
@@ -4283,20 +4389,41 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         syncRsnodePort();
     }
 
-    // The node Start repeating acts on: one set up here, or a paused Repeater in the live view. Firmware that
-    // does not report forwarding (1.0.0) is offered it too; START on a forwarding node changes nothing.
-    function rsnodeRepeaterTarget() {
+    // The node the Repeater controls act on: one set up here, or a Repeater the live view read. forwarding is
+    // null on firmware that does not report it (1.0.0); board is null when no STATUS named it.
+    function rsnodeRepeaterNode() {
         var result = rsnodeRepeaterResult;
-        if (result) return result.repeating ? null : result.nodeId;
+        if (result) return { nodeId: result.nodeId, board: result.board || null, repeater: result.repeater !== false, forwarding: !!result.repeating };
         var facts = rsnodeDeviceFacts;
-        var node = facts && facts.rsnode && facts.rsnode.node;
-        if (!facts || !rsnodeIsRepeater(facts) || !facts.transport.radioProfile || (node && node.forwarding === true)) return null;
-        return facts.status.nodeId;
+        if (!facts || !rsnodeIsRepeater(facts) || !facts.transport.radioProfile) return null;
+        var rsnode = facts.rsnode, node = rsnode && rsnode.node;
+        return { nodeId: facts.status.nodeId, board: rsnode && rsnode.board ? rsnodeBoardForTarget(rsnode.board.board) : null,
+            repeater: true, forwarding: node ? node.forwarding : null };
     }
 
-    function setRsnodeRepeaterBusy(busy, starting) {
+    // The node Start repeating acts on: any of those not known to be forwarding. START on a forwarding node changes nothing.
+    function rsnodeRepeaterTarget() {
+        var node = rsnodeRepeaterNode();
+        return node && node.forwarding !== true ? node.nodeId : null;
+    }
+
+    // Stop repeating and Return to RNode mode are offered for a board with no menu of its own to do them.
+    // To offer them on every board, return true here.
+    function rsnodeRepeaterControls(board) {
+        return rsnodeBoardScreenless(board);
+    }
+
+    // What a control changed is what the tools now know of the node: the one set up here, and the live view's last read of it.
+    function noteRsnodeRepeater(nodeId, repeater, forwarding) {
+        var result = rsnodeRepeaterResult, facts = rsnodeDeviceFacts;
+        if (result && result.nodeId === nodeId) Object.assign(result, { repeater: repeater, repeating: forwarding });
+        var node = facts && facts.status.nodeId === nodeId && facts.rsnode && facts.rsnode.node;
+        if (node) Object.assign(node, { repeater: repeater, forwarding: node.forwarding === null ? null : forwarding });
+    }
+
+    function setRsnodeRepeaterBusy(busy, control) {
         rsnodeRepeaterBusy = busy;
-        rsnodeRepeaterStarting = !!starting;
+        rsnodeRepeaterControl = busy && control || null;
         document.getElementById('rsnodeRepeaterDot').classList.toggle('is-busy', busy);
         syncRsnodeRepeaterForm();
         syncRsnodeSettingsForm();
@@ -4393,13 +4520,13 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     }
 
     // A refused USB write, in the panel's words; an invalid entry lands on its field.
-    function rsnodeRepeaterRefusal(outcome, nodeId, field) {
+    function rsnodeRepeaterRefusal(outcome, nodeId, field, screenless) {
         var name = 'RNode ' + nodeId;
         if (outcome.kind === 'invalid') {
             var target = outcome.field && field(outcome.field);
             return target ? rsnodeFieldError(target, outcome.message) : new Error(outcome.message);
         }
-        if (outcome.kind === 'refused') return new Error(rsnodeHeldMessage(nodeId, 'Bluetooth or Wi-Fi'));
+        if (outcome.kind === 'refused') return new Error(rsnodeHeldMessage(nodeId, 'Bluetooth or Wi-Fi', screenless));
         if (outcome.kind === 'busy') return new Error(name + ' is busy finishing an update or saving. Try again in a minute.');
         if (outcome.kind === 'storage') return new Error(name + ' could not confirm that it saved. Try again.');
         if (outcome.kind === 'unsupported') return new Error(name + ' cannot set up a Repeater over USB. Update it first.');
@@ -4442,11 +4569,17 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             var name = 'RNode ' + nodeId;
             var status = await readRsnodeStatus(session);
             if (!status || !status.node) throw new Error(name + ' cannot set up a Repeater over USB. Update it first.');
+            var screenless = rsnodeScreenless(status);
             var held = rsnodeHeldElsewhere(status);
-            if (held) throw new Error(rsnodeHeldMessage(nodeId, held));
+            if (held) throw new Error(rsnodeHeldMessage(nodeId, held, screenless));
             var board = status.board && rsnodeBoardForTarget(status.board.board);
             if (board && !repeaterRegions(board).some(function(region) { return region.id === form.region; })) {
                 throw rsnodeFieldError(rsnodeRepeaterField('region'), board.label + ' has no 433 MHz radio. Choose another region.');
+            }
+            // The node says which board it is: a form filled in for a board with Wi-Fi does not fit one without.
+            if (board) hearRsnodeBoard(board);
+            if (form.remote && !rsnodeBoardHasWifi(board)) {
+                throw new Error(board.label + ' has no Wi-Fi, so it cannot connect to a server. Finish setup again to set it up without one.');
             }
             ui.setStatus('Adding the Owner to ' + name + '…');
             var owner = repeaterOwner(form);
@@ -4471,7 +4604,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
                     } else if (saved.kind !== 'unchanged') {
                         throw rsnodeRepeaterRefusal(saved, nodeId, function(key) {
                             return rsnodeRepeaterField(key === 'wifiMode' ? 'name' : key);
-                        });
+                        }, screenless);
                     }
                 }
             }
@@ -4481,7 +4614,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             ui.log('repeater setup: ' + setup.map(function(entry) { return '0x' + entry[0].toString(16).padStart(2, '0'); }).join(' '));
             var outcome = await writeRepeaterSetup(session, setup);
             ui.log('result: ' + outcome.kind);
-            if (outcome.kind !== 'restart' && outcome.kind !== 'done') throw rsnodeRepeaterRefusal(outcome, nodeId, rsnodeRepeaterField);
+            if (outcome.kind !== 'restart' && outcome.kind !== 'done') throw rsnodeRepeaterRefusal(outcome, nodeId, rsnodeRepeaterField, screenless);
             if (outcome.kind === 'restart') {
                 rsnodeRepeaterMessage('Restarting…');
                 ui.setStatus('Restarting…');
@@ -4493,7 +4626,8 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             var identity = await readRsnodeIdentity(session);
             if (!identity || !identity.present) throw new Error(name + ' did not report its identity, so there is no contact card to show.');
             await leaveRsnode(session);
-            rsnodeRepeaterResult = { nodeId: nodeId, identity: identity, card: nodeContactCard(identity), repeating: false };
+            rsnodeRepeaterResult = { nodeId: nodeId, identity: identity, card: nodeContactCard(identity), repeating: false,
+                repeater: !!(status && status.node && status.node.repeater), board: board || null };
             renderRsnodeRepeaterCard();
             document.getElementById('rsnodeRepeaterNotice').hidden = true;
             rsnodeRepeaterMessage(repeaterSavedMessage(nodeId, status, form), false, true);
@@ -4517,20 +4651,34 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         return text.charAt(0).toUpperCase() + text.slice(1);
     }
 
-    // REPEATER_CONTROL start on the node that was set up; a node already in Repeater mode does not restart.
-    async function runRsnodeRepeaterStart() {
-        var target = rsnodeRepeaterTarget();
-        if (!target || rsnodeRepeaterBusy || rsnodeSettingsBusy || rsnodeOwnerBusy || rsnodeChecking || state.flashing) return;
+    var RSNODE_REPEATER_CONTROLS = {
+        start: { log: 'Starting the Repeater…', to: 'start it', done: 'The node is repeating.', flashes: 'twice' },
+        stop: { log: 'Stopping the Repeater…', to: 'stop it', done: 'The node stopped repeating.', flashes: 'once' },
+        exit: { log: 'Returning to RNode mode…', to: 'return it to RNode mode' }
+    };
+
+    // REPEATER_CONTROL on the node the controls act on: start, stop (it stays a Repeater), or exit to RNode mode.
+    // A node already in Repeater mode starts and stops without a restart; leaving Repeater mode restarts it.
+    async function runRsnodeRepeaterControl(action) {
+        var node = rsnodeRepeaterNode();
+        if (!node || (action === 'start' ? node.forwarding === true : !(node.repeater && rsnodeRepeaterControls(node.board))) ||
+            rsnodeRepeaterBusy || rsnodeSettingsBusy || rsnodeOwnerBusy || rsnodeChecking || state.flashing) return;
         if (!('serial' in navigator)) {
             showSerialWarning();
             return;
         }
-        var ui = null, session = null, stage = 'port';
-        setRsnodeRepeaterBusy(true, true);
+        var name = 'RNode ' + node.nodeId, text = RSNODE_REPEATER_CONTROLS[action];
+        // The restart is said before it happens.
+        if (action === 'exit' && !window.confirm('Return ' + name + ' to RNode mode?\n\nIt stops repeating and restarts as an RNode. ' +
+            'Its Repeater settings and managers stay.')) return;
+        var ui = null, session = null, stage = 'port', exited = false;
+        // A board with no screen shows what it is doing on its lights.
+        var lights = rsnodeLights(node.board);
+        setRsnodeRepeaterBusy(true, action);
         rsnodeRepeaterMessage('');
         try {
             await rsnodeToolPortFromUser();
-            ui = openProgressLog('Starting the Repeater…', document.getElementById('rsnodeRepeaterActivity'));
+            ui = openProgressLog(text.log, document.getElementById('rsnodeRepeaterActivity'));
             stage = 'open';
             session = createRnodeSession(await openRnodeSerialPort(ui.log, RNODE_REPAIR_SETTLE_MS, await rsnodeOtherPorts()));
             stage = 'protocol';
@@ -4540,19 +4688,23 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             }
             var nodeId = (await readManagementStatus(session)).nodeId;
             ui.log('node id: RNode ' + nodeId);
-            if (nodeId !== target) throw new Error('This is RNode ' + nodeId + ', not RNode ' + target + '. Connect RNode ' + target + ' to start it.');
-            ui.log('repeater control: start');
-            var outcome = await controlRepeater(session, 'start');
+            if (nodeId !== node.nodeId) throw new Error('This is RNode ' + nodeId + ', not ' + name + '. Connect ' + name + ' to ' + text.to + '.');
+            ui.log('repeater control: ' + action);
+            var outcome = await controlRepeater(session, action);
             ui.log('result: ' + outcome.kind);
-            if (outcome.kind !== 'restart' && outcome.kind !== 'done') throw rsnodeRepeaterRefusal(outcome, nodeId, function() { return null; });
+            if (outcome.kind !== 'restart' && outcome.kind !== 'done') {
+                throw rsnodeRepeaterRefusal(outcome, nodeId, function() { return null; }, rsnodeBoardScreenless(node.board));
+            }
             if (outcome.kind === 'restart') {
                 ui.setStatus('Restarting…');
                 await followRsnodeRestart(session, outcome.restartMs,
-                    'RNode ' + nodeId + ' did not answer after restarting. Press RESET on the board, then check it in the live view.');
+                    name + ' did not answer after restarting. Press RESET on the board, then check it in the live view.');
             }
             await leaveRsnode(session);
-            if (rsnodeRepeaterResult) rsnodeRepeaterResult.repeating = true;
-            rsnodeRepeaterMessage('The node is repeating.', false, true);
+            exited = action === 'exit';
+            noteRsnodeRepeater(nodeId, !exited, action === 'start');
+            rsnodeRepeaterMessage(exited ? name + ' is back in RNode mode.'
+                : text.done + (lights ? ' Its ' + lights.heartbeat + ' now flashes ' + text.flashes + ' every 5 seconds.' : ''), false, true);
         } catch (error) {
             if (ui) ui.log('Error: ' + error.message, 'log-red');
             rsnodeRepeaterMessage(rsnodeRepeaterError(error, stage, null), true);
@@ -4560,19 +4712,28 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             await closeRnodeSession(session);
             setRsnodeRepeaterBusy(false);
         }
+        // Back in RNode mode, the live view connects so the owner sees the node say so.
+        if (exited) showRsnodeDeviceCheck();
     }
 
-    // The next step after an install: the node is an RNode until it is set up here.
-    function showRsnodeRepeaterStep() {
+    // The next step after an install: the node is an RNode until it is set up here. A board with
+    // no screen is checked in the live view first, so its owner sees that the install worked.
+    function showRsnodeRepeaterStep(board) {
         state.rsnodeInstalled = true;
+        state.rsnodeInstalledBoard = board || null;
+        if (rsnodeBoard(board)) hearRsnodeBoard(rsnodeBoard(board));
+        var check = rsnodeBoardScreenless(rsnodeBoard(board));
         updateRsnodeRepeaterVisibility();
-        document.getElementById('rsnodeRepeaterNotice').hidden = false;
-        document.getElementById('rsnodeRepeater').open = true;
+        if (check) updateRsnodeDeviceVisibility();
+        document.getElementById('rsnodeRepeaterNotice').hidden = check;
+        document.getElementById('rsnodeDeviceNotice').hidden = !check;
+        document.getElementById(check ? 'rsnodeDevice' : 'rsnodeRepeater').open = true;
     }
 
     // The flash button is gone once rsNode is installed; the next step takes focus.
     function focusRsnodeRepeaterNotice() {
-        var notice = document.getElementById('rsnodeRepeaterNotice');
+        var check = document.getElementById('rsnodeDeviceNotice');
+        var notice = check.hidden ? document.getElementById('rsnodeRepeaterNotice') : check;
         notice.scrollIntoView({ block: 'center' });
         notice.focus({ preventScroll: true });
     }
@@ -4593,7 +4754,11 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         if (await useRsnodeRepeaterCard(this.value)) this.value = '';
         syncRsnodeRepeaterForm();
     });
-    if (ADVANCED) document.getElementById('rsnodeRepeaterGo').addEventListener('click', runRsnodeRepeaterStart);
+    if (ADVANCED) ['Go', 'Stop', 'Exit'].forEach(function(button, index) {
+        document.getElementById('rsnodeRepeater' + button).addEventListener('click', function() {
+            runRsnodeRepeaterControl(['start', 'stop', 'exit'][index]);
+        });
+    });
     if (ADVANCED) document.getElementById('rsnodeRepeaterScan').addEventListener('click', startRsnodeRepeaterScan);
     // A closed panel lets the camera go.
     if (ADVANCED) document.getElementById('rsnodeRepeater').addEventListener('toggle', function() {
@@ -4646,12 +4811,19 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     var rsnodeDeviceRadio = null;
     var rsnodeScreenPixels = null;
     var rsnodeScreenImage = null;
+    // What the status check and the lights legend last drew.
+    var rsnodeCheckShown = null;
     var RSNODE_SCREEN_INTERVAL_MS = 250;
     var RSNODE_RADIO_INTERVAL_MS = 2000;
     var RSNODE_RESUME_MS = 20000;
+    // rsNode holds a pairing window two minutes, and two more from the code once a phone asks (PAIRING_TIMEOUT_MS).
+    var RSNODE_PAIRING_MS = 120000;
     var RSNODE_PIXEL_ON = [226, 236, 246, 255];
     var RSNODE_PIXEL_OFF = [11, 12, 14, 255];
     var RSNODE_TAKEOVER = 'If you just installed, press RESET on the board first.';
+    // The panel's words for a board with a screen, and for one without.
+    var RSNODE_DEVICE_COPY = { screen: { meta: 'See the node’s screen and status over USB', lede: 'Watch the node\'s screen and read its status over USB.' },
+        check: { meta: 'Check the node and see its status over USB', lede: 'Check that the node is running, and read its status over USB.' } };
 
     function updateRsnodeDeviceVisibility() {
         var panel = document.getElementById('rsnodeDevice');
@@ -4664,6 +4836,54 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         var status = document.getElementById('rsnodeDeviceStatus');
         status.textContent = message || '';
         status.classList.toggle('is-error', !!error);
+    }
+
+    // The board STATUS names for a node the live view read, or null.
+    function rsnodeFactsBoard(facts) {
+        var target = facts.rsnode && facts.rsnode.board;
+        return target ? rsnodeBoardForTarget(target.board) : null;
+    }
+
+    // The board the live view is about: the node it shows, else the board the tools last heard of.
+    function rsnodeDeviceBoard() {
+        return rsnodeDeviceFacts ? rsnodeFactsBoard(rsnodeDeviceFacts) : rsnodeHeardBoard;
+    }
+
+    // Opens the live view and connects, so the owner sees what the node now is.
+    function showRsnodeDeviceCheck() {
+        var panel = document.getElementById('rsnodeDevice');
+        panel.open = true;
+        panel.scrollIntoView({ block: 'nearest' });
+        return runRsnodeDevice();
+    }
+
+    // A board with no screen gets a status check where the mirror would be, and a legend for its lights.
+    function renderRsnodeCheck() {
+        var board = rsnodeDeviceBoard(), screenless = rsnodeBoardScreenless(board), facts = rsnodeDeviceFacts;
+        var items = !screenless ? [] : facts ? rsnodeStatusCheck(facts, rsnodeDeviceRadio)
+            : [{ ok: false, text: rsnodeDevice ? 'Reading the node…' : 'Connect to check the node.' }];
+        var lights = screenless ? rsnodeLights(board) : null;
+        var legend = lights ? lights.legend : [];
+        var shown = JSON.stringify([screenless, items, legend]);
+        if (shown === rsnodeCheckShown) return;
+        rsnodeCheckShown = shown;
+        var copy = RSNODE_DEVICE_COPY[screenless ? 'check' : 'screen'];
+        document.getElementById('rsnodeDeviceMeta').textContent = copy.meta;
+        document.getElementById('rsnodeDeviceLede').textContent = copy.lede;
+        document.getElementById('rsnodeScreenBezel').hidden = screenless;
+        document.getElementById('rsnodeCheck').hidden = !screenless;
+        var list = document.getElementById('rsnodeCheckList');
+        list.replaceChildren.apply(list, items.map(function(item) {
+            return Object.assign(document.createElement('li'), { className: item.ok ? 'is-ok' : '', textContent: item.text });
+        }));
+        document.getElementById('rsnodeLights').hidden = !legend.length;
+        var rows = document.getElementById('rsnodeLightsList');
+        rows.replaceChildren.apply(rows, legend.map(function(light) {
+            var row = document.createElement('div');
+            row.append(Object.assign(document.createElement('dt'), { textContent: light[0] }),
+                Object.assign(document.createElement('dd'), { textContent: light[1] }));
+            return row;
+        }));
     }
 
     // Connect is the one primary action until a session starts; the rest appear once they have something to act on.
@@ -4682,13 +4902,19 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         var repeater = live && rsnodeIsRepeater(device.facts);
         var restart = document.getElementById('rsnodeRestart');
         restart.disabled = restart.hidden = !live || repeater;
-        // Pairing only where the screen mirror can show its code, and not while Wi-Fi keeps Bluetooth off.
+        // Pairing only where its code can be read: on the mirrored screen, or here for a board with no screen.
+        // Not while Wi-Fi keeps Bluetooth off.
+        var screenless = live && rsnodeScreenless(device.facts.rsnode);
         var pair = document.getElementById('rsnodePair');
-        pair.hidden = !live || repeater || !screenSupported(device.facts.board);
+        pair.hidden = !live || repeater || !(screenless || screenSupported(device.facts.board));
         var bluetoothOff = !pair.hidden && rsnodeBluetoothOff(device.facts);
         pair.disabled = pair.hidden || bluetoothOff;
         document.getElementById('rsnodePairNote').hidden = !bluetoothOff;
+        var recheck = document.getElementById('rsnodeRecheck');
+        recheck.disabled = recheck.hidden = !screenless;
         document.getElementById('rsnodeFacts').classList.toggle('is-stale', !!rsnodeDeviceFacts && !live);
+        document.getElementById('rsnodeCheck').classList.toggle('is-stale', !!rsnodeDeviceFacts && !live);
+        renderRsnodeCheck();
         syncRsnodePort();
     }
 
@@ -4728,6 +4954,15 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     function showRsnodeDeviceFacts(facts, radio) {
         rsnodeDeviceFacts = facts;
         rsnodeDeviceRadio = radio;
+        if (facts) {
+            hearRsnodeBoard(rsnodeFactsBoard(facts));
+            // A node set up here is as its STATUS now says: a manager may have started, stopped, or exited it since.
+            var result = rsnodeRepeaterResult, node = facts.rsnode && facts.rsnode.node;
+            if (result && node && result.nodeId === facts.status.nodeId) {
+                result.repeater = node.repeater;
+                if (node.forwarding !== null) result.repeating = node.repeater && node.forwarding;
+            }
+        }
         var summary = facts && rsnodeSummary(facts, radio);
         document.getElementById('rsnodeFactsEmpty').hidden = !!summary;
         document.getElementById('rsnodeFacts').hidden = !summary;
@@ -4756,24 +4991,71 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         return !document.hidden && document.getElementById('rsnodeDevice').open;
     }
 
+    function rsnodeCheckedAt() {
+        return 'Checked at ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    }
+
+    // Check again: the live loop reads the node afresh on its next turn.
+    function recheckRsnodeDevice() {
+        var device = rsnodeDevice;
+        if (!device || !device.facts || device.stopping) return;
+        device.recheck = true;
+        setRsnodeScreenState('Checking…', false, true);
+    }
+
+    // A board with no screen has its pairing code shown here; pairing is { code, until } or null.
+    function showRsnodePairing(device, pairing) {
+        device.pairing = pairing;
+        var shown = document.getElementById('rsnodePairCode');
+        shown.hidden = !(pairing && pairing.code);
+        shown.textContent = shown.hidden ? '' : 'Pairing code: ' + pairing.code + '. Enter it in your app within 2 minutes.';
+    }
+
+    // The node sends the code once a phone starts pairing, and closes the window two minutes later.
+    function followRsnodePairing(device, code, screenless) {
+        if (code && screenless) {
+            showRsnodePairing(device, { code: code, until: Date.now() + RSNODE_PAIRING_MS });
+            rsnodeDeviceMessage('');
+        } else if (device.pairing && Date.now() >= device.pairing.until) {
+            showRsnodePairing(device, null);
+            rsnodeDeviceMessage('The pairing window closed. If your app did not pair, start pairing again.');
+        }
+    }
+
     // Screens as fast as the node answers, at most four a second, while the panel is in view;
     // the radio every two seconds. A node that goes quiet is followed through its restart.
+    // A board with no screen gets its status check instead, read again when asked.
     async function streamRsnodeDevice(device) {
-        var session = device.session, screen, nextRadio, shown;
+        var session = device.session, screen, screenless, nextRadio, shown;
         function begin() {
-            screen = screenSupported(device.facts.board);
+            screenless = rsnodeScreenless(device.facts.rsnode);
+            screen = !screenless && screenSupported(device.facts.board);
             nextRadio = Date.now() + RSNODE_RADIO_INTERVAL_MS;
             shown = [];
-            if (!screen) clearRsnodeScreen('No screen view for this board');
+            if (!screen) clearRsnodeScreen(screenless ? '' : 'No screen view for this board');
             document.getElementById('rsnodeScreenBezel').classList.toggle('is-none', !screen);
-            setRsnodeScreenState(screen ? 'Live' : 'Status only', true);
+            setRsnodeScreenState(screen ? 'Live' : screenless ? rsnodeCheckedAt() : 'Status only', true);
         }
         begin();
         while (!device.stopping) {
             var started = Date.now();
             var watched = rsnodeDeviceWatched();
             var quiet = false, dark = false, radio = null;
-            if (screen && watched) {
+            followRsnodePairing(device, await readRsnodePairingCode(session), screenless);
+            if (device.stopping) return;
+            if (device.recheck) {
+                device.recheck = false;
+                try {
+                    device.facts = await readRsnodeFacts(session);
+                    begin();
+                    nextRadio = 0;
+                } catch (error) {
+                    // A node that stops answering mid-check is followed like any restart.
+                    quiet = true;
+                }
+                if (device.stopping) return;
+            }
+            if (!quiet && screen && watched) {
                 var pixels = await readRsnodeScreen(session);
                 if (device.stopping) return;
                 if (pixels) {
@@ -4817,6 +5099,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
     // wait for it to answer again, then read it afresh, since its mode may have changed.
     async function resumeRsnodeDevice(device) {
         setRsnodeScreenState('Restarting…', false, true);
+        showRsnodePairing(device, null);
         var answered = await waitForRsnode(device.session, {
             timeoutMs: RSNODE_RESUME_MS,
             stopped: function() { return device.stopping; }
@@ -4864,6 +5147,12 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             device.stage = 'facts';
             device.facts = await readRsnodeFacts(device.session);
             showRsnodeDeviceFacts(device.facts, await readRsnodeRadio(device.session));
+            // The first check of a board with no screen confirms the install that sent its owner here.
+            var notice = document.getElementById('rsnodeDeviceNotice');
+            if (!notice.hidden && rsnodeScreenless(device.facts.rsnode)) {
+                notice.hidden = true;
+                rsnodeDeviceMessage('RNode ' + device.facts.status.nodeId + ' is running rsNode. Set it up as a Repeater, or keep it as an RNode for one app.');
+            }
             device.stage = 'live';
             await streamRsnodeDevice(device);
         } catch (error) {
@@ -4874,11 +5163,12 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
                     if (!device.restart) await leaveRsnode(device.session);
                     else if (!await restartRsnode(device.session)) {
                         device.reason = 'RNode ' + device.facts.status.nodeId + ' did not restart: another app is using it. ' +
-                            'Restart it from the device.';
+                            (rsnodeScreenless(device.facts.rsnode) ? 'Disconnect that app, or press RESET on the board.' : 'Restart it from the device.');
                     }
                 } catch (error) { /* the port is already gone */ }
             }
             await closeRnodeSession(device.session);
+            showRsnodePairing(device, null);
             rsnodeDevice = null;
             document.getElementById('rsnodeFactsEmpty').hidden = !!rsnodeDeviceFacts;
             if (!rsnodeScreenPixels && !document.getElementById('rsnodeScreenBezel').classList.contains('is-none')) clearRsnodeScreen('Connect to see the screen');
@@ -4911,23 +5201,28 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         return stopRsnodeDevice('Disconnected so another USB task could use the port. Connect again to resume.');
     }
 
-    // rsNode's Heltec firmware holds the pairing window two minutes (PAIRING_TIMEOUT_MS).
+    // rsNode holds the pairing window two minutes (PAIRING_TIMEOUT_MS). A board with a screen shows the code;
+    // one without sends it here, where the live loop shows it.
     async function pairRsnodeDevice() {
         var device = rsnodeDevice;
         if (!device || !device.facts || device.stopping) return;
+        var screenless = rsnodeScreenless(device.facts.rsnode), before = device.pairing;
         try {
             if (!await startRsnodePairing(device.session)) {
                 rsnodeDeviceMessage(rsnodeBluetoothOff(device.facts) ? document.getElementById('rsnodePairNote').textContent
                     : 'RNode ' + device.facts.status.nodeId + ' did not start pairing: another app is using it. ' +
-                    'Disconnect that app, or pair from the device.', true);
+                    (screenless ? 'Disconnect that app, then start pairing again.' : 'Disconnect that app, or pair from the device.'), true);
                 return;
             }
         } catch (error) {
             rsnodeDeviceMessage(rsnodeDeviceError(error, device.stage), true);
             return;
         }
-        rsnodeDeviceMessage('Pairing started. Within 2 minutes, choose RNode ' + device.facts.status.nodeId +
-            ' in your app\'s Bluetooth list and enter the code shown on its screen. Bluetooth stays on.');
+        // A code that arrived while the node took the command is this window's: it stays.
+        if (device.pairing && device.pairing !== before && device.pairing.code) return;
+        if (screenless) showRsnodePairing(device, { code: null, until: Date.now() + RSNODE_PAIRING_MS });
+        rsnodeDeviceMessage('Pairing started. Within 2 minutes, choose RNode ' + device.facts.status.nodeId + ' in your app\'s Bluetooth list' +
+            (screenless ? '. Stay connected: the pairing code will appear here.' : ' and enter the code shown on its screen.') + ' Bluetooth stays on.');
     }
 
     if (ADVANCED) document.getElementById('rsnodeConnect').addEventListener('click', function() {
@@ -4943,6 +5238,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         stopRsnodeDevice('Restarting ' + name + '. Connect again in a few seconds.', true);
     });
     if (ADVANCED) document.getElementById('rsnodePair').addEventListener('click', pairRsnodeDevice);
+    if (ADVANCED) document.getElementById('rsnodeRecheck').addEventListener('click', recheckRsnodeDevice);
     if (ADVANCED) document.getElementById('rsnodeScreenshot').addEventListener('click', function() {
         if (!rsnodeScreenPixels) return;
         var scale = 4;
@@ -5061,8 +5357,10 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
                         : state.rsnodeUpdated
                         ? state.rsnodeUpdated.message
                         : state.rsnodeInstalled
-                        ? (rsnodeToolsUnlocked() ? 'rsNode is installed. Press RESET on the board; the tools below read and set it up.'
-                            : 'rsNode is installed. Press RESET on the board.')
+                        ? (!rsnodeToolsUnlocked() ? 'rsNode is installed. Press RESET on the board.'
+                            : rsnodeBoardScreenless(rsnodeBoard(state.rsnodeInstalledBoard))
+                            ? 'rsNode is installed. Press RESET on the board, then check it in rsNode live view below.'
+                            : 'rsNode is installed. Press RESET on the board; the tools below read and set it up.')
                         : 'Installed. Restart the device to start using it.';
                 }
             }
@@ -5126,8 +5424,11 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         if (!rsnodeBoardSelect.value) return 'Choose your board to flash. To manage a node that already runs rsNode, use the tools below.';
         if (state.rsnodeLoading) return 'Loading the firmware for your board…';
         if (state.rsnodeLoadFailed) return 'Firmware could not be loaded. Choose the board again to retry.';
-        if (state.rsnodeUf2) return 'Copy the firmware file to the board, as the steps above show. Then use the tools below.';
-        if (!rsnodeVariantIsConfirmed()) return 'Confirm the V4 variant to continue.';
+        if (state.rsnodeUf2) {
+            return 'Copy the firmware file to the board, as the steps above show. ' +
+                (rsnodeBoardScreenless(rsnodeBoard(state.rsnodeUf2.board)) ? 'Then check it in rsNode live view below.' : 'Then use the tools below.');
+        }
+        if (!rsnodeVariantIsConfirmed()) return rsnodeVariantPrompt(rsnodeBoardSelect.value);
         return 'Select a USB device to continue.';
     }
 
@@ -5809,6 +6110,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             manifest = JSON.parse(await manifestEntry.file.async('string'));
             if (manifest.product === 'rsnode') {
                 if (manifestEntry.path !== 'manifest.json') throw new Error('rsNode manifest must be at the root of the ZIP.');
+                if (manifest.installMode === 'uf2') throw new Error(RSNODE_UF2_UPLOAD);
                 var uploadedRsnode = await validateBetaManifest(zip, manifest, { id: manifest.board, version: manifest.version });
                 state.firmwareAppBytes = uploadedRsnode.bytes;
                 logMessage('Verified rsNode factory image for ' + uploadedRsnode.boardLabel + ' @ 0x0', '');
@@ -5958,7 +6260,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         proceed.textContent = review ? review.action : 'Erase and install';
         var variant = document.getElementById('installDialogVariant');
         var variantConfirmed = document.getElementById('installDialogVariantConfirmed');
-        var needsVariant = prepared.product === 'rsnode' && prepared.board !== 'heltec-v3' && !isRsnodeSelected();
+        var needsVariant = prepared.product === 'rsnode' && rsnodeNeedsVariant(prepared.board) && !isRsnodeSelected();
         variant.hidden = !needsVariant;
         variantConfirmed.checked = false;
         document.getElementById('installDialogVariantLabel').textContent = 'I checked that my device is ' + rsnodeVariantDescription(prepared.board) + '.';
@@ -6041,7 +6343,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         state.rsnodeInstalled = false;
         state.rsnodeUpdated = null;
         clearRecovery();
-        if (ADVANCED) document.getElementById('rsnodeRepeaterNotice').hidden = true;
+        if (ADVANCED) document.getElementById('rsnodeRepeaterNotice').hidden = document.getElementById('rsnodeDeviceNotice').hidden = true;
         state.rnodeSetupVerified = false;
         state.rnodeSetupIssue = null;
         state.rnodeSetupIssueKind = null;
@@ -6313,7 +6615,7 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
             state.flashComplete = true;
             state.rnodeSetupVerified = rnodeSetupCompleted;
             btn.style.display = 'none';
-            if (prepared && prepared.product === 'rsnode') showRsnodeRepeaterStep();
+            if (prepared && prepared.product === 'rsnode') showRsnodeRepeaterStep(prepared.board);
             if (state.rsnodeInstalled && rsnodeToolsUnlocked()) focusRsnodeRepeaterNotice();
             updateFlashFlow();
             if (rnodeSetupCompleted) showRnodeSetupComplete();
@@ -6490,6 +6792,9 @@ import { inspectHandheld, handheldUpdatePlan, handheldConfirmation } from '/asse
         }
         if (/beta access expired/i.test(message)) {
             return { step: 'install', title: 'Your beta access expired', cause: 'Unlock the rsNode beta again, then install.', fixes: [] };
+        }
+        if (message === RSNODE_UF2_UPLOAD) {
+            return { step: 'install', title: 'This package installs from a file', cause: RSNODE_UF2_UPLOAD, fixes: [] };
         }
         return { step: 'install', title: 'The install stopped',
             cause: 'Something went wrong while talking to the device.',

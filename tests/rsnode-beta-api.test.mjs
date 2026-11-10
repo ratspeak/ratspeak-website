@@ -502,8 +502,9 @@ test('missing, weak, or incomplete configuration fails closed and hides configur
   }
 });
 
-test('catalog accepts all six beta boards and formatted JSON without leaking Blob URLs', async () => {
-  const boards = ['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft', 'heltec-t114', 't-echo'].map(id => ({ ...BOARD, id }));
+test('catalog accepts all nine beta boards and formatted JSON without leaking Blob URLs', async () => {
+  const boards = ['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft', 'heltec-t114', 't-echo', 'thinknode-m1', 'rak4631',
+    'heltec-wsl-v3'].map(id => ({ ...BOARD, id }));
   const f = fixture({ RSNODE_BETA_CATALOG: JSON.stringify({ boards }, null, 2) });
   const response = await f.request('catalog', { cookie: await f.ready() });
   assert.equal(response.status, 200);
@@ -511,13 +512,34 @@ test('catalog accepts all six beta boards and formatted JSON without leaking Blo
   assert.equal(serialized.includes('blob.vercel-storage.com'), false);
   assert.equal(serialized.includes('url'), false);
   const catalog = JSON.parse(serialized);
-  assert.deepEqual(catalog.boards.map(b => b.flashSize), ['8MB', '16MB', '16MB', '16MB', undefined, undefined]);
-  for (const [index, id, label] of [[4, 'heltec-t114', 'Heltec T114'], [5, 't-echo', 'LilyGO T-Echo']]) {
+  assert.deepEqual(catalog.boards.map(b => b.flashSize), ['8MB', '16MB', '16MB', '16MB', undefined, undefined, undefined, undefined, '8MB']);
+  for (const [index, id, label] of [[4, 'heltec-t114', 'Heltec T114'], [5, 't-echo', 'LilyGO T-Echo'],
+    [6, 'thinknode-m1', 'Elecrow ThinkNode M1'], [7, 'rak4631', 'RAK4631']]) {
     assert.deepEqual(catalog.boards[index], {
       id, board: id, label,
       version: BOARD.version, fileName: BOARD.fileName, size: BOARD.size, sha256: HASH,
       product: 'rsnode', installMode: 'uf2', chipFamily: 'nRF52840', platform: 'nrf52', flashStrategy: 'uf2-drive'
     });
+  }
+  // The Stick Lite V3 is listed as a V3 is, under its own label.
+  const { id: _id, board: _board, label: _label, ...v3 } = catalog.boards[0];
+  assert.deepEqual(catalog.boards[8], { id: 'heltec-wsl-v3', board: 'heltec-wsl-v3', label: 'Heltec Wireless Stick Lite V3', ...v3 });
+  assert.deepEqual([v3.installMode, v3.chipFamily, v3.flashStrategy], ['factory', 'ESP32-S3', 'esp32-esptool']);
+});
+
+test('the Stick Lite V3 takes a signed update for its own target only; the new UF2 boards take none', async () => {
+  const update = { ...UPDATE, otaTarget: '80:81:ba' };
+  const lite = { ...BOARD, id: 'heltec-wsl-v3' };
+  const f = fixture({ RSNODE_BETA_CATALOG: JSON.stringify({ boards: [{ ...lite, update }] }) });
+  const { url: _url, ...listed } = update;
+  assert.deepEqual((await (await f.request('catalog', { cookie: await f.ready() })).json()).boards[0].update, listed);
+  const refused = [{ ...lite, update: { ...update, otaTarget: '80:81:3a' } }, { ...BOARD, id: 'heltec-v3', update },
+    { ...BOARD, id: 'rak4631', update: { ...update, otaTarget: '70:71:51' } },
+    { ...BOARD, id: 'thinknode-m1', update: { ...update, otaTarget: '70:71:c4' } },
+    { ...BOARD, id: 'rak4631', flashSize: '8MB' }, { ...BOARD, id: 'thinknode-m1', installMode: 'factory' },
+    { ...lite, flashSize: '16MB' }, { ...lite, installMode: 'uf2' }];
+  for (const board of refused) {
+    assert.equal((await fixture({ RSNODE_BETA_CATALOG: JSON.stringify({ boards: [board] }) }).request()).status, 503, JSON.stringify(board));
   }
 });
 

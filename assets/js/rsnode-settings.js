@@ -2,7 +2,7 @@
 // `id len value` entries, the ids of rsNode's crates/rsnode-management/src/settings.rs. A get
 // reduces passwords and IFAC keys to one byte, set (1) or not (0); a set applies every entry at
 // once or none. The page's form is read and checked here; download.html only moves it to the DOM.
-import { RSNODE_RESULT, rsnodeCommand } from './rsnode-device.js';
+import { RSNODE_RESULT, rsnodeCommand, rsnodeScreenless } from './rsnode-device.js';
 
 const SUB_SETTINGS_GET = 0x02;
 const SUB_SETTINGS_SET = 0x03;
@@ -309,9 +309,11 @@ export function settingsSavedMessage(nodeId, settings, status, repeater) {
   if (mode === WIFI_MODES.off) return `Saved. ${name} restarted with Wi-Fi off.` + (repeater ? '' : ' Bluetooth is available again.');
   const network = mode === WIFI_MODES.join ? `“${settings.wifi.name}”` : `“${settings.wifi.name || name}”`;
   if (!wifi || wifi.mode !== mode || !wifi.ready || !wifi.ip) {
+    // A board with no screen shows its Wi-Fi state in the live view's status check.
+    const shows = rsnodeScreenless(status) ? 'status check in rsNode live view shows its Wi-Fi state.' : 'node\'s screen shows its Wi-Fi state.';
     return mode === WIFI_MODES.join
-      ? `Saved. ${name} restarted but has not joined ${network} yet. Check the network name and password; the node's screen shows its Wi-Fi state.`
-      : `Saved. ${name} restarted but its own network is not up yet. The node's screen shows its Wi-Fi state.`;
+      ? `Saved. ${name} restarted but has not joined ${network} yet. Check the network name and password; the ${shows}`
+      : `Saved. ${name} restarted but its own network is not up yet. The ${shows}`;
   }
   const where = mode === WIFI_MODES.join ? `joined ${network} at ${wifi.ip}.` : `runs its own network ${network} at ${wifi.ip}.`;
   const connect = repeater

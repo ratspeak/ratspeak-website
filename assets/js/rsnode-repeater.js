@@ -1,7 +1,7 @@
 // A Repeater set up over USB (rsNode ADR 0016): CMD_RSNODE IDENTITY, REPEATER_SETUP and
 // REPEATER_CONTROL as rsNode's messaging-management interfaces §6 define them. A USB connection
 // proves possession, so it stands in for the board's button. Refusals carry the settings reasons.
-import { RSNODE_RESULT, rsnodeCommand } from './rsnode-device.js';
+import { RSNODE_RESULT, rsnodeCommand, rsnodeScreenless } from './rsnode-device.js';
 import { SETTINGS_REASONS, checkSettingsForm, decodeSettings, encodeEntries, settingsForm } from './rsnode-settings.js';
 import { destinationHash, identityHash } from './rsnode-card.js';
 import { parseHash } from './rsnode-provision.js';
@@ -201,17 +201,23 @@ export function repeaterSummary(form) {
   return `Saves ${region.label} with ${preset.label}, LIMITS ${LIMITS_TEXT[form.limits.mode]}.`;
 }
 
-/** What a set-up node says, once it is back and its STATUS says where it stands. */
+/**
+ * What a set-up node says, once it is back and its STATUS says where it stands. A board with no
+ * screen is checked in the live view.
+ */
 export function repeaterSavedMessage(nodeId, status, form) {
   const name = `RNode ${nodeId}`;
+  const screenless = rsnodeScreenless(status);
   if (!status || !status.node || !status.node.repeater) {
-    return `${name} saved the Repeater settings but did not restart as a Repeater. Check its screen.`;
+    return `${name} saved the Repeater settings but did not restart as a Repeater. ` +
+      (screenless ? 'Run the status check in rsNode live view.' : 'Check its screen.');
   }
   const saved = `${name} is set up as a Repeater and is not repeating yet.`;
   if (!form.remote) return saved;
   const wifi = status.wifi;
   if (!wifi || wifi.mode !== 1 || !wifi.ready || !wifi.ip) {
-    return `${saved} It has not joined “${form.wifiName}” yet. Check the network name and password; its screen shows its Wi-Fi state.`;
+    return `${saved} It has not joined “${form.wifiName}” yet. Check the network name and password; ` +
+      (screenless ? 'the status check in rsNode live view shows its Wi-Fi state.' : 'its screen shows its Wi-Fi state.');
   }
   return `${saved} It joined “${form.wifiName}” at ${wifi.ip} and connects to ${form.uplinkHost.trim()}, port ${Number(form.uplinkPort)}.`;
 }

@@ -266,3 +266,35 @@ test('a T114 package uploads like the others, but never with a signed update', a
     /No signed updates for heltec-t114/);
   assert.equal(uploads, 0);
 });
+
+test('all nine boards upload together; the Stick Lite V3 carries a signed update for its own target, the new UF2 boards none', async t => {
+  const f = await fixture(t);
+  const bundle = rsota('8081ba');
+  const update = { fileName: 'heltec-wsl-v3.rsota', size: bundle.length, sha256: createHash('sha256').update(bundle).digest('hex'),
+    sequence: 2026110201, otaTarget: '80:81:ba', releaseKeyId: '0011223344556677', version: '1.2.0-test' };
+  await writeFile(join(f.dir, update.fileName), bundle);
+  const ids = ['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft', 'heltec-t114', 't-echo', 'thinknode-m1', 'rak4631', 'heltec-wsl-v3'];
+  const boards = ids.map(id => ({ ...f.boards[0], id, fileName: id + '.zip', ...(id === 'heltec-wsl-v3' ? { update } : {}) }));
+  for (const board of boards) await writeFile(join(f.dir, board.fileName), f.bytes);
+  await writeFile(f.catalogPath, JSON.stringify({ boards }));
+  const uploaded = new Map();
+  const options = { token: 'fixture', report() {},
+    upload: async (path, bytes) => { const url = 'https://fixture.private.blob.vercel-storage.com/' + path; uploaded.set(url, bytes); return { url }; },
+    fetchAsset: async (url, request) => request.headers ? new Response(uploaded.get(String(url))) : new Response(null, { status: 403 }) };
+  const result = await uploadBetaPackages(f.catalogPath, f.output, options);
+  assert.deepEqual(result.boards.map(entry => entry.id), ids);
+  assert.deepEqual(result.boards.filter(entry => entry.update).map(entry => [entry.id, entry.update.otaTarget]), [['heltec-wsl-v3', '80:81:ba']]);
+  // A tenth package, a V3's target on the Stick Lite, and an update on a UF2 board are all refused before any upload.
+  const refused = [
+    [{ boards: [...boards, { ...boards[0] }] }, /Expected one to nine beta board packages\./],
+    [{ boards: [{ ...boards[8], update: { ...update, otaTarget: '80:81:3a' } }] }, /Invalid update entry: heltec-wsl-v3/],
+    [{ boards: [{ ...boards[7], update }] }, /No signed updates for rak4631/],
+    [{ boards: [{ ...boards[6], update }] }, /No signed updates for thinknode-m1/]
+  ];
+  for (const [index, [catalog, message]] of refused.entries()) {
+    await writeFile(f.catalogPath, JSON.stringify(catalog));
+    let uploads = 0;
+    await assert.rejects(uploadBetaPackages(f.catalogPath, join(f.dir, `refused-${index}.json`), { ...options, upload() { uploads++; } }), message);
+    assert.equal(uploads, 0);
+  }
+});
