@@ -251,6 +251,15 @@ test('a T114 package uploads like the others, but never with a signed update', a
     fetchAsset: async (_url, options) => options.headers ? new Response(f.bytes) : new Response(null, { status: 403 })
   });
   assert.deepEqual(result.boards.map(entry => entry.id), ['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-t114']);
+  const techo = { ...f.boards[0], id: 't-echo', fileName: 't-echo.zip' };
+  await writeFile(join(f.dir, techo.fileName), f.bytes);
+  await writeFile(f.catalogPath, JSON.stringify({ boards: [techo] }));
+  const nordic = await uploadBetaPackages(f.catalogPath, join(f.dir, 'techo.json'), {
+    token: 'fixture', report() {},
+    upload: async path => ({ url: 'https://fixture.private.blob.vercel-storage.com/' + path }),
+    fetchAsset: async (_url, options) => options.headers ? new Response(f.bytes) : new Response(null, { status: 403 })
+  });
+  assert.deepEqual(nordic.boards.map(entry => entry.id), ['t-echo']);
   await writeFile(f.catalogPath, JSON.stringify({ boards: [{ ...board, update: { fileName: 'heltec-t114.rsota' } }] }));
   let uploads = 0;
   await assert.rejects(uploadBetaPackages(f.catalogPath, join(f.dir, 'again.json'), { token: 'fixture', upload() { uploads++; }, report() {} }),

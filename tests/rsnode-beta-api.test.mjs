@@ -502,8 +502,8 @@ test('missing, weak, or incomplete configuration fails closed and hides configur
   }
 });
 
-test('catalog accepts all five beta boards and formatted JSON without leaking Blob URLs', async () => {
-  const boards = ['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft', 'heltec-t114'].map(id => ({ ...BOARD, id }));
+test('catalog accepts all six beta boards and formatted JSON without leaking Blob URLs', async () => {
+  const boards = ['heltec-v3', 'heltec-v4', 'heltec-v4-r8', 'heltec-v4-r8-tft', 'heltec-t114', 't-echo'].map(id => ({ ...BOARD, id }));
   const f = fixture({ RSNODE_BETA_CATALOG: JSON.stringify({ boards }, null, 2) });
   const response = await f.request('catalog', { cookie: await f.ready() });
   assert.equal(response.status, 200);
@@ -511,12 +511,14 @@ test('catalog accepts all five beta boards and formatted JSON without leaking Bl
   assert.equal(serialized.includes('blob.vercel-storage.com'), false);
   assert.equal(serialized.includes('url'), false);
   const catalog = JSON.parse(serialized);
-  assert.deepEqual(catalog.boards.map(b => b.flashSize), ['8MB', '16MB', '16MB', '16MB', undefined]);
-  assert.deepEqual(catalog.boards[4], {
-    id: 'heltec-t114', board: 'heltec-t114', label: 'Heltec T114',
-    version: BOARD.version, fileName: BOARD.fileName, size: BOARD.size, sha256: HASH,
-    product: 'rsnode', installMode: 'uf2', chipFamily: 'nRF52840', platform: 'nrf52', flashStrategy: 'uf2-drive'
-  });
+  assert.deepEqual(catalog.boards.map(b => b.flashSize), ['8MB', '16MB', '16MB', '16MB', undefined, undefined]);
+  for (const [index, id, label] of [[4, 'heltec-t114', 'Heltec T114'], [5, 't-echo', 'LilyGO T-Echo']]) {
+    assert.deepEqual(catalog.boards[index], {
+      id, board: id, label,
+      version: BOARD.version, fileName: BOARD.fileName, size: BOARD.size, sha256: HASH,
+      product: 'rsnode', installMode: 'uf2', chipFamily: 'nRF52840', platform: 'nrf52', flashStrategy: 'uf2-drive'
+    });
+  }
 });
 
 test('invalid assets, unknown boards, duplicate targets, and unsafe metadata disable the catalog', async () => {

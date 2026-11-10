@@ -9,7 +9,9 @@ const BOARDS = Object.freeze({
   'heltec-v4-r8': { ...ESP, label: 'Heltec V4 · R8', flashSize: '16MB', capacity: 16 * 1024 * 1024, otaBoard: 0xbf },
   'heltec-v4-r8-tft': { ...ESP, label: 'Heltec V4 · R8 TFT', flashSize: '16MB', capacity: 16 * 1024 * 1024, otaBoard: 0xc0 },
   'heltec-t114': { chipFamily: 'nRF52840', installMode: 'uf2', label: 'Heltec T114', otaBoard: 0x3c,
-    uf2: { base: 0x26000, end: 0xe8000, family: 0xada52840, drive: 'HT-n5262' } }
+    uf2: { base: 0x26000, end: 0xe8000, family: 0xada52840, drive: 'HT-n5262' } },
+  't-echo': { chipFamily: 'nRF52840', installMode: 'uf2', label: 'LilyGO T-Echo', otaBoard: 0x44,
+    uf2: { base: 0x26000, end: 0xef000, family: 0xada52840, drive: 'TECHOBOOT' } }
 });
 const UF2_BLOCK = 512;
 const owns = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
