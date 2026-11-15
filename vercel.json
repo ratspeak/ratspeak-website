@@ -99,6 +99,16 @@
       "source": "/tasks.html",
       "destination": "/",
       "statusCode": 308
+    },
+    {
+      "source": "/interop",
+      "destination": "https://interop.ratspeak.org/",
+      "statusCode": 308
+    },
+    {
+      "source": "/interop/:path*",
+      "destination": "https://interop.ratspeak.org/",
+      "statusCode": 308
     }
   ],
   "rewrites": [
