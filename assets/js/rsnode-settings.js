@@ -274,7 +274,7 @@ export function settingsRefusal(body, mode = 'join') {
 
 /** A SETTINGS_SET reply: restart (with its delay), unchanged, or why it was refused. */
 export function settingsOutcome(reply, mode) {
-  if (!reply) return { kind: 'unsupported' };
+  if (!reply) return { kind: 'uncertain', message: 'The node did not answer the settings write. Read its settings before retrying.' };
   const { result, body } = reply;
   if (result === RSNODE_RESULT.ok) {
     if (body.length === 2) return { kind: 'restart', restartMs: u16(body) };

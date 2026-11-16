@@ -111,7 +111,7 @@ async function transfer(session, data, onProgress) {
   const manifest = Array.from(data.slice(0, RSOTA_MANIFEST_LEN));
   const image = data.subarray(RSOTA_MANIFEST_LEN);
   const begin = await exchange(session, SUB_BEGIN, manifest, BEGIN_TIMEOUT_MS);
-  if (!begin) throw refusal(RSNODE_RESULT.unsupported);
+  if (!begin) throw new Error('The node did not answer the update request.');
   if (begin.result !== RSNODE_RESULT.ok) throw refusal(begin.result);
   if (begin.body.length !== 6) throw new Error('The node answered the update with a malformed reply.');
   const chunkMax = Math.min(CHUNK_MAX, (begin.body[4] << 8) | begin.body[5]) || CHUNK_MAX;

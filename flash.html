@@ -148,7 +148,7 @@
                         <div class="custom-source-pane rsnode-beta" id="customSourceRsnode" role="tabpanel" aria-labelledby="sourceTabRsnode" hidden>
                             <form class="rsnode-beta__login" id="rsnodeLoginForm">
                                 <p class="rsnode-beta__note">rsNode is LoRa firmware for Heltec V3 and V4 boards, in private beta.</p>
-                                <details class="rsnode-beta__about"><summary>How rsNode works</summary><p class="rsnode-beta__note">It runs in one of two modes, chosen on the device or in the tools below. As an <strong>RNode</strong>, it is the radio for one app, over USB, Bluetooth, or Wi-Fi. As a <strong>Repeater</strong>, it forwards traffic on its own. Bluetooth is off while Wi-Fi is on. Managers are optional and only manage a Repeater.</p></details>
+                                <details class="rsnode-beta__about"><summary>How rsNode works</summary><p class="rsnode-beta__note">It runs in one of two modes, chosen on the device or in the tools below. As an <strong>RNode</strong>, it is the radio for one app, over USB, Bluetooth, or Wi-Fi. As a <strong>Repeater</strong>, it forwards traffic on its own. Bluetooth is off while Wi-Fi is on. You can set up a Repeater without managers from its screen. The USB setup form requires an Owner.</p></details>
                                 <label for="rsnodePassword">Private beta password</label>
                                 <input class="rsnode-beta__password" id="rsnodePassword" type="password" autocomplete="current-password" required maxlength="256" aria-describedby="rsnodeStatus rsnodePasswordHelp">
                                 <button class="rsnode-beta__button" id="rsnodeUnlock" type="submit">Unlock</button>
@@ -373,7 +373,7 @@
                 </summary>
                 <div class="flash-cta__repair-body">
                     <p class="rsnode-tools__notice" id="rsnodeRepeaterNotice" tabindex="-1" hidden>Next: press RESET on the board. Then set it up as a Repeater here, or keep it as an RNode for one app.</p>
-                    <p class="rsnode-tools__lede">A Repeater forwards mesh traffic on its own. Choose its radio and its Owner here, then manage it from Ratspeak by messaging it.</p>
+                    <p class="rsnode-tools__lede">A Repeater forwards mesh traffic on its own. Choose its radio settings and enter an Owner to set it up over USB. The Owner can then manage it from Ratspeak by messaging it.</p>
                     <form id="rsnodeRepeaterForm" novalidate>
                         <fieldset class="rsnode-owner__fields" id="rsnodeRepeaterFields">
                             <fieldset class="rsnode-settings__group">
@@ -401,7 +401,7 @@
                                 <label class="rsnode-beta__check"><input type="checkbox" id="rsnodeRepeaterAccept" aria-describedby="rsnodeRepeaterRules"><span>I understand and accept this.</span></label>
                             </fieldset>
                             <fieldset class="rsnode-settings__group">
-                                <legend class="rnode-source__label">Owner</legend>
+                                <legend class="rnode-source__label">Owner (required)</legend>
                                 <p class="rsnode-tools__help">The Owner manages the node by messaging it from Ratspeak. This replaces any Owner the node has now.</p>
                                 <div class="rsnode-repeater__owner" id="rsnodeRepeaterOwnerEntry">
                                     <input class="rsnode-owner__input" id="rsnodeRepeaterOwner" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Your Ratspeak LXMF address" aria-label="Owner's Ratspeak LXMF address" aria-describedby="rsnodeRepeaterOwnerNote">
@@ -645,11 +645,11 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
                         rsNode device management
                     </span>
-                    <span class="flash-cta__repair-meta">Optional &middot; Owner and Admins of a Repeater, over USB</span>
+                    <span class="flash-cta__repair-meta">Edit a Repeater’s Owner and Admins over USB</span>
                     <svg class="flash-cta__repair-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
                 </summary>
                 <div class="flash-cta__repair-body">
-                    <p class="rsnode-tools__lede">Managers are optional. They manage this node over the mesh while it runs as a Repeater; an RNode ignores them.</p>
+                    <p class="rsnode-tools__lede">USB Repeater setup requires one Owner. You can add Admins here if others need to manage the Repeater over the mesh.</p>
                     <form id="rsnodeOwnerForm" novalidate>
                         <fieldset class="rsnode-owner__fields" id="rsnodeOwnerFields">
                             <div class="rsnode-owner__grid">

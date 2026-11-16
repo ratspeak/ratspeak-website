@@ -148,14 +148,15 @@ async function query(session, name, command, length, payload = [], accept = unde
 }
 
 /**
- * A CMD_RSNODE exchange: { result, body }, or null when the node does not know the command
- * (it answers CMD_ERROR, or nothing within timeoutMs).
+ * A CMD_RSNODE exchange returns { result, body }. A timeout returns null.
+ * Older firmware rejects an unknown command with CMD_ERROR.
  */
 export async function rsnodeCommand(session, sub, body = [], timeoutMs = EXCHANGE_TIMEOUT_MS) {
   await session.send(CMD_RSNODE, [sub, ...body]);
   const frame = await session.readFrame(candidate => candidate.command === CMD_ERROR ||
     (candidate.command === CMD_RSNODE && candidate.payload[0] === sub), timeoutMs);
-  if (!frame || frame.command === CMD_ERROR) return null;
+  if (!frame) return null;
+  if (frame.command === CMD_ERROR) return { result: RSNODE_RESULT.unsupported, body: [] };
   if (frame.payload.length < 2) throw new Error(`malformed rsNode reply length=${frame.payload.length}`);
   return { result: frame.payload[1], body: Array.from(frame.payload.slice(2)) };
 }

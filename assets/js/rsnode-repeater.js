@@ -98,7 +98,7 @@ export function repeaterSetupRefusal(body) {
 }
 
 function outcome(reply, refusal) {
-  if (!reply) return { kind: 'unsupported' };
+  if (!reply) return { kind: 'uncertain', message: 'The node did not answer the Repeater command. Read its status before retrying.' };
   const { result, body } = reply;
   if (result === RSNODE_RESULT.ok) {
     if (body.length === 2) return { kind: 'restart', restartMs: u16(body) };

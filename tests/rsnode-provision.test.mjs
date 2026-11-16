@@ -460,7 +460,7 @@ test('the tools ask for a Ratspeak LXMF address, say managers are optional, and 
   const text = tools.replace(/<[^>]+>/g, ' ');
   assert.match(text, /your Ratspeak LXMF address/);
   assert.match(text, /The Owner changes settings and managers\. Admins read status and settings and install updates\./);
-  assert.match(text, /Managers are optional\. They manage this node over the mesh while it runs as a Repeater/);
+  assert.match(text, /USB Repeater setup requires one Owner\. You can add Admins here/);
   assert.match(text, /Next: press RESET on the board\. Then set it up as a Repeater here, or keep it as an RNode for one app\./);
   assert.match(text, /A Repeater answers status over USB/);
   assert.match(text, /If you just installed, press RESET on the board first\./);

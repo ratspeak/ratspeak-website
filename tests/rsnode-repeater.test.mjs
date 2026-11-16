@@ -7,7 +7,7 @@ import { addRsnodeOwner, parseNodeStatus } from '../assets/js/rsnode-provision.j
 import { LIMITS, REPEATER_PRESETS, REPEATER_REGIONS, SETUP, checkRepeaterForm, controlRepeater, parseRsnodeIdentity,
   readRsnodeIdentity, repeaterOwner, repeaterRadioLine, repeaterRegions, repeaterSettingsForm, repeaterSetupEntries,
   repeaterSavedMessage, repeaterSetupOutcome, repeaterSetupRefusal, repeaterSummary, writeRepeaterSetup } from '../assets/js/rsnode-repeater.js';
-import { WIFI_MODES, checkSettingsForm, decodeSettings, encodeEntries, settingsChanges } from '../assets/js/rsnode-settings.js';
+import { WIFI_MODES, checkSettingsForm, decodeSettings, encodeEntries, settingsChanges, writeRsnodeSettings } from '../assets/js/rsnode-settings.js';
 import { nodeContactCard, parseContactCard } from '../assets/js/rsnode-card.js';
 import { rsnodeBoard, rsnodeBoardForTarget } from '../assets/js/rsnode-beta.js';
 import { flasherPage } from './flasher-page.mjs';
@@ -80,7 +80,8 @@ test('a setup reply says restart, saved, or why: the entry and settings reason n
   assert.deepEqual(repeaterSetupRefusal([]), { field: null, message: 'The node could not read the request. Nothing changed.' });
   for (const [result, kind] of [['refused', 'refused'], ['busy', 'busy'], ['storage', 'storage'], ['unsupported', 'unsupported'],
     ['unavailable', 'unsupported']]) assert.equal(repeaterSetupOutcome({ result: RSNODE_RESULT[result], body: [] }).kind, kind, result);
-  assert.deepEqual(repeaterSetupOutcome(null), { kind: 'unsupported' });
+  assert.equal(repeaterSetupOutcome(null).kind, 'uncertain');
+  assert.match(repeaterSetupOutcome(null).message, /did not answer/);
   assert.deepEqual(repeaterSetupOutcome({ result: RSNODE_RESULT.denied, body: [] }), { kind: 'failed', result: 1 });
 });
 
@@ -314,6 +315,21 @@ function repeaterTask(node, form, overrides = {}) {
 
 const statusOf = (repeater, hostOwner, extra = {}) => ({ node: { repeater, bluetoothAvailable: true, bluetoothEnabled: true, hostOwner },
   board: { platform: 0x80, mcu: 0x81, board: 0x3f }, wifi: null, ...extra });
+
+test('a settings timeout reports the unanswered save and stops Repeater setup', async () => {
+  const form = baseForm({ remote: true, wifiName: 'Home', uplinkHost: 'rns.example.org' });
+  const writes = [];
+  const task = repeaterTask({ nodeId: '887A', settings: FRESH, status: [statusOf(false, 1)] }, form, {
+    createRnodeSession: () => ({ send: async (command, payload) => writes.push([command, payload[0]]),
+      readFrame: async () => null }),
+    writeRsnodeSettings
+  });
+  await task.runRsnodeRepeaterTask();
+  assert.deepEqual(writes, [[0x7a, 0x03]]);
+  assert.deepEqual(task.calls.filter(call => call[0] === 'message').at(-1),
+    ['message', 'The node did not answer the settings write. Read its settings before retrying.', true, false]);
+  assert.ok(!task.calls.some(call => ['setup', 'sleep'].includes(call[0])));
+});
 
 test('Finish setup enrols the Owner, saves Wi-Fi and the uplink, saves the Repeater without starting it, then shows the node\'s card', async () => {
   const identity = await parseRsnodeIdentity(identityBody(node));

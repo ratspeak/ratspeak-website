@@ -172,7 +172,7 @@ test('a set reply says restart, unchanged, or why: the entry and reason name the
   assert.deepEqual(settingsRefusal([0x29, 4]), { field: 'uplinkHost', message: 'The node refused this uplink host.' });
   for (const [result, kind] of [['refused', 'refused'], ['busy', 'busy'], ['storage', 'storage'], ['unsupported', 'unsupported'],
     ['unavailable', 'unsupported']]) assert.equal(settingsOutcome({ result: RSNODE_RESULT[result], body: [] }).kind, kind, result);
-  assert.deepEqual(settingsOutcome(null), { kind: 'unsupported' });
+  assert.equal(settingsOutcome(null).kind, 'uncertain');
   assert.deepEqual(settingsOutcome({ result: RSNODE_RESULT.denied, body: [] }), { kind: 'failed', result: 1 });
 });
 

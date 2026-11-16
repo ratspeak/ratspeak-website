@@ -502,12 +502,12 @@ test('the page names the private boards only in the unlocked picker: its own tex
   assert.doesNotMatch(page, /T114|T-Echo|ThinkNode M1|RAK4631|Wireless Stick|TECHOBOOT|HT-n5262/i);
 });
 
-test('the rsNode pane says what Install erases, what the two modes are, and that managers are optional', () => {
+test('the rsNode pane says what Install erases, what the two modes are, and when an Owner is required', () => {
   const pane = /id="customSourceRsnode"[\s\S]*?<!-- Mode B/.exec(html)[0].replace(/<[^>]+>/g, '');
   assert.match(pane, /Install erases the node: identity, managers, Wi-Fi, Bluetooth pairings, and Repeater settings\./);
   assert.match(pane, /Update requires a compatible package and firmware that supports USB updates\./);
   assert.match(pane, /As an RNode, it is the radio for one app, over USB, Bluetooth, or Wi-Fi\. As a Repeater, it forwards traffic on its own\./);
-  assert.match(pane, /Bluetooth is off while Wi-Fi is on\. Managers are optional and only manage a Repeater\./);
+  assert.match(pane, /Bluetooth is off while Wi-Fi is on\. You can set up a Repeater without managers from its screen\. The USB setup form requires an Owner\./);
   assert.doesNotMatch(pane, /signed OTA/);
   assert.match(extractFunction('confirmFactoryInstall'), /identity, managers, Wi-Fi, Bluetooth pairings, and Repeater settings/);
 });
