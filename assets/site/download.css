@@ -34,6 +34,38 @@ body.is-flasher-active .dl-hero{display:none}
 .dl-spotlight__case:focus-visible{outline:0}
 .dl-spotlight__case:focus-visible .dl-spotlight__title{outline:3px solid var(--focus);outline-offset:6px}
 .dl-spotlight__panel{min-width:0;color:var(--text)}
+/* device carousel beside the app downloads (above the buttons when stacked); the three steps run full width below.
+   The panel's children join the case grid, keeping their own margins, so the carousel can sit after the lede. */
+.dl-spotlight__case--carousel{grid-template-columns:minmax(0,5fr) minmax(0,7fr);row-gap:0;
+  grid-template-areas:"title carousel" "lede carousel" "ctas carousel" "facts carousel" "link carousel" "next next"}
+.dl-spotlight__case--carousel>.dl-spotlight__panel{display:contents}
+.dl-spotlight__case--carousel .dl-spotlight__title{grid-area:title}
+.dl-spotlight__case--carousel .dl-spotlight__lede{grid-area:lede}
+.dl-spotlight__case--carousel .dl-cta-row{grid-area:ctas}
+.dl-spotlight__case--carousel .dl-facts{grid-area:facts}
+.dl-spotlight__case--carousel .dl-release-link{grid-area:link;justify-self:start}
+.dl-spotlight__case--carousel>.dl-next{grid-area:next;max-width:none;margin-top:56px}
+.dl-spotlight__case--carousel .dl-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:32px}
+.dl-spotlight__case--carousel .dl-steps li{border-bottom:0;padding:16px 0 4px;align-content:start}
+.dl-carousel{grid-area:carousel;align-self:center;justify-self:center;width:100%;max-width:680px;min-width:0}
+.dl-carousel--mobile{max-width:440px}
+.dl-carousel__slides{display:grid}
+.dl-carousel__slide{grid-area:1/1;display:block;width:100%;height:auto;opacity:0;visibility:hidden;transition:opacity .5s ease,visibility 0s linear .5s}
+.dl-carousel__slide.is-active{opacity:1;visibility:visible;transition:opacity .5s ease}
+.dl-carousel__slide[hidden]{display:none}
+.dl-carousel__nav{display:flex;justify-content:center;align-items:center;gap:4px;margin-top:0}
+.dl-carousel__nav[hidden]{display:none}
+.dl-carousel__dot,.dl-carousel__pause{display:grid;place-items:center;width:24px;height:24px;padding:0;border:0;background:none;cursor:pointer;color:var(--muted)}
+.dl-carousel__dot::before{content:'';width:8px;height:8px;border-radius:4px;background:var(--line);transition:width .25s ease,background-color .25s ease}
+.dl-carousel__dot:hover::before{background:var(--muted)}
+.dl-carousel__dot[aria-current="true"]::before{width:20px;background:var(--text-strong)}
+.dl-carousel__dot[aria-current="true"]{width:32px}
+.dl-carousel__pause{margin-left:8px}
+.dl-carousel__pause:hover{color:var(--text)}
+.dl-carousel__pause .i-play,.dl-carousel__pause[data-state="paused"] .i-pause{display:none}
+.dl-carousel__pause[data-state="paused"] .i-play{display:inline}
+.dl-carousel__dot:focus-visible,.dl-carousel__pause:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+@media(prefers-reduced-motion:reduce){.dl-carousel__slide,.dl-carousel__slide.is-active,.dl-carousel__dot::before{transition:none}}
 .nowrap{white-space:nowrap}
 .dl-spotlight__title{font:400 var(--h3)/.98 Anton,Impact,sans-serif;letter-spacing:-.015em;text-wrap:balance;text-transform:uppercase;color:var(--text-strong);margin:0 0 12px}
 .dl-spotlight__lede{font-size:var(--t-lead);line-height:1.5;margin:0 0 20px;max-width:560px}
@@ -583,7 +615,20 @@ html.rn-dialog-open{overflow:hidden;scrollbar-gutter:stable}
   .dl-next{max-width:560px}
   .flash-steps,.rsnode-device__layout{grid-template-columns:minmax(0,1fr)}
 }
+@media(min-width:901px) and (max-width:1099px){.dl-spotlight__case--carousel{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(max-width:900px){
+  .dl-spotlight__case--carousel{grid-template-columns:minmax(0,1fr);row-gap:0;grid-template-areas:"title" "lede" "carousel" "ctas" "facts" "link" "next"}
+  /* as wide as the download buttons, so its edges line up with them; phones centre inside */
+  .dl-carousel{max-width:520px;justify-self:start;margin:12px 0 28px}
+  .dl-carousel--mobile{max-width:520px}
+  .dl-carousel--mobile .dl-carousel__slides{max-width:400px;margin-inline:auto}
+  .dl-spotlight__case--carousel>.dl-next{max-width:560px;margin-top:32px}
+  .dl-spotlight__case--carousel .dl-steps{display:block}
+  .dl-spotlight__case--carousel .dl-steps li{border-bottom:1px solid var(--line);padding:14px 0}
+  .dl-spotlight__case--carousel .dl-steps li:last-child{border-bottom:0;padding-bottom:4px}
+}
 @media(max-width:700px){
+  .dl-carousel{max-width:none}
   .dl-hero{padding:24px var(--pad-x) 40px}
   .dl-hero h1{font-size:clamp(48px,16.5vw,88px)}
   .dl-picker{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
