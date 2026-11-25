@@ -156,8 +156,8 @@ main:has(>.band:last-child)+.site-foot{border-top:0}
   .foot-cols{grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 16px}
   .foot-cols a{padding:10px 0}
 }
-/* narrow screens: brand and actions on one row, nav on a second once the three links no longer fit beside them */
-@media(max-width:569px){
+/* narrow screens: brand and actions on one row, nav on a second once the four links no longer fit beside them */
+@media(max-width:679px){
   .topbar{grid-template-columns:auto 1fr;grid-template-areas:"brand end" "nav nav";gap:0}
   .topbar .brand{height:60px}
   .topbar-end{justify-self:end}

@@ -26,9 +26,9 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://ratspeak.org/community.html</loc>
+    <loc>https://ratspeak.org/token.html</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://ratspeak.org/privacy.html</loc>

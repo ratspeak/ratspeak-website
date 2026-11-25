@@ -81,6 +81,21 @@
       "statusCode": 308
     },
     {
+      "source": "/token",
+      "destination": "/token.html",
+      "statusCode": 308
+    },
+    {
+      "source": "/community.html",
+      "destination": "/token.html",
+      "statusCode": 308
+    },
+    {
+      "source": "/community",
+      "destination": "/token.html",
+      "statusCode": 308
+    },
+    {
       "source": "/about.html",
       "destination": "/",
       "statusCode": 308
