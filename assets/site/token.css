@@ -86,6 +86,7 @@
 .token-tag{display:inline-flex;align-items:center;gap:7px;width:max-content;min-height:28px;padding:0 10px;font-size:var(--t-micro);font-weight:700;border:1px solid var(--line);color:var(--text)}
 .token-tag--live{background:var(--success-tint);border-color:transparent;color:var(--success)}
 .token-tag--live::before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor}
+.token-tag--design{background:var(--tint);border-color:var(--text-strong);color:var(--text-strong)}
 .token-tag--explore{background:var(--tint);border-color:transparent;color:var(--text-strong)}
 .token-tag--open{background:var(--warning-tint);border-color:transparent;color:var(--warning)}
 .bento-card h3{margin:0;font:400 clamp(30px,3.2vw,44px)/.98 Anton,Impact,sans-serif;text-transform:uppercase;color:var(--text-strong)}
